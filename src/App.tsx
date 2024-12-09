@@ -6,6 +6,8 @@ import CompleteProfile from "./pages/CompleteProfile.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./store/slices/authSlice.ts";
+import Homepage from "./pages/Homepage.tsx";
+import '@fontsource/ubuntu'
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
@@ -20,7 +22,8 @@ const App: React.FC = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<LoginSignupForm />} />
+      <Route path="/" element={<Homepage />} />
+      <Route path="/register" element={<LoginSignupForm />} />
       <Route path="/verify-phone" element={<OTPVerification />} />
 
       {/* Protected Routes */}
