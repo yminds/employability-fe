@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { RootState } from "@/store/store";
 import TextInput from "@/components/TextInput";
 import Toggle from "@/components/ui/Toggle";
+import FeatureCard from "@/components/cards/FeatureCard";
 
 interface SignupData {
   email: string;
@@ -80,13 +81,7 @@ const LoginSignupForm: React.FC = () => {
   return (
     <section className="grid grid-cols-2 h-screen">
       {/* Left Image Section */}
-      <div className="bg-[#F5F6FA] flex items-center justify-center">
-        <div
-          className="w-[832px] h-[800px] bg-no-repeat bg-cover "
-          style={{ backgroundImage: "url('./src/assets/carousel.png')" }}
-        ></div>
-      </div>
-
+      <FeatureCard />
       {/* Right Form Section */}
       <div className="flex items-center justify-center">
         <div className="w-[400px]">
