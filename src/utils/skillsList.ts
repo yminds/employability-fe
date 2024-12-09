@@ -180,6 +180,7 @@ export const skillsList = [
   "React.js",
   "Recoil",
   "Redux",
+  "Redux Toolkit",
   "Rollup",
   "Ruby",
   "SDLC",
