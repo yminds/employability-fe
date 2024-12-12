@@ -11,15 +11,17 @@ import { RootState } from "@/store/store";
 import TextInput from "@/components/TextInput";
 import Toggle from "@/components/ui/Toggle";
 import FeatureCard from "@/components/cards/FeatureCard";
+import { PhoneInput } from "@/components/cards/phoneInput/PhoneInput";
 
 interface SignupData {
   email: string;
   password: string;
   name: string;
   role: string;
+  phoneNumber: string;
 }
 
-const LoginSignupForm: React.FC = () => {
+const SignupLoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const authState = useSelector((state: RootState) => state.auth);
@@ -31,12 +33,6 @@ const LoginSignupForm: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [isWhatsAppEnabled, setIsWhatsAppEnabled] = useState(false);
-
-  useEffect(() => {
-    if (authState.isAuthenticated) {
-      navigate("/verify-phone");
-    }
-  }, [authState.isAuthenticated, navigate]);
 
   const handleCustomSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,11 +47,14 @@ const LoginSignupForm: React.FC = () => {
       password,
       name,
       role: "candidate",
+      phoneNumber,
     };
 
     try {
+      console.log(phoneNumber);
+      console.log(signupData);
       await dispatch(registerUser(signupData)).unwrap();
-      navigate("/verify-phone");
+      navigate("/verify-otp");
     } catch (error) {
       console.error("Signup failed:", error);
     }
@@ -79,15 +78,18 @@ const LoginSignupForm: React.FC = () => {
   };
 
   return (
-    <section className="grid grid-cols-2 h-screen">
+    <section className="grid grid-cols-1 md:grid-cols-2 h-screen w-screen overflow-hidden bg-white gap-x-6">
       {/* Left Image Section */}
-      <FeatureCard />
+      <div className="hidden md:flex items-center justify-end overflow-hidden">
+        <FeatureCard />
+      </div>
+
       {/* Right Form Section */}
-      <div className="flex items-center justify-center">
-        <div className="w-[400px]">
+      <div className="flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
           {/* Header */}
           <h1
-            className="mb-6 text-[32px] font-semibold leading-[28px] text-[#1A1A1A] text-center"
+            className="text-2xl font-semibold text-gray-800 text-center mb-6"
             style={{
               fontFamily: '"Work Sans", sans-serif',
               fontFeatureSettings: "'liga' off, 'clig' off",
@@ -98,35 +100,41 @@ const LoginSignupForm: React.FC = () => {
           </h1>
 
           {/* Social Login */}
-          <div className="flex justify-center gap-4 mb-8">
-            <button
-              onClick={() => handleOAuthLogin("google")}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300"
-            >
-              <img src="./src/assets/Search.png" alt="Google" />
-            </button>
-            <button
-              onClick={() => handleOAuthLogin("linkedin")}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300"
-            >
-              <img src="./src/assets/Linkedin.png" alt="LinkedIn" />
-            </button>
-            <button
-              onClick={() => handleOAuthLogin("apple")}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300"
-            >
-              <img src="./src/assets/Apple logo.png" alt="Apple" />
-            </button>
-            <button
-              onClick={() => handleOAuthLogin("github")}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300"
-            >
-              <img src="./src/assets/Github.png" alt="GitHub" />
-            </button>
+          <div className="flex justify-center gap-4 mb-6">
+            {[
+              {
+                provider: "google",
+                icon: "./src/assets/Search.png",
+                alt: "Google",
+              },
+              {
+                provider: "linkedin",
+                icon: "./src/assets/Linkedin.png",
+                alt: "LinkedIn",
+              },
+              {
+                provider: "apple",
+                icon: "./src/assets/Apple logo.png",
+                alt: "Apple",
+              },
+              {
+                provider: "github",
+                icon: "./src/assets/Github.png",
+                alt: "GitHub",
+              },
+            ].map(({ provider, icon, alt }) => (
+              <button
+                key={provider}
+                onClick={() => handleOAuthLogin(provider)}
+                className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 hover:shadow-md transition"
+              >
+                <img src={icon} alt={alt} />
+              </button>
+            ))}
           </div>
 
           {/* Divider */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-4 mb-6">
             <span className="flex-1 h-px bg-gray-300"></span>
             <span className="text-sm text-gray-500">Or register with</span>
             <span className="flex-1 h-px bg-gray-300"></span>
@@ -156,13 +164,20 @@ const LoginSignupForm: React.FC = () => {
               />
 
               {isSignup && (
-                <TextInput
-                  type="tel"
+                // <TextInput
+                //   type="tel"
+                //   value={phoneNumber}
+                //   onChange={(e) => setPhoneNumber(e.target.value)}
+                //   placeholder="Phone Number"
+                //   required
+                //   icon="./src/assets/India.png"
+                // />
+                <PhoneInput
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={(value) => setPhoneNumber(value)}
                   placeholder="Phone Number"
+                  // className="border border-[rgba(0,0,0,0.10)]"
                   required
-                  icon="./src/assets/India.png"
                 />
               )}
 
@@ -188,18 +203,20 @@ const LoginSignupForm: React.FC = () => {
             </div>
 
             {/* Toggle */}
-            <div className="flex items-center gap-2 mb-6">
-              <Toggle
-                isChecked={isWhatsAppEnabled}
-                onToggle={handleToggle}
-                label="Get recruiter updates on WhatsApp"
-              />
-            </div>
+            {isSignup && (
+              <div className="flex items-center gap-2 mb-6">
+                <Toggle
+                  isChecked={isWhatsAppEnabled}
+                  onToggle={handleToggle}
+                  label="Get recruiter updates on WhatsApp"
+                />
+              </div>
+            )}
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#0AD472] text-white py-3 rounded-lg text-lg font-semibold"
+              className="w-full bg-green-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-green-600 transition"
             >
               {isSignup ? "Sign Up" : "Login"}
             </button>
@@ -210,7 +227,7 @@ const LoginSignupForm: React.FC = () => {
             {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               onClick={() => setIsSignup(!isSignup)}
-              className="text-[#0AD472] underline"
+              className="text-green-500 underline hover:text-green-600"
             >
               {isSignup ? "Log in" : "Sign up"}
             </button>
@@ -221,4 +238,4 @@ const LoginSignupForm: React.FC = () => {
   );
 };
 
-export default LoginSignupForm;
+export default SignupLoginForm;

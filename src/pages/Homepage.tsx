@@ -1,4 +1,17 @@
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { setRole } from "@/store/slices/roleSlice"; // Import setRole action
+
 const Homepage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
+  // Handle role selection and navigation
+  const handleOptionClick = (role: string) => {
+    dispatch(setRole(role)); // Set the role in Redux store
+    navigate("/register"); // Navigate to the /register route
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-white">
       <div className="w-full max-w-6xl mx-4 p-6">
@@ -6,7 +19,7 @@ const Homepage = () => {
         <div className="flex flex-col justify-center items-center gap-4 text-center mb-12">
           <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 font-ubuntu">
             What brings you to{" "}
-            <span className="text-[#24D680]">Employability?</span>
+            <span className="text-green-500">Employability?</span>
           </h2>
           <p className="text-[#B3B3B3] text-base sm:text-3xl font-normal font-ubuntu">
             Choose your path and let us customize your experience.
@@ -15,15 +28,14 @@ const Homepage = () => {
 
         {/* Options Section */}
         <div className="flex flex-wrap justify-center items-center gap-6">
-          {/* Option 1 */}
-          <div className="p-6 bg-[#fcfcfc] rounded-xl border border-black/10 flex flex-col justify-start items-start gap-5 w-full sm:w-[45%]">
+          {/* Option 1 - Candidate */}
+          <div
+            className="group p-6 bg-[#fcfcfc] rounded-xl border border-black/10 flex flex-col justify-start items-start gap-5 w-full sm:w-[45%] hover:border-[#24D680] hover:shadow-lg transition duration-300"
+            onClick={() => handleOptionClick("candidate")} // Set role as 'candidate'
+          >
             {/* Icon Section */}
             <div className="w-12 h-12 flex items-center justify-center relative">
-              <img
-                // className="w-5 h-5 absolute origin-top-left rotate-[-3deg]"
-                src="./src/assets/upskill.svg"
-                alt="Upskill Icon"
-              />
+              <img src="./src/assets/upskill.svg" alt="Upskill Icon" />
             </div>
 
             {/* Text Section */}
@@ -38,8 +50,11 @@ const Homepage = () => {
             </div>
           </div>
 
-          {/* Option 2 */}
-          <div className="p-6 bg-[#fcfcfc] rounded-xl border border-black/10 flex flex-col justify-start items-start gap-5 w-full sm:w-[45%]">
+          {/* Option 2 - Employer */}
+          <div
+            className="group p-6 bg-[#fcfcfc] rounded-xl border border-black/10 flex flex-col justify-start items-start gap-5 w-full sm:w-[45%] hover:border-[#24D680] hover:shadow-lg transition duration-300"
+            onClick={() => handleOptionClick("employer")} // Set role as 'employer'
+          >
             {/* Icon Section */}
             <div className="w-12 h-12 flex items-center justify-center relative">
               <img src="./src/assets/find-talent.svg" alt="Hire Icon" />

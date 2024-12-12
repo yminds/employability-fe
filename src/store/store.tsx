@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
+import roleSlice from "./slices/roleSlice";
 import authSlice from "./slices/authSlice";
 import resumeSlice from "./slices/resumeSlice";
 const store = configureStore({
   reducer: {
+    role: roleSlice,
     auth: authSlice, // Add your reducers here
     resume: resumeSlice,
   },

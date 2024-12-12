@@ -42,6 +42,7 @@ export const registerUser = createAsyncThunk(
       const response = await axios.post(`${BASE_URL}/register`, userData, {
         withCredentials: true,
       });
+      console.log(response.data);
       return response.data;
     } catch (err: any) {
       const errorMessage =
@@ -127,7 +128,7 @@ const authSlice = createSlice({
       })
       .addCase(
         registerUser.fulfilled,
-        (state, action: PayloadAction<{ user: User; message: string }>) => {
+        (state, action: PayloadAction<{ user: User; message: string }>) => {  
           state.status = "succeeded";
           state.user = action.payload.user;
           state.isAuthenticated = true;

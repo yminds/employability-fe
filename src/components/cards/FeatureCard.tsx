@@ -1,10 +1,11 @@
-const FeatureCard = () => {
+import CarouselSVG from "../../assets/carousel.svg";
+
+const FeatureCard: React.FC = () => {
   return (
-    <div className="bg-[#F5F6FA] flex items-center justify-center">
-      <div
-        className="w-[832px] h-[800px] bg-no-repeat bg-cover "
-        style={{ backgroundImage: "url('./src/assets/carousel.svg')" }}
-      ></div>
+    <div className="flex justify-center items-center w-full h-full m-0 p-0">
+      <div className="w-full h-full max-w-[900px] max-h-[1069px] overflow-hidden">
+        <img src={CarouselSVG} alt="Carousel" className="h-full w-auto block" />
+      </div>
     </div>
   );
 };

@@ -5,6 +5,30 @@ module.exports = {
   theme: {
     extend: {
       borderRadius: {
+        colors: {
+          greens: {
+            100: "#DBFFEA",
+            200: "#AEFDCE",
+            300: "#7DFDB1",
+            400: "#5AFA9A",
+            500: "#2EE578",
+            600: "#1FD167",
+            700: "#10B754",
+            800: "#03963F",
+            900: "#003D19",
+          },
+          greys: {
+            100: "#F6F5FA",
+            200: "#D7D6D9",
+            300: "#B4B4B5",
+            400: "#8E8E91",
+            500: "#66656B",
+            600: "#3E3D47",
+            700: "#1D1C26",
+            800: "#0B0A12",
+            900: "#040309",
+          },
+        },
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
