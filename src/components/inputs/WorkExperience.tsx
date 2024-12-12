@@ -1,7 +1,7 @@
 // components/WorkExperience.tsx
 import React from "react";
 import TextInput from "./TextInput";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 interface WorkExperienceProps {
   workExperiences: Array<any>;

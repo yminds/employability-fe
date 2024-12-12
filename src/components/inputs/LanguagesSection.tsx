@@ -1,4 +1,4 @@
-import TextInput from "@/components/TextInput";
+import TextInput from "@/components/inputs/TextInput";
 
 interface LanguagesSectionProps {
   languages: string;

@@ -8,9 +8,9 @@ import {
 } from "../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "@/store/store";
-import TextInput from "@/components/TextInput";
+import TextInput from "@/components/inputs/TextInput";
 import Toggle from "@/components/ui/Toggle";
-import FeatureCard from "@/components/cards/FeatureCard";
+import FeatureCard from "@/components/cards/HeroCard";
 import { PhoneInput } from "@/components/cards/phoneInput/PhoneInput";
 
 interface SignupData {

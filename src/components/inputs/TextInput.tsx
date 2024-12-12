@@ -1,6 +1,6 @@
 // components/TextInput.tsx
 import React from "react";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 
 interface TextInputProps {
   label?: string;
@@ -10,7 +10,7 @@ interface TextInputProps {
   type?: string;
   placeholder?: string;
   error?: string;
-  icon?: string; 
+  icon?: string;
 }
 
 const TextInput: React.FC<TextInputProps> = ({

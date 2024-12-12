@@ -1,6 +1,6 @@
 // ProfessionalProfilesSection.tsx
 import React from "react";
-import TextInput from "@/components/TextInput";
+import TextInput from "@/components/inputs/TextInput";
 
 interface ProfessionalProfilesSectionProps {
   linkedinProfile: string;

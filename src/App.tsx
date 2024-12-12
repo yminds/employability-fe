@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./store/slices/authSlice.ts";
 import Homepage from "./pages/Homepage.tsx";
 import "@fontsource/ubuntu";
-import VerifyPhoneNumber from "./components/VerifyPhoneNumber.tsx";
+import VerifyPhoneNumber from "./components/inputs/VerifyPhoneNumber.tsx";
 
 const App: React.FC = () => {
   const dispatch = useDispatch();

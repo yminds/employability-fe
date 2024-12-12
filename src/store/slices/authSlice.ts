@@ -128,7 +128,7 @@ const authSlice = createSlice({
       })
       .addCase(
         registerUser.fulfilled,
-        (state, action: PayloadAction<{ user: User; message: string }>) => {  
+        (state, action: PayloadAction<{ user: User; message: string }>) => {
           state.status = "succeeded";
           state.user = action.payload.user;
           state.isAuthenticated = true;

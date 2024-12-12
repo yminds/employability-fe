@@ -5,27 +5,27 @@ import { useNavigate } from "react-router-dom";
 import { uploadResume } from "@/store/slices/resumeSlice";
 import { AppDispatch } from "@/store/store";
 import { Button } from "@/components/ui/button";
-import ResumeUpload from "@/components/ResumeUpload";
-import WorkExperience from "@/components/WorkExperience";
-import Education from "@/components/Education";
-import ProjectSection from "@/components/ProjectSection";
-import AwardsSection from "@/components/AwardSection";
+import ResumeUpload from "@/components/upload-resume/ResumeUpload";
+import WorkExperience from "@/components/inputs/WorkExperience";
+import Education from "@/components/inputs/Education";
+import ProjectSection from "@/components/inputs/ProjectSection";
+import AwardsSection from "@/components/inputs/AwardSection";
 import { createProfile } from "@/store/slices/profileSlice";
 import { skillsList } from "@/utils/skillsList";
-import LocationSelector from "@/components/LocationSection";
-import PersonalInfoSection from "@/components/PersonalInfoSection";
-import ProfessionalProfilesSection from "@/components/ProfessionalProfileSection";
-import LanguagesSection from "@/components/LanguagesSection";
-import CertificationsSection from "@/components/CertificationsSection";
+import LocationSelector from "@/components/inputs/LocationSection";
+import PersonalInfoSection from "@/components/inputs/PersonalInfoSection";
+import ProfessionalProfilesSection from "@/components/inputs/ProfessionalProfileSection";
+import LanguagesSection from "@/components/inputs/LanguagesSection";
+import CertificationsSection from "@/components/inputs/CertificationsSection";
 import Select from "react-select";
-import SkillSelector from "@/components/SkillSelector";
+import SkillSelector from "@/components/inputs/SkillSelector";
 
 interface Skill {
   name: string;
   rating: number;
 }
 
-console.log(skillsList);
+// console.log(skillsList);
 
 const CompleteProfile: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

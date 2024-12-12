@@ -1,7 +1,7 @@
 // components/Education.tsx
 import React from "react";
-import { Button } from "./ui/button";
-import TextInput from "./TextInput";
+import { Button } from "../ui/button";
+import TextInput from "../inputs/TextInput";
 
 interface EducationProps {
   educations: Array<any>;

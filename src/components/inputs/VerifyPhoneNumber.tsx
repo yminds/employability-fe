@@ -1,5 +1,5 @@
-import FeatureCard from "./cards/FeatureCard";
-import LockSVG from "../assets/lock.svg";
+import FeatureCard from "../cards/HeroCard";
+import LockSVG from "../../assets/lock.svg";
 import { useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
