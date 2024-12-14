@@ -5,9 +5,12 @@ import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFetchUserQuery } from "@/store/slices/authSlice";
+import BackButtonSVG from "../../assets/back-button.svg";
+import { useNavigate } from "react-router-dom";
 
 const VerifyPhoneNumber = () => {
   // Fetch user data using RTK Query
+  const navigate = useNavigate();
   const { data: user, isLoading, error } = useFetchUserQuery();
 
   console.log(user);
@@ -64,6 +67,13 @@ const VerifyPhoneNumber = () => {
       {/* Right Section - Verification Form */}
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
+          <img
+            src={BackButtonSVG}
+            alt=""
+            className="mb-[42px]"
+            onClick={() => navigate(-1)}
+          />
+
           {/* Lock Icon */}
           <div className="flex flex-col items-start">
             <div className="flex justify-start">
@@ -74,7 +84,7 @@ const VerifyPhoneNumber = () => {
 
             {/* Heading */}
             <h1
-              className="font-['Work Sans'] text-[32px] font-semibold leading-[28px] tracking-[-0.7px] mt-4"
+              className="font-['ubuntu'] text-[32px] font-semibold leading-[28px] tracking-[-0.7px] mt-4"
               style={{
                 textUnderlinePosition: "from-font",
                 textDecorationSkipInk: "none",

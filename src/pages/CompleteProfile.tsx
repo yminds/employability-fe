@@ -172,7 +172,7 @@ const CompleteProfile: React.FC = () => {
       await dispatch(createProfile({ userId: user._id, profileData })); // Replace with actual dispatch
     }
     navigate("/profile");
-    console.log("Profile Data Su bmitted:", profileData);
+    console.log("Profile Data Submitted:", profileData);
   };
 
   // Functions for handling dynamic sections (Work Experience, Education, etc.)
