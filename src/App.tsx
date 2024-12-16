@@ -3,17 +3,18 @@ import { Routes, Route } from "react-router-dom";
 import LoginSignupForm from "./pages/LoginSignupForm.tsx";
 import CompleteProfile from "./pages/CompleteProfile.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
-import { useDispatch, useSelector } from "react-redux";
-// import { fetchUser } from "./store/slices/authSlice.ts";
 import Homepage from "./pages/Homepage.tsx";
-// import "@fontsource/ubuntu";
 import VerifyPhoneNumber from "./components/inputs/VerifyPhoneNumber.tsx";
-import { useFetchUserQuery } from "./store/slices/authSlice.ts";
 import AddPhoneNumber from "./pages/AddPhoneNumber.tsx";
+// import { fetchUser } from "./store/slices/authSlice.ts";
+// import "@fontsource/ubuntu";
+// import { useDispatch, useSelector } from "react-redux";
+// import { useFetchUserQuery } from "./store/slices/authSlice.ts";
 import InterviewPage from "./pages/Interview.tsx";
 import "./App.css";
+
 const App: React.FC = () => {
-  const { data: user, isLoading, error } = useFetchUserQuery();
+  // const { data: user, isLoading, error } = useFetchUserQuery();
   // const dispatch = useDispatch();
   // const { status, isAuthenticated } = useSelector((state: any) => state.auth);
 
