@@ -22,16 +22,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   console.log("ProtectedRoute Debug - current location:", location.pathname);
 
   // If the user is not authenticated, redirect to login or specified redirectPath
-  if (!isAuthenticated) {
-    return <Navigate to={redirectPath} state={{ from: location }} />;
-  }
+  // if (!isAuthenticated) {
+  //   return <Navigate to={redirectPath} state={{ from: location }} />;
+  // }
 
-  // If profile is not completed, redirect to /complete-profile
-  if (isAuthenticated && !user?.isProfileCompleted) {
-    if (location.pathname !== "/complete-profile") {
-      return <Navigate to="/complete-profile" state={{ from: location }} />;
-    }
-  }
+  // // If profile is not completed, redirect to /complete-profile
+  // if (isAuthenticated && !user?.isProfileCompleted) {
+  //   if (location.pathname !== "/complete-profile") {
+  //     return <Navigate to="/complete-profile" state={{ from: location }} />;
+  //   }
+  // }
 
   // If all checks pass, render the children
   return <>{children}</>;

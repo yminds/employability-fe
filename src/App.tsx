@@ -7,18 +7,19 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./store/slices/authSlice.ts";
 import Homepage from "./pages/Homepage.tsx";
-import "@fontsource/ubuntu";
+// import "@fontsource/ubuntu";
 import VerifyPhoneNumber from "./components/inputs/VerifyPhoneNumber.tsx";
-
+import InterviewPage from "./pages/Interview.tsx";
+import "./App.css";
 const App: React.FC = () => {
-  const dispatch = useDispatch();
-  const { status, isAuthenticated } = useSelector((state: any) => state.auth);
+  // const dispatch = useDispatch();
+  // const { status, isAuthenticated } = useSelector((state: any) => state.auth);
 
-  React.useEffect(() => {
-    if (!isAuthenticated && status === "idle") {
-      dispatch(fetchUser());
-    }
-  }, [dispatch, isAuthenticated, status]);
+  // React.useEffect(() => {
+  //   if (!isAuthenticated && status === "idle") {
+  //     dispatch(fetchUser());
+  //   }
+  // }, [dispatch, isAuthenticated, status]);
 
   return (
     <Routes>
@@ -27,6 +28,7 @@ const App: React.FC = () => {
       <Route path="/register" element={<LoginSignupForm />} />
       <Route path="/verify-phone" element={<OTPVerification />} />
       <Route path="/verify-otp" element={<VerifyPhoneNumber />} />
+      <Route path="/interview/:id?" element={<InterviewPage />} />
 
       {/* Protected Routes */}
       <Route
