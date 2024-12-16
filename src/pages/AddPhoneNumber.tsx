@@ -3,12 +3,18 @@ import PhoneSVG from "../assets/phone.svg";
 import { Button } from "@/components/ui/button";
 import { PhoneInput } from "@/components/cards/phoneInput/PhoneInput";
 import BackButtonSVG from "../assets/back-button.svg";
-import { useFetchUserQuery } from "@/store/slices/authSlice";
+import {
+  useFetchUserQuery,
+  useUpdatePhoneMutation,
+} from "@/store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const AddPhoneNumber: React.FC = () => {
   const navigate = useNavigate();
-  const { data: user, isLoading, isError } = useFetchUserQuery();
+  const { data: user, isUserLoading, isError } = useFetchUserQuery();
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [updatePhone, { isLoading, error }] = useUpdatePhoneMutation();
 
   if (
     user?.isAuthenticated &&
@@ -18,18 +24,32 @@ const AddPhoneNumber: React.FC = () => {
     navigate("/complete-profile");
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      console.log(phoneNumber);
+      await updatePhone({ phoneNumber }).unwrap();
+      navigate("/verify-otp"); // Navigate to OTP verification page
+    } catch (err) {
+      console.error("Failed to update phone number:", err);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 h-screen w-screen overflow-hidden bg-white gap-x-6">
       {/* Left Section - Feature Card */}
       <div className="hidden md:flex items-center justify-end overflow-hidden">
         <FeatureCard />
       </div>
-
       {/* Right Section - Verification Form */}
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="w-full max-w-md">
-          <img src={BackButtonSVG} alt="" className="mb-[42px]" />
-
+          <img
+            src={BackButtonSVG}
+            alt=""
+            className="mb-[42px]"
+            onClick={() => navigate('/verify-otp')}
+          />
           {/* Lock Icon */}
           <div className="flex flex-col items-start">
             <div className="flex justify-start">
@@ -58,7 +78,7 @@ const AddPhoneNumber: React.FC = () => {
 
           {/* OTP Input and Verify Button */}
           <form
-            // onSubmit={handleSubmit}
+            onSubmit={handleSubmit}
             className="flex flex-col items-center gap-8 mt-8"
           >
             {/* OTP Inputs */}
@@ -66,6 +86,8 @@ const AddPhoneNumber: React.FC = () => {
               placeholder="Phone Number"
               required
               className="w-full"
+              value={phoneNumber}
+              onChange={(value) => setPhoneNumber(value || "")}
             />
             {/* Verify Button */}
             <Button

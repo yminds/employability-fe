@@ -74,6 +74,16 @@ export const authApiSlice = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
+    updatePhone: builder.mutation<{ message: string }, { phoneNumber: string }>(
+      {
+        query: (data) => ({
+          url: "/update-phone",
+          method: "POST",
+          body: data,
+        }),
+        invalidatesTags: ["Auth"],
+      }
+    ),
   }),
 });
 
@@ -82,5 +92,5 @@ export const {
   useLoginUserMutation,
   useFetchUserQuery,
   useLogoutUserMutation,
+  useUpdatePhoneMutation,
 } = authApiSlice;
-

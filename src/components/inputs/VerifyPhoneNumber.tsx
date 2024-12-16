@@ -100,7 +100,12 @@ const VerifyPhoneNumber = () => {
             <span className="font-medium text-primary-500 underline">
               {phoneNumber}
             </span>
-            <Button variant="ghost" size="icon" className="h-4 w-4 p-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-4 w-4 p-0"
+              onClick={() => navigate("/verify-phone")}
+            >
               <Pencil className="h-3 w-3 text-green-500" />
             </Button>
           </div>
