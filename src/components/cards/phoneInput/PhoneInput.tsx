@@ -55,10 +55,10 @@ const InputComponent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <Input
     className={cn(
-      "h-12 pl-20 rounded-lg bg-[#F8F9FC]",
-      "border-0 ring-0 shadow-none",
-      "placeholder:text-gray-500",
-      "focus:ring-0 focus:border-0",
+      "w-full py-[12px] px-[16px] bg-[#FAFBFE] rounded-[6px]", // Padding, background, and border radius
+      "border border-[rgba(0,0,0,0.10)]", // Light border style
+      "focus:outline-none focus:ring-2 focus:ring-[#0AD472]", // Green focus ring
+      "placeholder:text-gray-500 placeholder-shown:align-middle ps-16", // Fix placeholder alignment
       className
     )}
     {...props}

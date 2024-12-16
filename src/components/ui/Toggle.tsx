@@ -12,9 +12,9 @@ const Toggle: React.FC<ToggleProps> = ({ isChecked, onToggle, label }) => {
       {/* Toggle Switch */}
       <div
         onClick={onToggle}
-        className={`w-10 h-5 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer ${
-          isChecked ? "bg-[#08A358]" : "bg-gray-300"
-        }`}
+        className={`w-10 h-5 flex items-center rounded-full px-1 cursor-pointer ${
+          isChecked ? "bg-primary-500" : "bg-gray-300"
+        }`} // Applied primary-500 when checked
       >
         <div
           className={`h-4 w-4 bg-white rounded-full shadow-md transform duration-300 ${
@@ -24,7 +24,7 @@ const Toggle: React.FC<ToggleProps> = ({ isChecked, onToggle, label }) => {
       </div>
 
       {/* Label */}
-      {label && <span className="text-gray-600">{label}</span>}
+      {label && <span className={`text-sm ${"text-secondary-400"}`}>{label}</span>}
     </div>
   );
 };

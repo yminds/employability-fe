@@ -233,4 +233,4 @@ export const skillsList = [
   "iOS Development",
   "macOS",
   "spaCy",
-];
+];  
