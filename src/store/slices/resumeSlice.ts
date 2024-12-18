@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// Define the types for parsed resume data
+const BASE_URL = "http://localhost:3000/api";
+
 interface Address {
   street?: string;
   city?: string;
@@ -55,82 +56,35 @@ interface ParsedData {
   interests: string[];
 }
 
-interface ResumeState {
-  uploading: boolean;
-  error: string | null;
-  parsedData: ParsedData | null;
+interface UploadResumeResponse {
+  parsedData: ParsedData;
+  message: string;
 }
 
-const initialState: ResumeState = {
-  uploading: false,
-  error: null,
-  parsedData: null,
-};
+export const resumeApiSlice = createApi({
+  reducerPath: "resumeApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: BASE_URL,
+    credentials: "include",
+  }),
+  endpoints: (builder) => ({
+    uploadResume: builder.mutation<
+      UploadResumeResponse,
+      { file: File; userId: string }
+    >({
+      query: ({ file, userId }) => {
+        const formData = new FormData();
+        formData.append("resume", file);
+        formData.append("userId", userId);
 
-// Async thunk for uploading and parsing the resume
-export const uploadResume = createAsyncThunk(
-  "resume/uploadResume",
-  async (
-    { file, userId }: { file: File; userId: string },
-    { rejectWithValue }
-  ) => {
-    try {
-      const formData = new FormData();
-      formData.append("resume", file);
-      formData.append("userId", userId);
-
-      const response = await fetch("http://localhost:3000/api/upload-resume", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to upload resume");
-      }
-
-      // Return the parsed data from the backend
-      console.log(data.parsedData);
-      return data.parsedData;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-const resumeSlice = createSlice({
-  name: "resume",
-  initialState,
-  reducers: {
-    // Reset state when needed
-    resetResumeState: (state) => {
-      state.uploading = false;
-      state.error = null;
-      state.parsedData = null;
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(uploadResume.pending, (state) => {
-        state.uploading = true;
-        state.error = null;
-      })
-      .addCase(
-        uploadResume.fulfilled,
-        (state, action: PayloadAction<ParsedData>) => {
-          state.uploading = false;
-          state.parsedData = action.payload;
-        }
-      )
-      .addCase(uploadResume.rejected, (state, action) => {
-        state.uploading = false;
-        state.error = action.payload as string;
-      });
-  },
+        return {
+          url: "/upload-resume",
+          method: "POST",
+          body: formData,
+        };
+      },
+    }),
+  }),
 });
 
-export const { resetResumeState } = resumeSlice.actions;
-
-export default resumeSlice.reducer;
+export const { useUploadResumeMutation } = resumeApiSlice;

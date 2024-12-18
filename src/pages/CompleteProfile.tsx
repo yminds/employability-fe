@@ -2,7 +2,9 @@ import React, { useState, useEffect, FormEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { uploadResume } from "@/store/slices/resumeSlice";
+// import { uploadResume } from "@/store/slices/resumeSlice";
+import { useUploadResumeMutation } from "@/store/slices/resumeSlice";
+import { useFetchUserQuery } from "@/store/slices/authSlice";
 import { AppDispatch } from "@/store/store";
 import { Button } from "@/components/ui/button";
 import ResumeUpload from "@/components/upload-resume/ResumeUpload";
@@ -17,7 +19,6 @@ import PersonalInfoSection from "@/components/inputs/PersonalInfoSection";
 import ProfessionalProfilesSection from "@/components/inputs/ProfessionalProfileSection";
 import LanguagesSection from "@/components/inputs/LanguagesSection";
 import CertificationsSection from "@/components/inputs/CertificationsSection";
-import Select from "react-select";
 import SkillSelector from "@/components/inputs/SkillSelector";
 
 interface Skill {
@@ -31,11 +32,22 @@ const CompleteProfile: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
+  const { data: userData, isLoading, error } = useFetchUserQuery();
+  const user = userData?.user;
+  console.log(user);
+
+  const [uploadResume, { data, uploading, isUploaderror }] =
+    useUploadResumeMutation();
+
+  const parsedData = data?.parsedData;
+
+  console.log(parsedData);
+
   // Accessing user and resume data from Redux store
-  const user = useSelector((state: RootState) => state.auth.user);
-  const { uploading, error, parsedData } = useSelector(
-    (state: RootState) => state.resume
-  );
+  // const user = useSelector((state: RootState) => state.auth.user);
+  // const { uploading, error, parsedData } = useSelector(
+  //   (state: RootState) => state.resume
+  // );
 
   // Safely access skills from parsedData, checking if parsedData is available
   const parsedDataSkills = parsedData?.skills || [];

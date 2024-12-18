@@ -2,16 +2,21 @@ import { configureStore } from "@reduxjs/toolkit";
 import roleSlice from "./slices/roleSlice";
 // import authSlice from "./slices/authSlice";
 import { authApiSlice } from "./slices/authSlice";
-import resumeSlice from "./slices/resumeSlice";
+import { resumeApiSlice } from "./slices/resumeSlice";
+// import resumeSlice from "./slices/resumeSlice";
 const store = configureStore({
   reducer: {
     [authApiSlice.reducerPath]: authApiSlice.reducer,
     role: roleSlice,
     // auth: authSlice, // Add your reducers here
-    resume: resumeSlice,
+    // resume: resumeSlice,
+    [resumeApiSlice.reducerPath]: resumeApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(authApiSlice.middleware),
+    getDefaultMiddleware().concat(
+      authApiSlice.middleware,
+      resumeApiSlice.middleware
+    ),
 });
 
 // Define RootState and AppDispatch types for better TypeScript support

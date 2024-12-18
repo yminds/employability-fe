@@ -9,11 +9,8 @@ import BackButtonSVG from "../../assets/back-button.svg";
 import { useNavigate } from "react-router-dom";
 
 const VerifyPhoneNumber = () => {
-  // Fetch user data using RTK Query
   const navigate = useNavigate();
   const { data: user, isLoading, error } = useFetchUserQuery();
-
-  console.log(user);
 
   const phoneNumber = user?.user?.phoneNumber; // Extract phone number from user data
 
@@ -54,6 +51,14 @@ const VerifyPhoneNumber = () => {
     }
   };
 
+  const handleSkip = () => {
+    if (user?.user?.isProfileCompleted) {
+      navigate("/dashboard");
+    } else {
+      navigate("/complete-profile");
+    }
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error fetching user data.</p>;
 
@@ -70,15 +75,15 @@ const VerifyPhoneNumber = () => {
           <img
             src={BackButtonSVG}
             alt=""
-            className="mb-[42px]"
+            className="mb-[42px] cursor-pointer"
             onClick={() => navigate(-1)}
           />
 
           {/* Lock Icon */}
           <div className="flex flex-col items-start">
             <div className="flex justify-start">
-              <div className="rounded  mb-6">
-                <img src={LockSVG} alt="Lock Icon" className="h-16 w-16 " />
+              <div className="rounded mb-6">
+                <img src={LockSVG} alt="Lock Icon" className="h-16 w-16" />
               </div>
             </div>
 
@@ -115,7 +120,6 @@ const VerifyPhoneNumber = () => {
             onSubmit={handleSubmit}
             className="flex flex-col items-center gap-8 mt-8"
           >
-            {/* OTP Inputs */}
             <div className="flex justify-center gap-4">
               {otp.map((digit, index) => (
                 <Input
@@ -138,7 +142,6 @@ const VerifyPhoneNumber = () => {
               ))}
             </div>
 
-            {/* Verify Button */}
             <Button
               type="submit"
               className={`w-full py-3 text-sm font-medium rounded-l rounded-r ${
@@ -149,6 +152,16 @@ const VerifyPhoneNumber = () => {
               disabled={!otp.every(Boolean)}
             >
               Verify
+            </Button>
+
+            {/* Skip Button */}
+            <Button
+              type="button"
+              variant="link"
+              className="text-primary-500 underline hover:text-green-600 mt-4"
+              onClick={handleSkip}
+            >
+              Skip
             </Button>
           </form>
 
