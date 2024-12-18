@@ -30,6 +30,8 @@ const Interview: React.FC = () => {
   const nextSentenceToPlayRef = useRef<number>(0); // Tracks the next sentence to play
   const audioBufferMap = useRef<Map<number, Blob>>(new Map()); // Buffers audio blobs indexed by sentence
 
+  const recordingProcessed = useRef(false);
+
   useEffect(() => {
     const newSocket = io(SOCKET_URL, {
       // Optional configurations
@@ -93,13 +95,16 @@ const Interview: React.FC = () => {
   // Function to fetch TTS audio and handle ordered playback
   const fetchTTS = async (text: string, index: number) => {
     try {
-      const response = await fetch("http://localhost:3000/utility/text2Speech", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/utility/text2Speech",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -199,6 +204,10 @@ const Interview: React.FC = () => {
       audio: true,
       mediaRecorderOptions: { mimeType: "audio/webm" },
       onStop: async (blobUrl) => {
+        // Prevent multiple calls to onStop
+        if (recordingProcessed.current) return;
+        recordingProcessed.current = true;
+
         try {
           const response = await fetch(blobUrl);
           const audioBlob = await response.blob();
@@ -229,6 +238,9 @@ const Interview: React.FC = () => {
           clearBlobUrl();
         } catch (error) {
           console.error("Error transcribing audio:", error);
+        } finally {
+          // Reset the flag after processing
+          recordingProcessed.current = false;
         }
       },
     }
@@ -250,10 +262,12 @@ const Interview: React.FC = () => {
   }, []);
 
   const handleDoneAnswering = () => {
-    setIsUserAnswering(false);
-    stopRecording();
+    // Only stop recording if user is answering
+    if (isUserAnswering) {
+      stopRecording();
+      setIsUserAnswering(false);
+    }
   };
-
   const sendMessage = async (message: string) => {
     try {
       const response = await axios.post(
