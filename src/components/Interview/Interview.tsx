@@ -1,5 +1,5 @@
 // Interview.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Header from "./Header";
 import WebCam from "./WebCam";
 import Controls from "./Controls";
@@ -7,6 +7,7 @@ import AIProfile from "./AIProfile";
 import Conversation from "./Conversation";
 import { useReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
+import { io, Socket } from "socket.io-client";
 
 export interface IMessage {
   id: number;
@@ -14,10 +15,184 @@ export interface IMessage {
   sender: string;
 }
 
+const SOCKET_URL = "http://localhost:3000";
+
 const Interview: React.FC = () => {
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [frequencyData, setFrequencyData] = useState<number>(0);
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const bufferRef = useRef<string>(""); // Buffer to accumulate incoming data
+  const isComponentMounted = useRef<boolean>(true); // To handle component unmounting
+
+  // Sentence indexing for ordered playback
+  const sentenceIndexRef = useRef<number>(0); // Assigns a unique index to each sentence
+  const nextSentenceToPlayRef = useRef<number>(0); // Tracks the next sentence to play
+  const audioBufferMap = useRef<Map<number, Blob>>(new Map()); // Buffers audio blobs indexed by sentence
+
+  useEffect(() => {
+    const newSocket = io(SOCKET_URL, {
+      // Optional configurations
+    });
+
+    setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      console.log("Connected with ID:", newSocket.id);
+    });
+
+    newSocket.on("output", (data: string) => {
+      console.log("Output data:", data);
+      handleIncomingData(data);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      isComponentMounted.current = false;
+      newSocket.off("connect");
+      newSocket.off("output");
+      newSocket.disconnect();
+    };
+  }, []); // Empty dependency array ensures this runs once
+
+  // Handle incoming data by accumulating and parsing sentences
+  const handleIncomingData = (data: string) => {
+    bufferRef.current += data;
+
+    // Regex to match complete sentences
+    const sentenceRegex = /[^.!?]+[.!?]/g;
+    const sentences = bufferRef.current.match(sentenceRegex) || [];
+
+    // Process each complete sentence
+    sentences.forEach((sentence) => {
+      const trimmedSentence = sentence.trim();
+      if (trimmedSentence) {
+        // Assign a unique index to the sentence
+        const currentIndex = sentenceIndexRef.current;
+        sentenceIndexRef.current += 1;
+
+        // Add to messages as AI response
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: prevMessages.length + 1,
+            message: trimmedSentence,
+            sender: "AI Interviewer",
+          },
+        ]);
+
+        // Send TTS request immediately
+        fetchTTS(trimmedSentence, currentIndex);
+      }
+    });
+
+    // Remove processed sentences from the buffer
+    bufferRef.current = bufferRef.current.replace(sentenceRegex, "");
+  };
+
+  // Function to fetch TTS audio and handle ordered playback
+  const fetchTTS = async (text: string, index: number) => {
+    try {
+      const response = await fetch("http://localhost:3000/utility/text2Speech", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate speech");
+      }
+
+      const audioBlob = await response.blob();
+
+      // Store the audio blob in the buffer map
+      audioBufferMap.current.set(index, audioBlob);
+
+      // Attempt to play audio if it's the next in sequence
+      attemptPlayback();
+    } catch (error) {
+      console.error("Error fetching TTS audio:", error);
+    }
+  };
+
+  // Function to attempt playback of the next sentence
+  const attemptPlayback = () => {
+    const currentPlayIndex = nextSentenceToPlayRef.current;
+    const audioBlob = audioBufferMap.current.get(currentPlayIndex);
+
+    if (audioBlob) {
+      // Remove the blob from the map to free memory
+      audioBufferMap.current.delete(currentPlayIndex);
+
+      // Play the audio
+      playAudio(audioBlob)
+        .then(() => {
+          // Increment to the next sentence index
+          nextSentenceToPlayRef.current += 1;
+          // Recursively attempt to play the next sentence
+          attemptPlayback();
+        })
+        .catch((error) => {
+          console.error("Error playing audio:", error);
+          // Even if there's an error, proceed to the next sentence
+          nextSentenceToPlayRef.current += 1;
+          attemptPlayback();
+        });
+    }
+  };
+
+  // Function to play audio and handle frequency analysis
+  const playAudio = async (audioBlob: Blob): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audioElement = new Audio(audioUrl);
+      audioElement.crossOrigin = "anonymous"; // Enable CORS if needed
+
+      // Set up Web Audio API for frequency analysis
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+      const source = audioContext.createMediaElementSource(audioElement);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+
+      const calculateFrequency = () => {
+        analyser.getByteFrequencyData(dataArray);
+        // Calculate the average frequency
+        const avgFrequency =
+          dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
+        // Normalize the frequency to a range of 0 to 1
+        const normalizedFrequency = avgFrequency / 255;
+        setFrequencyData(normalizedFrequency);
+        if (!audioElement.paused && isComponentMounted.current) {
+          requestAnimationFrame(calculateFrequency);
+        }
+      };
+
+      calculateFrequency();
+
+      audioElement.play();
+
+      audioElement.onended = () => {
+        setIsUserAnswering(true);
+        startRecording();
+        setFrequencyData(0); // Reset frequency data when speech ends
+        resolve();
+      };
+
+      audioElement.onerror = (error) => {
+        console.error("Audio playback error:", error);
+        reject(error);
+      };
+    });
+  };
 
   const { startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder(
     {
@@ -61,7 +236,7 @@ const Interview: React.FC = () => {
 
   useEffect(() => {
     const startTimer = setTimeout(() => {
-      sendMessage("Hello");
+      sendMessage("Conduct a React Mock Interview");
       setMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -73,64 +248,6 @@ const Interview: React.FC = () => {
     }, 1000);
     return () => clearTimeout(startTimer);
   }, []);
-
-  const speak = async (text: string) => {
-    try {
-      const response = await fetch(
-        "http://localhost:3000/utility/text2Speech",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ text }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to generate speech");
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audioElement = new Audio(audioUrl);
-      audioElement.crossOrigin = "anonymous"; // Enable CORS if needed
-      // Set up Web Audio API for frequency analysis
-      const audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-      const source = audioContext.createMediaElementSource(audioElement);
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
-
-      const calculateFrequency = () => {
-        analyser.getByteFrequencyData(dataArray);
-        // Calculate the average frequency
-        const avgFrequency =
-          dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-        // Normalize the frequency to a range of 0 to 1
-        const normalizedFrequency = avgFrequency / 255;
-        setFrequencyData(normalizedFrequency);
-        requestAnimationFrame(calculateFrequency);
-      };
-
-      calculateFrequency();
-
-      audioElement.play();
-      audioElement.onended = () => {
-        setIsUserAnswering(true);
-        startRecording();
-        setFrequencyData(0); // Reset frequency data when speech ends
-      };
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
 
   const handleDoneAnswering = () => {
     setIsUserAnswering(false);
@@ -147,15 +264,22 @@ const Interview: React.FC = () => {
           instructions: "",
         }
       );
-      speak(response.data.content[0].text.value);
+
+      // Assuming the response contains a field 'content' which is a list of responses
+      const aiResponse = response.data.content[0].text.value;
       setMessages((prevMessages) => [
         ...prevMessages,
         {
           id: prevMessages.length + 1,
-          message: response.data.content[0].text.value,
+          message: aiResponse,
           sender: "AI Interviewer",
         },
       ]);
+
+      // Enqueue the AI response for TTS and playback
+      const currentIndex = sentenceIndexRef.current;
+      sentenceIndexRef.current += 1;
+      fetchTTS(aiResponse, currentIndex);
     } catch (error) {
       console.error("Error sending message to AI:", error);
     }
