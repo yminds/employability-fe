@@ -1,9 +1,19 @@
-import React from 'react'
+import React from "react";
 
-const Dashboard:React.FC = () => {
+const Dashboard: React.FC = () => {
   return (
-    <div>Dashboard</div>
-  )
-}
+    <>
+      <div>Dashboard</div>
+      <div
+        onClick={() => {
+          localStorage.clear();
+          window.location.href = "/login";
+        }}
+      >
+        Logout
+      </div>
+    </>
+  );
+};
 
-export default Dashboard
+export default Dashboard;

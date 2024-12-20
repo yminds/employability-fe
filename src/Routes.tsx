@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 
 // Hooks
-import useScrollToTop from "./utils/hooks/useScrollTop";
+import useScrollToTop from "./hooks/useScrollTop.ts";
 
 // Models
 import { Role } from "./models/Role";
@@ -13,8 +13,8 @@ import Interview from "./pages/Interview.tsx";
 
 // Components
 import NotFound from "@/components/app/NotFound";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Login from "./pages/Login.tsx";
+import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
+import Login from "./pages/LoginPage.tsx";
 
 interface RouteConfig {
   route: string;
@@ -28,7 +28,6 @@ export const routes: RouteConfig[] = [
   {
     route: "/login",
     component: <Login />,
-    roles: ["PUBLIC"],
     // redirectIfAuthenticated: "/",
   },
   {
