@@ -2,7 +2,6 @@
 // import axios from "axios";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { BedDouble } from "lucide-react";
 // import {createApi} from '@reduxjs/toolkit/query/react'
 
 const BASE_URL = "http://localhost:3000/api";
