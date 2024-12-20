@@ -32,6 +32,8 @@ const Interview: React.FC = () => {
 
   const recordingProcessed = useRef(false);
 
+  const timerStartRef = useRef<Date | null>(null);
+
   useEffect(() => {
     const newSocket = io(SOCKET_URL, {
       // Optional configurations
@@ -44,8 +46,21 @@ const Interview: React.FC = () => {
     });
 
     newSocket.on("output", (data: string) => {
-      console.log("Output data:", data);
+      // Stop the timer and print the end time,
       handleIncomingData(data);
+
+      if (timerStartRef.current) {
+        const endTime = new Date();
+        console.log("Timer ended at:", endTime);
+
+        const durationMs = endTime.getTime() - timerStartRef.current.getTime();
+        console.log(`Duration: ${durationMs} ms`);
+
+        // Additional console log for elapsed time
+        console.log(`Elapsed Time: ${durationMs / 1000} seconds`);
+
+        timerStartRef.current = null; // Reset the timer
+      }
     });
 
     // Cleanup on unmount
@@ -248,7 +263,8 @@ const Interview: React.FC = () => {
 
   useEffect(() => {
     const startTimer = setTimeout(() => {
-      sendMessage("Conduct a React Mock Interview");
+      sendMessage(`Tell me a long story about rabbit
+        `);
       setMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -269,6 +285,10 @@ const Interview: React.FC = () => {
     }
   };
   const sendMessage = async (message: string) => {
+    timerStartRef.current = new Date();
+    console.log("Timer started at:", timerStartRef.current);
+
+    // reset the time , Start Timer and print the start time
     try {
       const response = await axios.post(
         `http://localhost:3000/openai/threads/thread_pKIPJfBDu9sOWTbObajQOfi3/messages-and-run`,
