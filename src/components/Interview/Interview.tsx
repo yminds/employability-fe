@@ -17,7 +17,10 @@ export interface IMessage {
 
 const SOCKET_URL = "http://localhost:3000";
 
-const Interview: React.FC = () => {
+const Interview: React.FC<{
+  cameraScale: number;
+  id: string;
+}> = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [frequencyData, setFrequencyData] = useState<number>(0);
