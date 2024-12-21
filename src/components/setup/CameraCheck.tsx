@@ -1,88 +1,167 @@
-import React, { useEffect, useState, useRef } from "react";
+import React from "react";
+import Dropdown from "@/components/ui/dropdown";
+import { useCameraCheck } from "@/hooks/useCameraCheck";
 
-const CameraCheck: React.FC = () => {
-  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]); // List of cameras
-  const [selectedCamera, setSelectedCamera] = useState<string | null>(null); // Default to null
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+import camera from '@/assets/screen-setup/camera.svg'
+import check_circle from '@/assets/screen-setup/check_circle.svg'
+import person from '@/assets/screen-setup/person-skeleton.svg'
 
-  // Fetch available cameras on component mount
-  useEffect(() => {
-    const getCameras = async () => {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter((device) => device.kind === "videoinput");
-        setCameras(videoDevices); // Update the list of cameras
+interface CameraCheckProps {
+  onCameraChange: (isCameraSelected: boolean) => void;
+  onScaleChange: (scale: number) => void;
+}
 
-        // Do not pre-select any camera; keep dropdown default
-        if (!selectedCamera) {
-          setSelectedCamera(null);
-        }
-      } catch (error) {
-        console.error("Error fetching cameras:", error);
-      }
-    };
+const CameraCheck: React.FC<CameraCheckProps> = ({
+  onCameraChange,
+  onScaleChange,
+}) => {
+  const {
+    cameras,
+    selectedCamera,
+    zoom,
+    videoRef,
+    handleCameraChange,
+    handleZoomChange,
+  } = useCameraCheck();
 
-    getCameras();
-  }, [selectedCamera]);
+  const isCameraSelected = selectedCamera !== null;
 
-  // Start video stream when a camera is selected
-  useEffect(() => {
-    if (selectedCamera && videoRef.current) {
-      const constraints = { video: { deviceId: { exact: selectedCamera } } };
+  // Notify parent component of camera selection status
+  React.useEffect(() => {
+    onCameraChange(isCameraSelected);
+  }, [isCameraSelected, onCameraChange]);
 
-      navigator.mediaDevices
-        .getUserMedia(constraints)
-        .then((stream) => {
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-        })
-        .catch((err) => {
-          console.error("Error accessing selected camera:", err);
-        });
-    }
-  }, [selectedCamera]);
-
-  // Handle dropdown selection changes
-  const handleCameraChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    setSelectedCamera(value || null); // Set camera ID or reset to null
-  };
+  // Notify parent component of zoom scale
+  React.useEffect(() => {
+    onScaleChange(zoom / 100);
+  }, [zoom, onScaleChange]);
 
   return (
-    <div className="bg-[#FAFAFA] p-6 border rounded-lg flex flex-col justify-around">
-      <div className="w[42px] h-[42px]">
-      <img src="src\assets\images\video.png" alt="video img" />
+    <div
+      className={`bg-[#FAFAFA] p-6 pe-8 flex flex-col gap-4 rounded-xl ${
+        isCameraSelected
+          ? "border-[#10B754] border-2"
+          : "border border-[#DBDBDB]"
+      }`}
+    >
+      <div className="flex justify-between items-center">
+        <div className="text-[#333] text-xl not-italic font-medium leading-[normal] flex items-center gap-5">
+          <span className="flex w-10 h-10 p-2 justify-center items-center gap-1 bg-white border border-[#ddd] rounded-[42px]">
+            <img
+              className="w-6 h-4"
+              src={camera}
+              alt="Camera Icon"
+            />
+          </span>
+          <span className="text-[#333] text-xl not-italic font-medium leading-[normal]">
+            Camera Check
+          </span>
+        </div>
+        {isCameraSelected && (
+          <div className="flex items-center gap-2 relative">
+            <input
+              type="checkbox"
+              checked
+              readOnly
+              id="camera-check"
+              className="w-6 h-6 appearance-none"
+            />
+            <img
+              className="h-6 w-6 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-sm"
+              src={check_circle}
+              alt="Checked"
+            />
+          </div>
+        )}
       </div>
-      <div className="w-[244px] h-[52px] mb-7">
-      <h2 className="text-xl font-medium text-gray-800 mb-1 flex items-center">
-        <i className="fas fa-video text-green-500"></i> Camera Check
-      </h2>
-      <p className="text-gray-500 ">Make sure your camera is working and positioned correctly.</p>
-      </div>
-      <select
-        className="bg-gray-100 border border-gray-300 rounded-md px-4 py-2 w-full mb-4"
-        value={selectedCamera || ""} // Default to an empty string if null
+
+      <Dropdown
+        options={cameras.map((camera) => ({
+          label: camera.label || `Camera ${camera.deviceId}`,
+          value: camera.deviceId,
+        }))}
+        value={selectedCamera || ""}
+        placeholder="Select Video Source"
         onChange={handleCameraChange}
-      >
-        <option value="">Select Video Source</option> {/* Default option */}
-        {cameras.map((camera) => (
-          <option key={camera.deviceId} value={camera.deviceId}>
-            {camera.label || `Camera ${camera.deviceId}`}
-          </option>
-        ))}
-      </select>
-      <div className="w-full h-[160px] bg-gray-200 rounded-lg flex items-center justify-center">
+        width={300}
+        dropdownWidth={300}
+      />
+
+      <div className="w-full flex h-[374px] p-0 items-center justify-center gap-5 border-2 border-[#10B754] rounded-xl relative">
         {selectedCamera ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            className="w-full h-full object-cover rounded-lg"
-          />
+          <>
+            <img
+              className="absolute z-10 left-1/2 transform -translate-x-1/2 bottom-0"
+              src={person}
+              alt="Head Skeleton"
+            />
+            <div
+              className="relative w-full h-full flex items-center justify-center rounded-[10px]"
+              style={{ overflow: "hidden" }}
+            >
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                style={{
+                  transform: `scale(${zoom / 100})`,
+                  transition: "transform 0.3s ease",
+                  objectFit: "cover",
+                  width: "100%",
+                  height: "100%",
+                }}
+              />
+            </div>
+          </>
         ) : (
           <span className="text-gray-400">No Camera Selected</span>
         )}
+      </div>
+
+      <div className="flex flex-col gap-2 mt-4">
+        <div className="flex justify-between">
+          <span className="text-[#4C4C4C] text-sm font-medium">
+            Camera Zoom
+          </span>
+          <span className="text-[#4C4C4C] text-sm font-medium">
+            {zoom - 100}%
+          </span>
+        </div>
+        <input
+          type="range"
+          min="100"
+          max="300"
+          step="2"
+          value={zoom}
+          onChange={(e) => handleZoomChange(Number(e.target.value))}
+          className="w-full h-1.5 bg-gray-200 rounded appearance-none cursor-pointer"
+          style={{
+            background: `linear-gradient(to right, #4CAF50 ${
+              (zoom - 100) / 2
+            }%, #ddd ${(zoom - 100) / 2}%)`,
+          }}
+        />
+        {/* Custom Thumb Style */}
+        <style>{`
+            input[type="range"]::-webkit-slider-thumb {
+              background-color: white;
+              border: 2px solid #4CAF50; /* Optional: Add green border around the thumb */
+              width: 12px; /* Adjust thumb size */
+              height: 12px; /* Adjust thumb size */
+              border-radius: 50%; /* Make thumb circular */
+              cursor: pointer; /* Keep pointer cursor */
+              appearance: none; /* Remove default appearance */
+            }
+
+            input[type="range"]::-moz-range-thumb {
+              background-color: white; 
+              border: 2px solid #4CAF50; /* Optional: Add green border around the thumb */
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              cursor: pointer;
+            }
+          `}</style>
       </div>
     </div>
   );
