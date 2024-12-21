@@ -1,38 +1,54 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import CameraCheck from "@/components/setup/CameraCheck";
-import MicCheck from "@/components/setup/MicCheck";
-import ScreenSharing from "@/components/setup/ScreenSharing";
+import React from 'react';
+import MicCheck from 'src/components/MicCheck';
+import CameraCheck from 'src/components/CameraCheck';
+import ScreenSharingComponent from 'src/components/ScreenSharing';
 
-const CheckSetup: React.FC = () => {
-  const navigate = useNavigate(); // Hook to handle navigation
+type CheckSetupPageProps = {
+  isScreenSharing: boolean;
+  screenStream: MediaStream | null;
+  handleShareScreen: () => Promise<void>;
+  stopScreenSharing: () => void;
+  handleMicQualityChange: (isSelected: boolean, isMicTested: boolean) => void;
+  handleCameraChange: (isCameraSelected: boolean) => void;
+  handleScaleChange: (scale: number) => void;
+  videoRef: React.RefObject<HTMLVideoElement>;
+};
 
+const CheckSetupPage: React.FC<CheckSetupPageProps> = ({
+  isScreenSharing,
+  screenStream,
+  handleShareScreen,
+  stopScreenSharing,
+  handleMicQualityChange,
+  handleCameraChange,
+  handleScaleChange,
+  videoRef,
+}) => {
   return (
-    <div className="flex flex-col font-sans items-center justify-center h-screen">
-      <div className="w-[960px] justify-start">
-        <h1 className="text-[#1A1A1A] text-[32px] font-semibold leading-[51.2px] tracking-[-0.7px]">
-          Check Your Setup
-        </h1>
-        <p className="text-gray-500 mb-8">
-          We use audio, video, and screen sharing to generate an accurate
-          assessment & proctoring score. Please note that the recording of
-          <br />
-          your screen will be included in the AI interview report.
-        </p>
+    <div>
+      {/* Components Grid */}
+      <div className="grid grid-cols-5 grid-flow-col gap-4 h-[610px]">
+        <div className="col-span-2 h-[280px]">
+          <MicCheck onMicQualityChange={handleMicQualityChange} />
+        </div>
+        <div className="row-span-1 col-span-2 h-[310px]">
+          <ScreenSharingComponent
+            isScreenSharing={isScreenSharing}
+            screenStream={screenStream}
+            stopScreenSharing={stopScreenSharing}
+            handleShareScreen={handleShareScreen}
+            videoRef={videoRef}
+          />
+        </div>
+        <div className="row-span-3 col-span-3 h-[610px]">
+          <CameraCheck
+            onScaleChange={handleScaleChange}
+            onCameraChange={handleCameraChange}
+          />
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 w-[960px] h-[450px] gap-8">
-        <CameraCheck />
-        <MicCheck />
-        <ScreenSharing />
-      </div>
-      <button
-        className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg mt-8 shadow-md"
-        onClick={() => navigate("/interview")} // Navigate to /interview route
-      >
-        Proceed to Interview
-      </button>
     </div>
   );
 };
 
-export default CheckSetup;
+export default CheckSetupPage;
