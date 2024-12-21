@@ -38,7 +38,7 @@ const CameraCheck: React.FC<CameraCheckProps> = ({
 
   return (
     <div
-      className={`bg-[#FAFAFA] p-6 pe-8 flex flex-col gap-4 rounded-xl ${
+      className={`bg-[#FAFAFA] p-6 pe-8 flex h-[75vh] flex-col  justify-around rounded-xl ${
         isCameraSelected
           ? "border-[#10B754] border-2"
           : "border border-[#DBDBDB]"
@@ -46,9 +46,9 @@ const CameraCheck: React.FC<CameraCheckProps> = ({
     >
       <div className="flex justify-between items-center">
         <div className="text-[#333] text-xl not-italic font-medium leading-[normal] flex items-center gap-5">
-          <span className="flex w-10 h-10 p-2 justify-center items-center gap-1 bg-white border border-[#ddd] rounded-[42px]">
+          <span className="flex sm:w-[1vw]h-[2vh] md:w-12 h-12 justify-center items-center bg-white border border-[#ddd] rounded-[42px]">
             <img
-              className="w-6 h-4"
+              className="sm:w-[1vw] sm:h-[3vh] md:w-6 h-6"
               src={camera}
               alt="Camera Icon"
             />
@@ -83,15 +83,15 @@ const CameraCheck: React.FC<CameraCheckProps> = ({
         value={selectedCamera || ""}
         placeholder="Select Video Source"
         onChange={handleCameraChange}
-        width={300}
-        dropdownWidth={300}
+        width={40}
+        dropdownWidth={30}
       />
 
-      <div className="w-full flex h-[374px] p-0 items-center justify-center gap-5 border-2 border-[#10B754] rounded-xl relative">
+      <div className="w-full flex h-[40vh] items-center justify-center  border-2 border-[#10B754] rounded-xl relative">
         {selectedCamera ? (
           <>
             <img
-              className="absolute z-10 left-1/2 transform -translate-x-1/2 bottom-0"
+              className=" w-[40vh] absolute z-10 left-1/2 transform -translate-x-1/2 bottom-0"
               src={person}
               alt="Head Skeleton"
             />
@@ -99,7 +99,7 @@ const CameraCheck: React.FC<CameraCheckProps> = ({
               className="relative w-full h-full flex items-center justify-center rounded-[10px]"
               style={{ overflow: "hidden" }}
             >
-              <video
+              <video className="border-0"
                 ref={videoRef}
                 autoPlay
                 muted
@@ -109,6 +109,7 @@ const CameraCheck: React.FC<CameraCheckProps> = ({
                   objectFit: "cover",
                   width: "100%",
                   height: "100%",
+                  
                 }}
               />
             </div>

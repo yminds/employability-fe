@@ -1,6 +1,6 @@
 import React from "react";
 import useInterviewSetup from "@/hooks/useInterviewSetup";
-import Interview from "@/components/interview/Interview";
+import Interview from "@/components/Interview/Interview";
 import { useParams } from "react-router-dom";
 import CheckSetup from "../components/setup/CheckSetup";
 
@@ -26,18 +26,17 @@ const InterviewSetupNew: React.FC = () => {
     <>
       {!isInterviewStarted ? (
         <div className=" flex items-center justify-center h-screen">
-          <main className="max-w-7xl mx-auto w-[1084px] py-5">
-            <div className="flex flex-row items-center mb-10">
-              <div className="w-full">
+          <main className=" w-[70vw] py-4">
+            <div className="flex flex-row items-center justify-between mb-6">
+              <div className="">
                 <div className="text-black text-[32px] font-bold font-ubuntu">
                   Check Your Setup
                 </div>
-                <p className="text-base font-normal text-[#00000099] w-[680px]">
+                <p className="text-base font-normal text-[#00000099] ">
                   Before you proceed to the interview, make sure your setup is
                   working properly.
                 </p>
               </div>
-              <div className="flex items-end justify-between ">
                 <button
                   className={`bg-[#10B754] ${
                     isProceedButtonEnabled
@@ -49,7 +48,6 @@ const InterviewSetupNew: React.FC = () => {
                 >
                   Proceed to Interview
                 </button>
-              </div>
             </div>
 
             <CheckSetup
