@@ -82,12 +82,20 @@ const SetGoalCard: React.FC = () => {
                                             <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide">Select the technologies you'll be using for this goal</p>
                                         </label>
 
-                                        <input
-                                            type="text"
-                                            id="tech-stack"
-                                            placeholder="Search"
-                                            className="flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none"
-                                        />
+                                        <div className="relative w-full">
+                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                                <img
+                                                    src="./src/assets/set-goal/mail.svg"
+                                                    alt="Search"
+                                                />
+                                            </span>
+                                            <input
+                                                type="text"
+                                                id="tech-stack"
+                                                placeholder="Search"
+                                                className="w-full flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none pl-12"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex flex-col items-start gap-3.5 w-full">
