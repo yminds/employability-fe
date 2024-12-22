@@ -1,13 +1,14 @@
 // Interview.tsx
 import React, { useEffect, useState, useRef } from "react";
+import { useReactMediaRecorder } from "react-media-recorder";
+import { io, Socket } from "socket.io-client";
+
 import Header from "./Header";
 import WebCam from "./WebCam";
 import Controls from "./Controls";
 import AIProfile from "./AIProfile";
 import Conversation from "./Conversation";
-import { useReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
-import { io, Socket } from "socket.io-client";
 
 export interface IMessage {
   id: number;
@@ -41,6 +42,7 @@ const Interview: React.FC<{
     const newSocket = io(SOCKET_URL, {
       // Optional configurations
     });
+    console.log("Connecting to socket server...", socket);
 
     setSocket(newSocket);
 
@@ -204,8 +206,17 @@ const Interview: React.FC<{
       audioElement.play();
 
       audioElement.onended = () => {
-        setIsUserAnswering(true);
-        startRecording();
+        console.log(
+          "Audio playback ended",
+          nextSentenceToPlayRef.current,
+          sentenceIndexRef.current
+        );
+        if (nextSentenceToPlayRef.current + 1 === sentenceIndexRef.current) {
+          console.log("Audio playback ended");
+          setIsUserAnswering(true); // Now safe to set this flag as it's the last segment
+          startRecording();
+        }
+
         setFrequencyData(0); // Reset frequency data when speech ends
         resolve();
       };
@@ -244,6 +255,7 @@ const Interview: React.FC<{
           }
 
           const data = await res.json();
+          console.log("Transcribed text:", data.transcription.text);
           sendMessage(data.transcription.text);
           setMessages((prevMessages) => [
             ...prevMessages,
@@ -266,7 +278,7 @@ const Interview: React.FC<{
 
   useEffect(() => {
     const startTimer = setTimeout(() => {
-      sendMessage(`Tell me a long story about rabbit
+      sendMessage(`Conduct a React Mock Interview
         `);
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -287,7 +299,9 @@ const Interview: React.FC<{
       setIsUserAnswering(false);
     }
   };
+
   const sendMessage = async (message: string) => {
+    console.log("Sending transcript to AI:", message);
     timerStartRef.current = new Date();
     console.log("Timer started at:", timerStartRef.current);
 
