@@ -27,11 +27,11 @@ const CheckSetupPage: React.FC<CheckSetupPageProps> = ({
   return (
     <div>
       {/* Components Grid */}
-      <div className="grid grid-cols-5 grid-flow-col gap-4 h-[610px]">
-        <div className="col-span-2 h-[280px]">
+      <div className="grid grid-cols-5 grid-flow-col gap-4 h-[75vh]">
+        <div className="col-span-2 h-[35vh]">
           <MicCheck onMicQualityChange={handleMicQualityChange} />
         </div>
-        <div className="row-span-1 col-span-2 h-[310px]">
+        <div className="row-span-1 col-span-2 h-[40vh]">
           <ScreenSharing
             isScreenSharing={isScreenSharing}
             screenStream={screenStream}
@@ -40,7 +40,7 @@ const CheckSetupPage: React.FC<CheckSetupPageProps> = ({
             videoRef={videoRef}
           />
         </div>
-        <div className="row-span-3 col-span-3 h-[610px]">
+        <div className="row-span-3 col-span-3 h-[75vh]">
           <CameraCheck
             onScaleChange={handleScaleChange}
             onCameraChange={handleCameraChange}

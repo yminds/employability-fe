@@ -36,9 +36,9 @@ const Dropdown: React.FC<CustomDropdownProps> = ({
   const selectedOption = options.find(opt => opt.value === value);
 
   // Convert width to string with 'px' if it's a number
-  const buttonWidth = typeof width === 'number' ? `${width}px` : width;
+  const buttonWidth = typeof width === 'number' ? `${width}vh` : width;
   const listWidth = dropdownWidth 
-    ? (typeof dropdownWidth === 'number' ? `${dropdownWidth}px` : dropdownWidth)
+    ? (typeof dropdownWidth === 'number' ? `${dropdownWidth}vh` : dropdownWidth)
     : buttonWidth;
 
   return (
@@ -58,7 +58,7 @@ const Dropdown: React.FC<CustomDropdownProps> = ({
 
       {isOpen && (
         <div 
-          className="absolute mt-1 bg-white border-2 rounded shadow-lg z-10"
+          className="absolute mt-1 bg-white border-2 rounded shadow-lg z-20"
           style={{ width: listWidth }}
         >
           <ul className="p-2 max-h-60 overflow-auto flex flex-col items-start no-scrollbar">

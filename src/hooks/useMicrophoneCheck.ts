@@ -116,6 +116,7 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
   }, [selectedMic, isSpeaking, isMicSelected]);
 
   const handleMicChange = (micId: string) => {
+    setIsSpeaking(false)
     setQualityTested(false);
     setSelectedMic(micId || null);
     if (micId) {
