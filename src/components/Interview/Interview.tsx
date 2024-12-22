@@ -3,11 +3,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { io, Socket } from "socket.io-client";
 
-import Header from "./Header";
-import WebCam from "./WebCam";
-import Controls from "./Controls";
-import AIProfile from "./AIProfile";
-import Conversation from "./Conversation";
+import Header from "@/components/interview/Header";
+import WebCam from "@/components/interview/WebCam";
+import Controls from "@/components/interview/Controls";
+import AIProfile from "@/components/interview/AIProfile";
+import Conversation from "@/components/interview/Conversation";
 import axios from "axios";
 
 export interface IMessage {
