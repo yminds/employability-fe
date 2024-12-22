@@ -106,10 +106,10 @@ const Dashboard: React.FC = () => {
                     </div>
                   </section>
 
-                  {/* Explore Trending Jobs Section */}
+                  {/* Explore Trending Goals Section */}
                   <section className="flex flex-col items-start gap-4 self-stretch">
                     <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
-                    >Explore trending jobs</h5>
+                    >Explore trending goals</h5>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="bg-[#FCFCFC] shadow-sm rounded-[9px] border-1 border-[#eee]">
                         <img
@@ -149,55 +149,6 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col items-start gap-6 flex-1">
-                  {/* Profile Sidebar */}
-                  <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-3">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold mr-3">Y</div>
-                      <div>
-                        <h3 className="text-gray-600 text-[20px] font-medium leading-[26px] tracking-[-0.2px]">Mathew Johns</h3>
-                      </div>
-                    </div>
-
-                    <div className="h-px self-stretch bg-[#D9D9D9] mt-2 mb-2"></div>
-
-                    <div className="flex flex-col items-start gap-2 self-stretch">
-                      <h4 className="text-gray-900 text-base font-medium leading-5">Complete your profile</h4>
-                      <div className="flex items-center gap-5 self-stretch">
-                        <div className="relative w-full bg-[#FAFAFA] rounded-full h-[6px]">
-                          <div className="bg-[#2EE578] h-[6px] rounded-full" style={{ width: '30%' }}></div>
-                        </div>
-                        <span className="text-gray-60 text-sm font-medium leading-normal">30%</span>
-                      </div>
-                    </div>
-
-                    <p className="text-black text-base font-normal leading-6 tracking-wide mb-2">Employers are <span className="text-green-500">3 times</span> more likely to hire a candidate with a complete profile.</p>
-
-                    <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px]">
-                      <img
-                        src="./src/assets/dashboard/subtract.svg"
-                        alt=""
-                        className="w-5 h-5"
-                      />
-                      Import from LinkedIn
-                    </button>
-                    <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px]">
-                      <img
-                        src="./src/assets/dashboard/upload.svg"
-                        alt=""
-                        className="w-5 h-5"
-                      />
-                      Upload your resume
-                    </button>
-                    <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px]">
-                      <img
-                        src="./src/assets/dashboard/checklist_rtl.svg"
-                        alt=""
-                        className="w-5 h-5"
-                      />
-                      Fill out manually
-                    </button>
-                  </aside>
-
                   {/* Profile Sidebar */}
                   <ProfileCard
                     name="Mathew Johns"
