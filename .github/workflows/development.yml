@@ -3,88 +3,75 @@ name: Deploy Main
 on:
   push:
     branches:
-      - main  # Trigger workflow on pushes to the 'dev' branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
+      # Step 2: Identify changed and deleted files
       - name: Identify changed and deleted files
         id: files
         run: |
-          changed_files=$(git diff --name-only --diff-filter=d ${{github.event.before}} ${{github.sha}} | xargs)
-          deleted_files=$(git diff --name-only --diff-filter=D ${{github.event.before}} ${{github.sha}} | xargs)
-          
-          echo "changed_files=$changed_files" >> $GITHUB_ENV
-          echo "deleted_files=$deleted_files" >> $GITHUB_ENV
+          echo "changed_files=$(git diff --name-only --diff-filter=d ${{github.event.before}} ${{github.sha}} | xargs)" >> $GITHUB_ENV
+          echo "deleted_files=$(git diff --name-only --diff-filter=D ${{github.event.before}} ${{github.sha}} | xargs)" >> $GITHUB_ENV
 
-          if [[ -z "$changed_files" && -z "$deleted_files" ]]; then
-            echo "No files changed or deleted. Exiting..."
-            exit 0
-          fi
-
+      # Step 3: Compress changed files
       - name: Compress changed files
         if: env.changed_files != ''
         run: |
-          echo "Compressing changed files: $changed_files"
-          zip -r changed_files.zip $changed_files
+          zip -r ../changed_files.zip $changed_files
           echo "ZIP_EXISTS=true" >> $GITHUB_ENV
 
-      - name: Copy resources to server using username and password
+      # Step 4: Install sshpass (if not already available)
+      - name: Install sshpass
+        run: sudo apt-get install sshpass -y
+
+      # Step 5: Copy files to the server
+      - name: Copy resources to server
         if: env.changed_files != '' || env.deleted_files != ''
+        env:
+          SSHPASS: ${{secrets.AZURE_VM_PASSWORD}}
         run: |
-          echo "Transferring changed files and deleted files list to server..."
-
           if [[ $ZIP_EXISTS == "true" ]]; then
-            echo "Copying changed_files.zip to the server using password authentication..."
-            sshpass -p "${{ secrets.AZURE_VM_PASSWORD }}" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no changed_files.zip ${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/changed_files.zip
+            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../changed_files.zip ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/changed_files.zip
           fi
-
           if [[ $deleted_files != '' ]]; then
-            echo "Preparing deleted_files.txt..."
             echo $deleted_files > deleted_files.txt
-            echo "Copying deleted_files.txt to the server using password authentication..."
-            sshpass -p "${{ secrets.AZURE_VM_PASSWORD }}" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no deleted_files.txt ${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/deleted_files.txt
+            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no deleted_files.txt ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/deleted_files.txt
           fi
 
-      - name: Update server (unzip and delete files)
+      # Step 6: Process files on the server
+      - name: Update server (unzip and handle deletions)
         if: env.changed_files != '' || env.deleted_files != ''
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{ secrets.AZURE_VM_IP }}
-          username: ${{ secrets.AZURE_VM_USERNAME }}
-          password: ${{ secrets.AZURE_VM_PASSWORD }}
+          host: ${{secrets.AZURE_VM_IP}}
+          username: ${{secrets.AZURE_VM_USERNAME}}
+          password: ${{secrets.AZURE_VM_PASSWORD}}
           script: |
-            echo "Running server update commands..."
-            powershell.exe -Command "
-              # Handle changed files
-              if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip') {
-                echo 'Unzipping changed_files.zip...';
+            # Handle changed files
+            if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip') {
+              powershell.exe -Command "
                 Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test' -Force;
-                echo 'Removing changed_files.zip...';
-                Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip' -Force;
-              }
+              "
+              # Keep the ZIP file instead of deleting it
+            }
 
-              # Handle deleted files
-              if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt') {
-                echo 'Reading deleted_files.txt...';
+            # Handle deleted files
+            if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt') {
+              powershell.exe -Command "
                 $files = Get-Content -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt';
                 foreach ($file in $files) {
-                  echo ('Deleting file: ' + $file);
                   Remove-Item -Path ('E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\' + $file) -Force;
                 }
-                echo 'Removing deleted_files.txt...';
                 Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt' -Force;
-              }
-            "
-
-      - name: Clean up local temporary files
-        run: |
-          echo "Cleaning up local temporary files..."
-          rm -f changed_files.zip deleted_files.txt
+              "
+            }
