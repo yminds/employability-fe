@@ -9,6 +9,7 @@ import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
 import axios from "axios";
+import { useStreamMutation, useTtsMutation } from "@/api/aiApiSlice";
 
 export interface IMessage {
   id: number;
@@ -22,6 +23,31 @@ const Interview: React.FC<{
   cameraScale: number;
   id: string;
 }> = () => {
+  // API's
+  const [
+    streamResponse,
+    { isLoading: isStreamLoading, isSuccess: isStreamSuccess, data: response },
+  ] = useStreamMutation();
+  const [tts, { data: ttsResponse, isSuccess: ttsSuccess }] = useTtsMutation();
+
+  useEffect(() => {
+    if (isStreamSuccess && !isStreamLoading) {
+      console.log("Stream", response);
+    }
+  }, [response]);
+
+  useEffect(() => {
+    console.log("TTS", ttsResponse);
+    console.log("ttsSuccess", ttsSuccess);
+    if (ttsResponse && ttsSuccess) {
+      const audioBlob = ttsResponse;
+      // Store the audio blob in the buffer map
+
+      // Attempt to play audio if it's the next in sequence
+      attemptPlayback();
+    }
+  }, [ttsResponse, ttsSuccess]);
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [frequencyData, setFrequencyData] = useState<number>(0);
@@ -51,9 +77,7 @@ const Interview: React.FC<{
     });
 
     newSocket.on("output", (data: string) => {
-      // Stop the timer and print the end time,
       handleIncomingData(data);
-
       if (timerStartRef.current) {
         const endTime = new Date();
         console.log("Timer ended at:", endTime);
@@ -104,7 +128,16 @@ const Interview: React.FC<{
         ]);
 
         // Send TTS request immediately
-        fetchTTS(trimmedSentence, currentIndex);
+        tts({ text: trimmedSentence })
+          .unwrap()
+          .then((audioBlob) => {
+            audioBufferMap.current.set(currentIndex, audioBlob);
+            attemptPlayback();
+          })
+          .catch((error) => {
+            console.error("Error fetching TTS audio:", error);
+          });
+        // fetchTTS(trimmedSentence, currentIndex);
       }
     });
 
@@ -276,21 +309,21 @@ const Interview: React.FC<{
     }
   );
 
-  useEffect(() => {
-    const startTimer = setTimeout(() => {
-      sendMessage(`Conduct a React Mock Interview
-        `);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: prevMessages.length + 1,
-          message: "Hello",
-          sender: "User",
-        },
-      ]);
-    }, 1000);
-    return () => clearTimeout(startTimer);
-  }, []);
+  // useEffect(() => {
+  //   const startTimer = setTimeout(() => {
+  //     sendMessage(`Conduct a React Mock Interview
+  //       `);
+  //     setMessages((prevMessages) => [
+  //       ...prevMessages,
+  //       {
+  //         id: prevMessages.length + 1,
+  //         message: "Hello",
+  //         sender: "User",
+  //       },
+  //     ]);
+  //   }, 1000);
+  //   return () => clearTimeout(startTimer);
+  // }, []);
 
   const handleDoneAnswering = () => {
     // Only stop recording if user is answering
@@ -330,11 +363,37 @@ const Interview: React.FC<{
       // Enqueue the AI response for TTS and playback
       const currentIndex = sentenceIndexRef.current;
       sentenceIndexRef.current += 1;
-      fetchTTS(aiResponse, currentIndex);
+      tts({ text: aiResponse })
+        .unwrap()
+        .then((audioBlob) => {
+          audioBufferMap.current.set(currentIndex, audioBlob);
+          attemptPlayback();
+        })
+        .catch((error) => {
+          console.error("Error fetching TTS audio:", error);
+        });
     } catch (error) {
       console.error("Error sending message to AI:", error);
     }
   };
+
+  const addMessage = (prompt: string) => {
+    streamResponse({
+      prompt: prompt,
+      system:
+        "YOU ARE REACT INTEVIEWER WHO DOESNT EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS",
+      model: "gpt-4o",
+      provider: "openai",
+      // model: "claude-3-5-haiku-20241022",
+      // provider: "anthropic",
+      // "model": "claude-3-5-haiku-20241022",
+      // "provider":"anthropic"
+    });
+  };
+
+  useEffect(() => {
+    addMessage("Hello");
+  }, []);
 
   return (
     <div className="w-full h-screen pt-12">
