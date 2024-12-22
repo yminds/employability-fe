@@ -9,6 +9,7 @@ import { Role } from "./models/Role";
 
 // Routes Components
 import Dashboard from "./pages/Dashboard";
+import SetGoal from "./pages/SetGoal";
 import Interview from "./pages/Interview.tsx";
 
 // Components
@@ -35,6 +36,11 @@ export const routes: RouteConfig[] = [
     route: "/",
     component: <Dashboard />,
     roles: ["CANDIDATE", "EMPLOYER"],
+  },
+  {
+    route: "/setgoal",
+    component: <SetGoal />,
+    roles: ["CANDIDATE"],
   },
   {
     route: "/interview/:id",
