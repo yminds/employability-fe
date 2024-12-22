@@ -36,36 +36,21 @@ jobs:
           zip -r changed_files.zip $changed_files
           echo "ZIP_EXISTS=true" >> $GITHUB_ENV
 
-      - name: Set up SSH key
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.AZURE_SSH_PRIVATE_KEY }}
-        run: |
-          echo "Setting up SSH private key..."
-          echo "$SSH_PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-
-      - name: Debug SSH Key
-        run: |
-          echo "Debugging SSH private key file:"
-          ls -l private_key.pem
-          echo "First few lines of the private key file:"
-          head -n 5 private_key.pem
-
-      - name: Copy resources to server
+      - name: Copy resources to server using username and password
         if: env.changed_files != '' || env.deleted_files != ''
         run: |
           echo "Transferring changed files and deleted files list to server..."
 
           if [[ $ZIP_EXISTS == "true" ]]; then
-            echo "Copying changed_files.zip to the server..."
-            scp -v -i private_key.pem -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no changed_files.zip azure-user@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/changed_files.zip
+            echo "Copying changed_files.zip to the server using password authentication..."
+            sshpass -p "${{ secrets.AZURE_VM_PASSWORD }}" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no changed_files.zip ${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/changed_files.zip
           fi
 
           if [[ $deleted_files != '' ]]; then
             echo "Preparing deleted_files.txt..."
             echo $deleted_files > deleted_files.txt
-            echo "Copying deleted_files.txt to the server..."
-            scp -v -i private_key.pem -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no deleted_files.txt azure-user@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/deleted_files.txt
+            echo "Copying deleted_files.txt to the server using password authentication..."
+            sshpass -p "${{ secrets.AZURE_VM_PASSWORD }}" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no deleted_files.txt ${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/deleted_files.txt
           fi
 
       - name: Update server (unzip and delete files)
@@ -73,8 +58,8 @@ jobs:
         uses: appleboy/ssh-action@v0.1.4
         with:
           host: ${{ secrets.AZURE_VM_IP }}
-          username: azure-user
-          key: ${{ secrets.AZURE_SSH_PRIVATE_KEY }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          password: ${{ secrets.AZURE_VM_PASSWORD }}
           script: |
             echo "Running server update commands..."
             powershell.exe -Command "
@@ -102,4 +87,4 @@ jobs:
       - name: Clean up local temporary files
         run: |
           echo "Cleaning up local temporary files..."
-          rm -f changed_files.zip deleted_files.txt private_key.pem
+          rm -f changed_files.zip deleted_files.txt
