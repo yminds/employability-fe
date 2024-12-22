@@ -70,4 +70,4 @@ jobs:
               } else {
                 Write-Host 'Error: ZIP file not found.';
               }
-            "
+            " | Tee-Object -Variable Output -FilePath E:\powershell_output.log; Write-Output $Output
