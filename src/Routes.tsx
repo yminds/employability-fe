@@ -15,7 +15,7 @@ import Interview from "./pages/Interview.tsx";
 import NotFound from "@/components/app/NotFound";
 import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
 import Login from "./pages/LoginPage.tsx";
-
+import UserProfilePage from "./pages/UserProfilePage.tsx";
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -44,6 +44,11 @@ export const routes: RouteConfig[] = [
     route: "*",
     component: <NotFound />,
   },
+  {
+    route: "/userProfile",
+    component: <UserProfilePage/>,
+  },
+  
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {
