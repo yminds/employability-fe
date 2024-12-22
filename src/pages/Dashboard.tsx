@@ -1,17 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import ProfileCard from "@/features/dashboard/ProfileCard";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useGetAllPreDefinedGoalsQuery } from "@/api/goalsApiSlice";
-import { useNavigate } from "react-router-dom";
+// import { useGetAllPreDefinedGoalsQuery } from "@/api/goalsApiSlice";
+// import { useNavigate } from "react-router-dom";
+import GoalList from "@/features/dashboard/GoalList";
 
 const Dashboard: React.FC = () => {
-  const { data, error, isLoading } = useGetAllPreDefinedGoalsQuery(); // Fetch all predefined goals
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  // const { data, error, isLoading } = useGetAllPreDefinedGoalsQuery(); // Fetch all predefined goals
+  // const navigate = useNavigate(); // Initialize useNavigate hook
 
-  useEffect(() => {
-  }, [data, error, isLoading]);
+  // useEffect(() => {
+  // }, [data, error, isLoading]);
 
   return (
     <>
@@ -37,7 +38,7 @@ const Dashboard: React.FC = () => {
                           <DialogTrigger asChild>
                             <Button variant="outline" className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-5xl">
+                          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                             {/* Visually hidden title */}
                             <DialogTitle className="hidden">Set Your Goal</DialogTitle>
 
@@ -130,7 +131,9 @@ const Dashboard: React.FC = () => {
                     <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]">
                       Explore trending goals
                     </h5>
-                    {<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <GoalList isLoading={false} error={false}/>
+
+                    {/* {<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {isLoading && <p>Loading trending goals, please wait...</p>}
                       {error && <p>Oops! Something went wrong while loading goals.</p>}
                       {data?.data?.map((goal) => (
@@ -154,7 +157,7 @@ const Dashboard: React.FC = () => {
                           </div>
                         </div>
                       ))}
-                    </div>}
+                    </div>} */}
                   </section>
                 </div>
 

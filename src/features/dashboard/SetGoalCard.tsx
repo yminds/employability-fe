@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import GoalList from "@/features/dashboard/GoalList";
 
 const SetGoalCard: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false)
@@ -51,7 +52,7 @@ const SetGoalCard: React.FC = () => {
 
                 {/* Dialog */}
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                    <DialogContent className="p-0 max-w-2xl">
+                    <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto">
                         {/* Visually hidden title */}
                         <DialogTitle className="hidden">Define Your Custom Goal</DialogTitle>
 
@@ -119,7 +120,9 @@ const SetGoalCard: React.FC = () => {
             <section className="flex flex-col items-start gap-4 self-stretch">
                 <h5 className="text-[#909091] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
                 >Predefined Goals</h5>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <GoalList isLoading={false} error={false}/>
+
+                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <Link to="" className="rounded-[9px] border border-black/10 bg-[#FCFCFC] hover:border-[#1FD167]">
                         <img
                             src="./src/assets/dashboard/jobs_banner.png"
@@ -153,7 +156,7 @@ const SetGoalCard: React.FC = () => {
                             <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">Develop server-side logic and manage databases.</p>
                         </div>
                     </Link>
-                </div>
+                </div> */}
             </section>
 
         </div>
