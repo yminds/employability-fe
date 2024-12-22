@@ -9,7 +9,11 @@ import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
 import axios from "axios";
-import { useStreamMutation, useTtsMutation } from "@/api/aiApiSlice";
+import {
+  useStreamMutation,
+  useSttMutation,
+  useTtsMutation,
+} from "@/api/aiApiSlice";
 
 export interface IMessage {
   id: number;
@@ -29,21 +33,44 @@ const Interview: React.FC<{
     { isLoading: isStreamLoading, isSuccess: isStreamSuccess, data: response },
   ] = useStreamMutation();
   const [tts, { data: ttsResponse, isSuccess: ttsSuccess }] = useTtsMutation();
+  const [
+    stt,
+    {
+      isLoading: isSttLoading,
+      isSuccess: isSttSuccess,
+      data: sttData,
+      error: sttError,
+    },
+  ] = useSttMutation();
 
   useEffect(() => {
     if (isStreamSuccess && !isStreamLoading) {
       console.log("Stream", response);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: prevMessages.length + 1,
+          message: response,
+          sender: "AI Interviewer",
+        },
+      ]);
+      // Enqueue the AI response for TTS and playback
+      const currentIndex = sentenceIndexRef.current;
+      sentenceIndexRef.current += 1;
+      tts({ text: response })
+        .unwrap()
+        .then((audioBlob) => {
+          audioBufferMap.current.set(currentIndex, audioBlob);
+          attemptPlayback();
+        })
+        .catch((error) => {
+          console.error("Error fetching TTS audio:", error);
+        });
     }
   }, [response]);
 
   useEffect(() => {
-    console.log("TTS", ttsResponse);
-    console.log("ttsSuccess", ttsSuccess);
     if (ttsResponse && ttsSuccess) {
-      const audioBlob = ttsResponse;
-      // Store the audio blob in the buffer map
-
-      // Attempt to play audio if it's the next in sequence
       attemptPlayback();
     }
   }, [ttsResponse, ttsSuccess]);
@@ -277,37 +304,44 @@ const Interview: React.FC<{
           const formData = new FormData();
           formData.append("audio", audioBlob);
 
-          const res = await fetch("http://localhost:3000/utility/speech2Text", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || "Failed to transcribe audio");
-          }
-
-          const data = await res.json();
-          console.log("Transcribed text:", data.transcription.text);
-          sendMessage(data.transcription.text);
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              id: prevMessages.length + 1,
-              message: data.transcription.text,
-              sender: "User",
-            },
-          ]);
+          // sendMessage(data.transcription.text);
+          // setMessages((prevMessages) => [
+          //   ...prevMessages,
+          //   {
+          //     id: prevMessages.length + 1,
+          //     message: data.transcription.text,
+          //     sender: "User",
+          //   },
+          // ]);
+          stt(audioBlob);
           clearBlobUrl();
         } catch (error) {
           console.error("Error transcribing audio:", error);
         } finally {
           // Reset the flag after processing
-          recordingProcessed.current = false;
+          // recordingProcessed.current = false;
         }
       },
     }
   );
+
+  useEffect(() => {
+    if (isSttSuccess && sttData) {
+      sendMessage(sttData?.transcription?.text);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: prevMessages.length + 1,
+          message: sttData?.transcription?.text,
+          sender: "User",
+        },
+      ]);
+    }
+
+    if (sttError) {
+      console.error("Error transcribing audio:", sttError);
+    }
+  }, [isSttSuccess, sttData, sttError]);
 
   // useEffect(() => {
   //   const startTimer = setTimeout(() => {
@@ -340,38 +374,17 @@ const Interview: React.FC<{
 
     // reset the time , Start Timer and print the start time
     try {
-      const response = await axios.post(
-        `http://localhost:3000/openai/threads/thread_pKIPJfBDu9sOWTbObajQOfi3/messages-and-run`,
-        {
-          content: message,
-          assistantId: "asst_gggeZ8qgQLERTicPfw8CnO0F",
-          instructions: "",
-        }
-      );
-
-      // Assuming the response contains a field 'content' which is a list of responses
-      const aiResponse = response.data.content[0].text.value;
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: prevMessages.length + 1,
-          message: aiResponse,
-          sender: "AI Interviewer",
-        },
-      ]);
-
-      // Enqueue the AI response for TTS and playback
-      const currentIndex = sentenceIndexRef.current;
-      sentenceIndexRef.current += 1;
-      tts({ text: aiResponse })
-        .unwrap()
-        .then((audioBlob) => {
-          audioBufferMap.current.set(currentIndex, audioBlob);
-          attemptPlayback();
-        })
-        .catch((error) => {
-          console.error("Error fetching TTS audio:", error);
-        });
+      //   const response = await axios.post(
+      //     `http://localhost:3000/openai/threads/thread_pKIPJfBDu9sOWTbObajQOfi3/messages-and-run`,
+      //     {
+      //       content: message,
+      //       assistantId: "asst_gggeZ8qgQLERTicPfw8CnO0F",
+      //       instructions: "",
+      //     }
+      //   );
+      // // Assuming the response contains a field 'content' which is a list of responses
+      // const aiResponse = response.data.content[0].text.value;
+      tts({ text: message });
     } catch (error) {
       console.error("Error sending message to AI:", error);
     }

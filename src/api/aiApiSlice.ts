@@ -19,7 +19,21 @@ export const aiApiSlice = apiSlice.injectEndpoints({
         responseHandler: (response: Response) => response.blob(), // Handle the response as a blob
       }),
     }),
+    // STT
+    stt: builder.mutation({
+      query: (audioBlob) => {
+        const formData = new FormData();
+        formData.append("audio", audioBlob);
+
+        return {
+          url: "/api/v1/ai/stt", // Or your actual STT endpoint
+          method: "POST",
+          body: formData,
+          transformResponse: (response: Response) => response,
+        };
+      },
+    }),
   }),
 });
 
-export const { useStreamMutation, useTtsMutation } = aiApiSlice;
+export const { useStreamMutation, useTtsMutation, useSttMutation } = aiApiSlice;
