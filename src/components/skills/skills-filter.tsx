@@ -9,12 +9,12 @@ const SkillsFilter: React.FC<SkillsFilterProps> = ({ activeFilter, setFilter }) 
   const filters = ['All', 'Suggested', 'Verified', 'Unverified'];
 
   return (
-    <div className="flex space-x-4 bg-gray-100 p-2 rounded-md shadow-sm">
+    <div className="flex space-x-4 bg-white p-2 rounded-md h-[46px] shadow-sm">
       {filters.map((filter) => (
         <button
           key={filter}
           onClick={() => setFilter(filter)}
-          className={`px-4 py-2 text-sm font-medium rounded-md 
+          className={`px-2 text-[16px] font-medium rounded-md 
             ${
               activeFilter === filter
                 ? 'bg-green-100 text-green-600'
