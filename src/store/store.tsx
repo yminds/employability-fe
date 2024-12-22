@@ -11,6 +11,7 @@ import {
   REGISTER,
 } from "redux-persist";
 import authReducer from "@/features/authentication/authSlice";
+import goalReducer from "@/features/goals/goalSlice";
 import errorReducer from "@/features/error/errorSlice";
 import successReducer from "@/features/success/successSlice";
 import resumeSlice from "./slices/resumeSlice";
@@ -32,6 +33,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   auth: authReducer,
+  goals: goalReducer,
   error: errorReducer,
   success: successReducer,
   role: roleSlice,

@@ -9,13 +9,15 @@ import { Role } from "./models/Role";
 
 // Routes Components
 import Dashboard from "./pages/Dashboard";
+import SetGoal from "./pages/SetGoal";
 import Interview from "./pages/Interview.tsx";
 
 // Components
 import NotFound from "@/components/app/NotFound";
 import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
 import Login from "./pages/LoginPage.tsx";
-
+import Skills from "./pages/SkillsPage.tsx";
+import SkillDetailPage from "./pages/SkillDetailPage.tsx";
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -36,8 +38,23 @@ export const routes: RouteConfig[] = [
     roles: ["CANDIDATE", "EMPLOYER"],
   },
   {
+    route: "/setgoal",
+    component: <SetGoal />,
+    roles: ["CANDIDATE"],
+  },
+  {
     route: "/interview/:id",
     component: <Interview />,
+    roles: ["CANDIDATE"],
+  },
+  {
+    route: "/skills",
+    component: <Skills />,
+    roles: ["CANDIDATE"],
+  },
+  {
+    route: "/skills/:id",
+    component: <SkillDetailPage/>,
     roles: ["CANDIDATE"],
   },
   {
