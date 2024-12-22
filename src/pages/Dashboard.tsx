@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ProfileCard from "@/features/dashboard/ProfileCard";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useGetAllPreDefinedGoalsQuery } from "@/api/goalsApiSlice";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard: React.FC = () => {
+  const { data, error, isLoading } = useGetAllPreDefinedGoalsQuery(); // Fetch all predefined goals
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
+  useEffect(() => {
+  }, [data, error, isLoading]);
+
   return (
     <>
       <main>
@@ -119,43 +127,34 @@ const Dashboard: React.FC = () => {
 
                   {/* Explore Trending Goals Section */}
                   <section className="flex flex-col items-start gap-4 self-stretch">
-                    <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
-                    >Explore trending goals</h5>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="rounded-[9px] border border-black/10 bg-[#FCFCFC]">
-                        <img
-                          src="./src/assets/dashboard/jobs_banner.png"
-                          alt="Jobs"
-                          className="rounded-e-[9px] rounded-s-[9px] rounded-b-none w-full"
-                        />
-                        <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
-                          <h3 className="text-gray-800 text-base font-medium leading-5">Full Stack Developer</h3>
-                          <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">Build both the front-end and back-end of web apps.</p>
+                    <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]">
+                      Explore trending goals
+                    </h5>
+                    {<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {isLoading && <p>Loading trending goals, please wait...</p>}
+                      {error && <p>Oops! Something went wrong while loading goals.</p>}
+                      {data?.data?.map((goal) => (
+                        <div
+                          key={goal._id}
+                          className="bg-[#FCFCFC] shadow-sm rounded-[9px] border-1 border-[#eee] cursor-pointer"
+                          onClick={() => navigate(`/goals/${goal._id}`)}
+                        >
+                          <img
+                            src={goal.image || "./src/assets/dashboard/jobs_banner.png"}
+                            alt={goal.name}
+                            className="rounded-e-none-[9px] rounded-s-none-[9px] w-full"
+                          />
+                          <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
+                            <h3 className="text-gray-800 text-xl font-medium leading-5">
+                              {goal.name}
+                            </h3>
+                            <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">
+                              {goal.description}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="rounded-[9px] border border-black/10 bg-[#FCFCFC]">
-                        <img
-                          src="./src/assets/dashboard/jobs_banner.png"
-                          alt="Jobs"
-                          className="rounded-e-[9px] rounded-s-[9px] rounded-b-none w-full"
-                        />
-                        <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
-                          <h3 className="text-gray-800 text-base font-medium leading-5">Front-End Developer</h3>
-                          <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">Design and build interactive user interfaces.</p>
-                        </div>
-                      </div>
-                      <div className="rounded-[9px] border border-black/10 bg-[#FCFCFC]">
-                        <img
-                          src="./src/assets/dashboard/jobs_banner.png"
-                          alt="Jobs"
-                          className="rounded-e-[9px] rounded-s-[9px] rounded-b-none w-full"
-                        />
-                        <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
-                          <h3 className="text-gray-800 text-base font-medium leading-5">Backend Developer</h3>
-                          <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">Develop server-side logic and manage databases.</p>
-                        </div>
-                      </div>
-                    </div>
+                      ))}
+                    </div>}
                   </section>
                 </div>
 
