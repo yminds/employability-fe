@@ -48,6 +48,7 @@ const Interview: React.FC<{
   const [currentMessageIndex, setCurrentMessageIndex] = useState<number>(0);
 
   const recordingProcessed = useRef(false);
+  const frequencyDataRef = useRef<number>(0);
 
   const timerStartRef = useRef<Date | null>(null);
 
@@ -179,29 +180,51 @@ const Interview: React.FC<{
           dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
         // Normalize the frequency to a range of 0 to 1
         const normalizedFrequency = avgFrequency / 255;
-        setFrequencyData(normalizedFrequency);
-        if (!audioElement.paused && isComponentMounted.current) {
-          requestAnimationFrame(calculateFrequency);
+
+        // Update frequency data ref
+        frequencyDataRef.current = normalizedFrequency;
+
+        // Update the state to trigger UI update only if there's a change
+        if (frequencyData !== normalizedFrequency) {
+          setFrequencyData(normalizedFrequency);
         }
       };
 
-      calculateFrequency();
+      // Use timeupdate event to call calculateFrequency
+      audioElement.addEventListener("timeupdate", calculateFrequency);
 
       audioElement.play();
 
       audioElement.onended = () => {
+        // Clean up timeupdate listener
+        audioElement.removeEventListener("timeupdate", calculateFrequency);
+
         if (nextSentenceToPlayRef.current + 1 === sentenceIndexRef.current) {
           setIsUserAnswering(true); // Now safe to set this flag as it's the last segment
           startRecording();
         }
 
-        setFrequencyData(0); // Reset frequency data when speech ends
+        // Reset frequency data when speech ends
+        frequencyDataRef.current = 0;
+        setFrequencyData(0);
         resolve();
       };
 
       audioElement.onerror = (error) => {
         console.error("Audio playback error:", error);
+        // Clean up timeupdate listener in case of error as well
+        audioElement.removeEventListener("timeupdate", calculateFrequency);
         reject(error);
+      };
+
+      // Cleanup function for when the component unmounts or playback is stopped
+      return () => {
+        audioElement.removeEventListener("timeupdate", calculateFrequency);
+        audioElement.pause(); // Stop the audio
+        audioElement.src = ""; // Release the resource
+        if (audioContext) {
+          audioContext.close(); // Close the audio context when not needed
+        }
       };
     });
   };
@@ -257,11 +280,9 @@ const Interview: React.FC<{
   };
 
   // Add Message to State with Appending Logic for AI
-  const handleMessage = (
-    message: string,
-    role: string = "USER",
-  ) => {
+  const handleMessage = (message: string, role: string = "USER") => {
     if (role === "AI") {
+      console.log("Message:", message);
       setMessages((prevMessages) => {
         if (prevMessages.length === 0) {
           // If no messages exist, add the AI message
@@ -325,14 +346,17 @@ const Interview: React.FC<{
   // Function to Initiate AI Message Stream
   const addMessage = (prompt: string) => {
     stream({
-      prompt: prompt,
+      prompt: `
+      previous conversation:
+      ${messages.map((msg) => msg.message).join("\n")}
+      ${prompt}`,
       system:
-        "YOU ARE REACT INTERVIEWER WHO DOESN'T EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS",
-      model: "gpt-4o",
-      provider: "openai",
+        "YOU ARE REACT INTERVIEWER WHO DOESN'T EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS, its a real mock conversation interview so ask a question and wait for user response and then ask another question",
+      // model: "gpt-4o",
+      // provider: "openai",
       messageId: currentMessageIndex,
-      // model: "claude-3-5-haiku-20241022",
-      // provider: "anthropic",
+      model: "claude-3-5-haiku-20241022",
+      provider: "anthropic",
       // "model": "claude-3-5-haiku-20241022",
       // "provider":"anthropic"
     });
