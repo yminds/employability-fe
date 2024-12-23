@@ -28,5 +28,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "../employability-be/src/aws", "../employability-be/src/services", "../employability-be/src/config.ts"]
 }
