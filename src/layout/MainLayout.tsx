@@ -7,9 +7,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
 }
 
-const noSidebarRoutes = [
-  '/login',
-];
+const noSidebarRoutes = ["/login", "/interview"];
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
@@ -18,7 +16,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const currentPath = location.pathname;
 
     const isNoHeaderRoute = noSidebarRoutes.some((route) => {
-      return currentPath === route || currentPath.startsWith(route + '/');
+      return currentPath === route || currentPath.startsWith(route + "/");
     });
 
     if (isNoHeaderRoute) {
@@ -27,9 +25,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
     const isMatchedRoute = routes.some((routeObj) => {
       const routePath = routeObj.route;
-      if (routePath.includes(':')) {
-        const baseRoute = routePath.split('/:')[0];
-        return currentPath.startsWith(baseRoute + '/');
+      if (routePath.includes(":")) {
+        const baseRoute = routePath.split("/:")[0];
+        return currentPath.startsWith(baseRoute + "/");
       }
       return currentPath === routePath;
     });
@@ -39,10 +37,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <>
-      <div className="flex min-h-screen bg-gray-100">
-        {shouldDisplaySidebar() && (
-          <Sidebar />
-        )}
+      <div
+        className={`flex min-h-screen ${
+          shouldDisplaySidebar() ? "bg-gray-100" : ""
+        }`}
+      >
+        {shouldDisplaySidebar() && <Sidebar />}
         {children}
       </div>
     </>
