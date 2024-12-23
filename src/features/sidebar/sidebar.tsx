@@ -18,8 +18,7 @@ const Sidebar: React.FC = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("authToken"); 
-        sessionStorage.removeItem("authToken"); 
+        localStorage.clear();
         window.location.href = "/login"; 
     };
 

@@ -52,7 +52,7 @@ const GoalFormDialog: React.FC<Props> = () => {
         setTechStack(e.target.value); // Update the search term immediately
     };
 
-    const handleSkillSelect = (skillId: string, skillName: string) => {
+    const handleSkillSelect = (skillId: string) => {
         if (!selectedTechStack.includes(skillId)) {
             setSelectedTechStack((prev) => [...prev, skillId]); // Add the selected skill ID to the array
         }
@@ -194,7 +194,7 @@ const GoalFormDialog: React.FC<Props> = () => {
                                                             <li
                                                                 key={skill._id}
                                                                 className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer"
-                                                                onClick={() => handleSkillSelect(skill._id, skill.name)} // Select the skill
+                                                                onClick={() => handleSkillSelect(skill._id)} // Select the skill
                                                             >
                                                                 {skill.name}
                                                             </li>
