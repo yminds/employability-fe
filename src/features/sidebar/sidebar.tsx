@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from "react-redux";
 import LogoIcon from '../../assets/sidebar/logo.svg';
 import DashboardIcon from '../../assets/sidebar/dashboard.svg';
 import MentorIcon from '../../assets/sidebar/mentor.svg';
@@ -16,6 +17,9 @@ const Sidebar: React.FC = () => {
     const getActiveClass = (path: string) => {
         return window.location.pathname === path ? 'bg-[#DBFFEA] text-[#10B754]' : '';
     };
+
+    const user_name = useSelector((state) => state.auth.user.name);
+    const user_email = useSelector((state) => state.auth.user.email);
 
     const handleLogout = () => {
         localStorage.clear();
@@ -93,8 +97,8 @@ const Sidebar: React.FC = () => {
                         <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">Y</div>
                         {!isCollapsed && (
                             <div className="ml-3">
-                                <p className="text-gray-800 text-base font-medium">Mathew Johns</p>
-                                <p className="text-gray-400 text-xs font-medium">MJ1234@gmail.com</p>
+                                <p className="text-gray-800 text-base font-medium">{user_name}</p>
+                                <p className="text-gray-400 text-xs font-medium">{user_email}</p>
                             </div>
                         )}
                     </div>

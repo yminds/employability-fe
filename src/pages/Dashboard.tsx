@@ -7,7 +7,7 @@ import GoalList from "@/features/dashboard/GoalList";
 import { useSelector } from "react-redux";
 
 const Dashboard: React.FC = () => {
-  const user_name = useSelector((state) => state.auth.user.name)
+  const user_name = useSelector((state) => state.auth.user.name);
   return (
     <>
       <main className="h-screen overflow-auto">
@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
                     <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]">
                       Explore trending goals
                     </h5>
-                    <GoalList isLoading={false} error={false}/>
+                    <GoalList isLoading={false} error={false} />
                   </section>
                 </div>
 
