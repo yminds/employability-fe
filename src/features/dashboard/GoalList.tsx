@@ -7,17 +7,17 @@ interface Goal {
     name: string
     description: string
     image?: string
-  }
-  
-  interface GoalsData {
+}
+
+interface GoalsData {
     data: Goal[] // Array of Goal objects
-  }
-  
-  interface Props {
+}
+
+interface Props {
     isLoading: boolean
     error: boolean
     data?: GoalsData // The data could be undefined if the API request hasn't completed yet
-  }
+}
 
 const GoalList: React.FC<Props> = () => {
     const { data, error, isLoading } = useGetAllPreDefinedGoalsQuery(); // Fetch all predefined goals
