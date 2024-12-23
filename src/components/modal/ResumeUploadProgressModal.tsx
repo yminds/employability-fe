@@ -1,9 +1,10 @@
 import { X } from 'lucide-react'
 
+
 interface ResumeUploadProgressModalProps {
   onClose: () => void
-  fileName: string
-  fileSize: string
+  fileName: any
+  fileSize: any
   uploadProgress: number
 }
 

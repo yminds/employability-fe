@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.2.4",
+    "@aws-sdk/client-s3": "^3.717.0",
     "@fontsource/ubuntu": "^5.1.0",
     "@monaco-editor/react": "^4.6.0",
     "@radix-ui/react-dialog": "^1.1.2",
@@ -31,6 +32,7 @@
     "cmdk": "^1.0.0",
     "country-state-city": "^3.2.1",
     "css-loader": "^7.1.2",
+    "dotenv": "^16.4.7",
     "firebase": "^11.0.2",
     "framer-motion": "^11.14.4",
     "init": "^0.1.2",

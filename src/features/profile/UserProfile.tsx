@@ -1,18 +1,131 @@
 import React, { useState } from "react";
-import LinkedInImportModal from "./LinkedInImportModal";
-import ResumeUploadModal from "./ResumeUploadModal";
-import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
-import CompleteProfileModal from "./CompleteProfileModal";
+import LinkedInImportModal from "../../components/modal/LinkedInImportModal";
+import ResumeUploadModal from "../../components/modal/ResumeUploadModal";
+import ResumeUploadProgressModal from "../../components/modal/ResumeUploadProgressModal";
+import CompleteProfileModal from "../../components/modal/CompleteProfileModal";
 import { ProfileFormData } from "./types";
+import EditBioModal from "@/components/modal/EditBioModal";
+import EducationSection from "./EducationSection";
+import {
+  Education,
+  Certification,
+  ExperienceItem,
+} from "../../features/profile/types";
+import ExperienceSection from "./ExperienceSection";
+// import CertificationsSection from "@/components/inputs/CertificationsSection";
 
 const UserProfile: React.FC = () => {
+  const initialEducationEntries: Education[] = [
+    {
+      level: "bachelors",
+      degree: "B Tech Computer Science",
+      institute: "APJ Abdul Kalam University",
+      fromDate: "2020-10-01",
+      tillDate: "2024-04-30",
+      cgpa: "9.1",
+    },
+    {
+      level: "secondary",
+      degree: "Higher Secondary",
+      institute: "Kendriya Vidyalaya",
+      fromDate: "2018-04-01",
+      tillDate: "2020-11-30",
+      cgpa: "8.8",
+    },
+  ];
+  const initialExperiences: ExperienceItem[] = [
+    {
+      duration: "1y 2m",
+      id: "1",
+      companyLogo:
+        "https://st3.depositphotos.com/43745012/44906/i/450/depositphotos_449066958-stock-photo-financial-accounting-logo-financial-logo.jpg",
+      jobTitle: "Lead Full-stack Engineer",
+      companyName: "Ernst and Young",
+      employmentType: "Full time",
+      location: "Bangalore Urban, Karnataka, India",
+      startDate: "Apr 2022",
+      endDate: "Present",
+      description:
+        "As a lead full-stack developer at EY for over a year, I spearheaded the development of scalable web applications. My expertise in React, Python, and MongoDB allowed me to drive innovative, user-centric solutions that enhanced our clients' digital experiences.",
+      currentlyWorking: false,
+      currentCTC: "",
+      expectedCTC: "",
+      jobType: undefined,
+      isVerified: undefined,
+    },
+  ];
+
+  const [contactInfo, setContactInfo] = useState({
+    profileURL: "employability.ai/sreya",
+    mobileNumber: "+91 1234567890",
+    email: "contact@mathew.com",
+  });
+  const initialCertifications: Certification[] = [
+    {
+      title: "Certified React Developer",
+      issuedBy: "React Training",
+      issueDate: "2022-06-15",
+      expirationDate: "",
+      credentialURL: "https://example.com/certificate/react",
+    },
+  ];
+  const [isEditBioModalOpen, setIsEditBioModalOpen] = useState(false);
+  const [bio, setBio] = useState<string>(
+    "Full-stack developer with a strong foundation in React, Python, and MongoDB. A quick learner passionate about building user-friendly web applications, eager to apply skills in a professional environment."
+  );
+
+  const handleEditBio = (updatedBio: string) => {
+    setBio(updatedBio);
+  };
+  const [educationEntries, setEducationEntries] = useState<Education[]>(
+    initialEducationEntries
+  );
+  const [experiences, setExperiences] =
+    useState<ExperienceItem[]>(initialExperiences);
+
+  const [certifications, setCertifications] = useState<Certification[]>(
+    initialCertifications
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false);
+  const [selectedExperience, setSelectedExperience] =
+    useState<ExperienceItem | null>(null);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
+
+  };
+  // Handle Experience Save
+  const handleSaveExperience = (updatedExperiences: ExperienceItem[]) => {
+    setExperiences(updatedExperiences);
+    console.log("Experiences updated:", updatedExperiences);
+    // Optionally, perform API calls or other side effects here
   };
 
+  const handleAddExperience = () => {
+    setSelectedExperience(null); // No experience selected for adding
+    setIsExperienceModalOpen(true);
+  };
+  const handleExperiencesChange = (updatedExperiences: ExperienceItem[]) => {
+    setExperiences(updatedExperiences);
+  };
+  const handleEditExperience = (experience: ExperienceItem) => {
+    setSelectedExperience(experience); // Set the experience to edit
+    setIsExperienceModalOpen(true);
+  };
+
+  // Handle Education Save
+  const handleSaveEducation = (updatedEducation: Education[]) => {
+    setEducationEntries(updatedEducation);
+    // Optionally, perform API calls or other actions here
+  };
+
+  // Handle Certifications Save
+  const handleSaveCertifications = (updatedCertifications: Certification[]) => {
+    setCertifications(updatedCertifications);
+    // Optionally, perform API calls or other actions here
+  };
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
@@ -73,7 +186,7 @@ const UserProfile: React.FC = () => {
           <div className="bg-white rounded-lg">
             <div className=" ">
               <img
-                src="src\features\profile\Banner.png"
+                src="src/features/profile/images/Banner.png"
                 alt="Banner"
                 className="w-full rounded-t-lg"
               />
@@ -173,7 +286,7 @@ const UserProfile: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
               {/* Bio Section */}
-              <div className="md:col-span-2 bg-gray-50 p-6 rounded-lg">
+              <div className="relative md:col-span-2 bg-gray-50 p-6 rounded-lg group">
                 <h2 className="font-semibold text-gray-700">Bio</h2>
                 <p className="text-gray-600 mt-2">
                   Full-stack developer with a strong foundation in React,
@@ -181,6 +294,31 @@ const UserProfile: React.FC = () => {
                   user-friendly web applications, eager to apply skills in a
                   professional environment.
                 </p>
+                {/* Edit Icon */}
+                <button
+                  className="absolute top-4 right-4 p-2 bg-gray-200 rounded-full shadow hover:bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => setIsEditBioModalOpen(true)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    className="text-gray-600"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M15.502 1.94a1.5 1.5 0 0 1 0 2.12L14.121 5.44l-3.564-3.564 1.38-1.38a1.5 1.5 0 0 1 2.12 0l1.445 1.445ZM13.44 6.56l-3.564-3.564L2 11v3h3l8.44-8.44Z" />
+                  </svg>
+                </button>
+                {/* Edit Bio Modal */}
+                {isEditBioModalOpen && (
+                  <EditBioModal
+                    isOpen={isEditBioModalOpen}
+                    onClose={() => setIsEditBioModalOpen(false)}
+                    onSave={handleEditBio}
+                    initialBio={bio}
+                  />
+                )}
               </div>
 
               {/* Info Section */}
@@ -228,6 +366,27 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-lg mt-6">
+            {/* Education Section */}
+            <div className="bg-white rounded-lg mt-6 p-6 ">
+              <EducationSection
+                initialEducation={educationEntries} // Pass the initial education entries
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg mt-6">
+            {/* Education Section */}
+            <div className="bg-white rounded-lg mt-6 p-6 ">
+              <ExperienceSection
+                experiences={experiences}
+                totalDuration="4 years 5 months"
+                onAdd={handleAddExperience}
+                onEdit={() => console.log("Edit clicked")}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Right Section */}
@@ -240,6 +399,7 @@ const UserProfile: React.FC = () => {
               <option>Not looking</option>
             </select>
           </div>
+
           <div className="bg-white p-6 rounded-lg">
             <h2 className="font-semibold text-gray-700 mb-4 pl-4 pt-2">
               Contact Information
@@ -275,7 +435,7 @@ const UserProfile: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-gray-700 font-medium">Profile URL</h3>
-                  <p className="text-gray-600">employability.ai/sreya</p>
+                  <p className="text-gray-600">{contactInfo.profileURL}</p>
                 </div>
               </div>
 
@@ -309,7 +469,7 @@ const UserProfile: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-gray-700 font-medium">Mobile number</h3>
-                  <p className="text-gray-600">+91 1234567890</p>
+                  <p className="text-gray-600">{contactInfo.mobileNumber}</p>
                 </div>
               </div>
 
@@ -343,7 +503,7 @@ const UserProfile: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-gray-700 font-medium">Email Id</h3>
-                  <p className="text-gray-600">contact@mathew.com</p>
+                  <p className="text-gray-600">{contactInfo.email}</p>
                 </div>
               </div>
             </div>
@@ -396,6 +556,14 @@ const UserProfile: React.FC = () => {
                 <LinkedInImportModal onClose={handleCloseModal} />
               )}
 
+              {isProgressModalOpen && (
+                <ResumeUploadProgressModal
+                  onClose={() => setIsProgressModalOpen(false)}
+                  fileName={fileDetails.name}
+                  fileSize={fileDetails.size}
+                  uploadProgress={uploadProgress}
+                />
+              )}
               <button
                 onClick={() => setIsUploadModalOpen(true)}
                 className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
@@ -443,10 +611,10 @@ const UserProfile: React.FC = () => {
                   uploadProgress={uploadProgress}
                 />
               )}
-              <button 
-                      onClick={() => setIsProfileModalOpen(true)}
-
-              className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800">
+              <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
+              >
                 <div className="p-2 ">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -476,10 +644,13 @@ const UserProfile: React.FC = () => {
                 <span>Fill out manually</span>
               </button>
               {isProfileModalOpen && (
-        <CompleteProfileModal onClose={() => setIsProfileModalOpen(false)} onSave={function (data: ProfileFormData): void {
-                  throw new Error("Function not implemented.");
-                } } />
-      )}
+                <CompleteProfileModal
+                  onClose={() => setIsProfileModalOpen(false)}
+                  onSave={function (data: ProfileFormData): void {
+                    throw new Error("Function not implemented.");
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>

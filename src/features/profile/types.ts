@@ -49,4 +49,50 @@ export interface ProfileFormData {
     }>;
   }
   
+  // src/types.ts
+
+export interface Education {
+    level: string;
+    degree: string;
+    institute: string;
+    fromDate: string;
+    tillDate: string;
+    cgpa: string;
+  }
+  
+  export interface Certification {
+    title: string;
+    issuedBy: string;
+    issueDate: string;
+    expirationDate: string;
+    credentialURL: string;
+  }
+  
+
+// types.ts (or your designated types file)
+export interface ExperienceItem {
+    jobType: string | number | readonly string[] | undefined;
+    isVerified: boolean | undefined;
+    duration: string | number | readonly string[] | undefined;
+    id: string;
+    jobTitle: string;
+    employmentType: string;
+    companyName: string;
+    companyLogo: string;
+    location: string;
+    startDate: string;
+    endDate: string | null;
+    currentlyWorking: boolean;
+    currentCTC: string;
+    expectedCTC: string;
+    description: string;
+  }
+  
+  
+  export interface ExperienceProps {
+    experiences: ExperienceItem[]
+    totalDuration: string
+    onAdd?: () => void
+    onEdit?: () => void
+  }
   
