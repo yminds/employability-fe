@@ -32,23 +32,46 @@ jobs:
       - name: Copy resources to server
         if: env.changed_files != '' || env.deleted_files != ''
         env:
-          SSHPASS: ${{secrets.AZURE_VM_PASSWORD}}
+          SSHPASS: ${{ secrets.AZURE_VM_PASSWORD }}
         run: |
+          # Check if the ZIP_EXISTS environment variable is true before copying the file
           if [[ $ZIP_EXISTS == "true" ]]; then
-            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../changed_files.zip ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/changed_files.zip
+            # Using sshpass to copy the changed zip file to the server
+            echo "Copying zip file to the server..."
+            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../changed_files.zip ${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/changed_files.zip
+          else
+            echo "ZIP_EXISTS is not true, skipping file transfer."
           fi
 
       - name: Update server (unzip and delete files)
         if: env.changed_files != '' || env.deleted_files != ''
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{secrets.AZURE_VM_IP}}
-          username: ${{secrets.AZURE_VM_USERNAME}}
-          password: ${{secrets.AZURE_VM_PASSWORD}}
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          password: ${{ secrets.AZURE_VM_PASSWORD }}
           script: |
             powershell.exe -Command "
+              # Check if the zip file exists before trying to unzip
               if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip') {
-                Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai' -Force;
-                Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -Force;
+                Write-Host 'Zip file found. Starting extraction...'
+                
+                try {
+                  # Try to extract the zip file to the destination folder
+                  Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai' -Force;
+                  Write-Host 'File extracted successfully.'
+                  
+                  # Remove the zip file after extraction
+                  Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -Force;
+                  Write-Host 'Zip file removed successfully.'
+                }
+                catch {
+                  # Catch any errors that occur during the extraction process and log them
+                  Write-Host 'Error during extraction: ' $_.Exception.Message
+                  exit 1
+                }
+              }
+              else {
+                Write-Host 'No zip file found at the specified path. Skipping extraction.'
               }
             "
