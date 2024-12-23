@@ -1,22 +1,20 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
 import ProfileCard from "@/features/dashboard/ProfileCard";
+import SetGoalCard from "@/features/dashboard/SetGoalCard";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import GoalList from "@/features/dashboard/GoalList";
+import { useSelector } from "react-redux";
 
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate(); // Initialize useNavigate hook
-
-  // Handle role selection and navigation
-  const handleOptionClick = (route: string) => {
-    navigate(route); // Navigate to the specified route
-  };
-
+  const user_name = useSelector((state) => state.auth.user.name)
   return (
     <>
-      <main>
-        <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
+      <main className="h-screen overflow-auto">
+        <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
             <header className="mb-7">
-              <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Hi, Mathew Johns <span className="wave">👋</span></h1>
+              <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Hi, {user_name} <span className="wave">👋</span></h1>
             </header>
 
             <main>
@@ -28,8 +26,24 @@ const Dashboard: React.FC = () => {
                       <h2 className="text-[#0C0F12] text-[20px] font-medium leading-[26px] tracking-[-0.2px]">Set Your Goal</h2>
                       <div className="flex flex-col items-start gap-[50px] self-stretch">
                         <p className="text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Define your career aspirations and get a personalized roadmap to success.</p>
-                        <button className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 text-base leading-6 tracking-wide" 
-                        onClick={() => handleOptionClick("/SetGoal")}>Start Your Journey</button>
+
+                        {/* Dialog */}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto gap-8">
+                            {/* Visually hidden title */}
+                            <DialogTitle className="hidden">Set Your Goal</DialogTitle>
+
+                            <div className="flex flex-col items-start gap-1 flex-1">
+                              <h2 className="text-[#1A1A1A] text-[24px] font-medium leading-[32px] tracking[-0.24px]">Set Your Goal</h2>
+                              <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide">Choose your goal and get tailored resources to help you succeed.</p>
+                            </div>
+                            <SetGoalCard />
+                          </DialogContent>
+                        </Dialog>
+
                       </div>
                     </div>
 
@@ -47,13 +61,13 @@ const Dashboard: React.FC = () => {
                     <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
                     >Try these things out</h5>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="bg-white shadow-sm rounded-lg p-6 flex flex-col items-start gap-8 relative"
+                      <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
                       >
                         <div className="h-[100px]">
                           <img
                             src="./src/assets/dashboard/skills.svg"
                             alt="Skills"
-                            className="absolute top-0 end-0"
+                            className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
                           />
                         </div>
 
@@ -66,13 +80,13 @@ const Dashboard: React.FC = () => {
                         <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide">Add Skills</button>
                       </div>
 
-                      <div className="bg-white shadow-sm rounded-lg p-6 flex flex-col items-start gap-8 relative"
+                      <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
                       >
                         <div className="h-[100px]">
                           <img
                             src="./src/assets/dashboard/project.svg"
                             alt="Project"
-                            className="absolute top-0 end-0"
+                            className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
                           />
                         </div>
 
@@ -85,13 +99,13 @@ const Dashboard: React.FC = () => {
                         <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide">Add a Project</button>
                       </div>
 
-                      <div className="bg-white shadow-sm rounded-lg p-6 flex flex-col items-start gap-8 relative"
+                      <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
                       >
                         <div className="h-[100px]">
                           <img
                             src="./src/assets/dashboard/practice.svg"
                             alt="Practice"
-                            className="absolute top-0 end-0"
+                            className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
                           />
                         </div>
 
@@ -108,43 +122,10 @@ const Dashboard: React.FC = () => {
 
                   {/* Explore Trending Goals Section */}
                   <section className="flex flex-col items-start gap-4 self-stretch">
-                    <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
-                    >Explore trending goals</h5>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="bg-[#FCFCFC] shadow-sm rounded-[9px] border-1 border-[#eee]">
-                        <img
-                          src="./src/assets/dashboard/jobs_banner.png"
-                          alt="Jobs"
-                          className="rounded-e-none-[9px] rounded-s-none-[9px] w-full"
-                        />
-                        <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
-                          <h3 className="text-gray-800 text-base font-medium leading-5">Full Stack Developer</h3>
-                          <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">Build both the front-end and back-end of web apps.</p>
-                        </div>
-                      </div>
-                      <div className="bg-[#FCFCFC] shadow-sm rounded-[9px] border-1 border-[#eee]">
-                        <img
-                          src="./src/assets/dashboard/jobs_banner.png"
-                          alt="Jobs"
-                          className="rounded-e-none-[9px] rounded-s-none-[9px] w-full"
-                        />
-                        <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
-                          <h3 className="text-gray-800 text-base font-medium leading-5">Front-End Developer</h3>
-                          <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">Design and build interactive user interfaces.</p>
-                        </div>
-                      </div>
-                      <div className="bg-[#FCFCFC] shadow-sm rounded-[9px] border-1 border-[#eee]">
-                        <img
-                          src="./src/assets/dashboard/jobs_banner.png"
-                          alt="Jobs"
-                          className="rounded-e-none-[9px] rounded-s-none-[9px] w-full"
-                        />
-                        <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
-                          <h3 className="text-gray-800 text-base font-medium leading-5">Backend Developer</h3>
-                          <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">Develop server-side logic and manage databases.</p>
-                        </div>
-                      </div>
-                    </div>
+                    <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]">
+                      Explore trending goals
+                    </h5>
+                    <GoalList isLoading={false} error={false}/>
                   </section>
                 </div>
 

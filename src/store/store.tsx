@@ -11,6 +11,7 @@ import {
   REGISTER,
 } from "redux-persist";
 import authReducer from "@/features/authentication/authSlice";
+import goalReducer from "@/features/goals/goalSlice";
 import errorReducer from "@/features/error/errorSlice";
 import successReducer from "@/features/success/successSlice";
 import resumeSlice from "./slices/resumeSlice";
@@ -32,6 +33,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   auth: authReducer,
+  goals: goalReducer,
   error: errorReducer,
   success: successReducer,
   role: roleSlice,
@@ -44,7 +46,13 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 // Customized middleware
 const customizedMiddleware = {
   serializableCheck: {
-    ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+    ignoredPaths: ["api.mutations"], // Adjust this path as needed
+    ignoredActionPaths: [
+      "payload",
+      "meta.arg.originalArgs",
+      "meta.baseQueryMeta.request",
+      "meta.baseQueryMeta.response",
+    ], // Add the full path to the payload
   },
 };
 

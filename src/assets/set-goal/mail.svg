@@ -1,0 +1,13 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="mail">
+<mask id="mask0_40000715_3684" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+<rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_40000715_3684)">
+<g id="Search">
+<circle id="Ellipse_739" cx="11.8069" cy="11.8069" r="7.49047" stroke="#808080" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Line_181" d="M17.0156 17.4062L19.9523 20.3353" stroke="#808080" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</g>
+</svg>
