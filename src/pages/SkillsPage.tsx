@@ -1,4 +1,4 @@
-import SkillsContaineer from '@/components/skills/skills-container';
+import SkillsContaineer from '@/components/skills/skillscontainer';
 import React from 'react';
 
 

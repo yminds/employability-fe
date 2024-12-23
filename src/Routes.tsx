@@ -18,6 +18,7 @@ import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
 import Login from "./pages/LoginPage.tsx";
 import Skills from "./pages/SkillsPage.tsx";
 import SkillDetailPage from "./pages/SkillDetailPage.tsx";
+import SelectedSkill from "@/components/skills/slecetedSkill.tsx";
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -55,6 +56,11 @@ export const routes: RouteConfig[] = [
   {
     route: "/skills/:id",
     component: <SkillDetailPage/>,
+    roles: ["CANDIDATE"],
+  },
+  {
+    route: "/skills/suggestedskills/:id",
+    component: <SelectedSkill skill={""} icon={""} description={""} />,
     roles: ["CANDIDATE"],
   },
   {
