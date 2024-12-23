@@ -18,7 +18,7 @@ import {
 export interface IMessage {
   id: number;
   message: string;
-  sender: string;
+  role: string;
 }
 
 const SOCKET_URL = "http://localhost:3000";
@@ -29,45 +29,33 @@ const Interview: React.FC<{
 }> = () => {
   // API's
   const [
-    streamResponse,
-    { isLoading: isStreamLoading, isSuccess: isStreamSuccess, data: response },
+    stream,
+    {
+      isLoading: isStreamLoading,
+      isSuccess: isStreamSuccess,
+      data: streamResponse,
+    },
   ] = useStreamMutation();
   const [tts, { data: ttsResponse, isSuccess: ttsSuccess }] = useTtsMutation();
-  const [
-    stt,
-    {
-      isLoading: isSttLoading,
-      isSuccess: isSttSuccess,
-      data: sttData,
-      error: sttError,
-    },
-  ] = useSttMutation();
+  const [stt, { isSuccess: isSttSuccess, data: sttResponse, error: sttError }] =
+    useSttMutation();
 
   useEffect(() => {
     if (isStreamSuccess && !isStreamLoading) {
-      console.log("Stream", response);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: prevMessages.length + 1,
-          message: response,
-          sender: "AI Interviewer",
-        },
-      ]);
       // Enqueue the AI response for TTS and playback
       const currentIndex = sentenceIndexRef.current;
       sentenceIndexRef.current += 1;
-      tts({ text: response })
-        .unwrap()
-        .then((audioBlob) => {
-          audioBufferMap.current.set(currentIndex, audioBlob);
-          attemptPlayback();
-        })
-        .catch((error) => {
-          console.error("Error fetching TTS audio:", error);
-        });
+      // tts({ text: response })
+      //   .unwrap()
+      //   .then((audioBlob) => {
+      //     audioBufferMap.current.set(currentIndex, audioBlob);
+      //     attemptPlayback();
+      //   })
+      //   .catch((error) => {
+      //     console.error("Error fetching TTS audio:", error);
+      //   });
     }
-  }, [response]);
+  }, [streamResponse]);
 
   useEffect(() => {
     if (ttsResponse && ttsSuccess) {
@@ -86,6 +74,7 @@ const Interview: React.FC<{
   const sentenceIndexRef = useRef<number>(0); // Assigns a unique index to each sentence
   const nextSentenceToPlayRef = useRef<number>(0); // Tracks the next sentence to play
   const audioBufferMap = useRef<Map<number, Blob>>(new Map()); // Buffers audio blobs indexed by sentence
+  const [currentMessageIndex, setCurrentMessageIndex] = useState<number>(0);
 
   const recordingProcessed = useRef(false);
 
@@ -103,8 +92,8 @@ const Interview: React.FC<{
       console.log("Connected with ID:", newSocket.id);
     });
 
-    newSocket.on("output", (data: string) => {
-      handleIncomingData(data);
+    newSocket.on(`output${currentMessageIndex}`, (data: string) => {
+      handleIncomingData(data, currentMessageIndex);
       if (timerStartRef.current) {
         const endTime = new Date();
         console.log("Timer ended at:", endTime);
@@ -129,7 +118,7 @@ const Interview: React.FC<{
   }, []); // Empty dependency array ensures this runs once
 
   // Handle incoming data by accumulating and parsing sentences
-  const handleIncomingData = (data: string) => {
+  const handleIncomingData = (data: string, currentMessageIndex: number) => {
     bufferRef.current += data;
 
     // Regex to match complete sentences
@@ -145,62 +134,23 @@ const Interview: React.FC<{
         sentenceIndexRef.current += 1;
 
         // Add to messages as AI response
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            id: prevMessages.length + 1,
-            message: trimmedSentence,
-            sender: "AI Interviewer",
-          },
-        ]);
-
+        handleMessage(trimmedSentence, "AI", currentMessageIndex);
         // Send TTS request immediately
-        tts({ text: trimmedSentence })
-          .unwrap()
-          .then((audioBlob) => {
-            audioBufferMap.current.set(currentIndex, audioBlob);
-            attemptPlayback();
-          })
-          .catch((error) => {
-            console.error("Error fetching TTS audio:", error);
-          });
+        // tts({ text: trimmedSentence })
+        //   .unwrap()
+        //   .then((audioBlob) => {
+        //     audioBufferMap.current.set(currentIndex, audioBlob);
+        //     attemptPlayback();
+        //   })
+        //   .catch((error) => {
+        //     console.error("Error fetching TTS audio:", error);
+        //   });
         // fetchTTS(trimmedSentence, currentIndex);
       }
     });
 
     // Remove processed sentences from the buffer
     bufferRef.current = bufferRef.current.replace(sentenceRegex, "");
-  };
-
-  // Function to fetch TTS audio and handle ordered playback
-  const fetchTTS = async (text: string, index: number) => {
-    try {
-      const response = await fetch(
-        "http://localhost:3000/utility/text2Speech",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ text }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to generate speech");
-      }
-
-      const audioBlob = await response.blob();
-
-      // Store the audio blob in the buffer map
-      audioBufferMap.current.set(index, audioBlob);
-
-      // Attempt to play audio if it's the next in sequence
-      attemptPlayback();
-    } catch (error) {
-      console.error("Error fetching TTS audio:", error);
-    }
   };
 
   // Function to attempt playback of the next sentence
@@ -304,16 +254,7 @@ const Interview: React.FC<{
           const formData = new FormData();
           formData.append("audio", audioBlob);
 
-          // sendMessage(data.transcription.text);
-          // setMessages((prevMessages) => [
-          //   ...prevMessages,
-          //   {
-          //     id: prevMessages.length + 1,
-          //     message: data.transcription.text,
-          //     sender: "User",
-          //   },
-          // ]);
-          stt(audioBlob);
+          // stt(audioBlob);
           clearBlobUrl();
         } catch (error) {
           console.error("Error transcribing audio:", error);
@@ -326,38 +267,14 @@ const Interview: React.FC<{
   );
 
   useEffect(() => {
-    if (isSttSuccess && sttData) {
-      sendMessage(sttData?.transcription?.text);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: prevMessages.length + 1,
-          message: sttData?.transcription?.text,
-          sender: "User",
-        },
-      ]);
+    if (isSttSuccess && sttResponse) {
+      sendMessage(sttResponse?.transcription?.text);
     }
 
     if (sttError) {
       console.error("Error transcribing audio:", sttError);
     }
-  }, [isSttSuccess, sttData, sttError]);
-
-  // useEffect(() => {
-  //   const startTimer = setTimeout(() => {
-  //     sendMessage(`Conduct a React Mock Interview
-  //       `);
-  //     setMessages((prevMessages) => [
-  //       ...prevMessages,
-  //       {
-  //         id: prevMessages.length + 1,
-  //         message: "Hello",
-  //         sender: "User",
-  //       },
-  //     ]);
-  //   }, 1000);
-  //   return () => clearTimeout(startTimer);
-  // }, []);
+  }, [isSttSuccess, sttResponse, sttError]);
 
   const handleDoneAnswering = () => {
     // Only stop recording if user is answering
@@ -374,29 +291,20 @@ const Interview: React.FC<{
 
     // reset the time , Start Timer and print the start time
     try {
-      //   const response = await axios.post(
-      //     `http://localhost:3000/openai/threads/thread_pKIPJfBDu9sOWTbObajQOfi3/messages-and-run`,
-      //     {
-      //       content: message,
-      //       assistantId: "asst_gggeZ8qgQLERTicPfw8CnO0F",
-      //       instructions: "",
-      //     }
-      //   );
-      // // Assuming the response contains a field 'content' which is a list of responses
-      // const aiResponse = response.data.content[0].text.value;
-      tts({ text: message });
+      // tts({ text: message });
     } catch (error) {
       console.error("Error sending message to AI:", error);
     }
   };
 
   const addMessage = (prompt: string) => {
-    streamResponse({
+    stream({
       prompt: prompt,
       system:
         "YOU ARE REACT INTEVIEWER WHO DOESNT EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS",
       model: "gpt-4o",
       provider: "openai",
+      messageId: currentMessageIndex,
       // model: "claude-3-5-haiku-20241022",
       // provider: "anthropic",
       // "model": "claude-3-5-haiku-20241022",
@@ -406,7 +314,57 @@ const Interview: React.FC<{
 
   useEffect(() => {
     addMessage("Hello");
+    handleMessage("Hello", "USER");
   }, []);
+
+  const handleMessage = (
+    message: string,
+    role: string = "USER",
+    currentMessageIdx?: number
+  ) => {
+    if (role === "AI") {
+      console.log("ROLE", role + ":", message, currentMessageIdx, currentMessageIndex);
+      // console.log("currentMessageIndex", currentMessageIndex, message);
+      // console.log("currentMessageIdx", currentMessageIdx, message);
+      if (currentMessageIdx !== currentMessageIndex) {
+        setCurrentMessageIndex((prevIndex) => prevIndex + 1);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: prevMessages.length + 1,
+            message: message,
+            role: role,
+          },
+        ]);
+        // let messagesList = [...messages];
+        // console.log("Messages List", messagesList);
+      } else {
+        // find the message and update it
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: prevMessages.length + 1,
+            message: message,
+            role: role,
+          },
+        ]);
+        //  console.log("Message Index", messages, messageIndex);
+      }
+    } else {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: prevMessages.length + 1,
+          message: message,
+          role: role,
+        },
+      ]);
+    }
+  };
+
+  useEffect(() => {
+    // console.log("messages", messages);
+  }, [messages]);
 
   return (
     <div className="w-full h-screen pt-12">

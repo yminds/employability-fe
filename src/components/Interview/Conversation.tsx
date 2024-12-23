@@ -24,9 +24,15 @@ const Conversation: React.FC<{
           // <Message key={message.id} message={message} />
           // If the message is last or first, add a margin to the top or bottom
           index === 0 ? (
-            <Message key={message.id} message={{ ...message, className: "mt-12" }} />
+            <Message
+              key={message.id}
+              message={{ ...message, className: "mt-12" }}
+            />
           ) : index === messages.length - 1 ? (
-            <Message key={message.id} message={{ ...message, className: "mb-12" }} />
+            <Message
+              key={message.id}
+              message={{ ...message, className: "mb-12" }}
+            />
           ) : (
             <Message key={message.id} message={{ ...message }} />
           )
@@ -42,7 +48,7 @@ const Conversation: React.FC<{
 export default Conversation;
 
 const Message: React.FC<{
-  message: { id: number; message: string; sender: string; className?: string };
+  message: { id: number; message: string; role: string; className?: string };
 }> = ({ message }) => {
   return (
     <div
@@ -51,10 +57,10 @@ const Message: React.FC<{
       <div className="flex flex-col gap-1.5">
         <span
           className={`${
-            message.sender !== "User" ? "text-[#08A358]" : "text-[#228BBF]"
+            message.role !== "User" ? "text-[#08A358]" : "text-[#228BBF]"
           } font-ubuntu font-medium text-sm`}
         >
-          {message.sender}
+          {message.role}
         </span>
         <p className="text-left font-ubuntu text-base text-slate-900">
           {message.message}
