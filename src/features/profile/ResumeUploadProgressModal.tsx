@@ -1,10 +1,12 @@
-import { X } from 'lucide-react'
+import { X } from "lucide-react";
 
 interface ResumeUploadProgressModalProps {
-  onClose: () => void
-  fileName: string
-  fileSize: string
-  uploadProgress: number
+  onClose: () => void;
+  fileName: string;
+  fileSize: string;
+  uploadProgress: number;
+  isUploading: boolean; // Whether the upload is still pending
+  error: string | null;
 }
 
 export default function ResumeUploadProgressModal({
@@ -12,6 +14,8 @@ export default function ResumeUploadProgressModal({
   fileName,
   fileSize,
   uploadProgress,
+  isUploading,
+  error,
 }: ResumeUploadProgressModalProps) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
@@ -21,6 +25,7 @@ export default function ResumeUploadProgressModal({
           <h2 className="text-2xl font-semibold">Upload your Resume</h2>
           <button
             onClick={onClose}
+            disabled={isUploading} // Prevent closing while uploading
             className="text-gray-400 hover:text-gray-600 transition-colors"
             aria-label="Close"
           >
@@ -42,14 +47,6 @@ export default function ResumeUploadProgressModal({
                 <p className="text-sm text-gray-500">{fileSize}</p>
               </div>
             </div>
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Remove file"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
           {/* Progress Bar */}
           <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -60,20 +57,32 @@ export default function ResumeUploadProgressModal({
           </div>
           {/* Progress Percentage */}
           <p className="text-right text-sm text-gray-600 mt-1">
-            {uploadProgress}%
+            {uploadProgress}% {isUploading ? "Uploading..." : "Completed"}
           </p>
         </div>
 
         {/* Footer */}
         <div className="flex justify-end mt-6">
           <button
-            className="px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-900 transition-colors"
+            onClick={onClose}
+            disabled={isUploading} // Disable until upload is complete
+            className={`px-6 py-2 rounded-lg transition-colors ${
+              isUploading
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-emerald-500 hover:bg-emerald-600 text-white"
+            }`}
           >
-            Continue
+            {isUploading ? "Uploading..." : "Continue"}
           </button>
         </div>
+
+        {/* Show error message if upload failed */}
+        {error && (
+          <p className="text-red-500 text-sm mt-4 text-center">
+            Upload failed: {error}
+          </p>
+        )}
       </div>
     </div>
-  )
+  );
 }
-

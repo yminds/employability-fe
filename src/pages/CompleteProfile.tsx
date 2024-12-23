@@ -40,6 +40,8 @@ const CompleteProfile: React.FC = () => {
   // Safely access skills from parsedData, checking if parsedData is available
   const parsedDataSkills = parsedData?.skills || [];
 
+  console.log(parsedDataSkills);
+
   // Personal Information
   const [fullName, setFullName] = useState<string>(user?.name || "");
   const [email, setEmail] = useState<string>(user?.email || "");

@@ -36,11 +36,21 @@ const UserProfile: React.FC = () => {
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
-      setUploadProgress(progress);
-      if (progress === 100) {
-        clearInterval(interval);
-      }
+      setUploadProgress((prevProgress) => {
+        if (prevProgress >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return progress;
+      });
     }, 300);
+  };
+
+  const handleProgressContinue = () => {
+    if (uploadProgress === 100) {
+      setIsProgressModalOpen(false);
+      setIsProfileModalOpen(true); // Open the CompleteProfileModal
+    }
   };
 
   return (
@@ -438,15 +448,19 @@ const UserProfile: React.FC = () => {
               {isProgressModalOpen && (
                 <ResumeUploadProgressModal
                   onClose={() => setIsProgressModalOpen(false)}
+                  onContinue={handleProgressContinue} // Hooked to handle state transition
                   fileName={fileDetails.name}
                   fileSize={fileDetails.size}
                   uploadProgress={uploadProgress}
+                  isUploading={uploadProgress < 100} // Indicates upload is ongoing
+                  error={null}
                 />
               )}
-              <button 
-                      onClick={() => setIsProfileModalOpen(true)}
 
-              className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800">
+              <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
+              >
                 <div className="p-2 ">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -476,10 +490,13 @@ const UserProfile: React.FC = () => {
                 <span>Fill out manually</span>
               </button>
               {isProfileModalOpen && (
-        <CompleteProfileModal onClose={() => setIsProfileModalOpen(false)} onSave={function (data: ProfileFormData): void {
-                  throw new Error("Function not implemented.");
-                } } />
-      )}
+                <CompleteProfileModal
+                  onClose={() => setIsProfileModalOpen(false)}
+                  onSave={function (data: ProfileFormData): void {
+                    throw new Error("Function not implemented.");
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -79,11 +79,14 @@ export const uploadResume = createAsyncThunk(
       formData.append("resume", file);
       formData.append("userId", userId);
 
-      const response = await fetch("http://localhost:3000/api/upload-resume", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/v1/resume/upload-resume",
+        {
+          method: "POST",
+          body: formData,
+          // credentials: "include",
+        }
+      );
 
       const data = await response.json();
 
