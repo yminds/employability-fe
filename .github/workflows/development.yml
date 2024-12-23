@@ -1,73 +1,53 @@
-name: Deploy Main
+name: Deploy Main Branch
 
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # Step 2: Identify changed and deleted files
       - name: Identify changed and deleted files
         id: files
         run: |
           echo "changed_files=$(git diff --name-only --diff-filter=d ${{github.event.before}} ${{github.sha}} | xargs)" >> $GITHUB_ENV
           echo "deleted_files=$(git diff --name-only --diff-filter=D ${{github.event.before}} ${{github.sha}} | xargs)" >> $GITHUB_ENV
 
-      # Step 3: Compress changed files
-      - name: Compress changed files
+      - name: Compress dir
         if: env.changed_files != ''
         run: |
           zip -r ../changed_files.zip $changed_files
           echo "ZIP_EXISTS=true" >> $GITHUB_ENV
 
-      # Step 4: Install sshpass (if not already available)
-      - name: Install sshpass
+      - name: Install ssh pass
         run: sudo apt-get install sshpass -y
 
-      # Step 5: Copy files to the server
       - name: Copy resources to server
         if: env.changed_files != '' || env.deleted_files != ''
         env:
           SSHPASS: ${{secrets.AZURE_VM_PASSWORD}}
         run: |
           if [[ $ZIP_EXISTS == "true" ]]; then
-            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../changed_files.zip ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/changed_files.zip
+            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../changed_files.zip ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/changed_files.zip
           fi
           if [[ $deleted_files != '' ]]; then
             echo $deleted_files > deleted_files.txt
-            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no deleted_files.txt ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/deleted_files.txt
+            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no deleted_files.txt ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/deleted_files.txt
           fi
 
-      # Step 6: Process files on the server
       - name: Update server (unzip and delete files)
+        if: env.changed_files != '' || env.deleted_files != ''
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{ secrets.AZURE_VM_IP }}
-          username: ${{ secrets.AZURE_VM_USERNAME }}
-          password: ${{ secrets.AZURE_VM_PASSWORD }}
+          host: ${{secrets.AZURE_VM_IP}}
+          username: ${{secrets.AZURE_VM_USERNAME}}
+          password: ${{secrets.AZURE_VM_PASSWORD}}
           script: |
-            powershell.exe -Command "
-              Write-Host 'Checking for ZIP file...';
-              if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip') {
-                Write-Host 'ZIP file found. Starting extraction...';
-                try {
-                  Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test' -Force;
-                  Write-Host 'Extraction complete.';
-                } catch {
-                  Write-Host 'Error during extraction: ' + $_.Exception.Message;
-                  Write-Host 'Extraction incomplete.';
-                }
-              } else {
-                Write-Host 'Error: ZIP file not found.';
-              }
-            " | Tee-Object -Variable Output -FilePath E:\powershell_output.log; Write-Output $Output
+            powershell.exe -Command "if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip') {Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test' -Force; Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip' -Force;} if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt') {$files = Get-Content -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt'; foreach ($file in $files) {Remove-Item -Path ('E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\' + $file) -Force;} Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\\\deleted_files.txt' -Force;}"
