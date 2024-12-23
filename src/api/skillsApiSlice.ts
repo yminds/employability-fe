@@ -17,7 +17,15 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
         method: 'GET',
       }),
     }),
+
+
+    getUserSkillDetails:builder.query<any, string >({
+        query: ( skillId ) => ({
+          url: `api/v1/skills/userSkills/${skillId}`,
+          method: 'GET',
+        }),
+      }),
   }),
 });
 
-export const { useGetUserSkillsQuery, useGetUserSkillsSummaryQuery } = skillsApiSlice;
+export const { useGetUserSkillsQuery, useGetUserSkillsSummaryQuery,useGetUserSkillDetailsQuery } = skillsApiSlice;

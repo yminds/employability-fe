@@ -18,7 +18,7 @@ import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
 import Login from "./pages/LoginPage.tsx";
 import Skills from "./pages/SkillsPage.tsx";
 import SkillDetailPage from "./pages/SkillDetailPage.tsx";
-import SelectedSkill from "@/components/skills/slecetedSkill.tsx";
+import SelectedSkill from "@/components/skills/selectedskill.tsx";
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
