@@ -156,6 +156,7 @@ const GoalFormDialog: React.FC<Props> = () => {
                                                 placeholder="e.g., Mobile App Developer"
                                                 value={goal}
                                                 onChange={(e) => setGoal(e.target.value)}
+                                                 autoComplete="off"
                                                 className="flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none"
                                             />
                                         </div>
@@ -181,6 +182,7 @@ const GoalFormDialog: React.FC<Props> = () => {
                                                     placeholder="Search"
                                                     value={techStack}
                                                     onChange={handleTechStackChange}
+                                                    autoComplete="off"
                                                     className="w-full flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none pl-12"
                                                 />
                                                 {isLoading && <p>Loading skills...</p>}

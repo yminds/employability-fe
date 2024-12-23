@@ -33,7 +33,7 @@ const GoalList: React.FC<Props> = () => {
             {data?.data?.map((goal: any) => (
                 <div
                     key={goal._id}
-                    className="rounded-[9px] border border-black/10 bg-[#FCFCFC] cursor-pointer"
+                    className="rounded-[9px] border border-black/10 bg-[#FCFCFC] hover:border-[#1FD167] cursor-pointer"
                     onClick={() => navigate(`/goals/${goal._id}`)}
                 >
                     <img

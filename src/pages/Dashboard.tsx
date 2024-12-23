@@ -4,15 +4,17 @@ import SetGoalCard from "@/features/dashboard/SetGoalCard";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import GoalList from "@/features/dashboard/GoalList";
+import { useSelector } from "react-redux";
 
 const Dashboard: React.FC = () => {
+  const user_name = useSelector((state) => state.auth.user.name)
   return (
     <>
       <main className="h-screen overflow-auto">
         <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
             <header className="mb-7">
-              <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Hi, Mathew Johns <span className="wave">👋</span></h1>
+              <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Hi, {user_name} <span className="wave">👋</span></h1>
             </header>
 
             <main>

@@ -17,6 +17,12 @@ const Sidebar: React.FC = () => {
         return window.location.pathname === path ? 'bg-[#DBFFEA] text-[#10B754]' : '';
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("authToken"); 
+        sessionStorage.removeItem("authToken"); 
+        window.location.href = "/login"; 
+    };
+
     return (
         <div className="relative">
             <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden transition-all ${isCollapsed ? 'w-20' : 'w-64'}`}>
@@ -79,7 +85,11 @@ const Sidebar: React.FC = () => {
                         </li>
                     </ul>
                 </nav>
+                
                 <div className="mt-6 w-full">
+                    <button onClick={handleLogout} className="p-2 bg-gray-100 border mb-4 w-full">
+                        Logout
+                    </button>
                     <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'p-4 rounded-[6px] border border-[#F5F5F5] bg-white'}`}>
                         <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">Y</div>
                         {!isCollapsed && (
