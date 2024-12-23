@@ -38,12 +38,12 @@ const GoalList: React.FC<Props> = () => {
                 >
                     <img
                         src={goal.image || "./src/assets/dashboard/jobs_banner.png"}
-                        alt={goal.name}
+                        alt={goal.title}
                         className="rounded-e-none-[9px] rounded-s-none-[9px] w-full"
                     />
                     <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
                         <h3 className="text-gray-800 text-base font-medium leading-5">
-                            {goal.name}
+                            {goal.title}
                         </h3>
                         <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">
                             {goal.description}
