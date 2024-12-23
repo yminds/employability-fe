@@ -56,7 +56,7 @@ const Interview: React.FC<{
     const newSocket = io(SOCKET_URL, {
       // Optional configurations
     });
-    console.log("Connecting to socket server...", newSocket);
+    console.log("Connecting to socket server...", newSocket, socket);
 
     setSocket(newSocket);
 
@@ -67,14 +67,14 @@ const Interview: React.FC<{
     newSocket.on(`output${currentMessageIndex}`, (data: string) => {
       handleIncomingData(data, currentMessageIndex);
       if (timerStartRef.current) {
-        const endTime = new Date();
-        console.log("Timer ended at:", endTime);
+        // const endTime = new Date();
+        // console.log("Timer ended at:", endTime);
 
-        const durationMs = endTime.getTime() - timerStartRef.current.getTime();
-        console.log(`Duration: ${durationMs} ms`);
+        // const durationMs = endTime.getTime() - timerStartRef.current.getTime();
+        // console.log(`Duration: ${durationMs} ms`);
 
         // Additional console log for elapsed time
-        console.log(`Elapsed Time: ${durationMs / 1000} seconds`);
+        // console.log(`Elapsed Time: ${durationMs / 1000} seconds`);
 
         timerStartRef.current = null; // Reset the timer
       }
@@ -102,7 +102,7 @@ const Interview: React.FC<{
       const trimmedSentence = sentence.trim();
       if (trimmedSentence) {
         // Append sentence to the AI message
-        handleMessage(trimmedSentence, "AI", currentMessageIndex);
+        handleMessage(trimmedSentence, "AI");
 
         // Handle TTS and playback
         const currentIndex = sentenceIndexRef.current;
@@ -190,13 +190,7 @@ const Interview: React.FC<{
       audioElement.play();
 
       audioElement.onended = () => {
-        console.log(
-          "Audio playback ended",
-          nextSentenceToPlayRef.current,
-          sentenceIndexRef.current
-        );
         if (nextSentenceToPlayRef.current + 1 === sentenceIndexRef.current) {
-          console.log("Audio playback ended");
           setIsUserAnswering(true); // Now safe to set this flag as it's the last segment
           startRecording();
         }
@@ -235,7 +229,7 @@ const Interview: React.FC<{
           console.error("Error transcribing audio:", error);
         } finally {
           // Reset the flag after processing
-          // recordingProcessed.current = false;
+          recordingProcessed.current = false;
         }
       },
     }
@@ -244,7 +238,7 @@ const Interview: React.FC<{
   // Handle STT Success and Errors
   useEffect(() => {
     if (isSttSuccess && sttResponse) {
-      handleMessage(sttResponse.transcription.text, "USER", currentMessageIndex);
+      handleMessage(sttResponse.transcription.text, "USER");
       addMessage(sttResponse.transcription.text);
     }
 
@@ -266,7 +260,6 @@ const Interview: React.FC<{
   const handleMessage = (
     message: string,
     role: string = "USER",
-    currentMessageIdx?: number
   ) => {
     if (role === "AI") {
       setMessages((prevMessages) => {
@@ -308,7 +301,6 @@ const Interview: React.FC<{
           ];
         }
       });
-      console.log("AI message inserted/appended:", message);
     } else {
       // Handle USER messages normally
       setMessages((prevMessages) => [
