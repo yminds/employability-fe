@@ -9,6 +9,11 @@ import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
 import axios from "axios";
+import {
+  useStreamMutation,
+  useSttMutation,
+  useTtsMutation,
+} from "@/api/aiApiSlice";
 
 export interface IMessage {
   id: number;
@@ -22,6 +27,54 @@ const Interview: React.FC<{
   cameraScale: number;
   id: string;
 }> = () => {
+  // API's
+  const [
+    streamResponse,
+    { isLoading: isStreamLoading, isSuccess: isStreamSuccess, data: response },
+  ] = useStreamMutation();
+  const [tts, { data: ttsResponse, isSuccess: ttsSuccess }] = useTtsMutation();
+  const [
+    stt,
+    {
+      isLoading: isSttLoading,
+      isSuccess: isSttSuccess,
+      data: sttData,
+      error: sttError,
+    },
+  ] = useSttMutation();
+
+  useEffect(() => {
+    if (isStreamSuccess && !isStreamLoading) {
+      console.log("Stream", response);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: prevMessages.length + 1,
+          message: response,
+          sender: "AI Interviewer",
+        },
+      ]);
+      // Enqueue the AI response for TTS and playback
+      const currentIndex = sentenceIndexRef.current;
+      sentenceIndexRef.current += 1;
+      tts({ text: response })
+        .unwrap()
+        .then((audioBlob) => {
+          audioBufferMap.current.set(currentIndex, audioBlob);
+          attemptPlayback();
+        })
+        .catch((error) => {
+          console.error("Error fetching TTS audio:", error);
+        });
+    }
+  }, [response]);
+
+  useEffect(() => {
+    if (ttsResponse && ttsSuccess) {
+      attemptPlayback();
+    }
+  }, [ttsResponse, ttsSuccess]);
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [frequencyData, setFrequencyData] = useState<number>(0);
@@ -51,9 +104,7 @@ const Interview: React.FC<{
     });
 
     newSocket.on("output", (data: string) => {
-      // Stop the timer and print the end time,
       handleIncomingData(data);
-
       if (timerStartRef.current) {
         const endTime = new Date();
         console.log("Timer ended at:", endTime);
@@ -104,7 +155,16 @@ const Interview: React.FC<{
         ]);
 
         // Send TTS request immediately
-        fetchTTS(trimmedSentence, currentIndex);
+        tts({ text: trimmedSentence })
+          .unwrap()
+          .then((audioBlob) => {
+            audioBufferMap.current.set(currentIndex, audioBlob);
+            attemptPlayback();
+          })
+          .catch((error) => {
+            console.error("Error fetching TTS audio:", error);
+          });
+        // fetchTTS(trimmedSentence, currentIndex);
       }
     });
 
@@ -244,53 +304,60 @@ const Interview: React.FC<{
           const formData = new FormData();
           formData.append("audio", audioBlob);
 
-          const res = await fetch("http://localhost:3000/utility/speech2Text", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || "Failed to transcribe audio");
-          }
-
-          const data = await res.json();
-          console.log("Transcribed text:", data.transcription.text);
-          sendMessage(data.transcription.text);
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              id: prevMessages.length + 1,
-              message: data.transcription.text,
-              sender: "User",
-            },
-          ]);
+          // sendMessage(data.transcription.text);
+          // setMessages((prevMessages) => [
+          //   ...prevMessages,
+          //   {
+          //     id: prevMessages.length + 1,
+          //     message: data.transcription.text,
+          //     sender: "User",
+          //   },
+          // ]);
+          stt(audioBlob);
           clearBlobUrl();
         } catch (error) {
           console.error("Error transcribing audio:", error);
         } finally {
           // Reset the flag after processing
-          recordingProcessed.current = false;
+          // recordingProcessed.current = false;
         }
       },
     }
   );
 
   useEffect(() => {
-    const startTimer = setTimeout(() => {
-      sendMessage(`Conduct a React Mock Interview
-        `);
+    if (isSttSuccess && sttData) {
+      sendMessage(sttData?.transcription?.text);
       setMessages((prevMessages) => [
         ...prevMessages,
         {
           id: prevMessages.length + 1,
-          message: "Hello",
+          message: sttData?.transcription?.text,
           sender: "User",
         },
       ]);
-    }, 1000);
-    return () => clearTimeout(startTimer);
-  }, []);
+    }
+
+    if (sttError) {
+      console.error("Error transcribing audio:", sttError);
+    }
+  }, [isSttSuccess, sttData, sttError]);
+
+  // useEffect(() => {
+  //   const startTimer = setTimeout(() => {
+  //     sendMessage(`Conduct a React Mock Interview
+  //       `);
+  //     setMessages((prevMessages) => [
+  //       ...prevMessages,
+  //       {
+  //         id: prevMessages.length + 1,
+  //         message: "Hello",
+  //         sender: "User",
+  //       },
+  //     ]);
+  //   }, 1000);
+  //   return () => clearTimeout(startTimer);
+  // }, []);
 
   const handleDoneAnswering = () => {
     // Only stop recording if user is answering
@@ -307,34 +374,39 @@ const Interview: React.FC<{
 
     // reset the time , Start Timer and print the start time
     try {
-      const response = await axios.post(
-        `http://localhost:3000/openai/threads/thread_pKIPJfBDu9sOWTbObajQOfi3/messages-and-run`,
-        {
-          content: message,
-          assistantId: "asst_gggeZ8qgQLERTicPfw8CnO0F",
-          instructions: "",
-        }
-      );
-
-      // Assuming the response contains a field 'content' which is a list of responses
-      const aiResponse = response.data.content[0].text.value;
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: prevMessages.length + 1,
-          message: aiResponse,
-          sender: "AI Interviewer",
-        },
-      ]);
-
-      // Enqueue the AI response for TTS and playback
-      const currentIndex = sentenceIndexRef.current;
-      sentenceIndexRef.current += 1;
-      fetchTTS(aiResponse, currentIndex);
+      //   const response = await axios.post(
+      //     `http://localhost:3000/openai/threads/thread_pKIPJfBDu9sOWTbObajQOfi3/messages-and-run`,
+      //     {
+      //       content: message,
+      //       assistantId: "asst_gggeZ8qgQLERTicPfw8CnO0F",
+      //       instructions: "",
+      //     }
+      //   );
+      // // Assuming the response contains a field 'content' which is a list of responses
+      // const aiResponse = response.data.content[0].text.value;
+      tts({ text: message });
     } catch (error) {
       console.error("Error sending message to AI:", error);
     }
   };
+
+  const addMessage = (prompt: string) => {
+    streamResponse({
+      prompt: prompt,
+      system:
+        "YOU ARE REACT INTEVIEWER WHO DOESNT EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS",
+      model: "gpt-4o",
+      provider: "openai",
+      // model: "claude-3-5-haiku-20241022",
+      // provider: "anthropic",
+      // "model": "claude-3-5-haiku-20241022",
+      // "provider":"anthropic"
+    });
+  };
+
+  useEffect(() => {
+    addMessage("Hello");
+  }, []);
 
   return (
     <div className="w-full h-screen pt-12">

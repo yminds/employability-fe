@@ -4,7 +4,7 @@ import SkillCard from '@/components/cards/skills/skillsCard';
 interface Skill {
   skill: string;
   skillImg: string;
-  rating: number;
+  verified_rating: number;
   selfRating: number;
   initialStatus: string; // Verification status
 }
@@ -23,17 +23,15 @@ const SkillList: React.FC<SkillListProps> = ({ skills, activeFilter }) => {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Your Skills</h2>
-
       {/* Render Filtered Skills */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4 mb-4">
         {filteredSkills.length > 0 ? (
           filteredSkills.map((skill, index) => (
             <SkillCard
               key={index}
               skill={skill.skill}
               skillImg={skill.skillImg}
-              rating={skill.rating}
+              verified_rating={skill.verified_rating}
               selfRating={skill.selfRating}
               initialStatus={skill.initialStatus}
             />
