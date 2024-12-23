@@ -132,7 +132,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex flex-col items-start gap-6 flex-1">
                   {/* Profile Sidebar */}
                   <ProfileCard
-                    name="Mathew Johns"
+                    name={user_name}
                     completionPercentage={30}
                     importButtonLabel="Import from LinkedIn"
                     uploadButtonLabel="Upload your resume"
