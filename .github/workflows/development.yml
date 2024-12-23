@@ -35,7 +35,7 @@ jobs:
           SSHPASS: ${{secrets.AZURE_VM_PASSWORD}}
         run: |
           if [[ $ZIP_EXISTS == "true" ]]; then
-            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../changed_files.zip ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs/test/changed_files.zip
+            sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ../changed_files.zip ${{secrets.AZURE_VM_USERNAME}}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/changed_files.zip
           fi
           if [[ $deleted_files != '' ]]; then
             echo $deleted_files > deleted_files.txt
@@ -51,9 +51,9 @@ jobs:
           password: ${{secrets.AZURE_VM_PASSWORD}}
           script: |
             powershell.exe -Command "
-              if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip') {
-                Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test' -Force;
-                Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\changed_files.zip' -Force;
+              if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip') {
+                Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test' -Force;
+                Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -Force;
               }
               if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt') {
                 $files = Get-Content -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt';
