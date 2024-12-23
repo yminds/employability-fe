@@ -52,7 +52,7 @@ jobs:
           script: |
             powershell.exe -Command "
               if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip') {
-                Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test' -Force;
+                Expand-Archive -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -DestinationPath 'E:\\Inetpub\\vhosts\\employability.ai' -Force;
                 Remove-Item -Path 'E:\\Inetpub\\vhosts\\employability.ai\\changed_files.zip' -Force;
               }
               if (Test-Path -Path 'E:\\Inetpub\\vhosts\\employability.ai\\httpdocs\\test\\deleted_files.txt') {
