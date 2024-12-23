@@ -16,8 +16,8 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <main>
-        <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
+      <main className="h-screen overflow-auto">
+        <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
             <header className="mb-7">
               <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Hi, Mathew Johns <span className="wave">👋</span></h1>
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
                           <DialogTrigger asChild>
                             <Button variant="outline" className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto gap-8">
                             {/* Visually hidden title */}
                             <DialogTitle className="hidden">Set Your Goal</DialogTitle>
 
