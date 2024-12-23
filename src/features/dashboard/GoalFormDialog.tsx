@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
-import { useCreateGoalMutation } from "@/api/goalsApiSlice";
+import { useCreateGoalMutation } from "@/api/predefinedGoalsApiSlice";
 import { useSelector } from "react-redux";
 
 // Define Zod schema for validation
