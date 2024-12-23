@@ -46,7 +46,13 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 // Customized middleware
 const customizedMiddleware = {
   serializableCheck: {
-    ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+    ignoredPaths: ["api.mutations"], // Adjust this path as needed
+    ignoredActionPaths: [
+      "payload",
+      "meta.arg.originalArgs",
+      "meta.baseQueryMeta.request",
+      "meta.baseQueryMeta.response",
+    ], // Add the full path to the payload
   },
 };
 

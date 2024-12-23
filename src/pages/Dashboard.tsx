@@ -3,21 +3,13 @@ import ProfileCard from "@/features/dashboard/ProfileCard";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-// import { useGetAllPreDefinedGoalsQuery } from "@/api/goalsApiSlice";
-// import { useNavigate } from "react-router-dom";
 import GoalList from "@/features/dashboard/GoalList";
 
 const Dashboard: React.FC = () => {
-  // const { data, error, isLoading } = useGetAllPreDefinedGoalsQuery(); // Fetch all predefined goals
-  // const navigate = useNavigate(); // Initialize useNavigate hook
-
-  // useEffect(() => {
-  // }, [data, error, isLoading]);
-
   return (
     <>
-      <main>
-        <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
+      <main className="h-screen overflow-auto">
+        <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
             <header className="mb-7">
               <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Hi, Mathew Johns <span className="wave">👋</span></h1>
@@ -38,7 +30,7 @@ const Dashboard: React.FC = () => {
                           <DialogTrigger asChild>
                             <Button variant="outline" className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto gap-8">
                             {/* Visually hidden title */}
                             <DialogTitle className="hidden">Set Your Goal</DialogTitle>
 
@@ -132,32 +124,6 @@ const Dashboard: React.FC = () => {
                       Explore trending goals
                     </h5>
                     <GoalList isLoading={false} error={false}/>
-
-                    {/* {<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {isLoading && <p>Loading trending goals, please wait...</p>}
-                      {error && <p>Oops! Something went wrong while loading goals.</p>}
-                      {data?.data?.map((goal) => (
-                        <div
-                          key={goal._id}
-                          className="bg-[#FCFCFC] shadow-sm rounded-[9px] border-1 border-[#eee] cursor-pointer"
-                          onClick={() => navigate(`/goals/${goal._id}`)}
-                        >
-                          <img
-                            src={goal.image || "./src/assets/dashboard/jobs_banner.png"}
-                            alt={goal.name}
-                            className="rounded-e-none-[9px] rounded-s-none-[9px] w-full"
-                          />
-                          <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
-                            <h3 className="text-gray-800 text-xl font-medium leading-5">
-                              {goal.name}
-                            </h3>
-                            <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">
-                              {goal.description}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>} */}
                   </section>
                 </div>
 
