@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetAllPreDefinedGoalsQuery } from "@/api/goalsApiSlice";
+import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
 
 interface Goal {
     _id: string
