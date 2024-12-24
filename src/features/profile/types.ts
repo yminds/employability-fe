@@ -71,6 +71,7 @@ export interface Education {
 
 // types.ts (or your designated types file)
 export interface ExperienceItem {
+    company: string;
     jobType: string | number | readonly string[] | undefined;
     isVerified: boolean | undefined;
     duration: string | number | readonly string[] | undefined;

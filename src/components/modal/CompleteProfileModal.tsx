@@ -6,15 +6,22 @@ import SkillsForm from "../forms/skills-form";
 import ExperienceForm from "../forms/experience-form";
 import EducationForm from "../forms/education-form";
 import { profileFormSchema } from "../../features/profile/shemas/profileFormSchema";
+import CertificationsForm from "../forms/certification-form";
 import { ZodError } from "zod";
 import debounce from "lodash.debounce"; // Install lodash.debounce
 import { RootState } from "@/store/store";
 import { useSelector } from "react-redux";
+import { useVerifySkillsMutation } from "@/api/skillApiSlice";
 
 interface CompleteProfileModalProps {
   onClose: () => void;
   onSave: (data: ProfileFormData) => void;
   type: string;
+}
+interface VerifiedSkill {
+  _id: string;
+  name: string;
+  description: string;
 }
 
 export default function CompleteProfileModal({
@@ -23,6 +30,14 @@ export default function CompleteProfileModal({
   type,
 }: CompleteProfileModalProps) {
   const data = useSelector((state: RootState) => state.resume.parsedData);
+
+  const [verifySkills, { isLoading: isVerifyingSkills }] =
+    useVerifySkillsMutation();
+  const [verifiedSkills, setVerifiedSkills] = useState<VerifiedSkill[]>([]);
+
+  // const [verifiedSkills, setVerifiedSkills] = useState<VerifiedSkill[]>([]);
+  // const [isVerifyingSkills, setIsVerifyingSkills] = useState(false);
+
   const [activeTab, setActiveTab] = useState("basic");
   const [formData, setFormData] = useState<ProfileFormData>({
     basicInfo: {
@@ -48,45 +63,133 @@ export default function CompleteProfileModal({
     certifications: [],
   });
 
-  const transformData = (data: any) => {
+  const transformData = async (data: any) => {
+    let validatedSkills: VerifiedSkill[] = [];
+    if (data.skills && data.skills.length > 0) {
+      try {
+        const normalizedSkills = data.skills.map((skill: string) =>
+          skill.toLowerCase()
+        );
+        const response = await verifySkills(normalizedSkills).unwrap();
+        validatedSkills = response.data;
+      } catch (error) {
+        console.error("Error verifying skills:", error);
+      }
+    }
+
+    // Helper function to transform date from "Month, Year" to "YYYY-MM"
+    const transformDate = (dateStr: string) => {
+      if (!dateStr) return "";
+      if (dateStr === "Present") return null;
+
+      try {
+        // Handle dates in "Month Year" or "Month, Year" format
+        const parts = dateStr.replace(",", "").trim().split(" ");
+        if (parts.length !== 2) {
+          console.error("Invalid date format:", dateStr);
+          return "";
+        }
+
+        const [monthStr, yearStr] = parts;
+        const monthNames: { [key: string]: string } = {
+          January: "01",
+          February: "02",
+          March: "03",
+          April: "04",
+          May: "05",
+          June: "06",
+          July: "07",
+          August: "08",
+          September: "09",
+          October: "10",
+          November: "11",
+          December: "12",
+        };
+
+        const month = monthNames[monthStr];
+        if (!month) {
+          console.error("Invalid month:", monthStr);
+          return "";
+        }
+
+        return `${yearStr}-${month}`;
+      } catch (error) {
+        console.error("Error parsing date:", dateStr);
+        return "";
+      }
+    };
+
     return {
       basicInfo: {
         name: data.name || "",
         mobile: data.contact?.phone || "",
         email: data.contact?.email || "",
-        dateOfBirth: "", // You may need to map a date of birth if it's available.
-        gender: "", // You can map this if gender information is available in your data.
-        country: "", // Country can be derived from the address or manually provided.
-        state: "", // State can be extracted from the address if needed.
-        city: "", // City can be extracted from the address if needed.
+        dateOfBirth: "",
+        gender: "",
+        country: "",
+        state: "",
+        city: "",
       },
       socialProfiles: {
         github: data.contact?.github || "",
         linkedin: data.contact?.linkedin || "",
-        dribbble: "", // Assuming this is not part of your data.
-        behance: "", // Assuming this is not part of your data.
+        dribbble: "",
+        behance: "",
         portfolio: data.contact?.portfolio || "",
       },
-      skills: data.skills || [],
-      experience: data.experience || [], // Assuming you may have more experience data to map.
-      education: data.education.map((edu) => ({
-        degree: edu.degree || "",
-        institution: edu.institution || "",
-        location: edu.location || "",
-        graduationYear: edu.graduationYear || "",
-      })),
-      certifications: data.certifications.map((cert) => ({
-        name: cert.name || "",
-        issuer: cert.issuer || "",
-        dateObtained: cert.dateObtained || "",
-        expiryDate: cert.expiryDate || "",
-      })),
+      skills: validatedSkills,
+      experience:
+        data.experience?.map((exp: any) => {
+          console.log("Processing experience:", exp); // Debug log
+          const startDate = transformDate(exp.startDate);
+          const endDate =
+            exp.endDate === "Present" ? null : transformDate(exp.endDate);
+          console.log("Transformed dates:", { startDate, endDate }); // Debug log
+
+          return {
+            id: Date.now().toString(),
+            jobTitle: exp.jobTitle || "",
+            companyName: exp.company || "",
+            employmentType: "",
+            companyLogo: "",
+            location: exp.location || "",
+            startDate,
+            endDate,
+            currentlyWorking: exp.endDate === "Present",
+            currentCTC: "",
+            expectedCTC: "",
+            description: exp.responsibilities?.join("\n") || "",
+            jobType: undefined,
+            isVerified: undefined,
+            duration: undefined,
+          };
+        }) || [],
+      education:
+        data.education?.map((edu: any) => ({
+          degree: edu.degree || "",
+          institution: edu.institution || "",
+          location: edu.location || "",
+          graduationYear: edu.graduationYear || "",
+        })) || [],
+      certifications:
+        data.certifications?.map((cert: any) => ({
+          name: cert.name || "",
+          issuer: cert.issuer || "",
+          dateObtained: cert.dateObtained || "",
+          expiryDate: cert.expiryDate || "",
+        })) || [],
     };
   };
 
   useEffect(() => {
-    setFormData(transformData(data));
-    console.log(data);
+    const initializeData = async () => {
+      if (data) {
+        const transformedData = await transformData(data);
+        setFormData(transformedData);
+        console.log("Transformed data:", transformedData);
+      }
+    };
+    initializeData();
   }, [data]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -97,6 +200,7 @@ export default function CompleteProfileModal({
     skills: useRef<HTMLDivElement>(null),
     experience: useRef<HTMLDivElement>(null),
     education: useRef<HTMLDivElement>(null),
+    certification: useRef<HTMLDivElement>(null),
   };
 
   const handleTabClick = (tab: string) => {
@@ -262,11 +366,18 @@ export default function CompleteProfileModal({
 
           {/* Skills Section */}
           <div ref={sectionRefs.skills} className="py-6">
-            <SkillsForm
-              skills={formData.skills}
-              onChange={(skills) => updateFormData("skills", skills)}
-              errors={errors}
-            />
+            {isVerifyingSkills ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                <span className="ml-2 text-gray-600">Verifying skills...</span>
+              </div>
+            ) : (
+              <SkillsForm
+                skills={formData.skills}
+                onChange={(skills) => updateFormData("skills", skills)}
+                errors={errors}
+              />
+            )}
           </div>
 
           {/* Experience Section */}
@@ -286,6 +397,16 @@ export default function CompleteProfileModal({
               education={formData.education}
               onChange={(education) => {
                 updateFormData("education", education);
+              }}
+              errors={errors}
+            />
+          </div>
+
+          <div ref={sectionRefs.certification} className="py-6">
+            <CertificationsForm
+              certifications={formData.certifications}
+              onChange={(certification) => {
+                updateFormData("certifications", certification);
               }}
               errors={errors}
             />

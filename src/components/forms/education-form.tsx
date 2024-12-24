@@ -2,12 +2,15 @@ import React from "react";
 import { Plus } from "lucide-react";
 
 interface Education {
+  institution?: string;
+  institute?: string;
   level: string;
   degree: string;
-  institute: string;
   fromDate: string;
   tillDate: string;
   cgpa: string;
+  graduationYear?: number;
+  location?: string;
 }
 
 interface EducationFormProps {
@@ -21,12 +24,14 @@ const EducationForm: React.FC<EducationFormProps> = ({
   onChange,
   errors,
 }) => {
-  // Function to add a new education entry
+  console.log("Education data:", education);
+
   const addEducation = () => {
     const newEducation: Education = {
       level: "",
       degree: "",
       institute: "",
+      institution: "",
       fromDate: "",
       tillDate: "",
       cgpa: "",
@@ -34,19 +39,27 @@ const EducationForm: React.FC<EducationFormProps> = ({
     onChange([...education, newEducation]);
   };
 
-  // Function to update a specific field in an education entry
   const updateEducation = (
     index: number,
     field: keyof Education,
-    value: string
+    value: string | number
   ) => {
-    const updatedEducation = education.map((edu, i) =>
-      i === index ? { ...edu, [field]: value } : edu
-    );
+    const updatedEducation = education.map((edu, i) => {
+      if (i === index) {
+        const updatedEdu = { ...edu, [field]: value };
+        // Sync both institute and institution fields
+        if (field === "institute") {
+          updatedEdu.institution = value as string;
+        } else if (field === "institution") {
+          updatedEdu.institute = value as string;
+        }
+        return updatedEdu;
+      }
+      return edu;
+    });
     onChange(updatedEducation);
   };
 
-  // Helper function to retrieve error messages based on the field path
   const getError = (path: string) => {
     return errors[path] || "";
   };
@@ -57,9 +70,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
 
       {education.map((edu, index) => (
         <div key={index} className="bg-gray-50 rounded-lg p-6 space-y-4 mb-4">
-          {/* Education Level and Degree Fields */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Education Level */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Select your highest level of education
@@ -88,7 +99,6 @@ const EducationForm: React.FC<EducationFormProps> = ({
               )}
             </div>
 
-            {/* Degree/Board Field */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Degree/Board
@@ -100,9 +110,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
                   updateEducation(index, "degree", e.target.value)
                 }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  getError(`education.${index}.degree`)
-                    ? "border-red-500"
-                    : ""
+                  getError(`education.${index}.degree`) ? "border-red-500" : ""
                 }`}
                 placeholder="Enter your degree or board"
               />
@@ -114,21 +122,18 @@ const EducationForm: React.FC<EducationFormProps> = ({
             </div>
           </div>
 
-          {/* Institute/University Field */}
           <div>
             <label className="block text-sm font-medium mb-1">
               Institute/University
             </label>
             <input
               type="text"
-              value={edu.institute}
+              value={edu.institute || edu.institution || ""}
               onChange={(e) =>
                 updateEducation(index, "institute", e.target.value)
               }
               className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                getError(`education.${index}.institute`)
-                  ? "border-red-500"
-                  : ""
+                getError(`education.${index}.institute`) ? "border-red-500" : ""
               }`}
               placeholder="Enter the name of your institute or university"
             />
@@ -139,13 +144,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
             )}
           </div>
 
-          {/* From and Till Date Fields */}
           <div className="grid grid-cols-2 gap-4">
-            {/* From Date */}
             <div>
               <label className="block text-sm font-medium mb-1">From</label>
               <input
-                type="date"
+                type="month"
                 value={edu.fromDate}
                 onChange={(e) =>
                   updateEducation(index, "fromDate", e.target.value)
@@ -163,11 +166,10 @@ const EducationForm: React.FC<EducationFormProps> = ({
               )}
             </div>
 
-            {/* Till Date */}
             <div>
               <label className="block text-sm font-medium mb-1">Till</label>
               <input
-                type="date"
+                type="month"
                 value={edu.tillDate}
                 onChange={(e) =>
                   updateEducation(index, "tillDate", e.target.value)
@@ -186,7 +188,6 @@ const EducationForm: React.FC<EducationFormProps> = ({
             </div>
           </div>
 
-          {/* CGPA/Marks Scored Field */}
           <div>
             <label className="block text-sm font-medium mb-1">
               CGPA/Marks Scored
@@ -209,7 +210,6 @@ const EducationForm: React.FC<EducationFormProps> = ({
         </div>
       ))}
 
-      {/* Add Education Button */}
       <button
         onClick={addEducation}
         className="inline-flex items-center text-emerald-600 hover:text-emerald-700"
