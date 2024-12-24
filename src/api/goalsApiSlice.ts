@@ -3,7 +3,7 @@ import { apiSlice } from './apiSlice';
 export const goalsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Fetch all predefined goals
-    getAllPreDefinedGoals: builder.query<any[], void>({
+    getAllPreDefinedGoals1: builder.query<any[], void>({
       query: () => ({
         url: '/api/v1/predefinedGoals/getAll',
         method: 'GET',

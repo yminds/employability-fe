@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from "react-redux";
 import LogoIcon from '../../assets/sidebar/logo.svg';
 import DashboardIcon from '../../assets/sidebar/dashboard.svg';
 import MentorIcon from '../../assets/sidebar/mentor.svg';
@@ -17,9 +18,17 @@ const Sidebar: React.FC = () => {
         return window.location.pathname === path ? 'bg-[#DBFFEA] text-[#10B754]' : '';
     };
 
+    const user_name = useSelector((state) => state.auth.user.name);
+    const user_email = useSelector((state) => state.auth.user.email);
+
+    const handleLogout = () => {
+        localStorage.clear();
+        window.location.href = "/login"; 
+    };
+
     return (
         <div className="relative">
-            <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden transition-all ${isCollapsed ? 'w-20' : 'w-64'}`}>
+            <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden minimal-scrollbar transition-all ${isCollapsed ? 'w-20' : 'w-64'}`}>
                 <Link to="/" className={`flex items-center gap-2 self-stretch ${isCollapsed ? 'justify-center' : ''}`}>
                     <img src={LogoIcon} alt='' />
                     {!isCollapsed && (
@@ -44,7 +53,7 @@ const Sidebar: React.FC = () => {
                             </Link>
                         </li>
                         <li>
-                            <Link to="/profile" className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/profile')}`}>
+                            <Link to="/user-profile" className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/user-profile')}`}>
                                 <img src={ProfileIcon} alt='Profile' />
                                 {!isCollapsed && <span className="text-gray-500 text-base font-medium leading-normal">Profile</span>}
                             </Link>
@@ -79,13 +88,17 @@ const Sidebar: React.FC = () => {
                         </li>
                     </ul>
                 </nav>
+                
                 <div className="mt-6 w-full">
+                    <button onClick={handleLogout} className={`p-2 bg-gray-100 border mb-4 w-full ${isCollapsed ? 'hidden' : ''}`}>
+                        Logout
+                    </button>
                     <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'p-4 rounded-[6px] border border-[#F5F5F5] bg-white'}`}>
                         <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">Y</div>
                         {!isCollapsed && (
                             <div className="ml-3">
-                                <p className="text-gray-800 text-base font-medium">Mathew Johns</p>
-                                <p className="text-gray-400 text-xs font-medium">MJ1234@gmail.com</p>
+                                <p className="text-gray-800 text-base font-medium">{user_name}</p>
+                                <p className="text-gray-400 text-xs font-medium">{user_email}</p>
                             </div>
                         )}
                     </div>

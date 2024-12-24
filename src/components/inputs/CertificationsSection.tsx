@@ -1,8 +1,8 @@
 import TextInput from "@/components/inputs/TextInput";
 
 interface CertificationsSectionProps {
-  certifications: string[];
-  onCertificationsChange: (value: string[]) => void;
+  certifications: any[];
+  onCertificationsChange: (value: any[]) => void;
 }
 
 const CertificationsSection: React.FC<CertificationsSectionProps> = ({
