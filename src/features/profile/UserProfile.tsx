@@ -6,6 +6,7 @@ import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { ProfileFormData } from "./types";
 import EditBioModal from "@/components/modal/EditBioModal";
 import EducationSection from "./EducationSection";
+import { useSelector } from "react-redux";
 import {
   Education,
   Certification,
@@ -16,8 +17,8 @@ import { useSelector } from "react-redux";
 // import CertificationsSection from "@/components/inputs/CertificationsSection";
 
 const UserProfile: React.FC = () => {
-  const userId = useSelector((state) => state.auth.user._id);
-  // console.log(userId);
+  const user = useSelector((state : any) => state.auth.user);
+console.log(user, "hhhhhhhhhhhhh");
 
   const initialEducationEntries: Education[] = [
     {
@@ -27,6 +28,7 @@ const UserProfile: React.FC = () => {
       fromDate: "2020-10-01",
       tillDate: "2024-04-30",
       cgpa: "9.1",
+      _id: ""
     },
     {
       level: "secondary",
@@ -35,6 +37,7 @@ const UserProfile: React.FC = () => {
       fromDate: "2018-04-01",
       tillDate: "2020-11-30",
       cgpa: "8.8",
+      _id: ""
     },
   ];
   const initialExperiences: ExperienceItem[] = [
@@ -213,7 +216,7 @@ const UserProfile: React.FC = () => {
                     className="w-32 h-32 rounded-full object-cover"
                   />
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Sreya</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">{user.name}</h1>
                     <p className="text-gray-500">Front-end Developer</p>
                   </div>
                 </div>
@@ -391,14 +394,12 @@ const UserProfile: React.FC = () => {
 
           <div className="bg-white rounded-lg mt-6">
             {/* Education Section */}
-            <div className="bg-white rounded-lg mt-6 p-6 ">
               <ExperienceSection
                 experiences={experiences}
                 totalDuration="4 years 5 months"
                 onAdd={handleAddExperience}
                 onEdit={() => console.log("Edit clicked")}
               />
-            </div>
           </div>
         </div>
 
@@ -516,7 +517,7 @@ const UserProfile: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-gray-700 font-medium">Email Id</h3>
-                  <p className="text-gray-600">{contactInfo.email}</p>
+                  <p className="text-gray-600">{user.email}</p>
                 </div>
               </div>
             </div>
