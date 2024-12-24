@@ -1,5 +1,5 @@
 import { apiSlice } from "./apiSlice";
-import { Interview } from "./models/interview";
+import { Interview } from "@/models/Interview";
 
 export const interviewApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
