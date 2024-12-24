@@ -1,5 +1,5 @@
 import { apiSlice } from "./apiSlice";
-import { Interview } from "./models/interview";
+import { Interview } from "@/models/Interview";
 
 export const interviewApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -10,7 +10,14 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         body: { ...data },
       }),
     }),
+    getInterviewbyId: builder.query({
+      query: (id: string) => ({
+        url: `/api/v1/interview/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateInterviewMutation } = interviewApiSlice;
+export const { useCreateInterviewMutation, useGetInterviewbyIdQuery } =
+  interviewApiSlice;
