@@ -3,9 +3,23 @@ import { apiSlice } from './apiSlice';
 export const goalsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Fetch all predefined goals
-    getAllPreDefinedGoals1: builder.query<any[], void>({
+    getAllPreDefinedGoals: builder.query<any[], void>({
       query: () => ({
         url: '/api/v1/predefinedGoals/getAll',
+        method: 'GET',
+      }),
+    }),
+
+    getGoalsbyuser: builder.query<{
+      message:string,
+      data: [
+        {
+          name: string
+        }
+      ]
+    }, void>({
+      query: (userId) => ({
+        url: `/api/v1/goals/userGoals/${userId}`,
         method: 'GET',
       }),
     }),
@@ -21,4 +35,4 @@ export const goalsApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetAllPreDefinedGoals1Query, useUpdateGoalNameMutation } = goalsApiSlice;
+export const { useGetAllPreDefinedGoalsQuery, useUpdateGoalNameMutation ,useGetGoalsbyuserQuery } = goalsApiSlice;

@@ -1,5 +1,22 @@
 import { apiSlice } from './apiSlice';
 
+interface RegisterUserPayload {
+  email: string;
+  password: string;
+  name: string;
+}
+
+interface AuthResponse {
+  user: User;
+  message: string;
+}
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  [key: string]: any; // For additional fields if needed
+}
+
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -9,7 +26,14 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: { ...credentials },
       }),
     }),
+    registerUser: builder.mutation<AuthResponse, RegisterUserPayload>({
+      query: (data) => ({
+        url: "/api/v1/user/signup",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation } = authApiSlice;
+export const { useLoginMutation, useRegisterUserMutation } = authApiSlice;
