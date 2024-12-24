@@ -10,7 +10,14 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         body: { ...data },
       }),
     }),
+    getInterviewbyId: builder.query({
+      query: (id: string) => ({
+        url: `/api/v1/interview/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateInterviewMutation } = interviewApiSlice;
+export const { useCreateInterviewMutation, useGetInterviewbyIdQuery } =
+  interviewApiSlice;
