@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ProfileCard from "@/features/dashboard/ProfileCard";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import GoalList from "@/features/dashboard/GoalList";
 import { useSelector } from "react-redux";

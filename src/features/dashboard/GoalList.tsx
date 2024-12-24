@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
-import GoalFormDialog from "@/features/dashboard/GoalFormDialog"; // Import GoalFormDialog
+import PredefinedGoalDialog from "@/features/dashboard/PredefinedGoalDialog"; // Import GoalFormDialog
 
 interface Goal {
     title: string;
@@ -8,6 +8,7 @@ interface Goal {
     name: string;
     description: string;
     image?: string;
+    skill_pool_id: string[]; // Array of skill IDs associated with the goal
 }
 
 interface GoalsData {
@@ -33,9 +34,8 @@ const GoalList: React.FC<Props> = () => {
 
     return (
         <div>
-            {/* Conditionally render the GoalFormDialog */}
             {isDialogOpen && selectedGoal && (
-                <GoalFormDialog
+                <PredefinedGoalDialog
                     isOpen={isDialogOpen}
                     setIsOpen={setIsDialogOpen}
                     selectedGoal={selectedGoal} // Pass the selected goal as a prop

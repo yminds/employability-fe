@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
 import { useSelector } from "react-redux";
-import { RootState } from '@/store/store';
 
 // Define Zod schema for validation
 const goalSchema = z.object({
@@ -24,16 +23,15 @@ interface GoalFormDialogProps {
     isOpen: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedGoal: Goal; // Goal data passed as a prop
-    setJourneyDialog: boolean
+    setJourneyDialog: boolean;
 }
 
 const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-    const user_id = useSelector((state:RootState) => state.auth.user?.id);
+    const user_id = useSelector((state) => state.auth.user._id)
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
     const [techStack, setTechStack] = useState(""); // Tech stack search term
     const [selectedTechStack, setSelectedTechStack] = useState<string[]>([]);
-    //const [techStackGoal] = useState<string[]>(selectedGoal ? selectedGoal.skill_pool_id : []);
     const [description, setDescription] = useState(selectedGoal ? selectedGoal.description : "");
     const [isSaved, setIsSaved] = useState(false); // State to handle success message visibility
     const [isSaving, setIsSaving] = useState(false); // State to handle saving/loading state
@@ -223,7 +221,6 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                 })
                                             )
                                         }
-
                                     </div>
                                 </div>
                             </div>

@@ -4,10 +4,12 @@ import GoalList from "@/features/dashboard/GoalList";
 import GoalFormDialog from "@/features/dashboard/GoalFormDialog";
 
 interface Goal {
+    title: string;
     _id: string;
     name: string;
     description: string;
     image?: string;
+    skill_pool_id: string[]; // Array of skill IDs associated with the goal
 }
 
 const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog }) => {
