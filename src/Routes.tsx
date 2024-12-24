@@ -45,10 +45,9 @@ export const routes: RouteConfig[] = [
     component: <NotFound />,
   },
   {
-    route: "/userProfile",
-    component: <UserProfilePage/>,
+    route: "/user-profile",
+    component: <UserProfilePage />,
   },
-  
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {

@@ -123,8 +123,10 @@ const resumeSlice = createSlice({
       .addCase(
         uploadResume.fulfilled,
         (state, action: PayloadAction<ParsedData>) => {
+          console.log(action);
           state.uploading = false;
           state.parsedData = action.payload;
+          console.log(state);
         }
       )
       .addCase(uploadResume.rejected, (state, action) => {

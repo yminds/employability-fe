@@ -34,6 +34,7 @@ const CompleteProfile: React.FC = () => {
   // Accessing user and resume data from Redux store
   const user = useSelector((state: RootState) => state.auth.user);
   const { uploading, error, parsedData } = useSelector(
+    // const { uploading, error, parsedData } = useSelector(
     (state: RootState) => state.resume
   );
 
@@ -41,6 +42,10 @@ const CompleteProfile: React.FC = () => {
   const parsedDataSkills = parsedData?.skills || [];
 
   console.log(parsedDataSkills);
+
+  useEffect(() => {
+    console.log("parsedData", parsedData);
+  }, [parsedData]);
 
   // Personal Information
   const [fullName, setFullName] = useState<string>(user?.name || "");
@@ -110,6 +115,12 @@ const CompleteProfile: React.FC = () => {
       }
     }
   }, [parsedData]);
+
+  console.log("hi");
+
+  useEffect(() => {
+    console.log("Hello");
+  }, []);
 
   console.log(parsedData);
 

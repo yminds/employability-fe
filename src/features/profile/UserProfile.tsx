@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import LinkedInImportModal from "../../components/modal/LinkedInImportModal";
 import ResumeUploadModal from "../../components/modal/ResumeUploadModal";
 import ResumeUploadProgressModal from "../../components/modal/ResumeUploadProgressModal";
-import CompleteProfileModal from "../../components/modal/CompleteProfileModal";
+import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { ProfileFormData } from "./types";
 import EditBioModal from "@/components/modal/EditBioModal";
 import EducationSection from "./EducationSection";
@@ -12,9 +12,13 @@ import {
   ExperienceItem,
 } from "../../features/profile/types";
 import ExperienceSection from "./ExperienceSection";
+import { useSelector } from "react-redux";
 // import CertificationsSection from "@/components/inputs/CertificationsSection";
 
 const UserProfile: React.FC = () => {
+  const userId = useSelector((state) => state.auth.user._id);
+  // console.log(userId);
+
   const initialEducationEntries: Education[] = [
     {
       level: "bachelors",
@@ -94,7 +98,6 @@ const UserProfile: React.FC = () => {
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
-
   };
   // Handle Experience Save
   const handleSaveExperience = (updatedExperiences: ExperienceItem[]) => {
@@ -610,6 +613,7 @@ const UserProfile: React.FC = () => {
                 <ResumeUploadModal
                   onClose={() => setIsUploadModalOpen(false)}
                   onUpload={handleUpload}
+                  userId={userId}
                 />
               )}
 
@@ -658,6 +662,7 @@ const UserProfile: React.FC = () => {
               </button>
               {isProfileModalOpen && (
                 <CompleteProfileModal
+                  type="resume"
                   onClose={() => setIsProfileModalOpen(false)}
                   onSave={function (data: ProfileFormData): void {
                     throw new Error("Function not implemented.");

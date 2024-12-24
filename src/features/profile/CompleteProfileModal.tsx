@@ -3,13 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { createProfile } from "@/store/slices/profileSlice";
 import { X } from "lucide-react";
-import BasicInfoForm from "./forms/basic-info-form";
-import SkillsForm from "./forms/skills-form";
-import ExperienceForm from "./forms/experience-form";
-import EducationForm from "./forms/education-form";
+import BasicInfoForm from "@/components/forms/basic-info-form";
+import SkillsForm from "@/components/forms/skills-form";
+import ExperienceForm from "@/components/forms/experience-form";
+import EducationForm from "@/components/forms/education-form";
 import { profileFormSchema } from "./shemas/profileFormSchema";
 import { ZodError } from "zod";
-
+import { useVerifySkillsMutation } from "@/api/skillApiSlice"; // Import RTK query hook
+import CertificationsForm from "@/components/forms/certification-form";
 interface VerifiedSkill {
   _id: string;
   name: string;
@@ -27,6 +28,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { parsedData } = useSelector((state: RootState) => state.resume);
+  console.log(parsedData);
 
   const [verifiedSkills, setVerifiedSkills] = useState<VerifiedSkill[]>([]);
   const [isVerifyingSkills, setIsVerifyingSkills] = useState(false);
@@ -63,39 +65,8 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
     education: useRef<HTMLDivElement>(null),
   };
 
-  const verifySkills = async (skills: string[]): Promise<string[]> => {
-    try {
-      setIsVerifyingSkills(true);
-
-      // Create the request body in the exact format needed
-      const requestBody = {
-        skills: skills.map((skill) => skill.toLowerCase()),
-      };
-
-      const response = await fetch(
-        "http://localhost:3000/api/v1/skills_pool/skills",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to verify skills");
-      }
-
-      const responseData = await response.json();
-      return responseData.data;
-    } catch (error) {
-      console.error("Error verifying skills:", error);
-      return [];
-    } finally {
-      setIsVerifyingSkills(false);
-    }
-  };
+  // Use the useVerifySkillsMutation hook
+  const [verifySkills, { isLoading: isVerifying }] = useVerifySkillsMutation();
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
@@ -135,20 +106,7 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
   const handleSave = async () => {
     try {
       console.log("Save button clicked - Before any processing");
-      // console.log("Current form data:", JSON.stringify(formData, null, 2));  
-
-      console.log(formData)
-
-      // try {
-      //   console.log("Attempting Zod validation...");
-      //   const validatedData = profileFormSchema.parse(formData);
-      //   console.log("Validation passed:", validatedData);
-      // } catch (validationError) {
-      //   console.error("Validation failed:", validationError);
-      //   throw validationError;
-      // }
-
-      // console.log("After validation, proceeding to dispatch");
+      console.log(formData);
 
       // If validation passes
       const dispatchResult = await dispatch(
@@ -200,12 +158,20 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
   useEffect(() => {
     const initializeData = async () => {
       if (parsedData) {
+        console.log(parsedData);
         let validatedSkills: VerifiedSkill[] = [];
         if (parsedData.skills && parsedData.skills.length > 0) {
           const normalizedSkills = parsedData.skills.map((skill) =>
             skill.toLowerCase()
           );
-          validatedSkills = await verifySkills(normalizedSkills);
+
+          try {
+            // Call the verifySkills mutation here
+            const response = await verifySkills(normalizedSkills).unwrap();
+            validatedSkills = response.data; // Get verified skills from the response
+          } catch (error) {
+            console.error("Error verifying skills:", error);
+          }
         }
         setVerifiedSkills(validatedSkills);
 
@@ -235,7 +201,8 @@ const CompleteProfileModal: React.FC<CompleteProfileModalProps> = ({
     };
 
     initializeData();
-  }, [parsedData]);
+  }, [parsedData, verifySkills]);
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center overflow-hidden ">
       <div className="bg-white rounded-md w-full max-w-3xl h-[90vh] flex flex-col p-6">

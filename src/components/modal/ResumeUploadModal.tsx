@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { uploadResume } from "@/store/slices/resumeSlice";
 import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
-import CompleteProfileModal from "./CompleteProfileModal";
+import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
+import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
 
 interface ResumeUploadModalProps {
   onClose: () => void;
@@ -22,6 +23,8 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
     progress: number;
   }>({ progress: 0 });
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
+  // const userId = useSelector((state) => state.auth.user._id);
+  // console.log(userId);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -76,7 +79,13 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
   }, [uploading]);
 
   if (showCompleteProfile) {
-    return <CompleteProfileModal onClose={onClose} userId={userId} />;
+    return (
+      <CompleteProfileModal
+        type="resumeUpload"
+        onClose={onClose}
+        userId={userId}
+      />
+    );
   }
 
   if (uploadState.file) {

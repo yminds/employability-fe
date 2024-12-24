@@ -8,20 +8,25 @@ import EducationForm from "../forms/education-form";
 import { profileFormSchema } from "../../features/profile/shemas/profileFormSchema";
 import { ZodError } from "zod";
 import debounce from "lodash.debounce"; // Install lodash.debounce
+import { RootState } from "@/store/store";
+import { useSelector } from "react-redux";
 
 interface CompleteProfileModalProps {
   onClose: () => void;
   onSave: (data: ProfileFormData) => void;
+  type: string;
 }
 
 export default function CompleteProfileModal({
   onClose,
   onSave,
+  type,
 }: CompleteProfileModalProps) {
+  const data = useSelector((state: RootState) => state.resume.parsedData);
   const [activeTab, setActiveTab] = useState("basic");
   const [formData, setFormData] = useState<ProfileFormData>({
     basicInfo: {
-      name: "",
+      name: "NAWAZ",
       mobile: "",
       email: "",
       dateOfBirth: "",
@@ -42,6 +47,47 @@ export default function CompleteProfileModal({
     education: [],
     certifications: [],
   });
+
+  const transformData = (data: any) => {
+    return {
+      basicInfo: {
+        name: data.name || "",
+        mobile: data.contact?.phone || "",
+        email: data.contact?.email || "",
+        dateOfBirth: "", // You may need to map a date of birth if it's available.
+        gender: "", // You can map this if gender information is available in your data.
+        country: "", // Country can be derived from the address or manually provided.
+        state: "", // State can be extracted from the address if needed.
+        city: "", // City can be extracted from the address if needed.
+      },
+      socialProfiles: {
+        github: data.contact?.github || "",
+        linkedin: data.contact?.linkedin || "",
+        dribbble: "", // Assuming this is not part of your data.
+        behance: "", // Assuming this is not part of your data.
+        portfolio: data.contact?.portfolio || "",
+      },
+      skills: data.skills || [],
+      experience: data.experience || [], // Assuming you may have more experience data to map.
+      education: data.education.map((edu) => ({
+        degree: edu.degree || "",
+        institution: edu.institution || "",
+        location: edu.location || "",
+        graduationYear: edu.graduationYear || "",
+      })),
+      certifications: data.certifications.map((cert) => ({
+        name: cert.name || "",
+        issuer: cert.issuer || "",
+        dateObtained: cert.dateObtained || "",
+        expiryDate: cert.expiryDate || "",
+      })),
+    };
+  };
+
+  useEffect(() => {
+    setFormData(transformData(data));
+    console.log(data);
+  }, [data]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
