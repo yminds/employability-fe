@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import GoalList from "@/features/dashboard/GoalList";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { RootState } from '@/store/store';
 
 const Dashboard: React.FC = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
-  const user_name = useSelector((state) => state.auth.user.name);
+  const user_name = useSelector((state:RootState) => state.auth.user?.name);
   const navigate = useNavigate(); // Initialize useNavigate hook
   const handleLinkClick = (route: string) => {
     navigate(route); // Navigate to the specified route
