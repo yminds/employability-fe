@@ -90,7 +90,7 @@ const Sidebar: React.FC = () => {
                 </nav>
                 
                 <div className="mt-6 w-full">
-                    <button onClick={handleLogout} className="p-2 bg-gray-100 border mb-4 w-full">
+                    <button onClick={handleLogout} className={`p-2 bg-gray-100 border mb-4 w-full ${isCollapsed ? 'hidden' : ''}`}>
                         Logout
                     </button>
                     <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'p-4 rounded-[6px] border border-[#F5F5F5] bg-white'}`}>

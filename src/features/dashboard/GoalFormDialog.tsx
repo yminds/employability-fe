@@ -210,7 +210,7 @@ const GoalFormDialog: React.FC<Props> = () => {
                                         <div className="mt-2">
                                             <div className="flex flex-wrap gap-2">
                                                 {selectedTechStack.map((skillId) => {
-                                                    const skill = skills.data?.find((s) => s._id === skillId); // Find skill by ID
+                                                    const skill = skills.data?.find((s: { _id: string; }) => s._id === skillId); // Find skill by ID
                                                     return (
                                                         skill && (
                                                             <span key={skillId} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5">
