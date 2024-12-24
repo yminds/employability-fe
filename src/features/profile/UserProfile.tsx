@@ -13,7 +13,6 @@ import {
   ExperienceItem,
 } from "../../features/profile/types";
 import ExperienceSection from "./ExperienceSection";
-import { useSelector } from "react-redux";
 // import CertificationsSection from "@/components/inputs/CertificationsSection";
 
 const UserProfile: React.FC = () => {

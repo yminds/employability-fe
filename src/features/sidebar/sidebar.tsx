@@ -53,7 +53,7 @@ const Sidebar: React.FC = () => {
                             </Link>
                         </li>
                         <li>
-                            <Link to="/profile" className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/profile')}`}>
+                            <Link to="/user-profile" className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/user-profile')}`}>
                                 <img src={ProfileIcon} alt='Profile' />
                                 {!isCollapsed && <span className="text-gray-500 text-base font-medium leading-normal">Profile</span>}
                             </Link>
