@@ -25,13 +25,16 @@ interface GoalFormDialogProps {
     selectedGoal: Goal; // Goal data passed as a prop
 }
 
-const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal }) => {
+const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
     const user_id = useSelector((state) => state.auth.user._id);
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
     const [techStack, setTechStack] = useState(""); // Tech stack search term
-    const [selectedTechStack, setSelectedTechStack] = useState<string[]>(selectedGoal ? selectedGoal.skill_pool_id : []);
+    const [selectedTechStack, setSelectedTechStack] = useState<string[]>([]);
+    //const [techStackGoal] = useState<string[]>(selectedGoal ? selectedGoal.skill_pool_id : []);
     const [description, setDescription] = useState(selectedGoal ? selectedGoal.description : "");
+    const [isSaved, setIsSaved] = useState(false); // State to handle success message visibility
+    const [isSaving, setIsSaving] = useState(false); // State to handle saving/loading state
     const [errors, setErrors] = useState({
         goal: "",
         techStack: "",
@@ -43,7 +46,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
         skip: callAPI
     });
 
-    const { data: skillsName} = useGetMultipleSkillsNameQuery(goalId, {
+    const { data: skillsName } = useGetMultipleSkillsNameQuery(goalId, {
         skip: !goalId,
     });
 
@@ -87,12 +90,17 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
             return;
         }
 
-        // If valid, proceed with form submission
+        // Prepare goal data
+        const goalData = { user_id: user_id, name: goal, skill_pool_ids: selectedTechStack, description };
+        setIsSaving(true); // Set saving state to true when submitting
         try {
-            const goalData = { user_id: user_id, name: goal, skill_pool_ids: selectedTechStack, description };
-            await createGoal(goalData).unwrap(); // Send data using the mutation hook
-            alert("Goal saved successfully!");
-            setIsOpen(false); // Close dialog
+            await createGoal(goalData).unwrap();
+            setIsSaved(true); // Show success message
+            setTimeout(() => {
+                setIsSaved(false);
+                setIsOpen(false);
+                setJourneyDialog(false);
+            }, 2000);
         } catch (err) {
             console.error("Failed to save goal:", err);
         }
@@ -178,23 +186,42 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                 {/* Display selected skills */}
                                 <div className="mt-2">
                                     <div className="flex flex-wrap gap-2">
-                                        {selectedTechStack.map((skillId) => {
-                                            const skill = skills.data?.find((s: { _id: string; }) => s._id === skillId); // Find skill by ID
-                                            return (
-                                                skill && (
-                                                    <span key={skillId} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5">
+                                        {
+                                            skillsName?.data?.skill_pool_id?.length > 0 ? (
+                                                skillsName.data.skill_pool_id.map((skill: any) => (
+                                                    <span key={skill._id} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5">
+                                                        {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
                                                         {skill.name}
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleSkillRemove(skillId)} // Remove skill
+                                                            onClick={() => handleSkillRemove(skill._id)} // Remove skill
                                                             className="ml-2 text-white bg-gray-400 rounded-full w-5 h-5 text-xs"
                                                         >
                                                             ✕
                                                         </button>
                                                     </span>
-                                                )
-                                            );
-                                        })}
+                                                ))
+                                            ) : (
+                                                selectedTechStack.map((skillId) => {
+                                                    const skill = skills.data?.find((s: { _id: string }) => s._id === skillId); // Find skill by ID
+                                                    return (
+                                                        skill && (
+                                                            <span key={skillId} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5">
+                                                                {skill.name}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleSkillRemove(skillId)} // Remove skill
+                                                                    className="ml-2 text-white bg-gray-400 rounded-full w-5 h-5 text-xs"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </span>
+                                                        )
+                                                    );
+                                                })
+                                            )
+                                        }
+
                                     </div>
                                 </div>
                             </div>
@@ -214,11 +241,13 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                 ></textarea>
                             </div>
 
+                            {/* Disable the button when saving */}
                             <button
                                 type="submit"
                                 className="flex h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#10B754] text-white text-[16px] font-medium leading-[24px] tracking-[0.24px]"
+                                disabled={isSaving}
                             >
-                                Save Goal
+                                {isSaving ? "Saving..." : "Save Goal"}
                             </button>
                         </form>
                     </div>

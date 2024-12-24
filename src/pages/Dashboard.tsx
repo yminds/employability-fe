@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ProfileCard from "@/features/dashboard/ProfileCard";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard: React.FC = () => {
+  const [journeyDialog, setJourneyDialog] = useState(false);
   const user_name = useSelector((state) => state.auth.user.name);
   const navigate = useNavigate(); // Initialize useNavigate hook
   const handleLinkClick = (route: string) => {
@@ -32,12 +33,14 @@ const Dashboard: React.FC = () => {
                       <h2 className="text-[#0C0F12] text-[20px] font-medium leading-[26px] tracking-[-0.2px]">Set Your Goal</h2>
                       <div className="flex flex-col items-start gap-[50px] self-stretch">
                         <p className="text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Define your career aspirations and get a personalized roadmap to success.</p>
+                        <Button
+                          onClick={() => {
+                            setJourneyDialog(true)
+                          }}
+                          className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
 
                         {/* Dialog */}
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
-                          </DialogTrigger>
+                        {<Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
                           <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto gap-8">
                             {/* Visually hidden title */}
                             <DialogTitle className="hidden">Set Your Goal</DialogTitle>
@@ -46,10 +49,9 @@ const Dashboard: React.FC = () => {
                               <h2 className="text-[#1A1A1A] text-[24px] font-medium leading-[32px] tracking[-0.24px]">Set Your Goal</h2>
                               <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide">Choose your goal and get tailored resources to help you succeed.</p>
                             </div>
-                            <SetGoalCard />
+                            <SetGoalCard setJourneyDialog={setJourneyDialog} />
                           </DialogContent>
-                        </Dialog>
-
+                        </Dialog>}
                       </div>
                     </div>
 

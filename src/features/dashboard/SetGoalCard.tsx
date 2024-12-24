@@ -10,7 +10,11 @@ interface Goal {
     image?: string;
 }
 
-const SetGoalCard: React.FC = () => {
+const SetGoalCard: React.FC<{
+    setJourneyDialog: any;
+}> = ({
+    setJourneyDialog
+}) => {
     const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
 
@@ -63,12 +67,10 @@ const SetGoalCard: React.FC = () => {
                     <GoalFormDialog
                         isOpen={isDialogOpen}
                         setIsOpen={setIsDialogOpen} 
-                        selectedGoal={selectedGoal}                   
+                        selectedGoal={selectedGoal}      
+                        setJourneyDialog={setJourneyDialog}             
                      />
                 )}
-
-                {/* Custom Goal Dialog */}
-                {/* <GoalFormDialog isLoading={false} error={false} /> */}
             </section>
 
             <section className="flex flex-col items-start gap-4 self-stretch">
