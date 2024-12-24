@@ -5,9 +5,15 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import { Button } from "@/components/ui/button";
 import GoalList from "@/features/dashboard/GoalList";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard: React.FC = () => {
   const user_name = useSelector((state) => state.auth.user.name);
+  const navigate = useNavigate(); // Initialize useNavigate hook
+  const handleLinkClick = (route: string) => {
+    navigate(route); // Navigate to the specified route
+  };
+
   return (
     <>
       <main className="h-screen overflow-auto">
@@ -77,7 +83,7 @@ const Dashboard: React.FC = () => {
                           <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Highlight top skills to help us match you with the right opportunities.</p>
                         </div>
 
-                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide">Add Skills</button>
+                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/skills")}>Add Skills</button>
                       </div>
 
                       <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
@@ -96,7 +102,7 @@ const Dashboard: React.FC = () => {
                           <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Start adding projects that showcase your expertise and creativity.</p>
                         </div>
 
-                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide">Add a Project</button>
+                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/projects")}>Add a Project</button>
                       </div>
 
                       <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
@@ -115,7 +121,7 @@ const Dashboard: React.FC = () => {
                           <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Prepare for real interviews by practicing with AI-driven questions.</p>
                         </div>
 
-                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide">Start Practice</button>
+                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/interviews")}>Start Practice</button>
                       </div>
                     </div>
                   </section>
