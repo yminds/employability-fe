@@ -16,7 +16,7 @@ import Interview from "./pages/Interview.tsx";
 import NotFound from "@/components/app/NotFound";
 import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
 import Login from "./pages/LoginPage.tsx";
-import Skills from "./pages/SkillsPage.tsx";
+import UserProfilePage from "./pages/UserProfilePage.tsx";import Skills from "./pages/SkillsPage.tsx";
 import SkillDetailPage from "./pages/SkillDetailPage.tsx";
 import SelectedSkill from "@/components/skills/selectedskill.tsx";
 interface RouteConfig {
@@ -66,6 +66,10 @@ export const routes: RouteConfig[] = [
   {
     route: "*",
     component: <NotFound />,
+  },
+  {
+    route: "/user-profile",
+    component: <UserProfilePage />,
   },
 ];
 
