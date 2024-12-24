@@ -11,6 +11,7 @@ import InterviewsIcon from '../../assets/sidebar/interviews.svg';
 import JobsIcon from '../../assets/sidebar/jobs.svg';
 import CloseIcon from '../../assets/sidebar/left_panel_close.svg';
 import OpenIcon from '../../assets/sidebar/left_panel_open.svg';
+import { RootState } from '@/store/store';
 
 const Sidebar: React.FC = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -18,8 +19,8 @@ const Sidebar: React.FC = () => {
         return window.location.pathname === path ? 'bg-[#DBFFEA] text-[#10B754]' : '';
     };
 
-    const user_name = useSelector((state) => state.auth.user.name);
-    const user_email = useSelector((state) => state.auth.user.email);
+    const user_name = useSelector((state:RootState) => state.auth.user?.name);
+    const user_email = useSelector((state:RootState) => state.auth.user?.email);
 
     const handleLogout = () => {
         localStorage.clear();

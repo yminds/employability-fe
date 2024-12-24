@@ -4,13 +4,15 @@ import GoalList from "@/features/dashboard/GoalList";
 import GoalFormDialog from "@/features/dashboard/GoalFormDialog";
 
 interface Goal {
+    title: string;
     _id: string;
     name: string;
     description: string;
     image?: string;
+    skill_pool_id: string[]; // Array of skill IDs associated with the goal
 }
 
-const SetGoalCard: React.FC = () => {
+const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog }) => {
     const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
 
@@ -39,8 +41,8 @@ const SetGoalCard: React.FC = () => {
                         </div>
                     </div>
                 </Link>
-                
-                 {/* Link to trigger dialog */}
+
+                {/* Link to trigger dialog */}
                 <Link to="" className="rounded-[9px] border border-black/10 bg-[#FFF] hover:border-[#1FD167]"
                     onClick={() => handleLinkClick()}>
                     <div className="flex flex-col items-start gap-8 relative p-6">
@@ -62,19 +64,17 @@ const SetGoalCard: React.FC = () => {
                 {isDialogOpen && (
                     <GoalFormDialog
                         isOpen={isDialogOpen}
-                        setIsOpen={setIsDialogOpen} 
-                        selectedGoal={selectedGoal}                   
-                     />
+                        setIsOpen={setIsDialogOpen}
+                        selectedGoal={selectedGoal}
+                        setJourneyDialog={setJourneyDialog}
+                    />
                 )}
-
-                {/* Custom Goal Dialog */}
-                {/* <GoalFormDialog isLoading={false} error={false} /> */}
             </section>
 
             <section className="flex flex-col items-start gap-4 self-stretch">
                 <h5 className="text-[#909091] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
                 >Predefined Goals</h5>
-                <GoalList isLoading={false} error={false}/>
+                <GoalList isLoading={false} error={false} />
             </section>
 
         </div>
