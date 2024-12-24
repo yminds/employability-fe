@@ -1,28 +1,58 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
+import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
+import { useSelector } from "react-redux";
 
 interface Goal {
     _id: string;
     title: string;
     description: string;
     skill_pool_id: string[]; // Assuming the selected skills are passed here
+    predefined_goal_id: string;
 }
 
 interface GoalFormDialogProps {
     isOpen: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedGoal: Goal; // Goal data passed as a prop
+    setJourneyDialog: boolean;
 }
 
-const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal }) => {
+const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
+    const user_id = useSelector((state) => state.auth.user._id)
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal] = useState(selectedGoal ? selectedGoal.title : "");
     const [description] = useState(selectedGoal ? selectedGoal.description : "");
+    const [isSaved, setIsSaved] = useState(false); // State to handle success message visibility
+    const [isSaving, setIsSaving] = useState(false); // State to handle saving/loading state
 
     const { data: skillsName, error, isLoading } = useGetMultipleSkillsNameQuery(goalId, {
         skip: !goalId,
     });
+
+    const [createGoal] = useCreateGoalMutation();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Prepare goal data
+        const goalData = {
+            user_id: user_id,
+            name: goal || '',
+            skill_pool_ids: selectedGoal?.skill_pool_id || [],
+            description: description || '',
+            predefined_goal_id: selectedGoal?._id || '',
+        };
+        setIsSaving(true); // Set saving state to true when submitting
+        try {
+            await createGoal(goalData).unwrap();
+            setIsSaved(false);
+            setIsOpen(false);
+           // setJourneyDialog(false);
+        } catch (err) {
+            console.error("Failed to save goal:", err);
+        }
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -66,7 +96,9 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
                         </div>
 
                         <div className="w-full flex justify-end mt-4">
-                            <button type="submit" className="flex w-auto h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#10B754] text-white text-[16px] font-medium leading-[24px] tracking-[0.24px]">
+                            <button type="submit" className="flex w-auto h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#10B754] text-white text-[16px] font-medium leading-[24px] tracking-[0.24px]"
+                                onClick={handleSubmit}
+                            >
                                 Set Goal
                             </button>
                         </div>

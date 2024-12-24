@@ -10,6 +10,7 @@ interface Goal {
     description: string;
     image?: string;
     skill_pool_id: string[]; // Array of skill IDs associated with the goal
+    predefined_goal_id: string;
 }
 
 const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog }) => {
@@ -74,7 +75,8 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
             <section className="flex flex-col items-start gap-4 self-stretch">
                 <h5 className="text-[#909091] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
                 >Predefined Goals</h5>
-                <GoalList isLoading={false} error={false} />
+                <GoalList isLoading={false} error={false} setJourneyDialog={setJourneyDialog}
+                />
             </section>
 
         </div>
