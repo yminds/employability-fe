@@ -10,11 +10,7 @@ interface Goal {
     image?: string;
 }
 
-const SetGoalCard: React.FC<{
-    setJourneyDialog: any;
-}> = ({
-    setJourneyDialog
-}) => {
+const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog }) => {
     const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
 
@@ -43,8 +39,8 @@ const SetGoalCard: React.FC<{
                         </div>
                     </div>
                 </Link>
-                
-                 {/* Link to trigger dialog */}
+
+                {/* Link to trigger dialog */}
                 <Link to="" className="rounded-[9px] border border-black/10 bg-[#FFF] hover:border-[#1FD167]"
                     onClick={() => handleLinkClick()}>
                     <div className="flex flex-col items-start gap-8 relative p-6">
@@ -66,17 +62,17 @@ const SetGoalCard: React.FC<{
                 {isDialogOpen && (
                     <GoalFormDialog
                         isOpen={isDialogOpen}
-                        setIsOpen={setIsDialogOpen} 
-                        selectedGoal={selectedGoal}      
-                        setJourneyDialog={setJourneyDialog}             
-                     />
+                        setIsOpen={setIsDialogOpen}
+                        selectedGoal={selectedGoal}
+                        setJourneyDialog={setJourneyDialog}
+                    />
                 )}
             </section>
 
             <section className="flex flex-col items-start gap-4 self-stretch">
                 <h5 className="text-[#909091] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
                 >Predefined Goals</h5>
-                <GoalList isLoading={false} error={false}/>
+                <GoalList isLoading={false} error={false} />
             </section>
 
         </div>

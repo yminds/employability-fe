@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
 import { useSelector } from "react-redux";
+import { RootState } from '@/store/store';
 
 // Define Zod schema for validation
 const goalSchema = z.object({
@@ -23,10 +24,11 @@ interface GoalFormDialogProps {
     isOpen: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedGoal: Goal; // Goal data passed as a prop
+    setJourneyDialog: boolean
 }
 
 const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-    const user_id = useSelector((state) => state.auth.user._id);
+    const user_id = useSelector((state:RootState) => state.auth.user?.id);
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
     const [techStack, setTechStack] = useState(""); // Tech stack search term
