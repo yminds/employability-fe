@@ -19,6 +19,7 @@ import roleSlice from "./slices/roleSlice";
 
 import { apiSlice } from "../api/apiSlice";
 import { errorMiddleware } from "./errorMiddleware";
+import { skillApi } from "@/api/skillApiSlice";
 // import { successMiddleware } from './successMiddleware';
 
 // Redux persist config
@@ -32,6 +33,7 @@ const persistConfig = {
 // Combined root reducer
 const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
+  [skillApi.reducerPath]: skillApi.reducer,
   auth: authReducer,
   goals: goalReducer,
   error: errorReducer,
@@ -61,6 +63,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware(customizedMiddleware).concat(
       apiSlice.middleware,
+      skillApi.middleware,
       errorMiddleware
     ),
   devTools: true,
