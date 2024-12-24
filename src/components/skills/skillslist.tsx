@@ -48,6 +48,7 @@ const SkillList: React.FC<SkillListProps> = ({ skills, activeFilter }) => {
           filteredSkills.map((skill) => (
             <SkillCard 
               key={skill._id}// Add a unique key for each SkillCard
+              skillId = {skill.skill_pool_id._id}
               skill={skill.skill_pool_id.name}
               skillImg={skill.skill_pool_id.icon} // Replace with actual image source if available
               verified_rating={skill.verified_rating}

@@ -6,6 +6,7 @@ import unverifiedImg from '@/assets/skills/unverifies.svg';
 
 interface SkillCardProps {
   key : string
+  skillId: string;
   skill: string;
   skillImg: string;
   verified_rating: number;
@@ -14,6 +15,8 @@ interface SkillCardProps {
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
+  key,
+  skillId,
   skill,
   skillImg,
   verified_rating,
@@ -26,19 +29,19 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const imgSrc = status === 'Verified' ? verifiedImg : unverifiedImg;
 
   const handleViewReport = () => {
-    navigate(`/skills/${skill}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/skills/${skillId}`, { state: { skill, verified_rating, selfRating } });
   };
 
   const handleImproveScore = () => {
-    navigate(`/interview/${skill}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/interview/${skillId}`, { state: { skill, verified_rating, selfRating } });
   };
 
   const handleLearn = () => {
-    navigate(`/mentor/${skill}`, { state: { skill } });
+    navigate(`/mentor/${skillId}`, { state: { skill } });
   };
 
   const handleVerifySkill = () => {
-    navigate(`/interview/${skill}`, { state: { skill } });
+    navigate(`/interview/${skillId}`, { state: { skill } });
   };
 
   return (

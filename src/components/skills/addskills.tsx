@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 
 interface Skill {
-  id: number;
+  id: string;
   name: string;
   rating: string;
   visibility: string;
@@ -11,14 +12,40 @@ interface Skill {
 interface AddSkillsModalProps {
   onClose: () => void; // Function to close the modal
   onSave: (newSkills: Skill[]) => void; // Callback to return new skills
+  userId: string; // Pass userId to fetch user-specific skills
 }
 
-const AddSkillsModal: React.FC<AddSkillsModalProps> = ({ onClose, onSave }) => {
-  const [skills, setSkills] = useState<Skill[]>([]);
+const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
+  onClose,
+  onSave,
+  userId,
+}) => {
+  const [skills, setSkills] = useState<Skill[]>([
+    {
+      id: "",
+      name: "",
+      rating: "__/10",
+      visibility: "All users",
+      status: "unverified",
+    },
+  ]);
+
+  const [suggestedSkills] = useState([
+    { id: "1", name: "React" },
+    { id: "2", name: "MongoDB" },
+    { id: "3", name: "Node.js" },
+    { id: "4", name: "GraphQL" },
+    { id: "5", name: "MySQL" },
+    { id: "6", name: "Express" },
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering skills
+
+  const { data: skillsData, error, isLoading } = useGetMultipleSkillsQuery(userId);
 
   const handleAddSkill = () => {
     const newSkill: Skill = {
-      id: skills.length + 1,
+      id: "",
       name: "",
       rating: "__/10",
       visibility: "All users",
@@ -27,48 +54,211 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({ onClose, onSave }) => {
     setSkills([...skills, newSkill]);
   };
 
-  const handleSave = () => {
-    onSave(skills); // Pass the skills to the parent
-    onClose(); // Close the modal
+  const handleRemoveSkill = (id: string) => {
+    setSkills(skills.filter((skill) => skill.id !== id));
   };
 
+  const handleAddSuggestedSkill = (suggestedSkill: { id: string; name: string }) => {
+    if (!skills.some((skill) => skill.id === suggestedSkill.id)) {
+      setSkills([
+        ...skills,
+        {
+          id: suggestedSkill.id,
+          name: suggestedSkill.name,
+          rating: "__/10",
+          visibility: "All users",
+          status: "verified",
+        },
+      ]);
+    }
+  };
+
+  const handleSave = () => {
+    console.log("Selected Skills:", skills);
+    onSave(skills);
+    onClose();
+  };
+
+  // Filter skills based on the search term
+  const filteredSkills = skillsData?.data.filter((skill: any) =>
+    skill.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Handle loading and error states
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-[800px] max-w-full">
+          <p>Loading skills...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-[800px] max-w-full">
+          <p>Error loading skills. Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-[800px] max-w-full">
-        <div className="flex justify-between items-center border-b pb-4 mb-4">
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white rounded-lg p-6 w-[800px] max-w-full">
+        {/* Header */}
+        <div className="flex justify-between items-center pb-4 ">
           <h2 className="text-xl font-bold">Add Skills</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-xl"
+          >
             ×
           </button>
         </div>
 
+        {/* Instructions */}
+        <p className="text-sm text-gray-500 mb-7">
+          Select the skills you want to appear in the profile
+        </p>
+
+        {/* Skills List */}
         <div className="space-y-4">
           {skills.map((skill, index) => (
-            <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <input
-                type="text"
-                value={skill.name}
-                onChange={(e) =>
-                  setSkills((prev) =>
-                    prev.map((s, i) =>
-                      i === index ? { ...s, name: e.target.value } : s
-                    )
-                  )
-                }
-                placeholder="Skill Name"
-                className="w-full p-2 border rounded-lg"
-              />
+            <>
+            <div
+              key={index}
+              className=" bg-gray-50 flex flex-col items-center rounded-lg border w-[716px] h-[168px] p-6 border-gray-200"
+            >
+              <div className="grid grid-cols-12 gap-4 items-center">
+                {/* Searchable Dropdown */}
+                <div className="col-span-4">
+                  <label >Skill {index + 1}</label>
+                  <input
+                    list={`skills-${index}`}
+                    value={skill.name}
+                    onChange={(e) => {
+                      const selectedSkill = skillsData?.data.find(
+                        (availableSkill: any) => availableSkill.name === e.target.value
+                      );
+                      setSkills((prev) =>
+                        prev.map((s, i) =>
+                          i === index
+                            ? {
+                                ...s,
+                                id: selectedSkill?.id || "",
+                                name: selectedSkill?.name || e.target.value,
+                              }
+                            : s
+                        )
+                      );
+                    }}
+                    onInput={(e) => setSearchTerm(e.currentTarget.value)}
+                    placeholder="Search skills"
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                  />
+                  <datalist id={`skills-${index}`}>
+                    {filteredSkills?.map((availableSkill: any) => (
+                      <option key={availableSkill.id} value={availableSkill.name}>
+                        {availableSkill.name}
+                      </option>
+                    ))}
+                  </datalist>
+                </div>
+
+                {/* Self Rating */}
+                <div className="col-span-4">
+                <label >Self rating </label>
+                  <select
+                    value={skill.rating}
+                    onChange={(e) =>
+                      setSkills((prev) =>
+                        prev.map((s, i) =>
+                          i === index ? { ...s, rating: e.target.value } : s
+                        )
+                      )
+                    }
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="__/10">__/10</option>
+                    {[...Array(10)].map((_, i) => (
+                      <option key={i + 1} value={`${i + 1}/10`}>
+                        {i + 1}/10
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Visibility */}
+                <div className="col-span-3">
+                <label >Visibilty</label>
+                  <select
+                    value={skill.visibility}
+                    onChange={(e) =>
+                      setSkills((prev) =>
+                        prev.map((s, i) =>
+                          i === index ? { ...s, visibility: e.target.value } : s
+                        )
+                      )
+                    }
+                    className="w-full p-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="Just me">Just me</option>
+                    <option value="All users">All users</option>
+                  </select>
+                </div>
+
+                {/* Remove Skill */}
+                <div className="col-span-1">
+                  <button
+                    onClick={() => handleRemoveSkill(skill.id)}
+                    className="text-red-500 hover:text-red-700 text-lg"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>            
+              <div className="mt-4 ">
+                    staus : <span className=" text-[#D48A0C]">{skill.status}</span>
+              </div>
             </div>
+
+            </>
           ))}
         </div>
 
-        <button onClick={handleAddSkill} className="text-green-600 mt-4">
-          + Add Skill
-        </button>
+        {/* Add Skill Button */}
+        <div className="mt-4">
+          <button
+            onClick={handleAddSkill}
+            className="w-1/4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-600"
+          >
+            + Add Skill
+          </button>
+        </div>
 
+        {/* Suggested Skills */}
+        <div className="mt-6">
+          <h3 className="text-sm font-semibold mb-2">Suggested Skills</h3>
+          <div className="flex flex-wrap gap-2">
+            {suggestedSkills.map((suggestedSkill) => (
+              <button
+                key={suggestedSkill.id}
+                onClick={() => handleAddSuggestedSkill(suggestedSkill)}
+                className="px-3 py-1 text-sm bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200"
+              >
+                {suggestedSkill.name} +
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Save Button */}
         <button
           onClick={handleSave}
-          className="w-full bg-green-600 text-white p-3 rounded-lg mt-6 hover:bg-green-700"
+          className="w-full bg-green-600 text-white p-3 rounded-lg mt-6 hover:bg-green-700 font-medium"
         >
           Save
         </button>
