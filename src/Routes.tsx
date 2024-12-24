@@ -42,7 +42,6 @@ export const routes: RouteConfig[] = [
   {
     route: "/signup",
     component: <SignupForm />,
-    roles: ["CANDIDATE", "EMPLOYER"],
   },
   {
     route: "/setgoal",

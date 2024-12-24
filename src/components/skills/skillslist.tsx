@@ -6,13 +6,16 @@ interface Skill {
   skill_pool_id: {
     _id: string;
     name: string;
+    icon: string; // Add the `icon` property to the `skill_pool_id` object
   };
   verified_rating: number;
   self_rating: number;
 }
 
 interface SkillsData {
-  data: Skill[]; // The `data` key contains an array of `Skill` objects
+  data: [
+    Skill
+  ]; // The `data` key contains an array of `Skill` objects
 }
 
 interface SkillListProps {
@@ -46,7 +49,7 @@ const SkillList: React.FC<SkillListProps> = ({ skills, activeFilter }) => {
             <SkillCard 
               key={skill._id}// Add a unique key for each SkillCard
               skill={skill.skill_pool_id.name}
-              skillImg="" // Replace with actual image source if available
+              skillImg={skill.skill_pool_id.icon} // Replace with actual image source if available
               verified_rating={skill.verified_rating}
               selfRating={skill.self_rating}
               initialStatus={skill.verified_rating > 0 ? 'Verified' : 'Unverified'}

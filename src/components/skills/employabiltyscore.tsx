@@ -7,14 +7,18 @@ import { useUpdateGoalNameMutation , useGetGoalsbyuserQuery } from '@/api/goalsA
 import { RootState } from '@/store/store';
 
 interface Skill {
-  _id: string;
-  skill_pool_id: {
-    _id: string;
-    name: string;
-  };
-  verified_rating: number;
-  self_rating: number;
-  data : any
+  data:[
+    {
+      _id: string;
+      skill_pool_id: {
+        _id: string;
+        name: string;
+        icon: string
+      };
+      verified_rating: number;
+      self_rating: number;
+    }
+  ]
 }
 
 interface Goal {
@@ -42,7 +46,9 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ skills }) => {
 
   const { data:goalData , error: goalError, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
  
+  const goalId = goalData?.data[0]?._id as string;
   const goalName = goalData?.data[0]?.name as string;
+ 
 
   const totalVerifiedRating = skills.data.reduce((acc, skill) => acc + skill.verified_rating, 0);
   const averageVerifiedRating = skills.data.length > 0 ? totalVerifiedRating / skills.data.length : 0;
@@ -61,7 +67,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ skills }) => {
   const handleSave = async () => {
     setIsEditing(false);
     try {
-      await updateExample({userId : userId, name : goal }).unwrap();
+      await updateExample({goalId : goalId, name : goal }).unwrap();
     } catch (err) {
       // Handle error
       console.error('Failed to update:', err);
@@ -72,7 +78,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ skills }) => {
     if (e.key === 'Enter') {
       setIsEditing(false); // Save the goal and exit edit mode
       try {
-        await updateExample({userId : userId, name : goal }).unwrap();
+        await updateExample({goalId : goalId, name : goal }).unwrap();
       } catch (err) {
         // Handle error
         console.error('Failed to update:', err);

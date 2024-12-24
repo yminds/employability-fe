@@ -5,15 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "@/api/authApiSlice";
 import { Button } from "@/components/elements/button";
 
+// IMAGES
 import logo from "@/assets/branding/logo.svg";
-import heroImg from "@/assets/sign-up/carousel.png";
-import arrow from '@/assets/skills/arrow.svg'
+import man from "@/assets/sign-up/man.png";
+import grid from "@/assets/sign-up/grid.svg";
+import arrow from "@/assets/skills/arrow.svg";
+import Mail from "@/assets/sign-up/mail.png";
+import Password from "@/assets/sign-up/password.png";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [login, { isSuccess }] = useLoginMutation();
-  const authState = useSelector((state: RootState) => state.auth);
   const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
 
@@ -26,87 +29,109 @@ const Login: React.FC = () => {
     if (isSuccess || token) {
       navigate("/");
     }
-  }, [isSuccess, authState]);
+  }, [isSuccess, token, navigate]);
 
   return (
-    <div className="flex h-screen  w-screen bg-gray-50 dark:bg-gray-800">
-      <div className=" absolute top-5 left-10 w-1/4  h-1/4  z-10">
-        <img src={logo} alt="" />
+    <div className="flex h-screen w-screen dark:bg-gray-800">
+      {/* Logo */}
+      <div className="absolute top-5 left-10 w-1/4 h-1/4 z-10">
+        <img src={logo} alt="Logo" />
       </div>
+
       {/* Hero Image Section */}
-      <div className="flex  w-1/2 justify-center items-center md:block md:p-0">
+      <div className="flex w-1/2 justify-center items-center md:block md:p-0 relative">
         <img
-          src={heroImg}
+          src={grid}
           alt="Hero"
-          className="w-full max-h-screen md:h-screen object-cover md:object-cover hidden md:block"
+          className="w-full max-h-screen md:h-screen object-cover hidden md:block"
+        />
+        <img
+          src={man}
+          alt="Hero"
+          className="w-[100%] bottom-0 absolute"
         />
       </div>
 
       {/* Form Section */}
-      <div className="flex flex-col justify-center flex-1 items-center md:items-center p-6 md:p-12">
-        <div className="h-[500px] w-[400px] max-w-lg justify-around  bg-white p-6 rounded-lg shadow-lg dark:bg-gray-900">
-          <div className=" w-[90px]h-[50px] flex items-center gap-2">
-            <img className="w-3 h-3" src={arrow} alt="" />
+      <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
+        <div className="w-full max-w-md bg-white rounded-lg p-8">
+          {/* Back Button */}
+          <div className="flex items-center gap-2 mb-6">
+            <img className="w-4 h-4" src={arrow} alt="Back Arrow" />
             <button
-            onClick={() => navigate("/")}
-            className="text-black hover:text-green-600"
+              onClick={() => navigate("/")}
+              className="text-sm text-black hover:text-green-600"
             >
-            Back
+              Back
             </button>
           </div>
-          <div>
-            <form 
-              className="space-y-4 md:space-y-6"
-              onSubmit={handleLogin}
-            >
-                <h1 className="text-3xl font-bold text-start text-gray-900 dark:text-white md:text-2xl">
-                  Log in to Your Account
-                </h1>
-                <div className="text-start space-y-4 mt-6">
-                  <p className="text-sm text-gray-500">
-                    New to Employability.AI?{" "}
-                    <button
-                      onClick={() => navigate("/signup")}
-                      className="text-primary-500 underline hover:text-green-600"
-                      
-                    >
-                      Sign In
-                    </button>
-                  </p>
-                </div>
-                <div>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                </div>
-                <div>
-                <input
-                  placeholder="Enter your password"
-                  type="password"
-                  name="password"
-                  id="password"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                </div>
-            </form>
-          </div>
-          
-          <div className="mt-5 h-11 flex justify-between items-center">
-                <Button
-                  type="submit"
-                  className="w-full text-sm bg-[#10B754] font-sans font-medium hover:bg-green-600 text-white py-3 rounded-lg"
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="h-[84px] flex flex-col justify-around mx-auto">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Login to Your Account
+              </h1>
+              <p className="text-sm text-gray-500">
+                New to Employability.AI?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/signup")}
+                  className="text-green-600 underline hover:text-green-800"
                 >
-                  Log In
-                </Button>
-          </div>
+                  Sign in
+                </button>
+              </p>
+            </div>
+
+            {/* Email Input */}
+            <div className="relative">
+              <input
+                type="email"
+                name="email"
+                id="email"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="Email or Phone"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <img
+                src={Mail}
+                alt="Email Icon"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+              />
+            </div>
+
+            {/* Password Input */}
+            <div className="relative">
+              <input
+                type="password"
+                name="password"
+                id="password"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <img
+                src={Password}
+                alt="Password Icon"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+              />
+            </div>
+
+            {/* Login Button */}
+            <Button
+              type="submit"
+              className="w-full p-3 text-white bg-green-600 hover:bg-green-700 rounded-lg font-medium"
+              disabled={false}
+            >
+              Login
+            </Button>
+
+          </form>
         </div>
       </div>
     </div>

@@ -11,8 +11,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
 import logo from "@/assets/branding/logo.svg";
-import hero from "@/assets/sign-up/carousel.png";
-
+import man from "@/assets/sign-up/man.png";
+import grid from "@/assets/sign-up/grid.svg";
 interface SignupData {
   email: string;
   password: string;
@@ -68,11 +68,16 @@ const SignupForm = () => {
             <img src={logo} alt="" />
         </div>
       {/* Left Image Section */}
-      <div className="flex  w-1/2 ">
+      <div className="flex w-1/2 justify-center items-center md:block md:p-0 relative">
         <img
-          src={hero}
-          alt="Carousel"
-          className=" w-full h-full object-cover"
+          src={grid}
+          alt="Hero"
+          className="w-full max-h-screen md:h-screen object-cover hidden md:block"
+        />
+        <img
+          src={man}
+          alt="Hero"
+          className="w-[100%] bottom-0 absolute"
         />
       </div>
 

@@ -25,9 +25,9 @@ export const goalsApiSlice = apiSlice.injectEndpoints({
     }),
 
     // Update a specific goal name
-    updateGoalName: builder.mutation<any, { userId: string; name: string }>({
-      query: ({ userId, name }) => ({
-        url: `/api/v1/goals/userGoals/${userId}`, // API endpoint for updating a goal
+    updateGoalName: builder.mutation<any, { goalId: string; name: string }>({
+      query: ({ goalId, name }) => ({
+        url: `/api/v1/goals/userGoals/${goalId}`, // API endpoint for updating a goal
         method: 'PUT', // HTTP method
         body: { name }, // Payload containing the new goal name
       }),

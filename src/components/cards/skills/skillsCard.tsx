@@ -19,7 +19,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   verified_rating,
   selfRating,
   initialStatus,
-}) => {
+}) => {  
   const navigate = useNavigate();
   
   const status = initialStatus === 'Verified' ? 'Verified' : 'Unverified';
@@ -45,7 +45,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
     <div className="flex items-center justify-around w-[920px] h-[140px] p-4 bg-white border rounded-lg shadow-sm">
       {/* Left Section: Skill Image and Name */}
       <div className="flex w-[30%] h-full items-center justify-center space-x-4">
-        <img src={skillImg} alt={skill} className="w-10 h-10 rounded-full" />
+        <img src={skillImg} alt={skill} className="w-10 h-10 " />
         <div>
           <h3 className="text-[2vh] font-semibold">{skill}</h3>
           <p className="text-sm text-gray-600">Self rating: {selfRating}/10</p>

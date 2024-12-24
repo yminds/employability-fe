@@ -23,10 +23,12 @@ const SkillsContainer: React.FC = () => {
   if (error) {
     return <div>Error loading skills. Please try again later.</div>;
   }
+  const handleAddSkills = (newSkills: any[]) => {
+    setSkills((prev) => [...prev, ...newSkills]); // Append new skills to the list
+  };
 
   // The `skillsData` object contains the list of skills
-  const skills = skillsData || []; // Adjust the structure based on your API response
-  console.log(skills);
+  const skills = skillsData; // Adjust the structure based on your API response
   
   return (
     <section className="w-full h-full flex bg-[#F5F5F5] justify-center">
@@ -35,7 +37,11 @@ const SkillsContainer: React.FC = () => {
         <div className="w-[920px] h-full overflow-y-auto scrollbar-hide">
           {/* Sticky Header */}
           <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5]">
-            <SkillsHeader activeFilter={activeFilter} setFilter={setActiveFilter} />
+          <SkillsHeader
+            activeFilter={activeFilter}
+            setFilter={setActiveFilter}
+            onSkillsAdded={handleAddSkills} // Pass callback to handle added skills
+          />
           </div>
           {/* Content below the header */}
           <div className="mt-[120px]"> {/* Ensure spacing matches header height */}
