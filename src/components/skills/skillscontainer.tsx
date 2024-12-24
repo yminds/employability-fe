@@ -6,12 +6,11 @@ import SuggestedSkills from '@/components/skills/suggestedskills';
 import EmployabilityScore from '@/components/skills/employabiltyscore';
 import SkillSummary from '@/components/skills/skillssummary';
 import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
 
 const SkillsContainer: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<string>('All');
-  const userId = useSelector((state) => state.auth.user._id);
-  console.log("userId",userId);
-  
+  const userId = useSelector((state :RootState) => state.auth.user._id);
 
   // Fetch user skills by userId
   const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId);
@@ -27,7 +26,8 @@ const SkillsContainer: React.FC = () => {
 
   // The `skillsData` object contains the list of skills
   const skills = skillsData || []; // Adjust the structure based on your API response
-
+  console.log(skills);
+  
   return (
     <section className="w-full h-full flex bg-[#F5F5F5] justify-center">
       <div className="grid grid-flow-col w-[1300px] gap-4 m-0">

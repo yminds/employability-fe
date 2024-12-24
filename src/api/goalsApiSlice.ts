@@ -10,6 +10,20 @@ export const goalsApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    getGoalsbyuser: builder.query<{
+      message:string,
+      data: [
+        {
+          name: string
+        }
+      ]
+    }, void>({
+      query: (userId) => ({
+        url: `/api/v1/goals/userGoals/${userId}`,
+        method: 'GET',
+      }),
+    }),
+
     // Update a specific goal name
     updateGoalName: builder.mutation<any, { userId: string; name: string }>({
       query: ({ userId, name }) => ({
@@ -21,4 +35,4 @@ export const goalsApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetAllPreDefinedGoalsQuery, useUpdateGoalNameMutation } = goalsApiSlice;
+export const { useGetAllPreDefinedGoalsQuery, useUpdateGoalNameMutation ,useGetGoalsbyuserQuery } = goalsApiSlice;
