@@ -1,32 +1,94 @@
 // src/components/EducationSection.tsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Building2, Clock, Plus, Edit } from "lucide-react";
 import AddEditEducationModal from "../../components/modal/AddEditEducationModal"; // Adjust the path as necessary
 import { Education, Certification } from "../../features/profile/types"; // Define these types accordingly
-
+import {
+    useGetEducationByIdQuery,
+  useAddEducationMutation,
+  useUpdateEducationMutation,
+  useDeleteEducationMutation,
+} from "../../api/educationSlice";
+import { useSelector } from "react-redux";
 interface EducationSectionProps {
   initialEducation?: Education[];
 }
 
-const EducationSection: React.FC<EducationSectionProps> = ({
-  initialEducation = [],
-}) => {
-  const [education, setEducation] = useState<Education[]>(initialEducation);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleSave = (updatedEducation: Education[]) => {
-    setEducation(updatedEducation);
-    // Optionally, handle additional actions like API calls here
-  };
+const EducationSection: React.FC<EducationSectionProps> = ({  }) => {
+    const user = useSelector((state : any) => state.auth.user);
+console.log(user);
+    const [education, setEducation] = useState<Education[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [editingEducation, setEditingEducation] = useState<Education | null>(
+      null
+    );
+  
+    const {
+      data: educationData,
+    
+    } = useGetEducationByIdQuery(user._id);
+//   console.log(educationData, "jjjjjjjjjjjjjj");
+  
+    const [addEducation] = useAddEducationMutation();
+    const [updateEducation] = useUpdateEducationMutation();
+    const [deleteEducation] = useDeleteEducationMutation();
+  
+    useEffect(() => {
+      if (educationData) {
+        setEducation(educationData);
+      }
+    }, [educationData]);
+  
+    const openModal = (educationItem?: Education) => {
+      setEditingEducation(educationItem || null); // Open modal for editing or adding
+      setIsModalOpen(true);
+    };
+  
+    const closeModal = () => {
+      setIsModalOpen(false);
+    };
+  
+    const handleSave = async (updatedEducation: Education[]) => {
+      if (editingEducation) {
+        // Update existing record
+        const updated = updatedEducation[0];
+        try {
+          await updateEducation({
+            id: updated._id, // Use the ID from the record
+            updatedEducation: updated,
+          }).unwrap();
+          alert("Education updated successfully!");
+        } catch (err) {
+          console.error("Failed to update education:", err);
+        }
+      } else {
+        // Add new record
+        const newEducation = updatedEducation[0];
+        try {
+          await addEducation({
+            ...newEducation,
+            user_id: user._id,
+          }).unwrap();
+          alert("Education added successfully!");
+        } catch (err) {
+          console.error("Failed to add education:", err);
+        }
+      }
+      setIsModalOpen(false);
+    };
+  
+    const handleDelete = async (id: string) => {
+      if (window.confirm("Are you sure you want to delete this record?")) {
+        try {
+          await deleteEducation(id).unwrap();
+          alert("Education deleted successfully!");
+        } catch (err) {
+          console.error("Failed to delete education:", err);
+        }
+      }
+    };
 
   return (
     <div className="rounded-lg bg-white p-6 overflow-auto">
@@ -141,3 +203,4 @@ const EducationSection: React.FC<EducationSectionProps> = ({
 };
 
 export default EducationSection;
+
