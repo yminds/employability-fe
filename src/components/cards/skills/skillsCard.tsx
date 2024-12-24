@@ -1,11 +1,13 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useCreateInterview } from "@/hooks/useCreateInterview";
 
-import verifiedImg from '@/assets/skills/verified.svg';
-import unverifiedImg from '@/assets/skills/unverifies.svg';
+import verifiedImg from "@/assets/skills/verified.svg";
+import unverifiedImg from "@/assets/skills/unverifies.svg";
 
 interface SkillCardProps {
-  key : string
+  id: string;
+  key: string;
   skill: string;
   skillImg: string;
   verified_rating: number;
@@ -14,31 +16,43 @@ interface SkillCardProps {
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
+  id,
   skill,
   skillImg,
   verified_rating,
   selfRating,
   initialStatus,
-}) => {  
+}) => {
   const navigate = useNavigate();
-  
-  const status = initialStatus === 'Verified' ? 'Verified' : 'Unverified';
-  const imgSrc = status === 'Verified' ? verifiedImg : unverifiedImg;
+  const { createInterview, isLoading, isSuccess, isError, error } =
+    useCreateInterview();
+
+  const status = initialStatus === "Verified" ? "Verified" : "Unverified";
+  const imgSrc = status === "Verified" ? verifiedImg : unverifiedImg;
 
   const handleViewReport = () => {
-    navigate(`/skills/${skill}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/skills/${skill}`, {
+      state: { skill, verified_rating, selfRating },
+    });
   };
 
   const handleImproveScore = () => {
-    navigate(`/interview/${skill}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/interview/${skill}`, {
+      state: { skill, verified_rating, selfRating },
+    });
   };
 
   const handleLearn = () => {
     navigate(`/mentor/${skill}`, { state: { skill } });
   };
 
-  const handleVerifySkill = () => {
-    navigate(`/interview/${skill}`, { state: { skill } });
+  const handleVerifySkill = async () => {
+    const interviewId = await createInterview({
+      title: "Skill Verification",
+      type: "Skill",
+      user_skill_id: id,
+    });
+    navigate(`/interview/${interviewId}`);
   };
 
   return (
@@ -59,7 +73,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           <img src={imgSrc} alt={status} className="w-4 h-4" />
           <span
             className={`text-sm font-medium ${
-              status === 'Verified' ? 'text-green-600' : 'text-yellow-600'
+              status === "Verified" ? "text-green-600" : "text-yellow-600"
             }`}
           >
             {status}
@@ -69,7 +83,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
       {/* Right Section: Buttons */}
       <div className="flex w-[40%] justify-center space-x-2">
-        {status === 'Verified' ? (
+        {status === "Verified" ? (
           <>
             <button
               onClick={handleViewReport}
