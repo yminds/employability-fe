@@ -53,6 +53,7 @@ export interface Education {
   from_date: any; // ISO date string
   till_date: any; // ISO date string
   cgpa_or_marks: any;
+  highest_education_level: any
   }
   
   export interface Certification {
