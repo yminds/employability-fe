@@ -95,7 +95,7 @@ export const uploadResume = createAsyncThunk(
       }
 
       // Return the parsed data from the backend
-      console.log(data.parsedData);
+      // console.log(data.parsedData);
       return data.parsedData;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -123,10 +123,10 @@ const resumeSlice = createSlice({
       .addCase(
         uploadResume.fulfilled,
         (state, action: PayloadAction<ParsedData>) => {
-          console.log(action);
+          // console.log(action);
           state.uploading = false;
           state.parsedData = action.payload;
-          console.log(state);
+          // console.log(state);
         }
       )
       .addCase(uploadResume.rejected, (state, action) => {

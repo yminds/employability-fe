@@ -6,7 +6,7 @@ import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { ProfileFormData } from "./types";
 import EditBioModal from "@/components/modal/EditBioModal";
 import EducationSection from "./EducationSection";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import {
   Education,
   Certification,
@@ -17,8 +17,8 @@ import { useSelector } from "react-redux";
 // import CertificationsSection from "@/components/inputs/CertificationsSection";
 
 const UserProfile: React.FC = () => {
-  const user = useSelector((state : any) => state.auth.user);
-console.log(user, "hhhhhhhhhhhhh");
+  const user = useSelector((state: any) => state.auth.user);
+  // console.log(user, "hhhhhhhhhhhhh");
 
   const initialEducationEntries: Education[] = [
     {
@@ -28,7 +28,7 @@ console.log(user, "hhhhhhhhhhhhh");
       fromDate: "2020-10-01",
       tillDate: "2024-04-30",
       cgpa: "9.1",
-      _id: ""
+      _id: "",
     },
     {
       level: "secondary",
@@ -37,7 +37,7 @@ console.log(user, "hhhhhhhhhhhhh");
       fromDate: "2018-04-01",
       tillDate: "2020-11-30",
       cgpa: "8.8",
-      _id: ""
+      _id: "",
     },
   ];
   const initialExperiences: ExperienceItem[] = [
@@ -59,6 +59,7 @@ console.log(user, "hhhhhhhhhhhhh");
       expectedCTC: "",
       jobType: undefined,
       isVerified: undefined,
+      company: "",
     },
   ];
 
@@ -105,7 +106,7 @@ console.log(user, "hhhhhhhhhhhhh");
   // Handle Experience Save
   const handleSaveExperience = (updatedExperiences: ExperienceItem[]) => {
     setExperiences(updatedExperiences);
-    console.log("Experiences updated:", updatedExperiences);
+    // console.log("Experiences updated:", updatedExperiences);
     // Optionally, perform API calls or other side effects here
   };
 
@@ -216,7 +217,9 @@ console.log(user, "hhhhhhhhhhhhh");
                     className="w-32 h-32 rounded-full object-cover"
                   />
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-800">{user.name}</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">
+                      {user.name}
+                    </h1>
                     <p className="text-gray-500">Front-end Developer</p>
                   </div>
                 </div>
@@ -394,12 +397,12 @@ console.log(user, "hhhhhhhhhhhhh");
 
           <div className="bg-white rounded-lg mt-6">
             {/* Education Section */}
-              <ExperienceSection
-                experiences={experiences}
-                totalDuration="4 years 5 months"
-                onAdd={handleAddExperience}
-                onEdit={() => console.log("Edit clicked")}
-              />
+            <ExperienceSection
+              experiences={experiences}
+              totalDuration="4 years 5 months"
+              onAdd={handleAddExperience}
+              onEdit={() => console.log("Edit clicked")}
+            />
           </div>
         </div>
 
@@ -614,7 +617,7 @@ console.log(user, "hhhhhhhhhhhhh");
                 <ResumeUploadModal
                   onClose={() => setIsUploadModalOpen(false)}
                   onUpload={handleUpload}
-                  userId={userId}
+                  userId={user._id}
                 />
               )}
 
