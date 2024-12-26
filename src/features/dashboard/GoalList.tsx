@@ -9,6 +9,7 @@ interface Goal {
     description: string;
     image?: string;
     skill_pool_id: string[]; // Array of skill IDs associated with the goal
+    predefined_goal_id: string;
 }
 
 interface GoalsData {
@@ -19,9 +20,10 @@ interface Props {
     isLoading: boolean;
     error: boolean;
     data?: GoalsData; // The data could be undefined if the API request hasn't completed yet
+    setJourneyDialog: boolean;
 }
 
-const GoalList: React.FC<Props> = () => {
+const GoalList: React.FC<Props> = (setJourneyDialog:any) => {
     const { data, error, isLoading } = useGetAllPreDefinedGoalsQuery(); // Fetch all predefined goals
     const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
@@ -39,6 +41,7 @@ const GoalList: React.FC<Props> = () => {
                     isOpen={isDialogOpen}
                     setIsOpen={setIsDialogOpen}
                     selectedGoal={selectedGoal} // Pass the selected goal as a prop
+                    setJourneyDialog={setJourneyDialog}
                 />
             )}
 

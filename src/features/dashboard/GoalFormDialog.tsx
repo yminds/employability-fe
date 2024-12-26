@@ -17,6 +17,7 @@ interface Goal {
     title: string;
     description: string;
     skill_pool_id: string[]; // Assuming the selected skills are passed here
+    predefined_goal_id: string;
 }
 
 interface GoalFormDialogProps {

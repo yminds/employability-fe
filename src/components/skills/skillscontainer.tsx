@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGetUserSkillsQuery } from '@/api/skillsApiSlice'; // Import the hook
+import { useGetUserSkillsQuery } from '@/api/skillsApiSlice';
 import SkillsHeader from '@/components/skills/skillsheader';
 import SkillList from '@/components/skills/skillslist';
 import SuggestedSkills from '@/components/skills/suggestedskills';

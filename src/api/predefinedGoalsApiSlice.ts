@@ -16,7 +16,7 @@ export const { useGetAllPreDefinedGoalsQuery } = goalsApiSlice;
 // Create Goal
 export const createGoalApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    createGoal: builder.mutation<any, { user_id: string; name: string; skill_pool_ids: string[]; description?: string }>({
+    createGoal: builder.mutation<any, { user_id: string; name: string; skill_pool_ids: string[]; description?: string; predefined_goal_id?: string }>({
       query: (newItem) => ({
         url: '/api/v1/goals/userGoals',  // The URL for creating the goal
         method: 'POST',

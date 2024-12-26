@@ -55,6 +55,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   };
 
   const handleRemoveSkill = (id: string) => {
+    console.log("Removing skill with id:", id);
     setSkills(skills.filter((skill) => skill.id !== id));
   };
 
@@ -233,7 +234,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         <div className="mt-4">
           <button
             onClick={handleAddSkill}
-            className="w-1/4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-600"
+            className="w-1/6 bg-green-600 text-white py-2 rounded-lg hover:bg-green-600"
           >
             + Add Skill
           </button>

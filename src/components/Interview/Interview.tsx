@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { io, Socket } from "socket.io-client";
+import { useParams } from "react-router-dom";
 
 import Header from "@/components/interview/Header";
 import WebCam from "@/components/interview/WebCam";
@@ -12,6 +13,7 @@ import {
   useSttMutation,
   useTtsMutation,
 } from "@/api/aiApiSlice";
+import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 
 export interface IMessage {
   id: number;
@@ -25,11 +27,20 @@ const Interview: React.FC<{
   cameraScale: number;
   id: string;
 }> = () => {
+  const { id: interviewId } = useParams<{ id: string }>();
   // API Mutations
   const [stream] = useStreamMutation();
   const [tts] = useTtsMutation();
   const [stt, { isSuccess: isSttSuccess, data: sttResponse, error: sttError }] =
     useSttMutation();
+
+  const { data: interviewDetails } = useGetInterviewbyIdQuery(
+    interviewId as string
+  );
+
+  useEffect(() => {
+
+  }, [interviewDetails]);
 
   // State Variables
   const [socket, setSocket] = useState<Socket | null>(null);
