@@ -42,7 +42,6 @@ const SkillsContainer: React.FC = () => {
           <SkillsHeader
             activeFilter={activeFilter}
             setFilter={setActiveFilter}
-            onSkillsAdded={handleAddSkills} 
             skills={skills} // Pass the skills array to the header
           />
           

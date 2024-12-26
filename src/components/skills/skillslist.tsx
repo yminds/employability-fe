@@ -19,6 +19,8 @@ interface Skill {
 const SkillList: React.FC= () => {
   // Replace the hardcoded skills array with the actual data from the API
   const userId = useSelector((state :RootState) => state.auth.user._id);
+  console.log("User ID:", userId);
+  
 
   // Fetch user skills by userId
   const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId);
@@ -46,16 +48,15 @@ const SkillList: React.FC= () => {
           <div className="">
             {skills.map((skill: Skill) => (
               <>
-
               <SkillCard
-                key={skill._id}
-                skillId={skill._id}
-                skill={skill.skill_pool_id.name}
-                skillImg={skill.skill_pool_id.icon}
-                verified_rating={skill.verified_rating}
-                selfRating={skill.self_rating}
-                initialStatus="Verified" // Hardcoded initial status for now
-              />
+                  key={skill._id}
+                  skillId={skill._id}
+                  skill={skill.skill_pool_id.name}
+                  skillImg={skill.skill_pool_id.icon}
+                  verified_rating={skill.verified_rating}
+                  selfRating={skill.self_rating}
+                  initialStatus={skill.verified_rating > 0 ? "Verified" : "Unverified"} // Hardcoded initial status for now
+                  skill_id={''}              />
               <div className=' w-full h-[1px] my-6 bg-[#E0E0E0]'></div>
               </>
             ))}

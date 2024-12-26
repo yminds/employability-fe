@@ -12,13 +12,11 @@ interface Skill {
 
 interface AddSkillsModalProps {
   onClose: () => void; // Function to close the modal
-  onSave: (newSkills: Skill[]) => void; // Callback to return new skills
   userId: string; // Pass userId to fetch user-specific skills
 }
 
 const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   onClose,
-  onSave,
   userId,
 }) => {
   const [skills, setSkills] = useState<Skill[]>([
