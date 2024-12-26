@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const educationSchema = z.array(
   z.object({
-    level: z.enum(["bachelors", "masters", "phd"]),
+    level: z.enum(["bachelors", "masters", "phd", "associate degree", "diploma", "certificate"]),
     degree: z.string().min(2, "Degree must be at least 2 characters"),
     institute: z.string().min(2, "Institute must be at least 2 characters"),
     fromDate: z.string().refine((date) => !isNaN(Date.parse(date)), {

@@ -525,9 +525,9 @@ export default function BasicInfoForm({
               }`}
             >
               <option value="">Select</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Others">Others</option>
             </select>
             {getError("basicInfo.gender") && (
               <p className="text-red-500 text-xs mt-1">

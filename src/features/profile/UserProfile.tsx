@@ -6,7 +6,7 @@ import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { ProfileFormData } from "./types";
 import EditBioModal from "@/components/modal/EditBioModal";
 import EducationSection from "./EducationSection";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import {
   Education,
   Certification,
@@ -24,8 +24,8 @@ import {
 
 
 const UserProfile: React.FC = () => {
-  const user = useSelector((state) => state.auth.user);
-console.log(user, "hhhhhhhhhhhhh");
+  const user = useSelector((state: any) => state.auth.user);
+  // console.log(user, "hhhhhhhhhhhhh");
 
   const initialEducationEntries: Education[] = [
     {
@@ -36,11 +36,6 @@ console.log(user, "hhhhhhhhhhhhh");
       tillDate: "2024-04-30",
       cgpa: "9.1",
       _id: "",
-      highest_education_level: undefined,
-      board_or_certification: "",
-      cgpa_or_marks: undefined,
-      from_date: "",
-      till_date: ""
     },
     {
       level: "secondary",
@@ -50,11 +45,6 @@ console.log(user, "hhhhhhhhhhhhh");
       tillDate: "2020-11-30",
       cgpa: "8.8",
       _id: "",
-      highest_education_level: undefined,
-      board_or_certification: "",
-      cgpa_or_marks: undefined,
-      from_date: "",
-      till_date: ""
     },
   ];
   const initialExperiences: ExperienceItem[] = [
@@ -76,6 +66,7 @@ console.log(user, "hhhhhhhhhhhhh");
       expectedCTC: "",
       jobType: undefined,
       isVerified: undefined,
+      company: "",
     },
   ];
 
@@ -122,7 +113,7 @@ console.log(user, "hhhhhhhhhhhhh");
   // Handle Experience Save
   const handleSaveExperience = (updatedExperiences: ExperienceItem[]) => {
     setExperiences(updatedExperiences);
-    console.log("Experiences updated:", updatedExperiences);
+    // console.log("Experiences updated:", updatedExperiences);
     // Optionally, perform API calls or other side effects here
   };
 
@@ -233,7 +224,9 @@ console.log(user, "hhhhhhhhhhhhh");
                     className="w-32 h-32 rounded-full object-cover"
                   />
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-800">{user.name}</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">
+                      {user.name}
+                    </h1>
                     <p className="text-gray-500">Front-end Developer</p>
                   </div>
                 </div>
@@ -411,12 +404,12 @@ console.log(user, "hhhhhhhhhhhhh");
 
           <div className="bg-white rounded-lg mt-6">
             {/* Education Section */}
-              <ExperienceSection
-                experiences={experiences}
-                totalDuration="4 years 5 months"
-                onAdd={handleAddExperience}
-                onEdit={() => console.log("Edit clicked")}
-              />
+            <ExperienceSection
+              experiences={experiences}
+              totalDuration="4 years 5 months"
+              onAdd={handleAddExperience}
+              onEdit={() => console.log("Edit clicked")}
+            />
           </div>
         </div>
 
