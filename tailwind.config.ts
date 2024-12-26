@@ -87,6 +87,7 @@ module.exports = {
       },
       fontFamily: {
         ubuntu: ["Ubuntu", "sans-serif"],
+        'sf-pro': ['SF Pro Display', 'sans-serif'],
       },
     },
     screens: {

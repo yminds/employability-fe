@@ -47,7 +47,7 @@ const SkillList: React.FC<SkillListProps> = ({ skills, activeFilter }) => {
         {filteredSkills.length > 0 ? (
           filteredSkills.map((skill) => (
             <SkillCard 
-              id={skill._id}
+              skill_id={skill._id}
               key={skill._id}// Add a unique key for each SkillCard
               skillId = {skill.skill_pool_id._id}
               skill={skill.skill_pool_id.name}

@@ -56,7 +56,7 @@ const Login: React.FC = () => {
       <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
         <div className="w-full max-w-md bg-white rounded-lg p-8">
           {/* Back Button */}
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-2 mb-6 hidden">
             <img className="w-4 h-4" src={arrow} alt="Back Arrow" />
             <button
               onClick={() => navigate("/")}
@@ -79,7 +79,7 @@ const Login: React.FC = () => {
                   onClick={() => navigate("/signup")}
                   className="text-green-600 underline hover:text-green-800"
                 >
-                  Sign in
+                  Sign up
                 </button>
               </p>
             </div>
