@@ -95,13 +95,13 @@ const SkillCard: React.FC<SkillCardProps> = ({
           <>
             <button
               onClick={handleLearn}
-              className="px-4 py-2 w-[138px] h-[44px] text-sm font-medium border rounded-md text-gray-700 hover:bg-[#10B754] hover:text-white"
+              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium rounded-md text-[#001630] underline"
             >
               Learn
             </button>
             <button
               onClick={handleVerifySkill}
-              className="px-4 py-2 w-[138px] h-[44px] text-sm font-medium text-white bg-black rounded-md hover:bg-[#10B754]"
+              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
             >
               Verify skill
             </button>
