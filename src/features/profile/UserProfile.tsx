@@ -7,6 +7,13 @@ import { ProfileFormData } from "./types";
 import EditBioModal from "@/components/modal/EditBioModal";
 import EducationSection from "./EducationSection";
 import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { Button } from "@/components/ui/button"
+// import arrow from '@/assets/skills/arrow.svg';
+
+import coverPhoto from '@/assets/images/coverPhoto.png'
+
+
 import {
   Education,
   Certification,
@@ -15,67 +22,61 @@ import {
 import ExperienceSection from "./ExperienceSection";
 // import CertificationsSection from "@/components/inputs/CertificationsSection";
 import {
-    useGetEducationByIdQuery,
+  useGetEducationByIdQuery,
   useAddEducationMutation,
   useUpdateEducationMutation,
   useDeleteEducationMutation,
 } from "../../api/educationSlice";
+import { Check } from "lucide-react";
 
 
 
 const UserProfile: React.FC = () => {
-  const user = useSelector((state) => state.auth.user);
-console.log(user, "hhhhhhhhhhhhh");
+  const user = useSelector((state: any) => state.auth.user);
+  console.log(user, "hhhhhhhhhhhhh");
 
   const initialEducationEntries: Education[] = [
     {
-      level: "bachelors",
+      highest_education_level: "bachelors",
       degree: "B Tech Computer Science",
       institute: "APJ Abdul Kalam University",
-      fromDate: "2020-10-01",
-      tillDate: "2024-04-30",
-      cgpa: "9.1",
+      from_date: "2020-10-01",
+      till_date: "2024-04-30",
+      cgpa_or_marks: "9.1",
       _id: "",
-      highest_education_level: undefined,
       board_or_certification: "",
-      cgpa_or_marks: undefined,
-      from_date: "",
-      till_date: ""
+      education_level: undefined
     },
     {
-      level: "secondary",
       degree: "Higher Secondary",
       institute: "Kendriya Vidyalaya",
-      fromDate: "2018-04-01",
-      tillDate: "2020-11-30",
-      cgpa: "8.8",
+      from_date: "2018-04-01",
+      till_date: "2020-11-30",
+      cgpa_or_marks: "8.8",
       _id: "",
       highest_education_level: undefined,
       board_or_certification: "",
-      cgpa_or_marks: undefined,
-      from_date: "",
-      till_date: ""
+      education_level: undefined
     },
   ];
   const initialExperiences: ExperienceItem[] = [
     {
       duration: "1y 2m",
       id: "1",
-      companyLogo:
-        "https://st3.depositphotos.com/43745012/44906/i/450/depositphotos_449066958-stock-photo-financial-accounting-logo-financial-logo.jpg",
+      companyLogo: "https://st3.depositphotos.com/43745012/44906/i/450/depositphotos_449066958-stock-photo-financial-accounting-logo-financial-logo.jpg",
       jobTitle: "Lead Full-stack Engineer",
       companyName: "Ernst and Young",
       employmentType: "Full time",
       location: "Bangalore Urban, Karnataka, India",
       startDate: "Apr 2022",
       endDate: "Present",
-      description:
-        "As a lead full-stack developer at EY for over a year, I spearheaded the development of scalable web applications. My expertise in React, Python, and MongoDB allowed me to drive innovative, user-centric solutions that enhanced our clients' digital experiences.",
+      description: "As a lead full-stack developer at EY for over a year, I spearheaded the development of scalable web applications. My expertise in React, Python, and MongoDB allowed me to drive innovative, user-centric solutions that enhanced our clients' digital experiences.",
       currentlyWorking: false,
       currentCTC: "",
       expectedCTC: "",
       jobType: undefined,
       isVerified: undefined,
+      company: ""
     },
   ];
 
@@ -190,8 +191,8 @@ console.log(user, "hhhhhhhhhhhhh");
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8 ">
-      <div className="max-w-6xl mx-auto space-y-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="">
+      <div className="max-w-6xl mx-auto space-y-8 grid grid-cols-1 lg:grid-cols-3 gap-8 ">
         {/* Left Section */}
         <div className="lg:col-span-2">
           <button
@@ -216,207 +217,124 @@ console.log(user, "hhhhhhhhhhhhh");
             <span>Back to Home</span>
           </button>
 
-          <div className="bg-white rounded-lg">
-            <div className=" ">
-              <img
-                src="src/features/profile/images/Banner.png"
-                alt="Banner"
-                className="w-full rounded-t-lg"
-              />
-            </div>
-            <div className="  p-8">
-              <div className="flex justify-between">
-                <div className="flex items-center space-x-6">
-                  <img
-                    src="https://s3-alpha-sig.figma.com/img/62e2/8e4d/486c896150b27448a2d7336ecf91ec03?Expires=1735516800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=PaRvDr2ySVWPht9AHLTJMmciWrZRJHyxvxEqVhNES7am-m6K81OXp8vOQMgLZxuvbaY-Jl2vvROupZnTD~ro4oOrUiOZCEyyJlQiJvxX7er1OuA8QpigQzDQDTL0nVb92alO6boKf5RuujpPT7AiHq9ZH2JCyEr0QJZ0sI9qxi2yHbmqQaDnDZGNjM4y0S7gzbfdrrTOtpe613ckT5OU32SEAWRyH2HYKrJo-u8PJ4jiR-aO7OJwgQoDwQrSaMPZWIj0Laa8Y3SCg1nEV2Vf2XVpFMFVOwLSEsd4G8UzPpEnlxFL6iVwKlzncApMdQFzO8DqW0N9AVn1LNTMbxw~sA__"
-                    alt="Profile"
-                    className="w-32 h-32 rounded-full object-cover"
-                  />
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-800">{user.name}</h1>
-                    <p className="text-gray-500">Front-end Developer</p>
-                  </div>
-                </div>
+          <div className=" rounded-lg sm:bg-cover md:bg-contain lg:bg-auto " style={{
+            backgroundImage: "url('src/assets/images/Frame 1410078135.jpg')", backgroundRepeat: "no-repeat", // Prevents the background from repeating
+            backgroundSize: "cover",      // Ensures the image covers the div
+            backgroundPosition: "center", // Centers the background image
+          }}>
 
-                {/* Social Media Links */}
-                <div className="flex items-center space-x-4">
-                  <a
-                    href="#"
-                    className="text-gray-600 hover:text-gray-800"
-                    aria-label="GitHub"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="25"
-                      height="24"
-                      viewBox="0 0 25 24"
-                      fill="none"
-                    >
-                      <g id="layer1">
-                        <path
-                          id="path16"
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M12.6241 0.296875C5.99836 0.296875 0.625 5.66952 0.625 12.2974C0.625 17.5986 4.0631 22.0967 8.83163 23.6843C9.43202 23.7941 9.65082 23.4235 9.65082 23.1053C9.65082 22.8201 9.64038 22.0658 9.63411 21.0646C6.29621 21.7895 5.59195 19.4558 5.59195 19.4558C5.04607 18.0693 4.25929 17.7003 4.25929 17.7003C3.16973 16.9562 4.34177 16.9709 4.34177 16.9709C5.54624 17.0557 6.17979 18.2078 6.17979 18.2078C7.25019 20.0414 8.98875 19.5117 9.67239 19.2045C9.7814 18.4296 10.0916 17.9006 10.4341 17.6008C7.76956 17.2973 4.96795 16.2681 4.96795 11.6698C4.96795 10.3592 5.43575 9.28881 6.20337 8.44974C6.07953 8.14622 5.6678 6.92625 6.32135 5.27388C6.32135 5.27388 7.32838 4.95124 9.62094 6.50344C10.5779 6.23748 11.6048 6.10488 12.6251 6.09972C13.6447 6.1039 14.6709 6.23754 15.6293 6.50344C17.9204 4.95124 18.9259 5.27388 18.9259 5.27388C19.5808 6.92625 19.169 8.14622 19.046 8.44974C19.8151 9.28881 20.2792 10.3592 20.2792 11.6698C20.2792 16.2799 17.4732 17.2943 14.8005 17.5912C15.2307 17.9617 15.6145 18.694 15.6145 19.8138C15.6145 21.4175 15.5999 22.7119 15.5999 23.1053C15.5999 23.4264 15.8165 23.8 16.425 23.6828C21.1899 22.0923 24.625 17.5979 24.625 12.2974C24.625 5.66952 19.252 0.296875 12.6241 0.296875Z"
-                          fill="#1B1817"
-                        />
-                      </g>
-                    </svg>
-                  </a>
-                  <a
-                    href="#"
-                    className="text-gray-600 hover:text-gray-800"
-                    aria-label="LinkedIn"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="21"
-                      height="20"
-                      viewBox="0 0 21 20"
-                      fill="none"
-                    >
-                      <path
-                        id="Subtract"
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M2.09361 0C1.2825 0 0.625 0.641645 0.625 1.43268V18.5673C0.625 19.3586 1.2825 20 2.09361 20H19.0298C19.8409 20 20.4984 19.3586 20.4984 18.5673V1.43268C20.4984 0.641645 19.8409 0 19.0298 0H2.09361ZM6.64915 7.70517V16.7363H3.64745V7.70517H6.64915ZM6.84656 4.91198C6.84656 5.77864 6.19504 6.47213 5.14828 6.47213H5.12872C4.12138 6.47213 3.47001 5.77864 3.47001 4.91198C3.47001 4.02581 4.14135 3.35156 5.16814 3.35156C6.19504 3.35156 6.82705 4.02581 6.84656 4.91198ZM11.3117 16.7363H8.31004C8.31004 16.7363 8.34952 8.55259 8.31013 7.70517H11.3118V8.98381L11.2918 9.01492H11.3118V8.98381C11.7107 8.36843 12.4247 7.49325 14.0169 7.49325C15.9918 7.49325 17.4727 8.78402 17.4727 11.558V16.7363H14.4713V11.9049C14.4713 10.6908 14.0368 9.86261 12.9506 9.86261C12.1214 9.86261 11.6275 10.4211 11.4105 10.9604C11.3312 11.1534 11.3117 11.423 11.3117 11.6929V16.7363Z"
-                        fill="#414447"
+            <div className="max-w-5xl mx-auto p-8">
+              <div className="flex flex-col gap-8">
+                {/* Profile Header */}
+                <div className="flex items-center justify-between ">
+                  <div className="relative flex gap-6 items-center">
+                    <div className="relative w-[130px] h-[130px]">
+                      {/* Profile Image */}
+                      <img
+                        src="https://s3-alpha-sig.figma.com/img/62e2/8e4d/486c896150b27448a2d7336ecf91ec03?Expires=1735516800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=PaRvDr2ySVWPht9AHLTJMmciWrZRJHyxvxEqVhNES7am-m6K81OXp8vOQMgLZxuvbaY-Jl2vvROupZnTD~ro4oOrUiOZCEyyJlQiJvxX7er1OuA8QpigQzDQDTL0nVb92alO6boKf5RuujpPT7AiHq9ZH2JCyEr0QJZ0sI9qxi2yHbmqQaDnDZGNjM4y0S7gzbfdrrTOtpe613ckT5OU32SEAWRyH2HYKrJo-u8PJ4jiR-aO7OJwgQoDwQrSaMPZWIj0Laa8Y3SCg1nEV2Vf2XVpFMFVOwLSEsd4G8UzPpEnlxFL6iVwKlzncApMdQFzO8DqW0N9AVn1LNTMbxw~sA__" alt="Profile"
+                        className="w-full h-full rounded-full object-cover"
                       />
-                    </svg>
-                  </a>
-                  <a
-                    href="#"
-                    className="text-gray-600 hover:text-gray-800"
-                    aria-label="Website"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="25"
-                      height="24"
-                      viewBox="0 0 25 24"
-                      fill="none"
-                    >
-                      <mask
-                        id="mask0_40000154_5146"
-                        maskUnits="userSpaceOnUse"
-                        x="0"
-                        y="0"
-                        width="25"
-                        height="24"
+                      {/* SVG Semi-Circle */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="130"
+                        height="130"
+                        viewBox="0 0 130 91"
+                        className="absolute bottom-[-20px] left-[0px]"
+                        fill="none"
                       >
-                        <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
-                      </mask>
-                      <g mask="url(#mask0_40000154_5146)">
                         <path
-                          d="M21.2 21.7693L18 18.5693V21.15H16.5V16H21.65V17.5H19.0443L22.2443 20.7L21.2 21.7693ZM12.5 21.5C11.1858 21.5 9.95083 21.2507 8.795 20.752C7.63917 20.2533 6.63375 19.5766 5.77875 18.7218C4.92375 17.8669 4.24692 16.8617 3.74825 15.706C3.24942 14.5503 3 13.3156 3 12.0017C3 10.6877 3.24933 9.45267 3.748 8.2965C4.24667 7.14033 4.92342 6.13467 5.77825 5.2795C6.63308 4.42433 7.63833 3.74725 8.794 3.24825C9.94967 2.74942 11.1844 2.5 12.4983 2.5C13.8123 2.5 15.0473 2.74942 16.2035 3.24825C17.3597 3.74692 18.3653 4.42375 19.2205 5.27875C20.0757 6.13375 20.7528 7.13917 21.2518 8.295C21.7506 9.45083 22 10.6858 22 12C22 12.3013 21.9858 12.6026 21.9573 12.9038C21.9288 13.2051 21.8859 13.5064 21.8288 13.8077H20.2885C20.359 13.5064 20.4118 13.2051 20.447 12.9038C20.4823 12.6026 20.5 12.3013 20.5 12C20.5 11.6367 20.476 11.2734 20.428 10.9102C20.3798 10.5469 20.3045 10.1858 20.202 9.827H16.4845C16.5473 10.1858 16.5929 10.5469 16.6212 10.9102C16.6494 11.2734 16.6635 11.6367 16.6635 12C16.6635 12.3013 16.6534 12.6026 16.6333 12.9038C16.6129 13.2051 16.5826 13.5064 16.5423 13.8077H15.0423C15.0828 13.5064 15.1131 13.2051 15.1333 12.9038C15.1534 12.6026 15.1635 12.3013 15.1635 12C15.1635 11.6367 15.1494 11.2734 15.1212 10.9102C15.0929 10.5469 15.0474 10.1858 14.9848 9.827H10.0152C9.95258 10.1858 9.90708 10.5472 9.87875 10.911C9.85058 11.2748 9.8365 11.6387 9.8365 12.0025C9.8365 12.3662 9.85058 12.7291 9.87875 13.0913C9.90708 13.4536 9.95258 13.8142 10.0152 14.173H13.6923V15.673H10.3595C10.5812 16.4597 10.8673 17.2144 11.218 17.9373C11.5688 18.6599 11.9962 19.3404 12.5 19.9788C12.8013 19.9788 13.1026 19.9612 13.4038 19.926C13.7051 19.8907 14.0064 19.8563 14.3077 19.823V21.3443C14.0064 21.3776 13.7051 21.4118 13.4038 21.447C13.1026 21.4823 12.8013 21.5 12.5 21.5ZM4.798 14.173H8.5155C8.45267 13.8142 8.40708 13.4528 8.37875 13.089C8.35058 12.7252 8.3365 12.3613 8.3365 11.9975C8.3365 11.6338 8.35058 11.2709 8.37875 10.9087C8.40708 10.5464 8.45267 10.1858 8.5155 9.827H4.798C4.6955 10.1858 4.62017 10.5472 4.572 10.911C4.524 11.2748 4.5 11.6387 4.5 12.0025C4.5 12.3662 4.524 12.7291 4.572 13.0913C4.62017 13.4536 4.6955 13.8142 4.798 14.173ZM5.427 8.327H8.81475C8.98692 7.60133 9.216 6.89942 9.502 6.22125C9.78783 5.54292 10.1417 4.89483 10.5635 4.277C9.44167 4.52567 8.43558 5.00383 7.54525 5.7115C6.65475 6.41917 5.94867 7.291 5.427 8.327ZM10.5635 19.723C10.161 19.0987 9.81517 18.4474 9.526 17.7693C9.23683 17.0911 9.00125 16.3923 8.81925 15.673H5.427C5.94867 16.7025 6.65633 17.5711 7.55 18.2788C8.44367 18.9866 9.44817 19.468 10.5635 19.723ZM10.3595 8.327H14.6405C14.4277 7.53983 14.141 6.78842 13.7805 6.07275C13.42 5.35725 12.9932 4.67342 12.5 4.02125C12.0025 4.65958 11.5746 5.34 11.2163 6.0625C10.8579 6.785 10.5723 7.53983 10.3595 8.327ZM16.1807 8.327H19.573C19.0513 7.291 18.3453 6.41758 17.4548 5.70675C16.5644 4.99575 15.5583 4.51917 14.4365 4.277C14.839 4.90133 15.18 5.55417 15.4595 6.2355C15.739 6.917 15.9794 7.61417 16.1807 8.327Z"
-                          fill="#1C1B1F"
+                          d="M123.72 53.8731C116.42 69.2531 103.377 81.1549 87.3944 87.0204C71.412 92.8859 53.7664 92.2469 38.2502 85.2406C22.734 78.2343 10.5859 65.4201 4.41711 49.5524C-1.75169 33.6846 -1.44876 16.0299 5.26076 0.383137L28.3705 10.2928C24.2565 19.8868 24.0707 30.7119 27.8532 40.4413C31.6356 50.1707 39.0843 58.0278 48.5981 62.3238C58.112 66.6197 68.9316 67.0116 78.7313 63.4151C88.531 59.8186 96.5285 52.5209 101.005 43.0906L123.72 53.8731Z"
+                          fill="url(#paint0_linear_40001011_4895)"
                         />
-                      </g>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
-              {/* Bio Section */}
-              <div className="relative md:col-span-2 bg-gray-50 p-6 rounded-lg group">
-                <h2 className="font-semibold text-gray-700">Bio</h2>
-                <p className="text-gray-600 mt-2">
-                  Full-stack developer with a strong foundation in React,
-                  Python, and MongoDB. A quick learner passionate about building
-                  user-friendly web applications, eager to apply skills in a
-                  professional environment.
-                </p>
-                {/* Edit Icon */}
-                <button
-                  className="absolute top-4 right-4 p-2 bg-gray-200 rounded-full shadow hover:bg-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setIsEditBioModalOpen(true)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    fill="currentColor"
-                    className="text-gray-600"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M15.502 1.94a1.5 1.5 0 0 1 0 2.12L14.121 5.44l-3.564-3.564 1.38-1.38a1.5 1.5 0 0 1 2.12 0l1.445 1.445ZM13.44 6.56l-3.564-3.564L2 11v3h3l8.44-8.44Z" />
-                  </svg>
-                </button>
-                {/* Edit Bio Modal */}
-                {isEditBioModalOpen && (
-                  <EditBioModal
-                    isOpen={isEditBioModalOpen}
-                    onClose={() => setIsEditBioModalOpen(false)}
-                    onSave={handleEditBio}
-                    initialBio={bio}
-                  />
-                )}
-              </div>
+                        <defs>
+                          <linearGradient id="paint0_linear_40001011_4895" x1="57.5949" y1="-11.411" x2="-7.13081" y2="86.2261" gradientUnits="userSpaceOnUse">
+                            <stop stopColor="white" stopOpacity="0" />
+                            <stop offset="0.858943" stopColor="#0AD472" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="mb-[]">
+                      <span className=" bg-slate-600 ">
+                      </span>
+                      </div>
+                    
+                      
+                    </div>
 
-              {/* Info Section */}
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="bg-white p-3 rounded-lg shadow-md">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 14.75C15.3137 14.75 18 12.0637 18 8.75C18 5.4363 15.3137 2.75 12 2.75C8.6863 2.75 6 5.4363 6 8.75C6 12.0637 8.6863 14.75 12 14.75ZM12 16.25C8.2721 16.25 3.75 18.2886 3.75 22C3.75 22.5523 4.1977 23 4.75 23H19.25C19.8023 23 20.25 22.5523 20.25 22C20.25 18.2886 15.7279 16.25 12 16.25Z"
-                        fill="#0C0F12"
-                      />
-                    </svg>
+
+                    <div className="flex flex-col gap-2 items-start justify-end">
+                      <h1 className="text-4xl font-semibold text-gray-900">Shreya</h1>
+                      <p className="text-xl text-gray-600">Hyderabad, India</p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <span className="text-gray-600">Actively seeking work</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="font-semibold text-gray-700">Experience</h2>
-                    <p className="text-gray-600">Fresher</p>
+                  <div className="flex flex-col items-start justify-end gap-2 mt-7">
+                    <h2 className="text-2xl font-medium text-gray-900">
+                      Full Stack developer
+                    </h2>
+                    <div className="flex items-center gap-2  rounded-lg">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-semibold">8.8</span>
+                        <span className="text-sm text-gray-600">/10</span>
+                      </div>
+                      <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" viewBox="0 0 29 29" fill="none">
+                          <path d="M13.0359 15.9001L10.7728 13.5635C10.5797 13.3622 10.3405 13.2593 10.0554 13.2547C9.77024 13.2501 9.51948 13.3604 9.30312 13.5857C9.10116 13.7964 9.00019 14.0517 9.00019 14.3516C9.00019 14.6514 9.10116 14.9067 9.30312 15.1174L12.1536 18.0884C12.4057 18.3509 12.6998 18.4822 13.0359 18.4822C13.3719 18.4822 13.666 18.3509 13.9182 18.0884L19.6969 12.0655C19.9042 11.8492 20.0064 11.5962 20.0036 11.3065C20.0011 11.0169 19.8988 10.7593 19.6969 10.5338C19.4805 10.3085 19.232 10.1921 18.9512 10.1846C18.6707 10.1771 18.4223 10.2861 18.2059 10.5116L13.0359 15.9001ZM9.4938 27.6968L7.56571 24.3179L3.91869 23.5015C3.60588 23.4383 3.35605 23.2669 3.16921 22.9874C2.98236 22.7079 2.90776 22.4051 2.94541 22.0791L3.30202 18.1694L0.821755 15.2123C0.607252 14.9739 0.5 14.687 0.5 14.3516C0.5 14.0161 0.607252 13.7292 0.821755 13.4908L3.30202 10.5338L2.94541 6.62402C2.90776 6.298 2.98236 5.99523 3.16921 5.71571C3.35605 5.43619 3.60588 5.26482 3.91869 5.2016L7.56571 4.38521L9.4938 1.0063C9.66182 0.719515 9.89062 0.523925 10.1802 0.41953C10.4698 0.315135 10.7639 0.331 11.0625 0.467125L14.5 1.98182L17.9375 0.467125C18.2361 0.331 18.5302 0.315135 18.8198 0.41953C19.1094 0.523925 19.3382 0.719515 19.5062 1.0063L21.4343 4.38521L25.0813 5.2016C25.3941 5.26482 25.6439 5.43619 25.8308 5.71571C26.0176 5.99523 26.0922 6.298 26.0546 6.62402L25.698 10.5338L28.1782 13.4908C28.3927 13.7292 28.5 14.0161 28.5 14.3516C28.5 14.687 28.3927 14.9739 28.1782 15.2123L25.698 18.1694L26.0546 22.0791C26.0922 22.4051 26.0176 22.7079 25.8308 22.9874C25.6439 23.2669 25.3941 23.4383 25.0813 23.5015L21.4343 24.3179L19.5062 27.6968C19.3382 27.9836 19.1094 28.1792 18.8198 28.2836C18.5302 28.388 18.2361 28.3721 17.9375 28.236L14.5 26.7213L11.0625 28.236C10.7639 28.3721 10.4698 28.388 10.1802 28.2836C9.89062 28.1792 9.66182 27.9836 9.4938 27.6968Z" fill="#10B754" />
+                          <path d="M13.0359 15.9001L10.7728 13.5635C10.5797 13.3622 10.3405 13.2593 10.0554 13.2547C9.77024 13.2501 9.51948 13.3604 9.30312 13.5857C9.10116 13.7964 9.00019 14.0517 9.00019 14.3516C9.00019 14.6514 9.10116 14.9067 9.30312 15.1174L12.1536 18.0884C12.4057 18.3509 12.6998 18.4822 13.0359 18.4822C13.3719 18.4822 13.666 18.3509 13.9182 18.0884L19.6969 12.0655C19.9042 11.8492 20.0064 11.5962 20.0036 11.3065C20.0011 11.0169 19.8988 10.7593 19.6969 10.5338C19.4805 10.3085 19.232 10.1921 18.9512 10.1846C18.6707 10.1771 18.4223 10.2861 18.2059 10.5116L13.0359 15.9001ZM9.4938 27.6968L7.56571 24.3179L3.91869 23.5015C3.60588 23.4383 3.35605 23.2669 3.16921 22.9874C2.98236 22.7079 2.90776 22.4051 2.94541 22.0791L3.30202 18.1694L0.821755 15.2123C0.607252 14.9739 0.5 14.687 0.5 14.3516C0.5 14.0161 0.607252 13.7292 0.821755 13.4908L3.30202 10.5338L2.94541 6.62402C2.90776 6.298 2.98236 5.99523 3.16921 5.71571C3.35605 5.43619 3.60588 5.26482 3.91869 5.2016L7.56571 4.38521L9.4938 1.0063C9.66182 0.719515 9.89062 0.523925 10.1802 0.41953C10.4698 0.315135 10.7639 0.331 11.0625 0.467125L14.5 1.98182L17.9375 0.467125C18.2361 0.331 18.5302 0.315135 18.8198 0.41953C19.1094 0.523925 19.3382 0.719515 19.5062 1.0063L21.4343 4.38521L25.0813 5.2016C25.3941 5.26482 25.6439 5.43619 25.8308 5.71571C26.0176 5.99523 26.0922 6.298 26.0546 6.62402L25.698 10.5338L28.1782 13.4908C28.3927 13.7292 28.5 14.0161 28.5 14.3516C28.5 14.687 28.3927 14.9739 28.1782 15.2123L25.698 18.1694L26.0546 22.0791C26.0922 22.4051 26.0176 22.7079 25.8308 22.9874C25.6439 23.2669 25.3941 23.4383 25.0813 23.5015L21.4343 24.3179L19.5062 27.6968C19.3382 27.9836 19.1094 28.1792 18.8198 28.2836C18.5302 28.388 18.2361 28.3721 17.9375 28.236L14.5 26.7213L11.0625 28.236C10.7639 28.3721 10.4698 28.388 10.1802 28.2836C9.89062 28.1792 9.66182 27.9836 9.4938 27.6968Z" stroke="#10B754" />
+                        </svg>
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-600">Employability score</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="bg-white p-3 rounded-lg shadow-md">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 14.75C15.3137 14.75 18 12.0637 18 8.75C18 5.4363 15.3137 2.75 12 2.75C8.6863 2.75 6 5.4363 6 8.75C6 12.0637 8.6863 14.75 12 14.75ZM12 16.25C8.2721 16.25 3.75 18.2886 3.75 22C3.75 22.5523 4.1977 23 4.75 23H19.25C19.8023 23 20.25 22.5523 20.25 22C20.25 18.2886 15.7279 16.25 12 16.25Z"
-                        fill="#0C0F12"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="font-semibold text-gray-700">Location</h2>
-                    <p className="text-gray-600">Bangalore, India</p>
-                  </div>
+
+                {/* Bio */}
+                <p className="text-lg text-gray-600 max-w-3xl">
+                  Full-stack developer with a strong foundation in React, Python, and MongoDB.
+                  A quick learner passionate about building user-friendly web applications,
+                  eager to apply skills in a professional environment.
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4">
+                  <Button
+                    variant="default"
+                    className="bg-[#001F3F] text-white hover:bg-[#001F3F]/90 px-8"
+                  >
+                    Contact
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-[#001F3F] text-[#001F3F] hover:bg-[#001F3F]/10 px-8"
+                  >
+                    Schedule AI interview
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg mt-6">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
             {/* Education Section */}
-            <div className="bg-white rounded-lg mt-6 p-6 ">
+            <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
               <EducationSection
                 initialEducation={educationEntries} // Pass the initial education entries
               />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg mt-6">
+          <div className="bg-white rounded-lg mt-6 mb-10">
             {/* Education Section */}
-              <ExperienceSection
-                experiences={experiences}
-                totalDuration="4 years 5 months"
-                onAdd={handleAddExperience}
-                onEdit={() => console.log("Edit clicked")}
-              />
+            <ExperienceSection
+              experiences={experiences}
+              totalDuration="4 years 5 months"
+              onAdd={handleAddExperience}
+              onEdit={() => console.log("Edit clicked")}
+            />
           </div>
         </div>
 
