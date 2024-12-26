@@ -75,7 +75,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       </div>
 
       {/* Right Section: Buttons */}
-      <div className="flex w-[40%] justify-center space-x-2">
+      <div className="flex w-[40%] justify-end space-x-2">
         {status === "Verified" ? (
           <>
             <button
