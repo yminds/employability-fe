@@ -37,9 +37,9 @@ const SkillList: React.FC= () => {
   
 
   return (
-    <section className="w-[920px] h-[763px] flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
-      <div className=' w-[836px] h-full bg-white  flex flex-col  rounded-t-[8px]  px-4'>
-        <div>
+    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
+      <div className='w-full h-full bg-white  flex flex-col  rounded-t-[8px]  px-4'>
+        <div className="text-gray-900 text-base font-medium leading-5 mb-5">
           Mandatory Skills ({skills.length})
         </div>
         <div>
@@ -56,7 +56,7 @@ const SkillList: React.FC= () => {
                 selfRating={skill.self_rating}
                 initialStatus="Verified" // Hardcoded initial status for now
               />
-              <div className=' w-full h-[1px] my-6 bg-[#E0E0E0]'></div>
+              <div className=' w-full h-[1px] my-4 bg-black bg-opacity-10'></div>
               </>
             ))}
           </div>
