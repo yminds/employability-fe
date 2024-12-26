@@ -3,6 +3,7 @@ import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 
 interface Skill {
   id: string;
+  skill_Id: string;
   name: string;
   rating: string;
   visibility: string;
@@ -22,7 +23,8 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 }) => {
   const [skills, setSkills] = useState<Skill[]>([
     {
-      id: "",
+      id: `${Date.now()}`,
+      skill_Id: "",
       name: "",
       rating: "__/10",
       visibility: "All users",
@@ -41,11 +43,13 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 
   const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering skills
 
-  const { data: skillsData, error, isLoading } = useGetMultipleSkillsQuery(userId);
+  const { data: skillsData, error, isLoading } = useGetMultipleSkillsQuery(searchTerm);
+  console.log("Skills Data:", skillsData);
 
   const handleAddSkill = () => {
     const newSkill: Skill = {
-      id: "",
+      id: ``,
+      skill_Id: "",
       name: "",
       rating: "__/10",
       visibility: "All users",
@@ -65,6 +69,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         ...skills,
         {
           id: suggestedSkill.id,
+          skill_Id: "", // Add this line
           name: suggestedSkill.name,
           rating: "__/10",
           visibility: "All users",
@@ -129,103 +134,111 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         <div className="space-y-4">
           {skills.map((skill, index) => (
             <>
-            <div
-              key={index}
-              className=" bg-gray-50 flex flex-col items-center rounded-lg border w-[716px] h-[168px] p-6 border-gray-200"
-            >
-              <div className="grid grid-cols-12 gap-4 items-center">
-                {/* Searchable Dropdown */}
-                <div className="col-span-4">
-                  <label >Skill {index + 1}</label>
+              <div
+                key={index}
+                className="bg-gray-50 flex flex-col items-center rounded-lg border w-[716px] h-[168px] p-6 border-gray-200"
+              >
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  {/* Searchable Dropdown */}
+                  <div className="col-span-4">
+                    <label>Skill {index + 1}</label>
+                    <input
+                      list={`skills-${index}`}
+                      value={skill.name}
+                      onChange={(e) => {
+                        const selectedSkill = skillsData?.data.find(
+                          (availableSkill: any) =>
+                            availableSkill.name === e.target.value
+                        );
+                        setSkills((prev) =>
+                          prev.map((s, i) =>
+                            i === index
+                              ? {
+                                  ...s,
+                                  id: selectedSkill?._id || s.id,
+                                  skill_Id: selectedSkill?._id || s.skill_Id, // Set skill_Id from skillsData
+                                  name: selectedSkill?.name || e.target.value,
+                                }
+                              : s
+                          )
+                        );
+                      }}
+                      onInput={(e) => setSearchTerm(e.currentTarget.value)}
+                      placeholder="Search skills"
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                    />
+                    <datalist id={`skills-${index}`}>
+                      {filteredSkills?.map((availableSkill: any) => (
+                        <option key={availableSkill._id} value={availableSkill.name}>
+                          {availableSkill.name}
+                        </option>
+                      ))}
+                    </datalist>
+                  </div>
+
+                  {/* Hidden Field for skill_Id */}
                   <input
-                    list={`skills-${index}`}
-                    value={skill.name}
-                    onChange={(e) => {
-                      const selectedSkill = skillsData?.data.find(
-                        (availableSkill: any) => availableSkill.name === e.target.value
-                      );
-                      setSkills((prev) =>
-                        prev.map((s, i) =>
-                          i === index
-                            ? {
-                                ...s,
-                                id: selectedSkill?.id || "",
-                                name: selectedSkill?.name || e.target.value,
-                              }
-                            : s
-                        )
-                      );
-                    }}
-                    onInput={(e) => setSearchTerm(e.currentTarget.value)}
-                    placeholder="Search skills"
-                    className="w-full p-2 border border-gray-300 rounded-lg"
+                    type="hidden"
+                    value={skill.skill_Id} // Automatically updated from skillsData
+                    name={`skill_Id-${index}`}
                   />
-                  <datalist id={`skills-${index}`}>
-                    {filteredSkills?.map((availableSkill: any) => (
-                      <option key={availableSkill.id} value={availableSkill.name}>
-                        {availableSkill.name}
-                      </option>
-                    ))}
-                  </datalist>
-                </div>
 
-                {/* Self Rating */}
-                <div className="col-span-4">
-                <label >Self rating </label>
-                  <select
-                    value={skill.rating}
-                    onChange={(e) =>
-                      setSkills((prev) =>
-                        prev.map((s, i) =>
-                          i === index ? { ...s, rating: e.target.value } : s
+                  {/* Self Rating */}
+                  <div className="col-span-4">
+                    <label>Self rating</label>
+                    <select
+                      value={skill.rating}
+                      onChange={(e) =>
+                        setSkills((prev) =>
+                          prev.map((s, i) =>
+                            i === index ? { ...s, rating: e.target.value } : s
+                          )
                         )
-                      )
-                    }
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="__/10">__/10</option>
-                    {[...Array(10)].map((_, i) => (
-                      <option key={i + 1} value={`${i + 1}/10`}>
-                        {i + 1}/10
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                      }
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="__/10">__/10</option>
+                      {[...Array(10)].map((_, i) => (
+                        <option key={i + 1} value={`${i + 1}/10`}>
+                          {i + 1}/10
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                {/* Visibility */}
-                <div className="col-span-3">
-                <label >Visibilty</label>
-                  <select
-                    value={skill.visibility}
-                    onChange={(e) =>
-                      setSkills((prev) =>
-                        prev.map((s, i) =>
-                          i === index ? { ...s, visibility: e.target.value } : s
+                  {/* Visibility */}
+                  <div className="col-span-3">
+                    <label>Visibility</label>
+                    <select
+                      value={skill.visibility}
+                      onChange={(e) =>
+                        setSkills((prev) =>
+                          prev.map((s, i) =>
+                            i === index ? { ...s, visibility: e.target.value } : s
+                          )
                         )
-                      )
-                    }
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="Just me">Just me</option>
-                    <option value="All users">All users</option>
-                  </select>
-                </div>
+                      }
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="Just me">Just me</option>
+                      <option value="All users">All users</option>
+                    </select>
+                  </div>
 
-                {/* Remove Skill */}
-                <div className="col-span-1">
-                  <button
-                    onClick={() => handleRemoveSkill(skill.id)}
-                    className="text-red-500 hover:text-red-700 text-lg"
-                  >
-                    ×
-                  </button>
+                  {/* Remove Skill */}
+                  <div className="col-span-1">
+                    <button
+                      onClick={() => handleRemoveSkill(skill.id)}
+                      className="text-red-500 hover:text-red-700 text-lg"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
-              </div>            
-              <div className="mt-4 ">
-                    staus : <span className=" text-[#D48A0C]">{skill.status}</span>
+                <div className="mt-4">
+                  status : <span className="text-[#D48A0C]">{skill.status}</span>
+                </div>
               </div>
-            </div>
-
             </>
           ))}
         </div>

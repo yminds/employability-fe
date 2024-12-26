@@ -48,18 +48,18 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-around w-[920px] h-[140px] p-4 bg-white border rounded-lg shadow-sm">
+    <div className="flex items-center justify-between w-[836pxpx] h-[82px]  bg-white">
       {/* Left Section: Skill Image and Name */}
       <div className="flex w-[30%] h-full items-center justify-center space-x-4">
         <img src={skillImg} alt={skill} className="w-10 h-10 " />
         <div>
-          <h3 className="text-[2vh] font-semibold">{skill}</h3>
+          <h3 className=" text-[16px] font-semibold">{skill}</h3>
           <p className="text-sm text-gray-600">Self rating: {selfRating}/10</p>
         </div>
       </div>
 
       {/* Middle Section: Rating and Status */}
-      <div className="flex w-[30%] flex-col items-center space-y-1 border-r-2 border-l-2">
+      <div className="flex w-[30%] flex-col items-center space-y-1">
         <p className="text-lg font-bold">{verified_rating}/10</p>
         <div className="flex items-center space-x-2">
           <img src={imgSrc} alt={status} className="w-4 h-4" />

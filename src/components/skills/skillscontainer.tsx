@@ -24,7 +24,9 @@ const SkillsContainer: React.FC = () => {
     return <div>Error loading skills. Please try again later.</div>;
   }
   const handleAddSkills = (newSkills: any[]) => {
-    setSkills((prev) => [...prev, ...newSkills]); 
+    console.log("New Skills:", newSkills);
+    
+    // setSkills((prev) => [...prev, ...newSkills]); 
   };
 
   // The `skillsData` object contains the list of skills
@@ -46,8 +48,8 @@ const SkillsContainer: React.FC = () => {
           
           </div>
           {/* Content below the header */}
-          <div className="mt-[120px]"> {/* Ensure spacing matches header height */}
-            <SkillList skills={skills} activeFilter={activeFilter} />
+          <div className="mt-[110px]"> {/* Ensure spacing matches header height */}
+            <SkillList />
             <SuggestedSkills />
           </div>
         </div>

@@ -33,7 +33,9 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   };
 
   const handleSaveSkills = (newSkills: any[]) => {
-    const updatedSkills = [...skills, ...newSkills]; // Combine existing and new skills
+    const updatedSkills = newSkills ; // Combine existing and new skills
+    console.log("Updated Skills:", updatedSkills);
+    
     onSkillsAdded(updatedSkills); // Pass the updated skills to the parent
     setIsModalOpen(false); // Close the modal
   };
