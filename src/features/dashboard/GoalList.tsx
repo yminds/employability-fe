@@ -58,7 +58,7 @@ const GoalList: React.FC<Props> = (setJourneyDialog:any) => {
                         <img
                             src={goal.image || "./src/assets/dashboard/jobs_banner.png"}
                             alt={goal.title}
-                            className="rounded-e-none-[9px] rounded-s-none-[9px] w-full"
+                            className="rounded-tl-[9px] rounded-tr-[9px] w-full"
                         />
                         <div className="flex flex-col p-6 justify-center items-start gap-2 self-stretch">
                             <h3 className="text-gray-800 text-base font-medium leading-5">{goal.title}</h3>

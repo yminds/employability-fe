@@ -171,9 +171,10 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                 {skills.data.map((skill: any) => (
                                                     <li
                                                         key={skill._id}
-                                                        className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer"
+                                                        className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer flex gap-2 leading-5"
                                                         onClick={() => handleSkillSelect(skill._id)} // Select the skill
                                                     >
+                                                        {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
                                                         {skill.name}
                                                     </li>
                                                 ))}
@@ -193,6 +194,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                     <span key={skill._id} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5">
                                                         {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
                                                         {skill.name}
+                                                        {console.log(skill.icon)}
                                                         <button
                                                             type="button"
                                                             onClick={() => handleSkillRemove(skill._id)} // Remove skill
@@ -208,6 +210,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                     return (
                                                         skill && (
                                                             <span key={skillId} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5">
+                                                                {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
                                                                 {skill.name}
                                                                 <button
                                                                     type="button"
