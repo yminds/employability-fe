@@ -29,8 +29,6 @@ const EducationForm: React.FC<EducationFormProps> = ({
   onAddEducation,
   onDeleteEducation,
 }) => {
-  const user = useSelector((state: any) => state.auth.user);
-
   const addEducation = () => {
     const newEducation: Education = {
       _id: "",
@@ -111,7 +109,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
                 <option value="bachelors">Bachelor's Degree</option>
                 <option value="masters">Master's Degree</option>
                 <option value="phd">Ph.D.</option>
-                <option value="associate">Associate Degree</option>
+                <option value="associate degree">Associate Degree</option>
                 <option value="diploma">Diploma</option>
                 <option value="certificate">Certificate</option>
               </select>

@@ -108,7 +108,7 @@ export default function SkillsForm({
                 </option>
               ))}
             </select>
-           
+
             {getError(`skills.${index}.name`) && (
               <p className="text-red-500 text-xs mt-1">
                 {getError(`skills.${index}.name`)}
@@ -128,7 +128,7 @@ export default function SkillsForm({
                 getError(`skills.${index}.rating`) ? "border-red-500" : ""
               }`}
             >
-              <option value="">__/10</option>
+              {/* <option value="">__/10</option> */}
               {[...Array(11)].map((_, i) => (
                 <option key={i} value={i}>
                   {i}/10

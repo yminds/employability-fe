@@ -20,6 +20,7 @@ import roleSlice from "./slices/roleSlice";
 import { apiSlice } from "../api/apiSlice";
 import { errorMiddleware } from "./errorMiddleware";
 import { skillApi } from "@/api/skillApiSlice";
+import { userApi } from "@/api/userApiSlice";
 // import { successMiddleware } from './successMiddleware';
 
 // Redux persist config
@@ -34,6 +35,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   [skillApi.reducerPath]: skillApi.reducer,
+  [userApi.reducerPath]: userApi.reducer,
   auth: authReducer,
   goals: goalReducer,
   error: errorReducer,
@@ -64,6 +66,7 @@ export const store = configureStore({
     getDefaultMiddleware(customizedMiddleware).concat(
       apiSlice.middleware,
       skillApi.middleware,
+      userApi.middleware,
       errorMiddleware
     ),
   devTools: true,

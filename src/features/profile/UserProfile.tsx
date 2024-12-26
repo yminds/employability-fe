@@ -123,7 +123,7 @@ const UserProfile: React.FC = () => {
   // Handle Experience Save
   const handleSaveExperience = (updatedExperiences: ExperienceItem[]) => {
     setExperiences(updatedExperiences);
-    console.log("Experiences updated:", updatedExperiences);
+    // console.log("Experiences updated:", updatedExperiences);
     // Optionally, perform API calls or other side effects here
   };
 

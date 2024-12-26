@@ -109,14 +109,14 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto minimal-scrollbar">
+            <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto minimal-scrollbar font-ubuntu">
                 <DialogTitle className="hidden">Define Your Custom Goal</DialogTitle>
 
                 <div className="flex items-center justify-center">
                     <div className="w-full inline-flex p-[42px] flex-col justify-center items-start gap-[40px]">
                         <div>
                             <h2 className="text-gray-900 text-2xl font-medium leading-8 tracking-tight">Define Your Custom Goal</h2>
-                            <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide">
+                            <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide font-sf-pro">
                                 Enter your goal and tailor your learning path.
                             </p>
                         </div>
@@ -135,7 +135,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                         value={goal}
                                         onChange={(e) => setGoal(e.target.value)}
                                         autoComplete="off"
-                                        className="flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none"
+                                        className="flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none font-sf-pro"
                                     />
                                 </div>
                                 {errors.goal && <p className="text-red-500 text-sm mt-1">{errors.goal}</p>}
@@ -145,7 +145,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                 <div className="flex flex-col items-start gap-3.5">
                                     <label htmlFor="tech-stack" className="text-gray-900 text-base font-medium leading-5 flex flex-col items-start gap-1">
                                         Pick Your Tech Stack
-                                        <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide">
+                                        <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide font-sf-pro">
                                             Select the technologies you'll be using for this goal
                                         </p>
                                     </label>
@@ -160,14 +160,14 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                             value={techStack}
                                             onChange={handleTechStackChange}
                                             autoComplete="off"
-                                            className="w-full flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none pl-12"
+                                            className="w-full flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none pl-12 font-sf-pro"
                                         />
 
                                         {isLoading && <p>Loading skills...</p>}
                                         {error && <p className="text-red-500 text-sm">Failed to load skills.</p>}
                                         {/* Show skills list if no skills are selected */}
                                         {skills && selectedTechStack.length === 0 && (
-                                            <ul className="mt-2 max-h-40 overflow-y-auto border rounded-lg bg-white absolute w-full p-2">
+                                            <ul className="mt-2 max-h-40 overflow-y-auto border rounded-lg bg-white absolute w-full p-2 font-sf-pro">
                                                 {skills.data.map((skill: any) => (
                                                     <li
                                                         key={skill._id}
@@ -191,7 +191,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                         {
                                             skillsName?.data?.skill_pool_id?.length > 0 ? (
                                                 skillsName.data.skill_pool_id.map((skill: any) => (
-                                                    <span key={skill._id} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5">
+                                                    <span key={skill._id} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5 font-sf-pro">
                                                         {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
                                                         {skill.name}
                                                         {console.log(skill.icon)}
@@ -209,7 +209,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                     const skill = skills.data?.find((s: { _id: string }) => s._id === skillId); // Find skill by ID
                                                     return (
                                                         skill && (
-                                                            <span key={skillId} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5">
+                                                            <span key={skillId} className="flex p-2 px-5 py-2.5 items-center gap-2 rounded-[26px] border border-black/10 bg-[#F5F5F5] text-gray-600 text-xs font-medium leading-5 font-sf-pro">
                                                                 {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
                                                                 {skill.name}
                                                                 <button
@@ -239,7 +239,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                     placeholder="e.g., Mern GEN AI engineer"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    className="w-full flex h-[150px] p-2 px-4 justify-between items-start rounded-[6px] border border-black/10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none"
+                                    className="w-full flex h-[150px] p-2 px-4 justify-between items-start rounded-[6px] border border-black/10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none font-sf-pro"
                                     rows={3}
                                 ></textarea>
                             </div>
@@ -247,7 +247,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                             {/* Disable the button when saving */}
                             <button
                                 type="submit"
-                                className="flex h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#10B754] text-white text-[16px] font-medium leading-[24px] tracking-[0.24px]"
+                                className="flex h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#00183D] text-white hover:bg-gray-600 text-[16px] font-medium leading-[24px] tracking-[0.24px]"
                                 disabled={isSaving}
                             >
                                 {isSaving ? "Saving..." : "Save Goal"}

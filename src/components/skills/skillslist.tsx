@@ -19,6 +19,8 @@ interface Skill {
 const SkillList: React.FC= () => {
   // Replace the hardcoded skills array with the actual data from the API
   const userId = useSelector((state :RootState) => state.auth.user._id);
+  console.log("User ID:", userId);
+  
 
   // Fetch user skills by userId
   const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId);
@@ -37,25 +39,24 @@ const SkillList: React.FC= () => {
   
 
   return (
-    <section className="w-[920px] h-[763px] flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
-      <div className=' w-[836px] h-full bg-white  flex flex-col  rounded-t-[8px]  px-4'>
-        <div>
+    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
+      <div className='w-full h-full bg-white  flex flex-col  rounded-t-[8px]  px-4'>
+        <div className="text-gray-900 text-base font-medium leading-5 mb-5">
           Mandatory Skills ({skills.length})
         </div>
         <div>
           <div className="">
             {skills.map((skill: Skill) => (
               <>
-
               <SkillCard
-                key={skill._id}
-                skillId={skill._id}
-                skill={skill.skill_pool_id.name}
-                skillImg={skill.skill_pool_id.icon}
-                verified_rating={skill.verified_rating}
-                selfRating={skill.self_rating}
-                initialStatus="Verified" // Hardcoded initial status for now
-              />
+                  key={skill._id}
+                  skillId={skill._id}
+                  skill={skill.skill_pool_id.name}
+                  skillImg={skill.skill_pool_id.icon}
+                  verified_rating={skill.verified_rating}
+                  selfRating={skill.self_rating}
+                  initialStatus={skill.verified_rating > 0 ? "Verified" : "Unverified"} // Hardcoded initial status for now
+                  skill_id={''}              />
               <div className=' w-full h-[1px] my-6 bg-[#E0E0E0]'></div>
               </>
             ))}

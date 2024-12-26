@@ -225,6 +225,7 @@ import { Education } from "../../features/profile/types"; // Define these types 
 
 import {
   useGetEducationByIdQuery,
+  useGetEducationByIdQuery,
   useAddEducationMutation,
   useUpdateEducationMutation,
   useDeleteEducationMutation,
@@ -235,28 +236,26 @@ interface EducationSectionProps {
 }
 
 const EducationSection: React.FC<EducationSectionProps> = ({}) => {
-  const [fetchEdu , setFetchEdu]= useState(false)
   const user = useSelector((state: any) => state.auth.user);
-
+  // console.log(user);
   const [education, setEducation] = useState<Education[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEducation, setEditingEducation] = useState<Education | null>(
     null
   );
 
-  const { data } = useGetEducationByIdQuery(user._id);
+  const { data: educationData } = useGetEducationByIdQuery(user._id);
+  //   console.log(educationData, "jjjjjjjjjjjjjj");
 
   const [addEducation] = useAddEducationMutation();
   const [updateEducation] = useUpdateEducationMutation();
   const [deleteEducation] = useDeleteEducationMutation();
 
   useEffect(() => {
-    if (data && data.data) {
-      setEducation(data.data); // Unwrap the data from the response
+    if (educationData) {
+      setEducation(educationData);
     }
-  }, [data, education]);
-
-  console.log(education, "education");
+  }, [educationData]);
 
   const openModal = (educationItem?: Education) => {
     setEditingEducation(educationItem || null); // Open modal for editing or adding
@@ -276,7 +275,6 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
           id: updated._id, // Use the ID from the record
           updatedEducation: updated,
         }).unwrap();
-        setFetchEdu(false)
         alert("Education updated successfully!");
       } catch (err) {
         console.error("Failed to update education:", err);

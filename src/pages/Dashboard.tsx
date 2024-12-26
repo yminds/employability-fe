@@ -8,6 +8,9 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from '@/store/store';
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
+import SkillList from "@/components/skills/skillslist";
+import CircularProgress from '@/components/ui/circular-progress-bar'; // Updated CircularProgress
+import logo from '@/assets/skills/e-Logo.svg';
 
 const Dashboard: React.FC = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
@@ -22,9 +25,12 @@ const Dashboard: React.FC = () => {
   const goalName = data?.data?.[0]?.name || "";
   const completionPercentage = 50;
 
+  const totalVerifiedRating = 10;
+  const averageVerifiedRating = 0;
+
   return (
     <>
-      <main className="h-screen overflow-auto">
+      <main className="h-screen overflow-auto font-ubuntu">
         <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
 
@@ -36,13 +42,12 @@ const Dashboard: React.FC = () => {
 
                 <div className="grid grid-cols-4 gap-4">
                   <div className="col-span-3 flex flex-col gap-10 shrink-0">
-                    {/* Set Your Goal Section */}
                     <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
                       <div className="flex flex-col items-start gap-6 self-stretch relative">
                         <div className="flex flex-col items-start gap-2">
                           <h2 className="text-[#0C0F12] text-[20px] font-medium leading-[26px] tracking-[-0.2px]">Goal: {goalName}</h2>
                           <div className="flex flex-col items-start gap-[50px] self-stretch">
-                            <p className="text-gray-500 text-base font-normal leading-6 tracking-[0.24px]">You’re doing great! Keep going and unlock your next milestone.</p>
+                            <p className="text-gray-500 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">You’re doing great! Keep going and unlock your next milestone.</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-5 self-stretch">
@@ -55,16 +60,27 @@ const Dashboard: React.FC = () => {
                     </section>
 
                     {/* Skills */}
-                    <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
-                      <div>
-                        <h5>Skills (5)</h5>
-                      </div>
+                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                      <SkillList />
                     </section>
 
                   </div>
 
                   <div className="flex flex-col items-start gap-6 flex-1">
                     <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-6">
+
+                    <div className="p-4 w-full h-[92px] bg-green-50 rounded-lg flex items-center space-x-4">
+                      <div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
+                        {/* Circular Progress Bar */}
+                        <CircularProgress progress={averageVerifiedRating} size={60} strokeWidth={6} showText={false} />
+                        <img className="absolute w-8 h-8" src={logo} alt="short logo" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900">{averageVerifiedRating}</p>
+                        <p className="text-base text-[#414447] font-sf-pro">Employability Score</p>
+                      </div>
+                    </div>
+
                       <ul className="flex flex-col items-start gap-5 self-stretch">
                         <li className="flex h-[48px] items-center gap-[14px] self-stretch">
                           <div className="flex w-[48px] h-[48px] p-[9px] px-[10px] justify-center items-center gap-[10px] rounded-[48px] border border-black/5 bg-[rgba(250,250,250,0.98)]">
@@ -76,7 +92,7 @@ const Dashboard: React.FC = () => {
                           </div>
                           <div className="flex flex-col items-start">
                             <span className="text-black text-base font-medium leading-5">6/10</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide">verified skills</span>
+                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">verified skills</span>
                           </div>
                         </li>
                         <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -89,7 +105,7 @@ const Dashboard: React.FC = () => {
                           </div>
                           <div className="flex flex-col items-start">
                             <span className="text-black text-base font-medium leading-5">3</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide">projects added</span>
+                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">projects added</span>
                           </div>
                         </li>
                         <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -102,7 +118,7 @@ const Dashboard: React.FC = () => {
                           </div>
                           <div className="flex flex-col items-start">
                             <span className="text-black text-base font-medium leading-5">5</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide">upskilling</span>
+                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">upskilling</span>
                           </div>
                         </li>
                       </ul>
@@ -133,12 +149,12 @@ const Dashboard: React.FC = () => {
                       <div className="flex w-[417px] flex-col items-start gap-2">
                         <h2 className="text-[#0C0F12] text-[20px] font-medium leading-[26px] tracking-[-0.2px]">Set Your Goal</h2>
                         <div className="flex flex-col items-start gap-[50px] self-stretch">
-                          <p className="text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Define your career aspirations and get a personalized roadmap to success.</p>
+                          <p className="text-[#68696B] text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">Define your career aspirations and get a personalized roadmap to success.</p>
                           <Button
                             onClick={() => {
                               setJourneyDialog(true)
                             }}
-                            className="bg-[#00183D] text-white py-[10px] px-6 rounded hover:bg-gray-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
+                            className="bg-[#00183D] text-white py-[10px] px-6 rounded hover:bg-gray-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none font-sf-pro">Start Your Journey</Button>
 
                           {/* Dialog */}
                           {<Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
@@ -148,7 +164,7 @@ const Dashboard: React.FC = () => {
 
                               <div className="flex flex-col items-start gap-1 flex-1">
                                 <h2 className="text-[#1A1A1A] text-[24px] font-medium leading-[32px] tracking[-0.24px]">Set Your Goal</h2>
-                                <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide">Choose your goal and get tailored resources to help you succeed.</p>
+                                <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide font-sf-pro">Choose your goal and get tailored resources to help you succeed.</p>
                               </div>
                               <SetGoalCard setJourneyDialog={setJourneyDialog} />
                             </DialogContent>
@@ -183,10 +199,10 @@ const Dashboard: React.FC = () => {
                           <div className="flex flex-col items-start gap-2">
                             <h3 className="text-[#202326] text-base font-medium leading-5"
                             >Showcase Your Skills</h3>
-                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Highlight top skills to help us match you with the right opportunities.</p>
+                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide font-sf-pro">Highlight top skills to help us match you with the right opportunities.</p>
                           </div>
 
-                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/skills")}>Add Skills</button>
+                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide font-sf-pro" onClick={() => handleLinkClick("/skills")}>Add Skills</button>
                         </div>
 
                         <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
@@ -202,10 +218,10 @@ const Dashboard: React.FC = () => {
                           <div className="flex flex-col items-start gap-2">
                             <h3 className="text-[#202326] text-base font-medium leading-5"
                             >Build Your Portfolio</h3>
-                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Start adding projects that showcase your expertise and creativity.</p>
+                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide font-sf-pro">Start adding projects that showcase your expertise and creativity.</p>
                           </div>
 
-                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/projects")}>Add a Project</button>
+                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide font-sf-pro" onClick={() => handleLinkClick("/projects")}>Add a Project</button>
                         </div>
 
                         <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
@@ -221,10 +237,10 @@ const Dashboard: React.FC = () => {
                           <div className="flex flex-col items-start gap-2">
                             <h3 className="text-[#202326] text-base font-medium leading-5"
                             >Take a Mock Interview</h3>
-                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Prepare for real interviews by practicing with AI-driven questions.</p>
+                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide font-sf-pro">Prepare for real interviews by practicing with AI-driven questions.</p>
                           </div>
 
-                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/interviews")}>Start Practice</button>
+                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide font-sf-pro" onClick={() => handleLinkClick("/interviews")}>Start Practice</button>
                         </div>
                       </div>
                     </section>
@@ -261,7 +277,7 @@ const Dashboard: React.FC = () => {
                           </div>
                           <div className="flex flex-col items-start">
                             <span className="text-black text-base font-medium leading-5">0</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide">verified skills</span>
+                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">verified skills</span>
                           </div>
                         </li>
                         <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -274,7 +290,7 @@ const Dashboard: React.FC = () => {
                           </div>
                           <div className="flex flex-col items-start">
                             <span className="text-black text-base font-medium leading-5">0</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide">projects added</span>
+                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">projects added</span>
                           </div>
                         </li>
                         <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -287,7 +303,7 @@ const Dashboard: React.FC = () => {
                           </div>
                           <div className="flex flex-col items-start">
                             <span className="text-black text-base font-medium leading-5">0</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide">upskilling</span>
+                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">upskilling</span>
                           </div>
                         </li>
                       </ul>

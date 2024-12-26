@@ -7,14 +7,12 @@ import AddSkillsModal from "@/components/skills/addskills";
 interface SkillsHeaderProps {
   activeFilter: string;
   setFilter: (filter: string) => void;
-  onSkillsAdded: (newSkills: any[]) => void; // Callback to handle added skills
   skills: any[];
 }
 
 const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   activeFilter,
   setFilter,
-  onSkillsAdded,
   skills,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,8 +33,6 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   const handleSaveSkills = (newSkills: any[]) => {
     const updatedSkills = newSkills ; // Combine existing and new skills
     console.log("Updated Skills:", updatedSkills);
-    
-    onSkillsAdded(updatedSkills); // Pass the updated skills to the parent
     setIsModalOpen(false); // Close the modal
   };
 
@@ -71,7 +67,6 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
       {isModalOpen && (
         <AddSkillsModal
           onClose={handleCloseModal}
-          onSave={handleSaveSkills} // Pass callback to handle save
           userId="userId" // Replace with actual userId if needed
         />
       )}
