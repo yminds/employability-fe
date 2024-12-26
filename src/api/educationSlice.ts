@@ -2,19 +2,10 @@ import { apiSlice } from "./apiSlice";
 
 export const educationApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // Fetch multiple education records with optional search query
-    getEducations: builder.query<any[], string | void>({
-      query: (searchTerm) => ({
-        url: "/api/v1/", // Adjust the endpoint to your backend's education API
-        method: "GET",
-        params: searchTerm ? { search: searchTerm } : {}, // Pass search term as query parameter if provided
-      }),
-    }),
-
     // Fetch a single education record by ID
     getEducationById: builder.query<any, string>({
       query: (id) => ({
-        url: `/api/v1/education/${id}`,
+        url: `/api/v1/user_education/education/${id}`, // Ensure this matches the backend
         method: "GET",
       }),
     }),
@@ -22,16 +13,19 @@ export const educationApiSlice = apiSlice.injectEndpoints({
     // Add a new education record
     addEducation: builder.mutation<any, any>({
       query: (newEducation) => ({
-        url: "/api/v1/education",
+        url: "/api/v1/user_education/education/${id}",
         method: "POST",
         body: newEducation,
       }),
     }),
 
     // Update an existing education record by ID
-    updateEducation: builder.mutation<any, { id: string; updatedEducation: any }>({
+    updateEducation: builder.mutation<
+      any,
+      { id: string; updatedEducation: any }
+    >({
       query: ({ id, updatedEducation }) => ({
-        url: `/api/v1/education/${id}`,
+        url: `/api/v1/user_education/education/${id}`,
         method: "PUT",
         body: updatedEducation,
       }),
@@ -40,7 +34,7 @@ export const educationApiSlice = apiSlice.injectEndpoints({
     // Delete an education record by ID
     deleteEducation: builder.mutation<any, string>({
       query: (id) => ({
-        url: `/api/v1/education/${id}`,
+        url: `/api/v1/user_education/education${id}`,
         method: "DELETE",
       }),
     }),
@@ -48,7 +42,6 @@ export const educationApiSlice = apiSlice.injectEndpoints({
 });
 
 export const {
-  useGetEducationsQuery,
   useGetEducationByIdQuery,
   useAddEducationMutation,
   useUpdateEducationMutation,
