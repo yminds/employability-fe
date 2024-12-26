@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+
+
+
 import React, { useState, useEffect } from "react";
 import { Plus, Trash } from "lucide-react";
 
 interface ExperienceItem {
-  // id: string;
+  // id: string; // Uncomment if you actually need an 'id'
   jobTitle: string;
   employmentType: string;
   companyName: string;
@@ -21,6 +23,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   experiences,
   onChange,
 }) => {
+  // 1) Keep a single declaration of isFresher
   const [isFresher, setIsFresher] = useState(false);
 
   useEffect(() => {
@@ -29,14 +32,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     }
   }, [experiences, isFresher]);
 
-  const [isFresher, setIsFresher] = useState(false);
-
-  useEffect(() => {
-    if (!experiences.length && !isFresher) {
-      addExperience();
-    }
-  }, [experiences, isFresher]);
-
+  // 2) Define addExperience once
   const addExperience = () => {
     const newExperience: ExperienceItem = {
       // id: Date.now().toString(),
@@ -55,10 +51,10 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     onChange(updatedExperiences);
   };
 
+  // 3) Correct the signature of updateExperience (remove duplicate 'value: string')
   const updateExperience = (
     index: number,
     field: keyof ExperienceItem,
-    value: string
     value: string
   ) => {
     const updatedExperiences = experiences.map((exp, i) =>
@@ -69,7 +65,6 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Fresher Checkbox */}
       {/* Fresher Checkbox */}
       <div className="flex items-center justify-between">
         <h3 className="font-medium">Experience</h3>
@@ -97,23 +92,8 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
       {!isFresher &&
         experiences.map((exp, index) => (
           <div
-            key={exp.id}
-            className="bg-gray-50 rounded-lg p-6 space-y-4 mb-4 relative"
-          >
-            {/* Remove Button */}
-            <button
-              onClick={() => removeExperience(index)}
-              className="absolute top-4 right-4 text-red-500 hover:text-red-700"
-              disabled={experiences.length === 1}
-              aria-label={`Remove experience ${index + 1}`}
-            >
-              <Trash className="w-5 h-5" />
-            </button>
-      {/* Experience Form */}
-      {!isFresher &&
-        experiences.map((exp, index) => (
-          <div
-            key={exp.id}
+            // If you need a unique key, use index or restore `id` in the interface
+            key={index}
             className="bg-gray-50 rounded-lg p-6 space-y-4 mb-4 relative"
           >
             {/* Remove Button */}
@@ -128,16 +108,13 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
 
             {/* Job Title */}
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Job Title
-              </label>
+              <label className="block text-sm font-medium mb-1">Job Title</label>
               <input
                 type="text"
                 value={exp.jobTitle}
                 onChange={(e) =>
                   updateExperience(index, "jobTitle", e.target.value)
                 }
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Enter job title"
               />
@@ -154,7 +131,6 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                   updateExperience(index, "employmentType", e.target.value)
                 }
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               >
                 <option value="">Select</option>
                 <option value="Full-time">Full-time</option>
@@ -162,7 +138,6 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 <option value="Contract">Contract</option>
                 <option value="Internship">Internship</option>
               </select>
-            </div>
             </div>
 
             {/* Company Name */}
@@ -176,7 +151,6 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 onChange={(e) =>
                   updateExperience(index, "companyName", e.target.value)
                 }
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Enter company name"
               />
@@ -192,10 +166,8 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                   updateExperience(index, "location", e.target.value)
                 }
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Enter location"
               />
-            </div>
             </div>
 
             {/* Start Date and End Date */}
@@ -214,28 +186,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  End Date
-                </label>
-            {/* Start Date and End Date */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Start Date
-                </label>
-                <input
-                  type="month"
-                  value={exp.startDate}
-                  onChange={(e) =>
-                    updateExperience(index, "startDate", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  End Date
-                </label>
+                <label className="block text-sm font-medium mb-1">End Date</label>
                 <input
                   type="month"
                   value={exp.endDate || ""}
@@ -244,16 +195,12 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                   }
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                />
               </div>
             </div>
           </div>
         ))}
-            </div>
-          </div>
-        ))}
 
+      {/* Add Experience Button(s) */}
       {!isFresher && (
         <button
           onClick={addExperience}

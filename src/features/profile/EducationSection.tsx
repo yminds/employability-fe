@@ -225,7 +225,6 @@ import { Education } from "../../features/profile/types"; // Define these types 
 
 import {
   useGetEducationByIdQuery,
-  useGetEducationByIdQuery,
   useAddEducationMutation,
   useUpdateEducationMutation,
   useDeleteEducationMutation,
@@ -244,7 +243,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
     null
   );
 
-  const { data: educationData } = useGetEducationByIdQuery(user._id);
+  const { data } = useGetEducationByIdQuery(user._id);
   //   console.log(educationData, "jjjjjjjjjjjjjj");
 
   const [addEducation] = useAddEducationMutation();
@@ -252,10 +251,10 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
   const [deleteEducation] = useDeleteEducationMutation();
 
   useEffect(() => {
-    if (educationData) {
-      setEducation(educationData);
+    if (data && data.data) {
+      setEducation(data.data); // Unwrap the data from the response
     }
-  }, [educationData]);
+  }, [data, education]);
 
   const openModal = (educationItem?: Education) => {
     setEditingEducation(educationItem || null); // Open modal for editing or adding
