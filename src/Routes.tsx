@@ -18,7 +18,8 @@ import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
 import Login from "./pages/LoginPage.tsx";
 import UserProfilePage from "./pages/UserProfilePage.tsx";import Skills from "./pages/SkillsPage.tsx";
 import SkillDetailPage from "./pages/SkillDetailPage.tsx";
-import SelectedSkill from "@/components/skills/selectedskill.tsx";
+import SelectedSkill from "@/components/skills/suggestedskills.tsx";
+import SignupForm from "./pages/SignUpPage.tsx";
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -37,6 +38,10 @@ export const routes: RouteConfig[] = [
     route: "/",
     component: <Dashboard />,
     roles: ["CANDIDATE", "EMPLOYER"],
+  },
+  {
+    route: "/signup",
+    component: <SignupForm />,
   },
   {
     route: "/setgoal",

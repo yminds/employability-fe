@@ -1,11 +1,14 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useCreateInterview } from "@/hooks/useCreateInterview";
 
-import verifiedImg from '@/assets/skills/verified.svg';
-import unverifiedImg from '@/assets/skills/unverifies.svg';
+import verifiedImg from "@/assets/skills/verified.svg";
+import unverifiedImg from "@/assets/skills/unverifies.svg";
 
 interface SkillCardProps {
-  key : string
+  skill_id: string;
+  key: string
+  skillId: string;
   skill: string;
   skillImg: string;
   verified_rating: number;
@@ -14,6 +17,7 @@ interface SkillCardProps {
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
+  skill_id,
   skill,
   skillImg,
   verified_rating,
@@ -21,12 +25,14 @@ const SkillCard: React.FC<SkillCardProps> = ({
   initialStatus,
 }) => {
   const navigate = useNavigate();
-  
-  const status = initialStatus === 'Verified' ? 'Verified' : 'Unverified';
-  const imgSrc = status === 'Verified' ? verifiedImg : unverifiedImg;
+  const { createInterview, isLoading, isSuccess, isError, error } =
+    useCreateInterview();
+
+  const status = initialStatus === "Verified" ? "Verified" : "Unverified";
+  const imgSrc = status === "Verified" ? verifiedImg : unverifiedImg;
 
   const handleViewReport = () => {
-    navigate(`/skills/${skill}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/skills/${skill_id}`, { state: { skill, verified_rating, selfRating } });
   };
 
   const handleImproveScore = () => {
@@ -34,33 +40,34 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   const handleLearn = () => {
-    navigate(`/mentor/${skill}`, { state: { skill } });
+    navigate(`/mentor/${skill_id}`, { state: { skill } });
   };
 
   const handleVerifySkill = () => {
-    navigate(`/interview/${skill}`, { state: { skill } });
+    navigate(`/interview/${skill_id}`, { state: { skill } });
   };
 
   return (
-    <div className="flex items-center justify-around w-[920px] h-[140px] p-4 bg-white border rounded-lg shadow-sm">
+    <div className="flex items-center justify-between h-[82px]  bg-white">
       {/* Left Section: Skill Image and Name */}
-      <div className="flex w-[30%] h-full items-center justify-center space-x-4">
-        <img src={skillImg} alt={skill} className="w-10 h-10 rounded-full" />
+      <div className="flex w-[30%] h-full items-center space-x-4">
+        <span className="flex w-[52px] h-[52px] p-[9.75px] px-[10.833px] justify-center items-center gap-[10.833px] flex-shrink-0 rounded-full border-[1.083px] border-black/5 bg-[rgba(250,250,250,0.98)]">
+          <img src={skillImg} alt={skill} className="w-[30] h-[30]" />
+        </span>
         <div>
-          <h3 className="text-[2vh] font-semibold">{skill}</h3>
-          <p className="text-sm text-gray-600">Self rating: {selfRating}/10</p>
+          <h3 className=" text-[16px] font-medium">{skill}</h3>
+          <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">Self rating: {selfRating}/10</p>
         </div>
       </div>
 
       {/* Middle Section: Rating and Status */}
-      <div className="flex w-[30%] flex-col items-center space-y-1 border-r-2 border-l-2">
-        <p className="text-lg font-bold">{verified_rating}/10</p>
+      <div className="flex w-[30%] flex-col items-center space-y-1">
+        <p className="text-lg font-medium">{verified_rating}<span className="text-[#909091]">/10</span></p>
         <div className="flex items-center space-x-2">
           <img src={imgSrc} alt={status} className="w-4 h-4" />
           <span
-            className={`text-sm font-medium ${
-              status === 'Verified' ? 'text-green-600' : 'text-yellow-600'
-            }`}
+            className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-green-600" : "text-yellow-600"
+              }`}
           >
             {status}
           </span>
@@ -68,18 +75,18 @@ const SkillCard: React.FC<SkillCardProps> = ({
       </div>
 
       {/* Right Section: Buttons */}
-      <div className="flex w-[40%] justify-center space-x-2">
-        {status === 'Verified' ? (
+      <div className="flex w-[40%] justify-end space-x-2">
+        {status === "Verified" ? (
           <>
             <button
               onClick={handleViewReport}
-              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium border rounded-md text-gray-700 hover:bg-[#10B754] hover:text-white"
+              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium rounded-md text-[#001630] underline"
             >
               View report
             </button>
             <button
               onClick={handleImproveScore}
-              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium text-white bg-black rounded-md hover:bg-[#10B754]"
+              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
             >
               Improve score
             </button>
@@ -88,13 +95,13 @@ const SkillCard: React.FC<SkillCardProps> = ({
           <>
             <button
               onClick={handleLearn}
-              className="px-4 py-2 w-[138px] h-[44px] text-sm font-medium border rounded-md text-gray-700 hover:bg-[#10B754] hover:text-white"
+              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium rounded-md text-[#001630] underline"
             >
               Learn
             </button>
             <button
               onClick={handleVerifySkill}
-              className="px-4 py-2 w-[138px] h-[44px] text-sm font-medium text-white bg-black rounded-md hover:bg-[#10B754]"
+              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
             >
               Verify skill
             </button>

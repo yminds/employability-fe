@@ -1,6 +1,6 @@
 export interface Area {
     name: string;
-    rating: "Low" | "Average" | "Good";
+    rating: "Low" | "Average" | "Good" | "Excellent";
     strengths: string[];
     areas_for_improvement: string[];
 }
@@ -46,3 +46,6 @@ export const UserSkillsIntialValues: UserSkill = {
     user_fundamental_id: "", 
 };
 
+export interface progressProps{
+    areas:Area[]
+}

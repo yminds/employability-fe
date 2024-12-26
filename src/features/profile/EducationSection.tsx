@@ -1,10 +1,10 @@
-// src/components/EducationSection.tsx
-
 import React, { useEffect, useState } from "react";
-import { Building2, Clock, Plus, Edit } from "lucide-react";
+import { Building2, Clock } from "lucide-react";
 import AddEditEducationModal from "../../components/modal/AddEditEducationModal"; // Adjust the path as necessary
-import { Education, Certification } from "../../features/profile/types"; // Define these types accordingly
+import { Education } from "../../features/profile/types"; // Define these types accordingly
+
 import {
+  useGetEducationByIdQuery,
   useGetEducationByIdQuery,
   useAddEducationMutation,
   useUpdateEducationMutation,
@@ -163,7 +163,9 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
           <div key={index} className="flex items-start gap-4 py-4">
             {/* Icon */}
             <div className="flex-shrink-0 mt-1">
-              {entry.level.toLowerCase().includes("secondary") ? (
+              {entry.highest_education_level
+                ?.toLowerCase()
+                ?.includes("secondary") ? (
                 <Clock className="h-6 w-6 text-gray-500" />
               ) : (
                 <Building2 className="h-6 w-6 text-gray-500" />
@@ -172,15 +174,30 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
 
             {/* Education Details */}
             <div className="flex-1">
-              <h3 className="font-medium text-gray-900">{entry.degree}</h3>
-              <p className="text-sm text-gray-500">{entry.institute}</p>
+              <h3 className="font-medium text-gray-900">
+                {entry.degree || "N/A"}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {entry.institute || "N/A"}
+              </p>
+              <p className="text-sm text-gray-500">
+                {entry.board_or_certification || "N/A"}
+              </p>
             </div>
 
             {/* CGPA and Dates */}
             <div className="text-right">
-              <p className="font-medium text-gray-900">{entry.cgpa} CGPA</p>
+              <p className="font-medium text-gray-900">
+                {entry.cgpa_or_marks ? `${entry.cgpa_or_marks} CGPA` : "N/A"}
+              </p>
               <p className="text-sm text-gray-500">
-                {entry.fromDate} - {entry.tillDate}
+                {entry.from_date
+                  ? new Date(entry.from_date).toLocaleDateString()
+                  : "N/A"}{" "}
+                -{" "}
+                {entry.till_date
+                  ? new Date(entry.till_date).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
           </div>

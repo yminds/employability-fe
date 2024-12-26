@@ -13,8 +13,15 @@ import {
   ExperienceItem,
 } from "../../features/profile/types";
 import ExperienceSection from "./ExperienceSection";
-import { useSelector } from "react-redux";
 // import CertificationsSection from "@/components/inputs/CertificationsSection";
+import {
+    useGetEducationByIdQuery,
+  useAddEducationMutation,
+  useUpdateEducationMutation,
+  useDeleteEducationMutation,
+} from "../../api/educationSlice";
+
+
 
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
@@ -174,7 +181,7 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8">
+    <div className="bg-gray-100 min-h-screen py-8 ">
       <div className="max-w-6xl mx-auto space-y-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Section */}
         <div className="lg:col-span-2">

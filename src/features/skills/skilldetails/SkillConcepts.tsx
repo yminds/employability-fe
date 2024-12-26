@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Area } from "@/types/userSkillsType";
+import { getRatingColor } from "@/utils/skills/skillDetail";
 
 interface skillConceptsProps {
   areas: Area[];
@@ -16,7 +17,7 @@ const SkillConcepts: React.FC<skillConceptsProps> = ({ areas }) => {
               <h3 className="text-sm font-semibold text-gray-800 font-ubuntu">{area.name}</h3>
               <div className="flex items-center space-x-2">
                 <p className="text-xs text-gray-500">Score :</p>
-                <p className="text-sm font-normal text-green-600">{area.rating}</p>
+                <p className={`text-sm font-normal text-${getRatingColor(area.rating)}`}>{area.rating}</p>
               </div>
             </div>
             <div className="flex flex-row gap-4">

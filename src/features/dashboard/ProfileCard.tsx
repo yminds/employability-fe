@@ -27,7 +27,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <div className="h-px self-stretch bg-[#D9D9D9] mt-2 mb-2"></div>
 
             <div className="flex flex-col items-start gap-2 self-stretch">
-                <h4 className="text-gray-900 text-base font-medium leading-5">Complete your profile</h4>
+                <h4 className="text-gray-900 text-base font-medium leading-5 font-sf-pro">Complete your profile</h4>
                 <div className="flex items-center gap-5 self-stretch">
                     <div className="relative w-full bg-[#FAFAFA] rounded-full h-[6px]">
                         <div className="bg-[#2EE578] h-[6px] rounded-full" style={{ width: `${completionPercentage}%` }}></div>
@@ -36,9 +36,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 </div>
             </div>
 
-            <p className="text-black text-base font-normal leading-6 tracking-wide mb-2">Employers are <span className="text-green-500">3 times</span> more likely to hire a candidate with a complete profile.</p>
+            <p className="text-black text-base font-normal leading-6 tracking-wide mb-2 font-sf-pro">Employers are <span className="text-green-500">3 times</span> more likely to hire a candidate with a complete profile.</p>
 
-            <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px]">
+            <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">
                 <img
                     src="./src/assets/dashboard/subtract.svg"
                     alt=""
@@ -46,7 +46,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 />
                 {importButtonLabel}
             </button>
-            <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px]">
+            <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">
                 <img
                     src="./src/assets/dashboard/upload.svg"
                     alt=""
@@ -54,7 +54,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 />
                {uploadButtonLabel}
             </button>
-            <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px]">
+            <button className="flex items-center gap-3 p-1 py-0 justify-between overflow-hidden text-gray-600 text-ellipsis text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">
                 <img
                     src="./src/assets/dashboard/checklist_rtl.svg"
                     alt=""

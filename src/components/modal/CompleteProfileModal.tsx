@@ -196,6 +196,8 @@ export default function CompleteProfileModal({
       }
     };
     initializeData();
+    setFormData(transformData(data));
+    console.log(data);
   }, [data]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
