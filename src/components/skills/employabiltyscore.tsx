@@ -1,20 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CircularProgress from '@/components/ui/circular-progress-bar'; // Updated CircularProgress
 import editIcon from '@/assets/skills/edit-icon.svg';
 import logo from '@/assets/skills/e-Logo.svg';
 import { useSelector } from 'react-redux';
-import { useUpdateGoalNameMutation } from '@/api/goalsApiSlice'
+import { useUpdateGoalNameMutation , useGetGoalsbyuserQuery } from '@/api/goalsApiSlice'
 import { RootState } from '@/store/store';
 
 interface Skill {
+  data:[
+    {
+      _id: string;
+      skill_pool_id: {
+        _id: string;
+        name: string;
+        icon: string
+      };
+      verified_rating: number;
+      self_rating: number;
+    }
+  ]
+}
+
+interface Goal {
   _id: string;
-  skill_pool_id: {
-    _id: string;
-    name: string;
-  };
-  verified_rating: number;
-  self_rating: number;
-  data : any
+  user_id: string;
+  __v: number;
+  description: string;
+  name: string;
+  skill_pool_ids: string[];
+}
+
+interface GoalsResponse {
+  message: string;
+  data: Goal[];
 }
 
 interface EmployabilityScoreProps {
@@ -22,14 +40,25 @@ interface EmployabilityScoreProps {
 }
 
 const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ skills }) => {
-  const userId =  useSelector((state:RootState) => state.auth.user?.id); //"676823f85069fc2239b53a46"
+  const userId =  useSelector((state:RootState) => state.auth.user._id); 
+
   const [updateExample, { isLoading, error }] = useUpdateGoalNameMutation();
+
+  const { data:goalData , error: goalError, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
+ 
+  const goalId = goalData?.data[0]?._id as string;
+  const goalName = goalData?.data[0]?.name as string;
+ 
 
   const totalVerifiedRating = skills.data.reduce((acc, skill) => acc + skill.verified_rating, 0);
   const averageVerifiedRating = skills.data.length > 0 ? totalVerifiedRating / skills.data.length : 0;
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [goal, setGoal] = useState<string>('Full stack developer');
+  const [goal, setGoal] = useState<string>();
+
+  useEffect(()=>{
+    setGoal(goalData?.data[0]?.name as string)
+  },[goalData])
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -38,9 +67,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ skills }) => {
   const handleSave = async () => {
     setIsEditing(false);
     try {
-      await updateExample({userId : userId,name : goal }).unwrap();
-      console.log({userId : userId,name : goal });
-      
+      await updateExample({goalId : goalId, name : goal }).unwrap();
     } catch (err) {
       // Handle error
       console.error('Failed to update:', err);
@@ -51,9 +78,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ skills }) => {
     if (e.key === 'Enter') {
       setIsEditing(false); // Save the goal and exit edit mode
       try {
-        await updateExample({userId : userId,name : goal }).unwrap();
-        console.log({userId : userId,name : goal });
-        
+        await updateExample({goalId : goalId, name : goal }).unwrap();
       } catch (err) {
         // Handle error
         console.error('Failed to update:', err);

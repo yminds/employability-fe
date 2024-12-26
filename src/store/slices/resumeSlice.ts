@@ -79,11 +79,14 @@ export const uploadResume = createAsyncThunk(
       formData.append("resume", file);
       formData.append("userId", userId);
 
-      const response = await fetch("http://localhost:3000/api/upload-resume", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/v1/resume/upload-resume",
+        {
+          method: "POST",
+          body: formData,
+          // credentials: "include",
+        }
+      );
 
       const data = await response.json();
 
@@ -120,8 +123,10 @@ const resumeSlice = createSlice({
       .addCase(
         uploadResume.fulfilled,
         (state, action: PayloadAction<ParsedData>) => {
+          console.log(action);
           state.uploading = false;
           state.parsedData = action.payload;
+          console.log(state);
         }
       )
       .addCase(uploadResume.rejected, (state, action) => {

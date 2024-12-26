@@ -1,9 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import GoalList from "@/features/dashboard/GoalList";
 import GoalFormDialog from "@/features/dashboard/GoalFormDialog";
 
-const SetGoalCard: React.FC = () => {
+interface Goal {
+    title: string;
+    _id: string;
+    name: string;
+    description: string;
+    image?: string;
+    skill_pool_id: string[]; // Array of skill IDs associated with the goal
+    predefined_goal_id: string;
+}
+
+const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog }) => {
+    const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
+    const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
+
+    const handleLinkClick = () => {
+        setSelectedGoal(null); // Set the selected goal
+        setIsDialogOpen(true); // Open the dialog
+    };
+
     return <>
         <div className="flex flex-col items-start gap-12 self-stretch">
             <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -25,14 +43,40 @@ const SetGoalCard: React.FC = () => {
                     </div>
                 </Link>
 
-                {/* Custom Goal Dialog */}
-                <GoalFormDialog isLoading={false} error={false} />
+                {/* Link to trigger dialog */}
+                <Link to="" className="rounded-[9px] border border-black/10 bg-[#FFF] hover:border-[#1FD167]"
+                    onClick={() => handleLinkClick()}>
+                    <div className="flex flex-col items-start gap-8 relative p-6">
+                        <div className="h-[50px]">
+                            <img
+                                src="./src/assets/set-goal/custom_goal.svg"
+                                alt="Skills"
+                                className="mt-3"
+                            />
+                        </div>
+
+                        <div className="flex flex-col items-start gap-3.5 self-stretch">
+                            <h3 className="text-gray-800 text-lg font-medium leading-6 tracking-tight"
+                            >Create Custom Goal</h3>
+                            <p className="text-gray-600 text-base font-normal leading-6 tracking-wide">Define your own career path and learning journey.</p>
+                        </div>
+                    </div>
+                </Link>
+                {isDialogOpen && (
+                    <GoalFormDialog
+                        isOpen={isDialogOpen}
+                        setIsOpen={setIsDialogOpen}
+                        selectedGoal={selectedGoal}
+                        setJourneyDialog={setJourneyDialog}
+                    />
+                )}
             </section>
 
             <section className="flex flex-col items-start gap-4 self-stretch">
                 <h5 className="text-[#909091] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
                 >Predefined Goals</h5>
-                <GoalList isLoading={false} error={false}/>
+                <GoalList isLoading={false} error={false} setJourneyDialog={setJourneyDialog}
+                />
             </section>
 
         </div>

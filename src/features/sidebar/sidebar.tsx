@@ -11,6 +11,7 @@ import InterviewsIcon from '../../assets/sidebar/interviews.svg';
 import JobsIcon from '../../assets/sidebar/jobs.svg';
 import CloseIcon from '../../assets/sidebar/left_panel_close.svg';
 import OpenIcon from '../../assets/sidebar/left_panel_open.svg';
+import { RootState } from '@/store/store';
 
 const Sidebar: React.FC = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -18,8 +19,8 @@ const Sidebar: React.FC = () => {
         return window.location.pathname === path ? 'bg-[#DBFFEA] text-[#10B754]' : '';
     };
 
-    const user_name = useSelector((state) => state.auth.user.name);
-    const user_email = useSelector((state) => state.auth.user.email);
+    const user_name = useSelector((state:RootState) => state.auth.user?.name);
+    const user_email = useSelector((state:RootState) => state.auth.user?.email);
 
     const handleLogout = () => {
         localStorage.clear();
@@ -28,7 +29,7 @@ const Sidebar: React.FC = () => {
 
     return (
         <div className="relative">
-            <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden transition-all ${isCollapsed ? 'w-20' : 'w-64'}`}>
+            <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden minimal-scrollbar transition-all ${isCollapsed ? 'w-20' : 'w-64'}`}>
                 <Link to="/" className={`flex items-center gap-2 self-stretch ${isCollapsed ? 'justify-center' : ''}`}>
                     <img src={LogoIcon} alt='' />
                     {!isCollapsed && (
@@ -53,7 +54,7 @@ const Sidebar: React.FC = () => {
                             </Link>
                         </li>
                         <li>
-                            <Link to="/profile" className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/profile')}`}>
+                            <Link to="/user-profile" className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/user-profile')}`}>
                                 <img src={ProfileIcon} alt='Profile' />
                                 {!isCollapsed && <span className="text-gray-500 text-base font-medium leading-normal">Profile</span>}
                             </Link>
@@ -90,7 +91,7 @@ const Sidebar: React.FC = () => {
                 </nav>
                 
                 <div className="mt-6 w-full">
-                    <button onClick={handleLogout} className="p-2 bg-gray-100 border mb-4 w-full">
+                    <button onClick={handleLogout} className={`p-2 bg-gray-100 border mb-4 w-full ${isCollapsed ? 'hidden' : ''}`}>
                         Logout
                     </button>
                     <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'p-4 rounded-[6px] border border-[#F5F5F5] bg-white'}`}>

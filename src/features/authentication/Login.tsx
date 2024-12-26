@@ -5,11 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "@/api/authApiSlice";
 import { Button } from "@/components/elements/button";
 
+// IMAGES
+import logo from "@/assets/branding/logo.svg";
+import man from "@/assets/sign-up/man.png";
+import grid from "@/assets/sign-up/grid.svg";
+import arrow from "@/assets/skills/arrow.svg";
+import Mail from "@/assets/sign-up/mail.png";
+import Password from "@/assets/sign-up/password.png";
+
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [login, { isSuccess }] = useLoginMutation();
-  const authState = useSelector((state: RootState) => state.auth);
   const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
 
@@ -22,65 +29,108 @@ const Login: React.FC = () => {
     if (isSuccess || token) {
       navigate("/");
     }
-  }, [isSuccess, authState]);
+  }, [isSuccess, token, navigate]);
 
   return (
-    <div className="flex flex-row w-full justify-center h-screen items-center bg-gray-50 dark:bg-gray-800">
-      <div className="rounded-xl flex flex-row h-3/4 w-[1024px] tablet:w-3/4 mobile:w-full mobile:mx-4 bg-white">
-        <div className="p-12 rounded-r-xl w-full flex items-start flex-col justify-center dark:bg-gray-900">
-          <form
-            className="space-y-4 md:space-y-6 mt-6 w-full"
-            onSubmit={handleLogin}
-          >
-            <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white md:text-2xl">
-              Log in to platform
-            </h1>
-            <div>
-              <label
-                htmlFor="email"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Email
-              </label>
+    <div className="flex h-screen w-screen dark:bg-gray-800">
+      {/* Logo */}
+      <div className="absolute top-5 left-10 w-1/4 h-1/4 z-10">
+        <img src={logo} alt="Logo" />
+      </div>
+
+      {/* Hero Image Section */}
+      <div className="flex w-1/2 justify-center items-center md:block md:p-0 relative">
+        <img
+          src={grid}
+          alt="Hero"
+          className="w-full max-h-screen md:h-screen object-cover hidden md:block"
+        />
+        <img
+          src={man}
+          alt="Hero"
+          className="w-[100%] bottom-0 absolute"
+        />
+      </div>
+
+      {/* Form Section */}
+      <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
+        <div className="w-full max-w-md bg-white rounded-lg p-8">
+          {/* Back Button */}
+          <div className="flex items-center gap-2 mb-6 hidden">
+            <img className="w-4 h-4" src={arrow} alt="Back Arrow" />
+            <button
+              onClick={() => navigate("/")}
+              className="text-sm text-black hover:text-green-600"
+            >
+              Back
+            </button>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="h-[84px] flex flex-col justify-around mx-auto">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Login to Your Account
+              </h1>
+              <p className="text-sm text-gray-500">
+                New to Employability.AI?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/signup")}
+                  className="text-green-600 underline hover:text-green-800"
+                >
+                  Sign up
+                </button>
+              </p>
+            </div>
+
+            {/* Email Input */}
+            <div className="relative">
               <input
                 type="email"
                 name="email"
                 id="email"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="name@company.com"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="Email or Phone"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <img
+                src={Mail}
+                alt="Email Icon"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
             </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Password
-              </label>
+
+            {/* Password Input */}
+            <div className="relative">
               <input
-                placeholder="Enter your password"
                 type="password"
                 name="password"
                 id="password"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
-              <div className="my-5 flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2"></div>
-                <span
-                  className="font-medium text-xs text-blue-700 cursor-pointer"
-                  onClick={() => navigate("/login/forget-password")}
-                >
-                  Lost password?
-                </span>
-              </div>
-              <Button type="submit" className="text-sm font-sans font-medium">
-                Log In
-              </Button>
+              <img
+                src={Password}
+                alt="Password Icon"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+              />
             </div>
+
+            {/* Login Button */}
+            <Button
+              type="submit"
+              className="w-full p-3 text-white bg-green-600 hover:bg-green-700 rounded-lg font-medium"
+              disabled={false}
+            >
+              Login
+            </Button>
+
           </form>
         </div>
       </div>
