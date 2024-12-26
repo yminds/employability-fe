@@ -6,7 +6,6 @@ import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { ProfileFormData } from "./types";
 import EditBioModal from "@/components/modal/EditBioModal";
 import EducationSection from "./EducationSection";
-import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Button } from "@/components/ui/button"
 // import arrow from '@/assets/skills/arrow.svg';
@@ -45,7 +44,8 @@ const UserProfile: React.FC = () => {
       till_date: "2024-04-30",
       cgpa_or_marks: "9.1",
       _id: "",
-      board_or_certification: ''
+      board_or_certification: '',
+      highest_education_level: undefined
     },
 
   ];
