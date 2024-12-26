@@ -20,6 +20,7 @@ import {
   useUpdateEducationMutation,
   useDeleteEducationMutation,
 } from "../../api/educationSlice";
+import { useSelector } from "react-redux";
 
 
 
@@ -29,23 +30,16 @@ const UserProfile: React.FC = () => {
 
   const initialEducationEntries: Education[] = [
     {
-      level: "bachelors",
+      education_level: "bachelors",
       degree: "B Tech Computer Science",
       institute: "APJ Abdul Kalam University",
-      fromDate: "2020-10-01",
-      tillDate: "2024-04-30",
-      cgpa: "9.1",
+      from_date: "2020-10-01",
+      till_date: "2024-04-30",
+      cgpa_or_marks: "9.1",
       _id: "",
+      board_or_certification: ''
     },
-    {
-      level: "secondary",
-      degree: "Higher Secondary",
-      institute: "Kendriya Vidyalaya",
-      fromDate: "2018-04-01",
-      tillDate: "2020-11-30",
-      cgpa: "8.8",
-      _id: "",
-    },
+
   ];
   const initialExperiences: ExperienceItem[] = [
     {

@@ -4,8 +4,7 @@ import AddEditEducationModal from "../../components/modal/AddEditEducationModal"
 import { Education } from "../../features/profile/types"; // Define these types accordingly
 
 import {
-  useGetEducationByIdQuery,
-  useGetEducationByIdQuery,
+    useGetEducationByIdQuery,
   useAddEducationMutation,
   useUpdateEducationMutation,
   useDeleteEducationMutation,
@@ -24,7 +23,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
     null
   );
 
-  const { data: educationData } = useGetEducationByIdQuery(user._id);
+  const { data } = useGetEducationByIdQuery(user._id);
   //   console.log(educationData, "jjjjjjjjjjjjjj");
 
   const [addEducation] = useAddEducationMutation();
@@ -32,10 +31,12 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
   const [deleteEducation] = useDeleteEducationMutation();
 
   useEffect(() => {
-    if (educationData) {
-      setEducation(educationData);
+    if (data && data.data) {
+      setEducation(data.data);
     }
-  }, [educationData]);
+  }, [data, education]);
+
+
 
   const openModal = (educationItem?: Education) => {
     setEditingEducation(educationItem || null); // Open modal for editing or adding
@@ -163,7 +164,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
           <div key={index} className="flex items-start gap-4 py-4">
             {/* Icon */}
             <div className="flex-shrink-0 mt-1">
-              {entry.highest_education_level
+              {entry.education_level
                 ?.toLowerCase()
                 ?.includes("secondary") ? (
                 <Clock className="h-6 w-6 text-gray-500" />
