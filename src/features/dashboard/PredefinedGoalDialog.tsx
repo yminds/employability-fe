@@ -56,7 +56,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto minimal-scrollbar">
+            <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto minimal-scrollbar font-ubuntu">
                 <DialogTitle className="hidden">Predefined Goals</DialogTitle>
 
                 <div className="flex items-center justify-center">
@@ -96,7 +96,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
                         </div>
 
                         <div className="w-full flex justify-end mt-4">
-                            <button type="submit" className="flex w-auto h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#10B754] text-white text-[16px] font-medium leading-[24px] tracking-[0.24px]"
+                            <button type="submit" className="flex w-auto h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#00183D] text-white text-[16px] font-medium leading-[24px] tracking-[0.24px]"
                                 onClick={handleSubmit}
                             >
                                 Set Goal

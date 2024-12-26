@@ -20,8 +20,8 @@ const Dashboard: React.FC = () => {
   const handleLinkClick = (route: string) => {
     navigate(route); // Navigate to the specified route
   };
-  //const { data } = "";
-  const { data } = useGetUserGoalQuery(user_id);
+  const { data } = "";
+  //const { data } = useGetUserGoalQuery(user_id);
   const goalName = data?.data?.[0]?.name || "";
   const completionPercentage = 50;
 
@@ -42,7 +42,6 @@ const Dashboard: React.FC = () => {
 
                 <div className="grid grid-cols-4 gap-4">
                   <div className="col-span-3 flex flex-col gap-10 shrink-0">
-                    {/* Set Your Goal Section */}
                     <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
                       <div className="flex flex-col items-start gap-6 self-stretch relative">
                         <div className="flex flex-col items-start gap-2">
