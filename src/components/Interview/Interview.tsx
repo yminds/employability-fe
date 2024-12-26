@@ -1,19 +1,19 @@
-// Interview.tsx
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { io, Socket } from "socket.io-client";
+import { useParams } from "react-router-dom";
 
 import Header from "@/components/interview/Header";
 import WebCam from "@/components/interview/WebCam";
 import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
-import axios from "axios";
 import {
   useStreamMutation,
   useSttMutation,
   useTtsMutation,
 } from "@/api/aiApiSlice";
+import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 
 export interface IMessage {
   id: number;
@@ -27,11 +27,20 @@ const Interview: React.FC<{
   cameraScale: number;
   id: string;
 }> = () => {
+  const { id: interviewId } = useParams<{ id: string }>();
   // API Mutations
   const [stream] = useStreamMutation();
   const [tts] = useTtsMutation();
   const [stt, { isSuccess: isSttSuccess, data: sttResponse, error: sttError }] =
     useSttMutation();
+
+  const { data: interviewDetails } = useGetInterviewbyIdQuery(
+    interviewId as string
+  );
+
+  useEffect(() => {
+
+  }, [interviewDetails]);
 
   // State Variables
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -282,7 +291,6 @@ const Interview: React.FC<{
   // Add Message to State with Appending Logic for AI
   const handleMessage = (message: string, role: string = "USER") => {
     if (role === "AI") {
-      console.log("Message:", message);
       setMessages((prevMessages) => {
         if (prevMessages.length === 0) {
           // If no messages exist, add the AI message
@@ -361,11 +369,6 @@ const Interview: React.FC<{
       // "provider":"anthropic"
     });
   };
-
-  // Log Messages for Debugging
-  useEffect(() => {
-    console.log("messages", messages);
-  }, [messages]);
 
   return (
     <div className="w-full h-screen pt-12">

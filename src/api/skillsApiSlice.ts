@@ -3,7 +3,20 @@ import { apiSlice } from './apiSlice';
 export const skillsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Fetch all user skills
-    getUserSkills: builder.query<any[], string>({
+    getUserSkills: builder.query<{
+        data:[
+          {
+            _id: string;
+            skill_pool_id: {
+              _id: string;
+              name: string;
+              icon: string;
+            };
+            verified_rating: number;
+            self_rating: number;
+          }
+        ]
+    }, string>({
       query: (userId) => ({
         url: `/api/v1/skills/userSkills/user/${userId}`, // Append the userId to the URL
         method: 'GET',

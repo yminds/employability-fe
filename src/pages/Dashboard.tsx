@@ -1,13 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import ProfileCard from "@/features/dashboard/ProfileCard";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import GoalList from "@/features/dashboard/GoalList";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { RootState } from '@/store/store';
 
 const Dashboard: React.FC = () => {
-  const user_name = useSelector((state) => state.auth.user.name);
+  const [journeyDialog, setJourneyDialog] = useState(false);
+  const user_name = useSelector((state:RootState) => state.auth.user?.name);
+  const navigate = useNavigate(); // Initialize useNavigate hook
+  const handleLinkClick = (route: string) => {
+    navigate(route); // Navigate to the specified route
+  };
+
   return (
     <>
       <main className="h-screen overflow-auto">
@@ -26,12 +34,14 @@ const Dashboard: React.FC = () => {
                       <h2 className="text-[#0C0F12] text-[20px] font-medium leading-[26px] tracking-[-0.2px]">Set Your Goal</h2>
                       <div className="flex flex-col items-start gap-[50px] self-stretch">
                         <p className="text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Define your career aspirations and get a personalized roadmap to success.</p>
+                        <Button
+                          onClick={() => {
+                            setJourneyDialog(true)
+                          }}
+                          className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
 
                         {/* Dialog */}
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" className="bg-[#1FD167] text-white py-[10px] px-6 rounded hover:bg-green-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none">Start Your Journey</Button>
-                          </DialogTrigger>
+                        {<Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
                           <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto gap-8">
                             {/* Visually hidden title */}
                             <DialogTitle className="hidden">Set Your Goal</DialogTitle>
@@ -40,10 +50,9 @@ const Dashboard: React.FC = () => {
                               <h2 className="text-[#1A1A1A] text-[24px] font-medium leading-[32px] tracking[-0.24px]">Set Your Goal</h2>
                               <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide">Choose your goal and get tailored resources to help you succeed.</p>
                             </div>
-                            <SetGoalCard />
+                            <SetGoalCard setJourneyDialog={setJourneyDialog} />
                           </DialogContent>
-                        </Dialog>
-
+                        </Dialog>}
                       </div>
                     </div>
 
@@ -77,7 +86,7 @@ const Dashboard: React.FC = () => {
                           <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Highlight top skills to help us match you with the right opportunities.</p>
                         </div>
 
-                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide">Add Skills</button>
+                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/skills")}>Add Skills</button>
                       </div>
 
                       <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
@@ -96,7 +105,7 @@ const Dashboard: React.FC = () => {
                           <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Start adding projects that showcase your expertise and creativity.</p>
                         </div>
 
-                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide">Add a Project</button>
+                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/projects")}>Add a Project</button>
                       </div>
 
                       <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
@@ -115,7 +124,7 @@ const Dashboard: React.FC = () => {
                           <p className="text-gray-500 text-base font-normal leading-6 tracking-wide">Prepare for real interviews by practicing with AI-driven questions.</p>
                         </div>
 
-                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide">Start Practice</button>
+                        <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-[#DBFFEA] text-green-600 text-base font-medium leading-6 tracking-wide" onClick={() => handleLinkClick("/interviews")}>Start Practice</button>
                       </div>
                     </div>
                   </section>

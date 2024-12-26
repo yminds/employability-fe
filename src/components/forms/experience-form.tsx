@@ -133,7 +133,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
               </label>
               <input
                 type="text"
-                value={exp.companyName}
+                value={exp.companyName || exp.company}
                 onChange={(e) =>
                   updateExperience(index, "companyName", e.target.value)
                 }
