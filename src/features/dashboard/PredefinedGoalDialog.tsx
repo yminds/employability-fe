@@ -48,7 +48,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
             await createGoal(goalData).unwrap();
             setIsSaved(false);
             setIsOpen(false);
-            // setJourneyDialog(false);
+            //setJourneyDialog(false);
         } catch (err) {
             console.error("Failed to save goal:", err);
         }
