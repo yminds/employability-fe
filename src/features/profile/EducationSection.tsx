@@ -24,10 +24,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
     null
   );
 
-  const { data } = useGetEducationByIdQuery(user._id,{
-
-
-  });
+  const { data } = useGetEducationByIdQuery(user._id);
 
   const [addEducation] = useAddEducationMutation();
   const [updateEducation] = useUpdateEducationMutation();

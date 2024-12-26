@@ -56,8 +56,8 @@ const EducationForm: React.FC<EducationFormProps> = ({
         const updatedEdu = { ...edu, [field]: value };
         // Sync both institute and institution fields
         if (field === "institute") {
-          updatedEdu.institution = value as string;
-        } else if (field === "institution") {
+          updatedEdu.institute = value as string;
+        } else if (field === "education_level") {
           updatedEdu.institute = value as string;
         }
         return updatedEdu;
@@ -134,7 +134,6 @@ const EducationForm: React.FC<EducationFormProps> = ({
                 }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
                   getError(`education.${index}.degree`) ? "border-red-500" : ""
-                  getError(`education.${index}.degree`) ? "border-red-500" : ""
                 }`}
                 placeholder="Enter your degree or board"
               />
@@ -152,7 +151,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
             </label>
             <input
               type="text"
-              value={edu.institute || edu.institution || ""}
+              value={edu.institute || edu.institute || ""}
               onChange={(e) =>
                 updateEducation(index, "institute", e.target.value)
               }
