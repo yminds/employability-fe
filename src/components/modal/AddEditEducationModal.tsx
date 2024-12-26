@@ -1,8 +1,12 @@
-// src/components/modals/AddEditEducationModal.tsx
-
 import React, { useState, useEffect } from "react";
-import EducationForm from "../forms/education-form"; // Adjust the path as necessary
-import { Education } from "./../../features/profile/types"; // Define the Education type accordingly
+import EducationForm from "../forms/education-form";
+import { Education } from "./../../features/profile/types";
+import {
+  useUpdateEducationMutation,
+  useDeleteEducationMutation,
+  useAddEducationMutation,
+} from "../../api/educationSlice";
+import { useSelector } from "react-redux";
 
 interface AddEditEducationModalProps {
   isOpen: boolean;
@@ -19,6 +23,13 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
 }) => {
   const [education, setEducation] = useState<Education[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const user = useSelector((state: any) => state.auth.user);
+
+  const [updateEducation, { isLoading: isUpdating }] =
+    useUpdateEducationMutation();
+  const [deleteEducation, { isLoading: isDeleting }] =
+    useDeleteEducationMutation();
+  const [addEducation, { isLoading: isAdding }] = useAddEducationMutation();
 
   useEffect(() => {
     if (isOpen) {
@@ -29,20 +40,79 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
 
   const handleFormChange = (updatedEducation: Education[]) => {
     setEducation(updatedEducation);
-    // Optionally, you can add validation logic here and update the 'errors' state
+  };
+  const handleAddEducation = async () => {
+    try {
+      // Iterate through all education entries
+      const savePromises = education.map(async (edu) => {
+        if (edu._id) {
+          // Existing entry, perform update
+          return await updateEducation({
+            id: edu._id,
+            updatedEducation: edu,
+          }).unwrap();
+        } else {
+          // New entry, perform add
+          return await addEducation({
+            ...edu,
+            user_id: user._id,
+          }).unwrap();
+        }
+      });
+
+      // Wait for all save operations to complete
+      await Promise.all(savePromises);
+
+      alert("All education entries saved successfully!");
+      // setIsModalOpen(false);
+    } catch (err) {
+      console.error("Failed to save education entries:", err);
+      alert("An error occurred while saving education entries.");
+    }
   };
 
-  const handleSave = () => {
-    // Optionally, perform additional validation here
-    onSave(education);
-    onClose();
+  const handleDeleteEducation = async (educationId: string) => {
+    try {
+      await deleteEducation(educationId).unwrap();
+      setEducation(education.filter((edu) => edu._id !== educationId));
+    } catch (error) {
+      console.error("Failed to delete education:", error);
+      setErrors({ ...errors, deleteEducation: "Failed to delete education" });
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const updatedEducations = await Promise.all(
+        education.map(async (edu) => {
+          if (edu._id) {
+            const result = await updateEducation({
+              id: edu._id,
+              updatedEducation: edu,
+            }).unwrap();
+            return result;
+          } else {
+            const result = await addEducation({
+              id: user._id,
+              newEducation: edu,
+            }).unwrap();
+            return result;
+          }
+        })
+      );
+      onSave(updatedEducations);
+      onClose();
+    } catch (error) {
+      console.error("Failed to save education:", error);
+      setErrors({ ...errors, saveEducation: "Failed to save education" });
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-hidden "
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-hidden"
       onClick={onClose}
       aria-modal="true"
       role="dialog"
@@ -50,9 +120,8 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
     >
       <div
         className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-8 overflow-auto h-[80vh]"
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 id="modal-title" className="text-2xl font-semibold">
             {initialEducation.length > 0
@@ -81,21 +150,27 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
           </button>
         </div>
 
-        {/* Body */}
         <div>
           <EducationForm
             education={education}
             onChange={handleFormChange}
             errors={errors}
+            onAddEducation={handleAddEducation}
+            onDeleteEducation={handleDeleteEducation}
           />
         </div>
 
-        <div className="p-6 border-t bg-white text-right justify-end ">
+        {errors.saveEducation && (
+          <p className="text-red-500 text-sm mt-2">{errors.saveEducation}</p>
+        )}
+
+        <div className="p-6 border-t bg-white text-right justify-end">
           <button
             onClick={handleSave}
-            className=" bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+            disabled={isUpdating || isAdding || isDeleting}
           >
-            Save
+            {isUpdating || isAdding || isDeleting ? "Saving..." : "Save"}
           </button>
         </div>
       </div>

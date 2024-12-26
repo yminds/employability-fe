@@ -6,8 +6,9 @@ import verifiedImg from "@/assets/skills/verified.svg";
 import unverifiedImg from "@/assets/skills/unverifies.svg";
 
 interface SkillCardProps {
-  id: string;
-  key: string;
+  skill_id:string;
+  key : string
+  skillId: string;
   skill: string;
   skillImg: string;
   verified_rating: number;
@@ -16,7 +17,7 @@ interface SkillCardProps {
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
-  id,
+  skill_id,
   skill,
   skillImg,
   verified_rating,
@@ -31,43 +32,34 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const imgSrc = status === "Verified" ? verifiedImg : unverifiedImg;
 
   const handleViewReport = () => {
-    navigate(`/skills/${skill}`, {
-      state: { skill, verified_rating, selfRating },
-    });
+    navigate(`/skills/${skill_id}`, { state: { skill, verified_rating, selfRating } });
   };
 
   const handleImproveScore = () => {
-    navigate(`/interview/${skill}`, {
-      state: { skill, verified_rating, selfRating },
-    });
+    navigate(`/interview/${skill}`, { state: { skill, verified_rating, selfRating } });
   };
 
   const handleLearn = () => {
-    navigate(`/mentor/${skill}`, { state: { skill } });
+    navigate(`/mentor/${skill_id}`, { state: { skill } });
   };
 
-  const handleVerifySkill = async () => {
-    const interviewId = await createInterview({
-      title: "Skill Verification",
-      type: "Skill",
-      user_skill_id: id,
-    });
-    navigate(`/interview/${interviewId}`);
+  const handleVerifySkill = () => {
+    navigate(`/interview/${skill_id}`, { state: { skill } });
   };
 
   return (
-    <div className="flex items-center justify-around w-[920px] h-[140px] p-4 bg-white border rounded-lg shadow-sm">
+    <div className="flex items-center justify-between w-[836pxpx] h-[82px]  bg-white">
       {/* Left Section: Skill Image and Name */}
       <div className="flex w-[30%] h-full items-center justify-center space-x-4">
         <img src={skillImg} alt={skill} className="w-10 h-10 " />
         <div>
-          <h3 className="text-[2vh] font-semibold">{skill}</h3>
+          <h3 className=" text-[16px] font-semibold">{skill}</h3>
           <p className="text-sm text-gray-600">Self rating: {selfRating}/10</p>
         </div>
       </div>
 
       {/* Middle Section: Rating and Status */}
-      <div className="flex w-[30%] flex-col items-center space-y-1 border-r-2 border-l-2">
+      <div className="flex w-[30%] flex-col items-center space-y-1">
         <p className="text-lg font-bold">{verified_rating}/10</p>
         <div className="flex items-center space-x-2">
           <img src={imgSrc} alt={status} className="w-4 h-4" />

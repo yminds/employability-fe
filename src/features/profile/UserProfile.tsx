@@ -14,9 +14,17 @@ import {
 } from "../../features/profile/types";
 import ExperienceSection from "./ExperienceSection";
 // import CertificationsSection from "@/components/inputs/CertificationsSection";
+import {
+    useGetEducationByIdQuery,
+  useAddEducationMutation,
+  useUpdateEducationMutation,
+  useDeleteEducationMutation,
+} from "../../api/educationSlice";
+
+
 
 const UserProfile: React.FC = () => {
-  const user = useSelector((state : any) => state.auth.user);
+  const user = useSelector((state) => state.auth.user);
 console.log(user, "hhhhhhhhhhhhh");
 
   const initialEducationEntries: Education[] = [
@@ -27,7 +35,12 @@ console.log(user, "hhhhhhhhhhhhh");
       fromDate: "2020-10-01",
       tillDate: "2024-04-30",
       cgpa: "9.1",
-      _id: ""
+      _id: "",
+      highest_education_level: undefined,
+      board_or_certification: "",
+      cgpa_or_marks: undefined,
+      from_date: "",
+      till_date: ""
     },
     {
       level: "secondary",
@@ -36,7 +49,12 @@ console.log(user, "hhhhhhhhhhhhh");
       fromDate: "2018-04-01",
       tillDate: "2020-11-30",
       cgpa: "8.8",
-      _id: ""
+      _id: "",
+      highest_education_level: undefined,
+      board_or_certification: "",
+      cgpa_or_marks: undefined,
+      from_date: "",
+      till_date: ""
     },
   ];
   const initialExperiences: ExperienceItem[] = [
@@ -172,7 +190,7 @@ console.log(user, "hhhhhhhhhhhhh");
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8">
+    <div className="bg-gray-100 min-h-screen py-8 ">
       <div className="max-w-6xl mx-auto space-y-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Section */}
         <div className="lg:col-span-2">
@@ -613,7 +631,7 @@ console.log(user, "hhhhhhhhhhhhh");
                 <ResumeUploadModal
                   onClose={() => setIsUploadModalOpen(false)}
                   onUpload={handleUpload}
-                  userId={userId}
+                  userId={user._id}
                 />
               )}
 

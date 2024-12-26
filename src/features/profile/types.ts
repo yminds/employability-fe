@@ -32,14 +32,7 @@ export interface ProfileFormData {
       currentCTC: string;
       expectedCTC: string;
     }>;
-    education: Array<{
-      level: string;
-      degree: string;
-      institute: string;
-      fromDate: string;
-      tillDate: string;
-      cgpa: string;
-    }>;
+
     certifications: Array<{
       title: string;
       issuedBy: string;
@@ -52,13 +45,14 @@ export interface ProfileFormData {
   // src/types.ts
 
 export interface Education {
-    _id: string;
-    level: string;
-    degree: string;
-    institute: string;
-    fromDate: string;
-    tillDate: string;
-    cgpa: string;
+  _id?: any;
+  education_level: any; // e.g., "bachelors", "masters", etc.
+  degree: any;
+  institute: any;
+  board_or_certification: any;
+  from_date: any; // ISO date string
+  till_date: any; // ISO date string
+  cgpa_or_marks: any;
   }
   
   export interface Certification {

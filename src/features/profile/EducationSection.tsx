@@ -1,11 +1,10 @@
-// src/components/EducationSection.tsx
-
 import React, { useEffect, useState } from "react";
-import { Building2, Clock, Plus, Edit } from "lucide-react";
+import { Building2, Clock } from "lucide-react";
 import AddEditEducationModal from "../../components/modal/AddEditEducationModal"; // Adjust the path as necessary
-import { Education, Certification } from "../../features/profile/types"; // Define these types accordingly
+import { Education } from "../../features/profile/types"; // Define these types accordingly
+
 import {
-    useGetEducationByIdQuery,
+  useGetEducationByIdQuery,
   useAddEducationMutation,
   useUpdateEducationMutation,
   useDeleteEducationMutation,
@@ -15,80 +14,79 @@ interface EducationSectionProps {
   initialEducation?: Education[];
 }
 
+const EducationSection: React.FC<EducationSectionProps> = ({}) => {
+  const [fetchEdu , setFetchEdu]= useState(false)
+  const user = useSelector((state: any) => state.auth.user);
 
-const EducationSection: React.FC<EducationSectionProps> = ({  }) => {
-    const user = useSelector((state : any) => state.auth.user);
-console.log(user);
-    const [education, setEducation] = useState<Education[]>([]);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [editingEducation, setEditingEducation] = useState<Education | null>(
-      null
-    );
-  
-    const {
-      data: educationData,
-    
-    } = useGetEducationByIdQuery(user._id);
-//   console.log(educationData, "jjjjjjjjjjjjjj");
-  
-    const [addEducation] = useAddEducationMutation();
-    const [updateEducation] = useUpdateEducationMutation();
-    const [deleteEducation] = useDeleteEducationMutation();
-  
-    useEffect(() => {
-      if (educationData) {
-        setEducation(educationData);
+  const [education, setEducation] = useState<Education[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [editingEducation, setEditingEducation] = useState<Education | null>(
+    null
+  );
+
+  const { data } = useGetEducationByIdQuery(user._id);
+
+  const [addEducation] = useAddEducationMutation();
+  const [updateEducation] = useUpdateEducationMutation();
+  const [deleteEducation] = useDeleteEducationMutation();
+
+  useEffect(() => {
+    if (data && data.data) {
+      setEducation(data.data); // Unwrap the data from the response
+    }
+  }, [data, education]);
+
+  console.log(education, "education");
+
+  const openModal = (educationItem?: Education) => {
+    setEditingEducation(educationItem || null); // Open modal for editing or adding
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSave = async (updatedEducation: Education[]) => {
+    if (editingEducation) {
+      // Update existing record
+      const updated = updatedEducation[0];
+      try {
+        await updateEducation({
+          id: updated._id, // Use the ID from the record
+          updatedEducation: updated,
+        }).unwrap();
+        setFetchEdu(false)
+        alert("Education updated successfully!");
+      } catch (err) {
+        console.error("Failed to update education:", err);
       }
-    }, [educationData]);
-  
-    const openModal = (educationItem?: Education) => {
-      setEditingEducation(educationItem || null); // Open modal for editing or adding
-      setIsModalOpen(true);
-    };
-  
-    const closeModal = () => {
-      setIsModalOpen(false);
-    };
-  
-    const handleSave = async (updatedEducation: Education[]) => {
-      if (editingEducation) {
-        // Update existing record
-        const updated = updatedEducation[0];
-        try {
-          await updateEducation({
-            id: updated._id, // Use the ID from the record
-            updatedEducation: updated,
-          }).unwrap();
-          alert("Education updated successfully!");
-        } catch (err) {
-          console.error("Failed to update education:", err);
-        }
-      } else {
-        // Add new record
-        const newEducation = updatedEducation[0];
-        try {
-          await addEducation({
-            ...newEducation,
-            user_id: user._id,
-          }).unwrap();
-          alert("Education added successfully!");
-        } catch (err) {
-          console.error("Failed to add education:", err);
-        }
+    } else {
+      // Add new record
+      const newEducation = updatedEducation[0];
+      try {
+        await addEducation({
+          ...newEducation,
+          user_id: user._id,
+        }).unwrap();
+        alert("Education added successfully!");
+      } catch (err) {
+        console.error("Failed to add education:", err);
       }
-      setIsModalOpen(false);
-    };
-  
-    const handleDelete = async (id: string) => {
-      if (window.confirm("Are you sure you want to delete this record?")) {
-        try {
-          await deleteEducation(id).unwrap();
-          alert("Education deleted successfully!");
-        } catch (err) {
-          console.error("Failed to delete education:", err);
-        }
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      try {
+        await deleteEducation(id).unwrap();
+        alert("Education deleted successfully!");
+      } catch (err) {
+        console.error("Failed to delete education:", err);
       }
-    };
+    }
+  };
 
   return (
     <div className="rounded-lg bg-white p-6 overflow-auto">
@@ -167,7 +165,9 @@ console.log(user);
           <div key={index} className="flex items-start gap-4 py-4">
             {/* Icon */}
             <div className="flex-shrink-0 mt-1">
-              {entry.level.toLowerCase().includes("secondary") ? (
+              {entry.highest_education_level
+                ?.toLowerCase()
+                ?.includes("secondary") ? (
                 <Clock className="h-6 w-6 text-gray-500" />
               ) : (
                 <Building2 className="h-6 w-6 text-gray-500" />
@@ -176,15 +176,30 @@ console.log(user);
 
             {/* Education Details */}
             <div className="flex-1">
-              <h3 className="font-medium text-gray-900">{entry.degree}</h3>
-              <p className="text-sm text-gray-500">{entry.institute}</p>
+              <h3 className="font-medium text-gray-900">
+                {entry.degree || "N/A"}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {entry.institute || "N/A"}
+              </p>
+              <p className="text-sm text-gray-500">
+                {entry.board_or_certification || "N/A"}
+              </p>
             </div>
 
             {/* CGPA and Dates */}
             <div className="text-right">
-              <p className="font-medium text-gray-900">{entry.cgpa} CGPA</p>
+              <p className="font-medium text-gray-900">
+                {entry.cgpa_or_marks ? `${entry.cgpa_or_marks} CGPA` : "N/A"}
+              </p>
               <p className="text-sm text-gray-500">
-                {entry.fromDate} - {entry.tillDate}
+                {entry.from_date
+                  ? new Date(entry.from_date).toLocaleDateString()
+                  : "N/A"}{" "}
+                -{" "}
+                {entry.till_date
+                  ? new Date(entry.till_date).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
           </div>
@@ -203,4 +218,3 @@ console.log(user);
 };
 
 export default EducationSection;
-

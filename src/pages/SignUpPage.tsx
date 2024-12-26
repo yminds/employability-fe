@@ -1,5 +1,6 @@
-import { useState, FormEvent } from "react";
+import { useState,useEffect, FormEvent } from "react";
 import {
+  useLoginMutation,
   useRegisterUserMutation,
 } from "@/api/authApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import logo from "@/assets/branding/logo.svg";
 import man from "@/assets/sign-up/man.png";
 import grid from "@/assets/sign-up/grid.svg";
+import arrow from "@/assets/skills/arrow.svg";
 interface SignupData {
   email: string;
   password: string;
@@ -29,6 +31,8 @@ const SignupForm = () => {
   const [isSignup, setIsSignup] = useState<boolean>(true);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [login, { isSuccess }] = useLoginMutation();
+   const [signup, { success }] = useRegisterUserMutation();
   const [name, setName] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -41,23 +45,54 @@ const SignupForm = () => {
       setError("Passwords do not match!");
       return;
     }
-
+    
     const signupData: SignupData = {
       email,
       password,
       name,
       role: urlRole,
     };
-
     try {
-      const response = await registerUser(signupData).unwrap();
-      console.log("Signup successful:", response);
-      navigate("/verify-otp");
-    } catch (err: any) {
-      setError(err.data?.message || "Signup failed. Please try again.");
-      console.error("Signup failed:", err);
+      // Perform the signup first
+      await signup(signupData);
+  
+      // After signup success, log the user in automatically
+      const loginResponse = await login({ email, password });
+
+      // Check if login is successful and navigate
+      if (loginResponse.data) {
+        navigate("/"); // Navigate after successful login
+      }
+    } catch (error) {
+      setError("Signup failed!"); // Handle signup failure
     }
-  };
+};
+
+  // const handleCustomSignupOTP = async (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   setError(null);
+
+  //   if (password !== confirmPassword) {
+  //     setError("Passwords do not match!");
+  //     return;
+  //   }
+
+  //   const signupData: SignupData = {
+  //     email,
+  //     password,
+  //     name,
+  //     role: urlRole,
+  //   };
+
+  //   try {
+  //     const response = await registerUser(signupData).unwrap();
+  //     console.log("Signup successful:", response);
+  //     navigate("/verify-otp");
+  //   } catch (err: any) {
+  //     setError(err.data?.message || "Signup failed. Please try again.");
+  //     console.error("Signup failed:", err);
+  //   }
+  // };
 
   const isLoading = isSignupLoading;
 
@@ -84,9 +119,20 @@ const SignupForm = () => {
       {/* Right Form Section */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="max-w-md w-full h-[546px] flex flex-col justify-around bg-white rounded-lg p-8">
+          {/* Back Button */}
+          <div className="flex items-center gap-2 mb-6">
+            
+            <button
+              onClick={() => navigate("/login")}
+              className="d-block hover:text-green-600 text-black text-sm flex items-center"
+            >
+            <img className="w-4 h-4 mr-2" src={arrow} alt="Back Arrow" /> <span>Back</span>
+            </button>
+          </div>
           {/* Header */}
+          
           <h1
-            className="text-2xl font-semibold text-gray-800 text-start mb-6"
+            className="text-2xl font-semibold text-gray-800 text-start"
             style={{
               fontFamily: '"Work Sans", sans-serif',
               fontFeatureSettings: "'liga' off, 'clig' off",
@@ -95,6 +141,16 @@ const SignupForm = () => {
           >
             Create Your Account
           </h1>
+          <p className="text-sm text-gray-500">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="text-green-600 underline hover:text-green-800"
+                >
+                  Log in
+                </button>
+              </p>
 
           {/* Error Alert */}
           {error && (
@@ -104,7 +160,7 @@ const SignupForm = () => {
           )}
 
           {/* Form */}
-          <form onSubmit={handleCustomSignup}>
+          <form className="mt-6" onSubmit={handleCustomSignup}>
             <div className="flex flex-col gap-6 mb-6">
               <TextInput
                 type="text"
@@ -166,16 +222,7 @@ const SignupForm = () => {
 
           {/* Footer Links */}
           <div className="text-start space-y-4 mt-6">
-            <p className="text-sm text-gray-500">
-              Already have an account?{" "}
-              <button
-                onClick={() => navigate("/login")}
-                className="text-primary-500 underline hover:text-green-600"
-                disabled={isLoading}
-              >
-                Log in
-              </button>
-            </p>
+            {/* ss */}
           </div>
         </div>
       </div>
