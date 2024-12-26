@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Interview } from "@/types/userSkillsType";
+import { convertTimestamp } from "@/utils/skills/skillDetail";
 
 
 const Transcript:React.FC<Interview>= ({transcription}) => {
@@ -23,10 +24,11 @@ const Transcript:React.FC<Interview>= ({transcription}) => {
                 {transcription?.map((entry, index) => (
                     <div key={index} className="text-sm">
                         <div className="flex space-x-4">
-                            <span className="text-gray-600">0.01</span>
+                            <span className="text-[#03963F]">{convertTimestamp(entry.timestamp)}</span>
+                            <span className={`${entry.role=="User"?"text-green-800":"text-green-800"}`}>{entry.role}</span>
                             <div>
                                 <p className="font-normal text-gray-800">{entry.message}</p>
-                                {/* <p className="text-gray-600">{entry.answer}</p> */}
+                             
                             </div>
                         </div>
                     </div>

@@ -1,100 +1,111 @@
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import SkillSummary from "./SkillSummary";
-import SkillConcepts from "./SkillConcepts";
-import Transcript from "./Transcript";
+import { Card, CardContent } from "@/components/ui/card";
 import arrow from '@/assets/skills/arrow.svg';
 import { useGetUserSkillDetailsQuery } from "@/api/skillsApiSlice";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { UserSkill, UserSkillsIntialValues } from "@/types/userSkillsType";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import SkillSummary from "./skilldetails/SkillSummary";
+import SkillConcepts from "./skilldetails/SkillConcepts";
+import Transcript from "./skilldetails/Transcript";
+import PerformanceSummary from "./skilldetails/PerformanceSummary";
+import SkillsProgress from "./skilldetails/SkillsProgress";
+
+
+
+
+
 
 const SkillDetails = () => {
-    const { id } = useParams<{ id: string }>();
-    const { data} = useGetUserSkillDetailsQuery(id!);
-    const [skillDetails, setSkillDetails] = useState<UserSkill>(UserSkillsIntialValues);
+  const { id } = useParams<{ id: string }>();
+  const { data } = useGetUserSkillDetailsQuery(id!);
+  const [skillDetails, setSkillDetails] = useState<UserSkill>(UserSkillsIntialValues);
 
-    useEffect(() => {
-        if (data) {
-            setSkillDetails(data.data);
-            console.log(data.data)
-        }
 
-    }, [data]);
 
-    return (
+  useEffect(() => {
+    if (data) {
+      setSkillDetails(data.data);
+      console.log(data.data)
+    }
 
-        <div className="h-[90vh] w-[88vw] pl-[25%]">
-            {/* Title Section */}
-            <div className="flex items-center space-x-4 pl-4 mb-2">
-                <button
-                    className="w-6 h-6 flex items-center justify-center bg-white shadow-sm rounded-full border border-gray-200"
-                    aria-label="Back"
-                >
-                    <img src={arrow} alt="Back" className="w-3 h-3" />
-                </button>
-                <h2 className="text-md font-ubuntu font-medium text-black">
-                    React Skill Report
-                </h2>
+  }, [data]);
+
+  return (
+
+    <div className="h-[90vh] w-[88vw] sm:px-[10%]">
+      {/* Title Section */}
+      <div className="flex items-center mb-2 pl-4 space-x-2">
+        <button
+          className="w-6 h-6 flex items-center justify-center bg-white shadow-sm rounded-full border border-gray-200"
+          aria-label="Back"
+        >
+          <img src={arrow} alt="Back" className="w-3 h-3" />
+        </button>
+        <h2 className="text-md font-ubuntu font-medium text-black">
+          React Skill Report
+        </h2>
+      </div>
+
+      {/* Main Content Section */}
+      <div className="flex h-[calc(90vh-40px)]">
+        <div
+          className="flex-1 overflow-y-auto"
+          style={{
+            scrollbarWidth: "none",
+          }}
+        >
+          <div
+            className="h-full"
+          >
+            <div className="p-5 space-y-4">
+              {/* Skill Summary */}
+              <SkillSummary summary={skillDetails.summary!} strengths={skillDetails.strengths!} areas_for_improvements={skillDetails.areas_for_improvement!} areas={skillDetails.areas!}/>
+
+              {/* Core Skill Details */}
+              <SkillConcepts areas={skillDetails.areas!} />
+
+              {/* Transcript */}
+              <Transcript transcription={skillDetails.latest_interview?.transcription!} />
             </div>
-
-            {/* Main Content Section */}
-            <div className="flex h-[calc(90vh-40px)]">
-                <div
-                    className="flex-1 overflow-y-auto pr-5"
-                    style={{
-                        scrollbarWidth: "none",
-                    }}
-                >
-                    <div
-                        className="h-full"
-                    >
-                        <div className="p-5 space-y-4">
-                            {/* Skill Summary */}
-                            <SkillSummary summary={skillDetails.summary!} strengths={skillDetails.strengths!} areas={skillDetails.areas_for_improvement!} />
-
-                            {/* Core Skill Details */}
-                            <SkillConcepts  areas={skillDetails.areas!}/>
-
-                            {/* Transcript */}
-                            <Transcript  transcription={skillDetails.latest_interview?.transcription!}/>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Panel */}
-                <aside className="hidden lg:block w-[35%] bg-[#F7F7F7] p-5">
-                    <Card>
-                        <CardHeader>
-                            <h2 className="text-lg font-semibold">Skill Breakdown</h2>
-                        </CardHeader>
-                        <CardContent>
-                            <ul className="space-y-4">
-                                <li>
-                                    <div className="flex justify-between">
-                                        <span>React Fundamentals</span>
-                                        <span>70%</span>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="flex justify-between">
-                                        <span>React Hooks</span>
-                                        <span>70%</span>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div className="flex justify-between">
-                                        <span>Redux</span>
-                                        <span>85%</span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
-                </aside>
-            </div>
+          </div>
         </div>
 
-    );
+        {/* Right Panel */}
+        <div className="hidden lg:block w-[30%] bg-[#F7F7F7] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+          <div className="space-y-6 p-6 max-w-3xl">
+
+            <PerformanceSummary />
+
+            {/* Download Report Card */}
+            <Card className="border-none shadow-sm p-4 bg-white rounded-lg">
+              <CardContent className="flex flex-col items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-800 font-sf-pro">
+                    Get a pdf version of this skill report to be shared with employers
+                  </h3>
+                </div>
+                <Button
+                  size={"sm"}
+                  variant={"outline"}
+                  className="text-[#03963F] py-1 rounded-xl w-full border-[#03963F] hover:bg-green-50 hover:text-[#03963F]"
+                >
+                  <Download />
+                  Download report
+                </Button>
+              </CardContent>
+            </Card>
+
+            <SkillsProgress areas={skillDetails.areas!}/>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  );
 };
 
 export default SkillDetails;

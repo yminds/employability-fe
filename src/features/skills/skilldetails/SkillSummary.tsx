@@ -1,17 +1,24 @@
-import { Card, CardContent } from "@/components/ui/card";
+
 import ReactPlayer from 'react-player';
+import {
+    Card,
+    CardContent,
+} from "@/components/ui/card";
 
 // Importing the icons
 import strengthsIcon from '@/assets/skills/strengths.svg';
 import areasIcon from '@/assets/skills/areas.svg';
+import { Area } from '@/types/userSkillsType';
+import AreasRadarCard from '@/components/cards/skills/AreasRadarCard';
 
 interface skillSummaryProps {
     summary: string;
     strengths: string[];
-    areas: string[]
+    areas_for_improvements: string[];
+    areas: Area[]
 }
 
-const SkillSummary: React.FC<skillSummaryProps> = ({ summary, strengths,areas }) => {
+const SkillSummary: React.FC<skillSummaryProps> = ({ summary, strengths, areas_for_improvements, areas }) => {
     return (
         <Card className="border-none shadow-sm h-full">
             <CardContent className="p-6">
@@ -26,7 +33,7 @@ const SkillSummary: React.FC<skillSummaryProps> = ({ summary, strengths,areas })
                     />
                 </div>
 
-                <div className="flex p-2 flex-col gap-2">
+                <div className="flex p-2 flex-col my-4">
                     <h2 className="font-ubuntu text-sm font-bold">Summary</h2>
                     <p className="text-sm font-ubuntu align-start font-normal">
                         {summary}
@@ -36,10 +43,8 @@ const SkillSummary: React.FC<skillSummaryProps> = ({ summary, strengths,areas })
                 {/* Cards for Scorecard, Strengths, and Areas of Improvement */}
                 <div className="container flex flex-row gap-4 text-sm">
                     <Card className="bg-[#F7F7F7] p-4 w-1/2 border-none">
-                        <h3>Scorecard</h3>
-                        <div>
-                            <canvas id="scorecard-chart"></canvas>
-                        </div>
+                        <h4 className="font-medium">Scorecard</h4>
+                        <AreasRadarCard areas={areas}/>
                     </Card>
 
                     <Card className="bg-[#F7F7F7] p-4 text-xs w-1/2 border-none">
@@ -49,7 +54,7 @@ const SkillSummary: React.FC<skillSummaryProps> = ({ summary, strengths,areas })
                             <h4 className="font-medium">Strengths</h4>
                         </div>
                         <ul className="pl-6 text-xs list-disc">
-                            {strengths.map((strength: string,index:number) => {
+                            {strengths.map((strength: string, index: number) => {
                                 return <li key={index} className="pb-1">{strength}</li>;
                             })}
                         </ul>
@@ -61,7 +66,7 @@ const SkillSummary: React.FC<skillSummaryProps> = ({ summary, strengths,areas })
                             <h4 className="font-medium">Areas for Improvement</h4>
                         </div>
                         <ul className="pl-6 text-xs list-disc">
-                            {areas.map((area: string,index:number) => {
+                            {areas_for_improvements.map((area: string, index: number) => {
                                 return <li key={index} className="pb-1">{area}</li>;
                             })}
                         </ul>
