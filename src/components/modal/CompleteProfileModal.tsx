@@ -46,7 +46,7 @@ export default function CompleteProfileModal({
   // const [isVerifyingSkills, setIsVerifyingSkills] = useState(false);
 
   const [activeTab, setActiveTab] = useState("basic");
-  const [formData, setFormData] = useState<any>({ });
+  const [formData, setFormData] = useState<any>({});
 
   const transformData = async (data: any) => {
     let validatedSkills: VerifiedSkill[] = [];
@@ -228,8 +228,6 @@ export default function CompleteProfileModal({
     }));
   };
 
-
-
   const handleSave = async () => {
     console.log(formData);
 
@@ -351,7 +349,7 @@ export default function CompleteProfileModal({
           {/* Basic Info Section */}
           <div ref={sectionRefs.basic} className="py-6">
             <BasicInfoForm
-              data={formData.basicInfo}
+              data={formData?.basicInfo}
               socialProfiles={formData.socialProfiles}
               onChange={(basicInfo, socialProfiles) => {
                 updateFormData("basicInfo", basicInfo);
@@ -370,7 +368,7 @@ export default function CompleteProfileModal({
               </div>
             ) : (
               <SkillsForm
-                skills={formData.skills}
+                skills={formData?.skills}
                 onChange={(skills) => updateFormData("skills", skills)}
                 errors={errors}
               />
@@ -380,7 +378,7 @@ export default function CompleteProfileModal({
           {/* Experience Section */}
           <div ref={sectionRefs.experience} className="py-6">
             <ExperienceForm
-              experiences={formData.experience}
+              experiences={formData?.experience}
               onChange={(experience: any) =>
                 updateFormData("experience", experience)
               }
@@ -393,12 +391,15 @@ export default function CompleteProfileModal({
               education={formData.education}
               onChange={(education: any) => {
                 updateFormData("education", education);
-              } }
-              errors={errors} onAddEducation={function (newEducation: Education): void {
+              }}
+              errors={errors}
+              onAddEducation={function (newEducation: Education): void {
                 throw new Error("Function not implemented.");
-              } } onDeleteEducation={function (educationId: string): void {
+              }}
+              onDeleteEducation={function (educationId: string): void {
                 throw new Error("Function not implemented.");
-              } }            />
+              }}
+            />
           </div>
 
           <div ref={sectionRefs.certification} className="py-6">

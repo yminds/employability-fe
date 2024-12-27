@@ -2,23 +2,20 @@ import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { UserSkill } from "@/types/userSkillsType";
 
-
 interface SkillsFormProps {
-  skills: any;
+  skills: UserSkill[];
   onChange: (skills: UserSkill[]) => void;
   errors: { [key: string]: string };
 }
 
 export default function SkillsForm({
-  skills,
+  skills = [], // Add default empty array
   onChange,
-  errors,
+  errors = {},
 }: SkillsFormProps) {
-  // State to store all available skills from the API
   const [availableSkills, setAvailableSkills] = useState<UserSkill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch all available skills when component mounts
   useEffect(() => {
     const fetchSkills = async () => {
       try {
@@ -40,17 +37,14 @@ export default function SkillsForm({
     fetchSkills();
   }, []);
 
-
-
   const handleSkillChange = (
     index: number,
     field: "rating" | "_id",
     value: number | string
   ) => {
-    const updatedSkills = skills.map((skill: any, i: any) => {
+    const updatedSkills = skills.map((skill: UserSkill, i: number) => {
       if (i === index) {
         if (field === "_id") {
-          // Find the selected skill from available skills
           const selectedSkill = availableSkills.find((s) => s._id === value);
           if (selectedSkill) {
             return { ...selectedSkill, rating: skill.rating || 0 };
@@ -63,19 +57,31 @@ export default function SkillsForm({
     onChange(updatedSkills);
   };
 
+  const addSkill = () => {
+    const newSkill: UserSkill = {
+      _id: "",
+      name: "",
+      description: "",
+      rating: 0,
+    };
+    onChange([...skills, newSkill]);
+  };
+
   const getError = (path: string) => {
     return errors[path] || "";
   };
 
-const addSkill =()=>{
+  // Add null check before mapping
+  if (!Array.isArray(skills)) {
+    return null; // or show a loading state or error message
+  }
 
-}
   return (
     <div className="space-y-6">
       <h3 className="font-medium">Skills</h3>
 
       {/* Skills Input */}
-      {skills.map((skill: any, index: number) => (
+      {skills.map((skill: UserSkill, index: number) => (
         <div key={skill._id || index} className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -96,7 +102,6 @@ const addSkill =()=>{
                 </option>
               ))}
             </select>
-
             {getError(`skills.${index}.name`) && (
               <p className="text-red-500 text-xs mt-1">
                 {getError(`skills.${index}.name`)}
@@ -116,7 +121,6 @@ const addSkill =()=>{
                 getError(`skills.${index}.rating`) ? "border-red-500" : ""
               }`}
             >
-              {/* <option value="">__/10</option> */}
               {[...Array(11)].map((_, i) => (
                 <option key={i} value={i}>
                   {i}/10
