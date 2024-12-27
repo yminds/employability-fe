@@ -16,6 +16,7 @@ import ExperienceSection from "./ExperienceSection";
 import CertificationsSection from "./CertificationsSection";
 import { useSelector } from "react-redux";
 import { currentStatusSVG } from "./svg/currentStatusSVG";
+import SkillList from "@/components/skills/skillslist";
 
 
 
@@ -283,6 +284,12 @@ const UserProfile: React.FC = () => {
             onSave={handleCertificationsSave}
           />
         </div>
+        <div className="bg-white rounded-lg mt-6 mb-10  max-h-[700px] overflow-hidden">
+          <div className="flex justify-between items-center mt-4 px-8 p-4">
+            <h3 className="font-medium text-lg">Skills</h3>
+          </div>
+          <SkillList isDashboard={false} />
+        </div>
       </div>
 
       {/* Right Section */}
@@ -331,7 +338,7 @@ const UserProfile: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-gray-700 font-medium">Profile URL</h3>
-                <p className="text-gray-600">{}</p>
+                <p className="text-gray-600">{ }</p>
               </div>
             </div>
 
@@ -365,7 +372,7 @@ const UserProfile: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-gray-700 font-medium">Mobile number</h3>
-                <p className="text-gray-600">{}</p>
+                <p className="text-gray-600">{ }</p>
               </div>
             </div>
 
@@ -459,7 +466,7 @@ const UserProfile: React.FC = () => {
                 fileSize={fileDetails.size}
                 uploadProgress={uploadProgress} onContinue={function (): void {
                   throw new Error("Function not implemented.");
-                } } isUploading={undefined}              />
+                }} isUploading={undefined} />
             )}
             <button
               onClick={() => setIsUploadModalOpen(true)}
@@ -496,7 +503,8 @@ const UserProfile: React.FC = () => {
             {isUploadModalOpen && (
               <ResumeUploadModal
                 onClose={() => setIsUploadModalOpen(false)}
-                onUpload={()=>{console.log();
+                onUpload={() => {
+                  console.log();
                 }}
                 userId={user._id}
               />
