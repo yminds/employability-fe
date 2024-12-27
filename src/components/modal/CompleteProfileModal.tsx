@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { ProfileFormData } from "../../features/profile/types";
+import { Education, ProfileFormData } from "../../features/profile/types";
 import BasicInfoForm from "../forms/basic-info-form";
 import SkillsForm from "../forms/skills-form";
 import ExperienceForm from "../forms/experience-form";
@@ -19,6 +19,7 @@ interface CompleteProfileModalProps {
   onClose: () => void;
   onSave: (data: ProfileFormData) => void;
   type: string;
+  userId?: string; // or userId: string if always required
 }
 interface VerifiedSkill {
   _id: string;
@@ -30,10 +31,10 @@ export default function CompleteProfileModal({
   onClose,
   onSave,
   type,
+  userId,
 }: CompleteProfileModalProps) {
   const data = useSelector((state: RootState) => state.resume.parsedData);
-  const userId = useSelector((state: RootState) => state.auth.user._id);
-  const [updateUser, { isUpdateUserLoading }] = useUpdateUserMutation();
+  const [updateUser] = useUpdateUserMutation();
 
   console.log(userId);
 
@@ -45,29 +46,7 @@ export default function CompleteProfileModal({
   // const [isVerifyingSkills, setIsVerifyingSkills] = useState(false);
 
   const [activeTab, setActiveTab] = useState("basic");
-  const [formData, setFormData] = useState<ProfileFormData>({
-    basicInfo: {
-      name: "NAWAZ",
-      mobile: "",
-      email: "",
-      dateOfBirth: "",
-      gender: "",
-      country: "",
-      state: "",
-      city: "",
-    },
-    socialProfiles: {
-      github: "",
-      linkedin: "",
-      dribbble: "",
-      behance: "",
-      portfolio: "",
-    },
-    skills: [],
-    experience: [],
-    education: [],
-    certifications: [],
-  });
+  const [formData, setFormData] = useState<any>({ });
 
   const transformData = async (data: any) => {
     let validatedSkills: VerifiedSkill[] = [];
@@ -243,36 +222,13 @@ export default function CompleteProfileModal({
   };
 
   const updateFormData = (section: keyof ProfileFormData, data: any) => {
-    setFormData((prev) => ({
+    setFormData((prev: any) => ({
       ...prev,
       [section]: data,
     }));
   };
 
-  // // Debounced validation function
-  // const validateForm = debounce(() => {
-  //   try {
-  //     profileFormSchema.parse(formData);
-  //     setErrors({});
-  //   } catch (err) {
-  //     if (err instanceof ZodError) {
-  //       const fieldErrors: { [key: string]: string } = {};
-  //       err.errors.forEach((error) => {
-  //         const path = error.path.join(".");
-  //         fieldErrors[path] = error.message;
-  //       });
-  //       setErrors(fieldErrors);
-  //     }
-  //   }
-  // }, 500); // 500ms debounce
 
-  // useEffect(() => {
-  //   validateForm();
-  //   // Cleanup debounce on unmount
-  //   return () => {
-  //     validateForm.cancel();
-  //   };
-  // }, [formData]);
 
   const handleSave = async () => {
     console.log(formData);
@@ -280,12 +236,6 @@ export default function CompleteProfileModal({
     try {
       console.log("button clicked");
 
-      //this is to check form validation
-      // profileFormSchema.parse(formData);
-      // If validation passes
-      // console.log(profileFormSchema.parse(formData));
-
-      // console.log(formData);
       const transformedData = transformFormDataForDB(formData);
       console.log(transformedData);
 
@@ -431,10 +381,9 @@ export default function CompleteProfileModal({
           <div ref={sectionRefs.experience} className="py-6">
             <ExperienceForm
               experiences={formData.experience}
-              onChange={(experience) =>
+              onChange={(experience: any) =>
                 updateFormData("experience", experience)
               }
-              errors={errors}
             />
           </div>
 
@@ -442,11 +391,14 @@ export default function CompleteProfileModal({
           <div ref={sectionRefs.education} className="py-6">
             <EducationForm
               education={formData.education}
-              onChange={(education) => {
+              onChange={(education: any) => {
                 updateFormData("education", education);
-              }}
-              errors={errors}
-            />
+              } }
+              errors={errors} onAddEducation={function (newEducation: Education): void {
+                throw new Error("Function not implemented.");
+              } } onDeleteEducation={function (educationId: string): void {
+                throw new Error("Function not implemented.");
+              } }            />
           </div>
 
           <div ref={sectionRefs.certification} className="py-6">

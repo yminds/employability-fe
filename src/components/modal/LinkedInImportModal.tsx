@@ -75,7 +75,7 @@ const LinkedInImportModal: React.FC<{ onClose: () => void }> = ({
             </div>
             <div>
               <img
-                src="/src/assets/images/Frame 1410077928.png"
+                src="src/assets/images/Frame 1410077928.png"
                 alt="LinkedIn profile download instructions"
                 className="w-full"
               />
@@ -129,8 +129,9 @@ const LinkedInImportModal: React.FC<{ onClose: () => void }> = ({
             onClose={() => setIsProgressModalOpen(false)}
             fileName={selectedFile?.name}
             fileSize={selectedFile?.size}
-            uploadProgress={0}
-          />
+            uploadProgress={0} onContinue={function (): void {
+              throw new Error("Function not implemented.");
+            } } isUploading={undefined}          />
         )}
       </div>
     </div>

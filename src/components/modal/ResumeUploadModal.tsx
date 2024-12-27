@@ -6,9 +6,11 @@ import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
 import { X, Upload } from "lucide-react";
+import { ProfileFormData } from "@/features/profile/types";
 
 interface ResumeUploadModalProps {
   onClose: () => void;
+  onUpload:()=> void;
   userId: string;
 }
 
@@ -24,8 +26,7 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
     progress: number;
   }>({ progress: 0 });
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
-  // const userId = useSelector((state) => state.auth.user._id);
-  // console.log(userId);
+
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -58,14 +59,27 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
   const startUpload = async (file: File) => {
     setUploadState({ file, progress: 0 });
 
-    // Simulate upload progress
-    for (let progress = 0; progress <= 90; progress += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setUploadState((prev) => ({ ...prev, progress }));
-    }
+    // Simulate progress up to 90%
+    const simulatedProgress = setInterval(() => {
+      setUploadState((prev) => {
+        if (prev.progress >= 90) {
+          clearInterval(simulatedProgress);
+          return prev; // Stop progress simulation at 90%
+        }
+        return { ...prev, progress: prev.progress + 5 }; // Increment by 5%
+      });
+    }, 300); // Update every 300ms
 
-    // Dispatch the Redux action to handle the backend upload
-    await dispatch(uploadResume({ file, userId }));
+    try {
+      // Dispatch the Redux action to handle the backend upload
+      await dispatch(uploadResume({ file, userId }));
+
+      // Smoothly complete progress to 100% after backend response
+      setUploadState((prev) => ({ ...prev, progress: 100 }));
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setUploadState((prev) => ({ ...prev, progress: 0 })); // Reset progress on failure
+    }
   };
 
   // Update progress to 100% when upload completes and show CompleteProfileModal
@@ -84,8 +98,8 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       <CompleteProfileModal
         type="resumeUpload"
         onClose={onClose}
-        userId={userId}
-      />
+        userId={userId} 
+        onSave={()=>console.log('')}      />
     );
   }
 
@@ -96,9 +110,9 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
         fileName={uploadState.file.name}
         fileSize={`${(uploadState.file.size / (1024 * 1024)).toFixed(2)} MB`}
         uploadProgress={uploadState.progress}
-        isUploading={uploading}
-        error={error}
-      />
+        isUploading={uploading} onContinue={function (): void {
+          throw new Error("Function not implemented.");
+        } }      />
     );
   }
 

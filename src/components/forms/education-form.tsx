@@ -2,24 +2,16 @@
 import React from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useSelector } from "react-redux";
+import type { Education } from "@/features/profile/types";
 
-interface Education {
-  _id?: any;
-  education_level: any; // e.g., "bachelors", "masters", etc.
-  degree: any;
-  institute: any;
-  board_or_certification: any;
-  from_date: any; // ISO date string
-  till_date: any; // ISO date string
-  cgpa_or_marks: any;
-}
 
 interface EducationFormProps {
   education: Education[];
-  onChange: (education: Education[]) => void;
+  onChange:any;
   errors: { [key: string]: string };
   onAddEducation: (newEducation: Education) => void;
   onDeleteEducation: (educationId: string) => void;
+  
 }
 
 const EducationForm: React.FC<EducationFormProps> = ({
@@ -28,6 +20,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
   errors,
   onAddEducation,
   onDeleteEducation,
+  
 }) => {
   const addEducation = () => {
     const newEducation: Education = {
@@ -39,9 +32,9 @@ const EducationForm: React.FC<EducationFormProps> = ({
       from_date: "",
       till_date: "",
       cgpa_or_marks: "",
+      highest_education_level: undefined
     };
     // Append the new education entry
-    onChange([...education, newEducation]);
   };
 
   const updateEducation = (
@@ -62,7 +55,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
       }
       return edu;
     });
-    onChange(updatedEducation);
+    // onChange(updatedEducation);
   };
 
   const getError = (path: string) => {

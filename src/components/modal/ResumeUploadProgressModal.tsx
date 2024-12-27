@@ -3,16 +3,20 @@ import { X } from 'lucide-react'
 
 interface ResumeUploadProgressModalProps {
   onClose: () => void
+  onContinue: ()=> void
   fileName: any
   fileSize: any
   uploadProgress: number
+  isUploading: any
 }
 
 export default function ResumeUploadProgressModal({
   onClose,
+  onContinue,
   fileName,
   fileSize,
   uploadProgress,
+  isUploading
 }: ResumeUploadProgressModalProps) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">

@@ -78,7 +78,6 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
         <ExperienceForm
           experiences={experience}
           onChange={handleFormChange}
-          errors={errors}
         />
 
         <div className="p-6 border-t bg-white text-right">
