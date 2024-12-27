@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import verifiedIcon from "@/assets/skills/verified_skills.svg";
 import excellentIcon from "@/assets/skills/excellent.svg";
 import strongIcon from "@/assets/skills/strong.svg";
@@ -6,10 +6,22 @@ import weakIcon from "@/assets/skills/weak.svg";
 import { useGetUserSkillsSummaryQuery } from '@/api/skillsApiSlice';
 import { useSelector } from 'react-redux';
 
-const SkillSummary: React.FC = () => {
+interface SkillSummaryProps {
+  isSkillsUpdated: boolean; // Flag to indicate if skills were updated
+}
+
+const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated }) => {
   const userId = useSelector((state) => state.auth.user._id);
+  
   // Fetch user skills summary by userId
-  const { data: skillsSummaryData, error, isLoading } = useGetUserSkillsSummaryQuery(userId);
+  const { data: skillsSummaryData, error, isLoading, refetch } = useGetUserSkillsSummaryQuery(userId);
+
+  // Re-fetch data when skills are updated
+  useEffect(() => {
+    if (isSkillsUpdated) {
+      refetch(); // Trigger a re-fetch of the skills summary
+    }
+  }, [isSkillsUpdated, refetch]);
 
   // Handle loading and error states
   if (isLoading) {
@@ -30,7 +42,7 @@ const SkillSummary: React.FC = () => {
   } = skillsSummaryData.data;
 
   return (
-    <div className="p-10 flex flex-col justify-around bg-white rounded-xl w-[356px] h-[326px]">
+    <div className="p-10 flex flex-col justify-around bg-white rounded-xl w-full h-[326px]">
       {/* Skills Verified Section */}
       <div className="flex items-start gap-2">
         <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border space-x-2 mb-4">

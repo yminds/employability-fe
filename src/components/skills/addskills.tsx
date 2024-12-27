@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
+import { useCreateUserSkillsMutation } from '@/api/skillsApiSlice';
 
 interface Skill {
-  id: string;
   skill_Id: string;
   name: string;
   rating: string;
@@ -11,17 +11,20 @@ interface Skill {
 }
 
 interface AddSkillsModalProps {
-  onClose: () => void; // Function to close the modal
-  userId: string; // Pass userId to fetch user-specific skills
+  onClose: () => void; 
+  userId: string; 
+  onSkillsUpdate: (isUpdated: boolean) => void;
 }
 
 const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   onClose,
   userId,
+  onSkillsUpdate
 }) => {
+  const [user_Id, setUserId] = useState<string>(userId);
+
   const [skills, setSkills] = useState<Skill[]>([
     {
-      id: `${Date.now()}`,
       skill_Id: "",
       name: "",
       rating: "__/10",
@@ -42,11 +45,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering skills
 
   const { data: skillsData, error, isLoading } = useGetMultipleSkillsQuery(searchTerm);
-  console.log("Skills Data:", skillsData);
 
   const handleAddSkill = () => {
     const newSkill: Skill = {
-      id: ``,
       skill_Id: "",
       name: "",
       rating: "__/10",
@@ -57,17 +58,15 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   };
 
   const handleRemoveSkill = (id: string) => {
-    console.log("Removing skill with id:", id);
-    setSkills(skills.filter((skill) => skill.id !== id));
+    setSkills(skills.filter((skill) => skill.skill_Id !== id));
   };
 
   const handleAddSuggestedSkill = (suggestedSkill: { id: string; name: string }) => {
-    if (!skills.some((skill) => skill.id === suggestedSkill.id)) {
+    if (!skills.some((skill) => skill.skill_Id === suggestedSkill.id)) {
       setSkills([
         ...skills,
         {
-          id: suggestedSkill.id,
-          skill_Id: "", // Add this line
+          skill_Id: suggestedSkill.id,
           name: suggestedSkill.name,
           rating: "__/10",
           visibility: "All users",
@@ -76,12 +75,36 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
       ]);
     }
   };
+  const [createUserSkills, { isLoading: isSaving, isError, isSuccess }] = useCreateUserSkillsMutation();
 
-  const handleSave = () => {
-    console.log("Selected Skills:", skills);
-    onSave(skills);
-    onClose();
+  const handleSave = async () => {
+    // Ensure userId is valid
+    if (!userId || typeof userId !== "string") {
+      console.error("Invalid user ID.");
+      return;
+    }
+  
+    // Prepare payload
+    const payload = {
+      user_id: user_Id, // Ensure no leading/trailing spaces
+      skills: skills.map((skill) => ({
+        skill_pool_id: skill.skill_Id,
+        self_rating: parseInt(skill.rating.split('/')[0]), // Extract numeric rating
+      })),
+    };
+  
+    try {
+      // Call the createUserSkills mutation
+      const response = await createUserSkills(payload).unwrap();
+      console.log("Skills added successfully:", response);
+      onSkillsUpdate(true); // Update the parent component
+      onClose(); // Close the modal
+    } catch (error) {
+      console.error("Failed to add skills:", error);
+      onSkillsUpdate(false); // Update the parent component
+    }
   };
+  
 
   // Filter skills based on the search term
   const filteredSkills = skillsData?.data.filter((skill: any) =>
@@ -153,7 +176,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                             i === index
                               ? {
                                   ...s,
-                                  id: selectedSkill?._id || s.id,
+                                  id: selectedSkill?._id || s.skill_Id,
                                   skill_Id: selectedSkill?._id || s.skill_Id, // Set skill_Id from skillsData
                                   name: selectedSkill?.name || e.target.value,
                                 }
@@ -226,7 +249,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   {/* Remove Skill */}
                   <div className="col-span-1">
                     <button
-                      onClick={() => handleRemoveSkill(skill.id)}
+                      onClick={() => handleRemoveSkill(skill.skill_Id)}
                       className="text-red-500 hover:text-red-700 text-lg"
                     >
                       ×

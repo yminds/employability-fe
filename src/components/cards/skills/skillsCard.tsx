@@ -62,12 +62,18 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
       {/* Middle Section: Rating and Status */}
       <div className="flex w-[30%] flex-col items-center space-y-1">
-        <p className="text-lg font-medium">{verified_rating}<span className="text-[#909091]">/10</span></p>
+        {status === "Verified" && (
+          <p className="text-lg font-medium">
+            {verified_rating}
+            <span className="text-[#909091]">/10</span>
+          </p>
+        )}
         <div className="flex items-center space-x-2">
           <img src={imgSrc} alt={status} className="w-4 h-4" />
           <span
-            className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-green-600" : "text-yellow-600"
-              }`}
+            className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
+              status === "Verified" ? "text-green-600" : "text-yellow-600"
+            }`}
           >
             {status}
           </span>
