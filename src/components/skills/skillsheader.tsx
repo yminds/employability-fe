@@ -6,11 +6,28 @@ import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
 import { RootState } from "@/store/store";
 import { useSelector } from "react-redux";
 
+interface Skill {
+  _id: string;
+  skill_pool_id: {
+    _id: string;
+    name: string;
+    icon: string
+  };
+  verified_rating: number;
+  self_rating: number;
+}
+
+
 interface SkillsHeaderProps {
+  skills: {
+    data: Skill[];
+  };
   onSkillsStatusChange: (isUpdated: boolean) => void; // Callback to notify parent of update status
 }
 
-const SkillsHeader: React.FC<SkillsHeaderProps> = ({ onSkillsStatusChange }) => {
+const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , onSkillsStatusChange }) => {
+  console.log(selectedSkills);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [skillsUpdated, setSkillsUpdated] = useState(false); // State to track updates
 
@@ -88,6 +105,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ onSkillsStatusChange }) => 
       {/* AddSkillsModal */}
       {isModalOpen && (
         <AddSkillsModal
+        selectedSkills  = {selectedSkills}
           onClose={handleCloseModal}
           userId={userId}
           onSkillsUpdate={handleSkillsUpdate} // Pass the update handler

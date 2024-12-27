@@ -1,25 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import CircularProgress from '@/components/ui/circular-progress-bar'; // Updated CircularProgress
 import logo from '@/assets/skills/e-Logo.svg';
 
 interface Skill {
-  data:[
-    {
+    _id: string;
+    skill_pool_id: {
       _id: string;
-      skill_pool_id: {
-        _id: string;
-        name: string;
-        icon: string
-      };
-      verified_rating: number;
-      self_rating: number;
-    }
-  ]
+      name: string;
+      icon: string
+    };
+    verified_rating: number;
+    self_rating: number;
 }
 
-
 interface EmployabilityScoreProps {
-  skills: Skill[]; // Accept skills array as a prop
+  skills: {
+    data: Skill[];
+  }; 
 }
 
 const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ skills }) => {
