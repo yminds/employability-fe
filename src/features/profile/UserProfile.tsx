@@ -14,6 +14,7 @@ import {
 } from "../../features/profile/types";
 import ExperienceSection from "./ExperienceSection";
 import CertificationsSection from "./CertificationsSection";
+import { useSelector } from "react-redux";
 
 
 
