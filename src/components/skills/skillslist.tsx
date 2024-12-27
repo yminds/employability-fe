@@ -27,10 +27,10 @@ const SkillList: React.FC<SkillListProps> = (isDashboard) => {
   };
   
   // Replace the hardcoded skills array with the actual data from the API
-  const userId = useSelector((state: RootState) => state.auth.user._id);
+  const userId = useSelector((state: RootState) => state.auth.user?._id);
 
   // Fetch user skills by userId
-  const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId);
+  const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId ?? "");
 
   // Handle loading and error states
   if (isLoading) {
@@ -53,8 +53,8 @@ const SkillList: React.FC<SkillListProps> = (isDashboard) => {
   }
 
   return (
-    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4  max-h-[700px]  overflow-y-auto " style={{scrollbarWidth:'none'}}>
-      <div className='w-full h-full bg-white  flex flex-col  rounded-t-[8px]  '>
+    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
+      <div className='w-full h-full bg-white  flex flex-col  rounded-t-[8px]  px-4'>
         <div className="text-gray-900 text-base font-medium leading-5 mb-5">
           {isDashboard.isDashboard ? (
             <>

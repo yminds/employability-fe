@@ -5,6 +5,7 @@ import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 // Define Zod schema for validation
 const goalSchema = z.object({
@@ -37,6 +38,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
     const [description, setDescription] = useState(selectedGoal ? selectedGoal.description : "");
     const [isSaved, setIsSaved] = useState(false); // State to handle success message visibility
     const [isSaving, setIsSaving] = useState(false); // State to handle saving/loading state
+    const [isSkillOpen, setIsSkillOpen] = useState(false);
     const [errors, setErrors] = useState({
         goal: "",
         techStack: "",
@@ -55,12 +57,15 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
     const handleTechStackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCallAPI(false);
         setTechStack(e.target.value); // Update the search term immediately
+        setIsSkillOpen(true);
     };
 
     const handleSkillSelect = (skillId: string) => {
         if (!selectedTechStack.includes(skillId)) {
             setSelectedTechStack((prev) => [...prev, skillId]); // Add the selected skill ID to the array
         }
+        setTechStack(""); // Clear the input after selection
+        setIsSkillOpen(false);
     };
 
     const handleSkillRemove = (skillId: string) => {
@@ -150,8 +155,8 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                             Select the technologies you'll be using for this goal
                                         </p>
                                     </label>
-                                    <div className="relative w-full">
-                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <div className="relative w-full h-12">
+                                        <span className="absolute inset-y-0  left-0 flex items-center pl-3">
                                             <img src="./src/assets/set-goal/mail.svg" alt="Search" />
                                         </span>
                                         <input
@@ -166,8 +171,34 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
 
                                         {isLoading && <p>Loading skills...</p>}
                                         {error && <p className="text-red-500 text-sm">Failed to load skills.</p>}
-                                        {/* Show skills list if no skills are selected */}
-                                        {skills && selectedTechStack.length === 0 && (
+                                        {/* Show DropdownMenu when techStack is not empty */}
+                                        <Popover open={isSkillOpen} onOpenChange={setIsSkillOpen}>
+                                            <PopoverTrigger asChild>
+                                                <button className="absolute right-0 left-0 top-[50px]"></button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="max-h-40 overflow-y-auto border rounded-lg bg-white p-2 font-sf-pro w-[500px]">
+                                                {/* Loading or error message */}
+                                                {isLoading && <p>Loading skills...</p>}
+                                                {error && <p className="text-red-500">Failed to load skills</p>}
+                                                {/* Display skills from API */}
+                                                {skills?.data?.length ? (
+                                                    skills.data.map((skill: any) => (
+                                                        <div
+                                                            key={skill._id}
+                                                             className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer flex gap-2 leading-5"
+                                                            onClick={() => handleSkillSelect(skill._id)} // Select the skill
+                                                        >
+                                                            {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
+                                                            {skill.name}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="p-2">No skills found</p>
+                                                )}
+                                            </PopoverContent>
+                                        </Popover>
+
+                                        {/* {skills && selectedTechStack.length === 0 && (
                                             <ul className="mt-2 max-h-40 overflow-y-auto border rounded-lg bg-white absolute w-full p-2 font-sf-pro">
                                                 {skills.data.map((skill: any) => (
                                                     <li
@@ -180,7 +211,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                     </li>
                                                 ))}
                                             </ul>
-                                        )}
+                                        )} */}
 
                                     </div>
                                 </div>
@@ -248,7 +279,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                             {/* Disable the button when saving */}
                             <button
                                 type="submit"
-                                className="flex h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#00183D] text-white hover:bg-gray-600 text-[16px] font-medium leading-[24px] tracking-[0.24px]"
+                                className="flex h-[44px] p-4 justify-center items-center gap-2 self-stretch rounded bg-[#001630] text-white hover:bg-[#062549] text-[16px] font-medium leading-[24px] tracking-[0.24px]"
                                 disabled={isSaving}
                             >
                                 {isSaving ? "Saving..." : "Save Goal"}

@@ -76,7 +76,7 @@ const SuggestedSkills: React.FC = () => {
   };
 
   return (
-    <section className="p-6 bg-white rounded-lg shadow-md">
+    <section className="p-6 bg-white rounded-lg">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-[20px] font-medium leading-[26px]">Suggested Skills ({suggestedSkills.length})</h2>
