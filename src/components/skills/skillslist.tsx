@@ -53,7 +53,7 @@ const SkillList: React.FC<SkillListProps> = (isDashboard) => {
   }
 
   return (
-    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4  max-h-[700px]  overflow-y-auto " style={{scrollbarWidth:'none'}}>
+    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
       <div className='w-full h-full bg-white  flex flex-col  rounded-t-[8px]  '>
         <div className="text-gray-900 text-base font-medium leading-5 mb-5">
           {isDashboard.isDashboard ? (
