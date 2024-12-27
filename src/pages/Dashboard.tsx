@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ProfileCard from "@/features/dashboard/ProfileCard";
+// import ProfileCard from "@/features/dashboard/ProfileCard";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -11,20 +11,27 @@ import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SkillList from "@/components/skills/skillslist";
 import CircularProgress from '@/components/ui/circular-progress-bar'; // Updated CircularProgress
 import logo from '@/assets/skills/e-Logo.svg';
+import ProfileCompletionCard from "@/components/cards/ProfileCompletionCard";
+import { useGetUserSkillsSummaryQuery } from '@/api/skillsApiSlice';
 
 const Dashboard: React.FC = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
-  const user_id = useSelector((state) => state.auth.user._id)
+  //const user_id = useSelector((state) => state.auth.user._id)
+  const user_id = useSelector((state :RootState) => state.auth.user._id);
   const user_name = useSelector((state: RootState) => state.auth.user?.name);
   const navigate = useNavigate(); // Initialize useNavigate hook
   const handleLinkClick = (route: string) => {
     navigate(route); // Navigate to the specified route
   };
-  const { data } = "";
-  //const { data } = useGetUserGoalQuery(user_id);
-  const goalName = data?.data?.[0]?.name || "";
-  const completionPercentage = 50;
+  //const { data: goalsData } = "";
+  const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  const goalName = goalsData?.data?.[0]?.name || "";
 
+  const { data: skillsSummaryData } = useGetUserSkillsSummaryQuery(user_id) || {};
+  const totalSkills = skillsSummaryData?.data?.totalSkills;
+  const totalVerifiedSkills = skillsSummaryData?.data?.totalVerifiedSkills;
+
+  const completionPercentage = 50;
   const totalVerifiedRating = 10;
   const averageVerifiedRating = 0;
 
@@ -34,7 +41,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
 
-            {data ? (
+            {goalsData ? (
               <main>
                 <header className="mb-7">
                   <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Welcome Back, {user_name} <span className="wave">👋</span></h1>
@@ -91,7 +98,7 @@ const Dashboard: React.FC = () => {
                             />
                           </div>
                           <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">6/10</span>
+                            <span className="text-black text-base font-medium leading-5">{totalVerifiedSkills}/{totalSkills}</span>
                             <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">verified skills</span>
                           </div>
                         </li>
@@ -104,7 +111,7 @@ const Dashboard: React.FC = () => {
                             />
                           </div>
                           <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">3</span>
+                            <span className="text-black text-base font-medium leading-5">0</span>
                             <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">projects added</span>
                           </div>
                         </li>
@@ -117,7 +124,7 @@ const Dashboard: React.FC = () => {
                             />
                           </div>
                           <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">5</span>
+                            <span className="text-black text-base font-medium leading-5">0</span>
                             <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">upskilling</span>
                           </div>
                         </li>
@@ -125,13 +132,15 @@ const Dashboard: React.FC = () => {
                     </aside>
 
                     {/* Profile Sidebar */}
-                    <ProfileCard
+                    <ProfileCompletionCard/>
+                    
+                    {/* <ProfileCard
                       name={user_name}
                       completionPercentage={30}
                       importButtonLabel="Import from LinkedIn"
                       uploadButtonLabel="Upload your resume"
                       manualButtonLabel="Fill out manually"
-                    />
+                    /> */}
                   </div>
                 </div>
 
@@ -256,13 +265,14 @@ const Dashboard: React.FC = () => {
 
                   <div className="flex flex-col items-start gap-6 flex-1">
                     {/* Profile Sidebar */}
-                    <ProfileCard
+                    <ProfileCompletionCard/>
+                    {/* <ProfileCard
                       name={user_name}
                       completionPercentage={30}
                       importButtonLabel="Import from LinkedIn"
                       uploadButtonLabel="Upload your resume"
                       manualButtonLabel="Fill out manually"
-                    />
+                    /> */}
 
                     <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-6">
                       <h4 className="text-black text-base font-medium leading-5">My activity</h4>
@@ -276,7 +286,7 @@ const Dashboard: React.FC = () => {
                             />
                           </div>
                           <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">0</span>
+                            <span className="text-black text-base font-medium leading-5">{totalVerifiedSkills}/{totalSkills}</span>
                             <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">verified skills</span>
                           </div>
                         </li>

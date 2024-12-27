@@ -19,7 +19,7 @@ interface GoalFormDialogProps {
 }
 
 const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-    const user_id = useSelector((state) => state.auth.user._id)
+    const user_id = useSelector((state :RootState) => state.auth.user._id);
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal] = useState(selectedGoal ? selectedGoal.title : "");
     const [description] = useState(selectedGoal ? selectedGoal.description : "");
