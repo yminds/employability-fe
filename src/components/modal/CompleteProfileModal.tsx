@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { ProfileFormData } from "../../features/profile/types";
 import BasicInfoForm from "../forms/basic-info-form";
@@ -12,6 +12,8 @@ import debounce from "lodash.debounce"; // Install lodash.debounce
 import { RootState } from "@/store/store";
 import { useSelector } from "react-redux";
 import { useVerifySkillsMutation } from "@/api/skillApiSlice";
+import { transformFormDataForDB } from "@/utils/transformData";
+import { useUpdateUserMutation } from "@/api/userApiSlice";
 
 interface CompleteProfileModalProps {
   onClose: () => void;
@@ -30,6 +32,10 @@ export default function CompleteProfileModal({
   type,
 }: CompleteProfileModalProps) {
   const data = useSelector((state: RootState) => state.resume.parsedData);
+  const userId = useSelector((state: RootState) => state.auth.user._id);
+  const [updateUser, { isUpdateUserLoading }] = useUpdateUserMutation();
+
+  console.log(userId);
 
   const [verifySkills, { isLoading: isVerifyingSkills }] =
     useVerifySkillsMutation();
@@ -86,7 +92,7 @@ export default function CompleteProfileModal({
         // Handle dates in "Month Year" or "Month, Year" format
         const parts = dateStr.replace(",", "").trim().split(" ");
         if (parts.length !== 2) {
-          console.error("Invalid date format:", dateStr);
+          // console.error("Invalid date format:", dateStr);
           return "";
         }
 
@@ -140,11 +146,11 @@ export default function CompleteProfileModal({
       skills: validatedSkills,
       experience:
         data.experience?.map((exp: any) => {
-          console.log("Processing experience:", exp); // Debug log
+          // console.log("Processing experience:", exp); // Debug log
           const startDate = transformDate(exp.startDate);
           const endDate =
             exp.endDate === "Present" ? null : transformDate(exp.endDate);
-          console.log("Transformed dates:", { startDate, endDate }); // Debug log
+          // console.log("Transformed dates:", { startDate, endDate }); // Debug log
 
           return {
             id: Date.now().toString(),
@@ -182,8 +188,19 @@ export default function CompleteProfileModal({
   };
 
   useEffect(() => {
-    setFormData(transformData(data));
-    console.log(data);
+    const initializeData = async () => {
+      if (data) {
+        try {
+          const transformedData = await transformData(data);
+          setFormData(transformedData);
+          console.log("Transformed data:", transformedData);
+        } catch (error) {
+          console.error("Error transforming data:", error);
+        }
+      }
+    };
+
+    initializeData();
   }, [data]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -257,11 +274,47 @@ export default function CompleteProfileModal({
   //   };
   // }, [formData]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    console.log(formData);
+
     try {
-      profileFormSchema.parse(formData);
+      console.log("button clicked");
+
+      //this is to check form validation
+      // profileFormSchema.parse(formData);
       // If validation passes
-      onSave(formData);
+      // console.log(profileFormSchema.parse(formData));
+
+      // console.log(formData);
+      const transformedData = transformFormDataForDB(formData);
+      console.log(transformedData);
+
+      const response = await fetch(
+        `http://localhost:3000/api/v1/user/update/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(transformedData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update user");
+      }
+
+      const result = await response.json();
+      console.log("API Response:", result);
+
+      // const result = await updateUser({
+      //   userId,
+      //   data: transformData,
+      // }).unwrap();
+
+      // console.log("Update successful:", result);
+      onClose(); // to close the modal after submission
+      // onSave(formData);
     } catch (err) {
       if (err instanceof ZodError) {
         const fieldErrors: { [key: string]: string } = {};

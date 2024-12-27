@@ -312,6 +312,8 @@ export default function BasicInfoForm({
   const [states, setStates] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
 
+  console.log(data);
+
   useEffect(() => {
     // Load all countries on component mount
     const allCountries = Country.getAllCountries();
@@ -320,7 +322,7 @@ export default function BasicInfoForm({
 
   useEffect(() => {
     // Update states when country changes
-    if (data.country) {
+    if (data?.country) {
       const countryStates = State.getStatesOfCountry(data.country);
       setStates(countryStates);
       // Reset state and city when country changes
@@ -525,9 +527,9 @@ export default function BasicInfoForm({
               }`}
             >
               <option value="">Select</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Others">Others</option>
             </select>
             {getError("basicInfo.gender") && (
               <p className="text-red-500 text-xs mt-1">
