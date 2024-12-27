@@ -49,7 +49,7 @@ const SkillsContainer: React.FC = () => {
           </div>
           {/* Content below the header */}
           <div className="mt-[110px]"> {/* Ensure spacing matches header height */}
-            <SkillList />
+            <SkillList setDashboard={false}/>
             <SuggestedSkills />
           </div>
         </div>
