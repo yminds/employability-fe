@@ -14,10 +14,14 @@ import logo from '@/assets/skills/e-Logo.svg';
 import ProfileCompletionCard from "@/components/cards/ProfileCompletionCard";
 import { useGetUserSkillsSummaryQuery } from '@/api/skillsApiSlice';
 
-const Dashboard: React.FC = () => {
+interface Props {
+  isDashboard: boolean; // Define the prop type here
+}
+
+const Dashboard: React.FC<Props> = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
   //const user_id = useSelector((state) => state.auth.user._id)
-  const user_id = useSelector((state :RootState) => state.auth.user._id);
+  const user_id = useSelector((state: RootState) => state.auth.user._id);
   const user_name = useSelector((state: RootState) => state.auth.user?.name);
   const navigate = useNavigate(); // Initialize useNavigate hook
   const handleLinkClick = (route: string) => {
@@ -68,7 +72,7 @@ const Dashboard: React.FC = () => {
 
                     {/* Skills */}
                     <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      <SkillList />
+                      <SkillList isDashboard={true}/>
                     </section>
 
                   </div>
@@ -76,17 +80,17 @@ const Dashboard: React.FC = () => {
                   <div className="flex flex-col items-start gap-6 flex-1">
                     <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-6">
 
-                    <div className="p-4 w-full h-[92px] bg-green-50 rounded-lg flex items-center space-x-4">
-                      <div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
-                        {/* Circular Progress Bar */}
-                        <CircularProgress progress={averageVerifiedRating} size={60} strokeWidth={6} showText={false} />
-                        <img className="absolute w-8 h-8" src={logo} alt="short logo" />
+                      <div className="p-4 w-full h-[92px] bg-green-50 rounded-lg flex items-center space-x-4">
+                        <div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
+                          {/* Circular Progress Bar */}
+                          <CircularProgress progress={averageVerifiedRating} size={60} strokeWidth={6} showText={false} />
+                          <img className="absolute w-8 h-8" src={logo} alt="short logo" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900">{averageVerifiedRating}</p>
+                          <p className="text-base text-[#414447] font-sf-pro">Employability Score</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-2xl font-bold text-gray-900">{averageVerifiedRating}</p>
-                        <p className="text-base text-[#414447] font-sf-pro">Employability Score</p>
-                      </div>
-                    </div>
 
                       <ul className="flex flex-col items-start gap-5 self-stretch">
                         <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -132,8 +136,8 @@ const Dashboard: React.FC = () => {
                     </aside>
 
                     {/* Profile Sidebar */}
-                    <ProfileCompletionCard/>
-                    
+                    <ProfileCompletionCard />
+
                     {/* <ProfileCard
                       name={user_name}
                       completionPercentage={30}
@@ -265,7 +269,7 @@ const Dashboard: React.FC = () => {
 
                   <div className="flex flex-col items-start gap-6 flex-1">
                     {/* Profile Sidebar */}
-                    <ProfileCompletionCard/>
+                    <ProfileCompletionCard />
                     {/* <ProfileCard
                       name={user_name}
                       completionPercentage={30}
