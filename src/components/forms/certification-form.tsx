@@ -10,8 +10,8 @@ interface Certification {
 }
 
 interface CertificationsFormProps {
-  certifications: Certification[];
-  onChange: (certifications: Certification[]) => void;
+  certifications: any[];
+  onChange: (certifications: any[]) => void;
   errors: { [key: string]: string };
 }
 
