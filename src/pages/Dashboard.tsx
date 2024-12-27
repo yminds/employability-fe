@@ -27,7 +27,7 @@ const Dashboard: React.FC<Props> = () => {
   const handleLinkClick = (route: string) => {
     navigate(route); // Navigate to the specified route
   };
-  //const { data: goalsData } = "";
+ // const { data: goalsData } = "";
   const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
 
@@ -167,7 +167,7 @@ const Dashboard: React.FC<Props> = () => {
                             onClick={() => {
                               setJourneyDialog(true)
                             }}
-                            className="bg-[#00183D] text-white py-[10px] px-6 rounded hover:bg-gray-600 hover:text-white text-base leading-6 tracking-wide focus:outline-none font-sf-pro">Start Your Journey</Button>
+                            className="bg-[#001630] text-white py-[10px] px-6 rounded hover:bg-[#062549] hover:text-white text-base leading-6 tracking-wide focus:outline-none font-sf-pro">Start Your Journey</Button>
 
                           {/* Dialog */}
                           {<Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
