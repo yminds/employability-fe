@@ -71,10 +71,10 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ onSkillsStatusChange }) => 
         <div className="flex justify-between items-center mb-4">
           {/* Goal Section */}
           <div className="bg-white w-ful h-[46px] rounded-lg flex items-center justify-start px-4 ">
-            <span className="text-sm text-gray-600 items-center">Goal : </span>
-            <span className="text-lg font-semibold text-gray-900 pl-2 truncate">
-              {goal}
-            </span>
+            <span className=" text-base font-normal leading-6 tracking-[0.015rem]">Goal : {goal} </span>
+            {/* <span className="text-sm  text-gray-600 pl-2 truncate">
+              
+            </span> */}
           </div>
           <button
             onClick={handleOpenModal}
