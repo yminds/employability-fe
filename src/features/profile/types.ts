@@ -1,4 +1,5 @@
 export interface ProfileFormData {
+    education: Education[];
     basicInfo: {
       name: string;
       mobile: string;

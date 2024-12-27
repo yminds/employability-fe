@@ -31,7 +31,6 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
   const [certifications, setCertifications] = useState<Certification[]>(
     initialCertifications || []
   );
-console.log(certifications, "certifications");
 
   // Keep track of whether the Add/Edit modal is open
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

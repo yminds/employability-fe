@@ -15,14 +15,14 @@ import {
 import ExperienceSection from "./ExperienceSection";
 import CertificationsSection from "./CertificationsSection";
 import { useSelector } from "react-redux";
-
+import { currentStatusSVG } from "./svg/currentStatusSVG";
 
 
 
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
 
-console.log(user, "user");
+  console.log(user, "user");
 
   const initialExperiences: ExperienceItem[] = [
   ];
@@ -190,25 +190,7 @@ console.log(user, "user");
                       className="w-full h-full rounded-full object-cover"
                     />
                     {/* SVG Semi-Circle */}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="130"
-                      height="130"
-                      viewBox="0 0 130 91"
-                      className="absolute bottom-[-20px] left-[0px]"
-                      fill="none"
-                    >
-                      <path
-                        d="M123.72 53.8731C116.42 69.2531 103.377 81.1549 87.3944 87.0204C71.412 92.8859 53.7664 92.2469 38.2502 85.2406C22.734 78.2343 10.5859 65.4201 4.41711 49.5524C-1.75169 33.6846 -1.44876 16.0299 5.26076 0.383137L28.3705 10.2928C24.2565 19.8868 24.0707 30.7119 27.8532 40.4413C31.6356 50.1707 39.0843 58.0278 48.5981 62.3238C58.112 66.6197 68.9316 67.0116 78.7313 63.4151C88.531 59.8186 96.5285 52.5209 101.005 43.0906L123.72 53.8731Z"
-                        fill="url(#paint0_linear_40001011_4895)"
-                      />
-                      <defs>
-                        <linearGradient id="paint0_linear_40001011_4895" x1="57.5949" y1="-11.411" x2="-7.13081" y2="86.2261" gradientUnits="userSpaceOnUse">
-                          <stop stopColor="white" stopOpacity="0" />
-                          <stop offset="0.858943" stopColor="#0AD472" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
+                    {currentStatusSVG}
                     <div className="mb-[]">
                       <span className=" bg-slate-600 ">
                       </span>
@@ -290,7 +272,7 @@ console.log(user, "user");
             experiences={experiences}
             onAdd={handleAddExperience}
             onEdit={() => console.log("Edit clicked")}
-            onDelete={()=>console.log(" delete clicked ")}
+            onDelete={() => console.log(" delete clicked ")}
           />
         </div>
         <div className="bg-white rounded-lg mt-6 mb-10">
@@ -349,7 +331,7 @@ console.log(user, "user");
               </div>
               <div>
                 <h3 className="text-gray-700 font-medium">Profile URL</h3>
-                <p className="text-gray-600">{contactInfo.profileURL}</p>
+                <p className="text-gray-600">{}</p>
               </div>
             </div>
 
@@ -383,7 +365,7 @@ console.log(user, "user");
               </div>
               <div>
                 <h3 className="text-gray-700 font-medium">Mobile number</h3>
-                <p className="text-gray-600">{contactInfo.mobileNumber}</p>
+                <p className="text-gray-600">{}</p>
               </div>
             </div>
 
@@ -475,8 +457,9 @@ console.log(user, "user");
                 onClose={() => setIsProgressModalOpen(false)}
                 fileName={fileDetails.name}
                 fileSize={fileDetails.size}
-                uploadProgress={uploadProgress}
-              />
+                uploadProgress={uploadProgress} onContinue={function (): void {
+                  throw new Error("Function not implemented.");
+                } } isUploading={undefined}              />
             )}
             <button
               onClick={() => setIsUploadModalOpen(true)}
@@ -513,7 +496,8 @@ console.log(user, "user");
             {isUploadModalOpen && (
               <ResumeUploadModal
                 onClose={() => setIsUploadModalOpen(false)}
-                onUpload={handleUpload}
+                onUpload={()=>{console.log();
+                }}
                 userId={user._id}
               />
             )}
@@ -526,7 +510,6 @@ console.log(user, "user");
                 fileSize={fileDetails.size}
                 uploadProgress={uploadProgress}
                 isUploading={uploadProgress < 100} // Indicates upload is ongoing
-                error={null}
               />
             )}
             <button
