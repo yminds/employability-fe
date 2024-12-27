@@ -219,20 +219,12 @@
 
 import React, { useState, useEffect, Key } from "react";
 import { Plus, Trash } from "lucide-react";
+import type { ExperienceItem } from "@/features/profile/types";
 
-interface ExperienceItem {
-  id: Key | null | undefined;
-  jobTitle: string;
-  employmentType: string;
-  companyName: string;
-  location: string;
-  startDate: string;
-  endDate: string | null;
-}
 
 interface ExperienceFormProps {
-  experiences: ExperienceItem[];
-  onChange: (experiences: ExperienceItem[]) => void;
+  experiences: any[];
+  onChange: any;
 }
 
 const ExperienceForm: React.FC<ExperienceFormProps> = ({
@@ -251,13 +243,22 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
   // 2) Define addExperience once
   const addExperience = () => {
     const newExperience: ExperienceItem = {
-      id: Date.now(), // Added to ensure unique keys
+      id: '',
       jobTitle: "",
       employmentType: "",
       companyName: "",
       location: "",
       startDate: "",
       endDate: null,
+      company: "",
+      jobType: undefined,
+      isVerified: undefined,
+      duration: undefined,
+      companyLogo: "",
+      currentlyWorking: false,
+      currentCTC: "",
+      expectedCTC: "",
+      description: ""
     };
     onChange([...experiences, newExperience]);
   };
