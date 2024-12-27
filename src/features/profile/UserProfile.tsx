@@ -6,7 +6,6 @@ import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { ProfileFormData } from "./types";
 import EditBioModal from "@/components/modal/EditBioModal";
 import EducationSection from "./EducationSection";
-import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Button } from "@/components/ui/button"
 // import arrow from '@/assets/skills/arrow.svg';
@@ -27,6 +26,7 @@ import {
   useUpdateEducationMutation,
   useDeleteEducationMutation,
 } from "../../api/educationSlice";
+import { useSelector } from "react-redux";
 import { Check } from "lucide-react";
 
 
@@ -37,27 +37,17 @@ const UserProfile: React.FC = () => {
 
   const initialEducationEntries: Education[] = [
     {
-      highest_education_level: "bachelors",
+      education_level: "bachelors",
       degree: "B Tech Computer Science",
       institute: "APJ Abdul Kalam University",
       from_date: "2020-10-01",
       till_date: "2024-04-30",
       cgpa_or_marks: "9.1",
       _id: "",
-      board_or_certification: "",
-      education_level: undefined
+      board_or_certification: '',
+      highest_education_level: undefined
     },
-    {
-      degree: "Higher Secondary",
-      institute: "Kendriya Vidyalaya",
-      from_date: "2018-04-01",
-      till_date: "2020-11-30",
-      cgpa_or_marks: "8.8",
-      _id: "",
-      highest_education_level: undefined,
-      board_or_certification: "",
-      education_level: undefined
-    },
+
   ];
   const initialExperiences: ExperienceItem[] = [
     {

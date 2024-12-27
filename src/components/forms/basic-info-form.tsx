@@ -312,6 +312,8 @@ export default function BasicInfoForm({
   const [states, setStates] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
 
+  console.log(data);
+
   useEffect(() => {
     // Load all countries on component mount
     const allCountries = Country.getAllCountries();
@@ -320,7 +322,7 @@ export default function BasicInfoForm({
 
   useEffect(() => {
     // Update states when country changes
-    if (data.country) {
+    if (data?.country) {
       const countryStates = State.getStatesOfCountry(data.country);
       setStates(countryStates);
       // Reset state and city when country changes

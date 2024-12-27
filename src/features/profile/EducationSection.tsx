@@ -382,7 +382,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({}) => {
           <div key={index} className="flex items-start gap-4 py-4">
             {/* Icon */}
             <div className="flex-shrink-0 mt-1">
-              {entry.highest_education_level
+              {entry.education_level
                 ?.toLowerCase()
                 ?.includes("secondary") ? (
                 <Clock className="h-6 w-6 text-gray-500" />
