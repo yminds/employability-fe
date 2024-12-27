@@ -59,12 +59,27 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
   const startUpload = async (file: File) => {
     setUploadState({ file, progress: 0 });
 
-    // Simulate upload progress
-    for (let progress = 0; progress <= 90; progress += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setUploadState((prev) => ({ ...prev, progress }));
-    }
+    // Simulate progress up to 90%
+    const simulatedProgress = setInterval(() => {
+      setUploadState((prev) => {
+        if (prev.progress >= 90) {
+          clearInterval(simulatedProgress);
+          return prev; // Stop progress simulation at 90%
+        }
+        return { ...prev, progress: prev.progress + 5 }; // Increment by 5%
+      });
+    }, 300); // Update every 300ms
 
+    try {
+      // Dispatch the Redux action to handle the backend upload
+      await dispatch(uploadResume({ file, userId }));
+
+      // Smoothly complete progress to 100% after backend response
+      setUploadState((prev) => ({ ...prev, progress: 100 }));
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setUploadState((prev) => ({ ...prev, progress: 0 })); // Reset progress on failure
+    }
   };
 
   // Update progress to 100% when upload completes and show CompleteProfileModal

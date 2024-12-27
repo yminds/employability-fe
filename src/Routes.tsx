@@ -16,10 +16,12 @@ import Interview from "./pages/Interview.tsx";
 import NotFound from "@/components/app/NotFound";
 import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
 import Login from "./pages/LoginPage.tsx";
-import UserProfilePage from "./pages/UserProfilePage.tsx";import Skills from "./pages/SkillsPage.tsx";
+import UserProfilePage from "./pages/UserProfilePage.tsx";
+import Skills from "./pages/SkillsPage.tsx";
 import SkillDetailPage from "./pages/SkillDetailPage.tsx";
 import SelectedSkill from "@/components/skills/suggestedskills.tsx";
 import SignupForm from "./pages/SignUpPage.tsx";
+import ProjectsPage from "./pages/ProjectsPage.tsx";
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -60,7 +62,7 @@ export const routes: RouteConfig[] = [
   },
   {
     route: "/skills/:id",
-    component: <SkillDetailPage/>,
+    component: <SkillDetailPage />,
     roles: ["CANDIDATE"],
   },
   {
@@ -75,6 +77,11 @@ export const routes: RouteConfig[] = [
   {
     route: "/user-profile",
     component: <UserProfilePage />,
+  },
+
+  {
+    route: "/user-projects",
+    component: <ProjectsPage />,
   },
 ];
 
