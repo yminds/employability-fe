@@ -27,10 +27,10 @@ const SkillList: React.FC<SkillListProps> = (isDashboard) => {
   };
   
   // Replace the hardcoded skills array with the actual data from the API
-  const userId = useSelector((state: RootState) => state.auth.user._id);
+  const userId = useSelector((state: RootState) => state.auth.user?._id);
 
   // Fetch user skills by userId
-  const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId);
+  const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId ?? "");
 
   // Handle loading and error states
   if (isLoading) {
