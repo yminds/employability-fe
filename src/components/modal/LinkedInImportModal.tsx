@@ -1,19 +1,16 @@
-
-
-
 import React, { useState } from "react";
 import { X, Upload } from "lucide-react";
 import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
 import { useDispatch } from "react-redux";
-import { resetResumeState } from '@/store/slices/resumeSlice'
+import { resetResumeState } from "@/store/slices/resumeSlice";
 
 // LinkedInImportModal Component
-const LinkedInImportModal: React.FC<{ onClose: () => void }> =  ({
+const LinkedInImportModal: React.FC<{ onClose: () => void }> = ({
   onClose,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
-const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedFile(event.target.files[0]);
@@ -25,7 +22,7 @@ const dispatch = useDispatch()
       try {
         // Await the dispatch of resetResumeState
         await dispatch(resetResumeState());
-  
+
         // Proceed with the file upload logic
         console.log("File uploaded:", selectedFile);
         setIsProgressModalOpen(true);
@@ -35,9 +32,8 @@ const dispatch = useDispatch()
       }
     } else {
       alert("Please select a file to upload.");
-    } 
+    }
   };
-  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
@@ -79,7 +75,7 @@ const dispatch = useDispatch()
             </div>
             <div>
               <img
-                src="/src/features/profile/images/Frame 1410077928.png"
+                src="/src/assets/images/Frame 1410077928.png"
                 alt="LinkedIn profile download instructions"
                 className="w-full"
               />
@@ -113,9 +109,7 @@ const dispatch = useDispatch()
               />
               {selectedFile && (
                 <span className="text-gray-600">{selectedFile.name}</span>
-                   
               )}
-              
             </div>
           </div>
         </div>
@@ -129,16 +123,15 @@ const dispatch = useDispatch()
             Continue
           </button>
         </div>
- 
-        
+
         {isProgressModalOpen && (
-                <ResumeUploadProgressModal
-                  onClose={() => setIsProgressModalOpen(false)}
-                  fileName={selectedFile?.name}
-                  fileSize={selectedFile?.size}
-                  uploadProgress={0}
-                />
-              )}
+          <ResumeUploadProgressModal
+            onClose={() => setIsProgressModalOpen(false)}
+            fileName={selectedFile?.name}
+            fileSize={selectedFile?.size}
+            uploadProgress={0}
+          />
+        )}
       </div>
     </div>
   );
