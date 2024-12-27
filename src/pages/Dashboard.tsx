@@ -14,11 +14,11 @@ import logo from '@/assets/skills/e-Logo.svg';
 import ProfileCompletionCard from "@/components/cards/ProfileCompletionCard";
 import { useGetUserSkillsSummaryQuery } from '@/api/skillsApiSlice';
 
-interface SkillListProps {
-  setDashboard: boolean; // Define the prop type here
+interface Props {
+  isDashboard: boolean; // Define the prop type here
 }
 
-const Dashboard: React.FC<SkillListProps> = () => {
+const Dashboard: React.FC<Props> = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
   //const user_id = useSelector((state) => state.auth.user._id)
   const user_id = useSelector((state: RootState) => state.auth.user._id);
@@ -72,7 +72,7 @@ const Dashboard: React.FC<SkillListProps> = () => {
 
                     {/* Skills */}
                     <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      <SkillList setDashboard={true}/>
+                      <SkillList isDashboard={true}/>
                     </section>
 
                   </div>
