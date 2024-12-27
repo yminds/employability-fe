@@ -28,7 +28,7 @@ interface GoalFormDialogProps {
 }
 
 const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-    const user_id = useSelector((state) => state.auth.user._id)
+    const user_id = useSelector((state :RootState) => state.auth.user._id);
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
     const [techStack, setTechStack] = useState(""); // Tech stack search term
@@ -166,7 +166,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                         {isLoading && <p>Loading skills...</p>}
                                         {error && <p className="text-red-500 text-sm">Failed to load skills.</p>}
                                         {/* Show skills list if no skills are selected */}
-                                        {skills && selectedTechStack.length === 0 && (
+                                        {skills && (
                                             <ul className="mt-2 max-h-40 overflow-y-auto border rounded-lg bg-white absolute w-full p-2 font-sf-pro">
                                                 {skills.data.map((skill: any) => (
                                                     <li
