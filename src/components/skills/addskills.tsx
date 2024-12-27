@@ -7,15 +7,16 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronDown, ChevronsUpDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import icon from "@/assets/skills/add_circle.svg";
 
 interface Skill {
   skill_Id: string;
@@ -45,6 +46,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     },
   ]);
 
+  const [isSkillOpen, setIsSkillOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
   const [suggestedSkills] = useState([
     { id: "1", name: "React" },
     { id: "2", name: "MongoDB" },
@@ -58,7 +62,11 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   const [open, setOpen] = useState<boolean[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
 
-  const { data: skillsData, error, isLoading } = useGetMultipleSkillsQuery(searchValue);
+  const {
+    data: skillsData,
+    error,
+    isLoading,
+  } = useGetMultipleSkillsQuery(searchValue);
 
   const handleAddSkill = () => {
     const newSkill: Skill = {
@@ -72,7 +80,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   };
 
   const handleRemoveSkill = (id: string) => {
-    const index = skills.findIndex(skill => skill.skill_Id === id);
+    const index = skills.findIndex((skill) => skill.skill_Id === id);
     const newSkills = skills.filter((skill) => skill.skill_Id !== id);
     const newOpen = [...open];
     newOpen.splice(index, 1);
@@ -80,7 +88,8 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     setOpen(newOpen);
   };
 
-  const [createUserSkills, { isLoading: isSaving }] = useCreateUserSkillsMutation();
+  const [createUserSkills, { isLoading: isSaving }] =
+    useCreateUserSkillsMutation();
 
   const handleSave = async () => {
     if (!userId || typeof userId !== "string") {
@@ -123,7 +132,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         <div className="flex justify-between items-start mb-6">
           <div>
             <h2 className="text-xl font-bold">Add Skills</h2>
-            <p className="text-sm text-gray-500">Select the skills you want to appear in the profile</p>
+            <p className="text-sm text-gray-500">
+              Select the skills you want to appear in the profile
+            </p>
           </div>
           <Button variant="ghost" className="h-6 w-6 p-0" onClick={onClose}>
             ×
@@ -135,45 +146,65 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
             <div key={index} className="bg-gray-50 rounded-lg border p-4">
               <div className="grid grid-cols-2 gap-4 relative">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Skill {index + 1}</label>
-                  <Popover open={open[index]} onOpenChange={(isOpen) => {
-                    const newOpen = [...open];
-                    newOpen[index] = isOpen;
-                    setOpen(newOpen);
-                  }}>
+                  <label className="text-sm font-medium mb-2 block">
+                    Skill {index + 1}
+                  </label>
+                  <Popover
+                    open={isSkillOpen}
+                    onOpenChange={(isOpen) => setIsSkillOpen(isOpen)}
+                  >
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         role="combobox"
-                        aria-expanded={open[index]}
+                        aria-expanded={isSkillOpen}
                         className="w-full justify-between"
                       >
                         {skill.name || "Select skill..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        {isSkillOpen ? (
+                          <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-full p-0">
                       <Command>
-                        <CommandInput placeholder="Search skills..." onValueChange={setSearchValue} />
+                        <CommandInput
+                          placeholder="Search skills..."
+                          onValueChange={setSearchValue}
+                        />
                         <CommandEmpty>No skill found.</CommandEmpty>
                         <CommandGroup>
                           {skillsData?.data?.map((item: any) => (
                             <CommandItem
+                            disabled={[
+                              "React"
+                            ].includes(item.name)}
                               key={item._id}
                               value={item.name}
                               onSelect={() => {
-                                setSkills(skills.map((s, i) => 
-                                  i === index ? { ...s, skill_Id: item._id, name: item.name } : s
-                                ));
-                                const newOpen = [...open];
-                                newOpen[index] = false;
-                                setOpen(newOpen);
+                                // Update selected skill and close dropdown
+                                setSkills(
+                                  skills.map((s, i) =>
+                                    i === index
+                                      ? {
+                                          ...s,
+                                          skill_Id: item._id,
+                                          name: item.name,
+                                        }
+                                      : s
+                                  )
+                                );
+                                setIsSkillOpen(false); // Close dropdown
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  skill.skill_Id === item._id ? "opacity-100" : "opacity-0"
+                                  skill.skill_Id === item._id
+                                    ? "opacity-100"
+                                    : "opacity-0"
                                 )}
                               />
                               {item.name}
@@ -186,12 +217,21 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Self rating</label>
-                  <Popover>
+                  <label className="text-sm font-medium mb-2 block">
+                    Self rating
+                  </label>
+                  <Popover open={isOpen} onOpenChange={setIsOpen}>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-between">
-                        {skill.rating}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between"
+                      >
+                        {skill.rating || "Select rating..."}
+                        {isOpen ? (
+                          <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-[200px] p-0">
@@ -201,15 +241,21 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                             <CommandItem
                               key={rating}
                               onSelect={() => {
-                                setSkills(skills.map((s, i) =>
-                                  i === index ? { ...s, rating } : s
-                                ));
+                                // Update the rating and close the popover
+                                setSkills(
+                                  skills.map((s, i) =>
+                                    i === index ? { ...s, rating } : s
+                                  )
+                                );
+                                setIsOpen(false); // Close the popover after selecting
                               }}
                             >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  skill.rating === rating ? "opacity-100" : "opacity-0"
+                                  skill.rating === rating
+                                    ? "opacity-100"
+                                    : "opacity-0"
                                 )}
                               />
                               {rating}
@@ -223,35 +269,38 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 
                 <Button
                   variant="ghost"
-                  className="absolute right-0 top-0 h-6 w-6 p-0"
+                  className="absolute right-0 top-[-10px] h-6 w-6 p-0"
                   onClick={() => handleRemoveSkill(skill.skill_Id)}
                 >
-                  ×
+                  <span className="text-[12px]">×</span>
                 </Button>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-4 flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="text-green-600 border-green-600"
-            onClick={handleAddSkill}
-          >
-            <span className="mr-2">+</span>
-            Add Skill
-          </Button>
-        </div>
+        {/* Button */}
+        <Button
+          variant="outline"
+          className="text-green-600 border-0 flex-1 px-0 mt-6 hover:bg-white hover:text-green-600"
+          onClick={handleAddSkill}
+          type="button"
+        >
+          <span>
+            {" "}
+            <img className="w-6 h-6" src={icon} alt="" />
+          </span>
+          Add Skill
+        </Button>
 
         <div className="mt-6">
-          <h3 className="text-sm font-semibold mb-2">Suggested Skills</h3>
+          <h3 className="text-sm font-semibold mb-2">Suggested</h3>
           <div className="flex flex-wrap gap-2">
             {suggestedSkills.map((suggestedSkill) => (
               <Button
                 key={suggestedSkill.id}
                 variant="outline"
-                className="text-sm"
+                className="text-[16px] text-[#414447] font-normal leading-[22px] rounded-full bg-[#FAFBFE]"
                 onClick={() => {
                   const newSkill = {
                     skill_Id: suggestedSkill.id,
@@ -263,14 +312,14 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   setOpen([...open, false]);
                 }}
               >
-                {suggestedSkill.name} +
+                {suggestedSkill.name} <span className="text-[#03963F]">+</span>
               </Button>
             ))}
           </div>
         </div>
 
         <Button
-          className="w-full mt-6 bg-[#00183D] hover:bg-[#001A4D]"
+          className="w-full mt-6 bg-[#00183D] hover:bg-[#062549]"
           onClick={handleSave}
           disabled={isSaving}
         >
