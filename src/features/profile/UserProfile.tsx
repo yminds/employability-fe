@@ -5,7 +5,6 @@ import ResumeUploadProgressModal from "../../components/modal/ResumeUploadProgre
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { ProfileFormData } from "./types";
 import EducationSection from "./EducationSection";
-import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Button } from "@/components/ui/button"
 import {

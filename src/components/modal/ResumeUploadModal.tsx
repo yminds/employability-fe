@@ -5,6 +5,7 @@ import { uploadResume } from "@/store/slices/resumeSlice";
 import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
+import { X, Upload } from "lucide-react";
 
 interface ResumeUploadModalProps {
   onClose: () => void;
@@ -108,9 +109,10 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
           <h2 className="text-2xl font-semibold">Upload your Resume</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-500 hover:text-gray-700"
+            aria-label="Close"
           >
-            X
+            <X className="w-5 h-5" />
           </button>
         </div>
 

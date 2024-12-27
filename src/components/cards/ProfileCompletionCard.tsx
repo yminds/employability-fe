@@ -5,10 +5,12 @@ import ResumeUploadModal from "../modal/ResumeUploadModal";
 import ResumeUploadProgressModal from "../modal/ResumeUploadProgressModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { ProfileFormData } from "@/features/profile/types";
+import { useSelector } from "react-redux";
 
 const ProfileCompletionCard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const user_name = useSelector((state: RootState) => state.auth.user?.name);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -45,8 +47,16 @@ const ProfileCompletionCard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 w-1/5">
-      <div className="bg-white p-6 rounded-lg">
+    <div className="space-y-6 bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-3">
+      <div className="bg-white rounded-lg">
+        <div className="flex items-center pb-3">
+            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold mr-3">Y</div>
+            <div>
+                <h3 className="text-gray-600 text-[20px] font-medium leading-[26px] tracking-[-0.2px]">{user_name}</h3>
+            </div>
+        </div>
+        <div className="h-px self-stretch bg-[#D9D9D9] mt-2 mb-5"></div>
+
         <h2 className="font-semibold text-gray-700 mb-4">
           Complete your profile
         </h2>

@@ -31,14 +31,24 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
-
     getUserSkillDetails:builder.query<any, string >({
         query: ( skillId ) => ({
           url: `api/v1/skills/userSkills/${skillId}`,
           method: 'GET',
         }),
       }),
+    
+      createUserSkills: builder.mutation<any, { user_id: string; skills: { skill_pool_id: string; self_rating: number }[] }>({
+        query: ({ user_id, skills }) => ({
+          url: '/api/v1/skills/userSkills', // Replace with your endpoint
+          method: 'POST',
+          body: {
+            user_id,
+            skills,
+          },
+        }),
+      }),
   }),
 });
 
-export const { useGetUserSkillsQuery, useGetUserSkillsSummaryQuery,useGetUserSkillDetailsQuery } = skillsApiSlice;
+export const { useGetUserSkillsQuery, useGetUserSkillsSummaryQuery,useGetUserSkillDetailsQuery, useCreateUserSkillsMutation } = skillsApiSlice;

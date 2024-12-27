@@ -190,14 +190,17 @@ export default function CompleteProfileModal({
   useEffect(() => {
     const initializeData = async () => {
       if (data) {
-        const transformedData = await transformData(data);
-        setFormData(transformedData);
-        // console.log("Transformed data:", transformedData);
+        try {
+          const transformedData = await transformData(data);
+          setFormData(transformedData);
+          console.log("Transformed data:", transformedData);
+        } catch (error) {
+          console.error("Error transforming data:", error);
+        }
       }
     };
+
     initializeData();
-    setFormData(transformData(data));
-    console.log(data);
   }, [data]);
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
