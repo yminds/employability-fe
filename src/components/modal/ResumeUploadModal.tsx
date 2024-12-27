@@ -6,9 +6,11 @@ import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
 import { X, Upload } from "lucide-react";
+import { ProfileFormData } from "@/features/profile/types";
 
 interface ResumeUploadModalProps {
   onClose: () => void;
+  onUpload:()=> void;
   userId: string;
 }
 
@@ -24,8 +26,7 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
     progress: number;
   }>({ progress: 0 });
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
-  // const userId = useSelector((state) => state.auth.user._id);
-  // console.log(userId);
+
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -97,8 +98,8 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       <CompleteProfileModal
         type="resumeUpload"
         onClose={onClose}
-        userId={userId}
-      />
+        userId={userId} 
+        onSave={()=>console.log('')}      />
     );
   }
 
@@ -109,9 +110,9 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
         fileName={uploadState.file.name}
         fileSize={`${(uploadState.file.size / (1024 * 1024)).toFixed(2)} MB`}
         uploadProgress={uploadState.progress}
-        isUploading={uploading}
-        error={error}
-      />
+        isUploading={uploading} onContinue={function (): void {
+          throw new Error("Function not implemented.");
+        } }      />
     );
   }
 

@@ -1,6 +1,22 @@
 import React, { useState } from "react";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import { useCreateUserSkillsMutation } from "@/api/skillsApiSlice";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
+import icon from "@/assets/skills/add_circle.svg";
 
 interface Skill {
   skill_Id: string;
@@ -8,28 +24,48 @@ interface Skill {
   rating: string;
   visibility: string;
 }
+interface skillsSelected {
+  data:[
+    {
+      _id: string;
+      skill_pool_id: {
+        _id: string;
+        name: string;
+        icon: string
+      };
+      verified_rating: number;
+      self_rating: number;
+  }
+  ]
+}
 
 interface AddSkillsModalProps {
+  selectedSkills: skillsSelected
   onClose: () => void;
   userId: string;
   onSkillsUpdate: (isUpdated: boolean) => void;
 }
 
 const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
+  selectedSkills,
   onClose,
   userId,
   onSkillsUpdate,
 }) => {
+  console.log("selected skills ",selectedSkills);
+  
   const [user_Id] = useState<string>(userId);
-
   const [skills, setSkills] = useState<Skill[]>([
     {
       skill_Id: "",
       name: "",
       rating: "__/10",
-      visibility: "All users", // Default visibility
+      visibility: "All users",
     },
   ]);
+
+  const [isSkillOpen, setIsSkillOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [suggestedSkills] = useState([
     { id: "1", name: "React" },
@@ -40,9 +76,15 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     { id: "6", name: "Express" },
   ]);
 
-  const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering skills
+  const ratings = Array.from({ length: 10 }, (_, i) => `${i + 1}/10`);
+  const [open, setOpen] = useState<boolean[]>([]);
+  const [searchValue, setSearchValue] = useState<string>("");
 
-  const { data: skillsData, error, isLoading } = useGetMultipleSkillsQuery(searchTerm);
+  const {
+    data: skillsData,
+    error,
+    isLoading,
+  } = useGetMultipleSkillsQuery(searchValue);
 
   const handleAddSkill = () => {
     const newSkill: Skill = {
@@ -52,227 +94,253 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
       visibility: "All users",
     };
     setSkills([...skills, newSkill]);
+    setOpen([...open, false]);
   };
 
   const handleRemoveSkill = (id: string) => {
-    setSkills(skills.filter((skill) => skill.skill_Id !== id));
+    const index = skills.findIndex((skill) => skill.skill_Id === id);
+    const newSkills = skills.filter((skill) => skill.skill_Id !== id);
+    const newOpen = [...open];
+    newOpen.splice(index, 1);
+    setSkills(newSkills);
+    setOpen(newOpen);
   };
 
-  const handleAddSuggestedSkill = (suggestedSkill: { id: string; name: string }) => {
-    if (!skills.some((skill) => skill.skill_Id === suggestedSkill.id)) {
-      setSkills([
-        ...skills,
-        {
-          skill_Id: suggestedSkill.id,
-          name: suggestedSkill.name,
-          rating: "__/10",
-          visibility: "All users",
-        },
-      ]);
-    }
-  };
-
-  const [createUserSkills, { isLoading: isSaving, isError, isSuccess }] =
+  const [createUserSkills, { isLoading: isSaving }] =
     useCreateUserSkillsMutation();
 
   const handleSave = async () => {
-    // Ensure userId is valid
     if (!userId || typeof userId !== "string") {
       console.error("Invalid user ID.");
       return;
     }
 
-    // Prepare payload
     const payload = {
       user_id: user_Id,
       skills: skills.map((skill) => ({
         skill_pool_id: skill.skill_Id,
-        self_rating: parseInt(skill.rating.split("/")[0]), // Extract numeric rating
+        self_rating: parseInt(skill.rating.split("/")[0]),
       })),
     };
 
     try {
-      // Call the createUserSkills mutation
       const response = await createUserSkills(payload).unwrap();
       console.log("Skills added successfully:", response);
-      onSkillsUpdate(true); // Notify parent component
-      onClose(); // Close the modal
+      onSkillsUpdate(true);
+      onClose();
     } catch (error) {
       console.error("Failed to add skills:", error);
-      onSkillsUpdate(false); // Notify parent component
+      onSkillsUpdate(false);
     }
   };
 
-  // Filter skills based on the search term
-  const filteredSkills = skillsData?.data.filter((skill: any) =>
-    skill.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Handle loading and error states
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-[800px] max-w-full">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
           <p>Loading skills...</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-[800px]">
-          <p>Error loading skills. Please try again later.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center  z-50">
-      <div className="bg-white rounded-lg p-8 max-w-[800px]">
-        {/* Header */}
-        <div className="flex justify-between items-start">
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white rounded-lg p-8 w-full max-w-2xl">
+        <div className="flex justify-between items-start mb-6">
           <div>
             <h2 className="text-xl font-bold">Add Skills</h2>
-            <p className="text-sm text-gray-500">Select the skills you want to appear in the profile</p>
+            <p className="text-sm text-gray-500">
+              Select the skills you want to appear in the profile
+            </p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-xl w-6 h-6"
-          >
+          <Button variant="ghost" className="h-[32px] w-[32px] p-0" onClick={onClose}>
             ×
-          </button>
+          </Button>
         </div>
 
-        {/* Skills List */}
-        <div className="space-y-4 mt-6">
+        <div className="space-y-4">
           {skills.map((skill, index) => (
-            <div
-              key={index}
-              className="bg-gray-50 rounded-lg border max-w-[716px] h-[100px] p-4 border-gray-200"
-            >
-              <div className="grid grid-cols-2 relative gap-4">
-                {/* Skill Input */}
-                <div className="col-span-1">
-                  <label className="text-sm font-medium">Skill {index + 1}</label>
-                  <input
-                    list={`skills-${index}`}
-                    value={skill.name}
-                    onChange={(e) => {
-                      const selectedSkill = skillsData?.data.find(
-                        (availableSkill: any) =>
-                          availableSkill.name === e.target.value
-                      );
-                      setSkills((prev) =>
-                        prev.map((s, i) =>
-                          i === index
-                            ? {
-                                ...s,
-                                skill_Id: selectedSkill?._id || s.skill_Id,
-                                name: selectedSkill?.name || e.target.value,
-                              }
-                            : s
-                        )
-                      );
-                    }}
-                    onInput={(e) => setSearchTerm(e.currentTarget.value)}
-                    placeholder="Search skills"
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                  />
-                  <datalist id={`skills-${index}`}>
-                    {filteredSkills?.map((availableSkill: any) => (
-                      <option
-                        key={availableSkill._id}
-                        value={availableSkill.name}
+            <div key={index} className="bg-gray-50 rounded-lg border p-4">
+              <div className="grid grid-cols-2 gap-4 relative">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Skill {index + 1}
+                  </label>
+                  <Popover
+                    open={isSkillOpen}
+                    onOpenChange={(isOpen) => setIsSkillOpen(isOpen)}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isSkillOpen}
+                        className="w-full justify-between"
                       >
-                        {availableSkill.name}
-                      </option>
-                    ))}
-                  </datalist>
+                        {skill.name || "Select skill"}
+                        {isSkillOpen ? (
+                          <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput
+                          placeholder="Search skills"
+                          onValueChange={setSearchValue}
+                        />
+                        <CommandEmpty>No skill found.</CommandEmpty>
+                        <CommandGroup>
+                          {skillsData?.data?.map((item: any) => (
+                            <CommandItem
+                            disabled={selectedSkills.data?.map((skill) => skill.skill_pool_id._id).includes(item._id)}  
+                              key={item._id}
+                              value={item.name}
+                              onSelect={() => {
+                                // Update selected skill and close dropdown
+                                setSkills(
+                                  skills.map((s, i) =>
+                                    i === index
+                                      ? {
+                                          ...s,
+                                          skill_Id: item._id,
+                                          name: item.name,
+                                        }
+                                      : s
+                                  )
+                                );
+                                setIsSkillOpen(false); // Close dropdown
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  skill.skill_Id === item._id
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {item.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
-                {/* Self Rating */}
-                <div className="col-span-1">
-                  <label className="text-sm font-medium">Self rating</label>
-                  <select
-                    value={skill.rating}
-                    onChange={(e) =>
-                      setSkills((prev) =>
-                        prev.map((s, i) =>
-                          i === index ? { ...s, rating: e.target.value } : s
-                        )
-                      )
-                    }
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="__/10">__/10</option>
-                    {[...Array(10)].map((_, i) => (
-                      <option key={i + 1} value={`${i + 1}/10`}>
-                        {i + 1}/10
-                      </option>
-                    ))}
-                  </select>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Self rating
+                  </label>
+                  <Popover open={isOpen} onOpenChange={setIsOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between"
+                      >
+                        {skill.rating || "Select rating..."}
+                        {isOpen ? (
+                          <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandGroup>
+                          {ratings.map((rating) => (
+                            <CommandItem
+                              key={rating}
+                              onSelect={() => {
+                                // Update the rating and close the popover
+                                setSkills(
+                                  skills.map((s, i) =>
+                                    i === index ? { ...s, rating } : s
+                                  )
+                                );
+                                setIsOpen(false); // Close the popover after selecting
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  skill.rating === rating
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {rating}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
-                {/* Remove Skill */}
-                <div className="absolute right-0 top-[-14px] flex justify-end">
-                  <button
-                    onClick={() => handleRemoveSkill(skill.skill_Id)}
-                    className="text-gray-500 w-4 h-4 text-lg"
-                  >
-                    ×
-                  </button>
-                </div>
+                <Button
+                  variant="ghost"
+                  className="absolute right-0 top-[-10px] h-6 w-6 p-0"
+                  onClick={() => handleRemoveSkill(skill.skill_Id)}
+                >
+                  <span className="text-[18px] font-normal">x</span>
+                </Button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Add Skill Button */}
-{/* Add Skill Button */}
-<div
-  className="mt-4 w-1/6 flex items-center gap-2 cursor-pointer"
-  onClick={handleAddSkill} // Apply the click handler to the wrapper div
->
-  {/* Icon */}
-  <div className="flex items-center justify-center w-5 h-5 bg-green-600 text-white text-lg rounded-full">
-    +
-  </div>
+        {/* Button */}
+        <Button
+          variant="outline"
+          className="text-green-600 border-0 flex-1 px-0 mt-6 hover:bg-white hover:text-green-600"
+          onClick={handleAddSkill}
+          type="button"
+        >
+          <span>
+            {" "}
+            <img className="w-6 h-6" src={icon} alt="" />
+          </span>
+          Add Skill
+        </Button>
 
-  {/* Button */}
-  <button
-    className="flex-1 text-green-600 py-2 rounded-lg"
-    type="button"
-  >
-    Add Skill
-  </button>
-</div>
-
-        {/* Suggested Skills */}
         <div className="mt-6">
-          <h3 className="text-sm font-semibold mb-2">Suggested Skills</h3>
+          <h3 className="text-sm font-semibold mb-2">Suggested</h3>
           <div className="flex flex-wrap gap-2">
             {suggestedSkills.map((suggestedSkill) => (
-              <button
+              <Button
                 key={suggestedSkill.id}
-                onClick={() => handleAddSuggestedSkill(suggestedSkill)}
-                className="px-3 py-1 text-sm bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200"
+                variant="outline"
+                className="text-[16px] text-[#414447] font-normal leading-[22px] rounded-full bg-[#FAFBFE]"
+                onClick={() => {
+                  const newSkill = {
+                    skill_Id: suggestedSkill.id,
+                    name: suggestedSkill.name,
+                    rating: "__/10",
+                    visibility: "All users",
+                  };
+                  setSkills([...skills, newSkill]);
+                  setOpen([...open, false]);
+                }}
               >
-                {suggestedSkill.name} +
-              </button>
+                {suggestedSkill.name} <span className="text-[#03963F]">+</span>
+              </Button>
             ))}
           </div>
         </div>
 
-        {/* Save Button */}
-        <button
+        <Button
+          className="w-full mt-6 bg-[#00183D] hover:bg-[#062549]"
           onClick={handleSave}
-          className="w-full bg-[#00183D] text-white py-3 rounded-lg mt-6 hover:bg-[#001A4D]"
+          disabled={isSaving}
         >
-          Save
-        </button>
+          {isSaving ? "Saving..." : "Save"}
+        </Button>
       </div>
     </div>
   );

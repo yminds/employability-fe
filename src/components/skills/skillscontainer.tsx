@@ -9,12 +9,11 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
 const SkillsContainer: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState<string>("All");
   const [isUpdated, setIsUpdated] = useState<boolean>(false); // Track if skills were updated
-  const userId = useSelector((state: RootState) => state.auth.user._id);
+  const userId = useSelector((state: RootState) => state.auth.user?._id);
 
   // Fetch user skills by userId
-  const { data: skillsData, error, isLoading, refetch } = useGetUserSkillsQuery(userId);
+  const { data: skillsData, error, isLoading, refetch } = useGetUserSkillsQuery(userId ?? "");
 
   // Re-fetch user skills if `isUpdated` is true
   useEffect(() => {
@@ -45,7 +44,7 @@ const SkillsContainer: React.FC = () => {
         <div className="flex-[7] w-full h-full overflow-y-auto scrollbar-hide">
           {/* Sticky Header */}
           <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5]">
-            <SkillsHeader onSkillsStatusChange={setIsUpdated} />
+            <SkillsHeader skills={skills} onSkillsStatusChange={setIsUpdated} />
           </div>
           {/* Content below the header */}
           <div className="mt-[110px]"> {/* Ensure spacing matches header height */}

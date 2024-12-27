@@ -1,4 +1,5 @@
 export interface ProfileFormData {
+    education: Education[];
     basicInfo: {
       name: string;
       mobile: string;
@@ -56,14 +57,17 @@ export interface Education {
   highest_education_level: any
   }
   
-  export interface Certification {
-    title: string;
-    issuedBy: string;
-    issueDate: string;
-    expirationDate: string;
-    credentialURL: string;
-  }
-  
+// src/features/profile/types.ts
+
+export interface Certification {
+  _id: string;
+  title: string;
+  issuedBy: string;
+  issueDate: string;
+  expirationDate: string | null;
+  credentialURL: string;
+}
+
 
 // types.ts (or your designated types file)
 export interface ExperienceItem {
@@ -88,8 +92,8 @@ export interface ExperienceItem {
   
   export interface ExperienceProps {
     experiences: ExperienceItem[]
-    totalDuration: string
     onAdd?: () => void
     onEdit?: () => void
+    onDelete?:()=> void
   }
   

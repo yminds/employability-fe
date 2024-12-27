@@ -14,6 +14,8 @@ export interface Interview{
 }
 
 export interface UserSkill {
+    rating: number;
+    name: ReactNode;
     _id:string;
     user_id: string;
     skill_pool_id: string;

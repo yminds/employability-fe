@@ -1,16 +1,11 @@
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { UserSkill } from "@/types/userSkillsType";
 
-interface Skill {
-  _id: string;
-  name: string;
-  description: string;
-  rating?: number;
-}
 
 interface SkillsFormProps {
-  skills: Skill[];
-  onChange: (skills: Skill[]) => void;
+  skills: any;
+  onChange: (skills: UserSkill[]) => void;
   errors: { [key: string]: string };
 }
 
@@ -20,7 +15,7 @@ export default function SkillsForm({
   errors,
 }: SkillsFormProps) {
   // State to store all available skills from the API
-  const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<UserSkill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch all available skills when component mounts
@@ -45,24 +40,14 @@ export default function SkillsForm({
     fetchSkills();
   }, []);
 
-  const addSkill = () => {
-    onChange([
-      ...skills,
-      {
-        _id: "",
-        name: "",
-        description: "",
-        rating: 0,
-      },
-    ]);
-  };
+
 
   const handleSkillChange = (
     index: number,
     field: "rating" | "_id",
     value: number | string
   ) => {
-    const updatedSkills = skills.map((skill, i) => {
+    const updatedSkills = skills.map((skill: any, i: any) => {
       if (i === index) {
         if (field === "_id") {
           // Find the selected skill from available skills
@@ -82,12 +67,15 @@ export default function SkillsForm({
     return errors[path] || "";
   };
 
+const addSkill =()=>{
+
+}
   return (
     <div className="space-y-6">
       <h3 className="font-medium">Skills</h3>
 
       {/* Skills Input */}
-      {skills.map((skill, index) => (
+      {skills.map((skill: any, index: number) => (
         <div key={skill._id || index} className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">
