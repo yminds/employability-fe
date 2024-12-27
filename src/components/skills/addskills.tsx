@@ -16,7 +16,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import icon from "@/assets/skills/add_circle.svg";
+
+import plusicon from "@/assets/skills/add_icon.png";
+import icon from "@/assets/skills/icon.svg"
+import addicon from "@/assets/skills/add_circle.svg";
 
 interface Skill {
   skill_Id: string;
@@ -154,8 +157,8 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
               Select the skills you want to appear in the profile
             </p>
           </div>
-          <Button variant="ghost" className="h-[32px] w-[32px] p-0" onClick={onClose}>
-            ×
+          <Button variant="ghost" className="h-6 w-6 p-0" onClick={onClose}>
+            <img src={icon} alt="" />
           </Button>
         </div>
 
@@ -288,7 +291,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   className="absolute right-0 top-[-10px] h-6 w-6 p-0"
                   onClick={() => handleRemoveSkill(skill.skill_Id)}
                 >
-                  <span className="text-[18px] font-normal">x</span>
+                  <img src={icon} alt="" />
                 </Button>
               </div>
             </div>
@@ -304,7 +307,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         >
           <span>
             {" "}
-            <img className="w-6 h-6" src={icon} alt="" />
+            <img className="w-6 h-6" src={addicon} alt="" />
           </span>
           Add Skill
         </Button>
@@ -328,7 +331,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   setOpen([...open, false]);
                 }}
               >
-                {suggestedSkill.name} <span className="text-[#03963F]">+</span>
+                {suggestedSkill.name} <img src={plusicon} alt="" />
               </Button>
             ))}
           </div>
