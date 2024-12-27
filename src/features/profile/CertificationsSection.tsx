@@ -1,37 +1,61 @@
-// src/components/CertificationsSection.tsx
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Edit } from "lucide-react";
-import CertificationsForm from "../../components/forms/certification-form"; // Adjust the path as necessary
-import AddEditCertificationsModal from "@/components/modal/AddEditCertificationsModal"; // You'll need to create this modal
-import { Certification } from "../../features/profile/types"; // Ensure the Certification type is correctly defined
-import { useState } from "react";
+// import CertificationsForm from "../../components/forms/certification-form"; // Adjust if needed
+import AddEditCertificationsModal from "@/components/modal/AddEditCertificationsModal"; 
+import { Certification } from "../../features/profile/types"; 
+import { useGetCertificatesByUserIdQuery } from "@/api/certificatesApiSlice";
+import { useSelector } from "react-redux";
 
 interface CertificationsSectionProps {
+  /** 
+   *  Optionally allow parent to pass initial certifications;
+   *  but we’ll primarily display the fetched data from Redux query.
+   */
   certifications: Certification[];
-  onAdd: () => void;
-  onEdit: (index: number) => void;
-  onSave: (updatedCertifications: Certification[]) => void;
+  onAdd?: () => void;
+  onEdit?: (index: number) => void;
+  onSave?: (updatedCertifications: Certification[]) => void;
 }
 
 const CertificationsSection: React.FC<CertificationsSectionProps> = ({
-  certifications,
+  certifications: initialCertifications,
   onAdd,
   onEdit,
   onSave,
 }) => {
+  const user = useSelector((state: any) => state.auth.user);
+  const { data } = useGetCertificatesByUserIdQuery(user._id);
+
+  // Local state to store the currently displayed certifications
+  const [certifications, setCertifications] = useState<Certification[]>(
+    initialCertifications || []
+  );
+console.log(certifications, "certifications");
+
+  // Keep track of whether the Add/Edit modal is open
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  // Which certification index is being edited; null means “add new”
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
+  // Fetch latest data from the server and update local state
+  useEffect(() => {
+    if (data?.data) {
+      setCertifications(data.data);
+    }
+  }, [data]);
+
+  // Handle Add
   const handleOpenModalForAdd = () => {
     setSelectedIndex(null);
-    onAdd();
+    onAdd?.(); // Call parent callback if provided
     setIsModalOpen(true);
   };
 
+  // Handle Edit
   const handleOpenModalForEdit = (index: number) => {
     setSelectedIndex(index);
-    onEdit(index);
+    onEdit?.(index); // Call parent callback if provided
     setIsModalOpen(true);
   };
 
@@ -39,13 +63,16 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
     setIsModalOpen(false);
   };
 
+  // After saving from the modal, update local state & inform parent if needed
   const handleSave = (updatedCertifications: Certification[]) => {
-    onSave(updatedCertifications);
+    setCertifications(updatedCertifications);
+    onSave?.(updatedCertifications);
     setIsModalOpen(false);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-10">
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-medium text-lg">Certifications</h3>
         <button
@@ -58,10 +85,12 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
         </button>
       </div>
 
+      {/* If no certifications */}
       {certifications.length === 0 && (
         <p className="text-gray-500">No certifications added yet.</p>
       )}
 
+      {/* Display certifications */}
       <div className="divide-y divide-gray-200">
         {certifications.map((cert, index) => (
           <div key={index} className="flex items-start gap-4 py-4">
@@ -93,26 +122,30 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
               <p className="text-sm text-gray-500">
                 {cert.issueDate} - {cert.expirationDate || "Present"}
               </p>
-              <a
-                href={cert.credentialURL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-600 hover:underline text-sm"
-              >
-                View Credential
-              </a>
+              {cert.credentialURL && (
+                <a
+                  href={cert.credentialURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-600 hover:underline text-sm"
+                >
+                  View Credential
+                </a>
+              )}
             </div>
 
-            {/* Actions */}
+            {/* Edit Action */}
             <div>
               <button
-                onClick={() => handleOpenModalForEdit(index)}
+                // onClick={() => handleOpenModalForEdit(index)}
                 className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
                 aria-label={`Edit certification entry ${index + 1}`}
               >
-                <Edit className="w-4 h-4" />
-                <span>Edit</span>
+                {/* <Edit className="w-4 h-4" /> */}
+                <span>View certifications</span>
               </button>
+
+
             </div>
           </div>
         ))}

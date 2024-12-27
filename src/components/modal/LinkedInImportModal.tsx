@@ -79,7 +79,7 @@ const dispatch = useDispatch()
             </div>
             <div>
               <img
-                src="/src/features/profile/images/Frame 1410077928.png"
+                src="src/assets/images/Frame 1410077928.png"
                 alt="LinkedIn profile download instructions"
                 className="w-full"
               />
