@@ -9,7 +9,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
 const SkillsContainer: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState<string>("All");
   const [isUpdated, setIsUpdated] = useState<boolean>(false); // Track if skills were updated
   const userId = useSelector((state: RootState) => state.auth.user._id);
 
