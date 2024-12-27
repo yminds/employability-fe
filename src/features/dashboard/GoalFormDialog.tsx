@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
 import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 // Define Zod schema for validation
 const goalSchema = z.object({
@@ -28,7 +29,7 @@ interface GoalFormDialogProps {
 }
 
 const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-    const user_id = useSelector((state :RootState) => state.auth.user._id);
+     const user_id = useSelector((state: RootState) => state.auth.user._id);
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
     const [techStack, setTechStack] = useState(""); // Tech stack search term
@@ -166,7 +167,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                         {isLoading && <p>Loading skills...</p>}
                                         {error && <p className="text-red-500 text-sm">Failed to load skills.</p>}
                                         {/* Show skills list if no skills are selected */}
-                                        {skills && (
+                                        {skills && selectedTechStack.length === 0 && (
                                             <ul className="mt-2 max-h-40 overflow-y-auto border rounded-lg bg-white absolute w-full p-2 font-sf-pro">
                                                 {skills.data.map((skill: any) => (
                                                     <li
