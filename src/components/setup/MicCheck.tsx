@@ -1,5 +1,5 @@
 import React from "react";
-import Dropdown from "@/components/ui/dropdown-menu";
+import Dropdown from "@/components/ui/custom-dropdown";
 import { useMicrophoneCheck } from "@/hooks/useMicrophoneCheck";
 
 // Images

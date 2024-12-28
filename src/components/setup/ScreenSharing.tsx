@@ -21,7 +21,7 @@ const ScreenSharingComponent: React.FC<ScreenSharingComponentProps> = ({
 }) => {
   return (
     <div
-      className={`bg-[#FAFAFA] p-[24px] pe-8 flex flex-col justify-around  gap-1 rounded-xl h-[38vh] ${
+      className={`bg-[#FAFAFA] p-[24px] pe-8 flex flex-col justify-around  gap-1 rounded-xl h-[40vh] ${
         isScreenSharing
           ? " border-[#10B754] border-2"
           : "border border-[#DBDBDB]"
