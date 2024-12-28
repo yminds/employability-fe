@@ -4,10 +4,12 @@ import { useCreateInterview } from "@/hooks/useCreateInterview";
 
 import verifiedImg from "@/assets/skills/verified.svg";
 import unverifiedImg from "@/assets/skills/unverifies.svg";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface SkillCardProps {
-  key: string
-  skill_id: string;
+  key: string;
+  skillId: string;
   skill: string;
   skillImg: string;
   verified_rating: number;
@@ -17,7 +19,7 @@ interface SkillCardProps {
 
 const SkillCard: React.FC<SkillCardProps> = ({
   key,
-  skill_id,
+  skillId,
   skill,
   skillImg,
   verified_rating,
@@ -34,19 +36,28 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const imgSrc = status === "Verified" ? verifiedImg : unverifiedImg;
 
   const handleViewReport = () => {
-    navigate(`/skills/${skill_id}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/skills/${skillId}`, {
+      state: { skill, verified_rating, selfRating },
+    });
   };
 
   const handleImproveScore = () => {
-    navigate(`/interview/${skill}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/interview/${skill}`, {
+      state: { skill, verified_rating, selfRating },
+    });
   };
 
   const handleLearn = () => {
-    navigate(`/mentor/${skill_id}`, { state: { skill } });
+    navigate(`/mentor/${skillId}`, { state: { skill } });
   };
 
-  const handleVerifySkill = () => {
-    navigate(`/interview/${skill_id}`, { state: { skill } });
+  const handleVerifySkill = async () => {
+    const interviewId = await createInterview({
+      title: `${user?.name}'s ${skill} Interview`,
+      type: "Skill",
+      user_skill_id: skillId,
+    });
+    navigate(`/interview/${interviewId}`);
   };
 
   return (
@@ -58,7 +69,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
         </span>
         <div>
           <h3 className=" text-[16px] font-medium">{skill}</h3>
-          <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">Self rating: {selfRating}/10</p>
+          <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">
+            Self rating: {selfRating}/10
+          </p>
         </div>
       </div>
 
