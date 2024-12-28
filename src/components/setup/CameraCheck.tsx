@@ -1,5 +1,5 @@
 import React from "react";
-import Dropdown from "@/components/ui/dropdown-menu";
+import Dropdown from "@/components/ui/custom-dropdown";
 import { useCameraCheck } from "@/hooks/useCameraCheck";
 
 import camera from '@/assets/screen-setup/camera.svg'
