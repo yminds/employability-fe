@@ -1,9 +1,9 @@
-import React from 'react';
-import SkillCard from '@/components/cards/skills/skillsCard';
-import { useGetUserSkillsQuery } from '@/api/skillsApiSlice';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import SkillCard from "@/components/cards/skills/skillsCard";
+import { useGetUserSkillsQuery } from "@/api/skillsApiSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { useNavigate } from "react-router-dom";
 
 interface Skill {
   _id: string;
@@ -25,12 +25,16 @@ const SkillList: React.FC<SkillListProps> = (isDashboard) => {
   const handleLinkClick = (route: string) => {
     navigate(route); // Navigate to the specified route
   };
-  
+
   // Replace the hardcoded skills array with the actual data from the API
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
   // Fetch user skills by userId
-  const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId ?? "");
+  const {
+    data: skillsData,
+    error,
+    isLoading,
+  } = useGetUserSkillsQuery(userId ?? "");
 
   // Handle loading and error states
   if (isLoading) {
@@ -46,15 +50,18 @@ const SkillList: React.FC<SkillListProps> = (isDashboard) => {
 
   let skills: any[] = []; // Declare skills outside the condition
   if (isDashboard.isDashboard) {
-    skills = skillsData && Array.isArray(skillsData.data) ? skillsData.data.slice(0, 5) : []; // Get only the first 5 items
-  }
-  else {
-    skills = skillsData && Array.isArray(skillsData.data) ? skillsData.data : []; // Ensure skills is always an array
+    skills =
+      skillsData && Array.isArray(skillsData.data)
+        ? skillsData.data.slice(0, 5)
+        : []; // Get only the first 5 items
+  } else {
+    skills =
+      skillsData && Array.isArray(skillsData.data) ? skillsData.data : []; // Ensure skills is always an array
   }
 
   return (
     <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
-      <div className='w-full h-full bg-white  flex flex-col  rounded-t-[8px]  px-4'>
+      <div className="w-full h-full bg-white  flex flex-col  rounded-t-[8px]  px-4">
         <div className="text-gray-900 text-base font-medium leading-5 mb-5">
           {isDashboard.isDashboard ? (
             <>
@@ -67,9 +74,7 @@ const SkillList: React.FC<SkillListProps> = (isDashboard) => {
               </button>
             </>
           ) : (
-            <>
-              Mandatory Skills ({skills.length})
-            </>
+            <>Mandatory Skills ({skills.length})</>
           )}
         </div>
         <div>
@@ -83,15 +88,16 @@ const SkillList: React.FC<SkillListProps> = (isDashboard) => {
                   skillImg={skill.skill_pool_id.icon}
                   verified_rating={skill.verified_rating}
                   selfRating={skill.self_rating}
-                  initialStatus={skill.verified_rating > 0 ? "Verified" : "Unverified"} // Hardcoded initial status for now
-                  skill_id={''} />
-                <div className=' w-full h-[1px] my-6 bg-[#E0E0E0]'></div>
+                  initialStatus={
+                    skill.verified_rating > 0 ? "Verified" : "Unverified"
+                  } // Hardcoded initial status for now
+                />
+                <div className=" w-full h-[1px] my-6 bg-[#E0E0E0]"></div>
               </>
             ))}
           </div>
         </div>
       </div>
-
     </section>
   );
 };
