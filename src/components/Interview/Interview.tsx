@@ -373,8 +373,6 @@ const Interview: React.FC<{
       messageId: currentMessageIndex,
       // model: "claude-3-5-haiku-20241022",
       // provider: "anthropic",
-      // "model": "claude-3-5-haiku-20241022",
-      // "provider":"anthropic"
     });
   };
 
