@@ -4,21 +4,17 @@ import { useCreateInterview } from "@/hooks/useCreateInterview";
 
 import verifiedImg from "@/assets/skills/verified.svg";
 import unverifiedImg from "@/assets/skills/unverifies.svg";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 
 interface SkillCardProps {
-  key: string;
   skillId: string;
   skill: string;
-  skillImg: string;
+  skillImg: string | undefined;
   verified_rating: number;
   selfRating: number;
   initialStatus: string; // Initial status of the skill
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
-  key,
   skillId,
   skill,
   skillImg,
@@ -52,7 +48,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleVerifySkill = async () => {
     const interviewId = await createInterview({
-      title: `${user?.name}'s ${skill} Interview`,
+      title: `${skill} Interview`,
       type: "Skill",
       user_skill_id: skillId,
     });

@@ -124,8 +124,10 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         skill_pool_id: skill.skill_Id,
         self_rating: parseInt(skill.rating.split("/")[0]),
       })),
+      goal_id: "676fa3a381861bd29ac93134",
     };
 
+    
     try {
       const response = await createUserSkills(payload).unwrap();
       console.log("Skills added successfully:", response);

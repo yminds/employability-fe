@@ -88,7 +88,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
         {displaySkills.map((skill: Skill, index: number) => (
           <React.Fragment key={skill._id}>
             <SkillCard
-              skill_id={skill._id}
+              skillId={skill._id}
               skill={skill.skill_pool_id.name}
               skillImg={skill.skill_pool_id.icon}
               verified_rating={skill.verified_rating}
