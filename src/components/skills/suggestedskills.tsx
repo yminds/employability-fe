@@ -88,7 +88,7 @@ const SuggestedSkills: React.FC = () => {
         </button>
       </div>
       {/* Skills Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {displayedSkills.map((skill, index) => (
           <div
             key={index}

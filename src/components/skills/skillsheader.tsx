@@ -34,6 +34,8 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
   const userId = useSelector((state: RootState) => state.auth.user._id);
 
   const { data: goalData, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
+  console.log(goalData);
+  
 
   const navigate = useNavigate();
 
@@ -95,7 +97,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
           </div>
           <button
             onClick={handleOpenModal}
-            className="px-4 py-2 w-[138px] h-[44px] bg-black text-white rounded-md hover:bg-green-600"
+            className="px-4 py-2 w-[138px] h-[44px] bg-black text-white rounded-md hover:bg-[#001630]"
           >
             Add Skills
           </button>

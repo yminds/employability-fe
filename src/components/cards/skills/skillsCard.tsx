@@ -26,7 +26,6 @@ const SkillCard: React.FC<SkillCardProps> = ({
   selfRating,
   initialStatus,
 }) => {
-  console.log("key", key, );
   
   const navigate = useNavigate();
   const { createInterview, isLoading, isSuccess, isError, error } =
@@ -107,7 +106,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
             </button>
             <button
               onClick={handleImproveScore}
-              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
+              className=" py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
             >
               Improve score
             </button>

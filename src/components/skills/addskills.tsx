@@ -62,7 +62,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     {
       skill_Id: "",
       name: "",
-      rating: "__/10",
+      rating: "0",
       visibility: "All users",
     },
   ]);
@@ -93,7 +93,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     const newSkill: Skill = {
       skill_Id: "",
       name: "",
-      rating: "__/10",
+      rating: "0",
       visibility: "All users",
     };
     setSkills([...skills, newSkill]);
@@ -189,8 +189,8 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
+                    <PopoverContent className="w-full  p-0">
+                      <Command className="w-full max-h-[375px]">
                         <CommandInput
                           placeholder="Search skills"
                           onValueChange={setSearchValue}
@@ -324,7 +324,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   const newSkill = {
                     skill_Id: suggestedSkill.id,
                     name: suggestedSkill.name,
-                    rating: "__/10",
+                    rating: "0",
                     visibility: "All users",
                   };
                   setSkills([...skills, newSkill]);
