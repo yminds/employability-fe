@@ -14,6 +14,7 @@ import {
   useTtsMutation,
 } from "@/api/aiApiSlice";
 import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
+import CodeSnippetEditor from "./CodeSnippetEditor";
 
 export interface IMessage {
   id: number;
@@ -38,9 +39,7 @@ const Interview: React.FC<{
     interviewId as string
   );
 
-  useEffect(() => {
-
-  }, [interviewDetails]);
+  useEffect(() => {}, [interviewDetails]);
 
   // State Variables
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -55,6 +54,9 @@ const Interview: React.FC<{
   const nextSentenceToPlayRef = useRef<number>(0); // Tracks the next sentence to play
   const audioBufferMap = useRef<Map<number, Blob>>(new Map()); // Buffers audio blobs indexed by sentence
   const [currentMessageIndex, setCurrentMessageIndex] = useState<number>(0);
+
+  const [codeSnippet, setCodeSnippet] = useState<boolean>(false);
+  const [question, setQuestion] = useState<string>("");
 
   const recordingProcessed = useRef(false);
   const frequencyDataRef = useRef<number>(0);
@@ -88,6 +90,11 @@ const Interview: React.FC<{
 
         timerStartRef.current = null; // Reset the timer
       }
+    });
+
+    newSocket.on(`codeEditor`, (data: string) => {
+      setCodeSnippet(true);
+      setQuestion(data);
     });
 
     // Cleanup on unmount
@@ -358,15 +365,14 @@ const Interview: React.FC<{
       previous conversation:
       ${messages.map((msg) => msg.message).join("\n")}
       ${prompt}`,
-      system:
-        "YOU ARE REACT INTERVIEWER WHO DOESN'T EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS, its a real mock conversation interview so ask a question and wait for user response and then ask another question",
-      // model: "gpt-4o",
-      // provider: "openai",
+      system: `YOU ARE REACT INTERVIEWER WHO DOESN'T EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS, its a real mock conversation interview so ask a question and wait for user response and then ask another question
+        ask code snippet question second most question use miniCodeEditor tool to ask code snippet question
+        `,
+      model: "gpt-4o",
+      provider: "openai",
       messageId: currentMessageIndex,
-      model: "claude-3-5-haiku-20241022",
-      provider: "anthropic",
-      // "model": "claude-3-5-haiku-20241022",
-      // "provider":"anthropic"
+      // model: "claude-3-5-haiku-20241022",
+      // provider: "anthropic",
     });
   };
 
@@ -381,6 +387,14 @@ const Interview: React.FC<{
               <Controls doneAnswering={handleDoneAnswering} />
             ) : (
               <div className="text-center text-gray-500"></div>
+            )}
+            {codeSnippet && (
+              <CodeSnippetEditor
+                question={question}
+                onSubmission={(code) => {
+                  console.log("Code Submitted:", code);
+                }}
+              />
             )}
           </div>
           <div className="w-[40%] flex flex-col gap-8">
