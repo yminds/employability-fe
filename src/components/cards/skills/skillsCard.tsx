@@ -6,9 +6,8 @@ import verifiedImg from "@/assets/skills/verified.svg";
 import unverifiedImg from "@/assets/skills/unverifies.svg";
 
 interface SkillCardProps {
-  skill_id: string;
   key: string
-  skillId: string;
+  skill_id: string;
   skill: string;
   skillImg: string;
   verified_rating: number;
@@ -17,6 +16,7 @@ interface SkillCardProps {
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
+  key,
   skill_id,
   skill,
   skillImg,
@@ -24,6 +24,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
   selfRating,
   initialStatus,
 }) => {
+  console.log("key", key, );
+  
   const navigate = useNavigate();
   const { createInterview, isLoading, isSuccess, isError, error } =
     useCreateInterview();

@@ -55,7 +55,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   userId,
   onSkillsUpdate,
 }) => {
-  console.log("selected skills ",selectedSkills);
+  // console.log("selected in Add Modal skills ",selectedSkills);
   
   const [user_Id] = useState<string>(userId);
   const [skills, setSkills] = useState<Skill[]>([

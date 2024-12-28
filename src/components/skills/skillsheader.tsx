@@ -26,7 +26,7 @@ interface SkillsHeaderProps {
 }
 
 const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , onSkillsStatusChange }) => {
-  console.log(selectedSkills);
+  // console.log(selectedSkills);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [skillsUpdated, setSkillsUpdated] = useState(false); // State to track updates
@@ -105,7 +105,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
       {/* AddSkillsModal */}
       {isModalOpen && (
         <AddSkillsModal
-        selectedSkills  = {selectedSkills}
+        selectedSkills  = {selectedSkills.data.all}
           onClose={handleCloseModal}
           userId={userId}
           onSkillsUpdate={handleSkillsUpdate} // Pass the update handler
