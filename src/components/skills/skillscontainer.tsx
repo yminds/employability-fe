@@ -36,7 +36,7 @@ const SkillsContainer: React.FC = () => {
 
   // The `skillsData` object contains the list of skills
   const skills = skillsData ? skillsData : []; // Ensure skills is always an array
-
+  // console.log(skills);
   return (
     <section className="w-full h-full flex bg-[#F5F5F5] justify-center">
       <div className="flex w-full max-w-[1300px] gap-6">
