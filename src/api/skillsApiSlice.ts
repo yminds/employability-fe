@@ -38,13 +38,14 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
         }),
       }),
     
-      createUserSkills: builder.mutation<any, { user_id: string; skills: { skill_pool_id: string; self_rating: number }[] }>({
-        query: ({ user_id, skills }) => ({
+      createUserSkills: builder.mutation<any, { user_id: string; skills: { skill_pool_id: string; self_rating: number, goal_id : string}[] }>({
+        query: ({ user_id, skills ,goal_id}) => ({
           url: '/api/v1/skills/userSkills', // Replace with your endpoint
           method: 'POST',
           body: {
             user_id,
             skills,
+            goal_id
           },
         }),
       }),

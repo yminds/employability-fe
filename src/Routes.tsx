@@ -19,7 +19,7 @@ import Login from "./pages/LoginPage.tsx";
 import UserProfilePage from "./pages/UserProfilePage.tsx";
 import Skills from "./pages/SkillsPage.tsx";
 import SkillDetailPage from "./pages/SkillDetailPage.tsx";
-import SelectedSkill from "@/components/skills/suggestedskills.tsx";
+import SelectedSkill from "@/components/skills/selectedskill.tsx";
 import SignupForm from "./pages/SignUpPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 import JobsPage from "./pages/JobsPage.tsx";
