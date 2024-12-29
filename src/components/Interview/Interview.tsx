@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { useReactMediaRecorder } from "react-media-recorder";
 import { io, Socket } from "socket.io-client";
 import { useParams } from "react-router-dom";
 
@@ -8,10 +7,12 @@ import WebCam from "@/components/interview/WebCam";
 import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
-import { useInterviewStreamMutation, useSttMutation } from "@/api/aiApiSlice";
+import { useInterviewStreamMutation } from "@/api/aiApiSlice";
 import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 import CodeSnippetEditor from "./CodeSnippetEditor";
 import { useTTS } from "@/hooks/useTTS";
+
+import { useSTT } from "@/hooks/useSTT";
 
 export interface IMessage {
   id: number;
@@ -27,8 +28,14 @@ const Interview: React.FC<{
 }> = () => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
-  const [stt, { isSuccess: isSttSuccess, data: sttResponse, error: sttError }] =
-    useSttMutation();
+
+  const {
+    startRecording,
+    stopRecording,
+    isSttSuccess,
+    sttResponse,
+    sttError,
+  } = useSTT();
 
   const {
     data: interviewDetails,
@@ -36,6 +43,7 @@ const Interview: React.FC<{
   } = useGetInterviewbyIdQuery(interviewId as string, {
     skip: !interviewId,
   });
+
   // State Variables
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isUserAnswering, setIsUserAnswering] = useState(false);
@@ -43,7 +51,6 @@ const Interview: React.FC<{
   const isComponentMounted = useRef<boolean>(true);
   const [codeSnippet, setCodeSnippet] = useState<boolean>(false);
   const [question, setQuestion] = useState<string>("");
-  const recordingProcessed = useRef(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize TTS hook
@@ -90,34 +97,6 @@ const Interview: React.FC<{
     };
   }, [isInterviewLoaded, interviewDetails]);
 
-  // Media Recorder Setup
-  const { startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder(
-    {
-      audio: true,
-      mediaRecorderOptions: { mimeType: "audio/webm" },
-      onStop: async (blobUrl) => {
-        if (recordingProcessed.current) return;
-        recordingProcessed.current = true;
-
-        try {
-          const response = await fetch(blobUrl);
-          const audioBlob = await response.blob();
-
-          const formData = new FormData();
-          formData.append("audio", audioBlob);
-
-          stt(audioBlob);
-          clearBlobUrl();
-        } catch (error) {
-          console.error("Error transcribing audio:", error);
-        } finally {
-          recordingProcessed.current = false;
-        }
-      },
-    }
-  );
-
-  // Handle STT Success and Errors
   useEffect(() => {
     if (isSttSuccess && sttResponse) {
       handleMessage(sttResponse.transcription.text, "USER");
@@ -203,8 +182,6 @@ const Interview: React.FC<{
         `,
       model: "gpt-4o",
       provider: "openai",
-      // model: "claude-3-5-sonnet-latest",
-      // provider: "anthropic"
     });
   };
 
