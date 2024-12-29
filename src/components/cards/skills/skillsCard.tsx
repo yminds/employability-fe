@@ -4,6 +4,8 @@ import { useCreateInterview } from "@/hooks/useCreateInterview";
 
 import verifiedImg from "@/assets/skills/verified.svg";
 import unverifiedImg from "@/assets/skills/unverifies.svg";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface SkillCardProps {
   skillId: string;
