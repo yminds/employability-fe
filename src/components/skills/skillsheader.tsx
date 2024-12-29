@@ -23,9 +23,10 @@ interface SkillsHeaderProps {
     data: Skill[];
   };
   onSkillsStatusChange: (isUpdated: boolean) => void; // Callback to notify parent of update status
+  onGoalChange: (goalId: string) => void; // Callback to notify parent of goal change
 }
 
-const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , onSkillsStatusChange }) => {
+const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , onSkillsStatusChange ,onGoalChange}) => {
   // console.log(selectedSkills);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -90,14 +91,30 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
         <div className="flex justify-between items-center mb-4">
           {/* Goal Section */}
           <div className="bg-white w-ful h-[46px] rounded-lg flex items-center justify-start px-4 ">
-            <span className=" text-base font-normal leading-6 tracking-[0.015rem]">Goal : {goal} </span>
-            {/* <span className="text-sm  text-gray-600 pl-2 truncate">
-              
-            </span> */}
+            {/* <span className=" text-base font-normal leading-6 tracking-[0.015rem]">Goal : {goal} </span> */}
+            {/*  Add dropdown here */}
+            <span>Goal :</span>
+<select
+  className="text-base font-normal leading-6 tracking-[0.015rem] bg-transparent border-none outline-none"
+  value={goal}
+  onChange={(e) => {
+    const selectedGoalId = goalData?.data.find(goal => goal.name === e.target.value)?._id;
+    setGoal(e.target.value);
+    if (selectedGoalId) {
+      onGoalChange(selectedGoalId); // Notify parent with the selected goal ID
+    }
+  }}
+>
+  {goalData?.data.map((goal) => (
+    <option key={goal._id} value={goal.name}>
+      {goal.name}
+    </option>
+  ))}
+</select>
           </div>
           <button
             onClick={handleOpenModal}
-            className="px-4 py-2 w-[138px] h-[44px] bg-black text-white rounded-md hover:bg-[#001630]"
+            className="px-4 py-2 w-[138px] h-[44px] bg-black text-white rounded-md hover:bg-green-600"
           >
             Add Skills
           </button>
