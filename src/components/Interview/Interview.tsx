@@ -29,20 +29,13 @@ const Interview: React.FC<{
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
 
-  const {
-    startRecording,
-    stopRecording,
-    isSttSuccess,
-    sttResponse,
-    sttError,
-  } = useSTT();
+  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } =
+    useSTT();
 
-  const {
-    data: interviewDetails,
-    isSuccess: isInterviewLoaded,
-  } = useGetInterviewbyIdQuery(interviewId as string, {
-    skip: !interviewId,
-  });
+  const { data: interviewDetails, isSuccess: isInterviewLoaded } =
+    useGetInterviewbyIdQuery(interviewId as string, {
+      skip: !interviewId,
+    });
 
   // State Variables
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -172,16 +165,14 @@ const Interview: React.FC<{
       return;
     }
     interviewStream({
-      interviewId: interviewDetails.data._id,
-      prompt: `
-      previous conversation:
-      ${messages.map((msg) => msg.message).join("\n")}
-      ${prompt}`,
-      system: `YOU ARE REACT INTERVIEWER WHO DOESN'T EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS, its a real mock conversation interview so ask a question and wait for user response and then ask another question
-       use miniCodeEditor tool to ask code snippet question whenever needed not for every question
-        `,
+      prompt,
       model: "gpt-4o",
       provider: "openai",
+       // model: "claude-3-5-sonnet-latest",
+      // provider: "anthropic",
+      _id: interviewDetails.data._id,
+      thread_id: interviewDetails.data.thread_id,
+      user_id: interviewDetails.data.user_id,
     });
   };
 
