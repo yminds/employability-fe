@@ -8,10 +8,10 @@ import WebCam from "@/components/interview/WebCam";
 import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
-import { useStreamMutation, useSttMutation } from "@/api/aiApiSlice";
+import { useInterviewStreamMutation, useSttMutation } from "@/api/aiApiSlice";
 import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 import CodeSnippetEditor from "./CodeSnippetEditor";
-import { useTTS } from "@/hooks/useTTS"; // Import the new hook
+import { useTTS } from "@/hooks/useTTS";
 
 export interface IMessage {
   id: number;
@@ -26,26 +26,25 @@ const Interview: React.FC<{
   id: string;
 }> = () => {
   const { id: interviewId } = useParams<{ id: string }>();
-  const [stream] = useStreamMutation();
+  const [interviewStream] = useInterviewStreamMutation();
   const [stt, { isSuccess: isSttSuccess, data: sttResponse, error: sttError }] =
     useSttMutation();
 
-  const { data: interviewDetails } = useGetInterviewbyIdQuery(
-    interviewId as string
-  );
-
-  useEffect(() => {}, [interviewDetails]);
-
+  const {
+    data: interviewDetails,
+    isSuccess: isInterviewLoaded,
+  } = useGetInterviewbyIdQuery(interviewId as string, {
+    skip: !interviewId,
+  });
   // State Variables
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
   const isComponentMounted = useRef<boolean>(true);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState<number>(0);
   const [codeSnippet, setCodeSnippet] = useState<boolean>(false);
   const [question, setQuestion] = useState<string>("");
   const recordingProcessed = useRef(false);
-  const timerStartRef = useRef<Date | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize TTS hook
   const { frequencyData, handleIncomingData } = useTTS({
@@ -57,6 +56,8 @@ const Interview: React.FC<{
 
   // Initialize Socket Connection
   useEffect(() => {
+    if (!isInterviewLoaded || !interviewDetails?.data?._id) return;
+
     const newSocket = io(SOCKET_URL);
     console.log("Connecting to socket server...", newSocket, socket);
 
@@ -64,16 +65,19 @@ const Interview: React.FC<{
 
     newSocket.on("connect", () => {
       console.log("Connected with ID:", newSocket.id);
-    });
-
-    newSocket.on(`output${currentMessageIndex}`, (data: string) => {
-      handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
-      if (timerStartRef.current) {
-        timerStartRef.current = null;
+      if (!isInitialized) {
+        console.log("Starting initial conversation...");
+        setIsInitialized(true);
+        addMessage("Hello");
+        handleMessage("Hello", "USER");
       }
     });
 
-    newSocket.on(`codeEditor`, (data: string) => {
+    newSocket.on(`aiResponse${interviewDetails.data._id}`, (data: string) => {
+      handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
+    });
+
+    newSocket.on(`codeEditor${interviewDetails.data._id}`, (data: string) => {
       setCodeSnippet(true);
       setQuestion(data);
     });
@@ -81,10 +85,10 @@ const Interview: React.FC<{
     return () => {
       isComponentMounted.current = false;
       newSocket.off("connect");
-      newSocket.off(`output${currentMessageIndex}`);
+      newSocket.off("aiResponse");
       newSocket.disconnect();
     };
-  }, [currentMessageIndex]);
+  }, [isInterviewLoaded, interviewDetails]);
 
   // Media Recorder Setup
   const { startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder(
@@ -182,15 +186,14 @@ const Interview: React.FC<{
     }
   };
 
-  // Initial Setup: Add Greeting Messages
-  useEffect(() => {
-    addMessage("Hello");
-    handleMessage("Hello", "USER");
-  }, []);
-
   // Function to Initiate AI Message Stream
   const addMessage = (prompt: string) => {
-    stream({
+    if (!interviewDetails?.data?._id) {
+      console.error("Interview details not loaded yet");
+      return;
+    }
+    interviewStream({
+      interviewId: interviewDetails.data._id,
       prompt: `
       previous conversation:
       ${messages.map((msg) => msg.message).join("\n")}
@@ -198,11 +201,10 @@ const Interview: React.FC<{
       system: `YOU ARE REACT INTERVIEWER WHO DOESN'T EXPLAIN ANY CONCEPTS JUST TAKE THE INTERVIEW AND ASK QUESTIONS WITHOUT GIVING HINTS, its a real mock conversation interview so ask a question and wait for user response and then ask another question
        use miniCodeEditor tool to ask code snippet question whenever needed not for every question
         `,
-      // model: "gpt-4o",
-      // provider: "openai",
-      model: "claude-3-5-sonnet-latest",
-      provider: "anthropic",
-      messageId: currentMessageIndex,
+      model: "gpt-4o",
+      provider: "openai",
+      // model: "claude-3-5-sonnet-latest",
+      // provider: "anthropic"
     });
   };
 

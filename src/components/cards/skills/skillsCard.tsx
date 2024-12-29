@@ -18,7 +18,6 @@ interface SkillCardProps {
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
-  key,
   skillId,
   skill,
   skillImg,
@@ -26,7 +25,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   selfRating,
   initialStatus,
 }) => {
-  
+  const user = useSelector((state: RootState) => state.auth.user);
   const navigate = useNavigate();
   const { createInterview, isLoading, isSuccess, isError, error } =
     useCreateInterview();
