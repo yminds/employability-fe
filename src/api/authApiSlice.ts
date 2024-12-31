@@ -1,4 +1,4 @@
-import { apiSlice } from './apiSlice';
+import { apiSlice } from "./apiSlice";
 
 interface RegisterUserPayload {
   email: string;
@@ -21,8 +21,8 @@ export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
-        url: '/api/v1/user/login',
-        method: 'POST',
+        url: "/api/v1/user/login",
+        method: "POST",
         body: { ...credentials },
       }),
     }),

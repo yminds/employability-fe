@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
-import ExperienceForm from "../forms/experience-form"; // Adjust the path as necessary
+import ExperienceForm from "../forms/experience-form";
 import type { ExperienceItem } from "@/features/profile/types";
+import { useSelector } from "react-redux";
+import {
+  useAddExperienceMutation,
+  useUpdateExperienceMutation,
+} from "@/api/experienceApiSlice";
 
 interface AddEditExperienceModalProps {
   isOpen: boolean;
@@ -17,6 +22,9 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
 }) => {
   const [experience, setExperience] = useState<ExperienceItem[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [addExperience] = useAddExperienceMutation();
+  const [updateExperience] = useUpdateExperienceMutation();
+  const user = useSelector((state: any) => state.auth.user);
 
   useEffect(() => {
     if (isOpen) {
@@ -29,10 +37,90 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
     setExperience(updatedExperience);
   };
 
-  const handleSave = () => {
- 
+  const validateExperience = (exp: ExperienceItem) => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!exp.jobTitle) newErrors["jobTitle"] = "Job title is required";
+    if (!exp.employmentType)
+      newErrors["employmentType"] = "Employment type is required";
+    if (!exp.companyName) newErrors["companyName"] = "Company name is required";
+    if (!exp.location) newErrors["location"] = "Location is required";
+    if (!exp.startDate) newErrors["startDate"] = "Start date is required";
+    if (!exp.currentlyWorking && !exp.endDate) {
+      newErrors["endDate"] = "End date is required when not currently working";
+    }
+    if (!exp.description) newErrors["description"] = "Description is required";
+
+    return newErrors;
   };
 
+  const handleSave = async () => {
+    try {
+      // const validationErrors = experience.reduce((acc, exp, index) => {
+      //   const errors = validateExperience(exp);
+      //   if (Object.keys(errors).length > 0) {
+      //     Object.keys(errors).forEach((key) => {
+      //       acc[`experience.${index}.${key}`] = errors[key];
+      //     });
+      //   }
+      //   return acc;
+      // }, {} as { [key: string]: string });
+
+      // if (Object.keys(validationErrors).length > 0) {
+      //   setErrors(validationErrors);
+      //   return;
+      // }
+
+      // Map the experience data first
+      const experienceData = experience.map((exp) => ({
+        user_id: user._id,
+        title: exp.jobTitle,
+        employment_type: exp.employmentType,
+        company: exp.companyName,
+        location: exp.location,
+        start_date: exp.startDate,
+        end_date: exp.currentlyWorking ? null : exp.endDate,
+        currently_working: exp.currentlyWorking,
+        description: exp.description,
+      }));
+
+      // Separate experiences into existing and new
+      const existingExperiences = experience.filter((exp) => exp.id);
+      const newExperiences = experience.filter((exp) => !exp.id);
+
+      // Update existing experiences
+      if (existingExperiences.length > 0) {
+        console.log("Updating experiences:", existingExperiences);
+        await Promise.all(
+          existingExperiences.map((exp, index) =>
+            updateExperience({
+              id: exp.id!,
+              updatedExperience: experienceData[index],
+            }).unwrap()
+          )
+        );
+      }
+
+      // Add new experiences
+      if (newExperiences.length > 0) {
+        console.log("Adding new experiences:", newExperiences);
+        await Promise.all(
+          newExperiences.map((exp, index) =>
+            addExperience(
+              experienceData[existingExperiences.length + index]
+            ).unwrap()
+          )
+        );
+      }
+
+      // Call onSave with the updated experiences
+      onSave(experience);
+      onClose();
+    } catch (error) {
+      console.error("Failed to save experiences:", error);
+      alert("Failed to save experiences. Please try again.");
+    }
+  };
   if (!isOpen) return null;
 
   return (
@@ -78,14 +166,15 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
         <ExperienceForm
           experiences={experience}
           onChange={handleFormChange}
+          errors={errors}
         />
 
-        <div className="p-6 border-t bg-white text-right">
+        <div className="mt-6 border-t pt-6 bg-white text-right">
           <button
             onClick={handleSave}
             className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
           >
-            Save
+            Save Changes
           </button>
         </div>
       </div>

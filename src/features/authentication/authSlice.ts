@@ -34,53 +34,44 @@ const authSlice = createSlice({
       state.token = null;
       state.refreshToken = null;
     },
+    updateUserProfile: (state, action: { payload: Partial<User> }) => {
+      if (state.user) {
+        // Merge the existing user data with the new data
+        state.user = {
+          ...state.user,
+          ...action.payload,
+          // Ensure arrays are properly updated
+          skills: action.payload.skills || state.user.skills,
+          education: action.payload.education || state.user.education,
+          experience: action.payload.experience || state.user.experience,
+          certificates: action.payload.certificates || state.user.certificates,
+          // Update nested objects
+          address: action.payload.address
+            ? { ...state.user.address, ...action.payload.address }
+            : state.user.address,
+        };
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
       .addMatcher(
-        (action) => {
-          return action.type.endsWith("api/executeMutation/fulfilled");
-        },
-        (
-          state,
-          action: {
-            meta: {
-              arg: {
-                endpointName: string;
-              };
-            };
-            payload: {
-              user_info: User;
-              token: string;
-            };
-          }
-        ) => {
+        (action) => action.type.endsWith("api/executeMutation/fulfilled"),
+        (state, action) => {
           const endpointName = action.meta.arg.endpointName;
           if (endpointName === "login") {
-            console.log("action.payload.data", action);
             state.user = action.payload.user_info;
             state.token = action.payload.token;
-            // state.refreshToken = action.payload.refreshToken;
+          } else if (endpointName === "updateUser") {
+            if (action.payload.data) {
+              state.user = action.payload.data;
+            }
           }
         }
       )
       .addMatcher(
-        (action: { type: string }) => {
-          return action.type.endsWith("api/executeQuery/fulfilled");
-        },
-        (
-          state,
-          action: {
-            meta: {
-              arg: {
-                endpointName: string;
-              };
-            };
-            payload: {
-              data: User;
-            };
-          }
-        ) => {
+        (action) => action.type.endsWith("api/executeQuery/fulfilled"),
+        (state, action) => {
           const endpointName = action.meta.arg.endpointName;
           if (endpointName === "profile") {
             state.user = action.payload.data;
@@ -90,6 +81,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logOut } = authSlice.actions;
+export const { setCredentials, logOut, updateUserProfile } = authSlice.actions;
 
 export default authSlice.reducer;
