@@ -1,30 +1,25 @@
-
 import React from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { useSelector } from "react-redux";
 import type { Education } from "@/features/profile/types";
-
 
 interface EducationFormProps {
   education: Education[];
-  onChange:any;
-  errors: { [key: string]: string };
-  onAddEducation: (newEducation: Education) => void;
-  onDeleteEducation: (educationId: string) => void;
-  
+  onChange: (education: Education[]) => void;
+  errors?: { [key: string]: string };
+  onAddEducation?: (newEducation: Education) => void;
+  onDeleteEducation?: (educationId: string) => void;
 }
 
 const EducationForm: React.FC<EducationFormProps> = ({
-  education,
+  education = [], // Add default empty array
   onChange,
-  errors,
+  errors = {},
   onAddEducation,
   onDeleteEducation,
-  
 }) => {
   const addEducation = () => {
     const newEducation: Education = {
-      _id: "",
+      _id: Date.now().toString(), // Generate unique ID
       education_level: "",
       degree: "",
       institute: "",
@@ -32,9 +27,14 @@ const EducationForm: React.FC<EducationFormProps> = ({
       from_date: "",
       till_date: "",
       cgpa_or_marks: "",
-      highest_education_level: undefined
+      highest_education_level: undefined,
     };
-    // Append the new education entry
+
+    if (onAddEducation) {
+      onAddEducation(newEducation);
+    } else {
+      onChange([...(education || []), newEducation]);
+    }
   };
 
   const updateEducation = (
@@ -42,10 +42,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
     field: keyof Education,
     value: string | number
   ) => {
+    if (!education) return;
+
     const updatedEducation = education.map((edu, i) => {
       if (i === index) {
         const updatedEdu = { ...edu, [field]: value };
-        // Sync both institute and institution fields
         if (field === "institute") {
           updatedEdu.institute = value as string;
         } else if (field === "education_level") {
@@ -55,12 +56,25 @@ const EducationForm: React.FC<EducationFormProps> = ({
       }
       return edu;
     });
-    // onChange(updatedEducation);
+    onChange(updatedEducation);
+  };
+
+  const handleDeleteEducation = (index: number, id?: string) => {
+    if (id && onDeleteEducation) {
+      onDeleteEducation(id);
+    } else {
+      const updatedEducation = education.filter((_, i) => i !== index);
+      onChange(updatedEducation);
+    }
   };
 
   const getError = (path: string) => {
     return errors[path] || "";
   };
+
+  if (!education) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
@@ -73,7 +87,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
         >
           {/* Delete Button */}
           <button
-            onClick={() => edu._id && onDeleteEducation(edu._id)}
+            onClick={() => handleDeleteEducation(index, edu._id)}
             className="absolute top-2 right-2 text-red-500 hover:text-red-700"
             type="button"
             aria-label="Delete education"
@@ -85,7 +99,8 @@ const EducationForm: React.FC<EducationFormProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">
-                Select your highest level of education
+                Select your highest level of education{" "}
+                <span className="text-red-500">*</span>
               </label>
               <select
                 value={edu.education_level}
@@ -115,7 +130,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
 
             <div>
               <label className="block text-sm font-medium mb-1">
-                Degree/Board
+                Degree/Board <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -138,11 +153,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Institute/University
+              Institute/University <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={edu.institute || edu.institute || ""}
+              value={edu.institute || ""}
               onChange={(e) =>
                 updateEducation(index, "institute", e.target.value)
               }
@@ -160,7 +175,9 @@ const EducationForm: React.FC<EducationFormProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">From</label>
+              <label className="block text-sm font-medium mb-1">
+                From <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 value={edu.from_date || ""}
@@ -181,13 +198,17 @@ const EducationForm: React.FC<EducationFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Till</label>
+              <label className="block text-sm font-medium mb-1">
+                Till <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 value={edu.till_date || ""}
                 onChange={(e) =>
                   updateEducation(index, "till_date", e.target.value)
                 }
+                min={edu.from_date}
+                max={new Date().toISOString().split("T")[0]}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
                   getError(`education.${index}.till_date`)
                     ? "border-red-500"
@@ -204,11 +225,11 @@ const EducationForm: React.FC<EducationFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              CGPA/Marks Scored
+              CGPA/Marks Scored <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={edu.cgpa_or_marks}
+              value={edu.cgpa_or_marks || ""}
               onChange={(e) =>
                 updateEducation(index, "cgpa_or_marks", e.target.value)
               }

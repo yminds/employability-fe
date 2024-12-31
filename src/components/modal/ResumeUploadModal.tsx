@@ -10,7 +10,7 @@ import { ProfileFormData } from "@/features/profile/types";
 
 interface ResumeUploadModalProps {
   onClose: () => void;
-  onUpload:()=> void;
+  onUpload: () => void;
   userId: string;
 }
 
@@ -26,7 +26,6 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
     progress: number;
   }>({ progress: 0 });
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
-
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -59,26 +58,43 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
   const startUpload = async (file: File) => {
     setUploadState({ file, progress: 0 });
 
-    // Simulate progress up to 90%
     const simulatedProgress = setInterval(() => {
       setUploadState((prev) => {
         if (prev.progress >= 90) {
           clearInterval(simulatedProgress);
-          return prev; // Stop progress simulation at 90%
+          return prev;
         }
-        return { ...prev, progress: prev.progress + 5 }; // Increment by 5%
+        return { ...prev, progress: prev.progress + 5 };
       });
-    }, 300); // Update every 300ms
+    }, 300);
 
     try {
-      // Dispatch the Redux action to handle the backend upload
-      await dispatch(uploadResume({ file, userId }));
+      // First dispatch the Redux action to handle resume parsing
+      await dispatch(uploadResume({ file, userId })).unwrap();
 
-      // Smoothly complete progress to 100% after backend response
+      // Then make the S3 upload call using FormData
+      const formData = new FormData();
+      formData.append("file", file); // This will be req.file in controller
+      formData.append("userId", userId); // This will be req.body.userId
+      formData.append("fileType", "resume"); // This will be req.body.fileType
+      formData.append("name", file.name); // This will be req.body.name
+
+      const s3Response = await fetch("http://localhost:3000/api/v1/s3/upload", {
+        method: "POST",
+        body: formData, // Don't set Content-Type header, browser will set it
+      });
+
+      if (!s3Response.ok) {
+        throw new Error("Failed to upload to S3");
+      }
+
+      // Smoothly complete progress to 100% after both operations are done
       setUploadState((prev) => ({ ...prev, progress: 100 }));
     } catch (error) {
       console.error("Error uploading file:", error);
-      setUploadState((prev) => ({ ...prev, progress: 0 })); // Reset progress on failure
+      setUploadState((prev) => ({ ...prev, progress: 0 }));
+    } finally {
+      clearInterval(simulatedProgress);
     }
   };
 
@@ -98,8 +114,9 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       <CompleteProfileModal
         type="resumeUpload"
         onClose={onClose}
-        userId={userId} 
-        onSave={()=>console.log('')}      />
+        userId={userId}
+        onSave={() => console.log("")}
+      />
     );
   }
 
@@ -110,9 +127,11 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
         fileName={uploadState.file.name}
         fileSize={`${(uploadState.file.size / (1024 * 1024)).toFixed(2)} MB`}
         uploadProgress={uploadState.progress}
-        isUploading={uploading} onContinue={function (): void {
+        isUploading={uploading}
+        onContinue={function (): void {
           throw new Error("Function not implemented.");
-        } }      />
+        }}
+      />
     );
   }
 

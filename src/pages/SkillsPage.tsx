@@ -5,7 +5,7 @@ import React from 'react';
 const Skills: React.FC = () => {
   return (
     <div className="flex w-full  h-screen  justify-center">
-      <main className=" flex bg-[#F5F5F5] md:w-[90%] lg:max-w-[1300px] p-5 h-full">
+      <main className=" flex bg-[#F5F5F5] w-[95%] lg:max-w-[1300px] p-5 h-full">
         <SkillsContaineer/>
       </main>
     </div>

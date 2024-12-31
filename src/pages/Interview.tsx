@@ -1,5 +1,5 @@
 import React from "react";
-import useInterviewSetup from "@/hooks/useInterviewSetup";
+// import useInterviewSetup from "@/hooks/useInterviewSetup";
 import Interview from "@/components/interview/Interview";
 import { useParams } from "react-router-dom";
 import CheckSetup from "../components/setup/CheckSetup";
@@ -24,10 +24,10 @@ const InterviewSetupNew: React.FC = () => {
 
   return (
     <>
-      {false ? (
-        // {!isInterviewStarted ? (
-        // <div className=" flex items-center justify-center h-screen">
-        //   <main className=" w-[70vw] py-4">
+      {/* {!isInterviewStarted ? ( */}
+      { false ? (
+        // <div className="flex items-center h-screen w-[70%] mx-auto sm:w-[95%]">
+        //   <main className="py-4 w-full">
         //     <div className="flex flex-row items-center justify-between mb-6">
         //       <div className="">
         //         <div className="text-black text-[32px] font-bold font-ubuntu">
@@ -50,7 +50,6 @@ const InterviewSetupNew: React.FC = () => {
         //         Proceed to Interview
         //       </button>
         //     </div>
-
         //     <CheckSetup
         //       isScreenSharing={isScreenSharing}
         //       screenStream={screenStream}

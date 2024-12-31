@@ -4,26 +4,27 @@ import { useCreateInterview } from "@/hooks/useCreateInterview";
 
 import verifiedImg from "@/assets/skills/verified.svg";
 import unverifiedImg from "@/assets/skills/unverifies.svg";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface SkillCardProps {
-  skill_id: string;
-  key: string
   skillId: string;
   skill: string;
-  skillImg: string;
+  skillImg: string | undefined;
   verified_rating: number;
   selfRating: number;
   initialStatus: string; // Initial status of the skill
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
-  skill_id,
+  skillId,
   skill,
   skillImg,
   verified_rating,
   selfRating,
   initialStatus,
 }) => {
+  const user = useSelector((state: RootState) => state.auth.user);
   const navigate = useNavigate();
   const { createInterview, isLoading, isSuccess, isError, error } =
     useCreateInterview();
@@ -32,19 +33,28 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const imgSrc = status === "Verified" ? verifiedImg : unverifiedImg;
 
   const handleViewReport = () => {
-    navigate(`/skills/${skill_id}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/skills/${skillId}`, {
+      state: { skill, verified_rating, selfRating },
+    });
   };
 
   const handleImproveScore = () => {
-    navigate(`/interview/${skill}`, { state: { skill, verified_rating, selfRating } });
+    navigate(`/interview/${skill}`, {
+      state: { skill, verified_rating, selfRating },
+    });
   };
 
   const handleLearn = () => {
-    navigate(`/mentor/${skill_id}`, { state: { skill } });
+    navigate(`/mentor/${skillId}`, { state: { skill } });
   };
 
-  const handleVerifySkill = () => {
-    navigate(`/interview/${skill_id}`, { state: { skill } });
+  const handleVerifySkill = async () => {
+    const interviewId = await createInterview({
+      title: `${skill} Interview`,
+      type: "Skill",
+      user_skill_id: skillId,
+    });
+    navigate(`/interview/${interviewId}`);
   };
 
   return (
@@ -56,7 +66,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
         </span>
         <div>
           <h3 className=" text-[16px] font-medium">{skill}</h3>
-          <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">Self rating: {selfRating}/10</p>
+          <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">
+            Self rating: {selfRating}/10
+          </p>
         </div>
       </div>
 
@@ -92,7 +104,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
             </button>
             <button
               onClick={handleImproveScore}
-              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
+              className=" py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
             >
               Improve score
             </button>

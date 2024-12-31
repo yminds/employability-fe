@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
 interface Certification {
   title: string;
@@ -10,15 +10,15 @@ interface Certification {
 }
 
 interface CertificationsFormProps {
-  certifications: any[];
-  onChange: (certifications: any[]) => void;
-  errors: { [key: string]: string };
+  certifications: Certification[];
+  onChange: (certifications: Certification[]) => void;
+  errors?: { [key: string]: string };
 }
 
 const CertificationsForm: React.FC<CertificationsFormProps> = ({
-  certifications,
+  certifications = [], // Add default empty array
   onChange,
-  errors,
+  errors = {}, // Add default empty object
 }) => {
   const addCertification = () => {
     const newCertification: Certification = {
@@ -28,7 +28,7 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
       expirationDate: "",
       credentialURL: "",
     };
-    onChange([...certifications, newCertification]);
+    onChange([...(certifications || []), newCertification]);
   };
 
   const updateCertification = (
@@ -36,15 +36,26 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
     field: keyof Certification,
     value: string
   ) => {
+    if (!certifications) return;
     const updatedCertifications = certifications.map((cert, i) =>
       i === index ? { ...cert, [field]: value } : cert
     );
     onChange(updatedCertifications);
   };
 
+  const removeCertification = (index: number) => {
+    if (!certifications) return;
+    const updatedCertifications = certifications.filter((_, i) => i !== index);
+    onChange(updatedCertifications);
+  };
+
   const getError = (path: string) => {
     return errors[path] || "";
   };
+
+  if (!certifications) {
+    return null; // or show a loading state
+  }
 
   return (
     <div className="space-y-6">
@@ -53,13 +64,23 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
       {certifications.map((cert, index) => (
         <div
           key={index}
-          className="bg-gray-50 rounded-lg p-6 space-y-4 mb-4"
+          className="bg-gray-50 rounded-lg p-6 space-y-4 mb-4 relative"
         >
+          {/* Delete Button */}
+          <button
+            onClick={() => removeCertification(index)}
+            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+            type="button"
+            aria-label="Delete certification"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+
           <div className="grid grid-cols-2 gap-4">
             {/* Title Field */}
             <div>
               <label className="block text-sm font-medium mb-1">
-                Title
+                Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -84,7 +105,7 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
             {/* Issued By Field */}
             <div>
               <label className="block text-sm font-medium mb-1">
-                Issued By
+                Issued By <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -111,7 +132,7 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
             {/* Issue Date Field */}
             <div>
               <label className="block text-sm font-medium mb-1">
-                Issue Date
+                Issue Date <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -119,6 +140,7 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
                 onChange={(e) =>
                   updateCertification(index, "issueDate", e.target.value)
                 }
+                max={new Date().toISOString().split("T")[0]}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
                   getError(`certifications.${index}.issueDate`)
                     ? "border-red-500"
@@ -143,6 +165,7 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
                 onChange={(e) =>
                   updateCertification(index, "expirationDate", e.target.value)
                 }
+                min={cert.issueDate}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
                   getError(`certifications.${index}.expirationDate`)
                     ? "border-red-500"
@@ -160,7 +183,7 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
           {/* Credential URL Field */}
           <div>
             <label className="block text-sm font-medium mb-1">
-              Credential URL
+              Credential URL <span className="text-red-500">*</span>
             </label>
             <input
               type="url"

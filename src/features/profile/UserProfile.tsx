@@ -203,7 +203,7 @@ const UserProfile: React.FC = () => {
 
                   <div className="flex flex-col gap-2 items-start justify-end">
                     <h1 className="text-4xl font-semibold text-gray-900">{user.name}</h1>
-                    <p className="text-xl text-gray-600">{user.address.city}</p>
+                    <p className="text-xl text-gray-600">{user?.address?.city}</p>
                     <div className="flex items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="17" height="18" viewBox="0 0 17 18" fill="none">
                         <circle cx="8.5" cy="9" r="8.5" fill="#0AD472" />

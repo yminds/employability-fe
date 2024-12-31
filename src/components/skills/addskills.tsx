@@ -55,14 +55,14 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   userId,
   onSkillsUpdate,
 }) => {
-  console.log("selected skills ",selectedSkills);
+  // console.log("selected in Add Modal skills ",selectedSkills);
   
   const [user_Id] = useState<string>(userId);
   const [skills, setSkills] = useState<Skill[]>([
     {
       skill_Id: "",
       name: "",
-      rating: "__/10",
+      rating: "0",
       visibility: "All users",
     },
   ]);
@@ -93,7 +93,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     const newSkill: Skill = {
       skill_Id: "",
       name: "",
-      rating: "__/10",
+      rating: "0",
       visibility: "All users",
     };
     setSkills([...skills, newSkill]);
@@ -124,8 +124,10 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         skill_pool_id: skill.skill_Id,
         self_rating: parseInt(skill.rating.split("/")[0]),
       })),
+      goal_id: "676fa3a381861bd29ac93134",
     };
 
+    
     try {
       const response = await createUserSkills(payload).unwrap();
       console.log("Skills added successfully:", response);
@@ -189,8 +191,8 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
-                      <Command>
+                    <PopoverContent className="w-full  p-0">
+                      <Command className="w-full max-h-[375px]">
                         <CommandInput
                           placeholder="Search skills"
                           onValueChange={setSearchValue}
@@ -324,7 +326,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   const newSkill = {
                     skill_Id: suggestedSkill.id,
                     name: suggestedSkill.name,
-                    rating: "__/10",
+                    rating: "0",
                     visibility: "All users",
                   };
                   setSkills([...skills, newSkill]);

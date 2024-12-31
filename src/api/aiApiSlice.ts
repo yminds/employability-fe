@@ -33,7 +33,20 @@ export const aiApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+
+    interviewStream: builder.mutation({
+      query: (options) => ({
+        url: "/api/v1/ai/interviewStream",
+        method: "POST",
+        body: { ...options },
+      }),
+    }),
   }),
 });
 
-export const { useStreamMutation, useTtsMutation, useSttMutation } = aiApiSlice;
+export const {
+  useStreamMutation,
+  useTtsMutation,
+  useSttMutation,
+  useInterviewStreamMutation,
+} = aiApiSlice;
