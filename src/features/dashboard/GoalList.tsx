@@ -46,7 +46,7 @@ const GoalList: React.FC<Props> = (setJourneyDialog:any) => {
             )}
 
             {/* Grid displaying the list of goals */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 md:grid-cols-3 gap-6">
                 {isLoading && <p>Loading trending goals, please wait...</p>}
                 {error && <p>Oops! Something went wrong while loading goals.</p>}
                 {data?.data?.map((goal: Goal) => (

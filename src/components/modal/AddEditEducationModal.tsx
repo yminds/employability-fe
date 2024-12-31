@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from "react";
 import EducationForm from "../forms/education-form";
 import { Education } from "./../../features/profile/types";
@@ -24,6 +21,7 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
   initialEducation,
   onSave,
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
   const [education, setEducation] = useState<Education[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const user = useSelector((state: any) => state.auth.user);
@@ -38,34 +36,37 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
     if (isOpen) {
       setEducation(initialEducation);
       setErrors({});
+      setIsSaving(false); // Reset saving state
     }
   }, [isOpen, initialEducation]);
-
   const handleFormChange = (updatedEducation: Education[]) => {
     setEducation(updatedEducation);
   };
 
-  const handleAddEducation = async () => {
-    try {
-      const savePromises = education.map(async (edu) => {
-        if (edu._id) {
-          return await updateEducation({
-            id: edu._id,
-            updatedEducation: edu,
-          }).unwrap();
-        } else {
-          return await addEducation({
-            ...edu,
-            user_id: user._id,
-          }).unwrap();
-        }
-      });
+  const handleAddEducation = async (newEducation: Education) => {
+    // Update the local state first to show the new form immediately
+    setEducation((prevEducation) => [...prevEducation, newEducation]);
 
-      await Promise.all(savePromises);
-      alert("All education entries saved successfully!");
+    // Optional: If you want to save to API immediately
+    try {
+      const result = await addEducation({
+        ...newEducation,
+        user_id: user._id,
+      }).unwrap();
+
+      // Update the education array with the returned data from API
+      setEducation((prevEducation) =>
+        prevEducation.map((edu) =>
+          edu._id === newEducation._id ? result : edu
+        )
+      );
     } catch (err) {
-      console.error("Failed to save education entries:", err);
-      alert("An error occurred while saving education entries.");
+      console.error("Failed to save new education entry:", err);
+      // Optionally show error message
+      setErrors((prev) => ({
+        ...prev,
+        addEducation: "Failed to add education entry",
+      }));
     }
   };
 
@@ -81,28 +82,39 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
 
   const handleSave = async () => {
     try {
+      setIsSaving(true);
+      console.log("Starting save process with education:", education);
+
       const updatedEducations = await Promise.all(
         education.map(async (edu) => {
           if (edu._id) {
+            console.log("Updating existing education:", edu);
             const result = await updateEducation({
               id: edu._id,
               updatedEducation: edu,
             }).unwrap();
+            console.log("Update result:", result);
             return result;
           } else {
+            console.log("Adding new education:", edu);
             const result = await addEducation({
-              id: user._id,
-              newEducation: edu,
+              ...edu,
+              user_id: user._id,
             }).unwrap();
+            console.log("Add result:", result);
             return result;
           }
         })
       );
+
+      console.log("All educations saved:", updatedEducations);
       onSave(updatedEducations);
       onClose();
     } catch (error) {
       console.error("Failed to save education:", error);
       setErrors({ ...errors, saveEducation: "Failed to save education" });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -172,9 +184,9 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
             <button
               onClick={handleSave}
               className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
-              disabled={isUpdating || isAdding || isDeleting}
+              disabled={isSaving}
             >
-              {isUpdating || isAdding || isDeleting ? "Saving..." : "Save"}
+              {isSaving ? "Saving..." : "Save"}
             </button>
           </div>
         </div>
@@ -184,4 +196,3 @@ const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
 };
 
 export default AddEditEducationModal;
-

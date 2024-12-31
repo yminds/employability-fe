@@ -17,9 +17,33 @@ const EducationForm: React.FC<EducationFormProps> = ({
   onAddEducation,
   onDeleteEducation,
 }) => {
+  const checkFormValidity = (edu: Education) => {
+    const requiredFields = {
+      education_level: "Education Level",
+      degree: "Degree",
+      institute: "Institute/University",
+      from_date: "From Date",
+      till_date: "Till Date",
+      cgpa_or_marks: "CGPA/Marks",
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([key]) => !edu[key as keyof Education])
+      .map(([_, label]) => label);
+
+    return missingFields.length === 0 ? true : missingFields;
+  };
+
   const addEducation = () => {
+    // If there are existing education entries
+    if (education.length > 0) {
+      // Check the last education entry
+      const lastEducation = education[education.length - 1];
+      const formValidity = checkFormValidity(lastEducation);
+    }
+
     const newEducation: Education = {
-      _id: Date.now().toString(), // Generate unique ID
+      // _id: Date.now().toString(),
       education_level: "",
       degree: "",
       institute: "",
@@ -36,7 +60,6 @@ const EducationForm: React.FC<EducationFormProps> = ({
       onChange([...(education || []), newEducation]);
     }
   };
-
   const updateEducation = (
     index: number,
     field: keyof Education,

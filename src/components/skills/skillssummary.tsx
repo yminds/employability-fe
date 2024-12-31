@@ -3,30 +3,36 @@ import verifiedIcon from "@/assets/skills/verified_skills.svg";
 import excellentIcon from "@/assets/skills/excellent.svg";
 import strongIcon from "@/assets/skills/strong.svg";
 import weakIcon from "@/assets/skills/weak.svg";
-import { useGetUserSkillsSummaryQuery } from '@/api/skillsApiSlice';
+import { useGetUserSkillsSummaryMutation } from '@/api/skillsApiSlice';
 import { useSelector } from 'react-redux';
+import { RootState } from "@/store/store";
 
 interface SkillSummaryProps {
   isSkillsUpdated: boolean; // Flag to indicate if skills were updated
+  selectedGoalId: string; 
 }
 
-const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated }) => {
-  const userId = useSelector((state) => state.auth.user._id);
-  
-  // Fetch user skills summary by userId
-  const { data: skillsSummaryData, error, isLoading, refetch } = useGetUserSkillsSummaryQuery(userId);
+const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGoalId }) => {
+  const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const goalId = selectedGoalId;
+
+  // Initialize the mutation hook
+  const [getUserSkillsSummary, { data: skillsSummaryData, error, isLoading }] = useGetUserSkillsSummaryMutation();
+
+  // Fetch data when component mounts or selectedGoalId changes
+  useEffect(() => {
+    if (userId && selectedGoalId) {
+      getUserSkillsSummary({ userId, goalId }); // Call the mutation with parameters
+    }
+  }, [userId, selectedGoalId, getUserSkillsSummary]);
 
   // Re-fetch data when skills are updated
   useEffect(() => {
     if (isSkillsUpdated) {
-      refetch(); // Trigger a re-fetch of the skills summary
+      getUserSkillsSummary({ userId, goalId });
     }
-  }, [isSkillsUpdated, refetch]);
+  }, [isSkillsUpdated, userId, selectedGoalId, getUserSkillsSummary]);
 
-  // Handle loading and error states
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   if (error || !skillsSummaryData?.data) {
     return <div>Error loading skills summary. Please try again later.</div>;

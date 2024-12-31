@@ -2,41 +2,50 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import arrow from "@/assets/skills/arrow.svg";
 import AddSkillsModal from "@/components/skills/addskills";
-import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
-import { RootState } from "@/store/store";
-import { useSelector } from "react-redux";
 
 interface Skill {
   _id: string;
   skill_pool_id: {
     _id: string;
     name: string;
-    icon: string
+    icon: string;
   };
   verified_rating: number;
   self_rating: number;
 }
 
+interface Goal {
+  _id: string;
+  name: string;
+  description: string;
+  user_id: string;
+  skill_poll_id: string[];
+}
 
 interface SkillsHeaderProps {
+  userId: string;
+  goals: {
+    data: Goal[];
+  };
   skills: {
     data: Skill[];
   };
+  selectedGoalName: string; // New prop to pass the selected goal name
   onSkillsStatusChange: (isUpdated: boolean) => void; // Callback to notify parent of update status
   onGoalChange: (goalId: string) => void; // Callback to notify parent of goal change
 }
 
-const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , onSkillsStatusChange ,onGoalChange}) => {
-  // console.log(selectedSkills);
-  
+const SkillsHeader: React.FC<SkillsHeaderProps> = ({
+  userId,
+  goals,
+  skills: selectedSkills,
+  selectedGoalName, // Receive the selected goal name
+  onSkillsStatusChange,
+  onGoalChange,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [skillsUpdated, setSkillsUpdated] = useState(false); // State to track updates
-
-  const userId = useSelector((state: RootState) => state.auth.user._id);
-
-  const { data: goalData, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
-  console.log(goalData);
-  
+  const [selectedGoal, setSelectedGoal] = useState(selectedGoalName || ""); // Initialize with selectedGoalName
 
   const navigate = useNavigate();
 
@@ -58,19 +67,20 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
     onSkillsStatusChange(isUpdated); // Notify the parent of the update status
   };
 
-
-  const [goal, setGoal] = useState<string>();
-
-  useEffect(() => {
-    setGoal(goalData?.data[0]?.name as string);
-  }, [goalData]);
-
   useEffect(() => {
     if (skillsUpdated) {
       console.log("Perform actions like fetching updated data here.");
       setSkillsUpdated(false); // Reset the flag after handling
     }
   }, [skillsUpdated]);
+
+  const handleGoalChange = (goalName: string) => {
+    setSelectedGoal(goalName); // Update the selected goal name
+    const selectedGoalId = goals?.data.find((goal) => goal.name === goalName)?._id;
+    if (selectedGoalId) {
+      onGoalChange(selectedGoalId); // Notify parent with the selected goal ID
+    }
+  };
 
   return (
     <>
@@ -90,27 +100,19 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
         </div>
         <div className="flex justify-between items-center mb-4">
           {/* Goal Section */}
-          <div className="bg-white w-ful h-[46px] rounded-lg flex items-center justify-start px-4 ">
-            {/* <span className=" text-base font-normal leading-6 tracking-[0.015rem]">Goal : {goal} </span> */}
-            {/*  Add dropdown here */}
+          <div className="bg-white w-ful h-[46px] rounded-lg flex items-center justify-start px-4">
             <span>Goal :</span>
-<select
-  className="text-base font-normal leading-6 tracking-[0.015rem] bg-transparent border-none outline-none"
-  value={goal}
-  onChange={(e) => {
-    const selectedGoalId = goalData?.data.find(goal => goal.name === e.target.value)?._id;
-    setGoal(e.target.value);
-    if (selectedGoalId) {
-      onGoalChange(selectedGoalId); // Notify parent with the selected goal ID
-    }
-  }}
->
-  {goalData?.data.map((goal) => (
-    <option key={goal._id} value={goal.name}>
-      {goal.name}
-    </option>
-  ))}
-</select>
+            <select
+              className="text-base font-normal leading-6 tracking-[0.015rem] bg-transparent border-none outline-none"
+              value={selectedGoal} // Bind to the selected goal
+              onChange={(e) => handleGoalChange(e.target.value)}
+            >
+              {goals?.data.map((goal) => (
+                <option key={goal._id} value={goal.name}>
+                  {goal.name}
+                </option>
+              ))}
+            </select>
           </div>
           <button
             onClick={handleOpenModal}
@@ -124,7 +126,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
       {/* AddSkillsModal */}
       {isModalOpen && (
         <AddSkillsModal
-        selectedSkills  = {selectedSkills.data.all}
+          selectedSkills={selectedSkills.data.all}
           onClose={handleCloseModal}
           userId={userId}
           onSkillsUpdate={handleSkillsUpdate} // Pass the update handler

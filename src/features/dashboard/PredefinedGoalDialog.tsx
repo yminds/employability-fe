@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
 import { useSelector } from "react-redux";
+import { RootState } from '@/store/store';
 
 interface Goal {
     _id: string;
@@ -14,12 +15,12 @@ interface Goal {
 interface GoalFormDialogProps {
     isOpen: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    selectedGoal: Goal; // Goal data passed as a prop
+    selectedGoal: Goal | null; // Goal data passed as a prop
     setJourneyDialog: boolean;
 }
 
-const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-    const user_id = useSelector((state :RootState) => state.auth.user._id);
+const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal }) => {
+    const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal] = useState(selectedGoal ? selectedGoal.title : "");
     const [description] = useState(selectedGoal ? selectedGoal.description : "");
