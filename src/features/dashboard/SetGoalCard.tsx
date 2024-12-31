@@ -24,7 +24,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
 
     return <>
         <div className="flex flex-col items-start gap-12 self-stretch font-ubuntu">
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <section className="grid grid-cols-3 md:grid-cols-3 gap-6">
                 <Link to="mentor" className="rounded-[9px] border border-black/10 bg-[#FFF] hover:border-[#8B5CF6]">
                     <div className="flex flex-col items-start gap-8 relative p-6">
                         <div className="h-[50px]">

@@ -27,13 +27,13 @@ const Dashboard: React.FC<Props> = () => {
   const handleLinkClick = (route: string) => {
     navigate(route); // Navigate to the specified route
   };
-  // const { data: goalsData } = "";
+  //const { data: goalsData } = "";
   const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
 
   const { data: skillsSummaryData } = useGetUserSkillsSummaryQuery(user_id) || {};
-  const totalSkills = skillsSummaryData?.data?.totalSkills;
-  const totalVerifiedSkills = skillsSummaryData?.data?.totalVerifiedSkills;
+  const totalSkills = skillsSummaryData?.data?.totalSkills || 0;
+  const totalVerifiedSkills = skillsSummaryData?.data?.totalVerifiedSkills || 0;
 
   const completionPercentage = 50;
   const totalVerifiedRating = 10;
