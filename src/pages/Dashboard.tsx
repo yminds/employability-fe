@@ -27,7 +27,7 @@ const Dashboard: React.FC<Props> = () => {
   const handleLinkClick = (route: string) => {
     navigate(route); // Navigate to the specified route
   };
- // const { data: goalsData } = "";
+  // const { data: goalsData } = "";
   const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
 
