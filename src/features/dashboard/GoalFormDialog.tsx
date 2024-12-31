@@ -197,22 +197,6 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                 )}
                                             </PopoverContent>
                                         </Popover>
-
-                                        {/* {skills && selectedTechStack.length === 0 && (
-                                            <ul className="mt-2 max-h-40 overflow-y-auto border rounded-lg bg-white absolute w-full p-2 font-sf-pro">
-                                                {skills.data.map((skill: any) => (
-                                                    <li
-                                                        key={skill._id}
-                                                        className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer flex gap-2 leading-5"
-                                                        onClick={() => handleSkillSelect(skill._id)} // Select the skill
-                                                    >
-                                                        {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
-                                                        {skill.name}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )} */}
-
                                     </div>
                                 </div>
                                 {errors.techStack && <p className="text-red-500 text-sm mt-1">{errors.techStack}</p>}
