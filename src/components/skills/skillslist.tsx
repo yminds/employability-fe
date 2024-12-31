@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SkillCard from '@/components/cards/skills/skillsCard';
-import { useGetUserSkillsQuery } from '@/api/skillsApiSlice';
+import { useGetUserSkillsMutation } from '@/api/skillsApiSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useNavigate } from 'react-router-dom';
@@ -26,15 +26,34 @@ interface SkillsData {
 
 interface SkillListProps {
   isDashboard: boolean;
+  goalId: string;
 }
 
 type SkillCategory = 'mandatory' | 'optional' | 'all';
 
-const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
+const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
-  const { data: skillsData, error, isLoading } = useGetUserSkillsQuery(userId ?? "");
+
+  const [getUserSkills, { data: skillsData, isLoading, isError, error }] =
+    useGetUserSkillsMutation();
+
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory>('mandatory');
+
+  useEffect(() => {
+    if (userId && goalId) {
+      fetchSkills(userId, goalId);
+    }
+  }, [userId, goalId]);
+
+  const fetchSkills = async (userId: string, goalId: string) => {
+    try {
+      console.log("Fetching skills for userId:", userId, "goalId:", goalId);
+      await getUserSkills({ userId, goalId }).unwrap();
+    } catch (err) {
+      console.error("Error fetching skills:", err);
+    }
+  };
 
   const handleLinkClick = (route: string) => {
     navigate(route);
@@ -48,7 +67,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
     return <div>Loading...</div>;
   }
 
-  if (error) {
+  if (isError) {
     return <div>Error loading skills. Please try again later.</div>;
   }
 
@@ -108,7 +127,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
 
   const getSelectedSkills = () => {
     if (!skillsData?.data) return [];
-    
+
     if (isDashboard) {
       return skillsData.data.all;
     }
@@ -127,7 +146,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
 
   return (
     <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
-      <div className="w-full h-full bg-white flex flex-col rounded-t-[8px] px-4">
+      <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
         {isDashboard ? (
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-gray-900 text-base font-medium leading-5">

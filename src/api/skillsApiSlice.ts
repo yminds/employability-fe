@@ -3,8 +3,9 @@ import { apiSlice } from './apiSlice';
 export const skillsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Fetch all user skills
-    getUserSkills: builder.query<{
-        data:[
+      getUserSkills: builder.mutation<
+      {
+        data: [
           {
             _id: string;
             skill_pool_id: {
@@ -15,14 +16,20 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
             verified_rating: number;
             self_rating: number;
           }
-        ]
-    }, string>({
-      query: (userId) => ({
-        url: `/api/v1/skills/userSkills/user/${userId}`, // Append the userId to the URL
-        method: 'GET',
+        ];
+      },
+      { userId: any; goalId: any }
+    >({
+      query: ({ userId, goalId }) => ({
+        url: `/api/v1/skills/userSkills/user/${userId}`, // Adjusted the endpoint to remove userId from the URL
+        method: 'POST',
+        body: {
+          user_id: userId,
+          goalId: goalId,
+        },
       }),
     }),
-
+  
     // Fetch a specific user skill by skill ID
     getUserSkillsSummary: builder.query<any, string >({
       query: ( userId ) => ({
@@ -38,7 +45,7 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
         }),
       }),
     
-      createUserSkills: builder.mutation<any, { user_id: string; skills: { skill_pool_id: string; self_rating: number, goal_id : string}[] }>({
+      createUserSkills: builder.mutation<any, { user_id: string; skills: { skill_pool_id: string; self_rating: number}[] ,goal_id : string }>({
         query: ({ user_id, skills ,goal_id}) => ({
           url: '/api/v1/skills/userSkills', // Replace with your endpoint
           method: 'POST',
@@ -52,4 +59,4 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetUserSkillsQuery, useGetUserSkillsSummaryQuery,useGetUserSkillDetailsQuery, useCreateUserSkillsMutation } = skillsApiSlice;
+export const { useGetUserSkillsMutation, useGetUserSkillsSummaryQuery,useGetUserSkillDetailsQuery, useCreateUserSkillsMutation } = skillsApiSlice;
