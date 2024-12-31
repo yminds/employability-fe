@@ -63,10 +63,6 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
     setSelectedCategory(category);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   if (isError) {
     return <div>Error loading skills. Please try again later.</div>;
   }
