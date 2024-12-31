@@ -31,10 +31,14 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
     }),
   
     // Fetch a specific user skill by skill ID
-    getUserSkillsSummary: builder.query<any, string >({
-      query: ( userId ) => ({
+    getUserSkillsSummary: builder.mutation<any, { userId: any; goalId: any } >({
+      query: ( { userId, goalId } ) => ({
         url: `api/v1/skills/userSkills/summary/${userId}`, // Append userId and skillId
-        method: 'GET',
+        method: 'POST',
+        body:{
+          user_id: userId,
+          goalId: goalId, 
+        }
       }),
     }),
 
@@ -59,4 +63,4 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetUserSkillsMutation, useGetUserSkillsSummaryQuery,useGetUserSkillDetailsQuery, useCreateUserSkillsMutation } = skillsApiSlice;
+export const { useGetUserSkillsMutation, useGetUserSkillsSummaryMutation, useGetUserSkillDetailsQuery, useCreateUserSkillsMutation } = skillsApiSlice;

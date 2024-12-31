@@ -96,7 +96,10 @@ const SkillsContainer: React.FC = () => {
           {skillsLoading ? (
             <Skeleton height={300} width="100%" />
           ) : (
-            <SkillSummary isSkillsUpdated={isUpdated} />
+            <SkillSummary 
+              isSkillsUpdated={isUpdated}
+              selectedGoalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""}
+            />
           )}
         </div>
       </div>

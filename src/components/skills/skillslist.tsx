@@ -18,12 +18,6 @@ interface Skill {
   self_rating: number | null;
 }
 
-interface SkillsData {
-  mandatory: Skill[];
-  optional: Skill[];
-  all: Skill[];
-}
-
 interface SkillListProps {
   isDashboard: boolean;
   goalId: string;
@@ -48,7 +42,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
 
   const fetchSkills = async (userId: string, goalId: string) => {
     try {
-      console.log("Fetching skills for userId:", userId, "goalId:", goalId);
+      // console.log("Fetching skills for userId:", userId, "goalId:", goalId);
       await getUserSkills({ userId, goalId }).unwrap();
     } catch (err) {
       console.error("Error fetching skills:", err);
@@ -142,13 +136,13 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
 
     switch (selectedCategory) {
       case "mandatory":
-        return skillsData.data.mandatory;
+        return skillsData.data?.mandatory;
       case "optional":
-        return skillsData.data.optional;
+        return skillsData.data?.optional;
       case "all":
-        return skillsData.data.all;
+        return skillsData.data?.all;
       default:
-        return skillsData.data.all;
+        return skillsData.data?.all;
     }
   };
 
