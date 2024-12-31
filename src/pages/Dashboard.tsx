@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import GoalList from "@/features/dashboard/GoalList";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { RootState } from '@/store/store';
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SkillList from "@/components/skills/skillslist";
@@ -13,6 +12,7 @@ import CircularProgress from '@/components/ui/circular-progress-bar'; // Updated
 import logo from '@/assets/skills/e-Logo.svg';
 import ProfileCompletionCard from "@/components/cards/ProfileCompletionCard";
 import { useGetUserSkillsSummaryQuery } from '@/api/skillsApiSlice';
+import TryThingsSection from "@/features/dashboard/TryThingsSection";
 
 interface Props {
   isDashboard: boolean; // Define the prop type here
@@ -21,12 +21,9 @@ interface Props {
 const Dashboard: React.FC<Props> = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
   //const user_id = useSelector((state) => state.auth.user._id)
-  const user_id = useSelector((state: RootState) => state.auth.user._id);
-  const user_name = useSelector((state: RootState) => state.auth.user?.name);
-  const navigate = useNavigate(); // Initialize useNavigate hook
-  const handleLinkClick = (route: string) => {
-    navigate(route); // Navigate to the specified route
-  };
+  const user = useSelector((state: RootState) => state.auth.user);
+  const user_id = user ? user._id : "";
+  const user_name = user ? user.name : "";
   //const { data: goalsData } = "";
   const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
@@ -74,7 +71,6 @@ const Dashboard: React.FC<Props> = () => {
                     <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
                       <SkillList isDashboard={true}/>
                     </section>
-
                   </div>
 
                   <div className="flex flex-col items-start gap-6 flex-1">
@@ -137,14 +133,6 @@ const Dashboard: React.FC<Props> = () => {
 
                     {/* Profile Sidebar */}
                     <ProfileCompletionCard />
-
-                    {/* <ProfileCard
-                      name={user_name}
-                      completionPercentage={30}
-                      importButtonLabel="Import from LinkedIn"
-                      uploadButtonLabel="Upload your resume"
-                      manualButtonLabel="Fill out manually"
-                    /> */}
                   </div>
                 </div>
 
@@ -195,68 +183,7 @@ const Dashboard: React.FC<Props> = () => {
                     </section>
 
                     {/* Try These Things Out Section */}
-                    <section className="flex flex-col items-start gap-4 self-stretch">
-                      <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
-                      >Try these things out</h5>
-                      <div className="grid grid-cols-3 md:grid-cols-3 gap-6">
-                        <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
-                        >
-                          <div className="h-[100px]">
-                            <img
-                              src="./src/assets/dashboard/skills.svg"
-                              alt="Skills"
-                              className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
-                            />
-                          </div>
-
-                          <div className="flex flex-col items-start gap-2">
-                            <h3 className="text-[#202326] text-base font-medium leading-5"
-                            >Showcase Your Skills</h3>
-                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide font-sf-pro">Highlight top skills to help us match you with the right opportunities.</p>
-                          </div>
-
-                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide font-sf-pro" onClick={() => handleLinkClick("/skills")}>Add Skills</button>
-                        </div>
-
-                        <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
-                        >
-                          <div className="h-[100px]">
-                            <img
-                              src="./src/assets/dashboard/project.svg"
-                              alt="Project"
-                              className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
-                            />
-                          </div>
-
-                          <div className="flex flex-col items-start gap-2">
-                            <h3 className="text-[#202326] text-base font-medium leading-5"
-                            >Build Your Portfolio</h3>
-                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide font-sf-pro">Start adding projects that showcase your expertise and creativity.</p>
-                          </div>
-
-                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide font-sf-pro" onClick={() => handleLinkClick("/projects")}>Add a Project</button>
-                        </div>
-
-                        <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
-                        >
-                          <div className="h-[100px]">
-                            <img
-                              src="./src/assets/dashboard/practice.svg"
-                              alt="Practice"
-                              className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
-                            />
-                          </div>
-
-                          <div className="flex flex-col items-start gap-2">
-                            <h3 className="text-[#202326] text-base font-medium leading-5"
-                            >Take a Mock Interview</h3>
-                            <p className="text-gray-500 text-base font-normal leading-6 tracking-wide font-sf-pro">Prepare for real interviews by practicing with AI-driven questions.</p>
-                          </div>
-
-                          <button className="flex p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide font-sf-pro" onClick={() => handleLinkClick("/interviews")}>Start Practice</button>
-                        </div>
-                      </div>
-                    </section>
+                    <TryThingsSection />
 
                     {/* Explore Trending Goals Section */}
                     <section className="flex flex-col items-start gap-4 self-stretch">
@@ -270,13 +197,6 @@ const Dashboard: React.FC<Props> = () => {
                   <div className="flex flex-col items-start gap-6 flex-1">
                     {/* Profile Sidebar */}
                     <ProfileCompletionCard />
-                    {/* <ProfileCard
-                      name={user_name}
-                      completionPercentage={30}
-                      importButtonLabel="Import from LinkedIn"
-                      uploadButtonLabel="Upload your resume"
-                      manualButtonLabel="Fill out manually"
-                    /> */}
 
                     <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-6">
                       <h4 className="text-black text-base font-medium leading-5">My activity</h4>

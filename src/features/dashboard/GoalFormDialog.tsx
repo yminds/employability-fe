@@ -25,8 +25,8 @@ interface Goal {
 interface GoalFormDialogProps {
     isOpen: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    selectedGoal: Goal; // Goal data passed as a prop
-    setJourneyDialog: boolean;
+    selectedGoal: Goal | null; // Goal data passed as a prop
+    setJourneyDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
