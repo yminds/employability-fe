@@ -1,28 +1,27 @@
-
-
 import { useEffect, useState } from "react";
-import { Plus, Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { ExperienceItem } from "../profile/types";  // Adjust your import path as needed
+import type { ExperienceItem } from "../profile/types"; // Adjust your import path as needed
 import type { ExperienceProps } from "../profile/types";
 import AddEditExperienceModal from "@/components/modal/AddEditExperienceModal";
 import { useGetExperiencesByUserIdQuery } from "@/api/experienceApiSlice";
 import { useSelector } from "react-redux";
 
 export default function ExperienceSection({
-  experiences,      // Possibly passed from parent
-  onAdd,
-  onEdit,
-  onDelete
+  experiences, // Possibly passed from parent
 }: ExperienceProps) {
+  const user = useSelector((state: any) => state.auth.user);
+  const [experience, setExperience] = useState<ExperienceProps[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [editingExperince, setEditingExperince] =
+    useState<ExperienceItem | null>(null);
   // We’ll store the final, mapped experiences in local state:
-  const [mappedExperiences, setMappedExperiences] = useState<ExperienceItem[]>([]);
+  const [mappedExperiences, setMappedExperiences] = useState<ExperienceItem[]>(
+    []
+  );
 
   // If you need the user’s ID from Redux:
-  const user = useSelector((state: any) => state.auth.user);
 
   // Fetch experiences from the server
   const { data, error, isLoading } = useGetExperiencesByUserIdQuery(user?._id);
@@ -43,12 +42,12 @@ export default function ExperienceSection({
           endDate: exp.end_date || null,
           currentlyWorking: exp.currently_working,
           // Hard-code or compute the following if needed:
-          jobType: exp.employment_type,   // sometimes you might store this separately
-          isVerified: false,             // no field in backend? default to false
-          duration: "",                  // can be computed if you want
+          jobType: exp.employment_type, // sometimes you might store this separately
+          isVerified: false, // no field in backend? default to false
+          duration: "", // can be computed if you want
           currentCTC: "",
           expectedCTC: "",
-          description: "",               // fill in if your API has a `description` field
+          description: "", // fill in if your API has a `description` field
         };
       });
 
@@ -73,6 +72,11 @@ export default function ExperienceSection({
     ? mappedExperiences
     : mappedExperiences.slice(0, 3);
 
+  const openModal = (experience?: ExperienceItem) => {
+    setEditingExperince(experience || null);
+    setIsModalOpen(true);
+  };
+
   // Render
   return (
     <Card className="w-full">
@@ -81,26 +85,65 @@ export default function ExperienceSection({
           <h2 className="text-lg font-medium text-gray-900">Experience</h2>
           {/* <span className="text-gray-500">({totalDuration})</span> */}
         </div>
-        <div className="flex items-center gap-2">
-          {onAdd && (
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-          )}
-          {onEdit && (
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-            >
-              <Pencil className="h-5 w-5" />
-            </button>
-          )}
+        <div className="sticky top-0 bg-white z-10 px-6 py-4 ">
+          <div className="flex justify-between items-center">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => openModal()}
+                className="flex items-center space-x-1 text-emerald-600 hover:text-emerald-700 focus:outline-none"
+                aria-label="Add education"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="33"
+                  height="32"
+                  viewBox="0 0 33 32"
+                  fill="none"
+                >
+                  <rect
+                    x="0.5"
+                    width="32"
+                    height="32"
+                    rx="16"
+                    fill="#03963F"
+                    fillOpacity="0.1"
+                  />
+                  <path
+                    d="M15.5 17H10.5C10.2167 17 9.97917 16.9042 9.7875 16.7125C9.59583 16.5208 9.5 16.2833 9.5 16C9.5 15.7167 9.59583 15.4792 9.7875 15.2875C9.97917 15.0958 10.2167 15 10.5 15H15.5V10C15.5 9.71667 15.5958 9.47917 15.7875 9.2875C15.9792 9.09583 16.2167 9 16.5 9C16.7833 9 17.0208 9.09583 17.2125 9.2875C17.4042 9.47917 17.5 9.71667 17.5 10V15H22.5C22.7833 15 23.0208 15.0958 23.2125 15.2875C23.4042 15.4792 23.5 15.7167 23.5 16C23.5 16.2833 23.4042 16.5208 23.2125 16.7125C23.0208 16.9042 22.7833 17 22.5 17H17.5V22C17.5 22.2833 17.4042 22.5208 17.2125 22.7125C17.0208 22.9042 16.7833 23 16.5 23C16.2167 23 15.9792 22.9042 15.7875 22.7125C15.5958 22.5208 15.5 22.2833 15.5 22V17Z"
+                    fill="#03963F"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => openModal(experiences[0])}
+                className="flex items-center space-x-1 text-emerald-600 hover:text-emerald-700 focus:outline-none"
+                aria-label="Edit education"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="33"
+                  height="32"
+                  viewBox="0 0 33 32"
+                  fill="none"
+                >
+                  <rect
+                    x="0.5"
+                    width="32"
+                    height="32"
+                    rx="15"
+                    fill="#03963F"
+                    fillOpacity="0.1"
+                  />
+                  <path
+                    d="M11 21.5H12.0625L19.875 13.6875L18.8125 12.625L11 20.4375V21.5ZM10.2537 23C10.0429 23 9.86458 22.9285 9.71875 22.7854C9.57292 22.6425 9.5 22.4653 9.5 22.2537V20.4444C9.5 20.2453 9.53472 20.0556 9.60417 19.875C9.67361 19.6944 9.78472 19.5278 9.9375 19.375L19.875 9.4375C20.0278 9.28472 20.1933 9.17361 20.3717 9.10417C20.5499 9.03472 20.7374 9 20.9342 9C21.1308 9 21.3194 9.03472 21.5 9.10417C21.6806 9.17361 21.8472 9.28472 22 9.4375L23.0625 10.5C23.2153 10.6528 23.3264 10.8194 23.3958 11C23.4653 11.1806 23.5 11.3649 23.5 11.5529C23.5 11.7536 23.4651 11.9449 23.3954 12.1267C23.3257 12.3085 23.2147 12.4746 23.0625 12.625L13.125 22.5625C12.9722 22.7153 12.8059 22.8264 12.626 22.8958C12.4462 22.9653 12.257 23 12.0585 23H10.2537ZM19.3344 13.1656L18.8125 12.625L19.875 13.6875L19.3344 13.1656Z"
+                    fill="#03963F"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Add / Edit Modal */}
         <AddEditExperienceModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -110,8 +153,6 @@ export default function ExperienceSection({
       </CardHeader>
 
       <CardContent className="p-0">
-
-
         <div className="divide-y divide-gray-100 px-6">
           {displayedExperiences.map((item) => (
             <div key={item.id} className="flex items-start gap-6 p-6">
@@ -136,7 +177,9 @@ export default function ExperienceSection({
 
                 {/* Description if you have one */}
                 {item.description && (
-                  <p className="mt-4 text-gray-600 text-sm">{item.description}</p>
+                  <p className="mt-4 text-gray-600 text-sm">
+                    {item.description}
+                  </p>
                 )}
               </div>
 

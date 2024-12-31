@@ -21,8 +21,8 @@ import { apiSlice } from "../api/apiSlice";
 import { errorMiddleware } from "./errorMiddleware";
 import { skillApi } from "@/api/skillApiSlice";
 import { userApi } from "@/api/userApiSlice";
-// import { successMiddleware } from './successMiddleware';
-
+import { educationApiSlice } from "@/api/educationSlice";
+import { experienceApiSlice } from "@/api/experienceApiSlice";
 // Redux persist config
 const persistConfig = {
   key: "root",
@@ -36,6 +36,8 @@ const rootReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   [skillApi.reducerPath]: skillApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
+  [educationApiSlice.reducerPath]: educationApiSlice.reducer, // Added education reducer
+  [experienceApiSlice.reducerPath]: experienceApiSlice.reducer,
   auth: authReducer,
   goals: goalReducer,
   error: errorReducer,
@@ -56,7 +58,7 @@ const customizedMiddleware = {
       "meta.arg.originalArgs",
       "meta.baseQueryMeta.request",
       "meta.baseQueryMeta.response",
-    ], // Add the full path to the payload
+    ],
   },
 };
 
@@ -67,6 +69,8 @@ export const store = configureStore({
       apiSlice.middleware,
       skillApi.middleware,
       userApi.middleware,
+      educationApiSlice.middleware, // Added education middleware
+      experienceApiSlice.middleware,
       errorMiddleware
     ),
   devTools: true,

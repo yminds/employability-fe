@@ -22,6 +22,7 @@ import SkillDetailPage from "./pages/SkillDetailPage.tsx";
 import SelectedSkill from "@/components/skills/selectedskill.tsx";
 import SignupForm from "./pages/SignUpPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
+import JobsPage from "./pages/JobsPage.tsx";
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -78,7 +79,10 @@ export const routes: RouteConfig[] = [
     route: "/user-profile",
     component: <UserProfilePage />,
   },
-
+  {
+    route: "/jobs",
+    component: <JobsPage />, 
+  },
   {
     route: "/user-projects",
     component: <ProjectsPage />,

@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash } from "lucide-react";
 import type { ExperienceItem } from "@/features/profile/types";
-
+import {
+  useDeleteExperienceMutation,
+  useAddExperienceMutation,
+  useUpdateExperienceMutation,
+} from "@/api/experienceApiSlice";
+import { useSelector } from "react-redux";
 interface ExperienceFormProps {
   experiences: ExperienceItem[];
   onChange: (experiences: ExperienceItem[]) => void;
   errors?: { [key: string]: string };
+  onDeleteExperience?: (id: string) => void;
 }
 
 const ExperienceForm: React.FC<ExperienceFormProps> = ({
   experiences = [],
   onChange,
   errors = {},
+  onDeleteExperience,
 }) => {
   const [isFresher, setIsFresher] = useState(false);
+  const [deleteExperience] = useDeleteExperienceMutation();
+  const [addExperience] = useAddExperienceMutation();
+  const [updateExperience] = useUpdateExperienceMutation();
+  const user = useSelector((state: any) => state.auth.user);
+
+  console.log(user);
+
+  // const [deleteExperience] = useDeleteExperienceMutation;
 
   useEffect(() => {
     if (experiences && experiences.length === 0 && !isFresher) {
-      addExperience();
+      handleAddExperience();
     }
   }, [experiences, isFresher]);
 
-  const addExperience = () => {
+  const handleAddExperience = () => {
     const newExperience: ExperienceItem = {
       id: Date.now().toString(),
       jobTitle: "",
@@ -43,13 +58,31 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     onChange([...(experiences || []), newExperience]);
   };
 
-  const removeExperience = (index: number) => {
-    if (!experiences) return;
-    const updatedExperiences = experiences.filter((_, i) => i !== index);
-    onChange(updatedExperiences);
+  const removeExperience = async (index: number) => {
+    try {
+      const experienceToDelete = experiences[index];
+
+      // Only call API if experience has an ID (exists in backend)
+      if (experienceToDelete.id) {
+        await deleteExperience(experienceToDelete.id).unwrap();
+
+        // If onDeleteExperience callback exists, call it
+        if (onDeleteExperience) {
+          onDeleteExperience(experienceToDelete.id);
+        }
+      }
+
+      // Update local state by removing the experience
+      const updatedExperiences = experiences.filter((_, i) => i !== index);
+      onChange(updatedExperiences);
+    } catch (error) {
+      console.error("Failed to delete experience:", error);
+      // Optionally show an error message to the user
+      alert("Failed to delete experience. Please try again.");
+    }
   };
 
-  const updateExperience = (
+  const handleUpdateExperience = (
     index: number,
     field: keyof ExperienceItem,
     value: any
@@ -119,7 +152,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 type="text"
                 value={exp.jobTitle}
                 onChange={(e) =>
-                  updateExperience(index, "jobTitle", e.target.value)
+                  handleUpdateExperience(index, "jobTitle", e.target.value)
                 }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
                   getError(`experience.${index}.jobTitle`)
@@ -143,7 +176,11 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
               <select
                 value={exp.employmentType}
                 onChange={(e) =>
-                  updateExperience(index, "employmentType", e.target.value)
+                  handleUpdateExperience(
+                    index,
+                    "employmentType",
+                    e.target.value
+                  )
                 }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
                   getError(`experience.${index}.employmentType`)
@@ -174,7 +211,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 type="text"
                 value={exp.companyName}
                 onChange={(e) =>
-                  updateExperience(index, "companyName", e.target.value)
+                  handleUpdateExperience(index, "companyName", e.target.value)
                 }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
                   getError(`experience.${index}.companyName`)
@@ -199,7 +236,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 type="text"
                 value={exp.location}
                 onChange={(e) =>
-                  updateExperience(index, "location", e.target.value)
+                  handleUpdateExperience(index, "location", e.target.value)
                 }
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
                   getError(`experience.${index}.location`)
@@ -222,7 +259,11 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 id={`currentlyWorking-${index}`}
                 checked={exp.currentlyWorking}
                 onChange={(e) =>
-                  updateExperience(index, "currentlyWorking", e.target.checked)
+                  handleUpdateExperience(
+                    index,
+                    "currentlyWorking",
+                    e.target.checked
+                  )
                 }
                 className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
               />
@@ -244,7 +285,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                   type="month"
                   value={exp.startDate || ""}
                   onChange={(e) =>
-                    updateExperience(index, "startDate", e.target.value)
+                    handleUpdateExperience(index, "startDate", e.target.value)
                   }
                   max={new Date().toISOString().slice(0, 7)}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
@@ -268,7 +309,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                     type="month"
                     value={exp.endDate || ""}
                     onChange={(e) =>
-                      updateExperience(index, "endDate", e.target.value)
+                      handleUpdateExperience(index, "endDate", e.target.value)
                     }
                     min={exp.startDate}
                     max={new Date().toISOString().slice(0, 7)}
@@ -295,7 +336,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
               <textarea
                 value={exp.description}
                 onChange={(e) =>
-                  updateExperience(index, "description", e.target.value)
+                  handleUpdateExperience(index, "description", e.target.value)
                 }
                 rows={4}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
@@ -316,7 +357,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
 
       {!isFresher && (
         <button
-          onClick={addExperience}
+          onClick={handleAddExperience}
           className="inline-flex items-center text-emerald-600 hover:text-emerald-700"
           type="button"
         >
