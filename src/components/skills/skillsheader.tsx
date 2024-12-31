@@ -23,10 +23,11 @@ interface SkillsHeaderProps {
     data: Skill[];
   };
   onSkillsStatusChange: (isUpdated: boolean) => void; // Callback to notify parent of update status
+  onGoalChange: (goalId: string) => void; // Callback to notify parent of goal change
 }
 
-const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , onSkillsStatusChange }) => {
-  console.log(selectedSkills);
+const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , onSkillsStatusChange ,onGoalChange}) => {
+  // console.log(selectedSkills);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [skillsUpdated, setSkillsUpdated] = useState(false); // State to track updates
@@ -34,6 +35,8 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
   const userId = useSelector((state: RootState) => state.auth.user._id);
 
   const { data: goalData, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
+  console.log(goalData);
+  
 
   const navigate = useNavigate();
 
@@ -88,10 +91,26 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
         <div className="flex justify-between items-center mb-4">
           {/* Goal Section */}
           <div className="bg-white w-ful h-[46px] rounded-lg flex items-center justify-start px-4 ">
-            <span className=" text-base font-normal leading-6 tracking-[0.015rem]">Goal : {goal} </span>
-            {/* <span className="text-sm  text-gray-600 pl-2 truncate">
-              
-            </span> */}
+            {/* <span className=" text-base font-normal leading-6 tracking-[0.015rem]">Goal : {goal} </span> */}
+            {/*  Add dropdown here */}
+            <span>Goal :</span>
+<select
+  className="text-base font-normal leading-6 tracking-[0.015rem] bg-transparent border-none outline-none"
+  value={goal}
+  onChange={(e) => {
+    const selectedGoalId = goalData?.data.find(goal => goal.name === e.target.value)?._id;
+    setGoal(e.target.value);
+    if (selectedGoalId) {
+      onGoalChange(selectedGoalId); // Notify parent with the selected goal ID
+    }
+  }}
+>
+  {goalData?.data.map((goal) => (
+    <option key={goal._id} value={goal.name}>
+      {goal.name}
+    </option>
+  ))}
+</select>
           </div>
           <button
             onClick={handleOpenModal}
@@ -105,7 +124,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({ skills : selectedSkills , o
       {/* AddSkillsModal */}
       {isModalOpen && (
         <AddSkillsModal
-        selectedSkills  = {selectedSkills}
+        selectedSkills  = {selectedSkills.data.all}
           onClose={handleCloseModal}
           userId={userId}
           onSkillsUpdate={handleSkillsUpdate} // Pass the update handler

@@ -8,10 +8,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
 interface SkillCardProps {
-  key: string;
   skillId: string;
   skill: string;
-  skillImg: string;
+  skillImg: string | undefined;
   verified_rating: number;
   selfRating: number;
   initialStatus: string; // Initial status of the skill
@@ -51,7 +50,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleVerifySkill = async () => {
     const interviewId = await createInterview({
-      title: `${user?.name}'s ${skill} Interview`,
+      title: `${skill} Interview`,
       type: "Skill",
       user_skill_id: skillId,
     });
@@ -105,7 +104,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
             </button>
             <button
               onClick={handleImproveScore}
-              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
+              className=" py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
             >
               Improve score
             </button>
