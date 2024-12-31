@@ -30,7 +30,7 @@ interface GoalFormDialogProps {
 }
 
 const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-     const user_id = useSelector((state: RootState) => state.auth.user._id);
+     const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
     const [techStack, setTechStack] = useState(""); // Tech stack search term
