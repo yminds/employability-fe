@@ -8,33 +8,27 @@ import { useSelector } from "react-redux";
 import { RootState } from '@/store/store';
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SkillList from "@/components/skills/skillslist";
-import CircularProgress from '@/components/ui/circular-progress-bar'; // Updated CircularProgress
-import logo from '@/assets/skills/e-Logo.svg';
 import ProfileCompletionCard from "@/components/cards/ProfileCompletionCard";
-import { useGetUserSkillsSummaryQuery } from '@/api/skillsApiSlice';
 import TryThingsSection from "@/features/dashboard/TryThingsSection";
+import MyActivityCard from "@/features/dashboard/MyActivity";
 
 interface Props {
   isDashboard: boolean; // Define the prop type here
+  displayScore: boolean;
 }
 
 const Dashboard: React.FC<Props> = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
-  //const user_id = useSelector((state) => state.auth.user._id)
+  //const user_id = useSelector((state) => state.auth.user._id);
   const user = useSelector((state: RootState) => state.auth.user);
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
   
- // const { data: goalsData } = "";
+  //const { data: goalsData } = "";
   const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
 
-  const { data: skillsSummaryData } = useGetUserSkillsSummaryQuery(user_id) || {};
-  const totalSkills = skillsSummaryData?.data?.totalSkills || 0;
-  const totalVerifiedSkills = skillsSummaryData?.data?.totalVerifiedSkills || 0;
-
   const completionPercentage = 50;
-  const averageVerifiedRating = 0;
 
   return (
     <>
@@ -58,9 +52,10 @@ const Dashboard: React.FC<Props> = () => {
                             <p className="text-gray-500 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">You’re doing great! Keep going and unlock your next milestone.</p>
                           </div>
                         </div>
+                        
                         <div className="flex items-center gap-5 self-stretch">
                           <div className="relative w-full bg-[#DBFFEA] rounded-full h-[6px]">
-                            <div className="bg-[#2EE578] h-[6px] rounded-full" style={{ width: `${completionPercentage}%` }}></div>
+                            <div className="bg-[#1FD167] h-[6px] rounded-full" style={{ width: `${completionPercentage}%` }}></div>
                           </div>
                         </div>
                         <span className="text-[#1FD167] text-[24px] font-bold leading-[32px] tracking-[-0.24px] absolute end-0 top-0">{completionPercentage}%</span>
@@ -74,65 +69,11 @@ const Dashboard: React.FC<Props> = () => {
                   </div>
 
                   <div className="flex flex-col items-start gap-6 flex-1">
-                    <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-6">
-
-                      <div className="p-4 w-full h-[92px] bg-green-50 rounded-lg flex items-center space-x-4">
-                        <div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
-                          {/* Circular Progress Bar */}
-                          <CircularProgress progress={averageVerifiedRating} size={60} strokeWidth={6} showText={false} />
-                          <img className="absolute w-8 h-8" src={logo} alt="short logo" />
-                        </div>
-                        <div>
-                          <p className="text-2xl font-bold text-gray-900">{averageVerifiedRating}</p>
-                          <p className="text-base text-[#414447] font-sf-pro">Employability Score</p>
-                        </div>
-                      </div>
-
-                      <ul className="flex flex-col items-start gap-5 self-stretch">
-                        <li className="flex h-[48px] items-center gap-[14px] self-stretch">
-                          <div className="flex w-[48px] h-[48px] p-[9px] px-[10px] justify-center items-center gap-[10px] rounded-[48px] border border-black/5 bg-[rgba(250,250,250,0.98)]">
-                            <img
-                              src="./src/assets/dashboard/puzzle_piece.svg"
-                              alt=""
-                              className="w-6 h-6"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">{totalVerifiedSkills}/{totalSkills}</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">verified skills</span>
-                          </div>
-                        </li>
-                        <li className="flex h-[48px] items-center gap-[14px] self-stretch">
-                          <div className="flex w-[48px] h-[48px] p-[9px] px-[10px] justify-center items-center gap-[10px] rounded-[48px] border border-black/5 bg-[rgba(250,250,250,0.98)]">
-                            <img
-                              src="./src/assets/dashboard/folder_open.svg"
-                              alt=""
-                              className="w-6 h-6"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">0</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">projects added</span>
-                          </div>
-                        </li>
-                        <li className="flex h-[48px] items-center gap-[14px] self-stretch">
-                          <div className="flex w-[48px] h-[48px] p-[9px] px-[10px] justify-center items-center gap-[10px] rounded-[48px] border border-black/5 bg-[rgba(250,250,250,0.98)]">
-                            <img
-                              src="./src/assets/dashboard/chalkboard_user.svg"
-                              alt=""
-                              className="w-6 h-6"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">0</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">upskilling</span>
-                          </div>
-                        </li>
-                      </ul>
-                    </aside>
-
                     {/* Profile Sidebar */}
                     <ProfileCompletionCard />
+
+                    {/* My Activity Sidebar */}
+                    <MyActivityCard displayScore={true}/>
                   </div>
                 </div>
 
@@ -198,50 +139,8 @@ const Dashboard: React.FC<Props> = () => {
                     {/* Profile Sidebar */}
                     <ProfileCompletionCard />
 
-                    <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-6">
-                      <h4 className="text-black text-base font-medium leading-5">My activity</h4>
-                      <ul className="flex flex-col items-start gap-5 self-stretch">
-                        <li className="flex h-[48px] items-center gap-[14px] self-stretch">
-                          <div className="flex w-[48px] h-[48px] p-[9px] px-[10px] justify-center items-center gap-[10px] rounded-[48px] border border-black/5 bg-[rgba(250,250,250,0.98)]">
-                            <img
-                              src="./src/assets/dashboard/puzzle_piece.svg"
-                              alt=""
-                              className="w-6 h-6"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">{totalVerifiedSkills}/{totalSkills}</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">verified skills</span>
-                          </div>
-                        </li>
-                        <li className="flex h-[48px] items-center gap-[14px] self-stretch">
-                          <div className="flex w-[48px] h-[48px] p-[9px] px-[10px] justify-center items-center gap-[10px] rounded-[48px] border border-black/5 bg-[rgba(250,250,250,0.98)]">
-                            <img
-                              src="./src/assets/dashboard/folder_open.svg"
-                              alt=""
-                              className="w-6 h-6"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">0</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">projects added</span>
-                          </div>
-                        </li>
-                        <li className="flex h-[48px] items-center gap-[14px] self-stretch">
-                          <div className="flex w-[48px] h-[48px] p-[9px] px-[10px] justify-center items-center gap-[10px] rounded-[48px] border border-black/5 bg-[rgba(250,250,250,0.98)]">
-                            <img
-                              src="./src/assets/dashboard/chalkboard_user.svg"
-                              alt=""
-                              className="w-6 h-6"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="text-black text-base font-medium leading-5">0</span>
-                            <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">upskilling</span>
-                          </div>
-                        </li>
-                      </ul>
-                    </aside>
+                    {/* My Activity Sidebar */}
+                    <MyActivityCard displayScore={false}/>
                   </div>
                 </div>
 
