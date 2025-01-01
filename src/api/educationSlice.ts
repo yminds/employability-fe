@@ -1,22 +1,29 @@
-import { apiSlice } from "./apiSlice";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const educationApiSlice = apiSlice.injectEndpoints({
+const baseUrl = process.env.VITE_API_BASE_URL as string;
+
+export const educationApiSlice = createApi({
+  reducerPath: "educationApiSlice",
+  baseQuery: fetchBaseQuery({ baseUrl }),
+  tagTypes: ["Education"],
   endpoints: (builder) => ({
     // Fetch a single education record by ID
     getEducationById: builder.query<any, string>({
       query: (id) => ({
-        url: `/api/v1/user_education/education/${id}`, // Ensure this matches the backend
+        url: `/api/v1/user_education/education/${id}`,
         method: "GET",
       }),
+      providesTags: ["Education"],
     }),
 
     // Add a new education record
     addEducation: builder.mutation<any, any>({
       query: (newEducation) => ({
-        url: "/api/v1/user_education/education/${id}",
+        url: "/api/v1/user_education/education",
         method: "POST",
         body: newEducation,
       }),
+      invalidatesTags: ["Education"],
     }),
 
     // Update an existing education record by ID
@@ -29,14 +36,16 @@ export const educationApiSlice = apiSlice.injectEndpoints({
         method: "PUT",
         body: updatedEducation,
       }),
+      invalidatesTags: ["Education"],
     }),
 
     // Delete an education record by ID
     deleteEducation: builder.mutation<any, string>({
       query: (id) => ({
-        url: `/api/v1/user_education/education${id}`,
+        url: `/api/v1/user_education/education/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Education"],
     }),
   }),
 });

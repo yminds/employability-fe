@@ -21,10 +21,15 @@ interface EmployabilityScoreProps {
 
 const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ skills }) => {
 
-  const totalVerifiedRating = skills.data.all.reduce((acc: number, skill: Skill) => acc + skill.verified_rating, 0);
-  const averageVerifiedRating =
-    skills.data.length > 0 ? parseFloat((totalVerifiedRating / skills.data.length).toFixed(2)) : 0.00;
-
+  const totalVerifiedRating = skills?.data?.all?.reduce(
+    (acc: number, skill: Skill) => acc + skill.verified_rating,
+    0
+  ) || 0;
+  
+  const averageVerifiedRating = skills?.data?.all?.length
+    ? parseFloat((totalVerifiedRating / skills.data.all.length).toFixed(2))
+    : 0;
+  
   return (
     <div className=" bg-white w-[100%] rounded-lg mt-[48px] p-[42px]">
       {/* Employability Score Section */}

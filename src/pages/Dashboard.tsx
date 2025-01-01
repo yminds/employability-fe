@@ -24,9 +24,10 @@ const Dashboard: React.FC<Props> = () => {
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
 
-  const { data: goalsData } = "";
- // const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  //const { data: goalsData } = "";
+  const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
+  const goalId = goalsData?.data?.[0]?._id || "";
 
   const completionPercentage = 50;
 
@@ -64,7 +65,7 @@ const Dashboard: React.FC<Props> = () => {
 
                     {/* Skills */}
                     <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      <SkillList isDashboard={true} />
+                      <SkillList isDashboard={true} goalId={goalId} />
                     </section>
 
                     {/* Projects */}
@@ -82,7 +83,7 @@ const Dashboard: React.FC<Props> = () => {
                     <ProfileCompletionCard />
 
                     {/* My Activity Sidebar */}
-                    <MyActivityCard displayScore={true} />
+                    <MyActivityCard displayScore={true} goalId={goalId} />
                   </div>
                 </div>
 
