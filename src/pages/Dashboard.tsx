@@ -24,8 +24,8 @@ const Dashboard: React.FC<Props> = () => {
   const user_name = user ? user.name : "";
   const profile_image = user ? user.profile_image : "";
 
-  //const { data: goalsData } = "";
-  const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  const { data: goalsData } = "";
+  //const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
   const goalId = goalsData?.data?.[0]?._id || "";
 
