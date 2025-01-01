@@ -68,7 +68,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
         setSalaryRange([minValue, salaryRange[1]]);
     };
 
-    const handleMaxChange = (e) => {
+    const handleMaxChange = (e: { target: { value: any; }; }) => {
         const maxValue = Math.max(Number(e.target.value), salaryRange[0]);
         setSalaryRange([salaryRange[0], maxValue]);
     };
@@ -163,16 +163,25 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                         <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">Expected Salary Range</label>
                         <p className="text-[#909091] text-sm font-medium leading-5 tracking-[0.21px]">Choose a range</p>
                     </div>
-                    {/* Slider */}
+                    
+                    {/* Range Labels */}
+                    <div className="flex justify-between w-full text-[#414447] text-[14px] font-medium leading-[21px] tracking-[0.21px]">
+                        <span>0 LPA</span>
+                        <span>50 LPA</span>
+                    </div>
                     <div className="relative w-full flex items-center">
-                        {/* Range Track */}
+                        {/* Track (background line) */}
+                        <div className="absolute w-full h-1 bg-gray-200 rounded-full"></div>
+
+                        {/* Highlighted Range */}
                         <div
-                            className="absolute h-1 bg-[#1FD167] rounded-full"
+                            className="absolute h-1 bg-[#2EE578] rounded-full"
                             style={{
                                 left: `${(salaryRange[0] / 50) * 100}%`,
                                 right: `${100 - (salaryRange[1] / 50) * 100}%`,
                             }}
                         ></div>
+
                         {/* Min Slider */}
                         <input
                             type="range"
@@ -180,9 +189,12 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                             max="50"
                             value={salaryRange[0]}
                             onChange={handleMinChange}
-                            className="absolute w-full h-1 bg-[#1FD167] appearance-none focus:outline-none pointer-events-auto"
-                            style={{ zIndex: 2 }}
+                            className="absolute w-full h-1 appearance-none focus:outline-none pointer-events-auto z-10"
+                            style={{
+                                background: "transparent",
+                            }}
                         />
+
                         {/* Max Slider */}
                         <input
                             type="range"
@@ -190,28 +202,15 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                             max="50"
                             value={salaryRange[1]}
                             onChange={handleMaxChange}
-                            className="absolute w-full h-1 bg-[#1FD167] appearance-none focus:outline-none pointer-events-auto"
-                            style={{ zIndex: 2 }}
-                        />
-                        {/* Highlighted Range */}
-                        <div
-                            className="h-1 bg-[#1FD167] z-10 rounded-full"
+                            className="absolute w-full h-1 appearance-none focus:outline-none pointer-events-auto z-10"
                             style={{
-                                left: `${(salaryRange[0] / 50) * 100}%`,
-                                right: `${100 - (salaryRange[1] / 50) * 100}%`,
+                                background: "transparent",
                             }}
-                        >
-                        </div>
-                    </div>
-
-                    {/* Range Labels */}
-                    <div className="flex justify-between w-full text-sm text-gray-600">
-                        <span>0 LPA</span>
-                        <span>50 LPA</span>
+                        />
                     </div>
 
                     {/* Apply Button */}
-                    <button className="py-2 text-sm w-[80px] font-medium text-[#001630] rounded-md border border-solid border-[#001630] float-end">
+                    <button className="py-2 text-sm w-[80px] font-medium text-[#001630] rounded-md border border-solid border-[#001630] float-end mt-2">
                         Apply
                     </button>
                 </div>
