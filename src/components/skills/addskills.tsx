@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import { useCreateUserSkillsMutation } from "@/api/skillsApiSlice";
+import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import {
   Command,
   CommandEmpty,
@@ -27,37 +28,22 @@ interface Skill {
   rating: string;
   visibility: string;
 }
-interface skillsSelected {
-  data:[
-    {
-      _id: string;
-      skill_pool_id: {
-        _id: string;
-        name: string;
-        icon: string
-      };
-      verified_rating: number;
-      self_rating: number;
-  }
-  ]
-}
 
 interface AddSkillsModalProps {
-  selectedSkills: skillsSelected
+  goalId: string | undefined;
   onClose: () => void;
-  userId: string;
+  userId: string | undefined;
   onSkillsUpdate: (isUpdated: boolean) => void;
 }
 
 const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
-  selectedSkills,
+  goalId,
   onClose,
   userId,
   onSkillsUpdate,
 }) => {
-  // console.log("selected in Add Modal skills ",selectedSkills);
-  
-  const [user_Id] = useState<string>(userId);
+  const [user_Id] = useState<string>(userId ?? "");
+  const [selectedGoalId, setSelectedGoalId] = useState<string | undefined>(goalId);
   const [skills, setSkills] = useState<Skill[]>([
     {
       skill_Id: "",
@@ -79,15 +65,38 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     { id: "6", name: "Express" },
   ]);
 
+  const [getUserSkills, { data: userSkillsData, isLoading}] =
+    useGetUserSkillsMutation(); 
+ 
+  const fetchSkills = async (userId: string, goalId: string) => {
+    try {
+      await getUserSkills({ userId, goalId }).unwrap();
+    } catch (err) {
+      console.error("Error fetching skills:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (goalId !== selectedGoalId) {
+      setSelectedGoalId(goalId);
+    }
+  }, [goalId]);
+
+  useEffect(() => {
+    if (userId && selectedGoalId) {
+      fetchSkills(userId, selectedGoalId);
+    }
+  }, [userId, selectedGoalId]);
+
   const ratings = Array.from({ length: 10 }, (_, i) => `${i + 1}/10`);
   const [open, setOpen] = useState<boolean[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
 
   const {
     data: skillsData,
-    error,
-    isLoading,
-  } = useGetMultipleSkillsQuery(searchValue);
+    error:skillserror,
+    isLoading:skillsLoading,
+  } = useGetMultipleSkillsQuery(searchValue);  
 
   const handleAddSkill = () => {
     const newSkill: Skill = {
@@ -199,38 +208,45 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                         />
                         <CommandEmpty>No skill found.</CommandEmpty>
                         <CommandGroup>
-                          {skillsData?.data?.map((item: any) => (
-                            <CommandItem
-                            disabled={selectedSkills.data?.map((skill) => skill.skill_pool_id._id).includes(item._id)}  
-                              key={item._id}
-                              value={item.name}
-                              onSelect={() => {
-                                // Update selected skill and close dropdown
-                                setSkills(
-                                  skills.map((s, i) =>
-                                    i === index
-                                      ? {
-                                          ...s,
-                                          skill_Id: item._id,
-                                          name: item.name,
-                                        }
-                                      : s
-                                  )
-                                );
-                                setIsSkillOpen(false); // Close dropdown
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  skill.skill_Id === item._id
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {item.name}
-                            </CommandItem>
-                          ))}
+                          {skillsData?.data?.map((item: any) => {
+                            // Check if the skill is already in userSkillsData.all
+                            const isSkillAlreadyAdded = userSkillsData?.data?.all.some(
+                              (skill: any) => skill.skill_pool_id._id === item._id
+                            );
+
+                            return (
+                              <CommandItem
+                                key={item._id}
+                                value={item.name}
+                                disabled={isSkillAlreadyAdded} // Disable the item if it's already added
+                                onSelect={() => {
+                                  if (!isSkillAlreadyAdded) {
+                                    // Update selected skill and close dropdown
+                                    setSkills(
+                                      skills.map((s, i) =>
+                                        i === index
+                                          ? {
+                                              ...s,
+                                              skill_Id: item._id,
+                                              name: item.name,
+                                            }
+                                          : s
+                                      )
+                                    );
+                                    setIsSkillOpen(false); // Close dropdown
+                                  }
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    skill.skill_Id === item._id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {item.name}
+                              </CommandItem>
+                            );
+                          })}
                         </CommandGroup>
                       </Command>
                     </PopoverContent>

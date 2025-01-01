@@ -14,10 +14,11 @@ export const goalsApiSlice = apiSlice.injectEndpoints({
       message:string,
       data: [
         {
+          _id : string,
           name: string
         }
       ]
-    }, void>({
+    }, string | undefined>({
       query: (userId) => ({
         url: `/api/v1/goals/userGoals/${userId}`,
         method: 'GET',

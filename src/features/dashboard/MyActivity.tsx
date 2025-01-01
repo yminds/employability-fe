@@ -1,5 +1,5 @@
-import React from "react";
-import { useGetUserSkillsSummaryQuery } from "@/api/skillsApiSlice";
+import React, { useEffect } from "react";
+import { useGetUserSkillsSummaryMutation } from '@/api/skillsApiSlice';
 import CircularProgress from "@/components/ui/circular-progress-bar";
 import logo from '@/assets/skills/e-Logo.svg';
 import { useSelector } from "react-redux";
@@ -7,16 +7,24 @@ import { RootState } from '@/store/store';
 
 interface MyActivityProps {
     displayScore: boolean;
+    goalId : string
 }
 
-const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore }) => {
+const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
     const user = useSelector((state: RootState) => state.auth.user);
     const user_id = user ? user._id : "";
     
-    const { data: skillsSummaryData } = useGetUserSkillsSummaryQuery(user_id) || {};
+    const [getUserSkillsSummary, { data: skillsSummaryData, error, isLoading }] = useGetUserSkillsSummaryMutation();
+
     const totalSkills = skillsSummaryData?.data?.totalSkills || 0;
     const totalVerifiedSkills = skillsSummaryData?.data?.totalVerifiedSkills || 0;
 
+    // Fetch data when component mounts or selectedGoalId changes
+    useEffect(() => {
+      if (user_id && goalId) {
+        getUserSkillsSummary({ userId: user_id, goalId }); // Call the mutation with parameters
+      }
+    }, [user_id, goalId, getUserSkillsSummary]);
     const averageVerifiedRating = 50;
 
     return <>

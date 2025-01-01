@@ -1,6 +1,7 @@
 import React from "react"
 import { useState } from "react";
 
+import brandLogo from '../../../public/logo.svg';
 interface JobsHeaderProps {
     test:string;
     hello:number;
@@ -10,6 +11,8 @@ interface JobsHeaderProps {
 const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
     
     const [selectedCategory,setselectedCategory] = useState('All');
+    const [filters,setFilters] = useState({locations:['Mumbai']});
+
 
 
 
@@ -25,35 +28,56 @@ const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
                 <div className="w-[390px] text-black text-xl font-medium font-['Ubuntu'] leading-relaxed"><p></p>Jobs</div>
             </section>
         
-            <section id="search and filters " className="flex flex-row gap-4 justify-between items-center ">
+            <section id="search and filters " className="flex flex-row gap-3.5 justify-between items-center ">
                 
-                <div  id='job categories' className="bg-white   p-[5px] rounded-md justify-start items-start gap-2.5 inline-flex">
+                <div  id='job categories' className="bg-white   p-[5px] rounded-md justify-start text-center gap-2.5 inline-flex">
                     <button 
                     onClick={()=>setselectedCategory('All')}
                     className={`py-1.5 px-2 rounded-[3px]  text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight ${selectedCategory=='All'?'bg-[#DBFFEA] text-[#10B754]':''} `}
                     >All</button>
                     <button 
                     onClick={()=>setselectedCategory('Suggested')}
-                    className={`py-1.5 px-2 rounded-[3px] text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight ${selectedCategory=='Suggested'?'bg-[#DBFFEA] text-[#10B754]':''}`}>Suggested</button>
+                    className={`py-1.5 px-2 rounded-[3px] text-base font-normal font-['SF Pro Display']  leading-normal tracking-tight ${selectedCategory=='Suggested'?'bg-[#DBFFEA] text-[#10B754]':''}`}>Suggested</button>
                     <button 
                     onClick={()=>setselectedCategory('Active application')}
                     className={`py-1.5 px-2 rounded-[3px] text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight ${selectedCategory=='Active application'?'bg-[#DBFFEA] text-[#10B754]':''}`}>Active applications</button>
 
                 </div>
 
-                <div id='search bar and filters ' className="flex flex-row gap-4">
+                <div id='search bar and filters ' className="flex flex-row gap-3.5  item-center">
 
-                    <div id='searchbar' className="flex flex-row gap-4 items-center">
-                        <img src='x'></img>
-                        <input type="text" placeholder="Search" className=" rounded-[6px] font-['Ubuntu'] text-base text-normal leading-normal tracking-tight text-[#67696b]  bg-white p-5" />
-                    
+                    <div id='searchbar' className="flex flex-row p-[5px]  rounded-[6px] items-center bg-white">
+                        <div className="py-1.5 px-3 flex items-center justify-center">
+                            <img src={brandLogo} className="w-4 h-4 "></img>
+                        </div>
+                        <div className="py-1.5 pr-3 ">
+                        <input type="text" placeholder="Search" className=" text-[#67696b] text-base font-normal font-['SF Pro Display'] w-20 leading-normal tracking-tight focus:outline-none focus:w-28 " />
+                        </div>
                     </div>
-                
+
+                    <div id='filters' className="flex flex-row p-2.5 rounded-[6px] items-center text-center bg-white">
+                        <img src={brandLogo} className="w-4 h-4 my-1.5 mx-3 "></img>
+                        <div className=" my-1.6 mr-12 text-[#67696b] text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight"> Filters</div>
+                    </div>
                 </div>
-
-
-
             </section>
+
+            <section id='applied filters' className="flex flex-row gap-3.5 items-center">
+                    
+                    <p>Applied filters</p>
+                    {filters.locations &&
+                    <div id='filter categories'>
+                        <div id='location' className="flex flex-row bg-white rounded"> 
+                            <img src={brandLogo} className="w-4 h-4 my-1.5 mx-3 "></img>
+                            <p>{filters.locations.join(',')}</p>
+                        </div>
+                    </div> 
+                    }
+
+
+                </section>
+
+
         </div>
 
         

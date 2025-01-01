@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import SkillCard from "@/components/cards/skills/skillsCard";
-import { useGetUserSkillsQuery } from "@/api/skillsApiSlice";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import SkillCard from '@/components/cards/skills/skillsCard';
+import { useGetUserSkillsMutation } from '@/api/skillsApiSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
+import { useNavigate } from 'react-router-dom';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 interface SkillPoolId {
   _id: string;
@@ -18,28 +20,35 @@ interface Skill {
   self_rating: number | null;
 }
 
-interface SkillsData {
-  mandatory: Skill[];
-  optional: Skill[];
-  all: Skill[];
-}
-
 interface SkillListProps {
   isDashboard: boolean;
+  goalId: string | null;
 }
 
 type SkillCategory = "mandatory" | "optional" | "all";
 
-const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
+const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
-  const {
-    data: skillsData,
-    error,
-    isLoading,
-  } = useGetUserSkillsQuery(userId ?? "");
-  const [selectedCategory, setSelectedCategory] =
-    useState<SkillCategory>("mandatory");
+
+  const [getUserSkills, { data: skillsData, isLoading, isError }] =
+    useGetUserSkillsMutation();
+
+  const [selectedCategory, setSelectedCategory] = useState<SkillCategory>('mandatory');
+
+  useEffect(() => {
+    if (userId && goalId) {
+      fetchSkills(userId, goalId);
+    }
+  }, [userId, goalId]);
+
+  const fetchSkills = async (userId: string, goalId: string) => {
+    try {
+      await getUserSkills({ userId, goalId }).unwrap();
+    } catch (err) {
+      console.error("Error fetching skills:", err);
+    }
+  };
 
   const handleLinkClick = (route: string) => {
     navigate(route);
@@ -49,13 +58,37 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
     setSelectedCategory(category);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading skills. Please try again later.</div>;
-  }
+  const renderLoadingSkeleton = () => (
+    <div>
+      <div className="flex items-center justify-between w-full bg-white p-4 rounded-md  border-gray-200">
+        {/* Icon Skeleton */}
+        <div className="flex items-center">
+          <Skeleton circle={true} height={40} width={40} className="mr-4" />
+          <div>
+            {/* Skill Name Skeleton */}
+            <Skeleton height={16} width={100} className="mb-2" />
+            {/* Self-Rating Skeleton */}
+            <Skeleton height={12} width={80} />
+          </div>
+        </div>
+        <div>
+          {/* Status Skeleton */}
+          <Skeleton height={16} width={120} />
+        </div>
+        {/* Status and Buttons Skeleton */}
+        <div className="flex items-center gap-4">
+          {/* Buttons Skeleton */}
+          <div className="flex gap-2">
+            <Skeleton height={30} width={100} />
+            <Skeleton height={30} width={100} />
+          </div>
+        </div>
+      </div>
+      <div className='w-full flex justify-center '>
+        <Skeleton height={1} width={720} />
+      </div>
+    </div>
+  );
 
   const renderSkillChips = () => {
     if (isDashboard) return null;
@@ -132,19 +165,23 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
 
     switch (selectedCategory) {
       case "mandatory":
-        return skillsData.data.mandatory;
+        return skillsData.data?.mandatory;
       case "optional":
-        return skillsData.data.optional;
+        return skillsData.data?.optional;
       case "all":
-        return skillsData.data.all;
+        return skillsData.data?.all;
       default:
-        return skillsData.data.all;
+        return skillsData.data?.all;
     }
   };
 
+  if (isError) {
+    return <div className="text-red-500 text-center py-4">Error loading skills. Please try again later.</div>;
+  }
+
   return (
     <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
-      <div className="w-full h-full bg-white flex flex-col rounded-t-[8px] px-4">
+      <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
         {isDashboard ? (
           <div className="flex justify-between items-center mb-5">
             <h2 className="text-gray-900 text-base font-medium leading-5">
@@ -160,7 +197,16 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard }) => {
         ) : null}
 
         {renderSkillChips()}
-        {skillsData?.data && renderSkills(getSelectedSkills())}
+
+        {isLoading ? 
+        (
+          Array.from({ length: 3 }).map((_, index) => (
+            <div key={index}>{renderLoadingSkeleton()}</div>
+          ))
+        ): (
+          renderSkills(getSelectedSkills())
+        )
+        }
       </div>
     </section>
   );
