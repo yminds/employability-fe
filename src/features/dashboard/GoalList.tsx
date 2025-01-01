@@ -37,7 +37,7 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
     const [hoveredCard, setHoveredCard] = useState(null); // Track the hovered card by ID
 
     return (
-        <div>
+        <>
             {isDialogOpen && selectedGoal && (
                 <PredefinedGoalDialog
                     isOpen={isDialogOpen}
@@ -48,7 +48,7 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
             )}
 
             {/* Grid displaying the list of goals */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-6 w-full">
                 {/* Loading and Error States */}
                 {isLoading && <p>Loading trending goals, please wait...</p>}
                 {error && <p>Oops! Something went wrong while loading goals.</p>}
@@ -63,7 +63,7 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
                         onClick={() => handleGoalClick(goal)} // Handle card click
                     >
                         {/* Default Block */}
-                        <div className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
+                        <div className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
                         >
                             {/* Add an Image or Placeholder */}
                             <img
@@ -72,7 +72,7 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
                                 className="rounded-tl-[9px] rounded-tr-[9px] w-full"
                             />
 
-                            <div className="flex flex-col items-start gap-6 p-4 pt-4 pb-4 pl-3 self-stretch">
+                            <div className="flex flex-col gap-6 p-4 pt-4 pb-4 pl-3 self-stretch">
                                 <h3 className="text-[#414447] text-[20px] font-medium leading-[24px] tracking-[0.3px]">{goal.title}</h3>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">₹6L - ₹24L</div>
@@ -84,7 +84,10 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
                         </div>
 
                         {/* Hovered Block */}
-                        <div className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-opacity duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${hoveredCard === goal._id ? "opacity-100" : "opacity-0"}`}
+                        <div
+                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${
+                                hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                            }`}
                         >
                             <h3 className="text-[#414447] leading-[24px] tracking-[0.3px] mb-4">{goal.title}</h3>
                             <div className="grid grid-cols-2 gap-2">
@@ -94,7 +97,7 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
                                 <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: Easy</div>
                             </div>
                             <div className="mt-10">
-                                <button className="py-2 text-sm w-[100px] font-medium text-[#001630] rounded-md border border-solid border-[#001630] float-end">
+                                <button className="py-2 text-sm w-[100px] font-medium text-[#001630] rounded-md border border-solid border-[#001630] float-end absolute end-5 bottom-5">
                                     View Goal
                                 </button>
                             </div>
@@ -103,8 +106,7 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
                     </div>
                 ))}
             </div>
-
-        </div>
+        </>
     );
 };
 
