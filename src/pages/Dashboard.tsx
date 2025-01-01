@@ -23,9 +23,9 @@ const Dashboard: React.FC<Props> = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
-  
-  //const { data: goalsData } = "";
-  const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+
+  const { data: goalsData } = "";
+ // const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
 
   const completionPercentage = 50;
@@ -52,7 +52,7 @@ const Dashboard: React.FC<Props> = () => {
                             <p className="text-gray-500 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro">You’re doing great! Keep going and unlock your next milestone.</p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-5 self-stretch">
                           <div className="relative w-full bg-[#DBFFEA] rounded-full h-[6px]">
                             <div className="bg-[#1FD167] h-[6px] rounded-full" style={{ width: `${completionPercentage}%` }}></div>
@@ -64,7 +64,16 @@ const Dashboard: React.FC<Props> = () => {
 
                     {/* Skills */}
                     <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      <SkillList isDashboard={true}/>
+                      <SkillList isDashboard={true} />
+                    </section>
+
+                    {/* Projects */}
+                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                      <div className="p-[42px]">
+                        <h2 className="text-gray-900 text-base font-medium leading-5">
+                          Projects (5)
+                        </h2>
+                      </div>
                     </section>
                   </div>
 
@@ -73,7 +82,7 @@ const Dashboard: React.FC<Props> = () => {
                     <ProfileCompletionCard />
 
                     {/* My Activity Sidebar */}
-                    <MyActivityCard displayScore={true}/>
+                    <MyActivityCard displayScore={true} />
                   </div>
                 </div>
 
@@ -100,14 +109,14 @@ const Dashboard: React.FC<Props> = () => {
 
                           {/* Dialog */}
                           {<Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
-                            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto gap-8">
+                            <DialogContent className="max-w-[1326px] max-h-[90vh] overflow-y-auto rounded-[12px] scrollbar-default">
                               {/* Visually hidden title */}
                               <DialogTitle className="hidden">Set Your Goal</DialogTitle>
 
                               <div className="flex flex-col items-start gap-1 flex-1">
                                 <h2 className="text-[#1A1A1A] text-[24px] font-medium leading-[32px] tracking[-0.24px]">Set Your Goal</h2>
-                                <p className="text-black text-opacity-60 text-base font-normal leading-6 tracking-wide font-sf-pro">Choose your goal and get tailored resources to help you succeed.</p>
                               </div>
+                              <hr className="pt-3" />
                               <SetGoalCard setJourneyDialog={setJourneyDialog} />
                             </DialogContent>
                           </Dialog>}
@@ -140,7 +149,7 @@ const Dashboard: React.FC<Props> = () => {
                     <ProfileCompletionCard />
 
                     {/* My Activity Sidebar */}
-                    <MyActivityCard displayScore={false}/>
+                    <MyActivityCard displayScore={false} />
                   </div>
                 </div>
 

@@ -115,7 +115,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto minimal-scrollbar font-ubuntu">
+            <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto rounded-[12px] scrollbar-default font-ubuntu">
                 <DialogTitle className="hidden">Define Your Custom Goal</DialogTitle>
 
                 <div className="flex items-center justify-center">
