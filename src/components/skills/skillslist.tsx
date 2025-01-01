@@ -24,11 +24,12 @@ interface Skill {
 interface SkillListProps {
   isDashboard: boolean;
   goalId: string | null;
+  isSkillsUpdated?: boolean;
 }
 
 type SkillCategory = 'mandatory' | 'optional' | 'all';
 
-const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
+const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpdated}) => {
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
@@ -55,7 +56,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
     }
   }, [searchQuery, skillsData, selectedCategory]);
 
-  const fetchSkills = async (userId: string, goalId: string) => {
+  const fetchSkills = async (userId: string | undefined, goalId: string|null) => {
     try {
       await getUserSkills({ userId, goalId }).unwrap();
     } catch (err) {
@@ -81,6 +82,12 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
         label: `Added by you`,
       },
     ];
+
+    useEffect(() => {
+      if (isSkillsUpdated) {
+        fetchSkills(userId, goalId);
+      }
+    }, [isSkillsUpdated]);
 
     return (
       <div className="flex gap-x-1 h-[46px] items-center mb-4">
