@@ -38,7 +38,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
 
   const handleAddExperience = () => {
     const newExperience: ExperienceItem = {
-      id: Date.now().toString(),
+      // id: Date.now().toString(),
       jobTitle: "",
       employmentType: "",
       companyName: "",

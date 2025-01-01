@@ -6,25 +6,24 @@ import {
   useAddExperienceMutation,
   useUpdateExperienceMutation,
 } from "@/api/experienceApiSlice";
-
 interface AddEditExperienceModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialExperience: ExperienceItem[];
-  onSave: (experience: ExperienceItem[]) => void;
 }
 
 const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
   isOpen,
   onClose,
   initialExperience,
-  onSave,
 }) => {
   const [experience, setExperience] = useState<ExperienceItem[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [addExperience] = useAddExperienceMutation();
   const [updateExperience] = useUpdateExperienceMutation();
   const user = useSelector((state: any) => state.auth.user);
+
+  console.log(initialExperience);
 
   useEffect(() => {
     if (isOpen) {
@@ -114,7 +113,6 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
       }
 
       // Call onSave with the updated experiences
-      onSave(experience);
       onClose();
     } catch (error) {
       console.error("Failed to save experiences:", error);
