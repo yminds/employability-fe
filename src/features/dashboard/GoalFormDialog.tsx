@@ -30,7 +30,7 @@ interface GoalFormDialogProps {
 }
 
 const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-     const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
+    const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
     const [techStack, setTechStack] = useState(""); // Tech stack search term
@@ -185,7 +185,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                     skills.data.map((skill: any) => (
                                                         <div
                                                             key={skill._id}
-                                                             className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer flex gap-2 leading-5"
+                                                            className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer flex gap-2 leading-5"
                                                             onClick={() => handleSkillSelect(skill._id)} // Select the skill
                                                         >
                                                             {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}

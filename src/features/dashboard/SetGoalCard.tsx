@@ -63,7 +63,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
 
     const [salaryRange, setSalaryRange] = useState([0, 50]);
 
-    const handleMinChange = (e) => {
+    const handleMinChange = (e: { target: { value: any; }; }) => {
         const minValue = Math.min(Number(e.target.value), salaryRange[1]);
         setSalaryRange([minValue, salaryRange[1]]);
     };
