@@ -6,6 +6,7 @@ import { RootState } from '@/store/store';
 import { useNavigate } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import search from '@/assets/skills/search.svg';
 
 interface SkillPoolId {
   _id: string;
@@ -25,7 +26,7 @@ interface SkillListProps {
   goalId: string | null;
 }
 
-type SkillCategory = "mandatory" | "optional" | "all";
+type SkillCategory = 'mandatory' | 'optional' | 'all';
 
 const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
   const navigate = useNavigate();
@@ -34,7 +35,9 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
   const [getUserSkills, { data: skillsData, isLoading, isError }] =
     useGetUserSkillsMutation();
 
-  const [selectedCategory, setSelectedCategory] = useState<SkillCategory>('mandatory');
+  const [selectedCategory, setSelectedCategory] = useState<SkillCategory>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredSkills, setFilteredSkills] = useState<Skill[]>([]);
 
   useEffect(() => {
     if (userId && goalId) {
@@ -42,20 +45,75 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
     }
   }, [userId, goalId]);
 
+  useEffect(() => {
+    if (skillsData?.data) {
+      const selectedSkills = getSelectedSkills();
+      const filtered = selectedSkills.filter((skill) =>
+        skill.skill_pool_id.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredSkills(filtered);
+    }
+  }, [searchQuery, skillsData, selectedCategory]);
+
   const fetchSkills = async (userId: string, goalId: string) => {
     try {
       await getUserSkills({ userId, goalId }).unwrap();
     } catch (err) {
-      console.error("Error fetching skills:", err);
+      console.error('Error fetching skills:', err);
     }
-  };
-
-  const handleLinkClick = (route: string) => {
-    navigate(route);
   };
 
   const handleCategorySelect = (category: SkillCategory) => {
     setSelectedCategory(category);
+  };
+
+  const renderSkillChips = () => {
+    if (isDashboard) return null;
+
+    const categories = [
+      { id: 'all', label: `All` },
+      {
+        id: 'mandatory',
+        label: `Mandatory`,
+      },
+      {
+        id: 'optional',
+        label: `Added by you`,
+      },
+    ];
+
+    return (
+      <div className="flex gap-x-1 h-[46px] items-center mb-4">
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => handleCategorySelect(category.id as SkillCategory)}
+            className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all
+              ${
+                selectedCategory === category.id
+                  ? 'bg-[#001630] text-white hover:bg-[#062549]'
+                  : 'text-gray-600'
+              }`}
+          >
+            {category.label}
+          </button>
+        ))}
+        <div className="flex items-center ml-auto">
+          <div className="relative w-64">
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border border-[#D6D7D9] rounded-[6px] px-4 py-2 pl-10 text-sm w-full focus:outline-none "
+            />
+            <div className="absolute inset-y-0 left-3 flex items-center">
+              <img src={search} alt="Search Icon" className="w-4 h-4 text-gray-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderLoadingSkeleton = () => (
@@ -84,46 +142,11 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
           </div>
         </div>
       </div>
-      <div className='w-full flex justify-center '>
+      <div className="w-full flex justify-center ">
         <Skeleton height={1} width={720} />
       </div>
     </div>
   );
-
-  const renderSkillChips = () => {
-    if (isDashboard) return null;
-
-    const categories = [
-      {
-        id: "mandatory",
-        label: `Mandatory (${skillsData?.data?.mandatory.length || 0})`,
-      },
-      {
-        id: "optional",
-        label: `Optional (${skillsData?.data?.optional.length || 0})`,
-      },
-      { id: "all", label: `All (${skillsData?.data?.all.length || 0})` },
-    ];
-
-    return (
-      <div className="flex gap-4 mb-6">
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            onClick={() => handleCategorySelect(category.id as SkillCategory)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all
-              ${
-                selectedCategory === category.id
-                  ? "bg-[#001630] text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-          >
-            {category.label}
-          </button>
-        ))}
-      </div>
-    );
-  };
 
   const renderSkills = (skills: Skill[]) => {
     const displaySkills = isDashboard ? skills.slice(0, 5) : skills;
@@ -140,7 +163,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
               verified_rating={skill.verified_rating}
               selfRating={skill.self_rating ?? 0}
               initialStatus={
-                skill.verified_rating > 0 ? "Verified" : "Unverified"
+                skill.verified_rating > 0 ? 'Verified' : 'Unverified'
               }
             />
             {index < displaySkills.length - 1 && (
@@ -151,7 +174,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
       </div>
     ) : (
       <div className="text-gray-500 text-center py-4">
-        No skills found in this category
+        No skills found
       </div>
     );
   };
@@ -164,11 +187,11 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
     }
 
     switch (selectedCategory) {
-      case "mandatory":
+      case 'mandatory':
         return skillsData.data?.mandatory;
-      case "optional":
+      case 'optional':
         return skillsData.data?.optional;
-      case "all":
+      case 'all':
         return skillsData.data?.all;
       default:
         return skillsData.data?.all;
@@ -176,7 +199,11 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
   };
 
   if (isError) {
-    return <div className="text-red-500 text-center py-4">Error loading skills. Please try again later.</div>;
+    return (
+      <div className="text-red-500 text-center py-4">
+        Error loading skills. Please try again later.
+      </div>
+    );
   }
 
   return (
@@ -189,7 +216,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
             </h2>
             <button
               className="px-4 py-0 text-sm font-medium rounded-md text-[#001630] underline"
-              onClick={() => handleLinkClick("/skills")}
+              onClick={() => navigate('/skills')}
             >
               View All
             </button>
@@ -198,15 +225,11 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId }) => {
 
         {renderSkillChips()}
 
-        {isLoading ? 
-        (
-          Array.from({ length: 3 }).map((_, index) => (
-            <div key={index}>{renderLoadingSkeleton()}</div>
-          ))
-        ): (
-          renderSkills(getSelectedSkills())
-        )
-        }
+        {isLoading
+          ? Array.from({ length: 3 }).map((_, index) => (
+              <div key={index}>{renderLoadingSkeleton()}</div>
+            ))
+          : renderSkills(filteredSkills)}
       </div>
     </section>
   );

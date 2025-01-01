@@ -18,12 +18,18 @@ interface Skill {
 
 interface EmployabilityScoreProps {
   goalId: string;
+  goalName: string; 
 }
 
-const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId }) => {
+const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalName}) => {
+  console.log(goalName);
+  
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(goalId);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
-
+  const userName = useSelector((state: RootState) => state.auth.user?.name);
+  const user = useSelector((state: any) => state.auth.user);
+  console.log(user);
+  
   const [getUserSkills, { data: skillsData, isLoading, isError, error }] =
     useGetUserSkillsMutation();
 
@@ -55,7 +61,17 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId }) => {
     skillsData && skillsData?.data?.all.length > 0 ? totalVerifiedRating / skillsData?.data?.all.length : 0;
 
   return (
-    <div className="bg-white w-[100%] rounded-lg mt-[48px] p-[42px]">
+    <div className="bg-white flex flex-col w-[100%] rounded-lg mt-[48px] px-[42px]  gap-2 py-[32px]">
+      <div className="flex items-center gap-2">
+        <div>
+          <img className="w-[50px] h-[50px] rounded-full" src={user?.profile_image} alt="user" />
+        </div>
+        <div className='flex flex-col items-start'>
+          <p className='text-[#414447] font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.2px]'>{userName}</p>
+          <p className='text-[#909091]0 text-[14px] font-medium leading-[24px] tracking-[-0.2px]'>{goalName}</p>
+        </div>
+      </div>
+
       {/* Employability Score Section */}
       <div className="p-4 w-[100%] h-[92px] bg-green-50 rounded-lg flex items-center space-x-4">
         <div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">

@@ -52,7 +52,10 @@ const SkillsContainer: React.FC = () => {
         </div>
         {/* Right Section */}
         <div className="flex-[3] w-full space-y-4">
-          <EmployabilityScore goalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""} />
+          <EmployabilityScore 
+            goalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""}
+            goalName={goalData?.data.find((goal) => goal._id === selectedGoalId)?.name || ""}
+          />
           <SkillSummary
             isSkillsUpdated={isUpdated}
             selectedGoalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""}
