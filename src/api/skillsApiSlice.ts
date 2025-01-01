@@ -19,7 +19,7 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
         ];
       },
       { userId: any; goalId: any }
-    >({
+      >({
       query: ({ userId, goalId }) => ({
         url: `/api/v1/skills/userSkills/user/${userId}`, // Adjusted the endpoint to remove userId from the URL
         method: 'POST',

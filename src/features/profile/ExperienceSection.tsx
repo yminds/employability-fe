@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, CloudCog } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { ExperienceItem } from "../profile/types"; // Adjust your import path as needed
 import type { ExperienceProps } from "../profile/types";
@@ -11,58 +11,68 @@ export default function ExperienceSection({
   experiences, // Possibly passed from parent
 }: ExperienceProps) {
   const user = useSelector((state: any) => state.auth.user);
-  const [experience, setExperience] = useState<ExperienceProps[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExperince, setEditingExperince] =
     useState<ExperienceItem | null>(null);
-  // We’ll store the final, mapped experiences in local state:
   const [mappedExperiences, setMappedExperiences] = useState<ExperienceItem[]>(
     []
   );
 
-  // If you need the user’s ID from Redux:
+  // console.log(experiences);
 
   // Fetch experiences from the server
   const { data, error, isLoading } = useGetExperiencesByUserIdQuery(user?._id);
+  console.log(data);
 
   // Whenever we get new data from the server, map it to our ExperienceItem shape
   useEffect(() => {
+    console.log("Raw data from API", data);
+
     if (data && data.data) {
       const mappedData: ExperienceItem[] = data.data.map((exp: any) => {
+        // Function to format date to "Month Year"
+        const formatDate = (dateString: string | null) => {
+          if (!dateString) return null;
+          const date = new Date(dateString);
+          return date.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+          });
+        };
+
         return {
-          // Convert backend fields to your frontend fields
           id: exp._id,
           jobTitle: exp.title,
           employmentType: exp.employment_type,
           companyName: exp.company,
-          companyLogo: "", // or a default URL if you have logos somewhere
+          companyLogo: "",
           location: exp.location ?? "",
-          startDate: exp.start_date ?? "",
-          endDate: exp.end_date || null,
+          startDate: formatDate(exp.start_date) ?? "",
+          endDate: exp.currently_working ? null : formatDate(exp.end_date),
           currentlyWorking: exp.currently_working,
-          // Hard-code or compute the following if needed:
-          jobType: exp.employment_type, // sometimes you might store this separately
-          isVerified: false, // no field in backend? default to false
-          duration: "", // can be computed if you want
+          jobType: exp.employment_type,
+          isVerified: false,
+          duration: "",
           currentCTC: "",
           expectedCTC: "",
-          description: "", // fill in if your API has a `description` field
+          description: "",
         };
       });
 
+      console.log("mapped data", mappedData);
       setMappedExperiences(mappedData);
     }
     // If the parent passed in "experiences" prop, you might want to default to that
-    else if (experiences && experiences.length > 0) {
-      setMappedExperiences(experiences as ExperienceItem[]);
-    }
+    // else if (experiences && experiences.length > 0) {
+    //   setMappedExperiences(experiences as ExperienceItem[]);
+    // }
   }, [data, experiences]);
 
   // Handler when the modal “Save” is clicked
-  const handleSave = (updated: ExperienceItem[]) => {
-    setMappedExperiences(updated);
-  };
+  // const handleSave = (updated: ExperienceItem[]) => {
+  //   setMappedExperiences(updated);
+  // };
 
   // Toggling how many items we show
   const toggleExpand = () => {
@@ -148,7 +158,6 @@ export default function ExperienceSection({
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           initialExperience={mappedExperiences} // Pass the mapped data to the modal
-          onSave={handleSave}
         />
       </CardHeader>
 
