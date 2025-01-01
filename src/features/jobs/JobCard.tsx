@@ -82,9 +82,9 @@ const JobCard: React.FC<JobCardProps> = ({ job ,preferedLocations,userSkills,use
         
        
        {/* // jobs and skill match section */}
-      <div className="h-[46px] px-6 py-2.5 bg-[#ddf8e8]/50 rounded-[9px] justify-start items-center  gap-2.5 inline-flex">
+      <div className="h-[46px] px-6 py-5 bg-[#ddf8e8]/50 rounded-[9px] justify-start items-center  gap-2.5 inline-flex">
         <img className="w-[14.30px] h-[14.60px] " src={brandLogo} />
-        <div className='flex flex-row gap-[3px]'>
+        <div className='inline-block '>
           <span className="text-[#67696b] text-sm font-normal font-['SF Pro Display'] leading-normal tracking-tight">You have</span>
           <span className={`text-sm font-medium font-['SF Pro Display'] leading-normal tracking-tight ${matchPercentage>=minimumMatchPercentage ?'text-[#03963e]':'text-[#CF0C19]' } `}> {matchedSkills}/{requiredSkills} skills</span>
           <span className="text-[#67696b] text-sm font-normal font-['SF Pro Display'] leading-normal tracking-tight">required for this job.</span>
