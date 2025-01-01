@@ -22,14 +22,10 @@ interface EmployabilityScoreProps {
 }
 
 const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalName}) => {
-  console.log(goalName);
-  
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(goalId);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
   const userName = useSelector((state: RootState) => state.auth.user?.name);
   const user = useSelector((state: any) => state.auth.user);
-  console.log(user);
-  
   const [getUserSkills, { data: skillsData, isLoading, isError, error }] =
     useGetUserSkillsMutation();
 
