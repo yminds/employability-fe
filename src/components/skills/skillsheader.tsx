@@ -3,33 +3,17 @@ import { useNavigate } from "react-router-dom";
 import arrow from "@/assets/skills/arrow.svg";
 import AddSkillsModal from "@/components/skills/addskills";
 
-interface Skill {
-  _id: string;
-  skill_pool_id: {
-    _id: string;
-    name: string;
-    icon: string;
-  };
-  verified_rating: number;
-  self_rating: number;
-}
-
-interface Goal {
-  _id: string;
-  name: string;
-  description: string;
-  user_id: string;
-  skill_poll_id: string[];
-}
-
 interface SkillsHeaderProps {
-  userId: string;
+  userId: string | undefined;
   goals: {
-    data: Goal[];
-  };
-  skills: {
-    data: Skill[];
-  };
+    message: string;
+    data: [
+      {
+        _id: string;
+        name: string;
+      }
+    ];
+  } | undefined;
   selectedGoalName: string; // New prop to pass the selected goal name
   onSkillsStatusChange: (isUpdated: boolean) => void; // Callback to notify parent of update status
   onGoalChange: (goalId: string) => void; // Callback to notify parent of goal change
@@ -38,7 +22,6 @@ interface SkillsHeaderProps {
 const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   userId,
   goals,
-  skills: selectedSkills,
   selectedGoalName, // Receive the selected goal name
   onSkillsStatusChange,
   onGoalChange,
@@ -46,6 +29,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [skillsUpdated, setSkillsUpdated] = useState(false); // State to track updates
   const [selectedGoal, setSelectedGoal] = useState(selectedGoalName || ""); // Initialize with selectedGoalName
+  const [selectedGoalId, setSelectedGoalId] = useState<string | undefined>("");
 
   const navigate = useNavigate();
 
@@ -62,25 +46,32 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   };
 
   const handleSkillsUpdate = (isUpdated: boolean) => {
-    console.log(`Skills update status: ${isUpdated}`);
     setSkillsUpdated(isUpdated); // Set the local update flag
     onSkillsStatusChange(isUpdated); // Notify the parent of the update status
   };
 
   useEffect(() => {
     if (skillsUpdated) {
-      console.log("Perform actions like fetching updated data here.");
       setSkillsUpdated(false); // Reset the flag after handling
     }
   }, [skillsUpdated]);
 
   const handleGoalChange = (goalName: string) => {
     setSelectedGoal(goalName); // Update the selected goal name
-    const selectedGoalId = goals?.data.find((goal) => goal.name === goalName)?._id;
-    if (selectedGoalId) {
-      onGoalChange(selectedGoalId); // Notify parent with the selected goal ID
+    const foundGoal = goals?.data.find((goal) => goal.name === goalName);
+    if (foundGoal) {
+      setSelectedGoalId(foundGoal._id); // Update the goalId state
+      onGoalChange(foundGoal._id); // Notify parent with the selected goal ID
     }
   };
+
+  // Set initial selected goalId when the component mounts
+  useEffect(() => {
+    const initialGoal = goals?.data.find((goal) => goal.name === selectedGoalName);
+    if (initialGoal) {
+      setSelectedGoalId(initialGoal._id);
+    }
+  }, [goals, selectedGoalName]);
 
   return (
     <>
@@ -124,9 +115,9 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
       </div>
 
       {/* AddSkillsModal */}
-      {isModalOpen && (
+      {isModalOpen && selectedGoalId && (
         <AddSkillsModal
-          selectedSkills={selectedSkills.data.all}
+          goalId={selectedGoalId} // Pass the goalId to the modal
           onClose={handleCloseModal}
           userId={userId}
           onSkillsUpdate={handleSkillsUpdate} // Pass the update handler

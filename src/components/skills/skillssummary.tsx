@@ -6,10 +6,12 @@ import weakIcon from "@/assets/skills/weak.svg";
 import { useGetUserSkillsSummaryMutation } from '@/api/skillsApiSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from "@/store/store";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 interface SkillSummaryProps {
   isSkillsUpdated: boolean; // Flag to indicate if skills were updated
-  selectedGoalId: string; 
+  selectedGoalId: string;
 }
 
 const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGoalId }) => {
@@ -33,9 +35,28 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
     }
   }, [isSkillsUpdated, userId, selectedGoalId, getUserSkillsSummary]);
 
+  const renderLoadingSkeleton = () => (
+    <div className="flex flex-col justify-around bg-white rounded-xl w-full h-[326px] p-10">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="flex items-start gap-4 mb-4">
+          <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
+            <Skeleton circle={true} width={28} height={28} className=" mb-1" />
+          </div>
+          <div className="flex flex-col justify-center">
+            <Skeleton width={140} height={16} className="mb-1" />
+            <Skeleton width={100} height={16} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  
+  if (isLoading) {
+    return renderLoadingSkeleton();
+  }
 
   if (error || !skillsSummaryData?.data) {
-    return <div>Error loading skills summary. Please try again later.</div>;
+    return 
   }
 
   // Extract values from the API response
@@ -51,7 +72,7 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
     <div className="p-10 flex flex-col justify-around bg-white rounded-xl w-full h-[326px]">
       {/* Skills Verified Section */}
       <div className="flex items-start gap-2">
-        <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border space-x-2 mb-4">
+        <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
           <img src={verifiedIcon} alt="Verified icon" className="w-[24px] h-[24px]" />
         </div>
         <div className="flex flex-col">
@@ -69,7 +90,7 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
       </div>
       {/* Skill Levels */}
       <div className="flex items-start gap-2">
-        <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border space-x-2 mb-4">
+        <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
           <img src={excellentIcon} alt="Excellent icon" className="w-[24px] h-[24px]" />
         </div>
         <div className="flex flex-col">
@@ -86,7 +107,7 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
         </div>
       </div>
       <div className="flex items-start gap-2">
-        <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border space-x-2 mb-4">
+        <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
           <img src={strongIcon} alt="Strong icon" className="w-[24px] h-[24px]" />
         </div>
         <div className="flex flex-col">
@@ -103,7 +124,7 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
         </div>
       </div>
       <div className="flex items-start gap-2">
-        <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border space-x-2 mb-4">
+        <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
           <img src={weakIcon} alt="Weak icon" className="w-[24px] h-[24px]" />
         </div>
         <div className="flex flex-col">
