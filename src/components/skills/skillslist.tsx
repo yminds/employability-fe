@@ -159,7 +159,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpda
     const displaySkills = isDashboard ? skills.slice(0, 5) : skills;
 
     return displaySkills.length > 0 ? (
-      <div>
+      <div className="max-h-[50vh] overflow-y-auto scroll-smooth pr-2 snap-y snap-proximity minimal-scrollbar">
         {displaySkills.map((skill: Skill, index: number) => (
           <React.Fragment key={skill._id}>
             <SkillCard

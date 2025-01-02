@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import arrowIcon from "@/assets/components/arrow_drop_down.svg";
 
 interface SkillsHeaderProps {
   userId: string | undefined;
@@ -113,9 +114,9 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
                 >
                   <span className="font-medium">{selectedGoal}</span>
                   {dropdownOpen ? (
-                    <ChevronUp className="ml-2 h-4 w-4 text-gray-500" />
+                    <img className="ml-2 h-8 w-8 text-[#1C1B1F] rotate-180 duration-75"  src={arrowIcon} alt="arrow img" />
                   ) : (
-                    <ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
+                    <img className="ml-2 h-8 w-8 text-[#1C1B1F] "  src={arrowIcon} alt="arrow img" />
                   )}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-60">
