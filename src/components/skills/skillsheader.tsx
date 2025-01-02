@@ -2,6 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import arrow from "@/assets/skills/arrow.svg";
 import AddSkillsModal from "@/components/skills/addskills";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface SkillsHeaderProps {
   userId: string | undefined;
@@ -22,14 +29,15 @@ interface SkillsHeaderProps {
 const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   userId,
   goals,
-  selectedGoalName, // Receive the selected goal name
+  selectedGoalName,
   onSkillsStatusChange,
   onGoalChange,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [skillsUpdated, setSkillsUpdated] = useState(false); // State to track updates
-  const [selectedGoal, setSelectedGoal] = useState(selectedGoalName || ""); // Initialize with selectedGoalName
+  const [skillsUpdated, setSkillsUpdated] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null); // Start as null to handle loading
   const [selectedGoalId, setSelectedGoalId] = useState<string | undefined>("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -46,30 +54,35 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   };
 
   const handleSkillsUpdate = (isUpdated: boolean) => {
-    setSkillsUpdated(isUpdated); // Set the local update flag
-    onSkillsStatusChange(isUpdated); // Notify the parent of the update status
+    setSkillsUpdated(isUpdated);
+    onSkillsStatusChange(isUpdated);
   };
 
   useEffect(() => {
     if (skillsUpdated) {
-      setSkillsUpdated(false); // Reset the flag after handling
+      setSkillsUpdated(false);
     }
   }, [skillsUpdated]);
 
   const handleGoalChange = (goalName: string) => {
-    setSelectedGoal(goalName); // Update the selected goal name
+    setSelectedGoal(goalName);
     const foundGoal = goals?.data.find((goal) => goal.name === goalName);
     if (foundGoal) {
-      setSelectedGoalId(foundGoal._id); // Update the goalId state
-      onGoalChange(foundGoal._id); // Notify parent with the selected goal ID
+      setSelectedGoalId(foundGoal._id);
+      onGoalChange(foundGoal._id);
     }
   };
 
-  // Set initial selected goalId when the component mounts
   useEffect(() => {
-    const initialGoal = goals?.data.find((goal) => goal.name === selectedGoalName);
-    if (initialGoal) {
-      setSelectedGoalId(initialGoal._id);
+    if (goals?.data.length && selectedGoalName) {
+      const initialGoal = goals.data.find((goal) => goal.name === selectedGoalName);
+      if (initialGoal) {
+        setSelectedGoal(initialGoal.name);
+        setSelectedGoalId(initialGoal._id);
+      } else {
+        setSelectedGoal(goals.data[0].name); // Default to the first goal if no match
+        setSelectedGoalId(goals.data[0]._id);
+      }
     }
   }, [goals, selectedGoalName]);
 
@@ -91,23 +104,41 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
         </div>
         <div className="flex justify-between items-center mb-4">
           {/* Goal Section */}
-          <div className="bg-white w-ful h-[46px] rounded-lg flex items-center justify-start px-4">
-            <span>Goal :</span>
-            <select
-              className="text-base font-normal leading-6 tracking-[0.015rem] bg-transparent border-none outline-none"
-              value={selectedGoal} // Bind to the selected goal
-              onChange={(e) => handleGoalChange(e.target.value)}
-            >
-              {goals?.data.map((goal) => (
-                <option key={goal._id} value={goal.name}>
-                  {goal.name}
-                </option>
-              ))}
-            </select>
+          <div className="bg-white h-[46px] rounded-lg flex items-center justify-start px-4 border-gray-300">
+            <span className="text-[#00000066] font-medium mr-2">Goal:</span>
+            {selectedGoal ? (
+              <DropdownMenu onOpenChange={(open) => setDropdownOpen(open)}>
+                <DropdownMenuTrigger
+                  className="flex items-center justify-between text-base font-normal leading-6 tracking-[0.015rem] bg-transparent border-none outline-none cursor-pointer w-50"
+                >
+                  <span className="font-medium">{selectedGoal}</span>
+                  {dropdownOpen ? (
+                    <ChevronUp className="ml-2 h-4 w-4 text-gray-500" />
+                  ) : (
+                    <ChevronDown className="ml-2 h-4 w-4 text-gray-500" />
+                  )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-60">
+                  {goals?.data.map((goal) => (
+                    <DropdownMenuItem
+                      key={goal._id}
+                      onClick={() => handleGoalChange(goal.name)}
+                      className={`${
+                        selectedGoal === goal.name ? "bg-gray-100" : ""
+                      } cursor-pointer hover:bg-[#001630] hover:text-white`}
+                    >
+                      {goal.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <span className="text-gray-500 italic">Loading...</span>
+            )}
           </div>
           <button
             onClick={handleOpenModal}
-            className="px-4 py-2 w-[138px] h-[44px] bg-black text-white rounded-md hover:bg-green-600"
+            className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
           >
             Add Skills
           </button>
@@ -117,10 +148,11 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
       {/* AddSkillsModal */}
       {isModalOpen && selectedGoalId && (
         <AddSkillsModal
-          goalId={selectedGoalId} // Pass the goalId to the modal
+          goalId={selectedGoalId}
           onClose={handleCloseModal}
           userId={userId}
-          onSkillsUpdate={handleSkillsUpdate} // Pass the update handler
+          onSkillsUpdate={handleSkillsUpdate}
+          goals={goals}
         />
       )}
     </>

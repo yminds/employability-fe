@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import ProfileCard from "@/features/dashboard/ProfileCard";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -23,9 +22,10 @@ const Dashboard: React.FC<Props> = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
+  const profile_image = user ? user.profile_image : "";
 
-  //const { data: goalsData } = "";
-  const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  const { data: goalsData } = "";
+  //const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
   const goalId = goalsData?.data?.[0]?._id || "";
 
@@ -150,7 +150,7 @@ const Dashboard: React.FC<Props> = () => {
                     <ProfileCompletionCard />
 
                     {/* My Activity Sidebar */}
-                    <MyActivityCard displayScore={false} />
+                    <MyActivityCard displayScore={false} goalId={goalId} />
                   </div>
                 </div>
 

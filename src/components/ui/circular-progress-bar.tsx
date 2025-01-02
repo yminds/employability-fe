@@ -22,13 +22,15 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
       className="relative flex items-center justify-center"
       style={{ width: size, height: size }}
     >
-
       {/* Progress Circle */}
       <svg
         className="absolute"
         width={size}
         height={size}
-        style={{ transform: 'rotate(-90deg)' }}
+        style={{
+          transform: 'rotate(90deg)', // Start from the bottom
+          transformOrigin: 'center',
+        }}
       >
         <circle
           cx={size / 2}
@@ -39,6 +41,7 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
           fill="none"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
+          strokeLinecap="round" // Rounded edges for the progress
           style={{
             stroke: 'currentColor',
             transition: 'stroke-dashoffset 0.35s',
@@ -48,7 +51,7 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
 
       {/* Conditional Text */}
       {showText && (
-        <span className="absolute text-base font-semibold text-gray-700">
+        <span className="absolute text-base font-semibold">
           {Math.round(progress)}%
         </span>
       )}

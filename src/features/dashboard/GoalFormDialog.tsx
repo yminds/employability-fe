@@ -30,7 +30,7 @@ interface GoalFormDialogProps {
 }
 
 const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
-     const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
+    const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
     const [techStack, setTechStack] = useState(""); // Tech stack search term
@@ -169,8 +169,6 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                             className="w-full flex h-12 p-2 px-4 justify-between items-center self-stretch rounded-lg border border-black border-opacity-10 bg-[#FAFBFE] hover:border-[#1FD167] focus:border-[#1FD167] outline-none pl-12 font-sf-pro"
                                         />
 
-                                        {isLoading && <p>Loading skills...</p>}
-                                        {error && <p className="text-red-500 text-sm">Failed to load skills.</p>}
                                         {/* Show DropdownMenu when techStack is not empty */}
                                         <Popover open={isSkillOpen} onOpenChange={setIsSkillOpen}>
                                             <PopoverTrigger asChild>
@@ -185,7 +183,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                                     skills.data.map((skill: any) => (
                                                         <div
                                                             key={skill._id}
-                                                             className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer flex gap-2 leading-5"
+                                                            className="p-2 hover:bg-gray-100 hover:rounded-sm cursor-pointer flex gap-2 leading-5"
                                                             onClick={() => handleSkillSelect(skill._id)} // Select the skill
                                                         >
                                                             {skill.icon && <img src={skill.icon} alt={skill.name} className="w-5 h-5" />}
