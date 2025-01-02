@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import GoalList from "@/features/dashboard/GoalList";
 import GoalFormDialog from "@/features/dashboard/GoalFormDialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useGetSearchGoalQuery } from "@/api/predefinedGoalsApiSlice";
 
 interface Goal {
     title: string;
@@ -21,6 +22,21 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
         setSelectedGoal(null); // Set the selected goal
         setIsDialogOpen(true); // Open the dialog
     };
+
+    const [searchGoal, setSearchGoal] = useState("");
+    const [callAPI, setCallAPI] = useState(false);
+    const { data: searchGoals } = useGetSearchGoalQuery(searchGoal, {
+        skip: !callAPI,
+    });
+
+    useEffect(() => {
+        if (searchGoal.trim() === "") {
+            setCallAPI(false); // Don't call API for empty search
+        }
+        else {
+            setCallAPI(true); // Call API when there's a valid search term
+        }
+    }, [searchGoal]);
 
     const [selectedLevels, setSelectedLevels] = useState<string[]>(['entry']);
     const handleSelect = (level: string) => {
@@ -75,7 +91,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
 
     return <>
         <div className="grid grid-cols-4 gap-6">
-            <div className="col-span-1 flex flex-col gap-10 shrink-0">
+            <div className="col-span-1 flex flex-col gap-10 shrink-0 max-h-[80vh] overflow-y-auto scrollbar-default">
                 {/* Experience Level */}
                 <div className="flex flex-col items-start w-[280px] gap-5">
                     <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">Experience Level</label>
@@ -163,7 +179,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                         <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">Expected Salary Range</label>
                         <p className="text-[#909091] text-sm font-medium leading-5 tracking-[0.21px]">Choose a range</p>
                     </div>
-                    
+
                     {/* Range Labels */}
                     <div className="flex justify-between w-full text-[#414447] text-[14px] font-medium leading-[21px] tracking-[0.21px]">
                         <span>0 LPA</span>
@@ -457,7 +473,9 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                 </div>
 
             </div>
-            <div className="col-span-3 flex flex-col items-start gap-6 flex-1">
+
+            {/* Goals */}
+            <div className="col-span-3 flex flex-col items-start gap-6 flex-1 max-h-[80vh] overflow-y-auto scrollbar-default">
                 <div className="flex items-center gap-5 self-stretch relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                         <img src="./src/assets/set-goal/mail.svg" alt="Search" />
@@ -466,6 +484,8 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                         type="text"
                         id="tech-stack"
                         placeholder="Search"
+                        value={searchGoal}
+                        onChange={(e) => setSearchGoal(e.target.value)}
                         autoComplete="off"
                         className="flex h-[50px] p-2 px-12 justify-between items-center flex-[1_0_0] rounded-[6px] border border-black/10 bg-[#FAFBFE] focus:outline-none"
                     />
@@ -486,8 +506,8 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                 </div>
 
                 <section className="flex flex-col items-start gap-4 self-stretch">
-                    <h5 className="text-[20px] font-medium leading-[26px] tracking[-0.2px]">All Goals</h5>
-                    <GoalList isLoading={false} error={false} setJourneyDialog={setJourneyDialog} />
+                    {/* <h5 className="text-[20px] font-medium leading-[26px] tracking[-0.2px]">All Goals</h5> */}
+                    <GoalList isLoading={false} error={false} setJourneyDialog={setJourneyDialog} searchGoals={searchGoals} />
                 </section>
             </div>
         </div>

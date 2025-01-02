@@ -110,7 +110,7 @@ const Dashboard: React.FC<Props> = () => {
 
                           {/* Dialog */}
                           {<Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
-                            <DialogContent className="max-w-[1326px] max-h-[90vh] overflow-y-auto rounded-[12px] scrollbar-default">
+                            <DialogContent className="max-w-[1400px] rounded-[12px]">
                               {/* Visually hidden title */}
                               <DialogTitle className="hidden">Set Your Goal</DialogTitle>
 

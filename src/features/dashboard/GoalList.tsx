@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
 import PredefinedGoalDialog from "@/features/dashboard/PredefinedGoalDialog"; // Import GoalFormDialog
 
@@ -21,10 +21,29 @@ interface Props {
     error: boolean;
     data?: GoalsData; // The data could be undefined if the API request hasn't completed yet
     setJourneyDialog: boolean;
+    searchGoals: any[] | undefined;
 }
 
-const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
-    const { data, error, isLoading } = useGetAllPreDefinedGoalsQuery(); // Fetch all predefined goals
+const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals }) => {
+    const { data: predefinedGoals, error, isLoading } = useGetAllPreDefinedGoalsQuery();
+    const [data, setData] = useState<any[]>([]); // State to store the final data
+    const [searchTitle, setSearchTitle] = useState("");
+
+    useEffect(() => {
+        if (searchGoals && searchGoals.data.length > 0) {
+            setData(searchGoals);
+            setSearchTitle(`${searchGoals.data.length} "Stack" results`);
+        }
+        else if (searchGoals && searchGoals.data.length == 0) {
+            setData([]);
+            setSearchTitle("No Goals Found");
+        }
+        else if (predefinedGoals) {
+            setData(predefinedGoals);
+            setSearchTitle("All Goals");
+        }
+    }, [searchGoals, predefinedGoals]);
+
     const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
 
@@ -46,6 +65,17 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
                     setJourneyDialog={setJourneyDialog}
                 />
             )}
+
+            <h5 className="text-[20px] font-medium leading-[26px] tracking[-0.2px]">{searchTitle}</h5>
+
+            <div className="flex flex-start gap-2.5 hidden">
+                <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">
+                    Experience: Entry Level
+                </div>
+                <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">
+                    Salary Range: ₹0L - ₹50L
+                </div>
+            </div>
 
             {/* Grid displaying the list of goals */}
             <div className="grid grid-cols-3 gap-6 w-full">
@@ -85,9 +115,8 @@ const GoalList: React.FC<Props> = (setJourneyDialog: any) => {
 
                         {/* Hovered Block */}
                         <div
-                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${
-                                hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                            }`}
+                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                                }`}
                         >
                             <h3 className="text-[#414447] leading-[24px] tracking-[0.3px] mb-4">{goal.title}</h3>
                             <div className="grid grid-cols-2 gap-2">
