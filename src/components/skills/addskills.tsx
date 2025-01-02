@@ -147,43 +147,49 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     setOpenRatingPopovers((prevState) =>
       prevState.map((open, i) => (i === index ? isOpen : open))
     );
-    console.log("handleRatingPopoverOpenChange", index, isOpen);
   };
 
   const handleGoalChange = (goalId: string) => {
-    console.log("handleGoalChange", goalId);
-
     setSelectedGoalId(goalId);
   };
 
   const [createUserSkills, { isLoading: isSaving }] =
     useCreateUserSkillsMutation();
 
-  const handleSave = async () => {
-    if (!userId || typeof userId !== "string") {
-      console.error("Invalid user ID.");
-      return;
-    }
-
-    const payload = {
-      user_id: user_Id,
-      skills: skills.map((skill) => ({
-        skill_pool_id: skill.skill_Id,
-        self_rating: parseInt(skill.rating.split("/")[0]),
-      })),
-      goal_id: selectedGoalId ?? "",
+    const handleSave = async () => {
+      if (!userId || typeof userId !== "string") {
+        console.error("Invalid user ID.");
+        return;
+      }
+    
+      const payload = {
+        user_id: user_Id,
+        skills: skills.map((skill) => {
+          const existingSkill = userSkillsData?.data?.allUserSkills.find(
+            (userSkill: any) => userSkill.skill_pool_id._id === skill.skill_Id
+          );
+    
+          return {
+            skill_pool_id: skill.skill_Id,
+            self_rating: existingSkill
+              ? existingSkill.self_rating // Use existing self_rating if the skill already exists
+              : parseInt(skill.rating.split("/")[0]), // Otherwise, use the current rating
+          };
+        }),
+        goal_id: selectedGoalId ?? "",
+      };
+      
+      try {
+        const response = await createUserSkills(payload).unwrap();
+        console.log("Skills added successfully:", response);
+        onSkillsUpdate(true);
+        onClose();
+      } catch (error) {
+        console.error("Failed to add skills:", error);
+        onSkillsUpdate(false);
+      }
     };
-
-    try {
-      const response = await createUserSkills(payload).unwrap();
-      console.log("Skills added successfully:", response);
-      onSkillsUpdate(true);
-      onClose();
-    } catch (error) {
-      console.error("Failed to add skills:", error);
-      onSkillsUpdate(false);
-    }
-  };
+    
 
   useEffect(() => {
     setOpenRatingPopovers(skills.map(() => false));
@@ -213,10 +219,10 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
           >
             <PopoverTrigger asChild>
               <Button
-                variant="null"
+                variant="ghost"
                 role="combobox"
                 aria-expanded={isGoalPopoverOpen}
-                className="w-2/6 justify-between"
+                className="w-2/6 justify-between hover:bg-white"
               >
                 {goals?.data.find((goal) => goal._id === selectedGoalId)
                   ?.name || "Select a goal"}
@@ -355,21 +361,26 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium mb-2 block">
-                        Self rating
-                      </label>
+                      <label className="text-sm font-medium mb-2 block">Self rating</label>
                       <Popover
                         open={openRatingPopovers[index]}
-                        onOpenChange={(isOpen) =>
-                          handleRatingPopoverOpenChange(index, isOpen)
-                        }
+                        onOpenChange={(isOpen) => handleRatingPopoverOpenChange(index, isOpen)}
                       >
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
                             className="w-full justify-between"
+                            disabled={userSkillsData?.data?.allUserSkills.some(
+                              (userSkill: any) => userSkill.skill_pool_id._id === skill.skill_Id
+                            )} // Disable if the skill already exists
                           >
-                            {skill.rating || "Select rating..."}
+                            {userSkillsData?.data?.allUserSkills.find(
+                              (userSkill: any) => userSkill.skill_pool_id._id === skill.skill_Id
+                            )?.self_rating
+                              ? `${userSkillsData?.data?.allUserSkills.find(
+                                  (userSkill: any) => userSkill.skill_pool_id._id === skill.skill_Id
+                                ).self_rating}/10`
+                              : skill.rating || "Select rating..."}
                             {openRatingPopovers[index] ? (
                               <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             ) : (
@@ -384,21 +395,18 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                                 <CommandItem
                                   key={rating}
                                   onSelect={() => {
-                                    // Update the rating and close the specific popover
                                     setSkills(
                                       skills.map((s, i) =>
                                         i === index ? { ...s, rating } : s
                                       )
                                     );
-                                    handleRatingPopoverOpenChange(index, false); // Close the specific popover
+                                    handleRatingPopoverOpenChange(index, false);
                                   }}
                                 >
                                   <Check
                                     className={cn(
                                       "mr-2 h-4 w-4",
-                                      skill.rating === rating
-                                        ? "opacity-100"
-                                        : "opacity-0"
+                                      skill.rating === rating ? "opacity-100" : "opacity-0"
                                     )}
                                   />
                                   {rating}

@@ -55,6 +55,7 @@ const SkillsContainer: React.FC = () => {
           <EmployabilityScore 
             goalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""}
             goalName={goalData?.data.find((goal) => goal._id === selectedGoalId)?.name || ""}
+            isSkillsUpdated={isUpdated}
           />
           <SkillSummary
             isSkillsUpdated={isUpdated}
