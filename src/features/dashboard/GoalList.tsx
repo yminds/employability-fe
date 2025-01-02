@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
-import PredefinedGoalDialog from "@/features/dashboard/PredefinedGoalDialog"; // Import GoalFormDialog
+import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
 
 interface Goal {
     title: string;
@@ -22,13 +22,14 @@ interface Props {
     data?: GoalsData; // The data could be undefined if the API request hasn't completed yet
     setJourneyDialog: boolean;
     searchGoals: any[] | undefined;
+    displayTitle: boolean;
 }
 
-const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals }) => {
+const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle }) => {
     const { data: predefinedGoals, error, isLoading } = useGetAllPreDefinedGoalsQuery();
     const [data, setData] = useState<any[]>([]); // State to store the final data
     const [searchTitle, setSearchTitle] = useState("");
-
+    
     useEffect(() => {
         if (searchGoals && searchGoals.data.length > 0) {
             setData(searchGoals);
@@ -66,7 +67,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals }) => {
                 />
             )}
 
-            <h5 className="text-[20px] font-medium leading-[26px] tracking[-0.2px]">{searchTitle}</h5>
+            <h5 className={`text-[20px] font-medium leading-[26px] tracking[-0.2px] ${displayTitle ? "" : "hidden"}`}>{searchTitle}</h5>
 
             <div className="flex flex-start gap-2.5 hidden">
                 <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">

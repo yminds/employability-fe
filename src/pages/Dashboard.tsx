@@ -22,10 +22,9 @@ const Dashboard: React.FC<Props> = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
-  const profile_image = user ? user.profile_image : "";
 
   const { data: goalsData } = "";
-  //const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  // const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
   const goalId = goalsData?.data?.[0]?._id || "";
 
@@ -141,7 +140,7 @@ const Dashboard: React.FC<Props> = () => {
                       <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]">
                         Explore trending goals
                       </h5>
-                      <GoalList isLoading={false} error={false} setJourneyDialog={false} />
+                      <GoalList isLoading={false} error={false} setJourneyDialog={false} searchGoals={undefined} displayTitle={false} />
                     </section>
                   </div>
 
