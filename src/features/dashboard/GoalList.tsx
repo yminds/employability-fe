@@ -68,16 +68,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
             )}
 
             <h5 className={`text-[20px] font-medium leading-[26px] tracking[-0.2px] ${displayTitle ? "" : "hidden"}`}>{searchTitle}</h5>
-
-            <div className="flex flex-start gap-2.5 hidden">
-                <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">
-                    Experience: Entry Level
-                </div>
-                <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">
-                    Salary Range: ₹0L - ₹50L
-                </div>
-            </div>
-
+            
             {/* Grid displaying the list of goals */}
             <div className="grid grid-cols-3 gap-6 w-full">
                 {/* Loading and Error States */}

@@ -54,7 +54,6 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
     };
 
     return <>
-
         {/* Experience Level */}
         <div className="flex flex-col items-start w-[280px] gap-5">
             <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">Experience Level</label>
@@ -434,8 +433,6 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                 </div>
             </div>
         </div>
-
-
     </>
 };
 

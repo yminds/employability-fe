@@ -76,7 +76,16 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                 </div>
 
                 <section className="flex flex-col items-start gap-4 self-stretch">
-                    {/* <h5 className="text-[20px] font-medium leading-[26px] tracking[-0.2px]">All Goals</h5> */}
+
+                    <div className="flex flex-start gap-2.5">
+                        <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">
+                            Experience: Entry Level
+                        </div>
+                        <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">
+                            Salary Range: ₹0L - ₹50L
+                        </div>
+                    </div>
+
                     <GoalList isLoading={false} error={false} setJourneyDialog={setJourneyDialog} searchGoals={searchGoals} displayTitle={true} />
                 </section>
             </div>
