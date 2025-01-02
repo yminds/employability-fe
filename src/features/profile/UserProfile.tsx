@@ -82,6 +82,9 @@ const UserProfile: React.FC = () => {
   // ...
   const [certifications, setCertifications] = useState<Certification[]>([]);
 
+  console.log(certifications);
+  
+
   // Example handler that updates state when new certifications are saved
   const handleCertificationsSave = (updatedCerts: Certification[]) => {
     setCertifications(updatedCerts);

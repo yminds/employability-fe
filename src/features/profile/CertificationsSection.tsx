@@ -1,14 +1,13 @@
-
 import React, { useEffect, useState } from "react";
 import { Plus, Edit } from "lucide-react";
 // import CertificationsForm from "../../components/forms/certification-form"; // Adjust if needed
-import AddEditCertificationsModal from "@/components/modal/AddEditCertificationsModal"; 
-import { Certification } from "../../features/profile/types"; 
-import { useGetCertificatesByUserIdQuery } from "@/api/certificatesApiSlice";
+import AddEditCertificationsModal from "@/components/modal/AddEditCertificationsModal";
+import { Certification } from "../../features/profile/types";
+import { useGetCertificationsByUserIdQuery } from "@/api/certificatesApiSlice";
 import { useSelector } from "react-redux";
 
 interface CertificationsSectionProps {
-  /** 
+  /**
    *  Optionally allow parent to pass initial certifications;
    *  but we’ll primarily display the fetched data from Redux query.
    */
@@ -25,7 +24,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
   onSave,
 }) => {
   const user = useSelector((state: any) => state.auth.user);
-  const { data } = useGetCertificatesByUserIdQuery(user._id);
+  const { data } = useGetCertificationsByUserIdQuery(user._id);
 
   // Local state to store the currently displayed certifications
   const [certifications, setCertifications] = useState<Certification[]>(
@@ -68,6 +67,16 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
     onSave?.(updatedCertifications);
     setIsModalOpen(false);
   };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "No Expiration";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
 
   return (
     <div className="space-y-6 p-10">
@@ -117,13 +126,15 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
             {/* Certification Details */}
             <div className="flex-1">
               <h4 className="font-medium text-gray-900">{cert.title}</h4>
-              <p className="text-sm text-gray-500">Issued by: {cert.issuedBy}</p>
               <p className="text-sm text-gray-500">
-                {cert.issueDate} - {cert.expirationDate || "Present"}
+                Issued by: {cert.issued_by}
               </p>
-              {cert.credentialURL && (
+              <p className="text-sm text-gray-500">
+                {formatDate(cert.issue_date)} - {formatDate(cert.expiration_date) || "Present"}
+              </p>
+              {cert.certificate_s3_url && (
                 <a
-                  href={cert.credentialURL}
+                  href={cert.certificate_s3_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-emerald-600 hover:underline text-sm"
@@ -143,8 +154,6 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
                 {/* <Edit className="w-4 h-4" /> */}
                 <span>View certifications</span>
               </button>
-
-
             </div>
           </div>
         ))}
