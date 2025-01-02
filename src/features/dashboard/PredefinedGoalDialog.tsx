@@ -188,9 +188,9 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
                         </div>
 
                         <img
-                            src={"./src/assets/dashboard/jobs_banner.png"}
+                            src={"./src/assets/dashboard/goal_banner.png"}
                             alt="Fullstack Developer"
-                            className="rounded-tl-[9px] rounded-tr-[9px] w-full absolute top-0 right-0 opacity-15 h-[245px] object-cover"
+                            className="rounded-tl-[9px] rounded-tr-[9px] w-full absolute top-0 right-0 h-[245px] object-cover"
                         />
                     </div>
 
