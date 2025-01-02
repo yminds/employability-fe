@@ -32,7 +32,7 @@ const Dashboard: React.FC<Props> = () => {
 
   return (
     <>
-      <main className="h-screen overflow-auto font-ubuntu">
+      <main className="h-screen overflow-y-auto minimal-scrollbar font-ubuntu">
         <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
 

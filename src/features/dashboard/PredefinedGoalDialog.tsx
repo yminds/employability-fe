@@ -64,7 +64,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="p-0 max-w-5xl h-[80vh] overflow-y-auto rounded-[12px] scrollbar-default font-ubuntu [&>button:last-child]:hidden">
+            <DialogContent className="p-0 max-w-5xl h-[80vh] overflow-y-auto minimal-scrollbar rounded-[12px] font-ubuntu [&>button:last-child]:hidden">
                 <DialogTitle className="hidden">Predefined Goals</DialogTitle>
                 <div>
                     {/* Header Section */}

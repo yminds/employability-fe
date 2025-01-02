@@ -40,12 +40,12 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
 
     return <>
         <div className="grid grid-cols-4 gap-6">
-            <div className="col-span-1 flex flex-col gap-6 shrink-0 border-r max-h-[80vh] overflow-y-auto scrollbar-default">
+            <div className="col-span-1 flex flex-col gap-6 shrink-0 border-r max-h-[80vh] overflow-y-auto minimal-scrollbar">
                 <SetGoalFilter />
             </div>
 
             {/* Goals */}
-            <div className="col-span-3 flex flex-col items-start gap-6 flex-1 max-h-[80vh] overflow-y-auto scrollbar-default">
+            <div className="col-span-3 flex flex-col items-start gap-6 flex-1 max-h-[80vh] overflow-y-auto minimal-scrollbar">
                 <div className="flex items-center gap-5 self-stretch relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                         <img src="./src/assets/set-goal/mail.svg" alt="Search" />
