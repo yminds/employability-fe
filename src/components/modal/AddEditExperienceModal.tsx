@@ -23,8 +23,6 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
   const [updateExperience] = useUpdateExperienceMutation();
   const user = useSelector((state: any) => state.auth.user);
 
-  console.log(initialExperience);
-
   useEffect(() => {
     if (isOpen) {
       setExperience(initialExperience);
