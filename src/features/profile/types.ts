@@ -60,6 +60,10 @@ export interface Education {
 // src/features/profile/types.ts
 
 export interface Certification {
+  certificate_s3_url: any;
+  issue_date: ReactNode;
+  expiration_date: string;
+  issued_by: ReactNode;
   _id: string;
   title: string;
   issuedBy: string;

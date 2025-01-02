@@ -53,3 +53,17 @@ export const userGoalApiSlice = apiSlice.injectEndpoints({
 });
 
 export const { useGetUserGoalQuery } = userGoalApiSlice;
+
+export const searchGoalApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getSearchGoal: builder.query<any[], string>({
+      query: (searchTerm) => ({
+        url: `/api/v1/predefinedGoals/search`, // Use searchTerm as the dynamic part of the URL
+        method: 'GET',
+        params: { search: searchTerm }, // Pass the search term as a query parameter
+      }),
+    }),
+  }),
+});
+
+export const { useGetSearchGoalQuery } = searchGoalApiSlice;

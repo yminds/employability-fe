@@ -23,12 +23,9 @@ export default function ExperienceSection({
 
   // Fetch experiences from the server
   const { data, error, isLoading } = useGetExperiencesByUserIdQuery(user?._id);
-  console.log(data);
 
   // Whenever we get new data from the server, map it to our ExperienceItem shape
   useEffect(() => {
-    console.log("Raw data from API", data);
-
     if (data && data.data) {
       const mappedData: ExperienceItem[] = data.data.map((exp: any) => {
         // Function to format date to "Month Year"
@@ -59,8 +56,6 @@ export default function ExperienceSection({
           description: "",
         };
       });
-
-      console.log("mapped data", mappedData);
       setMappedExperiences(mappedData);
     }
     // If the parent passed in "experiences" prop, you might want to default to that

@@ -24,8 +24,8 @@ const Dashboard: React.FC<Props> = () => {
   const user_name = user ? user.name : "";
   const profile_image = user ? user.profile_image : "";
 
-  //const { data: goalsData } = "";
-  const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  const { data: goalsData } = "";
+  //const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
   const goalId = goalsData?.data?.[0]?._id || "";
 
@@ -110,7 +110,7 @@ const Dashboard: React.FC<Props> = () => {
 
                           {/* Dialog */}
                           {<Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
-                            <DialogContent className="max-w-[1326px] max-h-[90vh] overflow-y-auto rounded-[12px] scrollbar-default">
+                            <DialogContent className="max-w-[1400px] rounded-[12px]">
                               {/* Visually hidden title */}
                               <DialogTitle className="hidden">Set Your Goal</DialogTitle>
 
