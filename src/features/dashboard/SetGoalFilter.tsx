@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const SetGoalFilter: React.FC<{}> = ({ }) => {
+    // Level Selection
     const [selectedLevels, setSelectedLevels] = useState<string[]>(['entry']);
     const handleSelect = (level: string) => {
         if (selectedLevels.includes(level)) {
@@ -14,6 +15,7 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
         }
     };
 
+    // Demand Selection
     const [selectedDemands, setSelectedDemands] = useState<any[]>([]);
     const handleSelectDemand = (demand: any) => {
         if (selectedDemands.includes(demand)) {
@@ -26,11 +28,13 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
         }
     };
 
+    // Learning Time Selection
     const [selectedOption, setSelectedOption] = useState('1-3 Months');
     const handleSelectOption = (value: React.SetStateAction<string>) => {
         setSelectedOption(value);
     };
 
+    // Difficulty Level Selection
     const [selectedDiffcultLevels, setSelectedDiffcultLevels] = useState<string[]>(['easy']);
 
     const handleDiffcultSelect = (level: any) => {
@@ -41,6 +45,7 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
         }
     };
 
+    // Salary Range
     const [salaryRange, setSalaryRange] = useState([0, 50]);
 
     const handleMinChange = (e: { target: { value: any; }; }) => {
@@ -55,7 +60,7 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
     return <>
         {/* Experience Level */}
-        <div className="flex flex-col items-start w-[280px] gap-5">
+        <div className="flex flex-col items-start w-[280px] gap-5 border-b border-[#E0E0E0] pb-6">
             <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">Experience Level</label>
             <div className="flex flex-col items-start gap-3 self-stretch">
                 {/* Entry Level */}
@@ -136,7 +141,7 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
         </div>
 
         {/* Expected Salary Range */}
-        <div className="flex flex-col items-start w-[280px] gap-5">
+        <div className="flex flex-col items-start w-[280px] gap-5 border-b border-[#E0E0E0] pb-6">
             <div>
                 <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">Expected Salary Range</label>
                 <p className="text-[#909091] text-sm font-medium leading-5 tracking-[0.21px]">Choose a range</p>
@@ -194,7 +199,7 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
         </div>
 
         {/* Job Market Demand  */}
-        <div className="flex flex-col items-start w-[280px] gap-5">
+        <div className="flex flex-col items-start w-[280px] gap-5 border-b border-[#E0E0E0] pb-6">
             <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">Job Market Demand</label>
             <div className="flex flex-col items-start gap-3 self-stretch">
                 {/* High Demand */}
@@ -275,7 +280,7 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
         </div>
 
         {/* Estimated Learning Time */}
-        <div className="flex flex-col items-start w-[280px] gap-5">
+        <div className="flex flex-col items-start w-[280px] gap-5 border-b border-[#E0E0E0] pb-6">
             <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">
                 Est. Learning Time
             </label>
@@ -354,7 +359,7 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
         </div>
 
         {/* Difficulty Level */}
-        <div className="flex flex-col items-start w-[280px] gap-5">
+        <div className="flex flex-col items-start w-[280px] gap-5 pb-6">
             <label className="text-[#414447] text-base font-medium leading-6 tracking-wide">Difficulty Level</label>
             <div className="flex flex-col items-start gap-3 self-stretch">
                 {/* Easy */}
