@@ -18,11 +18,12 @@ import { useSelector } from "react-redux";
 import { currentStatusSVG } from "./svg/currentStatusSVG";
 import SkillList from "@/components/skills/skillslist";
 import ProfileBanner from "./ProfileBanner";
+import { useNavigate } from "react-router-dom";
 // import useGetUser
 
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
-
+  const navigate = useNavigate();
   const initialExperiences: ExperienceItem[] = [];
   const [contactInfo, setContactInfo] = useState({});
 
@@ -83,7 +84,6 @@ const UserProfile: React.FC = () => {
   const [certifications, setCertifications] = useState<Certification[]>([]);
 
   console.log(certifications);
-  
 
   // Example handler that updates state when new certifications are saved
   const handleCertificationsSave = (updatedCerts: Certification[]) => {
@@ -145,7 +145,7 @@ const UserProfile: React.FC = () => {
       <div className="col-span-2 ">
         <button
           className="text-gray-600 hover:text-gray-800 flex items-center space-x-4 mb-6"
-          onClick={handleOpenModal}
+          onClick={() => navigate("/")}
         >
           <div className="p-3 border bg-white border-gray-300 rounded-full">
             <svg
