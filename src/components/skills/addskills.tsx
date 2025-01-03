@@ -80,9 +80,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     { id: "1", name: "React" },
     { id: "2", name: "MongoDB" },
     { id: "3", name: "Node.js" },
-    { id: "4", name: "GraphQL" },
-    { id: "5", name: "MySQL" },
-    { id: "6", name: "Express" },
+
   ]);
 
   const [getUserSkills, { data: userSkillsData, isLoading }] =
@@ -217,23 +215,20 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         }
       }}
     >
-      <DialogContent className="bg-white rounded-lg p-8 w-full max-w-2xl">
-        <DialogHeader className="flex justify-between items-start mb-6">
-          <div>
+      <DialogContent className="bg-white rounded-lg p-[42px] w-full gap-2 max-w-2xl max-h-[98vh]">
+        <DialogHeader className="flex justify-between items-start max-h-[54px] mb-6">
+          <div className=" flex flex-col items-start">
             <DialogTitle className="text-xl font-bold">Add Skills</DialogTitle>
             <p className="text-sm text-gray-500">
               Select the skills you want to appear in the profile
             </p>
           </div>
-          <DialogClose asChild>
-            <Button variant="ghost" className="h-6 w-6 p-0">
-              <img src={icon} alt="Close" />
-            </Button>
+          <DialogClose asChild className="h-6 w-6 p-0 outline-none">
           </DialogClose>
         </DialogHeader>
 
         {/* Goal Selection Popover */}
-        <div className="mb-6 flex items-center">
+        <div className=" flex items-center max-h-[46px]">
           <span className="text-sm font-medium block">Goal : </span>
           <Popover
             open={isGoalPopoverOpen}
@@ -285,7 +280,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 
         <div
           ref={skillsRef}
-          className="max-h-[36vh] overflow-y-auto space-y-4 snap-y snap-proximity minimal-scrollbar"
+          className="max-h-[354px] xl:max-h-[236px] overflow-y-auto space-y-4 snap-y p-1 snap-proximity minimal-scrollbar"
         >
           {skills.map((skill, index) => (
             <div
@@ -480,22 +475,24 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
             </div>
           ))}
         </div>
+        <div>
+          {/* Add Skill Button */}
+          <Button
+            variant="outline"
+            className="text-green-600 border-0 flex-1 px-0 hover:bg-white hover:text-green-600"
+            onClick={handleAddSkill}
+            type="button"
+          >
+            <span>
+              <img className="w-6 h-6" src={addicon} alt="Add Skill" />
+            </span>
+            Add Skill
+          </Button>          
+        </div>
 
-        {/* Add Skill Button */}
-        <Button
-          variant="outline"
-          className="text-green-600 border-0 flex-1 px-0 mt-6 hover:bg-white hover:text-green-600"
-          onClick={handleAddSkill}
-          type="button"
-        >
-          <span>
-            <img className="w-6 h-6" src={addicon} alt="Add Skill" />
-          </span>
-          Add Skill
-        </Button>
 
         {/* Suggested Skills */}
-        <div className="mt-6">
+        <div className="mt-2">
           <h3 className="text-sm font-semibold mb-2">Suggested</h3>
           <div className="flex flex-wrap gap-2">
             {suggestedSkills.map((suggestedSkill) => (

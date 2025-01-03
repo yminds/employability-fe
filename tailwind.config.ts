@@ -93,7 +93,7 @@ module.exports = {
     },
     screens: {
       sm : {
-        min: '440px',
+        min: '320px',
         max: '767px'
       },
       md : {
