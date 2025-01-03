@@ -70,7 +70,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
             <h5 className={`text-[20px] font-medium leading-[26px] tracking[-0.2px] ${displayTitle ? "" : "hidden"}`}>{searchTitle}</h5>
             
             {/* Grid displaying the list of goals */}
-            <div className="grid grid-cols-3 gap-6 w-full">
+            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full">
                 {/* Loading and Error States */}
                 {isLoading && <p>Loading trending goals, please wait...</p>}
                 {error && <p>Oops! Something went wrong while loading goals.</p>}

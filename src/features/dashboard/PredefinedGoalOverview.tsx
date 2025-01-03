@@ -18,7 +18,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description }) => {
             </p>
 
             {/* Info Cards */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-5 sm:grid-cols-3 md:grid-cols-2 gap-4">
                 <div className="flex w-[160px] p-3 py-3 px-4 flex-col items-start gap-3 rounded-lg bg-[#DBFFEA]">
                     <img
                         src={"./src/assets/dashboard/entry.svg"}

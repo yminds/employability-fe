@@ -64,12 +64,12 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="p-0 max-w-5xl h-[80vh] overflow-y-auto minimal-scrollbar rounded-[12px] font-ubuntu [&>button:last-child]:hidden">
+            <DialogContent className="p-0 max-w-5xl h-[80vh] overflow-y-auto minimal-scrollbar rounded-[12px] font-ubuntu [&>button:last-child]:hidden lg:max-w-4xl md:max-w-lg">
                 <DialogTitle className="hidden">Predefined Goals</DialogTitle>
                 <div>
                     {/* Header Section */}
                     <div className="flex flex-col items-start justify-center gap-5 p-6 px-8 relative h-[245px] ">
-                        <button className="flex items-center gap-4 text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro"
+                        <button className="flex items-center gap-4 text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro z-[9999]"
                             onClick={handleCloseGoals}>
                             <img
                                 src={"./src/assets/dashboard/back.svg"}

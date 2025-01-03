@@ -93,7 +93,7 @@ const Dashboard: React.FC<Props> = () => {
                 <header className="mb-7">
                   <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Hi, {user_name} <span className="wave">👋</span></h1>
                 </header>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 gap-4">
                   <div className="col-span-3 flex flex-col gap-10 shrink-0">
                     {/* Set Your Goal Section */}
                     <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
@@ -144,7 +144,7 @@ const Dashboard: React.FC<Props> = () => {
                     </section>
                   </div>
 
-                  <div className="flex flex-col items-start gap-6 flex-1">
+                  <div className="flex flex-col items-start gap-6 flex-1 lg:col-span-2">
                     {/* Profile Sidebar */}
                     <ProfileCompletionCard />
 
