@@ -58,7 +58,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between h-[82px]  bg-white">
+    <div className="flex items-center justify-between h-[82px] snap-start bg-white">
       {/* Left Section: Skill Image and Name */}
       <div className="flex w-[30%] h-full items-center space-x-4">
         <span className="flex w-[52px] h-[52px] p-[9.75px] px-[10.833px] justify-center items-center gap-[10.833px] flex-shrink-0 rounded-full border-[1.083px] border-black/5 bg-[rgba(250,250,250,0.98)]">
