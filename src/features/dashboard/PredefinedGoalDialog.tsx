@@ -69,7 +69,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
                 <div>
                     {/* Header Section */}
                     <div className="flex flex-col items-start justify-center gap-5 p-6 px-8 relative h-[245px] ">
-                        <button className="flex items-center gap-4 text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro"
+                        <button className="flex items-center gap-4 text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro z-[9999]"
                             onClick={handleCloseGoals}>
                             <img
                                 src={"./src/assets/dashboard/back.svg"}

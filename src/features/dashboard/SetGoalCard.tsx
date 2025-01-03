@@ -3,6 +3,7 @@ import GoalList from "./GoalList";
 import GoalFormDialog from "./GoalFormDialog";
 import { useGetSearchGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SetGoalFilter from './SetGoalFilter';
+import ExperienceComponent from './ExperienceComponent';
 
 interface Goal {
     title: string;
@@ -76,14 +77,8 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                 </div>
 
                 <section className="flex flex-col items-start gap-4 self-stretch">
-
                     <div className="flex flex-start gap-2.5">
-                        <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">
-                            Experience: Entry Level
-                        </div>
-                        <div className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]">
-                            Salary Range: ₹0L - ₹50L
-                        </div>
+                        {ExperienceComponent({ selectedOption: "Entry Level" })}
                     </div>
 
                     <GoalList isLoading={false} error={false} setJourneyDialog={setJourneyDialog} searchGoals={searchGoals} displayTitle={true} />
