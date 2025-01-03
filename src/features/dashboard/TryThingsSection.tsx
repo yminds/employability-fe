@@ -11,7 +11,7 @@ const TryThingsSection: React.FC<{}> = ({ }) => {
         <section className="flex flex-col items-start gap-4 self-stretch">
             <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]"
             >Try these things out</h5>
-            <div className="grid grid-cols-3 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6 w-full">
                 <div className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
                 >
                     <div className="h-[100px]">
