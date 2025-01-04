@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
-import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
+import { useAddUserGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/predefinedGoalsApiSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -46,7 +46,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
         techStack: "",
         description: "",
     });
-    const [createGoal] = useCreateGoalMutation();
+    const [createGoal] = useAddUserGoalMutation();
     const [callAPI, setCallAPI] = useState(true);
     const { data: skills, error, isLoading } = useGetMultipleSkillsQuery(techStack, {
         skip: callAPI

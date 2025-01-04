@@ -2,14 +2,6 @@ import { apiSlice } from './apiSlice';
 
 export const goalsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // Fetch all predefined goals
-    getAllPreDefinedGoals: builder.query<any[], void>({
-      query: () => ({
-        url: '/api/v1/predefinedGoals/getAll',
-        method: 'GET',
-      }),
-    }),
-
     getGoalsbyuser: builder.query<{
       message:string,
       data: [
@@ -36,4 +28,4 @@ export const goalsApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetAllPreDefinedGoalsQuery, useUpdateGoalNameMutation ,useGetGoalsbyuserQuery } = goalsApiSlice;
+export const { useUpdateGoalNameMutation ,useGetGoalsbyuserQuery } = goalsApiSlice;

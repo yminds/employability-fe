@@ -28,7 +28,7 @@ const Sidebar: React.FC = () => {
     };
 
     return (
-        <div className="relative">
+        <div className="relative group">
             <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden scrollbar-default transition-all ${isCollapsed ? 'w-20' : 'w-64'}`}>
                 <Link to="/" className={`flex items-center gap-2 self-stretch ${isCollapsed ? 'justify-center' : ''}`}>
                     <img src={LogoIcon} alt='' />
@@ -105,12 +105,16 @@ const Sidebar: React.FC = () => {
                     </div>
                 </div>
             </aside>
-
+            
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none"
+                className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             >
-                {isCollapsed ? <img src={OpenIcon} alt="Expand" /> : <img src={CloseIcon} alt="Collapse" />}
+                {isCollapsed ? (
+                <img src={OpenIcon} alt="Expand" />
+                ) : (
+                <img src={CloseIcon} alt="Collapse" />
+                )}
             </button>
         </div>
     );

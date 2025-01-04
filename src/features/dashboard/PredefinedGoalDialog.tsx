@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useCreateGoalMutation } from "@/api/predefinedGoalsApiSlice";
+import { useAddUserGoalMutation } from "@/api/predefinedGoalsApiSlice";
 import { useSelector } from "react-redux";
 import { RootState } from '@/store/store';
 import PredefinedGoalSkills from "./PredefinedGoalSkills";
@@ -54,7 +54,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
     const [isSaved, setIsSaved] = useState(false); // State to handle success message visibility
     const [isSaving, setIsSaving] = useState(false); // State to handle saving/loading state
 
-    const [createGoal] = useCreateGoalMutation();
+    const [createGoal] = useAddUserGoalMutation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
