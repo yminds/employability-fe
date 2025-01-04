@@ -115,7 +115,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto rounded-[12px] scrollbar-default font-ubuntu">
+            <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto rounded-[12px] minimal-scrollbar font-ubuntu">
                 <DialogTitle className="hidden">Define Your Custom Goal</DialogTitle>
 
                 <div className="flex items-center justify-center">
@@ -174,7 +174,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                             <PopoverTrigger asChild>
                                                 <button className="absolute right-0 left-0 top-[50px]"></button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="max-h-40 overflow-y-auto border rounded-lg bg-white p-2 font-sf-pro w-[500px]">
+                                            <PopoverContent className="max-h-40 overflow-y-auto minimal-scrollbar border rounded-lg bg-white p-2 font-sf-pro w-[500px]">
                                                 {/* Loading or error message */}
                                                 {isLoading && <p>Loading skills...</p>}
                                                 {error && <p className="text-red-500">Failed to load skills</p>}

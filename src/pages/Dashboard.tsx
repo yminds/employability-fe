@@ -22,10 +22,9 @@ const Dashboard: React.FC<Props> = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
-  const profile_image = user ? user.profile_image : "";
 
   const { data: goalsData } = "";
-  //const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  // const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
   const goalId = goalsData?.data?.[0]?._id || "";
 
@@ -33,7 +32,7 @@ const Dashboard: React.FC<Props> = () => {
 
   return (
     <>
-      <main className="h-screen overflow-auto font-ubuntu">
+      <main className="h-screen overflow-y-auto minimal-scrollbar font-ubuntu">
         <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
 
@@ -94,7 +93,7 @@ const Dashboard: React.FC<Props> = () => {
                 <header className="mb-7">
                   <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight">Hi, {user_name} <span className="wave">👋</span></h1>
                 </header>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 gap-4">
                   <div className="col-span-3 flex flex-col gap-10 shrink-0">
                     {/* Set Your Goal Section */}
                     <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
@@ -141,11 +140,11 @@ const Dashboard: React.FC<Props> = () => {
                       <h5 className="text-[#68696B] text-[20px] font-medium leading-[26px] tracking[-0.2px]">
                         Explore trending goals
                       </h5>
-                      <GoalList isLoading={false} error={false} setJourneyDialog={false} />
+                      <GoalList isLoading={false} error={false} setJourneyDialog={false} searchGoals={undefined} displayTitle={false} />
                     </section>
                   </div>
 
-                  <div className="flex flex-col items-start gap-6 flex-1">
+                  <div className="flex flex-col items-start gap-6 flex-1 lg:col-span-2">
                     {/* Profile Sidebar */}
                     <ProfileCompletionCard />
 

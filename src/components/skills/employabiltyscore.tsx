@@ -65,7 +65,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalNam
     skillsData && skillsData?.data?.all.length > 0 ? totalVerifiedRating / skillsData?.data?.all.length : 0;
 
   return (
-    <div className="bg-white flex flex-col w-[100%] rounded-lg mt-[48px] px-[42px]  gap-2 py-[32px]">
+    <div className="bg-white flex flex-col w-[100%] rounded-lg  p-[30px] gap-6 md:mt-0 sm:mt-0">
       <div className="flex items-center gap-2">
         <div>
           <img className="w-[50px] h-[50px] rounded-full" src={user?.profile_image} alt="user" />
@@ -87,7 +87,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalNam
           <p className="text-2xl font-bold text-gray-900">{averageVerifiedRating > 0 ? averageVerifiedRating.toFixed(2) : averageVerifiedRating }
             <span className="text-2xl font-bold text-[#00000099]">/10</span>
           </p>
-          <p className="text-sm text-gray-600">Employability Score</p>
+          <p className="text-gray-900 font-sf-pro-display text-lg font-medium leading-6 tracking-[0.27px]">Skill Score</p>
         </div>
       </div>
     </div>

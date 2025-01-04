@@ -76,44 +76,46 @@ const SuggestedSkills: React.FC = () => {
   };
 
   return (
-    <section className="p-6 bg-white rounded-lg">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-[20px] font-medium leading-[26px]">Suggested Skills ({suggestedSkills.length})</h2>
-        <button
-          className="text-[14px] text-green-600 font-medium hover:underline"
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? 'Show Less' : 'View All →'}
-        </button>
-      </div>
-      {/* Skills Grid */}
-      <div className="grid grid-cols-3 gap-4">
-        {displayedSkills.map((skill, index) => (
-          <div
-            key={index}
-            className="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm flex flex-col space-y-4"
+    <div className='sm:max-w-[90vw] overflow-auto '>
+      <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start  sm:w-[68vw] sm:p-4 ">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-6 w-full sm:max-w-[90vw]">
+          <h2 className="text-[20px] font-medium leading-[26px] sm:text-sm">Suggested Skills ({suggestedSkills.length})</h2>
+          <button
+            className="text-[14px] text-green-600 font-medium hover:underline"
+            onClick={() => setShowAll(!showAll)}
           >
-            {/* Icon and Title */}
-            <div className="flex items-center space-x-3">
-              <div className="w-[42px] h-[42px] rounded-full flex justify-center items-center bg-white">
-                <img src={skill.icon} alt={skill.name} className="w-[22px] h-[22px]" />
-              </div>
-              <h3 className="text-[16px] font-medium text-gray-800">{skill.name}</h3>
-            </div>
-            {/* Description */}
-            <p className="text-[14px] text-gray-600 leading-[20px]">{skill.description}</p>
-            {/* Button */}
-            <button
-              className="text-[14px] text-left text-green-600 font-medium hover:text-green-700 hover:underline"
-              onClick={() => handleAddSkill(skill.id)}
-            >
-              Add Skill
-            </button>
+            {showAll ? 'Show Less' : 'View All →'}
+          </button>
+        </div>
+        {/* Skills Flex */}
+          <div className="flex flex-wrap gap-4 ">
+            {displayedSkills.map((skill, index) => (
+              <div
+                key={index}
+                className="p-4 bg-gray-50 rounded-lg  flex flex-col space-y-4 w-[259px] xl:w-[236px] lg:w-[240px] sm:w-[100%] "
+              >
+                {/* Icon and Title */}
+                <div className="flex items-center space-x-3">
+                  <div className="w-[42px] h-[42px] rounded-full flex justify-center items-center bg-white">
+                    <img src={skill.icon} alt={skill.name} className="w-[22px] h-[22px]" />
+                  </div>
+                  <h3 className="text-[16px] font-medium text-gray-800">{skill.name}</h3>
+                    </div>
+                      {/* Description */}
+                      <p className="text-[14px] text-gray-600 leading-[20px]">{skill.description}</p>
+                      {/* Button */}
+                      <button
+                        className="text-[14px] text-left text-green-600 font-medium hover:text-green-700 hover:underline"
+                        onClick={() => handleAddSkill(skill.id)}
+                            >
+                        Add Skill
+                      </button>
+                    </div>
+             ))}
           </div>
-        ))}
-      </div>
-    </section>
+      </section>      
+    </div>
   );
 };
 

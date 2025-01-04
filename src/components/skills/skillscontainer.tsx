@@ -8,15 +8,23 @@ import SkillSummary from "@/components/skills/skillssummary";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
+import GoalDialog from "@/components/skills/setGoalDialog";
+import { useNavigate } from "react-router-dom";
+import arrow from "@/assets/skills/arrow.svg";
 
 const SkillsContainer: React.FC = () => {
   const [isUpdated, setIsUpdated] = useState<boolean>(false);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: goalData, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
+  
   useEffect(() => {
-    if (goalData?.data?.length && selectedGoalId === null) {
+    if(goalData?.data && goalData.data.length === 0) {
+      setIsModalOpen(true);
+    }
+    else if (goalData?.data?.length && selectedGoalId === null) {
       setSelectedGoalId(goalData.data[0]._id);
     }
   }, [goalData, selectedGoalId]);
@@ -31,38 +39,67 @@ const SkillsContainer: React.FC = () => {
     setSelectedGoalId(goalId);
   };
 
+  const handleGoalModal = () => {
+    setIsModalOpen(false);
+  };
+  const navigate = useNavigate();
+
+  const handleBackToDashboard = () => {
+    navigate("/"); // Navigate to the dashboard page
+  };
+
+
   return (
-    <section className="w-full h-full flex bg-[#F5F5F5] justify-center">
-      <div className="flex w-full max-w-[1300px] gap-6">
-        {/* Left Section */}
-        <div className="flex-[7] w-full h-full overflow-y-auto scrollbar-hide">
-          <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5]">
-            <SkillsHeader
-              userId={userId}
-              goals={goalData}
-              selectedGoalName={goalData?.data.find((goal) => goal._id === selectedGoalId)?.name || ""}
-              onSkillsStatusChange={setIsUpdated}
-            />
-          </div>
-          <div className="mt-[110px]">
-            <SkillList isDashboard={false} goalId={selectedGoalId} isSkillsUpdated={isUpdated}/>
-            <SuggestedSkills />
-          </div>
-        </div>
-        {/* Right Section */}
-        <div className="flex-[3] w-full space-y-4">
-          <EmployabilityScore 
-            goalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""}
-            goalName={goalData?.data.find((goal) => goal._id === selectedGoalId)?.name || ""}
-            isSkillsUpdated={isUpdated}
-          />
-          <SkillSummary
-            isSkillsUpdated={isUpdated}
-            selectedGoalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""}
-          />
+    (isModalOpen) ? <GoalDialog isOpen={isModalOpen} onClose={handleGoalModal} /> :(
+      <>
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center space-x-2 gap-3">
+          <button
+            onClick={handleBackToDashboard}
+            className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
+          >
+            <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
+          </button>
+          <h1 className="text-black font-ubuntu text-[20px] font-bold leading-[26px] tracking-[-0.025rem]">
+            Skills
+          </h1>
         </div>
       </div>
-    </section>
+      <section className="w-full h-[90vh] flex bg-[#F5F5F5] justify-center ">
+        <div className="flex w-full max-w-[1300px] gap-6 md:flex-col-reverse md:overflow-y-auto md:space-y-6 md:gap-0 md:scrollbar-hide  sm:flex-col-reverse sm:overflow-y-auto sm:space-y-6 sm:gap-0 sm:scrollbar-hide">
+          {/* Left Section */}
+          <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] w-full xl:h-full lg:h-full xl:overflow-y-auto 2xl:h-full 2xl:overflow-y-auto lg:overflow-y-auto scrollbar-hide">
+            <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:min-w-[280px]">
+              <SkillsHeader
+                userId={userId}
+                goals={goalData}
+                selectedGoalName={goalData?.data.find((goal) => goal._id === selectedGoalId)?.name || ""}
+                onSkillsStatusChange={setIsUpdated}
+                onGoalChange={handleGoalChange}
+              />
+            </div>
+            <div className="mt-[50px] sm:min-w-[280px] overflow-y-auto">
+                <SkillList isDashboard={false} goalId={selectedGoalId} isSkillsUpdated={isUpdated}/>  
+                <SuggestedSkills />
+            </div>
+          </div>
+          {/* Right Section */}
+          <div className="flex-[3] w-full space-y-4">
+            <div className=" flex flex-col gap-6" >
+              <EmployabilityScore 
+                goalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""}
+                goalName={goalData?.data.find((goal) => goal._id === selectedGoalId)?.name || ""}
+                isSkillsUpdated={isUpdated}
+              />
+              <SkillSummary
+                isSkillsUpdated={isUpdated}
+                selectedGoalId={goalData?.data.find((goal) => goal._id === selectedGoalId)?._id || ""}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    </>)
   );
 };
 

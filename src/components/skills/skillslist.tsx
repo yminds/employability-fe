@@ -90,29 +90,32 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpda
     }, [isSkillsUpdated]);
 
     return (
-      <div className="flex gap-x-1 h-[46px] items-center mb-4">
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            onClick={() => handleCategorySelect(category.id as SkillCategory)}
-            className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all
-              ${
-                selectedCategory === category.id
-                  ? 'bg-[#001630] text-white hover:bg-[#062549]'
-                  : 'text-gray-600'
-              }`}
-          >
-            {category.label}
-          </button>
-        ))}
-        <div className="flex items-center ml-auto">
-          <div className="relative w-64">
+      <div className="flex gap-1 items-center mb-4 sm:max-w-[280px] sm:flex sm:flex-col-reverse sm:items-start md:items-start">
+        <div className=' sm:flex h-[46px]'>
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => handleCategorySelect(category.id as SkillCategory)}
+              className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all sm:px-2 sm:py-2
+                ${
+                  selectedCategory === category.id
+                    ? 'bg-[#001630] text-white hover:bg-[#062549]'
+                    : 'text-gray-600'
+                }`}
+            >
+              {category.label}
+            </button>
+          ))}          
+        </div>
+
+        <div className="flex items-center ml-auto sm:ml-0">
+          <div className="relative w-64 sm:max-w-[200px]">
             <input
               type="text"
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border border-[#D6D7D9] rounded-[6px] px-4 py-2 pl-10 text-sm w-full focus:outline-none "
+              className="border border-[#D6D7D9] rounded-[6px] px-4 py-2 pl-10 text-sm w-full focus:outline-none  "
             />
             <div className="absolute inset-y-0 left-3 flex items-center">
               <img src={search} alt="Search Icon" className="w-4 h-4 text-gray-400" />
@@ -159,7 +162,8 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpda
     const displaySkills = isDashboard ? skills.slice(0, 5) : skills;
 
     return displaySkills.length > 0 ? (
-      <div>
+      <>
+      <div className="max-h-[50vh] overflow-auto scroll-smooth pr-2 snap-y snap-proximity minimal-scrollbar sm:min-w-[290px]">
         {displaySkills.map((skill: Skill, index: number) => (
           <React.Fragment key={skill._id}>
             <SkillCard
@@ -178,7 +182,9 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpda
             )}
           </React.Fragment>
         ))}
-      </div>
+      </div>      
+      </>
+
     ) : (
       <div className="text-gray-500 text-center py-4">
         No skills found
@@ -214,7 +220,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpda
   }
 
   return (
-    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4">
+    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4  overflow-x-auto scrollbar-hide">
       <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
         {isDashboard ? (
           <div className="flex justify-between items-center mb-5">
