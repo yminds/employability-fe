@@ -42,7 +42,6 @@ const SkillsContainer: React.FC = () => {
               goals={goalData}
               selectedGoalName={goalData?.data.find((goal) => goal._id === selectedGoalId)?.name || ""}
               onSkillsStatusChange={setIsUpdated}
-              onGoalChange={handleGoalChange}
             />
           </div>
           <div className="mt-[110px]">
