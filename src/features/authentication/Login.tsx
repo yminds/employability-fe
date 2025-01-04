@@ -70,7 +70,7 @@ const Login: React.FC = () => {
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="h-[84px] flex flex-col justify-around mx-auto">
               <h1 className="text-2xl font-bold text-gray-900">
-                Login to Your Account!!!
+                Login to Your Account
               </h1>
               <p className="text-sm text-gray-500">
                 New to Employability.AI?{" "}
