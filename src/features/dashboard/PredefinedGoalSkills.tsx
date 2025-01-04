@@ -1,19 +1,5 @@
 import React from 'react';
-
-// SKills
-const skillsData = [
-    { skill: "JavaScript", proficiency: "Intermediate", importance: "High" },
-    { skill: "HTML", proficiency: "Basic", importance: "Medium" },
-    { skill: "CSS", proficiency: "Basic", importance: "Low" },
-    { skill: "Node.js", proficiency: "Intermediate", importance: "Medium" },
-    { skill: "MongoDB", proficiency: "Advanced", importance: "Medium" },
-    { skill: "React.js", proficiency: "Intermediate", importance: "High" },
-    { skill: "Express.js", proficiency: "Advanced", importance: "Medium" },
-    { skill: "Git Version Control", proficiency: "Basic", importance: "Medium" },
-    { skill: "Agile Methodology", proficiency: "Intermediate", importance: "High" },
-    { skill: "Communication", proficiency: "Basic", importance: "High" },
-    { skill: "Problem Solving", proficiency: "Basic", importance: "High" },
-];
+import { useGetMultipleSkillsNameQuery } from '@/api/predefinedGoalsApiSlice';
 
 const getBadgeColor = (type: string, value: string) => {
     if (type === "proficiency") {
@@ -21,18 +7,26 @@ const getBadgeColor = (type: string, value: string) => {
             ? "bg-blue-100 text-blue-600"
             : value === "Intermediate"
                 ? "bg-purple-100 text-purple-600"
-                : "bg-indigo-100 text-indigo-600";
+                : "bg-[#E5E7FF] text-[#1C2CD8]";
     }
     if (type === "importance") {
         return value === "Low"
             ? "bg-green-100 text-green-600"
             : value === "Medium"
                 ? "bg-yellow-100 text-yellow-600"
-                : "bg-orange-100 text-orange-600";
+                : "bg-[#FFF2DB] text-[#D48A0C]";
     }
 };
 
-const PredefinedGoalSkills: React.FC = () => {
+interface Props {
+    goalId: string | null;
+}
+
+const PredefinedGoalSkills: React.FC<Props> = ({ goalId }) => {
+    const { data: skillsData } = useGetMultipleSkillsNameQuery(String(goalId), {
+        skip: !goalId,
+    });
+
     return <>
         <div className="flex flex-col items-start gap-8 flex-1 self-stretch">
             <div className="w-full mx-auto">
@@ -40,39 +34,45 @@ const PredefinedGoalSkills: React.FC = () => {
                     <table className="min-w-full border border-gray-200 rounded-[12px]">
                         <thead>
                             <tr className="bg-[#FAFAFA] border-b">
-                                <th className="p-3 px-6 text-left text-gray-500 text-sm font-medium leading-5 tracking-tight">Skills</th>
-                                <th className="p-3 px-6 text-left text-gray-500 text-sm font-medium leading-5 tracking-tight">Proficiency Required</th>
-                                <th className="p-3 px-6 text-left text-gray-500 text-sm font-medium leading-5 tracking-tight">Importance</th>
+                                <th className="p-3 px-6 text-left text-[#68696B] text-sm font-medium leading-5 tracking-tight">Skills</th>
+                                <th className="p-3 px-6 text-left text-[#68696B] text-sm font-medium leading-5 tracking-tight">Proficiency Required</th>
+                                <th className="p-3 px-6 text-left text-[#68696B] text-sm font-medium leading-5 tracking-tight">Importance</th>
                             </tr>
                         </thead>
                         <tbody className="">
-                            {skillsData.map((item, index) => (
-                                <tr
-                                    key={index}
-                                >
-                                    <td className="p-3 px-6 text-gray-600 text-base font-medium leading-6 tracking-wide">{item.skill}</td>
-                                    <td className="p-3 px-6">
-                                        <span
-                                            className={`p-1 px-4 rounded-[40px] text-base font-medium leading-6 tracking-[0.24px]" ${getBadgeColor(
-                                                "proficiency",
-                                                item.proficiency
-                                            )}`}
+                            {
+                                skillsData?.data?.skill_pool_id?.length > 0 ? (
+                                    skillsData.data.skill_pool_id.map((item: any, index: React.Key | null | undefined) => (
+                                        <tr
+                                            key={index}
                                         >
-                                            {item.proficiency}
-                                        </span>
-                                    </td>
-                                    <td className="p-3 px-6">
-                                        <span
-                                            className={`p-1 px-4 rounded-[40px] text-base font-medium leading-6 tracking-[0.24px]" ${getBadgeColor(
-                                                "importance",
-                                                item.importance
-                                            )}`}
-                                        >
-                                            {item.importance}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
+                                            <td className="p-3 px-6 text-[#414447] text-base font-medium leading-6 tracking-wide">{item.name}</td>
+                                            <td className="p-3 px-6">
+                                                <span
+                                                    className={`p-1 px-4 rounded-[40px] text-base font-medium leading-6 tracking-[0.24px]" ${getBadgeColor(
+                                                        "proficiency",
+                                                        "Advanced"
+                                                    )}`}
+                                                >
+                                                    Advanced
+                                                </span>
+                                            </td>
+                                            <td className="p-3 px-6">
+                                                <span
+                                                    className={`p-1 px-4 rounded-[40px] text-base font-medium leading-6 tracking-[0.24px]" ${getBadgeColor(
+                                                        "importance",
+                                                        "High"
+                                                    )}`}
+                                                >
+                                                    High
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <p>No results</p>
+                                )
+                            }
                         </tbody>
                     </table>
                 </div>

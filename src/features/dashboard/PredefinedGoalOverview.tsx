@@ -1,12 +1,16 @@
-import { useGetMultipleSkillsNameQuery } from '@/api/predefinedGoalsApiSlice';
 import React from 'react';
+import { useGetMultipleSkillsNameQuery } from '@/api/predefinedGoalsApiSlice';
 
 interface Props {
     goalId: string | null;
     description: string | null;
+    jobMarketDemand: string | null;
+    salaryRange: string | null;
+    difficultyLevel: string | null;
+    learningTime: string | null;
 }
 
-const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description }) => {
+const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description, jobMarketDemand, salaryRange, difficultyLevel, learningTime }) => {
     const { data: skillsName, error, isLoading } = useGetMultipleSkillsNameQuery(String(goalId), {
         skip: !goalId,
     });
@@ -27,7 +31,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description }) => {
                     />
                     <div className="flex flex-col justify-center items-start gap-1 self-stretch">
                         <p className="text-gray-500 text-sm font-medium leading-5 tracking-tight">Entry level salary</p>
-                        <p className="text-[#03963F] text-[20px] font-bold leading-[24px] tracking-[0.3px]">6-15 LPA</p>
+                        <p className="text-[#03963F] text-[20px] font-bold leading-[24px] tracking-[0.3px]">{salaryRange}</p>
                     </div>
                 </div>
                 <div className="flex w-[160px] p-3 py-3 px-4 flex-col items-start gap-3 rounded-lg bg-[#FFF2DB]">
@@ -38,7 +42,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description }) => {
                     />
                     <div className="flex flex-col justify-center items-start gap-1 self-stretch">
                         <p className="text-gray-500 text-sm font-medium leading-5 tracking-tight">Demand</p>
-                        <p className="text-[#D48A0C] text-[20px] font-bold leading-[24px] tracking-[0.3px]">High</p>
+                        <p className="text-[#D48A0C] text-[20px] font-bold leading-[24px] tracking-[0.3px]">{jobMarketDemand}</p>
                     </div>
                 </div>
                 <div className="flex w-[160px] p-3 py-3 px-4 flex-col items-start gap-3 rounded-lg bg-[#E5F0FF]">
@@ -49,7 +53,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description }) => {
                     />
                     <div className="flex flex-col justify-center items-start gap-1 self-stretch">
                         <p className="text-gray-500 text-sm font-medium leading-5 tracking-tight">Difficulty Level</p>
-                        <p className="text-[#3888FF] text-[20px] font-bold leading-[24px] tracking-[0.3px]">High</p>
+                        <p className="text-[#3888FF] text-[20px] font-bold leading-[24px] tracking-[0.3px]">{difficultyLevel}</p>
                     </div>
                 </div>
                 <div className="flex w-[160px] p-3 py-3 px-4 flex-col items-start gap-3 rounded-lg bg-[#EEEBFF]">
@@ -60,7 +64,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description }) => {
                     />
                     <div className="flex flex-col justify-center items-start gap-1 self-stretch">
                         <p className="text-gray-500 text-sm font-medium leading-5 tracking-tight">Est. Learning Time</p>
-                        <p className="text-[#8C76FB] text-[20px] font-bold leading-[24px] tracking-[0.3px]">3-6 Months</p>
+                        <p className="text-[#8C76FB] text-[20px] font-bold leading-[24px] tracking-[0.3px]">{learningTime}</p>
                     </div>
                 </div>
                 <div className="flex w-[160px] p-3 py-3 px-4 flex-col items-start gap-3 rounded-lg bg-[#E5F6FF]">

@@ -10,6 +10,10 @@ interface Goal {
     image?: string;
     skill_pool_id: string[]; // Array of skill IDs associated with the goal
     predefined_goal_id: string;
+    job_market_demand: string;
+    salary_range: string;
+    difficulty_level: string;
+    learning_time: string;
 }
 
 interface GoalsData {
@@ -24,6 +28,10 @@ interface Props {
     searchGoals: any[] | undefined;
     displayTitle: boolean;
 }
+
+const jobsMarketDemandObj = {1: "High", 2: "Mid", 3: "Low"};
+const experienceLevelObj = {1: "Entry-level", 2: "Mid-level", 3: "Senior-level"};
+const difficultyLevelObj = {1: "Easy", 2: "Medium", 3: "High"};
 
 const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle }) => {
     const { data: predefinedGoals, error, isLoading } = useGetAllPreDefinedGoalsQuery();
@@ -97,10 +105,10 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                             <div className="flex flex-col gap-6 p-4 pt-4 pb-4 pl-3 self-stretch">
                                 <h3 className="text-[#414447] text-[20px] font-medium leading-[24px] tracking-[0.3px]">{goal.title}</h3>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">₹6L - ₹24L</div>
-                                    <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">High Demand</div>
-                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">Entry-level</div>
-                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: Easy</div>
+                                    <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{goal.salary_range}</div>
+                                    <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{jobsMarketDemandObj[goal.job_market_demand as keyof typeof jobsMarketDemandObj]}</div>
+                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">{experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}</div>
+                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: {difficultyLevelObj[goal.difficulty_level  as keyof typeof difficultyLevelObj]}</div>
                                 </div>
                             </div>
                         </div>
@@ -112,10 +120,10 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                         >
                             <h3 className="text-[#414447] leading-[24px] tracking-[0.3px] mb-4">{goal.title}</h3>
                             <div className="grid grid-cols-2 gap-2">
-                                <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">₹6L - ₹24L</div>
-                                <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">High Demand</div>
-                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">Entry-level</div>
-                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: Easy</div>
+                                <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{goal.salary_range}</div>
+                                <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{jobsMarketDemandObj[goal.job_market_demand as keyof typeof jobsMarketDemandObj]}</div>
+                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">{experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}</div>
+                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: {difficultyLevelObj[goal.difficulty_level  as keyof typeof difficultyLevelObj]}</div>
                             </div>
                             <div className="mt-10">
                                 <button className="py-2 text-sm w-[100px] font-medium text-[#001630] rounded-md border border-solid border-[#001630] float-end absolute end-5 bottom-5">

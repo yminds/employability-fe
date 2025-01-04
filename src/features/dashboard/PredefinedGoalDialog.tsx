@@ -14,6 +14,11 @@ interface Goal {
     description: string;
     skill_pool_id: string[]; // Assuming the selected skills are passed here
     predefined_goal_id: string;
+    job_market_demand: string;
+    salary_range: string;
+    difficulty_level: string;
+    learning_time: string;
+    experience_level: string;
 }
 
 interface GoalFormDialogProps {
@@ -23,11 +28,24 @@ interface GoalFormDialogProps {
     setJourneyDialog: boolean;
 }
 
+const jobsMarketDemandObj = {1: "High", 2: "Mid", 3: "Low"};
+const experienceLevelObj = {1: "Entry-level", 2: "Mid-level", 3: "Senior-level"};
+const difficultyLevelObj = {1: "Easy", 2: "Medium", 3: "High"};
+const learningTimeObj = {1: "1-3 Months", 2: "3-6 Months", 3: "6-12 Months", 4: "Over 1 Year"};
+
+const tabs = ["Overview", "Skills", "Market Trend", "Active Jobs"];
+
 const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal }) => {
     const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal] = useState(selectedGoal ? selectedGoal.title : "");
     const [description] = useState(selectedGoal ? selectedGoal.description : "");
+    const [jobMarketDemand] = useState(selectedGoal ? jobsMarketDemandObj[Number(selectedGoal.job_market_demand) as keyof typeof jobsMarketDemandObj] : "");
+    const [salaryRange] = useState(selectedGoal ? selectedGoal.salary_range : "");
+    const [difficultyLevel] = useState(selectedGoal ? difficultyLevelObj[Number(selectedGoal.difficulty_level) as keyof typeof difficultyLevelObj] : "");
+    const [learningTime] = useState(selectedGoal ? learningTimeObj[Number(selectedGoal.learning_time) as keyof typeof learningTimeObj] : "");
+    const [experienceLevel] = useState(selectedGoal ? experienceLevelObj[Number(selectedGoal.experience_level) as keyof typeof experienceLevelObj] : "");
+    
     const [isSaved, setIsSaved] = useState(false); // State to handle success message visibility
     const [isSaving, setIsSaving] = useState(false); // State to handle saving/loading state
 
@@ -60,7 +78,6 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
     };
 
     const [activeTab, setActiveTab] = useState("Overview");
-    const tabs = ["Overview", "Skills", "Market Trend", "Active Jobs"];
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -82,7 +99,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
                             <div className="flex-col items-end gap-3 self-stretch inline-block">
                                 <span className="text-[#414447] text-[32px] font-medium leading-[42px] tracking-[-0.5px]">{goal}</span>
                                 <span className="p-2 px-4 ml-3 justify-center items-center gap-2 rounded-[42px] bg-[#DBFFEA] text-[#10B754] text-[16px] font-medium leading-[25.6px] tracking-[-0.5px]">
-                                    Entry Level
+                                    {experienceLevel}
                                 </span>
                             </div>
                             <button className="flex w-[196px] h-[44px] p-4 px-8 justify-center items-center gap-2 rounded bg-[#00183D] text-white text-[16px] font-medium leading-[150%] font-sf-pro" onClick={handleSubmit}>
@@ -99,7 +116,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
 
                     <div className="p-6 px-8 font-sf-pro">
                         {/* Tab Navigation */}
-                        <div className="flex pb-10">
+                        <div className="flex pb-5">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab}
@@ -116,12 +133,12 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
 
                         {/* Content Section */}
                         {activeTab === "Overview" && (
-                            <PredefinedGoalOverview goalId={goalId} description={description}/>
+                            <PredefinedGoalOverview goalId={goalId} description={description} jobMarketDemand={jobMarketDemand} salaryRange={salaryRange} difficultyLevel={difficultyLevel} learningTime={learningTime} />
                         )}
 
                         {/* Skills Tabs */}
                         {activeTab === "Skills" && (
-                            <PredefinedGoalSkills />
+                            <PredefinedGoalSkills goalId={goalId} />
                         )}
 
                         {/* Market Trend Tabs */}

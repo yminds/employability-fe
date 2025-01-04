@@ -68,13 +68,13 @@ const Dashboard: React.FC<Props> = () => {
                     </section>
 
                     {/* Projects */}
-                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                    {/* <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
                       <div className="p-[42px]">
                         <h2 className="text-gray-900 text-base font-medium leading-5">
                           Projects (5)
                         </h2>
                       </div>
-                    </section>
+                    </section> */}
                   </div>
 
                   <div className="flex flex-col items-start gap-6 flex-1">
