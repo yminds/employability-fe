@@ -18,7 +18,8 @@ interface Goal {
     skill_pool_id: string[]; // Assuming the selected skills are passed here
     predefined_goal_id: string;
     job_market_demand: string;
-    salary_range: string;
+    min_salary_range: number;
+    max_salary_range: number;
     difficulty_level: string;
     learning_time: string;
     experience_level: string;
@@ -44,7 +45,8 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
     const [goal] = useState(selectedGoal ? selectedGoal.title : "");
     const [description] = useState(selectedGoal ? selectedGoal.description : "");
     const [jobMarketDemand] = useState(selectedGoal ? jobsMarketDemandObj[Number(selectedGoal.job_market_demand) as keyof typeof jobsMarketDemandObj] : "");
-    const [salaryRange] = useState(selectedGoal ? selectedGoal.salary_range : "");
+    const [minSalaryRange] = useState(selectedGoal ? selectedGoal.min_salary_range : 0);
+    const [maxSalaryRange] = useState(selectedGoal ? selectedGoal.max_salary_range : 0);
     const [difficultyLevel] = useState(selectedGoal ? difficultyLevelObj[Number(selectedGoal.difficulty_level) as keyof typeof difficultyLevelObj] : "");
     const [learningTime] = useState(selectedGoal ? learningTimeObj[Number(selectedGoal.learning_time) as keyof typeof learningTimeObj] : "");
     const [experienceLevel] = useState(selectedGoal ? experienceLevelObj[Number(selectedGoal.experience_level) as keyof typeof experienceLevelObj] : "");
@@ -137,7 +139,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
 
                         {/* Content Section */}
                         {activeTab === "Overview" && (
-                            <PredefinedGoalOverview goalId={goalId} description={description} jobMarketDemand={jobMarketDemand} salaryRange={salaryRange} difficultyLevel={difficultyLevel} learningTime={learningTime} />
+                            <PredefinedGoalOverview goalId={goalId} description={description} jobMarketDemand={jobMarketDemand} minSalaryRange={minSalaryRange} maxSalaryRange={maxSalaryRange} difficultyLevel={difficultyLevel} learningTime={learningTime} />
                         )}
 
                         {/* Skills Tabs */}

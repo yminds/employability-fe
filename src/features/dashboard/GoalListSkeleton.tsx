@@ -31,7 +31,7 @@ const GoalListSkeleton: React.FC = () => {
 const GoalListSkeletonContainer: React.FC = () => {
   return (
     <>
-      {Array.from({ length: 5 }).map((_, index) => (
+      {Array.from({ length: 6 }).map((_, index) => (
         <GoalListSkeleton key={index} />
       ))}
     </>

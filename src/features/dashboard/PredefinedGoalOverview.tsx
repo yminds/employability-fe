@@ -11,12 +11,13 @@ interface Props {
     goalId: string | null;
     description: string | null;
     jobMarketDemand: string | null;
-    salaryRange: string | null;
+    minSalaryRange: number | null;
+    maxSalaryRange: number | null;
     difficultyLevel: string | null;
     learningTime: string | null;
 }
 
-const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description, jobMarketDemand, salaryRange, difficultyLevel, learningTime }) => {
+const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description, jobMarketDemand, minSalaryRange, maxSalaryRange, difficultyLevel, learningTime }) => {
     const { data: skillsName, error, isLoading } = useGetMultipleSkillsNameQuery(String(goalId), {
         skip: !goalId,
     });
@@ -37,7 +38,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description, jobMarke
                     />
                     <div className="flex flex-col justify-center items-start gap-1 self-stretch">
                         <p className="text-gray-500 text-sm font-medium leading-5 tracking-tight">Entry level salary</p>
-                        <p className="text-[#03963F] text-[20px] font-bold leading-[24px] tracking-[0.3px]">{salaryRange}</p>
+                        <p className="text-[#03963F] text-[20px] font-bold leading-[24px] tracking-[0.3px]">{formatSalaryRange(minSalaryRange, maxSalaryRange)}</p>
                     </div>
                 </div>
                 <div className="flex w-[160px] p-3 py-3 px-4 flex-col items-start gap-3 rounded-lg bg-[#FFF2DB]">
@@ -126,3 +127,8 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description, jobMarke
 };
 
 export default PredefinedGoalOverview;
+
+const formatSalaryRange = (minSalary: number, maxSalary: number) => {
+    const formatToLPA = (amount: number) => `${(amount / 100000).toFixed(0)}`; // Convert to LPA without decimals
+    return `${formatToLPA(minSalary)}-${formatToLPA(maxSalary)} LPA`;
+};
