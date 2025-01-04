@@ -69,7 +69,7 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
   } = skillsSummaryData.data;
 
   return (
-    <div className="p-10 flex flex-col justify-around bg-white rounded-xl w-full h-[326px]">
+    <div className="p-[30px] flex flex-col justify-around bg-white rounded-xl w-full h-[326px]">
       {/* Skills Verified Section */}
       <div className="flex items-start gap-2">
         <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">

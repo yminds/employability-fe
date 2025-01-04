@@ -24,6 +24,7 @@ import { userApi } from "@/api/userApiSlice";
 import { educationApiSlice } from "@/api/educationSlice";
 import { experienceApiSlice } from "@/api/experienceApiSlice";
 import { certificationsApiSlice } from "@/api/certificatesApiSlice";
+import { projectApiSlice } from "@/api/projectsApiSlice";
 // Redux persist config
 const persistConfig = {
   key: "root",
@@ -40,6 +41,7 @@ const rootReducer = combineReducers({
   [educationApiSlice.reducerPath]: educationApiSlice.reducer, // Added education reducer
   [experienceApiSlice.reducerPath]: experienceApiSlice.reducer,
   [certificationsApiSlice.reducerPath]: certificationsApiSlice.reducer,
+  [projectApiSlice.reducerPath]: projectApiSlice.reducer,
   auth: authReducer,
   goals: goalReducer,
   error: errorReducer,
@@ -74,6 +76,7 @@ export const store = configureStore({
       educationApiSlice.middleware, // Added education middleware
       experienceApiSlice.middleware,
       certificationsApiSlice.middleware,
+      projectApiSlice.middleware,
       errorMiddleware
     ),
   devTools: true,

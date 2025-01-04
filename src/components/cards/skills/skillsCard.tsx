@@ -58,7 +58,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between h-[82px] snap-start bg-white">
+    <div className="flex items-center justify-between h-[82px] snap-start bg-white sm:min-w-[660px]">
       {/* Left Section: Skill Image and Name */}
       <div className="flex w-[30%] h-full items-center space-x-4">
         <span className="flex w-[52px] h-[52px] p-[9.75px] px-[10.833px] justify-center items-center gap-[10.833px] flex-shrink-0 rounded-full border-[1.083px] border-black/5 bg-[rgba(250,250,250,0.98)]">
@@ -93,7 +93,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       </div>
 
       {/* Right Section: Buttons */}
-      <div className="flex w-[40%] justify-end space-x-2">
+      <div className="flex w-[40%] lg:w-[50%] justify-end space-x-2">
         {status === "Verified" ? (
           <>
             <button
@@ -104,7 +104,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
             </button>
             <button
               onClick={handleImproveScore}
-              className=" py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
+              className=" py-2 text-sm w-[138px] h-[44px] md:h[50px] md:w[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630]"
             >
               Improve score
             </button>
