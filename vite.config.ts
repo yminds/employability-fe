@@ -9,5 +9,13 @@ export default defineConfig({
       "@": "/src",
     },
   },
-  plugins: [react(), tsconfigPaths(), EnvironmentPlugin("all")],
+  plugins: [
+    react(),
+    tsconfigPaths(),
+    EnvironmentPlugin({
+      // List only the variables you need
+      NODE_ENV: "development",
+      API_URL: "http://localhost:3000", // Example
+    }),
+  ],
 });

@@ -1,0 +1,69 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - hackathon
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.18.1'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React app
+        run: npm run build-dev
+        env:
+          CI: false
+
+      - name: Verify build output
+        run: ls -R dist
+
+      - name: Install sshpass
+        run: sudo apt-get install sshpass -y
+
+      - name: Create remote directory
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          password: ${{ secrets.AZURE_VM_PASSWORD }}
+          script: |
+            powershell.exe -Command "
+            if (-not (Test-Path 'E:\Inetpub\vhosts\employability.ai\httpdocs')) {
+              New-Item -Path 'E:\Inetpub\vhosts\employability.ai\httpdocs' -ItemType Directory -Force
+            }
+            "
+
+      - name: Copy files to server
+        env:
+          SSHPASS: ${{ secrets.AZURE_VM_PASSWORD }}
+        run: |
+          sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r dist/* "${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs"
+
+      - name: Verify deployment on server
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USERNAME }}
+          password: ${{ secrets.AZURE_VM_PASSWORD }}
+          script: |
+            powershell.exe -Command "
+            if ((Get-ChildItem -Path 'E:\Inetpub\vhosts\employability.ai\httpdocs').Count -gt 0) {
+              Write-Host 'Files deployed successfully.'
+            } else {
+              Write-Error 'Deployment failed: No files found in the target directory.'
+              exit 1
+            }
+            "

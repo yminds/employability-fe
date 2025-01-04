@@ -1,6 +1,6 @@
 import React from "react";
 // import useInterviewSetup from "@/hooks/useInterviewSetup";
-import Interview from "@/components/interview/Interview";
+import Interview from "@/components/Interview/Interview";
 import { useParams } from "react-router-dom";
 import CheckSetup from "../components/setup/CheckSetup";
 
