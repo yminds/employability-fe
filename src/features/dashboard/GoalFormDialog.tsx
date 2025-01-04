@@ -6,6 +6,7 @@ import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/pred
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import SearchImg from '@/assets/set-goal/mail.svg';
 
 // Define Zod schema for validation
 const goalSchema = z.object({
@@ -157,7 +158,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                     </label>
                                     <div className="relative w-full h-12">
                                         <span className="absolute inset-y-0  left-0 flex items-center pl-3">
-                                            <img src="./src/assets/set-goal/mail.svg" alt="Search" />
+                                            <img src={SearchImg} alt="Search" />
                                         </span>
                                         <input
                                             type="text"

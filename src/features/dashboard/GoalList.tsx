@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
 import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
+import GoalListSkeleton from "./GoalListSkeleton";
 
 interface Goal {
     title: string;
@@ -14,6 +15,7 @@ interface Goal {
     salary_range: string;
     difficulty_level: string;
     learning_time: string;
+    experience_level: string;
 }
 
 interface GoalsData {
@@ -80,7 +82,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
             {/* Grid displaying the list of goals */}
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full">
                 {/* Loading and Error States */}
-                {isLoading && <p>Loading trending goals, please wait...</p>}
+                {isLoading && <GoalListSkeleton /> }
                 {error && <p>Oops! Something went wrong while loading goals.</p>}
 
                 {/* Render Goal Cards */}
@@ -99,7 +101,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                             <img
                                 src={goal.image || "./src/assets/dashboard/jobs_banner.png"}
                                 alt={goal.title}
-                                className="rounded-tl-[9px] rounded-tr-[9px] w-full"
+                                className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover"
                             />
 
                             <div className="flex flex-col gap-6 p-4 pt-4 pb-4 pl-3 self-stretch">
