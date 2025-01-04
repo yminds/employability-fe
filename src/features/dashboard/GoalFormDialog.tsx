@@ -6,6 +6,8 @@ import { useCreateGoalMutation, useGetMultipleSkillsNameQuery } from "@/api/pred
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import SearchImg from '@/assets/set-goal/mail.svg';
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 // Define Zod schema for validation
 const goalSchema = z.object({
@@ -117,6 +119,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="p-0 max-w-2xl max-h-[100vh] overflow-y-auto rounded-[12px] minimal-scrollbar font-ubuntu">
                 <DialogTitle className="hidden">Define Your Custom Goal</DialogTitle>
+                <DialogDescription className="hidden">Enter your goal and tailor your learning path.</DialogDescription>
 
                 <div className="flex items-center justify-center">
                     <div className="w-full inline-flex p-[42px] flex-col justify-center items-start gap-[40px]">
@@ -157,7 +160,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                                     </label>
                                     <div className="relative w-full h-12">
                                         <span className="absolute inset-y-0  left-0 flex items-center pl-3">
-                                            <img src="./src/assets/set-goal/mail.svg" alt="Search" />
+                                            <img src={SearchImg} alt="Search" />
                                         </span>
                                         <input
                                             type="text"

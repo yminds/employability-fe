@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
 import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
+import GoalListSkeleton from "./GoalListSkeleton";
+import JobsBannerImg from '@/assets/dashboard/jobs_banner.png';
 
 interface Goal {
     title: string;
@@ -11,9 +13,11 @@ interface Goal {
     skill_pool_id: string[]; // Array of skill IDs associated with the goal
     predefined_goal_id: string;
     job_market_demand: string;
-    salary_range: string;
+    min_salary_range: number;
+    max_salary_range: number;
     difficulty_level: string;
     learning_time: string;
+    experience_level: string;
 }
 
 interface GoalsData {
@@ -80,7 +84,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
             {/* Grid displaying the list of goals */}
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full">
                 {/* Loading and Error States */}
-                {isLoading && <p>Loading trending goals, please wait...</p>}
+                {isLoading && <GoalListSkeleton /> }
                 {error && <p>Oops! Something went wrong while loading goals.</p>}
 
                 {/* Render Goal Cards */}
@@ -97,15 +101,15 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                         >
                             {/* Add an Image or Placeholder */}
                             <img
-                                src={goal.image || "./src/assets/dashboard/jobs_banner.png"}
+                                src={goal.image || JobsBannerImg}
                                 alt={goal.title}
-                                className="rounded-tl-[9px] rounded-tr-[9px] w-full"
+                                className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover"
                             />
 
                             <div className="flex flex-col gap-6 p-4 pt-4 pb-4 pl-3 self-stretch">
                                 <h3 className="text-[#414447] text-[20px] font-medium leading-[24px] tracking-[0.3px]">{goal.title}</h3>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{goal.salary_range}</div>
+                                    <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{formatSalaryRange(goal.min_salary_range, goal.max_salary_range)}</div>
                                     <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{jobsMarketDemandObj[goal.job_market_demand as keyof typeof jobsMarketDemandObj]}</div>
                                     <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">{experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}</div>
                                     <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: {difficultyLevelObj[goal.difficulty_level  as keyof typeof difficultyLevelObj]}</div>
@@ -115,12 +119,11 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
 
                         {/* Hovered Block */}
                         <div
-                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                                }`}
+                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
                         >
                             <h3 className="text-[#414447] leading-[24px] tracking-[0.3px] mb-4">{goal.title}</h3>
                             <div className="grid grid-cols-2 gap-2">
-                                <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{goal.salary_range}</div>
+                                <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{formatSalaryRange(goal.min_salary_range, goal.max_salary_range)}</div>
                                 <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{jobsMarketDemandObj[goal.job_market_demand as keyof typeof jobsMarketDemandObj]}</div>
                                 <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">{experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}</div>
                                 <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: {difficultyLevelObj[goal.difficulty_level  as keyof typeof difficultyLevelObj]}</div>
@@ -140,3 +143,8 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
 };
 
 export default GoalList;
+
+const formatSalaryRange = (minSalary: number, maxSalary: number) => {
+    const formatToLakh = (amount: number) => `₹${(amount / 100000).toFixed(0)}L`;
+    return `${formatToLakh(minSalary)} - ${formatToLakh(maxSalary)}`;
+};

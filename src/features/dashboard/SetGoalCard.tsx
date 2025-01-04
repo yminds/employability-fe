@@ -4,6 +4,8 @@ import GoalFormDialog from "./GoalFormDialog";
 import { useGetSearchGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SetGoalFilter from './SetGoalFilter';
 import ExperienceComponent from './ExperienceComponent';
+import SearchImg from '@/assets/set-goal/mail.svg';
+import AddGoalImg from '@/assets/dashboard/add.svg';
 
 interface Goal {
     title: string;
@@ -49,7 +51,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
             <div className="col-span-3 flex flex-col items-start gap-6 flex-1 max-h-[80vh] overflow-y-auto minimal-scrollbar">
                 <div className="flex items-center gap-5 self-stretch relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <img src="./src/assets/set-goal/mail.svg" alt="Search" />
+                        <img src={SearchImg} alt="Search" />
                     </span>
                     <input
                         type="text"
@@ -62,7 +64,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
                     />
                     <button className="flex p-3 px-6 py-3 gap-3 rounded bg-[#00183D] hover:bg-[#062549] text-white text-base font-medium leading-6 font-sf-pro" onClick={() => handleLinkClick()}>
                         <img
-                            src="./src/assets/dashboard/add.svg"
+                            src={AddGoalImg}
                             className="w-3 h-3 mt-1"
                         />
                         Create Custom Goal</button>
