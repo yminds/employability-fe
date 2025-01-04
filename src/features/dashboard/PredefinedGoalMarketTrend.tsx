@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import WorkImg from '@/assets/dashboard/work.svg';
 
 // Market Trend
 const chartData = [
@@ -38,7 +39,7 @@ const PredefinedGoalMarketTrend: React.FC = () => {
                     <div className="flex flex-col justify-center items-start gap-5 self-stretch border-b border-b-[rgba(0,0,0,0.10)] bg-[#FAFAFA] p-5 px-6 rounded-tl-[9px] rounded-tr-[9px]">
                         <h2 className="flex items-center gap-4 self-stretch text-gray-600 text-base font-medium leading-5 font-ubuntu">
                             <img
-                                src={"./src/assets/dashboard/work.svg"}
+                                src={WorkImg}
                                 alt=""
                                 className="w-5 h-5"
                             />Job Demand Over Time</h2>
@@ -92,7 +93,7 @@ const PredefinedGoalMarketTrend: React.FC = () => {
                     <div className="flex flex-col justify-center items-start gap-5 self-stretch border-b border-b-[rgba(0,0,0,0.10)] bg-[#FAFAFA] p-5 px-6 rounded-tl-[9px] rounded-tr-[9px]">
                         <h2 className="flex items-center gap-4 self-stretch text-gray-600 text-base font-medium leading-5 font-ubuntu">
                             <img
-                                src={"./src/assets/dashboard/work.svg"}
+                                src={WorkImg}
                                 alt=""
                                 className="w-5 h-5"
                             />Interest Over Time</h2>
