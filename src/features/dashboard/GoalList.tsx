@@ -39,44 +39,47 @@ const experienceLevelObj = {1: "Entry-level", 2: "Mid-level", 3: "Senior-level"}
 const difficultyLevelObj = {1: "Easy", 2: "Medium", 3: "High"};
 
 const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters }) => {
-    const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery();
+    const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery() as { data: GoalsData | undefined, error: any, isLoading: boolean };
     const [fetchFilteredGoals] = useFilterGoalsMutation();
-    
+
     useEffect(() => {
         const fetchData = async () => {
             if (filters && Object.keys(filters).length > 0) {
                 try {
                     const filteredGoals = await fetchFilteredGoals(filters).unwrap();
-                    setData(filteredGoals);
-                    setSearchTitle("Filtered Goals");
+                    if (filteredGoals?.data && filteredGoals.data.length > 0) {
+                        setData(filteredGoals.data);
+                        setSearchTitle("Filtered Goals");
+                    } else {
+                        setData([]);
+                        setSearchTitle("No Goals Found");
+                    }
                 } catch (err) {
                     console.error("Error fetching filtered goals:", err);
                     setData([]);
+                    setSearchTitle("Error Fetching Goals");
                 }
             } else if (allGoals?.data) {
                 setData(allGoals.data);
                 setSearchTitle("All Goals");
             }
         };
-    
+
         fetchData();
     }, [filters, allGoals, fetchFilteredGoals]);
-    
-    
+
     const [data, setData] = useState<any[]>([]); // State to store the final data
     const [searchTitle, setSearchTitle] = useState("");
-    
+
     useEffect(() => {
-        if ( searchGoals && searchGoals.data.length > 0) {
-            setData(searchGoals);
+        if (searchGoals && searchGoals.data.length > 0) {
+            setData(searchGoals.data);
             setSearchTitle(`${searchGoals.data.length} results`);
-        }
-        else if (searchGoals && searchGoals.data.length == 0) {
+        } else if (searchGoals && searchGoals.data.length === 0) {
             setData([]);
             setSearchTitle("No Goals Found");
-        }
-        else if (allGoals) {
-            setData(allGoals);
+        } else if (allGoals) {
+            setData(allGoals.data);
             setSearchTitle("All Goals");
         }
     }, [searchGoals, allGoals]);
@@ -104,15 +107,18 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
             )}
 
             <h5 className={`text-[20px] font-medium leading-[26px] tracking[-0.2px] ${displayTitle ? "" : "hidden"}`}>{searchTitle}</h5>
-            
+
             {/* Grid displaying the list of goals */}
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full">
                 {/* Loading and Error States */}
-                {isFetching && <GoalListSkeleton /> }
+                {isFetching && <GoalListSkeleton />}
                 {fetchError && <p>Oops! Something went wrong while loading goals.</p>}
 
+                {/* No Goals Found */}
+                {/* {data.length === 0 && !isFetching && !fetchError && <p>No goals match your filters.</p>} */}
+
                 {/* Render Goal Cards */}
-                {data?.data?.map((goal) => (
+                {data?.map((goal) => (
                     <div
                         key={goal._id}
                         className="relative cursor-pointer"
@@ -121,7 +127,8 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                         onClick={() => handleGoalClick(goal)} // Handle card click
                     >
                         {/* Default Block */}
-                        <div className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
+                        <div
+                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
                         >
                             {/* Add an Image or Placeholder */}
                             <img
@@ -133,10 +140,18 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                             <div className="flex flex-col gap-6 p-4 pt-4 pb-4 pl-3 self-stretch">
                                 <h3 className="text-[#414447] text-[20px] font-medium leading-[24px] tracking-[0.3px]">{goal.title}</h3>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{formatSalaryRange(goal.min_salary_range, goal.max_salary_range)}</div>
-                                    <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{jobsMarketDemandObj[goal.job_market_demand as keyof typeof jobsMarketDemandObj]}</div>
-                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">{experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}</div>
-                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: {difficultyLevelObj[goal.difficulty_level  as keyof typeof difficultyLevelObj]}</div>
+                                    <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">
+                                        {formatSalaryRange(goal.min_salary_range, goal.max_salary_range)}
+                                    </div>
+                                    <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">
+                                        {jobsMarketDemandObj[goal.job_market_demand as keyof typeof jobsMarketDemandObj]}
+                                    </div>
+                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">
+                                        {experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}
+                                    </div>
+                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">
+                                        Difficulty: {difficultyLevelObj[goal.difficulty_level as keyof typeof difficultyLevelObj]}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -147,10 +162,18 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                         >
                             <h3 className="text-[#414447] leading-[24px] tracking-[0.3px] mb-4">{goal.title}</h3>
                             <div className="grid grid-cols-2 gap-2">
-                                <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{formatSalaryRange(goal.min_salary_range, goal.max_salary_range)}</div>
-                                <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">{jobsMarketDemandObj[goal.job_market_demand as keyof typeof jobsMarketDemandObj]}</div>
-                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">{experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}</div>
-                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">Difficulty: {difficultyLevelObj[goal.difficulty_level  as keyof typeof difficultyLevelObj]}</div>
+                                <div className="flex p-1 px-3 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">
+                                    {formatSalaryRange(goal.min_salary_range, goal.max_salary_range)}
+                                </div>
+                                <div className="flex p-1 px-3.5 justify-center items-center gap-2.5 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">
+                                    {jobsMarketDemandObj[goal.job_market_demand as keyof typeof jobsMarketDemandObj]}
+                                </div>
+                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">
+                                    {experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}
+                                </div>
+                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">
+                                    Difficulty: {difficultyLevelObj[goal.difficulty_level as keyof typeof difficultyLevelObj]}
+                                </div>
                             </div>
                             <div className="mt-10">
                                 <button className="py-2 text-sm w-[100px] font-medium text-[#001630] rounded-md border border-solid border-[#001630] float-end absolute end-5 bottom-5">
@@ -158,7 +181,6 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                                 </button>
                             </div>
                         </div>
-
                     </div>
                 ))}
             </div>
