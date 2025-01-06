@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
+import { useGetAllPreDefinedGoalsQuery ,useFilterGoalsMutation } from "@/api/predefinedGoalsApiSlice";
 import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
 import GoalListSkeleton from "./GoalListSkeleton";
 import JobsBannerImg from '@/assets/dashboard/jobs_banner.png';
@@ -31,31 +31,55 @@ interface Props {
     setJourneyDialog: boolean;
     searchGoals: any[] | undefined;
     displayTitle: boolean;
+    filters: any;
 }
 
 const jobsMarketDemandObj = {1: "High", 2: "Mid", 3: "Low"};
 const experienceLevelObj = {1: "Entry-level", 2: "Mid-level", 3: "Senior-level"};
 const difficultyLevelObj = {1: "Easy", 2: "Medium", 3: "High"};
 
-const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle }) => {
-    const { data: predefinedGoals, error, isLoading } = useGetAllPreDefinedGoalsQuery();
+const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters }) => {
+    const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery();
+    const [fetchFilteredGoals] = useFilterGoalsMutation();
+    
+    useEffect(() => {
+        const fetchData = async () => {
+            if (filters && Object.keys(filters).length > 0) {
+                try {
+                    const filteredGoals = await fetchFilteredGoals(filters).unwrap();
+                    setData(filteredGoals);
+                    setSearchTitle("Filtered Goals");
+                } catch (err) {
+                    console.error("Error fetching filtered goals:", err);
+                    setData([]);
+                }
+            } else if (allGoals?.data) {
+                setData(allGoals.data);
+                setSearchTitle("All Goals");
+            }
+        };
+    
+        fetchData();
+    }, [filters, allGoals, fetchFilteredGoals]);
+    
+    
     const [data, setData] = useState<any[]>([]); // State to store the final data
     const [searchTitle, setSearchTitle] = useState("");
     
     useEffect(() => {
-        if (searchGoals && searchGoals.data.length > 0) {
+        if ( searchGoals && searchGoals.data.length > 0) {
             setData(searchGoals);
-            setSearchTitle(`${searchGoals.data.length} "Stack" results`);
+            setSearchTitle(`${searchGoals.data.length} results`);
         }
         else if (searchGoals && searchGoals.data.length == 0) {
             setData([]);
             setSearchTitle("No Goals Found");
         }
-        else if (predefinedGoals) {
-            setData(predefinedGoals);
+        else if (allGoals) {
+            setData(allGoals);
             setSearchTitle("All Goals");
         }
-    }, [searchGoals, predefinedGoals]);
+    }, [searchGoals, allGoals]);
 
     const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
@@ -84,8 +108,8 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
             {/* Grid displaying the list of goals */}
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full">
                 {/* Loading and Error States */}
-                {isLoading && <GoalListSkeleton /> }
-                {error && <p>Oops! Something went wrong while loading goals.</p>}
+                {isFetching && <GoalListSkeleton /> }
+                {fetchError && <p>Oops! Something went wrong while loading goals.</p>}
 
                 {/* Render Goal Cards */}
                 {data?.data?.map((goal) => (

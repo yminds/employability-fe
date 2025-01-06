@@ -1,63 +1,76 @@
 import React, { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-const SetGoalFilter: React.FC<{}> = ({ }) => {
-    // Level Selection
-    const [selectedLevels, setSelectedLevels] = useState<string[]>(['entry']);
-    const handleSelect = (level: string) => {
-        if (selectedLevels.includes(level)) {
-            // Remove the level if it's already selected
-            setSelectedLevels(selectedLevels.filter((item) => item !== level));
-        }
-        else {
-            // Add the level if it's not selected
-            setSelectedLevels([...selectedLevels, level]);
-        }
-    };
+const SetGoalFilter: React.FC<{ onFilterChange: (filters: any) => void }> = ({ onFilterChange }) => {
+    const [filterParams, setFilterParams] = useState<any>({});
 
+    // Update filter parameters and notify the parent component
+    const updateFilters = (newParams: any) => {
+      const updatedFilters = { ...filterParams, ...newParams };
+      setFilterParams(updatedFilters);
+      onFilterChange(updatedFilters); // Notify the parent
+    };
+  
+    // Level Selection
+    const [selectedLevels, setSelectedLevels] = useState<string[]>(['1']);
+    const handleSelect = (level: string) => {
+      setSelectedLevels((prevSelectedLevels) => {
+        const updatedLevels = prevSelectedLevels.includes(level)
+          ? prevSelectedLevels.filter((item) => item !== level)
+          : [...prevSelectedLevels, level];
+  
+        updateFilters({ experience_level: updatedLevels });
+        return updatedLevels;
+      });
+    };
+  
     // Demand Selection
     const [selectedDemands, setSelectedDemands] = useState<any[]>([]);
     const handleSelectDemand = (demand: any) => {
-        if (selectedDemands.includes(demand)) {
-            // Remove the demand if it's already selected
-            setSelectedDemands(selectedDemands.filter((item) => item !== demand));
-        }
-        else {
-            // Add the demand if it's not selected
-            setSelectedDemands([...selectedDemands, demand]);
-        }
+      setSelectedDemands((prevSelectedDemands) => {
+        const updatedDemands = prevSelectedDemands.includes(demand)
+          ? prevSelectedDemands.filter((item) => item !== demand)
+          : [...prevSelectedDemands, demand];
+  
+        updateFilters({ job_market_demand: updatedDemands });
+        return updatedDemands;
+      });
     };
-
+  
     // Learning Time Selection
-    const [selectedOption, setSelectedOption] = useState('1-3 Months');
-    const handleSelectOption = (value: React.SetStateAction<string>) => {
-        setSelectedOption(value);
+    const [selectedOption, setSelectedOption] = useState('1');
+    const handleSelectOption = (value: string) => {
+      setSelectedOption(value);
+      updateFilters({ learning_time: value });
     };
-
+  
     // Difficulty Level Selection
-    const [selectedDiffcultLevels, setSelectedDiffcultLevels] = useState<string[]>(['easy']);
-
-    const handleDiffcultSelect = (level: any) => {
-        if (selectedDiffcultLevels.includes(level)) {
-            setSelectedDiffcultLevels(selectedDiffcultLevels.filter((item) => item !== level));
-        } else {
-            setSelectedDiffcultLevels([...selectedDiffcultLevels, level]);
-        }
+    const [selectedDiffcultLevels, setSelectedDifficultyLevels] = useState<string[]>(['1']);
+    const handleDiffcultSelect = (level: string) => {
+      setSelectedDifficultyLevels((prevLevels) => {
+        const updatedLevels = prevLevels.includes(level)
+          ? prevLevels.filter((item) => item !== level)
+          : [...prevLevels, level];
+  
+        updateFilters({ difficulty_level: updatedLevels });
+        return updatedLevels;
+      });
     };
-
+  
     // Salary Range
-    const [salaryRange, setSalaryRange] = useState([0, 50]);
-
-    const handleMinChange = (e: { target: { value: any; }; }) => {
-        const minValue = Math.min(Number(e.target.value), salaryRange[1]);
-        setSalaryRange([minValue, salaryRange[1]]);
+    const [salaryRange, setSalaryRange] = useState<[number, number]>([0, 50]);
+    const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const minValue = Math.min(Number(e.target.value), salaryRange[1]);
+      setSalaryRange([minValue, salaryRange[1]]);
+       updateFilters({ min_salary_range: minValue * 100000 });
     };
-
-    const handleMaxChange = (e: { target: { value: any; }; }) => {
-        const maxValue = Math.max(Number(e.target.value), salaryRange[0]);
-        setSalaryRange([salaryRange[0], maxValue]);
+  
+    const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const maxValue = Math.max(Number(e.target.value), salaryRange[0]);
+      setSalaryRange([salaryRange[0], maxValue]);
+      updateFilters({ max_salary_range: maxValue * 100000 });
     };
-
+  
     return <>
         {/* Experience Level */}
         <div className="flex flex-col items-start w-[280px] gap-5 border-b border-[#E0E0E0] pb-6">
@@ -65,8 +78,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
             <div className="flex flex-col items-start gap-3 self-stretch">
                 {/* Entry Level */}
                 <div
-                    onClick={() => handleSelect('entry')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedLevels.includes('entry')
+                    onClick={() => handleSelect('1')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedLevels.includes('1')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -74,8 +87,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="entry"
-                        checked={selectedLevels.includes('entry')}
-                        onChange={() => handleSelect('entry')}
+                        checked={selectedLevels.includes('1')}
+                        onChange={() => handleSelect('1')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">
@@ -90,8 +103,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* Mid Level */}
                 <div
-                    onClick={() => handleSelect('mid')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedLevels.includes('mid')
+                    onClick={() => handleSelect('2')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedLevels.includes('2')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -99,8 +112,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="mid"
-                        checked={selectedLevels.includes('mid')}
-                        onChange={() => handleSelect('mid')}
+                        checked={selectedLevels.includes('2')}
+                        onChange={() => handleSelect('2')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">
@@ -115,8 +128,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* Senior Level */}
                 <div
-                    onClick={() => handleSelect('senior')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedLevels.includes('senior')
+                    onClick={() => handleSelect('3')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedLevels.includes('3')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -124,8 +137,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="senior"
-                        checked={selectedLevels.includes('senior')}
-                        onChange={() => handleSelect('senior')}
+                        checked={selectedLevels.includes('3')}
+                        onChange={() => handleSelect('3')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">
@@ -204,8 +217,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
             <div className="flex flex-col items-start gap-3 self-stretch">
                 {/* High Demand */}
                 <div
-                    onClick={() => handleSelectDemand('high-demand')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDemands.includes('high-demand')
+                    onClick={() => handleSelectDemand('1')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDemands.includes('1')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -213,8 +226,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="high-demand"
-                        checked={selectedDemands.includes('high-demand')}
-                        onChange={() => handleSelectDemand('high-demand')}
+                        checked={selectedDemands.includes('1')}
+                        onChange={() => handleSelectDemand('1')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">
@@ -229,8 +242,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* Mid Demand */}
                 <div
-                    onClick={() => handleSelectDemand('mid-demand')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDemands.includes('mid-demand')
+                    onClick={() => handleSelectDemand('2')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDemands.includes('2')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -238,8 +251,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="mid-demand"
-                        checked={selectedDemands.includes('mid-demand')}
-                        onChange={() => handleSelectDemand('mid-demand')}
+                        checked={selectedDemands.includes('2')}
+                        onChange={() => handleSelectDemand('2')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">
@@ -254,8 +267,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* Low Demand */}
                 <div
-                    onClick={() => handleSelectDemand('low-demand')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDemands.includes('low-demand')
+                    onClick={() => handleSelectDemand('3')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDemands.includes('3')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -263,8 +276,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="low-demand"
-                        checked={selectedDemands.includes('low-demand')}
-                        onChange={() => handleSelectDemand('low-demand')}
+                        checked={selectedDemands.includes('3')}
+                        onChange={() => handleSelectDemand('3')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">
@@ -290,13 +303,13 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
             >
                 {/* 1-3 Months */}
                 <div
-                    className={`flex items-center space-x-2 p-2 px-3 rounded border cursor-pointer w-full ${selectedOption === '1-3 Months'
+                    className={`flex items-center space-x-2 p-2 px-3 rounded border cursor-pointer w-full ${selectedOption === '1'
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
-                    onClick={() => handleSelectOption('1-3 Months')}
+                    onClick={() => handleSelectOption('1')}
                 >
-                    <RadioGroupItem value="1-3 Months" id="option-one" />
+                    <RadioGroupItem value="1" id="option-one" />
                     <label
                         htmlFor="option-one"
                         className="text-gray-500 text-sm font-medium leading-5 tracking-tight cursor-pointer"
@@ -307,13 +320,13 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* 3-6 Months */}
                 <div
-                    className={`flex items-center space-x-2 p-2 px-3 rounded border cursor-pointer w-full ${selectedOption === '3-6 Months'
+                    className={`flex items-center space-x-2 p-2 px-3 rounded border cursor-pointer w-full ${selectedOption === '2'
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
-                    onClick={() => handleSelectOption('3-6 Months')}
+                    onClick={() => handleSelectOption('2')}
                 >
-                    <RadioGroupItem value="3-6 Months" id="option-two" />
+                    <RadioGroupItem value="2" id="option-two" />
                     <label
                         htmlFor="option-two"
                         className="text-gray-500 text-sm font-medium leading-5 tracking-tight cursor-pointer"
@@ -324,13 +337,13 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* 6-12 Months */}
                 <div
-                    className={`flex items-center space-x-2 p-2 px-3 rounded border cursor-pointer w-full ${selectedOption === '6-12 Months'
+                    className={`flex items-center space-x-2 p-2 px-3 rounded border cursor-pointer w-full ${selectedOption === '3'
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
-                    onClick={() => handleSelectOption('6-12 Months')}
+                    onClick={() => handleSelectOption('3')}
                 >
-                    <RadioGroupItem value="6-12 Months" id="option-three" />
+                    <RadioGroupItem value="3" id="option-three" />
                     <label
                         htmlFor="option-three"
                         className="text-gray-500 text-sm font-medium leading-5 tracking-tight cursor-pointer"
@@ -341,13 +354,13 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* Over 1 Year */}
                 <div
-                    className={`flex items-center space-x-2 p-2 px-3 rounded border cursor-pointer w-full ${selectedOption === 'Over 1 Year'
+                    className={`flex items-center space-x-2 p-2 px-3 rounded border cursor-pointer w-full ${selectedOption === '4'
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
-                    onClick={() => handleSelectOption('Over 1 Year')}
+                    onClick={() => handleSelectOption('4')}
                 >
-                    <RadioGroupItem value="Over 1 Year" id="option-four" />
+                    <RadioGroupItem value="4" id="option-four" />
                     <label
                         htmlFor="option-four"
                         className="text-gray-500 text-sm font-medium leading-5 tracking-tight cursor-pointer"
@@ -364,8 +377,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
             <div className="flex flex-col items-start gap-3 self-stretch">
                 {/* Easy */}
                 <div
-                    onClick={() => handleDiffcultSelect('easy')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDiffcultLevels.includes('easy')
+                    onClick={() => handleDiffcultSelect('1')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDiffcultLevels.includes('1')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -373,8 +386,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="easy"
-                        checked={selectedDiffcultLevels.includes('easy')}
-                        onChange={() => handleDiffcultSelect('easy')}
+                        checked={selectedDiffcultLevels.includes('1')}
+                        onChange={() => handleDiffcultSelect('1')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">
@@ -389,8 +402,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* Medium */}
                 <div
-                    onClick={() => handleDiffcultSelect('medium')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDiffcultLevels.includes('medium')
+                    onClick={() => handleDiffcultSelect('2')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDiffcultLevels.includes('2')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -398,8 +411,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="medium"
-                        checked={selectedDiffcultLevels.includes('medium')}
-                        onChange={() => handleDiffcultSelect('medium')}
+                        checked={selectedDiffcultLevels.includes('2')}
+                        onChange={() => handleDiffcultSelect('2')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">
@@ -414,8 +427,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
 
                 {/* Hard */}
                 <div
-                    onClick={() => handleDiffcultSelect('hard')}
-                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDiffcultLevels.includes('hard')
+                    onClick={() => handleDiffcultSelect('3')}
+                    className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${selectedDiffcultLevels.includes('3')
                         ? 'border-[#1FD167] bg-[rgba(31,209,103,0.15)]'
                         : 'bg-white border-[#B4B4B5]'
                         }`}
@@ -423,8 +436,8 @@ const SetGoalFilter: React.FC<{}> = ({ }) => {
                     <input
                         type="checkbox"
                         id="hard"
-                        checked={selectedDiffcultLevels.includes('hard')}
-                        onChange={() => handleDiffcultSelect('hard')}
+                        checked={selectedDiffcultLevels.includes('3')}
+                        onChange={() => handleDiffcultSelect('3')}
                         className="hidden"
                     />
                     <div className="grid gap-1.5 leading-none">

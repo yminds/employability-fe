@@ -67,3 +67,24 @@ export const searchGoalApiSlice = apiSlice.injectEndpoints({
 });
 
 export const { useGetSearchGoalQuery } = searchGoalApiSlice;
+
+export const filterGoalsApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    filterGoals: builder.mutation<any, {
+      experience_level?: string;
+      min_salary_range?: number;
+      max_salary_range?: number;
+      job_market_demand?: string;
+      learning_time?: string;
+      difficulty_level?: string;
+    }>({
+      query: (filterParams) => ({
+        url: '/api/v1/predefinedGoals/getFilterGoals',
+        method: 'POST',
+        body: filterParams,
+      }),
+    }),
+  }),
+});
+
+export const { useFilterGoalsMutation } = filterGoalsApiSlice;

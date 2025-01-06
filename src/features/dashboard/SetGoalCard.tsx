@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import GoalList from "./GoalList";
 import GoalFormDialog from "./GoalFormDialog";
-import { useGetSearchGoalQuery } from "@/api/predefinedGoalsApiSlice";
+import {  useGetSearchGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SetGoalFilter from './SetGoalFilter';
 import ExperienceComponent from './ExperienceComponent';
 import SearchImg from '@/assets/set-goal/mail.svg';
@@ -41,10 +41,16 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
         }
     }, [searchGoal]);
 
+    const [filters, setFilters] = useState<any>({});
+
+    const handleFilterChange = async (updatedFilters: any) => {
+        setFilters(updatedFilters);     
+    };
+
     return <>
         <div className="grid grid-cols-4 gap-6">
             <div className="col-span-1 flex flex-col gap-6 shrink-0 border-r max-h-[80vh] overflow-y-auto minimal-scrollbar">
-                <SetGoalFilter />
+                <SetGoalFilter onFilterChange={handleFilterChange} />
             </div>
 
             {/* Goals */}
@@ -80,10 +86,10 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any; }> = ({ setJourneyDialog })
 
                 <section className="flex flex-col items-start gap-4 self-stretch">
                     <div className="flex flex-start gap-2.5">
-                        {ExperienceComponent({ selectedOption: "Entry Level" })}
+                     <ExperienceComponent filters={filters} />
                     </div>
 
-                    <GoalList isLoading={false} error={false} setJourneyDialog={setJourneyDialog} searchGoals={searchGoals} displayTitle={true} />
+                    <GoalList isLoading={false} error={false} setJourneyDialog={setJourneyDialog} searchGoals={searchGoals} displayTitle={true} filters={filters} />
                 </section>
             </div>
         </div>
