@@ -246,7 +246,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         className="w-2/6 justify-between hover:bg-white"
       >
         {goals?.data.find((goal) => goal._id === selectedGoalId)
-          ? `${goals?.data.find((goal) => goal._id === selectedGoalId)?.name} (${experienceLevelObj[goals?.data.find((goal) => goal._id === selectedGoalId)?.experience as keyof typeof experienceLevelObj] || 'N/A'})`
+          ? `${goals?.data.find((goal) => goal._id === selectedGoalId)?.name} (${experienceLevelObj[goals?.data.find((goal) => goal._id === selectedGoalId)?.experience as unknown as keyof typeof experienceLevelObj] || 'N/A'})`
           : "Select a goal"}
         {isGoalPopoverOpen ? (
           <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
