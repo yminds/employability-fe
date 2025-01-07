@@ -17,9 +17,11 @@ interface Goal {
   predefined_goal_id: string;
 }
 
-const SetGoalCard: React.FC<{ setJourneyDialog: any }> = ({
-  setJourneyDialog,
+const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string}> = ({
+  setJourneyDialog, selectedLevel
 }) => {
+  console.log(selectedLevel);
+  
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
 
@@ -47,6 +49,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any }> = ({
   // Handles the updated filters from the SetGoalFilter component
   const handleFilterChange = async (updatedFilters: any) => {
     setFilters(updatedFilters);
+    console.log(updatedFilters);
   };
 
   // Removes a specific filter
@@ -57,6 +60,14 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any }> = ({
       return updatedFilters;
     });
   };
+
+  // Effect to trigger handleFilterChange when selectedLevel changes
+  useEffect(() => {
+    if (selectedLevel !== undefined && selectedLevel !== null) {
+      setFilters({ experience_level: [selectedLevel] });
+    }
+  }, [selectedLevel]);
+
 
   return (
     <>

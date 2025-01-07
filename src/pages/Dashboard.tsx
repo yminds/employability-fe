@@ -29,8 +29,8 @@ const Dashboard: React.FC<Props> = () => {
   const user_name = user ? user.name : "";
   const profile_image = user ? user.profile_image : "";
 
-  const { data: goalsData } = "";
-  // const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  // const { data: goalsData } = "";
+  const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
   const goalName = goalsData?.data?.[0]?.name || "";
   const goalId = goalsData?.data?.[0]?._id || "";
 
@@ -40,10 +40,10 @@ const Dashboard: React.FC<Props> = () => {
 
   return (
     <>
-      <main className="h-screen overflow-y-auto minimal-scrollbar font-ubuntu">
+      <main className="h-screen overflow-y-auto minimal-scrollbar font-ubuntu ">
         <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
-            {goalsData ? (
+            {goalsData?.data.length > 0 ? (
               <main>
                 <header className="mb-7">
                   <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight flex items-center gap-3">

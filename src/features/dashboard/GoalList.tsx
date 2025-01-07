@@ -3,6 +3,7 @@ import { useGetAllPreDefinedGoalsQuery ,useFilterGoalsMutation } from "@/api/pre
 import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
 import GoalListSkeleton from "./GoalListSkeleton";
 import JobsBannerImg from '@/assets/dashboard/jobs_banner.png';
+import { useLocation } from "react-router-dom";
 
 interface Goal {
     title: string;
@@ -49,7 +50,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                     const filteredGoals = await fetchFilteredGoals(filters).unwrap();
                     if (filteredGoals?.data && filteredGoals.data.length > 0) {
                         setData(filteredGoals.data);
-                        setSearchTitle("Filtered Goals");
+                        setSearchTitle("");
                     } else {
                         setData([]);
                         setSearchTitle("No Goals Found");
@@ -61,7 +62,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                 }
             } else if (allGoals?.data) {
                 setData(allGoals.data);
-                setSearchTitle("All Goals");
+                setSearchTitle("");
             }
         };
 
@@ -80,7 +81,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
             setSearchTitle("No Goals Found");
         } else if (allGoals) {
             setData(allGoals.data);
-            setSearchTitle("All Goals");
+            setSearchTitle("");
         }
     }, [searchGoals, allGoals]);
 
@@ -95,15 +96,20 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
 
     const [hoveredCard, setHoveredCard] = useState(null); // Track the hovered card by ID
 
+    const location = useLocation(); // Get current location
+
+    // Check if the URL is `/setgoals`
+    const isSetGoalsPage = location.pathname === "/setgoal";
     return (
         <>
             {isDialogOpen && selectedGoal && (
-                <PredefinedGoalDialog
+                    <PredefinedGoalDialog
                     isOpen={isDialogOpen}
                     setIsOpen={setIsDialogOpen}
-                    selectedGoal={selectedGoal} // Pass the selected goal as a prop
+                    selectedGoal={selectedGoal}
                     setJourneyDialog={setJourneyDialog}
-                />
+                    isSetGoalsPage={isSetGoalsPage} // Pass the flag to control the appearance
+                    />
             )}
 
             <h5 className={`text-[20px] font-medium leading-[26px] tracking[-0.2px] ${displayTitle ? "" : "hidden"}`}>{searchTitle}</h5>

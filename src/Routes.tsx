@@ -9,7 +9,7 @@ import { Role } from "./models/Role";
 
 // Routes Components
 import Dashboard from "./pages/Dashboard";
-import SetGoal from "./pages/SetGoal";
+import SetGoal from "./pages/SetGoal.tsx";
 import Interview from "./pages/Interview.tsx";
 
 // Components

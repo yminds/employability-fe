@@ -10,6 +10,7 @@ import PredefinedGoalOverview from "./PredefinedGoalOverview";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import BackImg from '@/assets/dashboard/back.svg';
 import GoalBannerImg from '@/assets/dashboard/goal_banner.png';
+import { useNavigate } from "react-router-dom";
 
 interface Goal {
     _id: string;
@@ -30,6 +31,7 @@ interface GoalFormDialogProps {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedGoal: Goal | null; // Goal data passed as a prop
     setJourneyDialog: boolean;
+    isSetGoalsPage: boolean; 
 }
 
 const jobsMarketDemandObj = {1: "High", 2: "Mid", 3: "Low"};
@@ -39,7 +41,7 @@ const learningTimeObj = {1: "1-3 Months", 2: "3-6 Months", 3: "6-12 Months", 4: 
 
 const tabs = ["Overview", "Skills", "Market Trend", "Active Jobs"];
 
-const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal }) => {
+const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, isSetGoalsPage }) => { 
     const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal] = useState(selectedGoal ? selectedGoal.title : "");
@@ -55,6 +57,8 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
     const [isSaving, setIsSaving] = useState(false); // State to handle saving/loading state
 
     const [createGoal] = useAddUserGoalMutation();
+    const navigate = useNavigate();
+    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,6 +77,8 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
             setIsSaved(false);
             setIsOpen(false);
             //setJourneyDialog(false);
+            navigate("/");
+            
         } catch (err) {
             console.error("Failed to save goal:", err);
         }
@@ -83,84 +89,88 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
     };
 
     const [activeTab, setActiveTab] = useState("Overview");
+    const dialogClassName = `p-0 max-w-[1400px] h-[90vh] overflow-y-auto minimal-scrollbar rounded-[12px] font-ubuntu [&>button:last-child]:hidden lg:max-w-4xl md:max-w-lg ${
+        isSetGoalsPage ? 'fixed w-[50vw] h-[100vh] transition-all duration-300 border-none rounded-none ' + (isOpen ? 'translate-x-0' : 'translate-x-full') : ''
+    }`;
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="p-0 max-w-5xl h-[80vh] overflow-y-auto minimal-scrollbar rounded-[12px] font-ubuntu [&>button:last-child]:hidden lg:max-w-4xl md:max-w-lg">
-                <DialogTitle className="hidden">Predefined Goals</DialogTitle>
-                <DialogDescription className="hidden">Select a predefined goal to set your journey</DialogDescription>
-                <div>
-                    {/* Header Section */}
-                    <div className="flex flex-col items-start justify-center gap-5 p-6 px-8 relative h-[245px] ">
-                        <button className="flex items-center gap-4 text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro z-[9999]"
-                            onClick={handleCloseGoals}>
-                            <img
-                                src={BackImg}
-                                alt=""
-                                className="w-4 z-[9999]"
-                            /> Back to Goals
-                        </button>
-
-                        <div className="flex flex-col items-start gap-5 z-[9999]">
-                            <div className="flex-col items-end gap-3 self-stretch inline-block">
-                                <span className="text-[#414447] text-[32px] font-medium leading-[42px] tracking-[-0.5px]">{goal}</span>
-                                <span className="p-2 px-4 ml-3 justify-center items-center gap-2 rounded-[42px] bg-[#DBFFEA] text-[#10B754] text-[16px] font-medium leading-[25.6px] tracking-[-0.5px]">
-                                    {experienceLevel}
-                                </span>
-                            </div>
-                            <button className="flex w-[196px] h-[44px] p-4 px-8 justify-center items-center gap-2 rounded bg-[#00183D] text-white text-[16px] font-medium leading-[150%] font-sf-pro" onClick={handleSubmit}>
-                                Set This Goal
+        <div className=" relative  w-screen h-screen">
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className={dialogClassName}>
+                    <DialogTitle className="hidden">Predefined Goals</DialogTitle>
+                    <DialogDescription className="hidden">Select a predefined goal to set your journey</DialogDescription>
+                    <div>
+                        {/* Header Section */}
+                        <div className="flex flex-col items-start justify-center gap-5 p-6 px-8 relative h-[245px] ">
+                            <button className="flex items-center gap-4 text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro z-[9999]"
+                                onClick={handleCloseGoals}>
+                                <img
+                                    src={BackImg}
+                                    alt=""
+                                    className="w-4 z-[9999]"
+                                /> Back to Goals
                             </button>
-                        </div>
 
-                        <img
-                            src={GoalBannerImg}
-                            alt="Fullstack Developer"
-                            className="rounded-tl-[9px] rounded-tr-[9px] w-full absolute top-0 right-0 h-[245px] object-cover"
-                        />
-                    </div>
-
-                    <div className="p-6 px-8 font-sf-pro">
-                        {/* Tab Navigation */}
-                        <div className="flex pb-5">
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`flex h-[36px] justify-center items-center gap-[10px] flex-[1_0_0] text-center text-base font-normal leading-6 tracking-wide ${activeTab === tab
-                                        ? "border-b-2 border-[#00183D] text-[#00183D]"
-                                        : "text-[#909091] hover:text-[#00183D]"
-                                        }`}
-                                >
-                                    {tab}
+                            <div className="flex flex-col items-start gap-5 z-[9999]">
+                                <div className="flex-col items-end gap-3 self-stretch inline-block">
+                                    <span className="text-[#414447] text-[32px] font-medium leading-[42px] tracking-[-0.5px]">{goal}</span>
+                                    <span className="p-2 px-4 ml-3 justify-center items-center gap-2 rounded-[42px] bg-[#DBFFEA] text-[#10B754] text-[16px] font-medium leading-[25.6px] tracking-[-0.5px]">
+                                        {experienceLevel}
+                                    </span>
+                                </div>
+                                <button className="flex w-[196px] h-[44px] p-4 px-8 justify-center items-center gap-2 rounded bg-[#00183D] text-white text-[16px] font-medium leading-[150%] font-sf-pro" onClick={handleSubmit}>
+                                    Set This Goal
                                 </button>
-                            ))}
+                            </div>
+
+                            <img
+                                src={GoalBannerImg}
+                                alt="Fullstack Developer"
+                                className="rounded-tl-[9px] rounded-tr-[9px] w-full absolute top-0 right-0 h-[245px] object-cover"
+                            />
                         </div>
 
-                        {/* Content Section */}
-                        {activeTab === "Overview" && (
-                            <PredefinedGoalOverview goalId={goalId} description={description} jobMarketDemand={jobMarketDemand} minSalaryRange={minSalaryRange} maxSalaryRange={maxSalaryRange} difficultyLevel={difficultyLevel} learningTime={learningTime} />
-                        )}
+                        <div className="p-6 px-8 font-sf-pro">
+                            {/* Tab Navigation */}
+                            <div className="flex pb-5">
+                                {tabs.map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`flex h-[36px] justify-center items-center gap-[10px] flex-[1_0_0] text-center text-base font-normal leading-6 tracking-wide ${activeTab === tab
+                                            ? "border-b-2 border-[#00183D] text-[#00183D]"
+                                            : "text-[#909091] hover:text-[#00183D]"
+                                            }`}
+                                    >
+                                        {tab}
+                                    </button>
+                                ))}
+                            </div>
 
-                        {/* Skills Tabs */}
-                        {activeTab === "Skills" && (
-                            <PredefinedGoalSkills goalId={goalId} />
-                        )}
+                            {/* Content Section */}
+                            {activeTab === "Overview" && (
+                                <PredefinedGoalOverview goalId={goalId} description={description} jobMarketDemand={jobMarketDemand} minSalaryRange={minSalaryRange} maxSalaryRange={maxSalaryRange} difficultyLevel={difficultyLevel} learningTime={learningTime} />
+                            )}
 
-                        {/* Market Trend Tabs */}
-                        {activeTab === "Market Trend" && (
-                           <PredefinedGoalMarketTrend />
-                        )}
+                            {/* Skills Tabs */}
+                            {activeTab === "Skills" && (
+                                <PredefinedGoalSkills goalId={goalId} />
+                            )}
 
-                        {/* Active Jobs Tabs */}
-                        {activeTab === "Active Jobs" && (
-                            <PredefinedGoalActiveJobs />
-                        )}
+                            {/* Market Trend Tabs */}
+                            {activeTab === "Market Trend" && (
+                            <PredefinedGoalMarketTrend />
+                            )}
+
+                            {/* Active Jobs Tabs */}
+                            {activeTab === "Active Jobs" && (
+                                <PredefinedGoalActiveJobs />
+                            )}
+                        </div>
                     </div>
-
-                </div>
-            </DialogContent>
-        </Dialog>
+                </DialogContent>
+            </Dialog>
+        </div>
     );
 };
 
