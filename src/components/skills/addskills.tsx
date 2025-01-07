@@ -45,6 +45,7 @@ interface AddSkillsModalProps {
         message: string;
         data: [
           {
+            experience: string|null;
             _id: string;
             name: string;
           }
@@ -206,6 +207,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     }
   }, [skills]);
 
+  const experienceLevelObj = { 1: "Entry-level", 2: "Mid-level", 3: "Senior-level" };
+
+
   return (
     <Dialog
       defaultOpen
@@ -229,54 +233,55 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 
         {/* Goal Selection Popover */}
         <div className=" flex items-center max-h-[46px]">
-          <span className="text-sm font-medium block">Goal : </span>
-          <Popover
-            open={isGoalPopoverOpen}
-            onOpenChange={(isOpen) => setIsGoalPopoverOpen(isOpen)}
-          >
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                role="combobox"
-                aria-expanded={isGoalPopoverOpen}
-                className="w-2/6 justify-between hover:bg-white"
-              >
-                {goals?.data.find((goal) => goal._id === selectedGoalId)
-                  ?.name || "Select a goal"}
-                {isGoalPopoverOpen ? (
-                  <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                ) : (
-                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+  <span className="text-sm font-medium block">Goal : </span>
+  <Popover
+    open={isGoalPopoverOpen}
+    onOpenChange={(isOpen) => setIsGoalPopoverOpen(isOpen)}
+  >
+    <PopoverTrigger asChild>
+      <Button
+        variant="ghost"
+        role="combobox"
+        aria-expanded={isGoalPopoverOpen}
+        className="w-2/6 justify-between hover:bg-white"
+      >
+        {goals?.data.find((goal) => goal._id === selectedGoalId)
+          ? `${goals?.data.find((goal) => goal._id === selectedGoalId)?.name} (${experienceLevelObj[goals?.data.find((goal) => goal._id === selectedGoalId)?.experience as keyof typeof experienceLevelObj] || 'N/A'})`
+          : "Select a goal"}
+        {isGoalPopoverOpen ? (
+          <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        ) : (
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        )}
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-full max-h-[200px] p-0">
+      <Command className="w-full">
+        <CommandInput placeholder="Search goals" />
+        <CommandEmpty>No goals found.</CommandEmpty>
+        <CommandGroup>
+          {goals?.data.map((goal) => (
+            <CommandItem
+              key={goal._id}
+              onSelect={() => {
+                handleGoalChange(goal._id);
+                setIsGoalPopoverOpen(false);
+              }}
+            >
+              <Check
+                className={cn(
+                  "mr-2 h-4 w-4",
+                  selectedGoalId === goal._id ? "opacity-100" : "opacity-0"
                 )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full max-h-[200px] p-0">
-              <Command className="w-full">
-                <CommandInput placeholder="Search goals" />
-                <CommandEmpty>No goals found.</CommandEmpty>
-                <CommandGroup>
-                  {goals?.data.map((goal) => (
-                    <CommandItem
-                      key={goal._id}
-                      onSelect={() => {
-                        handleGoalChange(goal._id);
-                        setIsGoalPopoverOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedGoalId === goal._id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {goal.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
+              />
+              {goal.name} ({experienceLevelObj[goal.experience] || 'N/A'})
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </Command>
+    </PopoverContent>
+  </Popover>
+</div>
 
         <div
           ref={skillsRef}

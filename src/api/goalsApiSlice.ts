@@ -8,6 +8,7 @@ export const goalsApiSlice = apiSlice.injectEndpoints({
         {
           _id : string,
           name: string
+          experience:string
         }
       ]
     }, string | undefined>({
