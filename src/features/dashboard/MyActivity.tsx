@@ -37,8 +37,8 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
     const totalSkillsNum = Number(totalSkills) || 0;
     const totalVerifiedSkillsNum = Number(totalVerifiedSkills) || 0;
 
-    const averageVerifiedPercentage = totalSkillsNum > 0 ? (totalVerifiedSkillsNum / totalSkillsNum) * 100 : 0;
-    const averageVerifiedScore = totalSkillsNum > 0 ? averageVerifiedPercentage / 10 : 0;
+    const averageVerifiedPercentage = totalSkillsNum > 0 ? parseFloat(((totalVerifiedSkillsNum / totalSkillsNum) * 100).toFixed(2)) : 0;
+    const averageVerifiedScore = totalSkillsNum > 0 ? parseFloat((averageVerifiedPercentage / 10).toFixed(2)) : 0;
 
     return <>
         <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-6">
