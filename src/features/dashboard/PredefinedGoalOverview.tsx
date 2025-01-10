@@ -104,7 +104,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description, jobMarke
                     {
                         // Ensure skillsName is properly accessed and handled
                         skillsName?.data?.skill_pool_id?.length > 0 ? (
-                            skillsName.data.skill_pool_id.map((item: any) => {
+                            skillsName?.data.skill_pool_id.map((item: any) => {
                                 let skill = item.skills_pool;
                                 return (
                                     <span
