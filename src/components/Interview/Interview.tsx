@@ -2,16 +2,15 @@ import { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { useParams } from "react-router-dom";
 
-import Header from "@/components/Interview/Header";
-import WebCam from "@/components/Interview/WebCam";
-import Controls from "@/components/Interview/Controls";
-import AIProfile from "@/components/Interview/AIProfile";
-import Conversation from "@/components/Interview/Conversation";
+import Header from "@/components/interview/Header";
+import WebCam from "@/components/interview/WebCam";
+import Controls from "@/components/interview/Controls";
+import AIProfile from "@/components/interview/AIProfile";
+import Conversation from "@/components/interview/Conversation";
 import { useInterviewStreamMutation } from "@/api/aiApiSlice";
 import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
-import CodeSnippetEditor from "./CodeSnippetEditor";
+import CodeSnippetEditor from "@/components/interview/CodeSnippetEditor";
 import { useTTS } from "@/hooks/useTTS";
-
 import { useSTT } from "@/hooks/useSTT";
 
 export interface IMessage {
