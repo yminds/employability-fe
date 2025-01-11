@@ -73,7 +73,7 @@ const BannerSkillsIcons: React.FC<SkillIconsProps> = ({ data, color, isGoalsList
         zIndex: 15 - index,
         transform: `rotate(${style.rotate})`,
         boxShadow: isGoalsList
-          ? `10px 10px 30px ${shadowColor}` // Shadow for goals list
+          ? `10px 4px 30px ${shadowColor}` // Shadow for goals list
           : `0px 4px 12px ${shadowColor}`, // Shadow for non-goals list
         border: isGoalsList ? "4px solid white" : "2px solid white",
         fontSize: `${fontSize}px`
