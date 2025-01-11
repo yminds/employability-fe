@@ -41,17 +41,17 @@ interface AddSkillsModalProps {
   userId: string | undefined;
   onSkillsUpdate: (isUpdated: boolean) => void;
   goals:
-    | {
-        message: string;
-        data: [
-          {
-            experience: string|null;
-            _id: string;
-            name: string;
-          }
-        ];
+  | {
+    message: string;
+    data: [
+      {
+        experience: string | null;
+        _id: string;
+        name: string;
       }
-    | undefined;
+    ];
+  }
+  | undefined;
 }
 
 const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
@@ -233,55 +233,55 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 
         {/* Goal Selection Popover */}
         <div className=" flex items-center max-h-[46px]">
-  <span className="text-sm font-medium block">Goal : </span>
-  <Popover
-    open={isGoalPopoverOpen}
-    onOpenChange={(isOpen) => setIsGoalPopoverOpen(isOpen)}
-  >
-    <PopoverTrigger asChild>
-      <Button
-        variant="ghost"
-        role="combobox"
-        aria-expanded={isGoalPopoverOpen}
-        className="w-2/6 justify-between hover:bg-white"
-      >
-        {goals?.data.find((goal) => goal._id === selectedGoalId)
-          ? `${goals?.data.find((goal) => goal._id === selectedGoalId)?.name} (${experienceLevelObj[goals?.data.find((goal) => goal._id === selectedGoalId)?.experience as unknown as keyof typeof experienceLevelObj] || 'N/A'})`
-          : "Select a goal"}
-        {isGoalPopoverOpen ? (
-          <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        ) : (
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        )}
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent className="w-full max-h-[200px] p-0">
-      <Command className="w-full">
-        <CommandInput placeholder="Search goals" />
-        <CommandEmpty>No goals found.</CommandEmpty>
-        <CommandGroup>
-          {goals?.data.map((goal) => (
-            <CommandItem
-              key={goal._id}
-              onSelect={() => {
-                handleGoalChange(goal._id);
-                setIsGoalPopoverOpen(false);
-              }}
-            >
-              <Check
-                className={cn(
-                  "mr-2 h-4 w-4",
-                  selectedGoalId === goal._id ? "opacity-100" : "opacity-0"
+          <span className="text-sm font-medium block">Goal : </span>
+          <Popover
+            open={isGoalPopoverOpen}
+            onOpenChange={(isOpen) => setIsGoalPopoverOpen(isOpen)}
+          >
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                role="combobox"
+                aria-expanded={isGoalPopoverOpen}
+                className="w-2/6 justify-between hover:bg-white"
+              >
+                {goals?.data.find((goal) => goal._id === selectedGoalId)
+                  ? `${goals?.data.find((goal) => goal._id === selectedGoalId)?.name} (${experienceLevelObj[goals?.data.find((goal) => goal._id === selectedGoalId)?.experience as unknown as keyof typeof experienceLevelObj] || 'N/A'})`
+                  : "Select a goal"}
+                {isGoalPopoverOpen ? (
+                  <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                ) : (
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 )}
-              />
-              {goal.name} ({experienceLevelObj[goal.experience] || 'N/A'})
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </Command>
-    </PopoverContent>
-  </Popover>
-</div>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full max-h-[200px] p-0">
+              <Command className="w-full">
+                <CommandInput placeholder="Search goals" />
+                <CommandEmpty>No goals found.</CommandEmpty>
+                <CommandGroup>
+                  {goals?.data.map((goal) => (
+                    <CommandItem
+                      key={goal._id}
+                      onSelect={() => {
+                        handleGoalChange(goal._id);
+                        setIsGoalPopoverOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedGoalId === goal._id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {goal.name} ({experienceLevelObj[goal.experience] || 'N/A'})
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
 
         <div
           ref={skillsRef}
@@ -357,10 +357,10 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                                         skills.map((s, i) =>
                                           i === index
                                             ? {
-                                                ...s,
-                                                skill_Id: item._id,
-                                                name: item.name,
-                                              }
+                                              ...s,
+                                              skill_Id: item._id,
+                                              name: item.name,
+                                            }
                                             : s
                                         )
                                       );
@@ -424,9 +424,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                               userSkill.skill_pool_id._id === skill.skill_Id
                           )?.self_rating
                             ? `${userSkillsData?.data?.allUserSkills.find(
-                                (userSkill: any) =>
-                                  userSkill.skill_pool_id._id === skill.skill_Id
-                              ).self_rating
+                              (userSkill: any) =>
+                                userSkill.skill_pool_id._id === skill.skill_Id
+                            ).self_rating
                             }/10`
                             : skill.rating || "Select rating..."}
                           {openRatingPopovers[index] ? (
@@ -492,7 +492,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
               <img className="w-6 h-6" src={addicon} alt="Add Skill" />
             </span>
             Add Skill
-          </Button>          
+          </Button>
         </div>
 
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useGetAllPreDefinedGoalsQuery ,useFilterGoalsMutation } from "@/api/predefinedGoalsApiSlice";
+import { useGetAllPreDefinedGoalsQuery, useFilterGoalsMutation } from "@/api/predefinedGoalsApiSlice";
 import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
 import GoalListSkeleton from "./GoalListSkeleton";
 import JobsBannerImg from '@/assets/dashboard/jobs_banner.png';
 import { useLocation } from "react-router-dom";
+import GoalsBanner from "@/components/setgoals/GoalsBanner";
 
 interface Goal {
     title: string;
@@ -35,9 +36,9 @@ interface Props {
     filters: any;
 }
 
-const jobsMarketDemandObj = {1: "High", 2: "Mid", 3: "Low"};
-const experienceLevelObj = {1: "Entry-level", 2: "Mid-level", 3: "Senior-level"};
-const difficultyLevelObj = {1: "Easy", 2: "Medium", 3: "High"};
+const jobsMarketDemandObj = { 1: "High", 2: "Mid", 3: "Low" };
+const experienceLevelObj = { 1: "Entry-level", 2: "Mid-level", 3: "Senior-level" };
+const difficultyLevelObj = { 1: "Easy", 2: "Medium", 3: "High" };
 
 const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters }) => {
     const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery() as { data: GoalsData | undefined, error: any, isLoading: boolean };
@@ -69,8 +70,11 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
         fetchData();
     }, [filters, allGoals, fetchFilteredGoals]);
 
+
     const [data, setData] = useState<any[]>([]); // State to store the final data
+
     const [searchTitle, setSearchTitle] = useState("");
+    // const [BannerColor, setBannerCollor] = useState("")
 
     useEffect(() => {
         if (searchGoals && searchGoals.data.length > 0) {
@@ -100,16 +104,25 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
 
     // Check if the URL is `/setgoals`
     const isSetGoalsPage = location.pathname === "/setgoal";
+    const getProfessionalColor = (index: number): string => {
+        const palette = [
+           '#D89AFC', '#AA9AFC',  '#7BB0FF', '#FC9A9C', '#7DFDB1', '#FECF7D', '#B4B4B5', '#FF878F', '#DFF794', '#9AFCD5', '#9AEDFC', '#FC9AD3',
+        ];
+        // setBannerCollor(palette[index % palette.length])
+        return palette[index % palette.length];
+    };
+
     return (
         <>
-            {isDialogOpen && selectedGoal && (
-                    <PredefinedGoalDialog
+            {isDialogOpen && selectedGoal  && (
+                <PredefinedGoalDialog
                     isOpen={isDialogOpen}
                     setIsOpen={setIsDialogOpen}
                     selectedGoal={selectedGoal}
                     setJourneyDialog={setJourneyDialog}
                     isSetGoalsPage={isSetGoalsPage} // Pass the flag to control the appearance
-                    />
+                    bannarColor={"BannerColor"}
+                />
             )}
 
             <h5 className={`text-[20px] font-medium leading-[26px] tracking[-0.2px] ${displayTitle ? "" : "hidden"}`}>{searchTitle}</h5>
@@ -124,7 +137,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                 {/* {data.length === 0 && !isFetching && !fetchError && <p>No goals match your filters.</p>} */}
 
                 {/* Render Goal Cards */}
-                {data?.map((goal) => (
+                {data?.map((goal, index) => (
                     <div
                         key={goal._id}
                         className="relative cursor-pointer"
@@ -137,10 +150,12 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                             className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
                         >
                             {/* Add an Image or Placeholder */}
-                            <img
-                                src={goal.image || JobsBannerImg}
-                                alt={goal.title}
-                                className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover"
+
+                            <GoalsBanner
+                                className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover relative "
+                                data={goal}
+                                color={getProfessionalColor(index)} // Pass the color
+                                isGoalsList={true}
                             />
 
                             <div className="flex flex-col gap-6 p-4 pt-4 pb-4 pl-3 self-stretch">

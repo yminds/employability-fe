@@ -29,7 +29,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description, jobMarke
             </p>
 
             {/* Info Cards */}
-            <div className="grid grid-cols-5 sm:grid-cols-3 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-5 xl:grid-cols-4 sm:grid-cols-3 md:grid-cols-2 gap-4">
                 <div className="flex w-[160px] p-3 py-3 px-4 flex-col items-start gap-3 rounded-lg bg-[#DBFFEA]">
                     <img
                         src={EntryImg}
@@ -38,7 +38,7 @@ const PredefinedGoalOverview: React.FC<Props> = ({ goalId, description, jobMarke
                     />
                     <div className="flex flex-col justify-center items-start gap-1 self-stretch">
                         <p className="text-gray-500 text-sm font-medium leading-5 tracking-tight">Entry level salary</p>
-                        <p className="text-[#03963F] text-[20px] font-bold leading-[24px] tracking-[0.3px]">{formatSalaryRange(minSalaryRange, maxSalaryRange)}</p>
+                        <p className="text-[#03963F] text-[20px] font-bold leading-[24px] tracking-[0.3px]">{minSalaryRange !== null && maxSalaryRange !== null ? formatSalaryRange(minSalaryRange, maxSalaryRange) : 'N/A'}</p>
                     </div>
                 </div>
                 <div className="flex w-[160px] p-3 py-3 px-4 flex-col items-start gap-3 rounded-lg bg-[#FFF2DB]">

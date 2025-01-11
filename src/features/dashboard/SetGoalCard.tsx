@@ -49,7 +49,6 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string}> =
   // Handles the updated filters from the SetGoalFilter component
   const handleFilterChange = async (updatedFilters: any) => {
     setFilters(updatedFilters);
-    console.log(updatedFilters);
   };
 
   // Removes a specific filter
