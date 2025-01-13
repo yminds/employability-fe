@@ -1,6 +1,9 @@
 
 import React from "react";
 
+import cursorIcon from '@/assets/jobs/cursor.svg'
+import videoIcon from '@/assets/jobs/video.svg'
+import listIcon from '@/assets/jobs/list.svg'
 
 
 interface GoalsWindowProps {
@@ -50,7 +53,7 @@ const MyJobs: React.FC<MyJobsProps> = (Myjobs) => {
 
                 <div className="flex flex-row gap-4 items-left">
                     <div className="w-12 h-12 py-[9px] px-[10px]  bg-neutral-50/95 rounded-[48px] border border-black/5 justify-center items-center gap-2.5 inline-flex ">
-                    <img src='https://facebook.com/favicon.ico' className=" w-6 h-6" ></img>
+                    <img src={cursorIcon} className=" w-6 h-6" ></img>
                     </div>
                     <div>
                     <p className="text-black text-base font-medium font-['Ubuntu'] leading-snug">{applied}</p>
@@ -60,7 +63,7 @@ const MyJobs: React.FC<MyJobsProps> = (Myjobs) => {
 
                 <div className="flex flex-row gap-4 items-left">
                     <div className="w-12 h-12 py-[9px] px-[10px]  bg-neutral-50/95 rounded-[48px] border border-black/5 justify-center items-center gap-2.5 inline-flex ">
-                    <img src='https://facebook.com/favicon.ico' className=" w-6 h-6" ></img>
+                    <img src={videoIcon} className=" w-6 h-6" ></img>
                     </div>
                     <div>
                     <p className="text-black text-base font-medium font-['Ubuntu'] leading-snug">{intervied}</p>
@@ -70,7 +73,7 @@ const MyJobs: React.FC<MyJobsProps> = (Myjobs) => {
 
                 <div className="flex flex-row gap-4 items-left">
                     <div className="w-12 h-12 py-[9px] px-[10px]  bg-neutral-50/95 rounded-[48px] border border-black/5 justify-center items-center gap-2.5 inline-flex ">
-                    <img src='https://facebook.com/favicon.ico' className=" w-6 h-6" ></img>
+                    <img src={listIcon} className=" w-6 h-6" ></img>
                     </div>
                     <div>
                     <p className="text-black text-base font-medium font-['Ubuntu'] leading-snug">{shortlisted}</p>
