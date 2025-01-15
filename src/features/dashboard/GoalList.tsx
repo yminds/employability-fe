@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useGetAllPreDefinedGoalsQuery, useFilterGoalsMutation } from "@/api/predefinedGoalsApiSlice";
 import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
 import GoalListSkeleton from "./GoalListSkeleton";
-import JobsBannerImg from '@/assets/dashboard/jobs_banner.png';
 import { useLocation } from "react-router-dom";
 import GoalsBanner from "@/components/setgoals/GoalsBanner";
 
@@ -39,6 +38,10 @@ interface Props {
 const jobsMarketDemandObj = { 1: "High", 2: "Mid", 3: "Low" };
 const experienceLevelObj = { 1: "Entry-level", 2: "Mid-level", 3: "Senior-level" };
 const difficultyLevelObj = { 1: "Easy", 2: "Medium", 3: "High" };
+
+const colorPalette = [
+    '#D89AFC', '#AA9AFC',  '#7BB0FF', '#FC9A9C', '#7DFDB1', '#FECF7D', '#B4B4B5', '#FF878F', '#DFF794', '#9AFCD5', '#9AEDFC', '#FC9AD3',
+];
 
 const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters }) => {
     const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery() as { data: GoalsData | undefined, error: any, isLoading: boolean };
@@ -92,6 +95,15 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
     const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
     const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
 
+    const [bannerColors, setBannerColors] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (data.length > 0) {
+            const colors = data.map((_, index) => colorPalette[index % colorPalette.length]);
+            setBannerColors(colors);
+        }
+    }, [data]);
+
     // Function to open the dialog with selected goal
     const handleGoalClick = (goal: Goal) => {
         setSelectedGoal(goal); // Set the selected goal
@@ -121,7 +133,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                     selectedGoal={selectedGoal}
                     setJourneyDialog={setJourneyDialog}
                     isSetGoalsPage={isSetGoalsPage} // Pass the flag to control the appearance
-                    bannarColor={"BannerColor"}
+                    bannerColor={bannerColors[data.findIndex(goal => goal._id === selectedGoal._id)] || colorPalette[0]} // Ensure a default color
                 />
             )}
 
@@ -154,7 +166,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                             <GoalsBanner
                                 className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover relative "
                                 data={goal}
-                                color={getProfessionalColor(index)} // Pass the color
+                                color={bannerColors[index] || colorPalette[0]} // Ensure a default color
                                 isGoalsList={true}
                             />
 
