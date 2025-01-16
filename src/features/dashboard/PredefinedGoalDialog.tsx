@@ -11,7 +11,6 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import BackImg from '@/assets/dashboard/back.svg';
 import BannerSkillsIcons from "@/components/setgoals/BannerSkillsIcon";
 import { useNavigate } from "react-router-dom";
-import GoalsBanner from "@/components/setgoals/GoalsBanner";
 
 interface Goal {
     _id: string;
