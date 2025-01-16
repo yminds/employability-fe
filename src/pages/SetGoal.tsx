@@ -5,11 +5,10 @@ import arrow from "@/assets/skills/arrow.svg";
 
 const SetGoal: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-const [journeyDialog, setJourneyDialog] = useState(false);
+  const [journeyDialog, setJourneyDialog] = useState(false);
 
   const handleLevelSelection = (level: string) => {
     setSelectedLevel(level);
-    console.log(`Selected Level: ${level}`);
   };
 
   const handleBackBtn = () => {

@@ -80,12 +80,12 @@
 }
 
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; /* Remove default styling */
+  -webkit-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
   background: white;
-  border: 2px solid #2EE578; /* Green border */
+  border: 2px solid #2EE578;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -94,15 +94,15 @@ input[type="range"]::-moz-range-thumb {
   width: 16px;
   height: 16px;
   background: white;
-  border: 2px solid #2EE578; /* Green border */
+  border: 2px solid #2EE578; 
   border-radius: 50%;
   cursor: pointer;
 }
 
 input[type="range"]:focus::-webkit-slider-thumb {
-  outline: none; /* Remove focus outline */
+  outline: none; 
 }
 
 input[type="range"]:focus::-moz-range-thumb {
-  outline: none; /* Remove focus outline */
+  outline: none; 
 }

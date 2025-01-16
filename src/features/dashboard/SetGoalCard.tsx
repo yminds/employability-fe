@@ -49,7 +49,6 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string}> =
   // Handles the updated filters from the SetGoalFilter component
   const handleFilterChange = async (updatedFilters: any) => {
     setFilters(updatedFilters);
-    console.log(updatedFilters);
   };
 
   // Removes a specific filter
@@ -63,7 +62,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string}> =
 
   // Effect to trigger handleFilterChange when selectedLevel changes
   useEffect(() => {
-    if (selectedLevel !== undefined && selectedLevel !== null) {
+    if (selectedLevel !== undefined && selectedLevel !== null && selectedLevel !== "all") {
       setFilters({ experience_level: [selectedLevel] });
     }
   }, [selectedLevel]);

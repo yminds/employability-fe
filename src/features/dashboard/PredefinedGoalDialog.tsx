@@ -9,8 +9,9 @@ import PredefinedGoalActiveJobs from "./PredefinedGoalActiveJobs";
 import PredefinedGoalOverview from "./PredefinedGoalOverview";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import BackImg from '@/assets/dashboard/back.svg';
-import GoalBannerImg from '@/assets/dashboard/goal_banner.png';
+import BannerSkillsIcons from "@/components/setgoals/BannerSkillsIcon";
 import { useNavigate } from "react-router-dom";
+import GoalsBanner from "@/components/setgoals/GoalsBanner";
 
 interface Goal {
     _id: string;
@@ -32,6 +33,7 @@ interface GoalFormDialogProps {
     selectedGoal: Goal | null; // Goal data passed as a prop
     setJourneyDialog: boolean;
     isSetGoalsPage: boolean; 
+    bannerColor:string
 }
 
 const jobsMarketDemandObj = {1: "High", 2: "Mid", 3: "Low"};
@@ -41,7 +43,7 @@ const learningTimeObj = {1: "1-3 Months", 2: "3-6 Months", 3: "6-12 Months", 4: 
 
 const tabs = ["Overview", "Skills", "Market Trend", "Active Jobs"];
 
-const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, isSetGoalsPage }) => { 
+const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, isSetGoalsPage, bannerColor}) => { 
     const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal] = useState(selectedGoal ? selectedGoal.title : "");
@@ -101,7 +103,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
                     <DialogDescription className="hidden">Select a predefined goal to set your journey</DialogDescription>
                     <div>
                         {/* Header Section */}
-                        <div className="flex flex-col items-start justify-center gap-5 p-6 px-8 relative h-[245px] ">
+                        <div className="flex flex-col items-start justify-center gap-5 p-6 px-8 h-[245px] relative ">
                             <button className="flex items-center gap-4 text-gray-600 text-base font-normal leading-6 tracking-[0.24px] font-sf-pro z-[9999]"
                                 onClick={handleCloseGoals}>
                                 <img
@@ -122,12 +124,10 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
                                     Set This Goal
                                 </button>
                             </div>
+                            <div className=" bg-green-200">
+                                <BannerSkillsIcons data={selectedGoal} color={bannerColor} isGoalsList={false} />                                
+                            </div>
 
-                            <img
-                                src={GoalBannerImg}
-                                alt="Fullstack Developer"
-                                className="rounded-tl-[9px] rounded-tr-[9px] w-full absolute top-0 right-0 h-[245px] object-cover"
-                            />
                         </div>
 
                         <div className="p-6 px-8 font-sf-pro">

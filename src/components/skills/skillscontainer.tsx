@@ -21,7 +21,7 @@ const SkillsContainer: React.FC = () => {
   const { data: goalData, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
   
   useEffect(() => {
-    if(goalData?.data && goalData.data.length === 0) {
+    if(goalData?.data && goalData?.data.length === 0) {
       setIsModalOpen(true);
     }
     else if (goalData?.data?.length && selectedGoalId === null) {
@@ -82,7 +82,7 @@ const SkillsContainer: React.FC = () => {
                   selectedGoalExperienceLevel={selectedGoalExperienceLevel} // Pass experience level
                 />
               </div>
-              <div className="mt-[50px] sm:min-w-[280px] overflow-y-auto">
+              <div className="mt-[70px] sm:min-w-[280px] overflow-y-auto">
                 <SkillList isDashboard={false} goalId={selectedGoalId} isSkillsUpdated={isUpdated} />
                 <SuggestedSkills />
               </div>

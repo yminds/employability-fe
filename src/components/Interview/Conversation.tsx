@@ -9,7 +9,7 @@ const Conversation: React.FC<{
   return (
     <div
       ref={containerRef}
-      className="h-[40vh] relative w-full rounded-xl minimal-scrollbar"
+      className="h-[40vh] relative w-full rounded-xl "
       style={{
         scrollBehavior: "smooth",
         WebkitOverflowScrolling: "touch",
@@ -19,7 +19,7 @@ const Conversation: React.FC<{
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
 
       {/* Scrollable Messages */}
-      <div className="overflow-y-scroll h-full">
+      <div className="overflow-y-scroll h-full minimal-scrollbar">
         {messages.map((message, index) =>
           // <Message key={message.id} message={message} />
           // If the message is last or first, add a margin to the top or bottom

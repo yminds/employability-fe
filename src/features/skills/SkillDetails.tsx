@@ -12,16 +12,10 @@ import Transcript from "./skilldetails/Transcript";
 import PerformanceSummary from "./skilldetails/PerformanceSummary";
 import SkillsProgress from "./skilldetails/SkillsProgress";
 
-
-
-
-
-
 const SkillDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { data } = useGetUserSkillDetailsQuery(id!);
   const [skillDetails, setSkillDetails] = useState<UserSkill>(UserSkillsIntialValues);
-
 
 
   useEffect(() => {
@@ -38,7 +32,7 @@ const SkillDetails = () => {
       {/* Title Section */}
       <div className="flex items-center mb-2 pl-4 space-x-2">
         <button
-          className="w-6 h-6 flex items-center justify-center bg-white shadow-sm rounded-full border border-gray-200"
+          className="w-6 h-6 flex items-center justify-center bg-white rounded-full border border-gray-200"
           aria-label="Back"
         >
           <img src={arrow} alt="Back" className="w-3 h-3" />
@@ -73,7 +67,7 @@ const SkillDetails = () => {
         </div>
 
         {/* Right Panel */}
-        <div className="hidden lg:block w-[30%] bg-[#F7F7F7] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+        <div className=" lg:block w-[30%] bg-[#F7F7F7] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
           <div className="space-y-6 p-6 max-w-3xl">
 
             <PerformanceSummary />

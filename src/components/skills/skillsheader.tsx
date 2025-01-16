@@ -14,7 +14,7 @@ interface SkillsHeaderProps {
     message: string;
     data: [
       {
-        experience: 2 | 1 | 3;
+        experience: string | null;
         _id: string;
         name: string;
       }
@@ -87,7 +87,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   return (
     <>
       <div className="bg-[#F5F5F5] w-full md:flex absolute top-0 left-0 z-10">
-        <div className="flex w-full justify-between items-center mt-4 mb-4">
+        <div className="flex w-full justify-between items-center mb-6">
           {/* Goal Section */}
           <div className="bg-white h-[46px] rounded-lg flex items-center justify-start px-4 border-gray-300">
             <span className="text-[#00000066] font-medium mr-2">Goal:</span>
@@ -116,7 +116,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
                         selectedGoal === goal.name ? "bg-gray-100" : ""
                       } cursor-pointer hover:bg-[#001630] hover:text-white`}
                     >
-                      {goal.name} ({experienceLevelObj[goal.experience as keyof typeof experienceLevelObj]})
+                      {goal.name} ({experienceLevelObj[goal.experience as unknown as keyof typeof experienceLevelObj]})
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
