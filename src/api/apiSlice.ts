@@ -7,8 +7,10 @@ interface QueryArgs {
   body?: any;
 }
 
-const baseUrl = process.env.VITE_API_BASE_URL as string;
-const xApiKey = process.env.VITE_X_API_KEY as string;
+// const baseUrl = process.env.VITE_API_BASE_URL as string;
+// const xApiKey = process.env.VITE_X_API_KEY as string;
+const xApiKey = 'GCMUDiuY5a7WvyUNt9n3QztToSHzK7Uj';
+const baseUrl = 'http://localhost:3000/';
 
 const baseQuery: BaseQueryFn<QueryArgs, unknown, unknown> = fetchBaseQuery({
   baseUrl: baseUrl,
