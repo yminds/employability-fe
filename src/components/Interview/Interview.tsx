@@ -25,7 +25,10 @@ export interface IMessage {
   role: "USER" | "AI";
 }
 
-const Interview: React.FC = () => {
+const Interview: React.FC<{
+  id: string;
+  cameraScale: number;
+}> = () => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
 
