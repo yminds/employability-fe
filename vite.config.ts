@@ -12,13 +12,6 @@ export default defineConfig({
   plugins: [
     react(),
     tsconfigPaths(),
-    EnvironmentPlugin([
-      "VITE_X_API_KEY",
-      "VITE_API_BASE_URL",
-      "AWS_ACCESS_KEY_ID",
-      "AWS_SECRET_ACCESS_KEY",
-      "AWS_REGION",
-      "AWS_S3_BUCKET_NAME",
-    ]),
+    EnvironmentPlugin('all'),
   ],
 });
