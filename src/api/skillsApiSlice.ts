@@ -1,22 +1,25 @@
 import { apiSlice } from './apiSlice';
+interface Skill {
+  _id: string,
+  skill_pool_id: {
+    _id:string,
+    name:string
+  },
+  verified_rating:number
+  self_rating: number | null;
+}[];
 
 export const skillsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Fetch all user skills
       getUserSkills: builder.mutation<
       {
-        data: [
-          {
-            _id: string;
-            skill_pool_id: {
-              _id: string;
-              name: string;
-              icon: string;
-            };
-            verified_rating: number;
-            self_rating: number;
-          }
-        ];
+        data: {
+          all:Skill[],
+          allUserSkills:Skill[],
+          mandatory:Skill[],
+          optional:Skill[]
+        }
       },
       { userId: any; goalId: any }
       >({
