@@ -9,7 +9,6 @@ const SetGoal: React.FC = () => {
 
   const handleLevelSelection = (level: string) => {
     setSelectedLevel(level);
-    console.log(`Selected Level: ${level}`);
   };
 
   const handleBackBtn = () => {

@@ -6,6 +6,7 @@ import verifiedImg from "@/assets/skills/verified.svg";
 import unverifiedImg from "@/assets/skills/unverifies.svg";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import DefaultImg from "@/assets/skills/DefaultSkillImg.svg";
 
 interface SkillCardProps {
   skillId: string;
@@ -39,7 +40,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   const handleImproveScore = () => {
-    navigate(`/interview/${skill}`, {
+    navigate(`/interview/${skillId}`, {
       state: { skill, verified_rating, selfRating },
     });
   };
@@ -57,12 +58,21 @@ const SkillCard: React.FC<SkillCardProps> = ({
     navigate(`/interview/${interviewId}`);
   };
 
+  if (skillImg == undefined) {
+    skillImg = DefaultImg;
+  }
+
   return (
     <div className="flex items-center justify-between h-[82px] snap-start bg-white sm:min-w-[660px]">
       {/* Left Section: Skill Image and Name */}
       <div className="flex w-[30%] h-full items-center space-x-4">
         <span className="flex w-[52px] h-[52px] p-[9.75px] px-[10.833px] justify-center items-center gap-[10.833px] flex-shrink-0 rounded-full border-[1.083px] border-black/5 bg-[rgba(250,250,250,0.98)]">
-          <img src={skillImg} alt={skill} className="w-[30] h-[30]" />
+          <img
+            src={skillImg}
+            alt="Skill Icon"
+            className="w-[30px] h-[30px]"
+            onError={(e) => (e.currentTarget.src = DefaultImg)}
+          />
         </span>
         <div>
           <h3 className=" text-[16px] font-medium">{skill}</h3>
@@ -83,9 +93,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
         <div className="flex items-center space-x-2">
           <img src={imgSrc} alt={status} className="w-4 h-4" />
           <span
-            className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
-              status === "Verified" ? "text-green-600" : "text-yellow-600"
-            }`}
+            className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-green-600" : "text-yellow-600"
+              }`}
           >
             {status}
           </span>
@@ -98,7 +107,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           <>
             <button
               onClick={handleViewReport}
-              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium rounded-md text-[#001630] underline"
+              className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium rounded-md text-[#001630] underline "
             >
               View report
             </button>

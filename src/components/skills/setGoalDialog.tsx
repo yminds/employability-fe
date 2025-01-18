@@ -71,7 +71,7 @@ const GoalDialog: React.FC<GoalDialogProps> = ({ isOpen, onClose }) => {
               </DialogTitle>
             </DialogHeader>
             <hr className="w-full border-gray-300 my-4" />
-            <SetGoalCard setJourneyDialog={setJourneyDialog} />
+            <SetGoalCard setJourneyDialog={setJourneyDialog} selectedLevel="all" />
           </>
         )}
       </DialogContent>
