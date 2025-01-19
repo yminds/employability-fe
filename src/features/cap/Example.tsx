@@ -28,7 +28,9 @@ Output: [1, 2, 3, 4, 5, 6, 7, 8]
         language="JavaScript"
         questionNumber={5}
         timeLimit={90}
-        onSubmit={() => {}}
+        onSubmit={(code) => {
+          console.log(code);
+        }}
       />
     </div>
   );

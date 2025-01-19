@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import OutputConsole, { OutputItem } from "./OutputConsole";
+import TestCaseConsole from "./TestCaseConsole";
 
 interface CodeEditorProps {
   placeholder: string;
   language: string;
   onSubmit: (code: string) => void;
+  testCases: { input: string; expectedOutput: string; description: string }[];
 }
 
 const executeJavaScript = (code: string): OutputItem[] => {
@@ -45,9 +47,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   placeholder,
   language,
   onSubmit,
+  testCases,
 }) => {
   const [code, setCode] = useState<string>(placeholder);
   const [output, setOutput] = useState<OutputItem[]>([]);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [testsExecuted, setTestsExecuted] = useState<boolean>(false);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
@@ -56,6 +61,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const handleRun = () => {
+    setIsSubmitted(false); // Reset to show OutputConsole
     if (language.toLowerCase() !== "javascript") {
       setOutput([{ type: "error", content: "Only JavaScript execution is supported at the moment." }]);
       return;
@@ -65,9 +71,18 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     setOutput(executionOutput);
   };
 
+  const handleSubmit = () => {
+    if (!testsExecuted) {
+      setIsSubmitted(true);
+      setTestsExecuted(true);
+    } else {
+      onSubmit(code);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 h-full">
-      <div className="w-full h-[85%] rounded-lg">
+      <div className="w-full h-[80%] rounded-lg">
         <div className="bg-[#11df7c] px-3.5 py-2.5 rounded-t-lg flex flex-row items-center justify-between">
           <div className="flex items-center gap-1">
             <span className="text-[#05733E] text-base font-normal leading-[17px]">
@@ -85,10 +100,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
               Run
             </button>
             <button
-              onClick={() => onSubmit(code)}
+              onClick={handleSubmit}
               className="text-[#05733E] text-sm font-medium hover:text-[#0D0D0D]"
             >
-              Submit
+              {testsExecuted ? "Submit" : "Test"}
             </button>
           </div>
         </div>
@@ -109,8 +124,22 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           />
         </div>
       </div>
-      <div className="h-[15%]">
-        <OutputConsole output={output} />
+      <div className="h-[20%] flex flex-col gap-4">
+        {isSubmitted ? (
+          <div>
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => setIsSubmitted(false)}
+                className="text-[#05733E] text-sm font-medium hover:text-[#0D0D0D]"
+              >
+                Back to Console
+              </button>
+            </div>
+            <TestCaseConsole testCases={testCases} code={code} />
+          </div>
+        ) : (
+          <OutputConsole output={output} />
+        )}
       </div>
     </div>
   );

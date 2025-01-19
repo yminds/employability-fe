@@ -37,12 +37,15 @@ const CodeAssessmentPanel: React.FC<CodeAssessmentPanelProps> = ({
       </div>
       <div className="w-2/3 ">
         <CodeEditor
+          testCases={testCases}
           placeholder={`function flattenArray(arr) {
     // Your code here
     return [];
 }`}
-          language="JavaScript"
-          onSubmit={() => {}}
+          language={language}
+          onSubmit={(code) => {
+            onSubmit(code);
+          }}
         />
       </div>
     </div>
