@@ -4,6 +4,7 @@ import closeIcon from "@/assets/jobs/close.svg"
 
 import arrowDownIcon from '@/assets/jobs/arrowDown.svg';
 import { Any } from "react-spring";
+import { Popover, PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 interface ChipsCardProps{
     itemList:string[];
     setItemList:any;
@@ -40,9 +41,10 @@ const ChipsCard:React.FC<ChipsCardProps>=(props)=>{
                     </li>
                 ))} 
 
-                 <div className="flex flex-row flex-grow items-center justify-between gap-2 ">
-                    <input className='w-full p-0  focus:outline-none inline-block' onChange={handleInputChange}></input>
-                    <img src={arrowDownIcon} className=" h-4 w-4  inline-block "></img>
+                 <div className="flex flex-row  items-center justify-between gap-2 ">
+                    {/* <input className='w-full p-0  focus:outline-none inline-block' onChange={handleInputChange}></input>
+                    <img src={arrowDownIcon} className=" h-4 w-4  inline-block "></img> */}
+                    
                 </div>
             </ul>
 

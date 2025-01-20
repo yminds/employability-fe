@@ -83,10 +83,14 @@ const JobDetailsModal:React.FC<JobDetailsProps>=({jobData,userSkills,closeModal}
                                 <h3 className="text-[#191919] text-base font-medium font-['Ubuntu'] leading-snug my-auto ">{jobData.company}</h3> 
                             </div>
 
+                        {jobData.skills.length>0 &&
+                
                             <div>
                                <span className={`text-xl font-bold inline-block font-['Ubuntu'] leading-[18px] ${matchPercentage>=minimumMatchPercentage?'text-[#10b753]':'text-[#cf0c19]' }`}  >{matchPercentage}%</span>
                                <span className="text-[#0b0e12] text-base font-['Ubuntu'] leading-[18px] "> match</span>
                             </div>
+
+                        }
                         </div>
 
                         <div className='flex flex-col gap-1'>
@@ -94,6 +98,9 @@ const JobDetailsModal:React.FC<JobDetailsProps>=({jobData,userSkills,closeModal}
                             <p> {jobData.aboutCompany}</p>
                         </div>
                                                     {/* skills */}
+                       
+                      {jobData.skills.length>0 &&
+                       
                         <div className='flex flex-col gap-1'>
                             <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">Skills required</h3>
                             
@@ -110,6 +117,7 @@ const JobDetailsModal:React.FC<JobDetailsProps>=({jobData,userSkills,closeModal}
 
                             </ul>
                         </div>
+                        }
 
                     </div>
                                                 {/* job details */}
