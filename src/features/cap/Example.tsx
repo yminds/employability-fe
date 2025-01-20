@@ -21,8 +21,13 @@ Output: [1, 2, 3, 4, 5, 6, 7, 8]
         testCases={[
           {
             input: "[[1, [2, 3]], [4, [5, 6]], 7, 8]",
-            expectedOutput: "[1, 2, 3, 4, 5, 6, 7, 8]",
+            expectedOutput: "[1,2,3,4,5,6,7,8]",
             description: "Basic nested array",
+          },
+          {
+            input: "[[]]",
+            expectedOutput: "[]",
+            description: "Empty nested array",
           },
         ]}
         language="JavaScript"
