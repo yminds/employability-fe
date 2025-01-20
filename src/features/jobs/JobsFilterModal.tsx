@@ -14,8 +14,7 @@ import CheckBox from './CheckBox';
 
 import { Filter } from '@/pages/JobsPage';
 import { useGetJobLocationSuggestionsMutation ,useGetJobRoleSuggestionsMutation } from '@/api/jobsApiSlice';
-
-import { cn } from "@/lib/utils"
+import SearchPopover from './SearchPopover';
 
 
 
@@ -41,6 +40,10 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
     const [suggestedJobTitles,setSuggestedJobTitles]=useState(filters.jobRoles.length?filters.jobRoles:['Frontend developer','Product Manager','Data Scientist','System Administrator']);
     const [getJobRoleSuggestion, { data:fetchedSuggestedJobRoles, isLoading:isloadingJob, error:jobError }] = useGetJobRoleSuggestionsMutation();
     
+    const [fixedJobLocations,setFixedJobLocations]=useState<string[]>([])
+    const [fixedJobTitles,setFixedJobTitles]=useState<string[]>([])
+
+
     const [selectedLocations,setSelectedLocations]=useState(filters.locations)
     const [suggestedLocations,setSuggestedLocations]=useState(filters.locations.length?filters.locations:['Banglore','chennai','delhi'])
     const [getLocationSuggestions, { data:fetchedSuggestedLocations, isLoading, error }] = useGetJobLocationSuggestionsMutation();
@@ -73,6 +76,10 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
         if(fetchedSuggestedLocations!=undefined){
             const newLocations=fetchedSuggestedLocations.locations.filter(item=> {return !selectedLocations.includes(item)});
             setSuggestedLocations(newLocations);
+            if (fixedJobLocations.length==0){
+                setFixedJobLocations(newLocations)
+            }
+
         }
 
     },[fetchedSuggestedLocations])
@@ -81,6 +88,9 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
         if(fetchedSuggestedJobRoles!=undefined){
             const newJobTitles=fetchedSuggestedJobRoles.roles.filter(item=> {return !selectedJobTitles.includes(item)});
             setSuggestedJobTitles(newJobTitles);
+            if (fixedJobTitles.length==0){
+                setFixedJobTitles(newJobTitles)
+            }
         }
 
     },[fetchedSuggestedJobRoles])
@@ -88,14 +98,22 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
     const addJobTitletoFilters =(jobTitle:string)=>{
     
         setSuggestedJobTitles(suggestedJobTitles.filter(i=>i!=jobTitle))
-        setSelectedJobTitles([...selectedJobTitles,jobTitle]);
+       
+        if(!selectedJobTitles.includes(jobTitle)){
+            
+            setSelectedJobTitles([...selectedJobTitles,jobTitle]);
+        }
 
     }
 
 
     const addLocationToFilters=(location:string)=>{1
         setSuggestedLocations(suggestedLocations.filter(i=>i!=location))
-        setSelectedLocations([...selectedLocations,location]);
+        
+        if(!selectedLocations.includes(location)){
+
+            setSelectedLocations([...selectedLocations,location]);
+        }
     }
 
     const toggleOnlyRemote=()=>{
@@ -178,17 +196,22 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
                     <div className='bg-[#f9f9f9] rounded-[7px] p-6 pt-8 border border-black/10 flex-col justify-start  gap-6 flex items-stretch  '>
 
                                 {/* adding jobtitles */}
-                        <div className='h-min-16 p-4  bg-white rounded-md border border-black/10 justify-start items-center flex flex-row gap-4 '>
-                        
+                        <div className='h-min-16 p-4  bg-white rounded-md border border-black/10 justify-start items-center flex flex-wrap gap-4 '>
+                            <div className=''>
+
                             <ChipsCard onInputChange={handleJobTitleSearch} itemList={selectedJobTitles} setItemList={(items:string[])=>setSelectedJobTitles(items)}></ChipsCard>
-                            
+                            </div>
+                            <div className='flex-grow items-end inline-block'>
+
+                            <SearchPopover  onInputChange={handleJobTitleSearch}  options={suggestedJobTitles} onSelect={addJobTitletoFilters}  ></SearchPopover>
+                            </div>
                         </div>
 
                                 {/* suggestion tab for jobtitles */}
                         <div className='flex flex-col gap-3'>
                             <h2> Suggested </h2>
                             <div className=' justify-start items-center flex flex-row gap-4 '>
-                                <ChipsCardAdd itemList={suggestedJobTitles} selectItem={addJobTitletoFilters}></ChipsCardAdd>
+                                <ChipsCardAdd itemList={fixedJobTitles} selectItem={addJobTitletoFilters}></ChipsCardAdd>
                             </div>
 
                         </div>
@@ -209,7 +232,17 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
                         <div className='flex justify-between w-1/2'>
 
                         <h3>Minimum Experience </h3>
-                        <p>{mininmumExperience!=null?mininmumExperience+' Years':"Any"}</p>
+                        <div className='flex justify-end'>
+                            {mininmumExperience!=null?<>
+                                <input type='number' 
+                                className='focus:outline-none  bg-[#f9f9f9] appearance-none w-fix text-center'  
+                                value={mininmumExperience} 
+                                min={0} 
+                                max={31}
+                                onChange={(e:any) => e.target.value>31?setMinimumExperience(30):setMinimumExperience(e.target.value)}></input><p>Years</p>
+                            </>:'Any' }
+                        </div>
+                        
                                     
                         </div>
 
@@ -263,17 +296,21 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
                     <div className='bg-[#f9f9f9] rounded-[7px] p-6 pt-8 border border-black/10 flex-col justify-start  gap-6 flex items-stretch  '>
 
                                 {/* adding prefered locations */}
-                        <div className='h-min-16 p-4  bg-white rounded-md border border-black/10 justify-start items-center flex flex-row gap-4 '>
-                        
-                            <ChipsCard onInputChange={handleLocationSearch}  itemList={selectedLocations} setItemList={(items:string[])=>setSelectedLocations(items)}></ChipsCard>
-                            
+                        <div className='h-min-16 p-4  bg-white rounded-md border border-black/10 justify-start items-center flex flex-wrap gap-4 '>
+                            <div>
+                                <ChipsCard onInputChange={handleLocationSearch}  itemList={selectedLocations} setItemList={(items:string[])=>setSelectedLocations(items)}></ChipsCard>
+                            </div>
+                            <div className='flex-grow items-end inline-block'>
+                                <SearchPopover  onInputChange={handleLocationSearch}  options={suggestedLocations} onSelect={addLocationToFilters}  ></SearchPopover>
+                            </div>
+
                         </div>
 
                                 {/* suggestion tab for locations */}
                         <div className='flex flex-col gap-3 '>
                             <h2> Suggested </h2>
                             <div className='justify-start items-center flex flex-row gap-4 '>
-                                <ChipsCardAdd itemList={suggestedLocations} selectItem={addLocationToFilters}></ChipsCardAdd>
+                                <ChipsCardAdd itemList={fixedJobLocations} selectItem={addLocationToFilters}></ChipsCardAdd>
                             </div>
                         </div>
 
