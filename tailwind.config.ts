@@ -106,10 +106,10 @@ module.exports = {
       },
       xl : {
         min: '1280px',
-        max: '1535px'
+        max: '1728px'
       },
       '2xl' : {
-        min: '1536px'
+        min: '1729px'
       },
     },
   },

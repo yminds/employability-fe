@@ -22,12 +22,17 @@ import SkillDetailPage from "./pages/SkillDetailPage.tsx";
 import SelectedSkill from "@/components/skills/selectedskill.tsx";
 import SignupForm from "./pages/SignUpPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
-//import JobsPage from "./pages/JobsPage.tsx";
+import JobsPage from "./pages/JobsPage.tsx";
 import ProjectListing from "./pages/project-listing.tsx";
+<<<<<<< HEAD
 import LinkedInCallback from "./features/authentication/LinkedinCallback.tsx";
 import GitHubCallback from "./features/authentication/GithubCallback.tsx";
 import ExperienceLevel from "./pages/SetExperience.tsx";
 import AddPhone from "./pages/AddPhoneNumber.tsx";
+=======
+import Example from "./features/cap/Example.tsx";
+
+>>>>>>> e8d2adf40403c8e4964c9cbaa9643c47fe02a4b0
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -62,7 +67,7 @@ export const routes: RouteConfig[] = [
   },
   {
     route: "/",
-    component: <Dashboard />,
+    component: <Dashboard isDashboard={true} displayScore={true} />,
     roles: ["CANDIDATE", "EMPLOYER"],
   },
   {
@@ -102,15 +107,18 @@ export const routes: RouteConfig[] = [
     route: "/user-profile",
     component: <UserProfilePage />,
   },
-  //{
-    //route: "/jobs",
-    //component: <JobsPage />,
-  //},
+  {
+    route: "/jobs",
+    component: <JobsPage />,
+  },
   {
     route: "/projects",
     component: <ProjectsPage />,
   },
-
+  {
+    route: "/example",
+    component: <Example />,
+  },
   {
     route: "/project-listing",
     component: <ProjectListing />,

@@ -1,51 +1,54 @@
 import { useEffect, useState, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
 
+// Components
 import Header from "@/components/interview/Header";
 import WebCam from "@/components/interview/WebCam";
 import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
+import CodeSnippetEditor from "@/components/interview/CodeSnippetEditor";
+
+// Hooks and API
 import { useInterviewStreamMutation } from "@/api/aiApiSlice";
 import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
-import CodeSnippetEditor from "@/components/interview/CodeSnippetEditor";
 import { useTTS } from "@/hooks/useTTS";
 import { useSTT } from "@/hooks/useSTT";
+
+// Constants and Types
+const SOCKET_URL = "http://localhost:3000";
 
 export interface IMessage {
   id: number;
   message: string;
-  role: string;
+  role: "USER" | "AI";
 }
 
-const SOCKET_URL = "http://localhost:3000";
-
 const Interview: React.FC<{
-  cameraScale: number;
   id: string;
+  cameraScale: number;
 }> = () => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
 
-  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } =
-    useSTT();
+  // Queries and Speech Hooks
+  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
+  const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(
+    interviewId as string, 
+    { skip: !interviewId }
+  );
 
-  const { data: interviewDetails, isSuccess: isInterviewLoaded } =
-    useGetInterviewbyIdQuery(interviewId as string, {
-      skip: !interviewId,
-    });
-
-  // State Variables
-  const [socket, setSocket] = useState<Socket | null>(null);
+  // State
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const isComponentMounted = useRef<boolean>(true);
-  const [codeSnippet, setCodeSnippet] = useState<boolean>(false);
-  const [question, setQuestion] = useState<string>("");
+  const [codeSnippet, setCodeSnippet] = useState(false);
+  const [question, setQuestion] = useState("");
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  const isComponentMounted = useRef(true);
 
-  // Initialize TTS hook
+  // TTS Setup
   const { frequencyData, handleIncomingData } = useTTS({
     onPlaybackComplete: () => {
       setIsUserAnswering(true);
@@ -53,54 +56,58 @@ const Interview: React.FC<{
     },
   });
 
-  // Initialize Socket Connection
+  // Socket Connection
   useEffect(() => {
     if (!isInterviewLoaded || !interviewDetails?.data?._id) return;
 
     const newSocket = io(SOCKET_URL);
-    console.log("Connecting to socket server...", newSocket, socket);
 
-    setSocket(newSocket);
-
-    newSocket.on("connect", () => {
+    const handleConnect = () => {
       console.log("Connected with ID:", newSocket.id);
       if (!isInitialized) {
-        console.log("Starting initial conversation...");
         setIsInitialized(true);
-        addMessage("Hello");
-        handleMessage("Hello", "USER");
+        const initialGreeting = "Hello";
+        addMessage(initialGreeting);
+        handleMessage(initialGreeting, "USER");
       }
-    });
+    };
 
-    newSocket.on(`aiResponse${interviewDetails.data._id}`, (data: string) => {
+    const handleAIResponse = (data: string) => {
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
-    });
+    };
 
-    newSocket.on(`codeEditor${interviewDetails.data._id}`, (data: string) => {
+    const handleCodeEditor = (data: string) => {
       setCodeSnippet(true);
       setQuestion(data);
-    });
+    };
+
+    // Socket event listeners
+    newSocket.on("connect", handleConnect);
+    newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
+    newSocket.on(`codeEditor${interviewDetails.data._id}`, handleCodeEditor);
 
     return () => {
       isComponentMounted.current = false;
-      newSocket.off("connect");
-      newSocket.off("aiResponse");
+      newSocket.off("connect", handleConnect);
+      newSocket.off(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
+      newSocket.off(`codeEditor${interviewDetails.data._id}`, handleCodeEditor);
       newSocket.disconnect();
     };
   }, [isInterviewLoaded, interviewDetails]);
 
+  // Speech-to-Text handling
   useEffect(() => {
     if (isSttSuccess && sttResponse) {
-      handleMessage(sttResponse.transcription.text, "USER");
-      addMessage(sttResponse.transcription.text);
+      const { text } = sttResponse.transcription;
+      handleMessage(text, "USER");
+      addMessage(text);
     }
 
     if (sttError) {
-      console.error("Error transcribing audio:", sttError);
+      console.error("Speech-to-text error:", sttError);
     }
   }, [isSttSuccess, sttResponse, sttError]);
 
-  // Handle User Done Answering
   const handleDoneAnswering = () => {
     if (isUserAnswering) {
       stopRecording();
@@ -108,61 +115,36 @@ const Interview: React.FC<{
     }
   };
 
-  // Add Message to State with Appending Logic for AI
-  const handleMessage = (message: string, role: string = "USER") => {
-    if (role === "AI") {
-      setMessages((prevMessages) => {
+  const handleMessage = (message: string, role: "USER" | "AI") => {
+    setMessages((prevMessages) => {
+      if (role === "AI") {
         if (prevMessages.length === 0) {
-          return [
-            {
-              id: 1,
-              message: message,
-              role: role,
-            },
-          ];
+          return [{ id: 1, message, role }];
         }
 
         const lastMessage = prevMessages[prevMessages.length - 1];
-
         if (lastMessage.role === "AI") {
-          const updatedLastMessage: IMessage = {
-            ...lastMessage,
-            message: `${lastMessage.message} ${message}`,
-          };
-
           return [
-            ...prevMessages.slice(0, prevMessages.length - 1),
-            updatedLastMessage,
-          ];
-        } else {
-          return [
-            ...prevMessages,
-            {
-              id: prevMessages.length + 1,
-              message: message,
-              role: role,
-            },
+            ...prevMessages.slice(0, -1),
+            { ...lastMessage, message: `${lastMessage.message} ${message}` }
           ];
         }
-      });
-    } else {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: prevMessages.length + 1,
-          message: message,
-          role: role,
-        },
-      ]);
-    }
+      }
+      
+      return [...prevMessages, {
+        id: prevMessages.length + 1,
+        message,
+        role
+      }];
+    });
   };
 
-  // Function to Initiate AI Message Stream
   const addMessage = (prompt: string) => {
     if (!interviewDetails?.data?._id) {
-      console.error("Interview details not loaded yet");
+      console.error("Interview details not available");
       return;
     }
+
     interviewStream({
       prompt,
       model: "gpt-4o",
@@ -185,7 +167,7 @@ const Interview: React.FC<{
             {isUserAnswering ? (
               <Controls doneAnswering={handleDoneAnswering} />
             ) : (
-              <div className="text-center text-gray-500"></div>
+              <div className="text-center text-gray-500" />
             )}
             {codeSnippet && (
               <CodeSnippetEditor

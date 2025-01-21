@@ -44,41 +44,27 @@ const BannerSkillsIcons: React.FC<SkillIconsProps> = ({ data, color, isGoalsList
 
   // Predefined styles for icons
   const goalsCardsStyles = isGoalsList
-    ? [
-        { top: "22%", right: "18%", width: "85px", height: "85px", rotate: "0deg" },
-        { top: "40%", right: "39%", width: "75px", height: "75px", rotate: "-15deg" },
-        { top: "60%", right: "5%", width: "60px", height: "60px", rotate: "-30deg" },
-        { top: "12%", right: "38%", width: "35px", height: "35px", rotate: "15deg" }
-      ]
-    : [
-        { top: "50%", right: "20%", width: "160px", height: "160px", rotate: "0deg" },
-        { top: "64%", right: "30%", width: "145px", height: "145px", rotate: "-10deg" },
-        { top: "70%", right: "12%", width: "130px", height: "130px", rotate: "-30deg" },
-        { top: "31%", right: "29%", width: "100px", height: "100px", rotate: "15deg" }
-      ];
+  ? [
+      "absolute top-[22%] right-[18%] w-[85px] h-[85px] rotate-0",
+      "absolute top-[40%] right-[39%] w-[75px] h-[75px] rotate-[-15deg]",
+      "absolute top-[60%] right-[5%] w-[60px] h-[60px] rotate-[-30deg]",
+      "absolute top-[12%] right-[38%] w-[35px] h-[35px] rotate-[15deg]",
+    ]
+  : [
+      "absolute top-[50%] right-[20%] w-[160px] h-[160px] rotate-0",
+      "absolute top-[64%] right-[30%] xl:right-[35%] lg:right-[40%] w-[145px] h-[145px] rotate-[-10deg]",
+      "absolute top-[70%] right-[12%] xl:right-[7%] lg:right-[5%] w-[130px] h-[130px] rotate-[-30deg]",
+      "absolute top-[32%] right-[29%] xl:right-[33%] lg:right-[40%] w-[100px] h-[100px] rotate-[15deg]",
+    ];
 
-    const getIconStyles = (style: any, index: number) => {
-      const darkenedColor = darkenColor(color, index * 0.2);
-      const shadowColor = darkenColor(color,0.2); 
-    
-      const baseSize = Math.min(parseInt(style.width), parseInt(style.height)) * 0.7;
-      const fontSize = baseSize;
-    
-      return {
-        backgroundColor: darkenedColor,
-        top: style.top,
-        right: style.right,
-        width: style.width,
-        height: style.height,
-        zIndex: 15 - index,
-        transform: `rotate(${style.rotate})`,
-        boxShadow: isGoalsList
-          ? `10px 4px 30px ${shadowColor}` // Shadow for goals list
-          : `0px 4px 12px ${shadowColor}`, // Shadow for non-goals list
-        border: isGoalsList ? "4px solid white" : "2px solid white",
-        fontSize: `${fontSize}px`
-      };
-    };
+  const getFontSize = (style: string): string => {
+    const widthMatch = style.match(/w-\[(\d+)px\]/);
+    const heightMatch = style.match(/h-\[(\d+)px\]/);
+    const width = widthMatch ? parseInt(widthMatch[1]) : 0;
+    const height = heightMatch ? parseInt(heightMatch[1]) : 0;
+    const baseSize = Math.min(width, height) * 0.7;
+    return `${baseSize}px`;
+  };
 
   return (
     <div className={`absolute w-full h-full top-0 left-0 overflow-hidden bg-gradient-to-r from-white via-white to-cyan-400`}   style={{
@@ -89,15 +75,23 @@ const BannerSkillsIcons: React.FC<SkillIconsProps> = ({ data, color, isGoalsList
     <Banner bgColor={color} />
       {skillIcons.map((iconClass, index) => {
         const baseStyle = goalsCardsStyles[index % goalsCardsStyles.length];
-        const iconStyles = getIconStyles(baseStyle, index);
+        const fontSize = getFontSize(baseStyle);
+        const shadowColor = darkenColor(color,1*0.2)
 
         return (
           <div
             key={index}
-            className="absolute flex items-center justify-center rounded-full overflow-visible"
-            style={iconStyles}
+            className={`rounded-full flex justify-center items-center border-white ${baseStyle} ${
+              isGoalsList ? "border-4 shadow-lg" : "border-[4px] shadow-md"
+            }`}
+            style={{
+              background:darkenColor(color,index * 0.2),
+              zIndex: 15 - index,
+              boxShadow:`-2px -10px 15px -5px ${shadowColor}`,
+
+            }}
           >
-            <i className={`${iconClass} text-white`} style={{ fontSize: iconStyles.fontSize }}></i>
+            <i className={`${iconClass} text-white`} style={{ fontSize }}></i>
           </div>
         );
       })}

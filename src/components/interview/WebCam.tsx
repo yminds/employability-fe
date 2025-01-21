@@ -14,7 +14,7 @@ const WebCam: React.FC = () => {
           height: 850,
           facingMode: "user",
         }}
-        className="w-full h-full rounded-xl object-cover"
+        className="w-full h-full rounded-xl object-cover transform -scale-x-100"
       ></Webcam>
       <div className="absolute bottom-4 left-4 bg-white px-4 py-2 rounded-xl">
         <p>Nawaz Pasha</p>
