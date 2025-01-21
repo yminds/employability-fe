@@ -93,7 +93,7 @@ const SuggestedSkills: React.FC = () => {
             {displayedSkills.map((skill, index) => (
               <div
                 key={index}
-                className="p-4 bg-gray-50 rounded-lg  flex-1 flex-col space-y-4 min-w-[280px] "
+                className="p-4 bg-gray-50 rounded-lg  flex-1 flex-col space-y-4 min-w-[230px] "
               >
                 {/* Icon and Title */}
                 <div className="flex items-center space-x-3">

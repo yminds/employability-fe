@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import CircularProgress from '@/components/ui/circular-progress-bar'; // Updated CircularProgress
+import CircularProgress from '@/components/ui/circular-progress-bar'; 
 import logo from '@/assets/skills/e-Logo.svg';
 import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import { useSelector } from 'react-redux';
@@ -58,11 +58,11 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalNam
   
 
   const totalVerifiedRating = skillsData
-    ? skillsData?.data?.all.reduce((acc: number, skill: Skill) => acc + skill.verified_rating, 0)
+    ? skillsData?.data?.mandatory.reduce((acc: number, skill: Skill) => acc + skill.verified_rating, 0)
     : 0;
 
   const averageVerifiedRating =
-    skillsData && skillsData?.data?.all.length > 0 ? totalVerifiedRating / skillsData?.data?.all.length : 0;
+    skillsData && skillsData?.data?.mandatory.length > 0 ? totalVerifiedRating / skillsData?.data?.all.length : 0;
 
   return (
     <div className="bg-white flex flex-col w-[100%] rounded-lg  p-[30px] gap-6 md:mt-0 sm:mt-0">
