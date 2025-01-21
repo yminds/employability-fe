@@ -81,7 +81,7 @@ export const routes: RouteConfig[] = [
     component: <UserProfilePage />,
   },
   {
-    route: "/jobsdev",
+    route: "/jobs",
     component: <JobsPage />,
   },
   {

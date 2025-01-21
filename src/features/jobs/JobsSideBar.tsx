@@ -4,22 +4,34 @@ import React from "react";
 import cursorIcon from '@/assets/jobs/cursor.svg'
 import videoIcon from '@/assets/jobs/video.svg'
 import listIcon from '@/assets/jobs/list.svg'
-
+import type { Goal } from "@/pages/JobsPage";
 
 interface GoalsWindowProps {
-    goals: string[];
-    currentStatus: string;
+    goals: Goal[];
+    selectedGoalId:string|null;
+    currentStatus: string|null;
+    onGoalChange: (goalId:string) => void;
+    
 }
 
 
-const GoalsWindow: React.FC<GoalsWindowProps> = () => {
+const GoalsWindow: React.FC<GoalsWindowProps> = ( {goals,selectedGoalId,currentStatus,onGoalChange}) => {
+
+
+    const handleGoalsChange=(e:any)=>{
+        onGoalChange(e.target.value)
+    }
+
     return (
         <div className="w-full bg-white p-[34px] pb-[32px] flex flex-col justify-start gap-6 items-stretch rounded-[9px]">
             {/* goals */}
             <div className=" flex flex-col  items-stretch text-left p-4">
                 <p className="text-[14px] ml-1 leading-6 font-nornmal font-['SFPro Display'] text-[#909091]">Goals</p>
-                <select className="text-black text-lg font-medium font-['Ubuntu'] leading-snug">
-                    <option>Frontend Developer</option>
+                
+                <select value={ goals.length>0?goals.filter(item=> item._id==selectedGoalId)[0]._id:''} className="text-black text-lg font-medium font-['Ubuntu'] leading-snug" onChange={handleGoalsChange}>
+                   
+                   {goals.map((goal) => (<option value={goal._id}>{goal.name}</option> ))}
+                   
                 </select>
             
             </div>
@@ -89,13 +101,19 @@ const MyJobs: React.FC<MyJobsProps> = (Myjobs) => {
 
 
 
-const goals=['Frontend Developer','Entereprenuer'];
 const currentStatus='current unemployed';
 
-const JobSideBar : React.FC= () => {
+interface JobSideBarProps{
+    allGoals:Goal[];
+    selectedGoalId:string|null;
+    onGoalChange:(goalId:string)=>void
+}
+
+
+const JobSideBar : React.FC<JobSideBarProps>= ({allGoals,onGoalChange,selectedGoalId}) => {
     return ( 
     <div className=" h-full w-full pt-[54px] flex flex-col gap-6 items-stretch">
-    <GoalsWindow goals={goals} currentStatus={currentStatus} ></GoalsWindow>
+    <GoalsWindow goals={allGoals} currentStatus={currentStatus} selectedGoalId={selectedGoalId} onGoalChange={onGoalChange} ></GoalsWindow>
     <MyJobs applied={2} intervied={3} shortlisted={4}></MyJobs>
     </div>
      );

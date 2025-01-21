@@ -3,41 +3,62 @@ import {useEffect, useState} from "react";
 import JobCard from "@/features/jobs/JobCard";
 import JobSideBar from "@/features/jobs/JobsSideBar";
 import JobsHeader from "@/features/jobs/JobsHeader";
-
+import { useGetUserSkillsMutation } from '@/api/skillsApiSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
 import JobsFilterModal from "@/features/jobs/JobsFilterModal";
 
 import JobDetailsModal from "@/features/jobs/JobDetailsModal";
 
 import { useGetAllJobsMutation } from "@/api/jobsApiSlice";
+import {useGetGoalsbyuserQuery} from '@/api/goalsApiSlice'
 
 
 
 
+
+
+export interface Skill{
+    _id:string,
+    name:string
+}
 export interface Job {
     id: number;
     title: string;
     company: string;
     type: string;
     locations:string[];
-    skills:string[]
+    skills:Skill[]
+    status: string;
     logo: string;
     minimumExperience:number;
     aboutCompany:string;
     salaryRange:string;
     description:string;
+    applicationUrl:string
   }
 
 export interface Filter{
     search:string
     jobRoles:string[];
     locations:string[];
+    workPlacePref:string;
     minimumSalary:number;
     jobTypes:string[];
     companySize:string;
     currency:string;
+    minimumExperience:number|null;
     onlyRemoteJobs:boolean
-
+    skills:string[]
+        // might remove this 
 }
+
+export interface Goal{
+    _id:string,
+    name:string,
+    experience:string
+}
+
 
 const JobPage:React.FC=()=>{
 
@@ -45,22 +66,124 @@ const JobPage:React.FC=()=>{
     const defaultJobFilters:Filter={
         search:"",
         locations:[],
+        workPlacePref:'',
         jobRoles:[],
         minimumSalary:0,
         jobTypes:[],
         companySize:'',
         currency:'INR',
-        onlyRemoteJobs:false
+        onlyRemoteJobs:false,
+        minimumExperience:null,
+        skills:[]
+      
     };
     
-    const [isFilterModalOpen,setIsFilterModalOpen]=useState(false);
+    
+
+
     const [filters, setFilters] = useState(defaultJobFilters);
+    const userId = useSelector((state: RootState) => state.auth.user?._id); 
+    const { data: goalData, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
+    
+    const [allGoals,setAllGoals]=useState<Goal[]>([])
+    const [selectedGoal,setSelectedGoal]=useState<string|null>(null)
+
+    
+    
+    useEffect(()=>{
+        if(goalData!=undefined && goalData.data.length>0){
+           const fetched_goals=goalData.data
+            setAllGoals(fetched_goals)
+            setSelectedGoal(fetched_goals[0]._id)
+          
+        }
+    },[goalData])
+    
+    const [getUserSkills, { data: skillsData, isLoading:userSkillsLoading, isError }] = useGetUserSkillsMutation();
+    
+    const [userSkills,setUserSkills]=useState<string[]>([])
+    
+
+    useEffect(()=>{
+      
+        if(skillsData!=undefined){
+
+            const fetched_skills= skillsData.data.all.map((skill)=>skill.skill_pool_id);
+            const skill_ids=fetched_skills.map((item)=>item._id)
+            setUserSkills(skill_ids);
+           
+            
+        
+        }
+    },[skillsData])
+
+    useEffect(()=>{
+       
+        if (selectedGoal==null){
+            setUserSkills([])
+        }
+        else{
+            getUserSkills({userId,goalId:selectedGoal});
+        }
+       
+       
+    },[selectedGoal])
+
+
+
+    
+    // useEffect(()=>{
+    //     if(skillsData!=undefined && skillsData.data.length>0){
+    //         setUserSkills(skillsData.data.map((item:any)=>item._id))
+    //     }
+    // })
+
+
+    
+    const [isFilterModalOpen,setIsFilterModalOpen]=useState(false);
     const [jobsCategory,setJobsCategory]=useState('All')
-    const userSkills=['Linux','Agile','HTML','JavaScript','Java','MySQL','C++','Python'];
+
+
+    
+    useEffect(()=>{
+       
+        setPageNumber(1)
+        setJobsList([])
+    
+    },[filters])
+
+
+
+    useEffect(()=>{
+        let updatedSkills:string[] =[];
+        if(jobsCategory=='All'){
+            updatedSkills=[]
+        }
+        else if(jobsCategory=='Suggested'){
+            updatedSkills=userSkills
+        }
+        else if(jobsCategory=='Active applications'){
+            updatedSkills=[]
+        }
+
+        if ( (!filters.skills.every( item=>updatedSkills.includes(item)) || updatedSkills.length!=filters.skills.length )){
+            
+          
+        }
+        setFilters( (prev)=>({...prev,skills:updatedSkills}))
+        setPageNumber(1)
+        
+       
+
+    },[jobsCategory,userSkills])
+    
+   
+
+
     const userExperience=2;
 
     const [isDetailsModalOpen,setIsDetailsModalOpen]=useState(false);
-    const [selectedJob, setSelectedJob] = useState(undefined);
+    const [selectedJob, setSelectedJob] = useState<Job|null>(null);
 
    
     const [jobsList,setJobsList]=useState<Job[]>([])
@@ -70,16 +193,6 @@ const JobPage:React.FC=()=>{
 
 
     useEffect(()=>{
-        console.log('filters changed')
-        console.log(JSON.stringify(filters))
-        setJobsList(()=>[])
-        setPageNumber(()=>1)
-        console.log('emptied the jobslist and set page number to 1');
-    
-    },[filters])
-
-    useEffect(()=>{
-        console.log('pageNumber changed')
         getAllJobs({page:pageNumber,filters})
         
     },[pageNumber,filters])
@@ -87,10 +200,8 @@ const JobPage:React.FC=()=>{
 
     useEffect(()=>{ 
         
-        console.log('jobs changed',jobs)
-
+     
         if(jobs!==undefined && jobs.length>0){
-            console.log('added fetched jobs to jobslist');
                 
            setJobsList((prevJobs:any)=>[...prevJobs,...jobs])
        }
@@ -100,23 +211,31 @@ const JobPage:React.FC=()=>{
     
     const handleScroll = (e: any) => {
         const container = e.target;
-    
-        if (Math.floor(container.scrollHeight - container.scrollTop)-container.clientHeight <10) {
-           setPageNumber((prevPageNumber) => prevPageNumber + 1);
-           console.log('page number is',pageNumber);
+        const maxScroll = container.scrollHeight - container.clientHeight; // Absolute bottom
+       
+        if (Math.floor(container.scrollHeight - container.scrollTop)-container.clientHeight <1) {
+            if(!isLoading){
+            setPageNumber((prevPageNumber) => prevPageNumber + 1);
            
-            // Trigger your action here
+           
+            }
+            container.scrollTop = maxScroll // Preve
+
         }
     };
     
     const handleSearch=(searchTerm:string)=>{
-        console.log('search term changed',searchTerm);
+      
         setFilters((prevFilters)=>({...prevFilters,search:searchTerm}))
     }
    
     const displayDetails=(job:any)=>{
         setIsDetailsModalOpen(true);
         setSelectedJob(job);
+    }
+
+    const handleGoalChange=(goalId:string)=>{
+        setSelectedGoal(goalId)
     }
 
 return (
@@ -138,7 +257,7 @@ return (
     </div>
 
     <div className="w-[25%] w-max-[260px] mr-10 ">
-        <JobSideBar/>
+        <JobSideBar allGoals={allGoals} selectedGoalId={selectedGoal} onGoalChange={handleGoalChange} />
     </div>
 
     {isFilterModalOpen && <JobsFilterModal  filters={filters} setIsFilterModalOpen={setIsFilterModalOpen} setfilters={setFilters} />}

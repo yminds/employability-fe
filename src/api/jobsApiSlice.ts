@@ -7,44 +7,12 @@ interface Job {
     company: string;
     type: string;
     locations: string[];
-    skills: string[]; // Directly store skill names
+    skills: {_id:string,name:string } // Directly store skill names
     status?: string;
     logo: string;
     salary?: string;
     minimumExperience: number;
 }
-
-// Query parameters interface
-export interface JobSearchParams {
-  page?: number; // Page number, default is 1
-  locations?: string[]; // Array of locations
-  minimumSalary?: number; // Minimum salary filter
-  minimumExperience?: number | null; // Minimum experience filter, default null
-  jobRoles?: string[]; // Array of job roles
-  jobTypes?: string[]; // Array of job types
-  companySize?: string | null; // Company size filter
-  onlyRemoteJobs?: boolean; // Filter for only remote jobs
-}
-
-
-
-// export const jobApiSlice = apiSlice.injectEndpoints({
-//   endpoints: (builder) => ({
-//     getAllJobs: builder.mutation< Job[], { page:number,filter:JobSearchParams}>({
-//       query: (page:number,filter:JobSearchParams) => ({
-//         url: `/api/v1/jobs/alljobs`,
-//         method: 'POST',
-//         body: {page,...filter},
-//       }),
-//     }),
-//   }),
-// });
-
-// export const { useGetAllJobsQuery } = jobApiSlice;
-
-
-
-// Define the query parameters interface
 export interface JobSearchParams {
   page?: number; // Page number, default is 1
   search?:string;
@@ -54,7 +22,8 @@ export interface JobSearchParams {
   jobRoles?: string[]; // Array of job roles
   jobTypes?: string[]; // Array of job types
   companySize?: string | null; // Company size filter
-  onlyRemoteJobs?: boolean; // Filter for only remote jobs
+  onlyRemoteJobs?: boolean;
+  skills:string[] // Filter for only remote jobs
 }
 
 // Inject the endpoints into the API slice

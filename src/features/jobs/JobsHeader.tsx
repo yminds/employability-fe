@@ -6,11 +6,13 @@ import searchIcon from  '@/assets/jobs/search.svg'
 import locationIcon from  '@/assets/jobs/location.svg'
 import compensationsvg from '@/assets/jobs/compensation.svg'
 import employeesvg from '@/assets/jobs/employee.svg'
+import { Filter } from '@/pages/JobsPage';
+
 
 interface JobsHeaderProps {
     JobsTab:string;
     setJobsTab:(jobsCategory:string)=>void;
-    filters:any;
+    filters:Filter;
     openFiltersModal:()=>void
     onSearch:(keywork:string)=>void
 }
@@ -40,6 +42,8 @@ const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
         if (filters.companySize!=='') count++;
         if (filters.currency!=='INR') count++;
         if (filters.onlyRemoteJobs) count++;
+        if (filters.workPlacePref!='') count++;
+        if (filters.minimumExperience!=null) count++;
         return count
     }
 
@@ -85,7 +89,7 @@ const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
                     className={`py-1.5 px-2 rounded-[3px] text-base font-normal font-['SF Pro Display']  leading-normal tracking-tight ${JobsTab=='Suggested'?'bg-[#DBFFEA] text-[#10B754]':''}`}>Suggested</button>
                     <button 
                     onClick={()=>setJobsTab('Active application')}
-                    className={`py-1.5 px-2 rounded-[3px] text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight ${JobsTab=='Active application'?'bg-[#DBFFEA] text-[#10B754]':''}`}>Active applications</button>
+                    className={`py-1.5 px-2 rounded-[3px] text-base font-normal font-['SF Pro Display'] leading-normal text-nowrap tracking-tight ${JobsTab=='Active application'?'bg-[#DBFFEA] text-[#10B754]':''}`}>Active applications</button>
 
                 </div>
 
@@ -103,14 +107,14 @@ const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
                     <div id='filters' className="flex flex-row p-2.5 rounded-[6px] items-center text-center bg-white "
                     onClick={()=>openFiltersModal()}    >
                         <img src={filterIcon} className="w-4 h-4 my-1.5 mx-3 "></img>
-                        <p className=" my-1.6 mr-12 text-[#67696b] text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight"> Filters {appliedFiltersCount?`(${appliedFiltersCount})`:''}</p>
+                        <p className=" my-1.6 mr-12 text-[#67696b] text-nowrap text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight"> Filters {appliedFiltersCount?`(${appliedFiltersCount})`:''}</p>
                     </div>
                 </div>
             </section>
 
             {appliedFiltersCount>0 &&            
             
-                <section id='applied filters' className="flex  flex-row justify-start gap-3.5 items-center w-full  rounded-lg  overflow-clip overflow-ellipsis ">
+                <section id='applied filters' className="flex  flex-row justify-start gap-3.5 items-center w-full  rounded-lg  overflow-hidden overflow-ellipsis   ">
                     
                     <p className="  text-nowrap ">Applied filters  </p>
                    
@@ -118,9 +122,16 @@ const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
 
                             {/* location filters */}
                         {filters.locations.length>0 &&
-                            <div  className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-start py-2.5 bg-white text-nowrap text-ellipsis overflow-hidden min-w-min w-max-[320px]"> 
+                            <div  className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-start py-2.5 bg-white text-nowrap text-ellipsis overflow-hidden min-w-min w-max-[380px]"> 
                                 <img src={locationIcon} className="w-4 h-4  "></img>
                                 <p className=" inline-block ">{filters.locations.slice(0,4).join(',')}{filters.locations.length>4?'...':''}</p>
+                            </div>
+                        }
+
+                        {filters.workPlacePref!='' &&
+                            <div  className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-start py-2.5 bg-white text-nowrap text-ellipsis overflow-hidden min-w-min w-max-[320px]"> 
+                                <img src={locationIcon} className="w-4 h-4  "></img>
+                                <p className=" inline-block w-full ">{filters.workPlacePref}</p>
                             </div>
                         }
                         
@@ -152,11 +163,21 @@ const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
 
                         
                         {filters.companySize!='' && 
-                            <div  className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-center py-2.5 bg-white   text-ellipsis whitespace-nowrap  t"> 
+                            <div  className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-center py-2.5 bg-white   text-ellipsis text-nowrap overflow-hidden "> 
                                 <img src={employeesvg} className="w-4 h-4  "></img>
                                 <p className=" inline-block ">{filters.companySize} employees</p>
                             </div>    
                         }
+
+
+                        {filters.minimumExperience && 
+                            <div  className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-center py-2.5 bg-white   text-ellipsis text-nowrap overflow-hidden "> 
+                                <img src={employeesvg} className="w-4 h-4  "></img>
+                                <p className=" inline-block ">{filters.minimumExperience} Years</p>
+                            </div>    
+                        }
+
+
 
                        
 
