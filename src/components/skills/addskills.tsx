@@ -32,7 +32,7 @@ interface Skill {
   skill_Id: string;
   name: string;
   rating: string;
-  level: string; // New field for skill level
+  level: string;
   visibility: string;
 }
 
@@ -133,7 +133,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
       skill_Id: "",
       name: "",
       rating: "0",
-      level:"1",
+      level: "1",
       visibility: "All users",
     };
     setSkills([...skills, newSkill]);
@@ -176,7 +176,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         const existingSkill = userSkillsData?.data?.allUserSkills.find(
           (userSkill: any) => userSkill.skill_pool_id._id === skill.skill_Id
         );
-      
+
 
         return {
           skill_pool_id: skill.skill_Id,
@@ -474,68 +474,68 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                     </Popover>
                   )}
                 </div>
-<div>
-  <label className="text-sm font-medium mb-2 block">
-    Skill level
-  </label>
-  <Popover
-    open={open[index]}
-    onOpenChange={(isOpen) =>
-      setOpen((prevState) =>
-        prevState.map((openState, i) => (i === index ? isOpen : openState))
-      )
-    }
-  >
-    <PopoverTrigger asChild>
-      <Button
-        variant="outline"
-        className="w-full justify-between"
-      >
-        {skill.level === "1"
-          ? "Basic"
-          : skill.level === "2"
-          ? "Intermediate"
-          : "Advanced"}
-        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent className="w-[200px] p-0">
-      <Command>
-        <CommandGroup>
-          {["1", "2", "3"].map((level) => (
-            <CommandItem
-              key={level}
-              onSelect={() => {
-                setSkills(
-                  skills.map((s, i) =>
-                    i === index ? { ...s, level } : s
-                  )
-                );
-                setOpen((prevState) =>
-                  prevState.map((openState, i) =>
-                    i === index ? false : openState
-                  )
-                );
-              }}
-            >
-              <Check
-                className={cn(
-                  "mr-2 h-4 w-4",
-                  skill.level === level ? "opacity-100" : "opacity-0"
-                )}
-              />
-              {level === "1"
-                ? "Basic"
-                : level === "2"
-                ? "Intermediate"
-                : "Advanced"}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </Command>
-    </PopoverContent>
-  </Popover>
-</div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Skill level
+                  </label>
+                  <Popover
+                    open={open[index]}
+                    onOpenChange={(isOpen) =>
+                      setOpen((prevState) =>
+                        prevState.map((openState, i) => (i === index ? isOpen : openState))
+                      )
+                    }
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between"
+                      >
+                        {skill.level === "1"
+                          ? "Basic"
+                          : skill.level === "2"
+                            ? "Intermediate"
+                            : "Advanced"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandGroup>
+                          {["1", "2", "3"].map((level) => (
+                            <CommandItem
+                              key={level}
+                              onSelect={() => {
+                                setSkills(
+                                  skills.map((s, i) =>
+                                    i === index ? { ...s, level } : s
+                                  )
+                                );
+                                setOpen((prevState) =>
+                                  prevState.map((openState, i) =>
+                                    i === index ? false : openState
+                                  )
+                                );
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  skill.level === level ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {level === "1"
+                                ? "Basic"
+                                : level === "2"
+                                  ? "Intermediate"
+                                  : "Advanced"}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <Button
                   variant="ghost"
                   className="absolute right-0 top-[-10px] h-6 w-6 p-0"
@@ -543,7 +543,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                 >
                   <img src={icon} alt="Remove Skill" />
                 </Button>
-                
+
               </div>
             </div>
           ))}

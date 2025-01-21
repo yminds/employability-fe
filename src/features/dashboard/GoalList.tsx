@@ -170,7 +170,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                                     <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">
                                         {experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}
                                     </div>
-                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">
+                                    <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-center font-normal leading-6 tracking-[0.24px]">
                                         Difficulty: {difficultyLevelObj[goal.difficulty_level as keyof typeof difficultyLevelObj]}
                                     </div>
                                 </div>
@@ -191,7 +191,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                                 <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-wide">
                                     {experienceLevelObj[goal.experience_level as keyof typeof experienceLevelObj]}
                                 </div>
-                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-base font-normal leading-6 tracking-[0.24px]">
+                                <div className="flex p-1 px-3 justify-center items-center gap-2 rounded bg-[rgba(234,235,237,0.80)] text-[#68696B] text-center font-normal leading-6 tracking-[0.24px]">
                                     Difficulty: {difficultyLevelObj[goal.difficulty_level as keyof typeof difficultyLevelObj]}
                                 </div>
                             </div>
