@@ -46,6 +46,7 @@ export interface ProfileFormData {
 // src/types.ts
 
 export interface Education {
+  id: string;
   _id?: any;
   education_level: any; // e.g., "bachelors", "masters", etc.
   degree: any;
