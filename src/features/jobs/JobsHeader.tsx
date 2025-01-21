@@ -42,7 +42,7 @@ const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
         if (filters.companySize!=='') count++;
         if (filters.currency!=='INR') count++;
         if (filters.onlyRemoteJobs) count++;
-        if (filters.workPlacePref!='') count++;
+        if (filters.workTypes.length>0) count++;
         if (filters.minimumExperience!=null) count++;
         return count
     }
@@ -128,10 +128,10 @@ const JobsHeader:React.FC<JobsHeaderProps> = (props) => {
                             </div>
                         }
 
-                        {filters.workPlacePref!='' &&
+                        {filters.workTypes.length>0 &&
                             <div  className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-start py-2.5 bg-white text-nowrap text-ellipsis overflow-hidden min-w-min w-max-[320px]"> 
                                 <img src={locationIcon} className="w-4 h-4  "></img>
-                                <p className=" inline-block w-full ">{filters.workPlacePref}</p>
+                                <p className=" inline-block w-full ">{filters.workTypes.join(',')}</p>
                             </div>
                         }
                         

@@ -16,7 +16,8 @@ interface Job {
 export interface JobSearchParams {
   page?: number; // Page number, default is 1
   search?:string;
-  locations?: string[]; // Array of locations
+  locations?: string[];
+  workType?: string[]; // Array of locations
   minimumSalary?: number; // Minimum salary filter
   minimumExperience?: number | null; // Minimum experience filter, default null
   jobRoles?: string[]; // Array of job roles

@@ -28,7 +28,7 @@ const GoalsWindow: React.FC<GoalsWindowProps> = ( {goals,selectedGoalId,currentS
             <div className=" flex flex-col  items-stretch text-left p-4">
                 <p className="text-[14px] ml-1 leading-6 font-nornmal font-['SFPro Display'] text-[#909091]">Goals</p>
                 
-                <select value={ goals.length>0?goals.filter(item=> item._id==selectedGoalId)[0]._id:''} className="text-black text-lg font-medium font-['Ubuntu'] leading-snug" onChange={handleGoalsChange}>
+                <select value={ goals.length>0?goals.filter(item=> item._id==selectedGoalId)[0]._id:''} className="text-black text-lg font-medium font-['Ubuntu'] leading-snug focus:outline-none " onChange={handleGoalsChange}>
                    
                    {goals.map((goal) => (<option value={goal._id}>{goal.name}</option> ))}
                    
@@ -38,7 +38,7 @@ const GoalsWindow: React.FC<GoalsWindowProps> = ( {goals,selectedGoalId,currentS
             {/* current job status */}
             <div className="flex flex-col gap-4 items-stretch ">
                 <p className="text-black text-base font-medium font-['Ubuntu'] leading-snug  "> Current Status</p>
-                <select className=" ring-1 rounded-[6px] font-['Ubuntu'] ring-black/10 bg-[#FAFBFE] px-2 py-4" >
+                <select className=" ring-1 rounded-[6px] font-['Ubuntu'] ring-black/10 bg-[#FAFBFE] px-2 py-4 focus:outline-none" >
                     <option>Actively seeking job</option>
                     <option>Not unemployed for job</option>
                     <option>Not looking for job</option>    

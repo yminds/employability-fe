@@ -42,7 +42,7 @@ export interface Filter{
     search:string
     jobRoles:string[];
     locations:string[];
-    workPlacePref:string;
+    workTypes:string[];
     minimumSalary:number;
     jobTypes:string[];
     companySize:string;
@@ -66,7 +66,7 @@ const JobPage:React.FC=()=>{
     const defaultJobFilters:Filter={
         search:"",
         locations:[],
-        workPlacePref:'',
+        workTypes:[],
         jobRoles:[],
         minimumSalary:0,
         jobTypes:[],
@@ -80,9 +80,9 @@ const JobPage:React.FC=()=>{
     
     
 
-
+    const [reachedEnd,setReachedEnd]=useState<boolean>(true)
     const [filters, setFilters] = useState(defaultJobFilters);
-    const userId = useSelector((state: RootState) => state.auth.user?._id); 
+    const userId = useSelector((state: RootState) => state?.auth.user?._id); 
     const { data: goalData, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
     
     const [allGoals,setAllGoals]=useState<Goal[]>([])
@@ -146,10 +146,11 @@ const JobPage:React.FC=()=>{
 
     
     useEffect(()=>{
-       
+        setReachedEnd(false)
         setPageNumber(1)
         setJobsList([])
-    
+       
+        
     },[filters])
 
 
@@ -167,11 +168,12 @@ const JobPage:React.FC=()=>{
         }
 
         if ( (!filters.skills.every( item=>updatedSkills.includes(item)) || updatedSkills.length!=filters.skills.length )){
-            
+            setFilters( (prev)=>({...prev,skills:updatedSkills}))
+            setPageNumber(1)
           
         }
-        setFilters( (prev)=>({...prev,skills:updatedSkills}))
-        setPageNumber(1)
+      
+       
         
        
 
@@ -192,7 +194,9 @@ const JobPage:React.FC=()=>{
     const [getAllJobs, { data:jobs, isLoading, error }] = useGetAllJobsMutation();
 
 
+   
     useEffect(()=>{
+       
         getAllJobs({page:pageNumber,filters})
         
     },[pageNumber,filters])
@@ -205,6 +209,12 @@ const JobPage:React.FC=()=>{
                 
            setJobsList((prevJobs:any)=>[...prevJobs,...jobs])
        }
+       
+       if(jobs!==undefined && jobs.length<10){
+                // when end it reached
+            setReachedEnd(true)
+        
+        }
 
     },[jobs])
 
@@ -214,8 +224,9 @@ const JobPage:React.FC=()=>{
         const maxScroll = container.scrollHeight - container.clientHeight; // Absolute bottom
        
         if (Math.floor(container.scrollHeight - container.scrollTop)-container.clientHeight <1) {
-            if(!isLoading){
+            if(!isLoading && !reachedEnd){
             setPageNumber((prevPageNumber) => prevPageNumber + 1);
+           
            
            
             }
@@ -239,9 +250,9 @@ const JobPage:React.FC=()=>{
     }
 
 return (
-<div className=" flex-1 h-screen w-[75%]  bg-[#F5F5F5] flex flex-row gap-8 justify-around " >
+<div className="h-screen w-[75%]  w-max-[1300px]   bg-[#F5F5F5]  flex flex-row gap-8 mx-auto" >
     
-    <div className="w-[70%]  flex flex-col gap-8 ml-10">
+    <div className="w-max-[1260px] w-[73%]    flex flex-col gap-8 ml-10">
        <JobsHeader  onSearch={handleSearch} filters={filters} openFiltersModal={()=>setIsFilterModalOpen(true)} JobsTab={jobsCategory} setJobsTab={(jobsCategory:string)=>{setJobsCategory(jobsCategory)} }></JobsHeader>
 
         <div className="job flex flex-col gap-4 overflow-scroll scrollbar-hide w-full h-full   " onScroll={handleScroll}  >

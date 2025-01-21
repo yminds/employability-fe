@@ -7,7 +7,7 @@ import locaitonsvg from  '@/assets/jobs/location.svg'
 import compensationsvg from '@/assets/jobs/compensation.svg'
 import employeesvg from '@/assets/jobs/employee.svg'
 import buildingIcon from '@/assets/jobs/building.svg'
-
+import { ChevronDown } from 'lucide-react';
 import ChipsCard from './ChipsCard';
 import ChipsCardAdd from './chipsCardAdd';
 import CheckBox from './CheckBox';
@@ -15,6 +15,9 @@ import CheckBox from './CheckBox';
 import { Filter } from '@/pages/JobsPage';
 import { useGetJobLocationSuggestionsMutation ,useGetJobRoleSuggestionsMutation } from '@/api/jobsApiSlice';
 import SearchPopover from './SearchPopover';
+import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from "@/components/ui/checkbox"
 
 
 
@@ -42,8 +45,6 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
     
     const [fixedJobLocations,setFixedJobLocations]=useState<string[]>([])
     const [fixedJobTitles,setFixedJobTitles]=useState<string[]>([])
-
-
     const [selectedLocations,setSelectedLocations]=useState(filters.locations)
     const [suggestedLocations,setSuggestedLocations]=useState(filters.locations.length?filters.locations:['Banglore','chennai','delhi'])
     const [getLocationSuggestions, { data:fetchedSuggestedLocations, isLoading, error }] = useGetJobLocationSuggestionsMutation();
@@ -52,7 +53,7 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
     const [mininmumExperience,setMinimumExperience]=useState(filters.minimumExperience)
     const [currency,setCurrency]=useState(filters.currency)
     
-    const [workPlacePref,setWorkPlacePref]=useState(filters.workPlacePref)
+    const [workTypes,setWorkTypes]=useState<string[]>(filters.workTypes)
     
     const currencies=['INR','USD',"EUR",'AUD','RUB'];
 
@@ -64,6 +65,17 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
                         ];
 
     const companySizes=['1-10','11-50','51-200','200-1000','1000+']
+
+    const allWorkTypes=['Remote','Onsite','Hybrid']
+
+    const handleCheckboxChange=(pref:string)=>{
+        if(workTypes.includes(pref)){
+            setWorkTypes( (prev)=>prev.filter((item)=>item!=pref))
+        }
+        else{
+            setWorkTypes( (prev)=>[...prev,pref])
+        }
+    }
 
 
 
@@ -131,8 +143,9 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
     const applyFilters=()=>{
         const newFilters:Filter ={
             search:filters.search,
+            skills:filters.skills,
             locations:selectedLocations,
-            workPlacePref:workPlacePref,
+            workTypes:workTypes,
             jobRoles:selectedJobTitles,
             minimumSalary:minimumSalary,
             currency:currency,
@@ -140,7 +153,8 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
             companySize:companySize,
             minimumExperience:mininmumExperience,
             onlyRemoteJobs:onlyRemoteJobs,
-            skills:filters.skills
+          
+           
         }
         console.log(newFilters)
         setfilters(newFilters)
@@ -166,10 +180,7 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
         getJobRoleSuggestion({search})
     }
 
-    const handleWorkPrefChange=(e:any)=>{
-        setWorkPlacePref(e.target.value)
-    }
-
+    
 
   return (
     <div className='p-[42px] z-[52] flex items-center justify-center  w-full h-full absolute top-0 left-0  bg-black/50'  onClick={()=>{setIsFilterModalOpen(false)}}>  
@@ -315,14 +326,38 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
                         </div>
 
                                     {/* location type preferences */}
-                        <div className='flex flex-col gap-1 items-stretch justify-start'>
-                            <h3 className="text-black text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight"> Work Preference</h3>
-                            <select value={workPlacePref} onChange={handleWorkPrefChange} className='w-1/2  h-[50px]  focus:outline-none px-4 py-2 bg-white rounded-md border border-black/10 '>
-                                <option value="">Any</option>
-                                <option value="Hybrid">Hybrid</option>
-                                <option value="Onsite">Onsite</option>
-                                <option value="Remote">Remote</option>
-                            </select>
+                        <div className='flex flex-col gap-1 items-stretch justify-start  w-1/2'>
+                            <Popover modal={true}>
+                                <PopoverTrigger asChild className='w-full'>
+                                    
+                                    {/* <Button variant="default" >Work Preferences</Button> */}
+                                    <div className='w-1/2 flex gap-2 items-center '>
+                                        <p>Work Preference </p>
+                                         <ChevronDown />
+                                         </div>
+                                    
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full border px-1 rounded ">
+                                    <div className="flex flex-col gap-2 bg-white w-full">
+                                    {allWorkTypes.map((option) => (
+                                        <div key={option} className="flex items-center space-x-2">
+                                        
+                                        <Checkbox
+                                            className='data-[state=checked]:bg-black data-[state=unchecked]:bg-white border-black data-[state=checked]:text-white focus:border-none '
+                                            id={option}
+                                            checked={workTypes.includes(option)}
+                                            onCheckedChange={() => handleCheckboxChange(option)}
+                                        />
+                                        <label htmlFor={option} className="text-sm text-gray-700">
+                                            {option}
+                                        </label>
+                                        </div>
+                                    ))}             
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                            
+                           
                         </div>
                         
                     </div>
