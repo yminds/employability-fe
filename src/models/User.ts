@@ -13,6 +13,7 @@ interface Resume {
 }
 
 export type User = {
+  experience_level: string;
   _id: string;
   email: string;
   role: Role;

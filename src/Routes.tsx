@@ -24,6 +24,10 @@ import SignupForm from "./pages/SignUpPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 //import JobsPage from "./pages/JobsPage.tsx";
 import ProjectListing from "./pages/project-listing.tsx";
+import LinkedInCallback from "./features/authentication/LinkedinCallback.tsx";
+import GitHubCallback from "./features/authentication/GithubCallback.tsx";
+import ExperienceLevel from "./pages/SetExperience.tsx";
+import AddPhone from "./pages/AddPhoneNumber.tsx";
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -37,6 +41,24 @@ export const routes: RouteConfig[] = [
     route: "/login",
     component: <Login />,
     // redirectIfAuthenticated: "/",
+  },
+  {
+    route: "/auth/linkedin/callback",
+    component: <LinkedInCallback />,
+  },
+  {
+    route: "/auth/github/callback",
+    component: <GitHubCallback />,
+  },
+  {
+    route: "/setexperience",
+    component: <ExperienceLevel />,
+    roles: ["CANDIDATE"],
+  },
+  {
+    route: "/addphone",
+    component: <AddPhone />,
+    roles: ["CANDIDATE"],
   },
   {
     route: "/",

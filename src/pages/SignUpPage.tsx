@@ -1,8 +1,5 @@
-import { useState,useEffect, FormEvent } from "react";
-import {
-  useLoginMutation,
-  useRegisterUserMutation,
-} from "@/api/authApiSlice";
+import { useState, useEffect, FormEvent } from "react";
+import { useLoginMutation, useRegisterUserMutation } from "@/api/authApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import User from "@/assets/sign-up/user.png";
 import Mail from "@/assets/sign-up/mail.png";
@@ -10,6 +7,7 @@ import Password from "@/assets/sign-up/password.png";
 import TextInput from "@/components/inputs/TextInput";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import SocialLogin from "@/features/authentication/SocialAuth";
 
 import logo from "@/assets/branding/logo.svg";
 import man from "@/assets/sign-up/man.png";
@@ -24,15 +22,12 @@ interface SignupData {
 
 const SignupForm = () => {
   const navigate = useNavigate();
-  const [registerUser, { isLoading: isSignupLoading }] =
-    useRegisterUserMutation();
   const { role: urlRole } = useParams();
 
-  const [isSignup, setIsSignup] = useState<boolean>(true);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [login, { isSuccess }] = useLoginMutation();
-   const [signup, { success }] = useRegisterUserMutation();
+  const [login] = useLoginMutation();
+  const [signup, { isLoading: isSignupLoading }] = useRegisterUserMutation();
   const [name, setName] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +40,7 @@ const SignupForm = () => {
       setError("Passwords do not match!");
       return;
     }
-    
+
     const signupData: SignupData = {
       email,
       password,
@@ -55,18 +50,26 @@ const SignupForm = () => {
     try {
       // Perform the signup first
       await signup(signupData);
-  
       // After signup success, log the user in automatically
       const loginResponse = await login({ email, password });
 
       // Check if login is successful and navigate
       if (loginResponse.data) {
-        navigate("/"); // Navigate after successful login
+        console.log("Login successful:", loginResponse.data);
+
+        localStorage.setItem("userId", loginResponse.data.user_info._id);
+        navigate("/setexperience"); // Navigate after successful login
       }
     } catch (error) {
       setError("Signup failed!"); // Handle signup failure
     }
-};
+  };
+
+  const handleSocialLogin = (
+    provider: "google" | "linkedin" | "apple" | "github"
+  ) => {
+    console.log(`Social Login with ${provider}`);
+  };
 
   // const handleCustomSignupOTP = async (e: FormEvent<HTMLFormElement>) => {
   //   e.preventDefault();
@@ -98,10 +101,9 @@ const SignupForm = () => {
 
   return (
     <section className="flex h-screen w-screen relative dark:bg-gray-800">
-
-        <div className=" absolute top-5 left-10 w-1/4  h-1/4  z-10">
-            <img src={logo} alt="" />
-        </div>
+      <div className=" absolute top-5 left-10 w-1/4  h-1/4  z-10">
+        <img src={logo} alt="" />
+      </div>
       {/* Left Image Section */}
       <div className="flex w-1/2 justify-center items-center md:block md:p-0 relative">
         <img
@@ -109,11 +111,7 @@ const SignupForm = () => {
           alt="Hero"
           className="w-full max-h-screen md:h-screen object-cover hidden md:block"
         />
-        <img
-          src={man}
-          alt="Hero"
-          className="w-[100%] bottom-0 absolute"
-        />
+        <img src={man} alt="Hero" className="w-[100%] bottom-0 absolute" />
       </div>
 
       {/* Right Form Section */}
@@ -121,36 +119,30 @@ const SignupForm = () => {
         <div className="max-w-md w-full h-[546px] flex flex-col justify-around bg-white rounded-lg p-8">
           {/* Back Button */}
           <div className="flex items-center gap-2 mb-6">
-            
             <button
               onClick={() => navigate("/login")}
               className="d-block hover:text-green-600 text-black text-sm flex items-center"
             >
-            <img className="w-4 h-4 mr-2" src={arrow} alt="Back Arrow" /> <span>Back</span>
+              <img className="w-4 h-4 mr-2" src={arrow} alt="Back Arrow" />{" "}
+              <span>Back</span>
             </button>
           </div>
           {/* Header */}
-          
-          <h1
-            className="text-2xl font-semibold text-gray-800 text-start"
-            style={{
-              fontFamily: '"Work Sans", sans-serif',
-              fontFeatureSettings: "'liga' off, 'clig' off",
-              letterSpacing: "-0.7px",
-            }}
-          >
-            Create Your Account
-          </h1>
-          <p className="text-sm text-gray-500">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => navigate("/login")}
-                  className="text-green-600 underline hover:text-green-800"
-                >
-                  Log in
-                </button>
-              </p>
+          <div className="space-y-4">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Create Your Account
+            </h1>
+            <p className="text-sm text-gray-500">
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="text-green-600 underline hover:text-green-800"
+              >
+                Log in
+              </button>
+            </p>
+          </div>
 
           {/* Error Alert */}
           {error && (
@@ -169,7 +161,6 @@ const SignupForm = () => {
                 placeholder="Name"
                 required
                 icon={User}
-                disabled={isLoading}
               />
 
               <TextInput
@@ -179,7 +170,6 @@ const SignupForm = () => {
                 placeholder="Email"
                 required
                 icon={Mail}
-                disabled={isLoading}
               />
 
               <TextInput
@@ -189,7 +179,6 @@ const SignupForm = () => {
                 placeholder="Password"
                 required
                 icon={Password}
-                disabled={isLoading}
               />
 
               <TextInput
@@ -199,7 +188,6 @@ const SignupForm = () => {
                 placeholder="Confirm Password"
                 required
                 icon={Password}
-                disabled={isLoading}
               />
             </div>
 
@@ -220,10 +208,11 @@ const SignupForm = () => {
             </button>
           </form>
 
+          {/* Social Login */}
+          <SocialLogin onSocialLogin={handleSocialLogin} />
+
           {/* Footer Links */}
-          <div className="text-start space-y-4 mt-6">
-            {/* ss */}
-          </div>
+          <div className="text-start space-y-4 mt-6">{/* ss */}</div>
         </div>
       </div>
     </section>

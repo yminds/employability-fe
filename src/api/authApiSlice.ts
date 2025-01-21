@@ -5,16 +5,27 @@ interface RegisterUserPayload {
   password: string;
   name: string;
 }
-
+interface SocialAuthPayload {
+  provider: "google" | "linkedin" | "github";
+  token: string;
+}
 interface AuthResponse {
+  success: boolean;
+  user_info: any;
+  token: any;
   user: User;
   message: string;
+}
+interface UpdateFirstTimeUserPayload {
+  user_id: string; 
+  phone_number?: string;
+  experience_level?: "" | "entry" | "mid" | "senior"; 
 }
 interface User {
   id: string;
   name: string;
   email: string;
-  [key: string]: any; // For additional fields if needed
+  [key: string]: any; 
 }
 
 export const authApiSlice = apiSlice.injectEndpoints({
@@ -33,7 +44,26 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    socialAuth: builder.mutation<AuthResponse, SocialAuthPayload>({
+      query: (credentials) => ({
+        url: "/api/v1/user/social-auth",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    updateFirstTimeUser: builder.mutation<AuthResponse, UpdateFirstTimeUserPayload>({
+      query: ({ user_id, ...data }) => ({
+        url: `/api/v1/user/update-first-time/${user_id}`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterUserMutation } = authApiSlice;
+export const {
+  useLoginMutation,
+  useRegisterUserMutation,
+  useSocialAuthMutation,
+  useUpdateFirstTimeUserMutation
+} = authApiSlice;

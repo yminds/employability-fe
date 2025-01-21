@@ -12,11 +12,13 @@ import grid from "@/assets/sign-up/grid.svg";
 import arrow from "@/assets/skills/arrow.svg";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
+import SocialLogin from "./SocialAuth";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [login, { isSuccess }] = useLoginMutation();
+  const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
 
@@ -25,11 +27,21 @@ const Login: React.FC = () => {
     login({ email, password });
   };
 
+  const handleSocialLogin = (
+    provider: "google" | "linkedin" | "apple" | "github"
+  ) => {
+    console.log(`Social Login with ${provider}`);
+  };
+
   useEffect(() => {
     if (isSuccess || token) {
-      navigate("/");
+      if (user && user.experience_level === "") {
+        navigate("/setexperience");
+      } else {
+        navigate("/");
+      }
     }
-  }, [isSuccess, token, navigate]);
+  }, [isSuccess, token, user, navigate]);
 
   return (
     <div className="flex h-screen w-screen dark:bg-gray-800">
@@ -45,11 +57,7 @@ const Login: React.FC = () => {
           alt="Hero"
           className="w-full max-h-screen md:h-screen object-cover hidden md:block"
         />
-        <img
-          src={man}
-          alt="Hero"
-          className="w-[100%] bottom-0 absolute"
-        />
+        <img src={man} alt="Hero" className="w-[100%] bottom-0 absolute" />
       </div>
 
       {/* Form Section */}
@@ -131,6 +139,8 @@ const Login: React.FC = () => {
               Login
             </Button>
 
+            {/* Social Login */}
+            <SocialLogin onSocialLogin={handleSocialLogin} />
           </form>
         </div>
       </div>
