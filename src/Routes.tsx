@@ -24,15 +24,12 @@ import SignupForm from "./pages/SignUpPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 import JobsPage from "./pages/JobsPage.tsx";
 import ProjectListing from "./pages/project-listing.tsx";
-<<<<<<< HEAD
 import LinkedInCallback from "./features/authentication/LinkedinCallback.tsx";
 import GitHubCallback from "./features/authentication/GithubCallback.tsx";
 import ExperienceLevel from "./pages/SetExperience.tsx";
 import AddPhone from "./pages/AddPhoneNumber.tsx";
-=======
 import Example from "./features/cap/Example.tsx";
 
->>>>>>> e8d2adf40403c8e4964c9cbaa9643c47fe02a4b0
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
