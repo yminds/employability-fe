@@ -1,169 +1,170 @@
-import React from "react";
+import type React from "react"
+import { Trash2, Play, CheckCircle, AlertCircle, Clock } from "lucide-react"
 
 interface Skill {
-  _id: string;
-  name: string;
-  description: string;
-  icon?: string;
+  _id: string
+  name: string
+  description: string
+  icon?: string
 }
 
 interface ProjectCardProps {
   project: {
-    _id: string;
-    projectName: string;
-    description: string;
-    skills: Skill[];
-    githubLink: string;
-    liveLink: string;
-    thumbnail?: string;
-    isVerified?: boolean;
-  };
+    _id: string
+    name: string
+    description: string
+    tech: Skill[]
+    githubLink: string[]
+    liveLink: string
+    thumbnail?: string
+    status: "Incomplete" | "In-review" | "Unverified" | "Verified"
+    score: number
+    lastCompletedStep?: number
+  }
+  onOpenUploadModal?: (project: ProjectCardProps["project"]) => void
+  onOpenDeleteModal?: (projectId: string) => void
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
-  // Show first 5 skills and hide the rest
-  const visibleSkills = project.skills.slice(0, 5);
-  const remainingSkills = project.skills.length - 5;
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, onOpenDeleteModal }) => {
+  const visibleSkills = project.tech.slice(0, 5)
+  const remainingSkills = project.tech.length - 5
+  const isVerified = project.status === "Verified"
+  const score = project.score
 
-  // Placeholder value for demo purposes
-  const rating = 9.4;
+  const handleIncompleteClick = () => {
+    if (project.status === "Incomplete" && onOpenUploadModal) {
+      onOpenUploadModal(project)
+    }
+  }
+
+  const handleDeleteClick = () => {
+    if (onOpenDeleteModal) {
+      onOpenDeleteModal(project._id)
+    }
+  }
+
+  const renderStatusBadge = () => {
+    const statusConfig = {
+      Verified: { icon: CheckCircle, color: "text-[#25de84]" },
+      "In-review": { icon: Clock, color: "text-yellow-500" },
+      Unverified: { icon: AlertCircle, color: "text-orange-500" },
+      Incomplete: { icon: AlertCircle, color: "text-red-500" },
+    }
+
+    const { icon: Icon, color } = statusConfig[project.status]
+
+    return (
+      <div className="flex flex-col items-end">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-bold text-gray-800">{score.toFixed(1)}</span>
+          <span className="text-gray-600">/10</span>
+        </div>
+        <div className={`flex items-center gap-1 ${color}`}>
+          <Icon className="w-4 h-4" />
+          <span className="text-sm">{project.status}</span>
+        </div>
+      </div>
+    )
+  }
+
+  const renderActionButton = () => {
+    const buttonConfig = {
+      Verified: "View Project",
+      "In-review": "Details",
+      Unverified: "Verify",
+      Incomplete: "Complete Project",
+    }
+
+    return (
+      <button
+        onClick={project.status === "Incomplete" ? handleIncompleteClick : undefined}
+        className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+      >
+        {buttonConfig[project.status]}
+      </button>
+    )
+  }
 
   return (
-    <div className="flex flex-col gap-4 w-full p-6 bg-white rounded-md border border-gray-100">
-      {/* Main Row */}
-      <div className="flex items-center gap-6">
-        {/* Column 1: Thumbnail (only rendered if thumbnail exists) */}
+    <div className="bg-white rounded-lg shadow-sm p-6 max-w-5xl">
+      <div className="flex gap-6">
+        {/* Thumbnail */}
         {project.thumbnail && (
-          <div className="w-[120px] h-[90px] flex-shrink-0">
-            <div className="relative w-full h-full bg-gray-100 rounded-lg overflow-hidden">
-              <img
-                src={project.thumbnail}
-                alt={`${project.projectName} Thumbnail`}
-                className="absolute w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 bg-white/80 rounded-full flex items-center justify-center">
-                  <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-black/80 border-b-[6px] border-b-transparent ml-1"></div>
-                </div>
+          <div className="relative w-48 h-32 flex-shrink-0">
+            <img
+              src={project.thumbnail || "/placeholder.svg"}
+              alt={`${project.name} Thumbnail`}
+              className="w-full h-full object-cover rounded-lg"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center">
+                <Play className="w-5 h-5 text-gray-800" />
               </div>
             </div>
           </div>
         )}
 
-        {/* Column 2: Title and Skills */}
+        {/* Content */}
         <div className="flex-1">
-          <h2 className="text-lg font-medium text-gray-900 mb-2">
-            {project.projectName}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {visibleSkills.map((skill) => (
-              <span
-                key={skill._id}
-                className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm"
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">{project.name}</h2>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {visibleSkills.map((skill) => (
+                  <span key={skill._id} className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm">
+                    {skill.name}
+                  </span>
+                ))}
+                {remainingSkills > 0 && (
+                  <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm">+{remainingSkills}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="text-right">{renderStatusBadge()}</div>
+              <div className="flex items-center gap-2">
+                {renderActionButton()}
+                <button
+                  onClick={handleDeleteClick}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete Project"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-gray-600 mb-4 line-clamp-2">{project.description}</p>
+
+          <div className="flex gap-4">
+            {project.githubLink.length > 0 && (
+              <a
+                href={project.githubLink[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-800 hover:underline font-medium"
               >
-                {skill.name}
-              </span>
-            ))}
-            {remainingSkills > 0 && (
-              <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm">
-                +{remainingSkills}
-              </span>
+                View GIT repo
+              </a>
+            )}
+            {project.liveLink && (
+              <a
+                href={project.liveLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-800 hover:underline font-medium"
+              >
+                Live link
+              </a>
             )}
           </div>
         </div>
-
-        {/* Column 3: Rating and Verification Status */}
-        <div className="flex flex-col items-center">
-          {project.isVerified ? (
-            <>
-              <div className="flex items-center gap-1">
-                <span className="text-xl font-semibold">{rating}</span>
-                <span className="text-gray-500">/10</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-4 h-4">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="w-full h-full text-green-500"
-                  >
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </div>
-                <span className="text-green-500 text-sm">Verified</span>
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center gap-1">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="text-orange-500"
-              >
-                <path
-                  d="M7.33333 4H8.66667V5.33333H7.33333V4ZM7.33333 6.66667H8.66667V12H7.33333V6.66667ZM8 0.666667C4 0.666667 0.666667 4 0.666667 8C0.666667 12 4 15.3333 8 15.3333C12 15.3333 15.3333 12 15.3333 8C15.3333 4 12 0.666667 8 0.666667ZM8 14C4.68667 14 2 11.3133 2 8C2 4.68667 4.68667 2 8 2C11.3133 2 14 4.68667 14 8C14 11.3133 11.3133 14 8 14Z"
-                  fill="currentColor"
-                />
-              </svg>
-              <span className="text-orange-500 text-sm">Unverified</span>
-            </div>
-          )}
-        </div>
-
-        {/* Column 4: Improve Score or View Project (link) */}
-        <div className="flex items-center">
-          {project.isVerified ? (
-            <button className="text-blue-500 text-sm hover:underline whitespace-nowrap">
-              Improve score
-            </button>
-          ) : (
-            <button className="text-blue-500 text-sm hover:underline whitespace-nowrap">
-              View Project
-            </button>
-          )}
-        </div>
-
-        {/* Column 5: View Project or Verify (button) */}
-        <div className="flex items-center">
-          {project.isVerified ? (
-            <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 whitespace-nowrap">
-              View Project
-            </button>
-          ) : (
-            <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 whitespace-nowrap">
-              Verify
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="text-gray-600 text-sm leading-relaxed">
-        {project.description}
-      </p>
-
-      {/* Links */}
-      <div className="flex gap-4">
-        <a
-          href={project.githubLink}
-          className="text-gray-500 text-sm hover:text-gray-700"
-        >
-          View GIT repo
-        </a>
-        <a
-          href={project.liveLink}
-          className="text-gray-500 text-sm hover:text-gray-700"
-        >
-          Live link
-        </a>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProjectCard;
+export default ProjectCard
+

@@ -27,6 +27,7 @@ export interface TransformedData {
   certificates: any[];
   experience: any[];
   linkedIn: string;
+  profileImage?:string | null;
 }
 
 export const transformFormDataForDB = (formData: any): TransformedData => {
@@ -71,5 +72,6 @@ export const transformFormDataForDB = (formData: any): TransformedData => {
       description: exp.description,
     })),
     linkedIn: formData.socialProfiles.linkedin,
+    profileImage:formData.basicInfo.profileImage || null
   };
 };
