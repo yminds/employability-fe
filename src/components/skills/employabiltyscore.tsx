@@ -62,7 +62,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalNam
     : 0;
 
   const averageVerifiedRating =
-    skillsData && skillsData?.data?.mandatory.length > 0 ? totalVerifiedRating / skillsData?.data?.all.length : 0;
+    skillsData && skillsData?.data?.mandatory.length > 0 ? totalVerifiedRating / skillsData?.data?.mandatory.length : 0;
 
   return (
     <div className="bg-white flex flex-col w-[100%] rounded-lg  p-[30px] gap-6 md:mt-0 sm:mt-0">

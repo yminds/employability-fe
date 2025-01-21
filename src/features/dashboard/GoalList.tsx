@@ -53,6 +53,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [bannerColors, setBannerColors] = useState<string[]>([]);
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+    const [hoverDelayId, setHoverDelayId] = useState<NodeJS.Timeout | null>(null);
 
     const location = useLocation();
     const isSetGoalsPage = location.pathname === "/setgoal";
@@ -103,6 +104,18 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
         }
     }, [data]);
 
+    const handleMouseEnter = (goalId: string) => {
+        const timeoutId = setTimeout(() => setHoveredCard(goalId), 1000); // Delay of 1 seconds
+        setHoverDelayId(timeoutId);
+    };
+
+    const handleMouseLeave = () => {
+        if (hoverDelayId) {
+            clearTimeout(hoverDelayId);
+        }
+        setHoveredCard(null);
+    };
+
     const handleGoalClick = (goal: Goal) => {
         setSelectedGoal(goal);
         setIsDialogOpen(true);
@@ -131,12 +144,12 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                     <div
                         key={goal._id}
                         className="relative cursor-pointer"
-                        onMouseEnter={() => setHoveredCard(goal._id)}
-                        onMouseLeave={() => setHoveredCard(null)}
+                        onMouseEnter={() => handleMouseEnter(goal._id)}
+                        onMouseLeave={handleMouseLeave}
                         onClick={() => handleGoalClick(goal)}
                     >
                         <div
-                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
+                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm min-h-[100%] ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
                         >
                             <GoalsBanner
                                 className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover relative"
@@ -165,7 +178,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                         </div>
                         {/* Hovered Block */}
                         <div
-                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 border-2 ${hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
                         >
                             <h3 className="text-[#414447] leading-[24px] tracking-[0.3px] mb-4">{goal.title}</h3>
                             <div className="grid grid-cols-2 gap-2">
