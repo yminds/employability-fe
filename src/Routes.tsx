@@ -24,6 +24,8 @@ import SignupForm from "./pages/SignUpPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 import JobsPage from "./pages/JobsPage.tsx";
 import ProjectListing from "./pages/project-listing.tsx";
+import Example from "./features/cap/Example.tsx";
+
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -40,7 +42,7 @@ export const routes: RouteConfig[] = [
   },
   {
     route: "/",
-    component: <Dashboard />,
+    component: <Dashboard isDashboard={true} displayScore={true} />,
     roles: ["CANDIDATE", "EMPLOYER"],
   },
   {
@@ -88,7 +90,10 @@ export const routes: RouteConfig[] = [
     route: "/projects",
     component: <ProjectsPage />,
   },
-
+  {
+    route: "/example",
+    component: <Example />,
+  },
   {
     route: "/project-listing",
     component: <ProjectListing />,
