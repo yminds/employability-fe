@@ -8,16 +8,17 @@ import seniorLevelImg from "@/assets/set-goal/seniorLevel.png";
 import midLevelImg from "@/assets/set-goal/midLevel.png";
 import entrylevelImg from "@/assets/set-goal/entryLevel.png";
 import ProtectedOnboardingRoute from "@/features/authentication/ProtectedOnboardingRoute";
+import { useSelector } from "react-redux";
 
 const ExperienceLevel: React.FC = () => {
+  const user = useSelector((state: any) => state.auth.user);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const navigate = useNavigate();
+  console.log("User:", user.name);
 
   const handleSelection = async (level: string) => {
     setSelectedLevel(level);
     try {
-      //   // Store the selected level in local storage
-      //   localStorage.setItem('experienceLevel', level);
       navigate("/addphone", { state: { experienceLevel: level } });
     } catch (error) {
       console.error("Failed to store experience level:", error);
@@ -44,7 +45,10 @@ const ExperienceLevel: React.FC = () => {
           <div className="flex flex-col items-center justify-center max-w-[846px]">
             <div className="bg-white rounded-lg w-full max-w-[500px]">
               <div className="mb-[40px]">
-                <h1 className="font-ubuntu text-2xl font-bold leading-[42px] tracking-[-0.5px]">
+                <h2 className="font-ubuntu text-3xl font-bold text-[#1a1a1a] mb-2">
+                  Hey <span className="text-[#08a358]">{user.name}</span>!
+                </h2>
+                <h1 className="font-ubuntu text-2xl font-bold leading-[42px] tracking-[-0.5px] text-[#1a1a1a]">
                   What's your experience level?
                 </h1>
                 <p className="text-black text-opacity-60 font-sf-pro-display text-base font-normal leading-6 tracking-wide">

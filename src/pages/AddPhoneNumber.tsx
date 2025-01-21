@@ -10,6 +10,7 @@ import ESymbol from "@/assets/branding/e.png";
 import arrow from "@/assets/skills/arrow.svg";
 import ProtectedOnboardingRoute from "@/features/authentication/ProtectedOnboardingRoute";
 import { setCredentials } from "@/features/authentication/authSlice";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AddPhone: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
@@ -122,9 +123,14 @@ const AddPhone: React.FC = () => {
               </div>
 
               {errorMessage && (
-                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded transition-opacity duration-300">
-                  {errorMessage}
-                </div>
+                <Alert
+                  variant="destructive"
+                  className="mb-8 bg-[#ff3b30]/10 border border-[#ff3b30] text-[#ff3b30]"
+                >
+                  <AlertDescription className="text-[#ff3b30]">
+                    {errorMessage}
+                  </AlertDescription>
+                </Alert>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -141,11 +147,14 @@ const AddPhone: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-primary text-white py-4 rounded-lg font-medium 
-                         hover:bg-primary/90 transition-colors disabled:opacity-50 
-                         disabled:cursor-not-allowed"
+                  className="w-full h-[44px] flex justify-center items-center gap-2 px-8 py-4 
+                  bg-[#062549] text-white font-medium rounded-[4px] 
+                  hover:bg-[#083264] transition-colors duration-200 ease-in-out"
+                  style={{
+                    boxShadow: "0px 10px 16px -2px rgba(6, 90, 216, 0.15)",
+                  }}
                 >
-                  {isLoading ? "Updating..." : "Continue"}
+                  {isLoading ? "Updating..." : "Log in"}
                 </button>
               </form>
             </div>

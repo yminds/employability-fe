@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import User from "@/assets/sign-up/user.png";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
-import TextInput from "@/components/inputs/TextInput";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import SocialLogin from "@/features/authentication/SocialAuth";
@@ -48,20 +47,26 @@ const SignupForm = () => {
       role: urlRole,
     };
     try {
-      // Perform the signup first
-      await signup(signupData);
-      // After signup success, log the user in automatically
-      const loginResponse = await login({ email, password });
+      const result = await signup(signupData);
+      console.log("Signup successful:", result);
+      
+      if (result.data && result.data.success === true) {
+        const loginResponse = await login({ email, password });
 
-      // Check if login is successful and navigate
-      if (loginResponse.data) {
-        console.log("Login successful:", loginResponse.data);
-
-        localStorage.setItem("userId", loginResponse.data.user_info._id);
-        navigate("/setexperience"); // Navigate after successful login
+        if (loginResponse.data) {
+          navigate("/setexperience"); // Navigate after successful login
+        }
+      } else {
+        setError(result.data?.message || "Signup failed. Please try again.");
       }
-    } catch (error) {
-      setError("Signup failed!"); // Handle signup failure
+    } catch (err: any) {
+      if (err.data?.message) {
+        console.log("Signup failed:", err);
+        
+        setError(err.data.message);
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     }
   };
 
@@ -99,6 +104,16 @@ const SignupForm = () => {
 
   const isLoading = isSignupLoading;
 
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   return (
     <section className="flex h-screen w-screen relative dark:bg-gray-800">
       <div className=" absolute top-5 left-10 w-1/4  h-1/4  z-10">
@@ -115,8 +130,8 @@ const SignupForm = () => {
       </div>
 
       {/* Right Form Section */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="max-w-md w-full h-[546px] flex flex-col justify-around bg-white rounded-lg p-8">
+      <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
+        <div className="w-full max-w-md bg-white rounded-lg p-8">
           {/* Back Button */}
           <div className="flex items-center gap-2 mb-6">
             <button
@@ -128,66 +143,96 @@ const SignupForm = () => {
             </button>
           </div>
           {/* Header */}
-          <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Create Your Account
-            </h1>
-            <p className="text-sm text-gray-500">
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => navigate("/login")}
-                className="text-green-600 underline hover:text-green-800"
+
+          <form className="space-y-4" onSubmit={handleCustomSignup}>
+            <div className="h-[84px] flex flex-col justify-around mx-auto">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Create Your Account
+              </h1>
+              <p className="text-sm text-gray-500">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="text-green-600 underline hover:text-green-800"
+                >
+                  Log in
+                </button>
+              </p>
+            </div>
+
+            {error && (
+              <Alert
+                variant="destructive"
+                className="mb-8 bg-[#ff3b30]/10 border border-[#ff3b30] text-[#ff3b30]"
               >
-                Log in
-              </button>
-            </p>
-          </div>
+                <AlertDescription className="text-[#ff3b30]">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
 
-          {/* Error Alert */}
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* Form */}
-          <form className="mt-6" onSubmit={handleCustomSignup}>
-            <div className="flex flex-col gap-6 mb-6">
-              <TextInput
+            <div className="relative">
+              <input
                 type="text"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Name"
                 required
-                icon={User}
               />
+              <img
+                src={User}
+                alt="User Icon"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+              />
+            </div>
 
-              <TextInput
+            <div className="relative">
+              <input
                 type="email"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
                 required
-                icon={Mail}
               />
+              <img
+                src={Mail}
+                alt="Email Icon"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+              />
+            </div>
 
-              <TextInput
+            <div className="relative">
+              <input
                 type="password"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
                 required
-                icon={Password}
               />
+              <img
+                src={Password}
+                alt="Password Icon"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+              />
+            </div>
 
-              <TextInput
+            <div className="relative">
+              <input
                 type="password"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm Password"
                 required
-                icon={Password}
+              />
+              <img
+                src={Password}
+                alt="Password Icon"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
             </div>
 
@@ -195,7 +240,12 @@ const SignupForm = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full h-[44px] flex justify-center items-center gap-2 px-8 py-4 
+                 bg-[#062549] text-white font-medium rounded-[4px] 
+                 hover:bg-[#083264] transition-colors duration-200 ease-in-out"
+              style={{
+                boxShadow: "0px 10px 16px -2px rgba(6, 90, 216, 0.15)",
+              }}
             >
               {isLoading ? (
                 <>
@@ -206,13 +256,9 @@ const SignupForm = () => {
                 "Sign Up"
               )}
             </button>
+            {/* Social Login */}
+            <SocialLogin onSocialLogin={handleSocialLogin} />
           </form>
-
-          {/* Social Login */}
-          <SocialLogin onSocialLogin={handleSocialLogin} />
-
-          {/* Footer Links */}
-          <div className="text-start space-y-4 mt-6">{/* ss */}</div>
         </div>
       </div>
     </section>

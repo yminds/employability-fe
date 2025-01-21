@@ -11,8 +11,6 @@ const ProtectedOnboardingRoute: React.FC<ProtectedOnboardingRouteProps> = ({
 }) => {
   const navigate = useNavigate();
   const user = useSelector((state: any) => state.auth.user);
-  console.log("User:", user);
-  
 
   useEffect(() => {
     if (user && user.experience_level !== "") {
