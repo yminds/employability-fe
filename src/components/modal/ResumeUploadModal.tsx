@@ -76,7 +76,7 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       const formData = new FormData();
       formData.append("file", file); // This will be req.file in controller
       formData.append("userId", userId); // This will be req.body.userId
-      formData.append("fileType", "resume"); // This will be req.body.fileType
+      formData.append("folder", "resume"); // This will be req.body.fileType
       formData.append("name", file.name); // This will be req.body.name
 
       const s3Response = await fetch("http://localhost:3000/api/v1/s3/upload", {

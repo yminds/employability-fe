@@ -3,6 +3,7 @@ import { Country, State, City } from "country-state-city";
 import "react-phone-input-2/lib/style.css";
 import { useSelector } from "react-redux";
 import { RootState } from "@reduxjs/toolkit/query";
+import { X } from "lucide-react";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -17,7 +18,7 @@ interface BasicInfoFormProps {
     country: string;
     state: string;
     city: string;
-    profileImage?: File;
+    profileImage?: string;
   };
   socialProfiles: {
     github: string;
@@ -27,7 +28,7 @@ interface BasicInfoFormProps {
     portfolio: string;
   };
   onChange: (basicInfo: any, socialProfiles: any) => void;
-  errors: { [key: string]: string };
+  errors: { [key: string]: string }
 }
 
 export default function BasicInfoForm({
@@ -40,6 +41,7 @@ export default function BasicInfoForm({
     country: "",
     state: "",
     city: "",
+    profileImage: "",
   },
   socialProfiles = {
     github: "",
@@ -53,12 +55,14 @@ export default function BasicInfoForm({
 }: BasicInfoFormProps) {
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
-  console.log(userId);
+  console.log("userId", userId);
 
   const [countries, setCountries] = useState<any[]>([]);
   const [states, setStates] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    data.profileImage || null
+  );
   const [imageError, setImageError] = useState<string>("");
 
   // Debug logging
@@ -145,7 +149,7 @@ export default function BasicInfoForm({
       const formData = new FormData();
       formData.append("file", file); // Changed from 'profile_image' to 'file' to match our S3 controller
       formData.append("userId", userId); // Make sure userId is available
-      formData.append("fileType", "profile-image");
+      formData.append("folder", "profile-image");
       formData.append("name", file.name);
 
       // Upload to S3
@@ -175,16 +179,38 @@ export default function BasicInfoForm({
     }
   };
 
-  const removeImage = () => {
-    setImagePreview(null);
-    setImageError("");
-    onChange(
-      {
-        ...data,
-        profileImage: undefined,
-      },
-      socialProfiles
-    );
+  const removeImage = async () => {
+    try {
+      if (data.profileImage && userId) {
+        const bucketBaseUrl = "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
+      const key = data.profileImage.replace(bucketBaseUrl, "");
+      console.log("Deleting image with key:", key, "for user:", userId);
+        const response = await fetch('http://localhost:3000/api/v1/s3/delete', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+            body: JSON.stringify({key,userId,folder:"profile-image."}),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete file from S3');
+        }
+      }
+
+      setImagePreview(null);
+      setImageError("");
+      onChange(
+        {
+          ...data,
+          profileImage: undefined,
+        },
+        socialProfiles
+      );
+    } catch (error) {
+      console.error("Error removing image:", error);
+      setImageError("Failed to remove image. Please try again.");
+    }
   };
 
   const handleSocialProfileChange = (
@@ -217,7 +243,7 @@ export default function BasicInfoForm({
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                   type="button"
                 >
-                  <svg
+                  {/* <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-4 w-4"
                     viewBox="0 0 20 20"
@@ -228,7 +254,8 @@ export default function BasicInfoForm({
                       d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                       clipRule="evenodd"
                     />
-                  </svg>
+                  </svg> */}
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             ) : (

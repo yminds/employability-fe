@@ -1,6 +1,3 @@
-// components/ProjectUploadModal/FileList.tsx
-
-"use client";
 
 import React from "react";
 
