@@ -4,6 +4,7 @@ import { RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "@/api/authApiSlice";
 import { Button } from "@/components/elements/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // IMAGES
 import logo from "@/assets/branding/logo.svg";
@@ -12,24 +13,56 @@ import grid from "@/assets/sign-up/grid.svg";
 import arrow from "@/assets/skills/arrow.svg";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
+import SocialLogin from "./SocialAuth";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [login, { isSuccess }] = useLoginMutation();
+  const [login, { isSuccess, isLoading, isError }] = useLoginMutation();
+  const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    login({ email, password });
+    setErrorMessage(null);
+    try {
+      await login({ email, password }).unwrap();
+    } catch (err: any) {
+      if (err.data?.message) {
+        setErrorMessage(err.data.message);
+      } else {
+        setErrorMessage("An error occurred. Please try again.");
+      }
+    }
+  };
+
+  const handleSocialLogin = (
+    provider: "google" | "linkedin" | "apple" | "github"
+  ) => {
+    console.log(`Social Login with ${provider}`);
   };
 
   useEffect(() => {
-    if (isSuccess || token) {
-      navigate("/");
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+      }, 3000);
+
+      return () => clearTimeout(timer);
     }
-  }, [isSuccess, token, navigate]);
+  }, [errorMessage]);
+
+  useEffect(() => {
+    if (isSuccess || token) {
+      if (user && user.experience_level === "") {
+        navigate("/setexperience");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [isSuccess, token, user, navigate]);
 
   return (
     <div className="flex h-screen w-screen dark:bg-gray-800">
@@ -45,11 +78,7 @@ const Login: React.FC = () => {
           alt="Hero"
           className="w-full max-h-screen md:h-screen object-cover hidden md:block"
         />
-        <img
-          src={man}
-          alt="Hero"
-          className="w-[100%] bottom-0 absolute"
-        />
+        <img src={man} alt="Hero" className="w-[100%] bottom-0 absolute" />
       </div>
 
       {/* Form Section */}
@@ -83,6 +112,17 @@ const Login: React.FC = () => {
                 </button>
               </p>
             </div>
+
+            {errorMessage && (
+              <Alert
+                variant="destructive"
+                className="mb-8 bg-[#ff3b30]/10 border border-[#ff3b30] text-[#ff3b30]"
+              >
+                <AlertDescription className="text-[#ff3b30]">
+                  {errorMessage}
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Email Input */}
             <div className="relative">
@@ -125,12 +165,20 @@ const Login: React.FC = () => {
             {/* Login Button */}
             <Button
               type="submit"
-              className="w-full p-3 text-white bg-green-600 hover:bg-green-700 rounded-lg font-medium"
-              disabled={false}
+              className="w-full h-[44px] flex justify-center items-center gap-2 px-8 py-4 
+                 bg-[#001630] text-white font-medium rounded-[4px] 
+                 hover:bg-[#002a54] transition-colors duration-200 ease-in-out
+                 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                boxShadow: "0px 10px 16px -2px rgba(6, 90, 216, 0.15)",
+              }}
+              disabled={isLoading}
             >
-              Login
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
 
+            {/* Social Login */}
+            <SocialLogin onSocialLogin={handleSocialLogin} />
           </form>
         </div>
       </div>

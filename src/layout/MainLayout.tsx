@@ -7,7 +7,17 @@ interface MainLayoutProps {
   children: React.ReactNode;
 }
 
-const noSidebarRoutes = ["/login", "/interview" ,"/signup","/setgoal"];
+const noSidebarRoutes = [
+  "/login",
+  "/interview",
+  "/signup",
+  "/setgoal",
+   "/example",
+  "/setexperience",
+  "/addphone",
+  "/auth/github/callback",
+  "/auth/linkedin/callback",
+];
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();

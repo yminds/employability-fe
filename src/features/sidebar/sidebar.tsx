@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
 
     const user_name = useSelector((state:RootState) => state.auth.user?.name);
     const user_email = useSelector((state:RootState) => state.auth.user?.email);
-
+    
     const handleLogout = () => {
         localStorage.clear();
         window.location.href = "/login"; 

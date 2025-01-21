@@ -1,5 +1,3 @@
-// components/ProjectUploadModal/steps/ProjectSkillsStep.tsx
-
 "use client";
 
 import React from "react";
@@ -22,12 +20,14 @@ const ProjectSkillsStep: React.FC<ProjectSkillsStepProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <SkillSelector
-        selectedSkills={selectedSkills}
-        setSelectedSkills={setSelectedSkills}
-        label="Pick Your Skills"
-        placeholder="Search for skills..."
-      />
+        
+        <SkillSelector
+          selectedSkills={selectedSkills}
+          setSelectedSkills={setSelectedSkills}
+          label="Pick Your Skills"
+          placeholder="Search for skills..."
+        />
+
     </div>
   );
 };
