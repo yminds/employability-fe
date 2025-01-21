@@ -127,7 +127,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
           </div>
           <button
             onClick={handleOpenModal}
-            className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
+            className=" py-2 text-sm w-[138px] h-[44px] md:h[50px] md:w[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
           >
             Add Skills
           </button>

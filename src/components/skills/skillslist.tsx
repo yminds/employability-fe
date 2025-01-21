@@ -19,6 +19,7 @@ interface Skill {
   skill_pool_id: SkillPoolId;
   verified_rating: number;
   self_rating: number | null;
+  level?:string;
 }
 
 interface SkillListProps {
@@ -160,10 +161,11 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpda
 
   const renderSkills = (skills: Skill[]) => {
     const displaySkills = isDashboard ? skills.slice(0, 5) : skills;
+    console.log(displaySkills)
 
     return displaySkills.length > 0 ? (
       <>
-      <div className="max-h-[50vh] overflow-auto scroll-smooth pr-2 snap-y snap-proximity minimal-scrollbar sm:min-w-[290px]">
+      <div className=" scroll-smooth pr-2 snap-y snap-proximity minimal-scrollbar sm:min-w-[290px]">
         {displaySkills.map((skill: Skill, index: number) => (
           <React.Fragment key={skill._id}>
             <SkillCard
@@ -176,6 +178,7 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpda
               initialStatus={
                 skill.verified_rating > 0 ? 'Verified' : 'Unverified'
               }
+              level={skill.level}
             />
             {index < displaySkills.length - 1 && (
               <div className="w-full h-[1px] my-6 bg-[#E0E0E0]" />
@@ -194,30 +197,31 @@ const SkillList: React.FC<SkillListProps> = ({ isDashboard, goalId ,isSkillsUpda
 
   const getSelectedSkills = () => {
     if (!skillsData?.data) return [];
-
-    if (isDashboard) {
-      return skillsData.data.all;
-    }
-
+  
+    let selectedSkills: Skill[] = [];
+  
+    // Filter skills based on the selected category
     switch (selectedCategory) {
       case 'mandatory':
-        return skillsData.data?.mandatory;
+        selectedSkills = skillsData.data?.mandatory || [];
+        break;
       case 'optional':
-        return skillsData.data?.optional;
+        selectedSkills = skillsData.data?.optional || [];
+        break;
       case 'all':
-        return skillsData.data?.all;
       default:
-        return skillsData.data?.all;
+        selectedSkills = skillsData.data?.all || [];
+        break;
     }
+  
+    // Split the selected skills into unverified and verified
+    const unverifiedSkills = selectedSkills.filter((skill) => skill.verified_rating === 0);
+    const verifiedSkills = selectedSkills.filter((skill) => skill.verified_rating > 0);
+  
+    // Ensure the first skill is unverified, followed by verified and remaining unverified
+    return [...unverifiedSkills.slice(0, 1), ...verifiedSkills, ...unverifiedSkills.slice(1)];
   };
-
-  if (isError) {
-    return (
-      <div className="text-red-500 text-center py-4">
-        Error loading skills. Please try again later.
-      </div>
-    );
-  }
+  
 
   return (
     <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4  overflow-x-auto scrollbar-hide">
