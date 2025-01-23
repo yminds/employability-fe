@@ -35,9 +35,12 @@ const ChipsCard:React.FC<ChipsCardProps>=(props)=>{
              
             <ul className="flex flex-wrap flex-1 gap-3 w-full items-stretch">
                 {itemList.map((item, index) => (
-                    <li key={index} className="h-9 px-3 py-1.5 bg-[#fafbfe] rounded-[10px] border border-[#03963e] justify-start items-center gap-2 inline-flex"> 
+                    <li key={index} 
+                    className="h-9 px-3 py-1.5 bg-[#fafbfe] rounded-[10px] border border-[#03963e] justify-start items-center gap-2 inline-flex hover:cursor-pointer"
+                    onClick={()=>removeitem(item)}
+                    > 
                         <span className="text-[#03963e]"> {item}</span> 
-                        <img src={closeIcon} onClick={()=>removeitem(item)}></img>     
+                        <img src={closeIcon} ></img>     
                     </li>
                 ))} 
 

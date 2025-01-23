@@ -230,7 +230,7 @@ const JobPage:React.FC=()=>{
            
            
             }
-            container.scrollTop = maxScroll // Preve
+            container.scrollTop = maxScroll-5 // Preve
 
         }
     };
@@ -255,7 +255,7 @@ return (
     <div className="w-max-[1260px] w-[73%]    flex flex-col gap-8 ml-10">
        <JobsHeader  onSearch={handleSearch} filters={filters} openFiltersModal={()=>setIsFilterModalOpen(true)} JobsTab={jobsCategory} setJobsTab={(jobsCategory:string)=>{setJobsCategory(jobsCategory)} }></JobsHeader>
 
-        <div className="job flex flex-col gap-4 overflow-scroll scrollbar-hide w-full h-full   " onScroll={handleScroll}  >
+        <div className="job flex flex-col gap-4 overflow-scroll scrollbar-hide w-full h-full  snap-y snap-mandatory " onScroll={handleScroll}  >
             {jobsList.map(
                 (jobData,index)=><JobCard key={index}
                 job={jobData} 

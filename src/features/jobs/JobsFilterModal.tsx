@@ -326,39 +326,37 @@ const JobsFilterModal:React.FC<JobsFilterModalProps>=(props)=> {
                         </div>
 
                                     {/* location type preferences */}
-                        <div className='flex flex-col gap-1 items-stretch justify-start  w-1/2'>
-                            <Popover modal={true}>
-                                <PopoverTrigger asChild className='w-full'>
-                                    
+                        <div className='flex  gap-4 items-stretch justify-start  '>
+                           
                                     {/* <Button variant="default" >Work Preferences</Button> */}
-                                    <div className='w-1/2 flex gap-2 items-center '>
+                                    <div className='  text-nowrap flex gap-2 items-center '>
                                         <p>Work Preference </p>
-                                         <ChevronDown />
-                                         </div>
+                                     
+                                    </div>
                                     
-                                </PopoverTrigger>
-                                <PopoverContent className="w-full border px-1 rounded ">
-                                    <div className="flex flex-col gap-2 bg-white w-full">
+                                
+                                    <div className="flex  gap-2  w-full">
                                     {allWorkTypes.map((option) => (
-                                        <div key={option} className="flex items-center space-x-2">
+                                        <div key={option} className="flex items-center space-x-2"
+                                        onClick={ () => handleCheckboxChange(option)}>
                                         
                                         <Checkbox
-                                            className='data-[state=checked]:bg-black data-[state=unchecked]:bg-white border-black data-[state=checked]:text-white focus:border-none '
+                                            className='data-[state=checked]:bg-black data-[state=unchecked]:bg-white data-[state=unchecked]:outline-black border-black data-[state=checked]:text-white  '
                                             id={option}
                                             checked={workTypes.includes(option)}
-                                            onCheckedChange={() => handleCheckboxChange(option)}
+                                           
                                         />
-                                        <label htmlFor={option} className="text-sm text-gray-700">
+                                        <label className="text-sm text-gray-700">
                                             {option}
                                         </label>
                                         </div>
                                     ))}             
                                     </div>
-                                </PopoverContent>
-                            </Popover>
+                               
                             
-                           
+                           {/* -- */}
                         </div>
+
                         
                     </div>
 
