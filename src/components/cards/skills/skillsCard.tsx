@@ -136,7 +136,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   {!isMandatory && onDelete && (
     <button
       onClick={handleDeleteClick}
-      className="absolute left-[-3%] top-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 z-10"
+      className="absolute right-[-3%] top-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3 py-1 text-xs font-medium text-white bg-[#00183D] rounded hover:bg-black z-10"
     >
       <Trash2 size={16}/>
     </button>
