@@ -107,7 +107,7 @@ const SuggestedSkills: React.FC = () => {
                       {/* Button */}
                       <button
                         className="text-[14px] text-left text-green-600 font-medium hover:text-green-700 hover:underline"
-                        onClick={() => handleAddSkill(skill.id)}
+                        onClick={() => {}}
                             >
                         Add Skill
                       </button>
