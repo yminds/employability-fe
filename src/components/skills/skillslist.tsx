@@ -49,6 +49,7 @@ const SkillList: React.FC<SkillListProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredSkills, setFilteredSkills] = useState<Skill[]>([]);
+  const [isSelfRatingEdited, setSelfRatingChange] = useState(false)
 
   // Mutation hooks
   const [removeGoalFromSkill] = useRemoveGoalFromSkillMutation();
@@ -144,9 +145,7 @@ const SkillList: React.FC<SkillListProps> = ({
         skillId,
         selfRating,
       }).unwrap();
-      fetchSkills(userId,goalId)
-      onSkillsUpdate(true);
-
+      setSelfRatingChange(true)
     } catch (err) {
       console.error('Error updating self-rating:', err);
     }
@@ -167,6 +166,13 @@ const SkillList: React.FC<SkillListProps> = ({
       { id: 'mandatory', label: 'Mandatory' },
       { id: 'optional', label: 'Added by you' },
     ];
+
+    useEffect(() => {
+      if (isSelfRatingEdited) {
+        // onSkillsUpdate(true)
+        // fetchSkills(userId, goalId);
+      }
+    }, [isSelfRatingEdited]);
 
     return (
       <div className="flex gap-1 items-center mb-4 sm:max-w-[280px] sm:flex sm:flex-col-reverse sm:items-start md:items-start">

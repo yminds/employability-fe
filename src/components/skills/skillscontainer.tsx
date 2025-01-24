@@ -72,7 +72,7 @@ const SkillsContainer: React.FC = () => {
           <div className="flex w-full max-w-[1800px] gap-6 md:flex-col-reverse md:overflow-y-auto md:space-y-6 md:gap-0 md:scrollbar-hide  sm:flex-col-reverse sm:overflow-y-auto sm:space-y-6 sm:gap-0 sm:scrollbar-hide">
             {/* Left Section */}
             <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] w-full xl:h-full lg:h-full xl:overflow-y-auto 2xl:h-full 2xl:overflow-y-auto lg:overflow-y-auto scrollbar-hide">
-              <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:min-w-[280px]">
+              <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:min-w-[200px]">
                 <SkillsHeader
                   userId={userId}
                   goals={goalData}
@@ -82,7 +82,7 @@ const SkillsContainer: React.FC = () => {
                   selectedGoalExperienceLevel={selectedGoalExperienceLevel} // Pass experience level
                 />
               </div>
-              <div className="mt-[70px] sm:min-w-[280px] overflow-y-auto">
+              <div className="mt-[70px] sm:min-w-[280px] sm:mt-[8rem] overflow-y-auto">
                 <SkillList isDashboard={false} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} />
                 <SuggestedSkills userId={userId} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} />
               </div>

@@ -14,7 +14,7 @@ interface SkillsHeaderProps {
     message: string;
     data: [
       {
-        experience: string | null;
+        experience: string | undefined;
         _id: string;
         name: string;
       }
@@ -87,9 +87,9 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   return (
     <>
       <div className="bg-[#F5F5F5] w-full md:flex absolute top-0 left-0 z-10">
-        <div className="flex w-full justify-between items-center mb-6">
+        <div className="flex w-full justify-between items-center mb-6 sm:flex-col sm:justify-normal sm:items-start sm:m-0">
           {/* Goal Section */}
-          <div className="bg-white h-[46px] rounded-lg flex items-center justify-start px-4 border-gray-300">
+          <div className="bg-white h-[46px] rounded-lg flex items-center justify-start px-4 border-gray-300 sm:my-3">
             <span className="text-[#00000066] font-medium mr-2">Goal:</span>
             {selectedGoal ? (
               <DropdownMenu onOpenChange={(open) => setDropdownOpen(open)}>
