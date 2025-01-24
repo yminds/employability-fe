@@ -2,6 +2,7 @@ import { apiSlice } from "./apiSlice";
 
 // Define the Skill interface
 interface Skill {
+  level: string;
   _id: string;
   skill_pool_id: {
     _id: string;

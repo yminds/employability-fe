@@ -18,10 +18,10 @@ const SkillsContainer: React.FC = () => {
   const userId = useSelector((state: RootState) => state.auth.user?._id);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: goalData, isLoading: goalLoading } = useGetGoalsbyuserQuery(userId);
+  const { data: goalData, } = useGetGoalsbyuserQuery(userId);
   
   useEffect(() => {
-    if(goalData?.data && goalData?.data.length === 0) {
+    if(goalData?.data && goalData.data.length === 0 ) {
       setIsModalOpen(true);
     }
     else if (goalData?.data?.length && selectedGoalId === null) {

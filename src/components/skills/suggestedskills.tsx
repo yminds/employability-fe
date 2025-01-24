@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice"
 import { useCreateUserSkillsMutation, useGetUserSkillsMutation } from '@/api/skillsApiSlice';
+import AddSkillsModal from './addskills';
+import Skeleton from 'react-loading-skeleton';
 
 interface SuggestedSkillsProps {
   userId: string | undefined
@@ -53,7 +55,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
     }
   };
 
-  const [skills, setSkills] = useState<Skills[]>([
+  const [skills] = useState<Skills[]>([
     {
       skill_Id: "",
       name: "",
@@ -71,47 +73,44 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
 
   const displayedSkills = showAll ? suggestedSkillsData : suggestedSkillsData.slice(0, 3);
 
-  const [createUserSkills, { isLoading: isSaving }] =
-    useCreateUserSkillsMutation();
-    console.log(isSaving)
-
-  const handleAddSkill = async (id: any) => {
-    if (!userId || typeof userId !== "string") {
-      console.error("Invalid user ID.");
-      return;
-    }
-
-    const payload = {
-      user_id: userId,
-      skills: skills.map((skill) => {
-        const existingSkill = userSkills?.data?.allUserSkills.find(
-          (userSkill: any) => userSkill.skill_pool_id._id === skill.skill_Id
-        );
-
-        return {
-          skill_pool_id: id,
-          self_rating: existingSkill
-            ? existingSkill.self_rating // Use existing self_rating if the skill already exists
-            : parseInt(skill.rating.split("/")[0]), // Otherwise, use the current rating
-          level: skill.level, // Include skill level
-        };
-      }),
-      goal_id: goalId ?? "",
-    };
-    console.log("Payload:", payload);
-    // Remove the 'return' to allow the code to proceed to try-catch
-    try {
-      const response = await createUserSkills(payload).unwrap();
-      console.log("Skills added successfully:", response);
-      onSkillsUpdate(true);
-    } catch (error) {
-      console.error("Failed to add skills:", error);
-      onSkillsUpdate(false);
-    }
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal
+  const [selectedSkills, setSelectedSkills] = useState<any[]>([]);
+  const handleOpenModal = (skill: any) => {
+    setSelectedSkills([skill]); // Set the selected skill to prefill
+    setIsModalOpen(true); // Open the modal
+  };    
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedSkills([]);
   };
 
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='sm:max-w-[90vw] overflow-auto'>
+        <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start sm:w-[68vw] sm:p-4">
+          <div className="flex justify-between items-start mb-6 w-full sm:max-w-[90vw]">
+            <Skeleton width={200} height={30} />
+            <Skeleton width={100} height={20} />
+          </div>
+          <div className="flex flex-wrap gap-4">
+            {[1, 2, 3].map((_, index) => (
+              <div
+                key={index}
+                className="p-4 bg-gray-50 rounded-lg flex-1 flex-col space-y-4 min-w-[230px]"
+              >
+                <div className="flex items-center space-x-3">
+                  <Skeleton circle width={42} height={42} />
+                  <Skeleton width={150} height={20} />
+                </div>
+                <Skeleton count={2} />
+                <Skeleton width={100} height={20} />
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
   }
 
   return (
@@ -143,7 +142,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
               <p className="text-[14px] text-gray-600 leading-[20px]">{skill?.description}</p>
               <button
                 className="text-[14px] text-left text-green-600 font-medium hover:text-green-700 hover:underline"
-                onClick={() => handleAddSkill(skill?.id)}
+                onClick={() => handleOpenModal(skill)}
               >
                 Add Skill
               </button>
@@ -151,6 +150,18 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
           ))}
         </div>
       </section>
+
+
+      {/* AddSkillsModal Component */}
+      {isModalOpen && (
+        <AddSkillsModal
+            userId={userId}
+            goalId={goalId}
+            onClose={handleCloseModal}
+            onSkillsUpdate={onSkillsUpdate} goals={undefined}
+            prefillSkills={selectedSkills}
+        />
+      )}
     </div>
   );
 };

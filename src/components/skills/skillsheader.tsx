@@ -142,6 +142,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
           userId={userId}
           onSkillsUpdate={handleSkillsUpdate}
           goals={goals}
+          prefillSkills={[]}
         />
       )}
     </>

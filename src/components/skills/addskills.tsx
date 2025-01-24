@@ -54,6 +54,7 @@ interface AddSkillsModalProps {
     ];
   }
   | undefined;
+  prefillSkills: Skill[]; // Prefilled skills data
 }
 
 const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
@@ -62,21 +63,37 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   userId,
   onSkillsUpdate,
   goals,
+  prefillSkills
 }) => {
+  console.log(prefillSkills)
   const [isGoalPopoverOpen, setIsGoalPopoverOpen] = useState(false);
   const [user_Id] = useState<string>(userId ?? "");
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(
     goalId
   );
-  const [skills, setSkills] = useState<Skill[]>([
-    {
-      skill_Id: "",
-      name: "",
+  const transformSkills = (prefillSkills: any[]) => {
+    return prefillSkills.map(skill => ({
+      skill_Id: skill.id,
+      name: skill.name,
       rating: "0",
-      level: "1", // Default to Basic
-      visibility: "All users",
-    },
-  ]);
+      level: "1",
+      visibility: "All users"
+    }));
+  };
+  
+  // In your component's state initialization
+  const [skills, setSkills] = useState<Skill[]>(
+    prefillSkills.length > 0 
+      ? transformSkills(prefillSkills)
+      : [{
+          skill_Id: "",
+          name: "",
+          rating: "0",
+          level: "1", 
+          visibility: "All users",
+        }]
+  );
+
 
   const [isSkillOpen, setIsSkillOpen] = useState(false);
   const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
