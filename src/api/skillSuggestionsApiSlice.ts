@@ -6,6 +6,8 @@ import { apiSlice } from "./apiSlice";
 interface Skill{
     id:string
     name:string
+    description:string
+    icon:string
 }
 
 

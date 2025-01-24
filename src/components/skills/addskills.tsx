@@ -1,8 +1,7 @@
 // AddSkillsModal.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
-import { useCreateUserSkillsMutation } from "@/api/skillsApiSlice";
-import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
+import { useCreateUserSkillsMutation, useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import {
   Command,
   CommandEmpty,
@@ -27,6 +26,7 @@ import plusicon from "@/assets/skills/add_icon.png";
 import icon from "@/assets/skills/icon.svg";
 import addicon from "@/assets/skills/add_circle.svg";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice";
 
 interface Skill {
   skill_Id: string;
@@ -38,7 +38,7 @@ interface Skill {
 
 
 interface AddSkillsModalProps {
-  goalId: string | undefined;
+  goalId: string | undefined | null;
   onClose: () => void;
   userId: string | undefined;
   onSkillsUpdate: (isUpdated: boolean) => void;
@@ -79,13 +79,32 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   ]);
 
   const [isSkillOpen, setIsSkillOpen] = useState(false);
+  const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
+  const [isSuggestedLoading, setIsLoading] = useState(false);
+  
+  
+  const [suggestedSkillsData, setSuggestedSkillsData] = useState<any[]>([]);
+  console.log(suggestedSkillsData);
+  
 
-  const [suggestedSkills] = useState([
-    { id: "1", name: "React" },
-    { id: "2", name: "MongoDB" },
-    { id: "3", name: "Node.js" },
+  const getSkillNames = (skills: any[]) => {
+    return skills.map(skill => skill.skill_pool_id.name).join(',');
+   };
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Separate fetch calls
+      const userSkills = await getUserSkills({ userId, goalId }).unwrap();
+      const allSkillNames = getSkillNames(userSkills.data.all);
 
-  ]);
+      const suggestedSkills = await getSuggestedSkills({ query:allSkillNames }).unwrap();
+      setSuggestedSkillsData(suggestedSkills);
+    } catch (err) {
+      console.error('Error fetching skills:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const [getUserSkills, { data: userSkillsData, isLoading }] =
     useGetUserSkillsMutation();
@@ -107,6 +126,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   useEffect(() => {
     if (userId && selectedGoalId) {
       fetchSkills(userId, selectedGoalId);
+      fetchData()
     }
   }, [userId, selectedGoalId]);
 
@@ -568,7 +588,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         <div className="mt-2">
           <h3 className="text-sm font-semibold mb-2">Suggested</h3>
           <div className="flex flex-wrap gap-2">
-            {suggestedSkills.map((suggestedSkill) => (
+            {suggestedSkillsData?.map((suggestedSkill) => (
               <Button
                 key={suggestedSkill.id}
                 variant="outline"

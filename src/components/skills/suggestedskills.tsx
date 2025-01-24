@@ -1,86 +1,126 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice"
+import { useCreateUserSkillsMutation, useGetUserSkillsMutation } from '@/api/skillsApiSlice';
 
-const suggestedSkills = [
-  {
-    id: 'bootstrap',
-    name: 'Bootstrap',
-    description: 'Popular framework for developing responsive, mobile-first websites.',
-    icon: 'https://img.icons8.com/color/48/000000/bootstrap.png',
-  },
-  {
-    id: 'tailwind',
-    name: 'Tailwind CSS',
-    description: 'Utility first CSS framework designed to create applications faster and easier.',
-    icon: 'https://img.icons8.com/color/48/000000/tailwind-css.png',
-  },
-  {
-    id: 'javascript',
-    name: 'JavaScript',
-    description:
-      'Cross-platform, object-oriented programming language for making web pages interactive.',
-    icon: 'https://img.icons8.com/color/48/000000/javascript.png',
-  },
-  {
-    id: 'react',
-    name: 'React',
-    description: 'A JavaScript library for building user interfaces.',
-    icon: 'https://img.icons8.com/color/48/000000/react-native.png',
-  },
-  {
-    id: 'nodejs',
-    name: 'Node.js',
-    description: 'JavaScript runtime built on Chrome’s V8 JavaScript engine.',
-    icon: 'https://img.icons8.com/color/48/000000/nodejs.png',
-  },
-  {
-    id: 'mongodb',
-    name: 'MongoDB',
-    description: 'NoSQL database used for high-volume data storage.',
-    icon: 'https://img.icons8.com/color/48/000000/mongodb.png',
-  },
-  {
-    id: 'express',
-    name: 'Express.js',
-    description: 'Minimal and flexible Node.js web application framework.',
-    icon: 'https://img.icons8.com/ios/50/000000/api.png',
-  },
-  {
-    id: 'git',
-    name: 'Git',
-    description: 'Version control system for tracking changes in code.',
-    icon: 'https://img.icons8.com/color/48/000000/git.png',
-  },
-  {
-    id: 'docker',
-    name: 'Docker',
-    description: 'Platform to develop, ship, and run applications in containers.',
-    icon: 'https://img.icons8.com/color/48/000000/docker.png',
-  },
-  {
-    id: 'typescript',
-    name: 'TypeScript',
-    description: 'Strongly typed programming language that builds on JavaScript.',
-    icon: 'https://img.icons8.com/color/48/000000/typescript.png',
-  },
-];
+interface SuggestedSkillsProps {
+  userId: string | undefined
+  goalId: string | null;
+  onSkillsUpdate: (isUpdated: boolean) => void;
+  isSkillsUpdated:boolean
+}
 
-const SuggestedSkills: React.FC = () => {
-  const [showAll, setShowAll] = useState(false);
-  const navigate = useNavigate(); // Initialize the navigate function
+interface Skills {
+  skill_Id: string;
+  name: string;
+  rating: string;
+  level: string;
+  visibility: string;
+}
 
-  const displayedSkills = showAll ? suggestedSkills : suggestedSkills.slice(0, 3);
 
-  const handleAddSkill = (id: string) => {
-    navigate(`/skills/suggestedskills/${id}`);
+const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSkillsUpdate, isSkillsUpdated }) => {
+  const [getUserSkills, { data: userSkills }] = useGetUserSkillsMutation();
+  const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
+  
+  const [suggestedSkillsData, setSuggestedSkillsData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if ( userId && goalId ) {
+      fetchData();
+    }
+  }, [userId, goalId]);
+
+  useEffect(() => {
+    if ( isSkillsUpdated ) {
+      fetchData();
+    }
+  }, [ isSkillsUpdated]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Separate fetch calls
+      const userSkills = await getUserSkills({ userId, goalId }).unwrap();
+      const allSkillNames = getSkillNames(userSkills.data.all);
+
+      const suggestedSkills = await getSuggestedSkills({ query:allSkillNames }).unwrap();
+      setSuggestedSkillsData(suggestedSkills);
+    } catch (err) {
+      console.error('Error fetching skills:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  const [skills, setSkills] = useState<Skills[]>([
+    {
+      skill_Id: "",
+      name: "",
+      rating: "0",
+      level: "1", 
+      visibility: "All users",
+    },
+  ]);
+
+  const getSkillNames = (skills: any[]) => {
+    return skills.map(skill => skill.skill_pool_id.name).join(',');
+   };
+
+  const [showAll, setShowAll] = useState(false);
+
+  const displayedSkills = showAll ? suggestedSkillsData : suggestedSkillsData.slice(0, 3);
+
+  const [createUserSkills, { isLoading: isSaving }] =
+    useCreateUserSkillsMutation();
+    console.log(isSaving)
+
+  const handleAddSkill = async (id: any) => {
+    if (!userId || typeof userId !== "string") {
+      console.error("Invalid user ID.");
+      return;
+    }
+
+    const payload = {
+      user_id: userId,
+      skills: skills.map((skill) => {
+        const existingSkill = userSkills?.data?.allUserSkills.find(
+          (userSkill: any) => userSkill.skill_pool_id._id === skill.skill_Id
+        );
+
+        return {
+          skill_pool_id: id,
+          self_rating: existingSkill
+            ? existingSkill.self_rating // Use existing self_rating if the skill already exists
+            : parseInt(skill.rating.split("/")[0]), // Otherwise, use the current rating
+          level: skill.level, // Include skill level
+        };
+      }),
+      goal_id: goalId ?? "",
+    };
+    console.log("Payload:", payload);
+    // Remove the 'return' to allow the code to proceed to try-catch
+    try {
+      const response = await createUserSkills(payload).unwrap();
+      console.log("Skills added successfully:", response);
+      onSkillsUpdate(true);
+    } catch (error) {
+      console.error("Failed to add skills:", error);
+      onSkillsUpdate(false);
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className='sm:max-w-[90vw] overflow-auto '>
-      <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start  sm:w-[68vw] sm:p-4 ">
-        {/* Header */}
+    <div className='sm:max-w-[90vw] overflow-auto'>
+      <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start sm:w-[68vw] sm:p-4">
         <div className="flex justify-between items-start mb-6 w-full sm:max-w-[90vw]">
-          <h2 className="text-[20px] font-medium leading-[26px] sm:text-sm">Suggested Skills ({suggestedSkills.length})</h2>
+          <h2 className="text-[20px] font-medium leading-[26px] sm:text-sm">
+            Suggested Skills ({suggestedSkillsData?.length || 0})
+          </h2>
           <button
             className="text-[14px] text-green-600 font-medium hover:underline"
             onClick={() => setShowAll(!showAll)}
@@ -88,33 +128,29 @@ const SuggestedSkills: React.FC = () => {
             {showAll ? 'Show Less' : 'View All →'}
           </button>
         </div>
-        {/* Skills Flex */}
-          <div className="flex flex-wrap gap-4 ">
-            {displayedSkills.map((skill, index) => (
-              <div
-                key={index}
-                className="p-4 bg-gray-50 rounded-lg  flex-1 flex-col space-y-4 min-w-[230px] "
+        <div className="flex flex-wrap gap-4">
+          {displayedSkills?.map((skill, index) => (
+            <div
+              key={index}
+              className="p-4 bg-gray-50 rounded-lg flex-1 flex-col space-y-4 min-w-[230px]"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-[42px] h-[42px] rounded-full flex justify-center items-center bg-white">
+                  <img src={skill?.icon} alt={skill?.name} className="w-[22px] h-[22px]" />
+                </div>
+                <h3 className="text-[16px] font-medium text-gray-800">{skill?.name}</h3>
+              </div>
+              <p className="text-[14px] text-gray-600 leading-[20px]">{skill?.description}</p>
+              <button
+                className="text-[14px] text-left text-green-600 font-medium hover:text-green-700 hover:underline"
+                onClick={() => handleAddSkill(skill?.id)}
               >
-                {/* Icon and Title */}
-                <div className="flex items-center space-x-3">
-                  <div className="w-[42px] h-[42px] rounded-full flex justify-center items-center bg-white">
-                    <img src={skill.icon} alt={skill.name} className="w-[22px] h-[22px]" />
-                  </div>
-                  <h3 className="text-[16px] font-medium text-gray-800">{skill.name}</h3>
-                    </div>
-                      {/* Description */}
-                      <p className="text-[14px] text-gray-600 leading-[20px]">{skill.description}</p>
-                      {/* Button */}
-                      <button
-                        className="text-[14px] text-left text-green-600 font-medium hover:text-green-700 hover:underline"
-                        onClick={() => {}}
-                            >
-                        Add Skill
-                      </button>
-                    </div>
-             ))}
-          </div>
-      </section>      
+                Add Skill
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };

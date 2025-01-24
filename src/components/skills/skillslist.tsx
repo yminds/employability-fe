@@ -59,6 +59,13 @@ const SkillList: React.FC<SkillListProps> = ({
       fetchSkills(userId, goalId);
     }
   }, [userId, goalId]);
+ 
+  useEffect(() => {
+    if (isSkillsUpdated && userId && goalId) {
+      console.log("isSkillsUpdateduseEffect")
+      fetchSkills(userId, goalId);
+    }
+  }, [isSkillsUpdated]);
 
   const fetchSkills = async (userId: string | undefined, goalId: string | null) => {
     try {
@@ -67,7 +74,6 @@ const SkillList: React.FC<SkillListProps> = ({
       console.error('Error fetching skills:', err);
     }
   };
-
 
   // Update filteredSkills based on search and category
   useEffect(() => {
@@ -138,8 +144,9 @@ const SkillList: React.FC<SkillListProps> = ({
         skillId,
         selfRating,
       }).unwrap();
+      fetchSkills(userId,goalId)
       onSkillsUpdate(true);
-      // No need to manually refetch; cache invalidation will trigger refetch
+
     } catch (err) {
       console.error('Error updating self-rating:', err);
     }

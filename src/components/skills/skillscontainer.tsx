@@ -84,7 +84,7 @@ const SkillsContainer: React.FC = () => {
               </div>
               <div className="mt-[70px] sm:min-w-[280px] overflow-y-auto">
                 <SkillList isDashboard={false} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} />
-                <SuggestedSkills />
+                <SuggestedSkills userId={userId} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} />
               </div>
             </div>
             {/* Right Section */}

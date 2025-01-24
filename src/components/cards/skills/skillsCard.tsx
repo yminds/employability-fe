@@ -18,7 +18,7 @@ interface SkillCardProps {
   isMandatory?: boolean;
   onDelete?: (skillId: string) => void;
   onEdit?: (skillId: string, updatedSelfRating: number) => void;
-  userId?:string|undefined;
+  userId?: string | undefined;
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
@@ -43,15 +43,13 @@ const SkillCard: React.FC<SkillCardProps> = ({
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
-      console.log("useEffect isEditing && inputRef.current")
     }
   }, [isEditing]);
 
   const handleRatingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("handleRatingChange", e.target.value)
     const value = Number(e.target.value);
     setEditedSelfRating(value);
-    
+
     if (value > 10) {
       setRatingError("Rating cannot exceed 10");
     } else if (value < 0) {
@@ -62,7 +60,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   const handleRatingKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleRatingUpdate();
     }
   };
@@ -72,7 +70,6 @@ const SkillCard: React.FC<SkillCardProps> = ({
       const parsedRating = Math.min(10, Math.max(0, editedSelfRating));
       setIsEditing(false);
       onEdit(skillId, parsedRating);
-      
     }
   };
 
@@ -91,15 +88,15 @@ const SkillCard: React.FC<SkillCardProps> = ({
       return value === "Basic"
         ? "bg-[#E5F6FF] text-[#1C3FAA] w-fit"
         : value === "Intermediate"
-          ? "bg-[#E5F0FF] text-[#1C2CD8]"
-          : "bg-[#E5E7FF] text-[#1C2CD8]";
+        ? "bg-[#E5F0FF] text-[#1C2CD8]"
+        : "bg-[#E5E7FF] text-[#1C2CD8]";
     }
     if (type === "importance") {
       return value === "Low"
         ? "bg-[#DBFFEA] text-[#10B754]"
         : value === "Medium"
-          ? "bg-[#FFF9DB] text-[#D4B30C]"
-          : "bg-[#FFF2DB] text-[#D48A0C]";
+        ? "bg-[#FFF9DB] text-[#D4B30C]"
+        : "bg-[#FFF2DB] text-[#D48A0C]";
     }
   };
 
@@ -131,78 +128,73 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   return (
-<div className="group relative flex flex-col bg-white p-4 rounded-md transition">
-  {/* Delete Button */}
-  {!isMandatory && onDelete && (
-    <button
-      onClick={handleDeleteClick}
-      className="absolute right-[-3%] top-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3 py-1 text-xs font-medium text-white bg-[#00183D] rounded hover:bg-black z-10"
-    >
-      <Trash2 size={16}/>
-    </button>
-  )}
+    <div className="group relative flex flex-col bg-white p-4 rounded-md transition">
+      {/* Delete Button */}
+      {!isMandatory && onDelete && (
+        <button
+          onClick={handleDeleteClick}
+          className="absolute right-[-3%] top-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3 py-1 text-xs font-medium text-white bg-[#00183D] rounded hover:bg-black z-10"
+        >
+          <Trash2 size={16} />
+        </button>
+      )}
 
-  <div className="flex items-center justify-between h-[82px]">
-    {/* Left Section */}
-    <div className="flex w-[30%] items-center space-x-4">
-      <span className="flex w-[52px] h-[52px] p-[9.75px] px-[10.833px] justify-center items-center rounded-full border border-black/5 bg-[rgba(250,250,250,0.98)]">
-        <img
-          src={skillImg || DefaultImg}
-          alt="Skill Icon"
-          className="w-[30px] h-[30px]"
-          onError={(e) => (e.currentTarget.src = DefaultImg)}
-        />
-      </span>
-      <div>
-        <h3 className="text-[16px] font-medium">{skill}</h3>
-        <div className="flex items-center space-x-2">
-          {isMandatory && isEditing ? (
-            <div className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
-                  Self rating:
-                </p>
-                <input
-                  ref={inputRef}
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={editedSelfRating}
-                  onChange={handleRatingChange}
-                  onKeyDown={handleRatingKeyDown}
-                  className="w-16 p-1 border-none focus:outline-none appearance-none bg-transparent text-base"
-                  style={{
-                    MozAppearance: 'textfield',
-                    WebkitAppearance: 'none',
-                  }}
-                />
-                <span>/10</span>
-              </div>
-              {ratingError && (
-                <p className="text-red-500 text-xs mt-1">{ratingError}</p>
-              )}
-            </div>
-          ) : (
+      <div className="flex items-center justify-between h-[82px]">
+        {/* Left Section */}
+        <div className="flex w-[30%] items-center space-x-4">
+          <span className="flex w-[52px] h-[52px] p-[9.75px] px-[10.833px] justify-center items-center rounded-full border border-black/5 bg-[rgba(250,250,250,0.98)]">
+            <img
+              src={skillImg || DefaultImg}
+              alt="Skill Icon"
+              className="w-[30px] h-[30px]"
+              onError={(e) => (e.currentTarget.src = DefaultImg)}
+            />
+          </span>
+          <div>
+            <h3 className="text-[16px] font-medium">{skill}</h3>
             <div className="flex items-center space-x-2">
-              <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
-                Self rating: {editedSelfRating}/10
-              </p>
-              {isMandatory && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600"
-                >
-                  <Edit2 size={16} />
-                </button>
+              {isEditing ? (
+                <div className="flex flex-col">
+                  <div className="flex items-center space-x-2">
+                    <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
+                      Self rating:
+                    </p>
+                    <input
+                      ref={inputRef}
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={editedSelfRating}
+                      onChange={handleRatingChange}
+                      onKeyDown={handleRatingKeyDown}
+                      className="w-12 p-1 border-none focus:outline-none appearance-none bg-transparent text-base"
+                      style={{
+                        MozAppearance: "textfield",
+                        WebkitAppearance: "none",
+                      }}
+                    />
+                    <span>/10</span>
+                  </div>
+                  {ratingError && (
+                    <p className="text-red-500 text-xs mt-1">{ratingError}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
+                    Self rating: {editedSelfRating}/10
+                  </p>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                </div>
               )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </div>
-
-    {/* Rest of your code remains unchanged */}
-
 
         {/* Middle Section */}
         <div className="flex w-[30%] flex-col items-center">
@@ -212,7 +204,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
               level || "1"
             )}`}
           >
-            {skillsLevelObj[level as unknown as keyof typeof skillsLevelObj] ?? "Basic"}
+            {skillsLevelObj[level as unknown as keyof typeof skillsLevelObj] ??
+              "Basic"}
           </span>
         </div>
 
