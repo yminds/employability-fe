@@ -65,7 +65,6 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   goals,
   prefillSkills
 }) => {
-  console.log(prefillSkills)
   const [isGoalPopoverOpen, setIsGoalPopoverOpen] = useState(false);
   const [user_Id] = useState<string>(userId ?? "");
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(
@@ -80,33 +79,44 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
       visibility: "All users"
     }));
   };
-  
+
   // In your component's state initialization
   const [skills, setSkills] = useState<Skill[]>(
-    prefillSkills.length > 0 
+    prefillSkills.length > 0
       ? transformSkills(prefillSkills)
       : [{
-          skill_Id: "",
-          name: "",
-          rating: "0",
-          level: "1", 
-          visibility: "All users",
-        }]
+        skill_Id: "",
+        name: "",
+        rating: "0",
+        level: "1",
+        visibility: "All users",
+      }]
   );
 
-
-  const [isSkillOpen, setIsSkillOpen] = useState(false);
+  const [isSkillOpen] = useState(false); //setIsSkillOpen
   const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
   const [isSuggestedLoading, setIsLoading] = useState(false);
 
 
   const [suggestedSkillsData, setSuggestedSkillsData] = useState<any[]>([]);
-  console.log(suggestedSkillsData);
 
-
-  const getSkillNames = (skills: any[]) => {
-    return skills.map(skill => skill.skill_pool_id.name).join(',');
+  const getSkillNames = (skills:any[]) => {
+    const skillNames = skills.map((skill) => {
+      // Check if skill has `skill_pool_id` with a name
+      if (skill.skill_pool_id && skill.skill_pool_id.name) {
+        return skill.skill_pool_id.name;
+      }
+      // Check if skill has a direct `name` property
+      if (skill.name) {
+        return skill.name;
+      }
+      return null; // Handle cases where neither is present
+    });
+  
+    // Filter out any null values and return as CSV string
+    return skillNames.filter((name) => name !== null).join(",");
   };
+  
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -123,7 +133,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     }
   };
 
-  const [getUserSkills, { data: userSkillsData, isLoading }] =
+  const [getUserSkills, { data: userSkillsData }] =
     useGetUserSkillsMutation();
 
   const fetchSkills = async (userId: string, goalId: string) => {
@@ -147,13 +157,19 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     }
   }, [userId, selectedGoalId]);
 
+  useEffect(() => {
+    if (userId && selectedGoalId) {
+      fetchSuggestedSkills()
+    }
+  }, [skills]);
+
   const ratings = Array.from({ length: 10 }, (_, i) => `${i + 1}/10`);
   const [open, setOpen] = useState<boolean[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
 
   const {
     data: skillsData,
-    error: skillserror,
+    // error: skillserror,
     isLoading: skillsLoading,
   } = useGetMultipleSkillsQuery(searchValue);
 
@@ -165,7 +181,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     skills.map(() => false)
   );
 
-  const handleAddSkill = () => {
+  const handleAddSkill = async () => {
     const newSkill: Skill = {
       skill_Id: "",
       name: "",
@@ -174,13 +190,40 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
       visibility: "All users",
     };
     setSkills([...skills, newSkill]);
-    setOpenSkillPopovers([...openSkillPopovers, false]); // Add new popover state
+    setOpenSkillPopovers([...openSkillPopovers, false]);
+  };
+
+  const fetchSuggestedSkills = async () => {
+    if (userId && selectedGoalId) {
+      setIsLoading(true);
+      try {
+        // Fetch current user skills to get the skill names
+        const userSkills = await getUserSkills({ userId, goalId }).unwrap();
+
+        const allSkills = [
+          ...userSkills.data.all,
+          ...skills.filter((skill) => skill.skill_Id !== ""),
+        ];
+
+        const allSkillNames = getSkillNames(allSkills);
+
+        // Fetch suggested skills based on the current skills
+        const suggestedSkills = await getSuggestedSkills({ query: allSkillNames }).unwrap();
+        setSuggestedSkillsData(suggestedSkills);
+      } catch (err) {
+        console.error("Error fetching suggested skills:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleRemoveSkill = (index: number) => {
     setSkills(skills.filter((_, i) => i !== index));
-    setOpenSkillPopovers(openSkillPopovers.filter((_, i) => i !== index)); // Remove corresponding popover state
+    setOpenSkillPopovers(openSkillPopovers.filter((_, i) => i !== index));
+    // Refetch suggested skills
   };
+
 
   const handleSkillPopoverOpenChange = (index: number, isOpen: boolean) => {
     setOpenSkillPopovers((prevState) =>
@@ -252,7 +295,18 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 
   const experienceLevelObj = { 1: "Entry-level", 2: "Mid-level", 3: "Senior-level" };
 
-
+  const SkeletonChip = () => (
+    <div className="rounded-full">
+      <Skeleton
+        width={100}
+        height={40}
+        baseColor="#F0F2F5"
+        highlightColor="#FAFBFE"
+        borderRadius="20px"
+      />
+    </div>
+  )
+  
   return (
     <Dialog
       defaultOpen
@@ -317,7 +371,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                           selectedGoalId === goal._id ? "opacity-100" : "opacity-0"
                         )}
                       />
-                      {goal.name} ({experienceLevelObj[goal.experience as unknown as keyof typeof experienceLevelObj || 0] })
+                      {goal.name} ({experienceLevelObj[goal.experience as unknown as keyof typeof experienceLevelObj || 0]})
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -340,7 +394,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   <label className="text-sm font-medium mb-2 block">
                     Skill {index + 1}
                   </label>
-                  {isLoading ? (
+                  {skillsLoading ? (
                     // Show skeleton when loading
                     Array.from({ length: 1 }).map((_, idx) => (
                       <div
@@ -434,7 +488,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   <label className="text-sm font-medium mb-2 block">
                     Self rating
                   </label>
-                  {isLoading ? (
+                  {skillsLoading ? (
                     // Show skeleton when loading
                     Array.from({ length: 1 }).map((_, idx) => (
                       <div
@@ -594,47 +648,47 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
           </Button>
         </div>
 
-
-        {/* Suggested Skills */}
         <div className="mt-2">
           <h3 className="text-sm font-semibold mb-2">Suggested</h3>
           <div className="flex flex-wrap gap-2">
-            {suggestedSkillsData?.map((suggestedSkill) => (
-              <Button
-                key={suggestedSkill.id}
-                variant="outline"
-                className="text-[16px] text-[#414447] font-normal leading-[22px] rounded-full bg-[#FAFBFE]"
-                onClick={() => {
-                  // Check if the first skill is empty (no name selected)
-                  if (skills.length === 1 && skills[0].name === "") {
-                    // Replace the 0th skill with the suggested skill
-                    setSkills([
-                      {
-                        skill_Id: suggestedSkill.id,
-                        name: suggestedSkill.name,
-                        rating: "0",
-                        level: "1",
-                        visibility: "All users",
-                      },
-                    ]);
-                  } else {
-                    // Otherwise, add the suggested skill as a new entry
-                    const newSkill = {
-                      skill_Id: suggestedSkill.id,
-                      name: suggestedSkill.name,
-                      rating: "0",
-                      level: "1",
-                      visibility: "All users",
-                    };
-                    setSkills([...skills, newSkill]);
-                    setOpen([...open, false]);
-                  }
-                }}
-              >
-                {suggestedSkill.name} <img src={plusicon} alt="Add" />
-              </Button>
-            ))}
-
+            {isSuggestedLoading
+              ? // Show skeleton chips while loading
+                Array.from({ length: 6 }).map((_, index) => <SkeletonChip key={index} />)
+              : // Render actual data when available
+                suggestedSkillsData?.map((suggestedSkill) => (
+                  <Button
+                    key={suggestedSkill.id}
+                    variant="outline"
+                    className="text-[16px] text-[#414447] font-normal leading-[22px] rounded-full bg-[#FAFBFE]"
+                    onClick={() => {
+                      if (skills.length === 1 && skills[0].name === "") {
+                        // Replace the 0th skill with the suggested skill
+                        setSkills([
+                          {
+                            skill_Id: suggestedSkill.id,
+                            name: suggestedSkill.name,
+                            rating: "10",
+                            level: "1",
+                            visibility: "All users",
+                          },
+                        ]);
+                      } else {
+                        // Add the suggested skill as a new entry
+                        const newSkill = {
+                          skill_Id: suggestedSkill.id,
+                          name: suggestedSkill.name,
+                          rating: "0",
+                          level: "1",
+                          visibility: "All users",
+                        };
+                        setSkills((prev) => [...prev, newSkill]);
+                        setOpen([...open, false]);
+                      }
+                    }}
+                  >
+                    {suggestedSkill.name} <img src={plusicon} alt="Add" />
+                  </Button>
+                ))}
           </div>
         </div>
 

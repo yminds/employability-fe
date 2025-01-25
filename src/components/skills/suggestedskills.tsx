@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice"
-import { useCreateUserSkillsMutation, useGetUserSkillsMutation } from '@/api/skillsApiSlice';
+import { useGetUserSkillsMutation } from '@/api/skillsApiSlice';
 import AddSkillsModal from './addskills';
 import Skeleton from 'react-loading-skeleton';
 
@@ -11,17 +11,8 @@ interface SuggestedSkillsProps {
   isSkillsUpdated:boolean
 }
 
-interface Skills {
-  skill_Id: string;
-  name: string;
-  rating: string;
-  level: string;
-  visibility: string;
-}
-
-
 const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSkillsUpdate, isSkillsUpdated }) => {
-  const [getUserSkills, { data: userSkills }] = useGetUserSkillsMutation();
+  const [getUserSkills] = useGetUserSkillsMutation();
   const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
   
   const [suggestedSkillsData, setSuggestedSkillsData] = useState<any[]>([]);
@@ -55,15 +46,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
     }
   };
 
-  const [skills] = useState<Skills[]>([
-    {
-      skill_Id: "",
-      name: "",
-      rating: "0",
-      level: "1", 
-      visibility: "All users",
-    },
-  ]);
+
 
   const getSkillNames = (skills: any[]) => {
     return skills.map(skill => skill.skill_pool_id.name).join(',');
@@ -131,7 +114,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
           {displayedSkills?.map((skill, index) => (
             <div
               key={index}
-              className="p-4 bg-gray-50 rounded-lg flex-1 flex-col space-y-4 min-w-[230px]"
+              className="p-4 bg-gray-50 rounded-lg flex-1 flex-col space-y-4 min-w-[230px] 2xl:min-w-[300px]"
             >
               <div className="flex items-center space-x-3">
                 <div className="w-[42px] h-[42px] rounded-full flex justify-center items-center bg-white">
@@ -150,7 +133,6 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
           ))}
         </div>
       </section>
-
 
       {/* AddSkillsModal Component */}
       {isModalOpen && (
