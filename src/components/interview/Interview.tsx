@@ -8,13 +8,14 @@ import WebCam from "@/components/interview/WebCam";
 import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
-import CodeSnippetEditor from "@/components/interview/CodeSnippetEditor";
+// import CodeSnippetEditor from "@/components/interview/CodeSnippetEditor";
 
 // Hooks and API
 import { useInterviewStreamMutation } from "@/api/aiApiSlice";
 import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 import { useTTS } from "@/hooks/useTTS";
 import { useSTT } from "@/hooks/useSTT";
+import CodeSnippetQuestion from "./CodeSnippetQuestion";
 
 // Constants and Types
 const SOCKET_URL = "http://localhost:3000";
@@ -33,19 +34,25 @@ const Interview: React.FC<{
   const [interviewStream] = useInterviewStreamMutation();
 
   // Queries and Speech Hooks
-  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
-  const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(
-    interviewId as string, 
-    { skip: !interviewId }
-  );
+  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } =
+    useSTT();
+  const { data: interviewDetails, isSuccess: isInterviewLoaded } =
+    useGetInterviewbyIdQuery(interviewId as string, { skip: !interviewId });
 
   // State
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [codeSnippet, setCodeSnippet] = useState(false);
-  const [question, setQuestion] = useState("");
+  const [question, setQuestion] = useState<{
+    question: string;
+    codeSnippet: string;
+  }>({
+    question: "",
+    codeSnippet: "",
+  });
   const [isInitialized, setIsInitialized] = useState(false);
-  
+  const [layoutType, setLayoutType] = useState<1 | 2>(1);
+  const [isInterviewEnded, setIsInterviewEnded] = useState(false);
+
   const isComponentMounted = useRef(true);
 
   // TTS Setup
@@ -63,7 +70,6 @@ const Interview: React.FC<{
     const newSocket = io(SOCKET_URL);
 
     const handleConnect = () => {
-      console.log("Connected with ID:", newSocket.id);
       if (!isInitialized) {
         setIsInitialized(true);
         const initialGreeting = "Hello";
@@ -76,21 +82,34 @@ const Interview: React.FC<{
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
 
-    const handleCodeEditor = (data: string) => {
-      setCodeSnippet(true);
-      setQuestion(data);
+    const handleShiftLayout = (data: string) => {
+      setLayoutType(data === "1" ? 1 : 2);
+    };
+
+    const handleGenerateQuestion = (question: string, codeSnippet: string) => {
+      console.log("Generate Question", question, codeSnippet);
+      setQuestion({
+        question: question,
+        codeSnippet: codeSnippet,
+      });
+    };
+
+    const handleEndInterview = () => {
+      setIsInterviewEnded(true);
     };
 
     // Socket event listeners
     newSocket.on("connect", handleConnect);
     newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
-    newSocket.on(`codeEditor${interviewDetails.data._id}`, handleCodeEditor);
-
+    newSocket.on(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
+    newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
+    newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
     return () => {
       isComponentMounted.current = false;
       newSocket.off("connect", handleConnect);
       newSocket.off(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
-      newSocket.off(`codeEditor${interviewDetails.data._id}`, handleCodeEditor);
+      newSocket.off(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
+      newSocket.off(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
       newSocket.disconnect();
     };
   }, [isInterviewLoaded, interviewDetails]);
@@ -126,16 +145,19 @@ const Interview: React.FC<{
         if (lastMessage.role === "AI") {
           return [
             ...prevMessages.slice(0, -1),
-            { ...lastMessage, message: `${lastMessage.message} ${message}` }
+            { ...lastMessage, message: `${lastMessage.message} ${message}` },
           ];
         }
       }
-      
-      return [...prevMessages, {
-        id: prevMessages.length + 1,
-        message,
-        role
-      }];
+
+      return [
+        ...prevMessages,
+        {
+          id: prevMessages.length + 1,
+          message,
+          role,
+        },
+      ];
     });
   };
 
@@ -149,11 +171,15 @@ const Interview: React.FC<{
       prompt,
       model: "gpt-4o",
       provider: "openai",
-       // model: "claude-3-5-sonnet-latest",
+      // model: "claude-3-5-sonnet-latest",
       // provider: "anthropic",
+      // model: "gemini-2.0-flash-exp",
+      // provider: "google",
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
       user_id: interviewDetails.data.user_id,
+      code_snippet: question.codeSnippet,
+      question: question.question,
     });
   };
 
@@ -161,28 +187,77 @@ const Interview: React.FC<{
     <div className="w-full h-screen pt-12">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
         <Header />
-        <div className="w-full flex gap-8 max-h-screen">
-          <div className="w-[60%] flex flex-col gap-8">
-            <WebCam />
-            {isUserAnswering ? (
-              <Controls doneAnswering={handleDoneAnswering} />
-            ) : (
-              <div className="text-center text-gray-500" />
-            )}
-            {codeSnippet && (
-              <CodeSnippetEditor
-                question={question}
-                onSubmission={(code) => {
-                  console.log("Code Submitted:", code);
-                }}
-              />
-            )}
+       {
+        isInterviewEnded ? (
+          <div className="text-center text-gray-500">
+            <p>Thank you for your time. We will get back to you soon.</p>
           </div>
-          <div className="w-[40%] flex flex-col gap-8">
-            <AIProfile frequency={frequencyData} />
-            <Conversation messages={messages} />
-          </div>
-        </div>
+        ) : (
+          <LayoutBuilder
+            isUserAnswering={isUserAnswering}
+            handleDoneAnswering={handleDoneAnswering}
+            question={question}
+            frequencyData={frequencyData}
+            messages={messages}
+            layoutType={layoutType}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+const LayoutBuilder = ({
+  isUserAnswering,
+  handleDoneAnswering,
+  question,
+  frequencyData,
+  messages,
+  layoutType,
+}: {
+  isUserAnswering: boolean;
+  handleDoneAnswering: () => void;
+  question: {
+    question: string;
+    codeSnippet: string;
+  };
+  frequencyData: any;
+  messages: IMessage[];
+  layoutType: 1 | 2;
+}) => {
+  return layoutType === 1 ? (
+    <div className="w-full flex gap-8 max-h-screen">
+      <div className="w-[60%] flex flex-col gap-8">
+        <WebCam />
+        {isUserAnswering ? (
+          <Controls doneAnswering={handleDoneAnswering} />
+        ) : (
+          <div className="text-center text-gray-500" />
+        )}
+      </div>
+      <div className="w-[40%] flex flex-col gap-8">
+        <AIProfile frequency={frequencyData} />
+        <Conversation layoutType={1} messages={messages} />
+      </div>
+    </div>
+  ) : (
+    <div className="w-full flex gap-8 max-h-screen">
+      <div className="w-[45%] flex flex-col gap-8">
+        <AIProfile height={"20vh"} frequency={frequencyData} />
+        {question.codeSnippet && (
+          <CodeSnippetQuestion question={question.question} codeSnippet={question.codeSnippet} />
+        )}
+        {!question.codeSnippet && (
+          <Conversation layoutType={2} messages={messages} />
+        )}
+      </div>
+      <div className="w-[55%] flex flex-col gap-8">
+        <WebCam />
+        {isUserAnswering ? (
+          <Controls doneAnswering={handleDoneAnswering} />
+        ) : (
+          <div className="text-center text-gray-500" />
+        )}
       </div>
     </div>
   );

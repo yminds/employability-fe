@@ -3,30 +3,43 @@ import { IMessage } from "./Interview";
 
 const Conversation: React.FC<{
   messages: IMessage[];
-}> = ({ messages }) => {
+  layoutType: 1 | 2;
+}> = ({ messages, layoutType }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div
       ref={containerRef}
-      className="h-[40vh] relative w-full rounded-xl "
+      className={`relative w-full rounded-xl ${
+        layoutType === 1 ? "min-h-[40vh]" : "min-h-[56vh]"
+      }`}
       style={{
         scrollBehavior: "smooth",
         WebkitOverflowScrolling: "touch",
+        backgroundColor: layoutType === 2 ? "#f5f5f5" : "transparent",
       }}
     >
       {/* Top Gradient Overlay */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
+      {layoutType === 1 && (
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
+      )}
 
       {/* Scrollable Messages */}
-      <div className="overflow-y-scroll h-full minimal-scrollbar">
+      <div
+        className={`overflow-y-scroll h-full minimal-scrollbar ${
+          layoutType === 1 ? "p-0" : "p-4"
+        }`}
+      >
         {messages.map((message, index) =>
           // <Message key={message.id} message={message} />
           // If the message is last or first, add a margin to the top or bottom
           index === 0 ? (
             <Message
               key={message.id}
-              message={{ ...message, className: "mt-12" }}
+              message={{
+                ...message,
+                className: layoutType === 1 ? "mt-12" : "mt-4",
+              }}
             />
           ) : index === messages.length - 1 ? (
             <Message
@@ -40,7 +53,9 @@ const Conversation: React.FC<{
       </div>
 
       {/* Bottom Gradient Overlay */}
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+      {layoutType === 1 && (
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+      )}
     </div>
   );
 };
