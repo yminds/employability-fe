@@ -257,6 +257,7 @@ const SkillList: React.FC<SkillListProps> = ({
               <SkillCard
                 skillId={skill._id}
                 skill={skill.skill_pool_id.name}
+                skillPoolId={skill.skill_pool_id._id}
                 skillImg={skill.skill_pool_id.icon}
                 verified_rating={skill.verified_rating}
                 selfRating={skill.self_rating ?? 0}
