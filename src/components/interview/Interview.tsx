@@ -186,6 +186,8 @@ const Interview: React.FC<{
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
       user_id: interviewDetails.data.user_id,
+      user_skill_id: interviewDetails.data.user_skill_id,
+      skill_id: interviewDetails.data.skill_id,
       code_snippet: question.codeSnippet,
       question: question.question,
     });
