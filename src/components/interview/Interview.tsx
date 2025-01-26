@@ -60,8 +60,10 @@ const Interview: React.FC<{
   // TTS Setup
   const { frequencyData, handleIncomingData } = useTTS({
     onPlaybackComplete: () => {
-      setIsUserAnswering(true);
-      startRecording();
+      setTimeout(() => {
+        setIsUserAnswering(true);
+        startRecording();
+      }, 50);
     },
   });
 
@@ -187,6 +189,7 @@ const Interview: React.FC<{
       // model: "claude-3-5-sonnet-latest",
       // provider: "anthropic",
       // model: "gemini-2.0-flash-exp",
+      // model: "gemini-1.5-flash-latest",
       // provider: "google",
       // model: "deepseek-chat",
       // provider: "deepseek",
