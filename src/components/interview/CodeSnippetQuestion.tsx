@@ -13,6 +13,7 @@ const CodeSnippetQuestion: React.FC<{
           className="h-full"
           value={codeSnippet}
           theme="vs-dark"
+          language="javascript" // need to disable later
           options={{
             readOnly: true,
             padding: { top: 16, bottom: 16 },
