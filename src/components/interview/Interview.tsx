@@ -45,9 +45,11 @@ const Interview: React.FC<{
   const [question, setQuestion] = useState<{
     question: string;
     codeSnippet: string;
+    isCodeSnippetMode: boolean;
   }>({
     question: "",
     codeSnippet: "",
+    isCodeSnippetMode: false
   });
   const [isInitialized, setIsInitialized] = useState(false);
   const [layoutType, setLayoutType] = useState<1 | 2>(1);
@@ -84,13 +86,19 @@ const Interview: React.FC<{
 
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
+      // Exit code snippet mode when layout shifts
+      setQuestion(prev => ({
+        ...prev,
+        isCodeSnippetMode: false
+      }));
     };
 
     const handleGenerateQuestion = (question: string, codeSnippet: string) => {
       console.log("Generate Question", question, codeSnippet);
       setQuestion({
-        question: question,
-        codeSnippet: codeSnippet,
+        question,
+        codeSnippet,
+        isCodeSnippetMode: true  // Enter code snippet mode
       });
     };
 
@@ -220,6 +228,7 @@ const LayoutBuilder = ({
   question: {
     question: string;
     codeSnippet: string;
+    isCodeSnippetMode: boolean;
   };
   frequencyData: any;
   messages: IMessage[];
@@ -244,10 +253,12 @@ const LayoutBuilder = ({
     <div className="w-full flex gap-8 max-h-screen">
       <div className="w-[45%] flex flex-col gap-8">
         <AIProfile height={"20vh"} frequency={frequencyData} />
-        {question.codeSnippet && (
-          <CodeSnippetQuestion question={question.question} codeSnippet={question.codeSnippet} />
-        )}
-        {!question.codeSnippet && (
+        {question.isCodeSnippetMode ? (
+          <CodeSnippetQuestion 
+            question={question.question} 
+            codeSnippet={question.codeSnippet} 
+          />
+        ) : (
           <Conversation layoutType={2} messages={messages} />
         )}
       </div>
