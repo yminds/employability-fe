@@ -137,6 +137,11 @@ const Interview: React.FC<{
 
   const handleDoneAnswering = () => {
     if (isUserAnswering) {
+      setQuestion({
+        question: "",
+        codeSnippet: "",
+        isCodeSnippetMode: false  // Exit code snippet mode
+      });
       stopRecording();
       setIsUserAnswering(false);
     }
@@ -183,6 +188,8 @@ const Interview: React.FC<{
       // provider: "anthropic",
       // model: "gemini-2.0-flash-exp",
       // provider: "google",
+      // model: "deepseek-chat",
+      // provider: "deepseek",
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
       user_id: interviewDetails.data.user_id,
