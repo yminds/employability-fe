@@ -11,7 +11,7 @@ const Conversation: React.FC<{
     <div
       ref={containerRef}
       className={`relative w-full rounded-xl ${
-        layoutType === 1 ? "min-h-[40vh]" : "min-h-[56vh]"
+        layoutType === 1 ? "h-[40vh]" : "h-[56vh]"
       }`}
       style={{
         scrollBehavior: "smooth",
