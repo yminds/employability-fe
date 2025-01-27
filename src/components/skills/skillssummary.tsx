@@ -50,13 +50,13 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
       ))}
     </div>
   );
-  
+
   if (isLoading) {
     return renderLoadingSkeleton();
   }
 
   if (error || !skillsSummaryData?.data) {
-    return 
+    return
   }
 
   // Extract values from the API response
@@ -69,8 +69,9 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
   } = skillsSummaryData.data;
 
   return (
-    <div className="p-[30px] flex flex-col justify-around bg-white rounded-xl w-full h-[326px]">
+    <div className="p-[30px] flex flex-col justify-around bg-white rounded-xl w-full h-[326px] sm:flex-row sm:flex-wrap  sm:h-auto sm:gap-3 sm:justify-between">
       {/* Skills Verified Section */}
+      <div className=' min-w-[150px]'>
       <div className="flex items-start gap-2">
         <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
           <img src={verifiedIcon} alt="Verified icon" className="w-[24px] h-[24px]" />
@@ -87,8 +88,11 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
             </span>
           </p>
         </div>
+      </div>        
       </div>
+
       {/* Skill Levels */}
+      <div className=' min-w-[150px]'>
       <div className="flex items-start gap-2">
         <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
           <img src={excellentIcon} alt="Excellent icon" className="w-[24px] h-[24px]" />
@@ -105,7 +109,10 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
             </span>
           </p>
         </div>
+      </div>      
       </div>
+
+      <div className=' min-w-[150px]'>
       <div className="flex items-start gap-2">
         <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
           <img src={strongIcon} alt="Strong icon" className="w-[24px] h-[24px]" />
@@ -122,7 +129,10 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
             </span>
           </p>
         </div>
+      </div>      
       </div>
+      
+      <div className=' min-w-[150px]'>
       <div className="flex items-start gap-2">
         <div className="flex items-center justify-center rounded-full w-[46px] h-[46px] bg-[#FAFAFAFA] border">
           <img src={weakIcon} alt="Weak icon" className="w-[24px] h-[24px]" />
@@ -139,7 +149,9 @@ const SkillSummary: React.FC<SkillSummaryProps> = ({ isSkillsUpdated, selectedGo
             </span>
           </p>
         </div>
+      </div>        
       </div>
+
     </div>
   );
 };
