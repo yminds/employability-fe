@@ -21,7 +21,7 @@ const SkillsContainer: React.FC = () => {
   const { data: goalData, } = useGetGoalsbyuserQuery(userId);
   
   useEffect(() => {
-    if(goalData?.data && goalData.data.length === 0 ) {
+    if(goalData?.data && goalData.data.length === 0) {
       setIsModalOpen(true);
     }
     else if (goalData?.data?.length && selectedGoalId === null) {
@@ -41,6 +41,7 @@ const SkillsContainer: React.FC = () => {
 
   const handleGoalModal = () => {
     setIsModalOpen(false);
+    navigate("/skills"); 
   };
   const navigate = useNavigate();
 

@@ -1,4 +1,25 @@
 import { apiSlice } from './apiSlice';
+interface Goal {
+  title: string;
+  _id: string;
+  name: string;
+  description: string;
+  image?: string;
+  skill_pool_id: string[];
+  predefined_goal_id: string;
+  job_market_demand: string;
+  min_salary_range: number;
+  max_salary_range: number;
+  difficulty_level: string;
+  learning_time: string;
+  experience_level: string;
+}
+
+interface GoalsData {
+  data: Goal[];
+  message: string;
+}
+
 
 export const goalsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -43,7 +64,7 @@ export const { useGetMultipleSkillsNameQuery } = skillsPoolNameApiSlice;
 
 export const userGoalApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getUserGoal: builder.query<any[], string>({
+    getUserGoal: builder.query<GoalsData, string>({
       query: (searchTerm) => ({
         url: `/api/v1/goals/userGoals/${searchTerm}`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',
@@ -56,7 +77,7 @@ export const { useGetUserGoalQuery } = userGoalApiSlice;
 
 export const searchGoalApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getSearchGoal: builder.query<any[], string>({
+    getSearchGoal: builder.query<GoalsData, string>({
       query: (searchTerm) => ({
         url: `/api/v1/predefinedGoals/search`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',

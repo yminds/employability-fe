@@ -30,7 +30,7 @@ interface Props {
     error: boolean;
     data?: GoalsData;
     setJourneyDialog: boolean;
-    searchGoals: any[] | undefined;
+    searchGoals: GoalsData | undefined;
     displayTitle: boolean;
     filters: any;
 }
@@ -44,7 +44,7 @@ const colorPalette = [
 ];
 
 const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters }) => {
-    const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery() as { data: GoalsData | undefined, error: any, isLoading: boolean };
+    const { data: allGoals, error: fetchError } = useGetAllPreDefinedGoalsQuery() as { data: GoalsData | undefined, error: any, isLoading: boolean };
     const [fetchFilteredGoals, { isLoading: isFetchingFilteredGoals }] = useFilterGoalsMutation();
 
     const [data, setData] = useState<any[]>([]);
@@ -136,7 +136,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                         onClick={() => handleGoalClick(goal)}
                     >
                         <div
-                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
+                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity h-full duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
                         >
                             <GoalsBanner
                                 className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover relative"

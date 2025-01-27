@@ -48,7 +48,7 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
           weak: number;
         };
       },
-      { userId: string; goalId: string }
+      { userId: string|undefined; goalId: string }
     >({
       query: ({ userId, goalId }) => ({
         url: `/api/v1/skills/userSkills/summary/${userId}`,
