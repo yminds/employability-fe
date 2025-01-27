@@ -1,180 +1,250 @@
-import React, { useState, useEffect } from "react";
-import ExperienceForm from "../forms/experience-form";
-import type { ExperienceItem } from "@/features/profile/types";
+import type React from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
   useAddExperienceMutation,
   useUpdateExperienceMutation,
+  useDeleteExperienceMutation,
 } from "@/api/experienceApiSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import ExperienceForm from "@/features/profile/forms/experience-form";
+import type { ExperienceItem } from "@/features/profile/types";
+import { toast } from "sonner";
+
 interface AddEditExperienceModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialExperience: ExperienceItem[];
+  mode: "add" | "edit" | null;
 }
 
 const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
   isOpen,
   onClose,
   initialExperience,
+  mode,
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
   const [experience, setExperience] = useState<ExperienceItem[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const user = useSelector((state: any) => state.auth.user);
+
   const [addExperience] = useAddExperienceMutation();
   const [updateExperience] = useUpdateExperienceMutation();
-  const user = useSelector((state: any) => state.auth.user);
+  const [deleteExperience] = useDeleteExperienceMutation();
 
   useEffect(() => {
     if (isOpen) {
-      setExperience(initialExperience);
+      setExperience(
+        mode === "add"
+          ? [
+              {
+                id: "",
+                title: "",
+                employment_type: "",
+                location: "",
+                start_date: "",
+                end_date: "",
+                currently_working: false,
+                description: "",
+                company: "",
+                isVerified: false,
+                companyLogo: "",
+              },
+            ]
+          : initialExperience
+      );
       setErrors({});
+      setIsSaving(false);
     }
-  }, [isOpen, initialExperience]);
+  }, [isOpen, initialExperience, mode]);
 
   const handleFormChange = (updatedExperience: ExperienceItem[]) => {
     setExperience(updatedExperience);
   };
 
-  const validateExperience = (exp: ExperienceItem) => {
-    const newErrors: { [key: string]: string } = {};
+  const handleAddExperience = () => {
+    const newExperience: ExperienceItem = {
+      id: "",
+      title: "",
+      employment_type: "",
+      location: "",
+      start_date: "",
+      end_date: "",
+      currently_working: false,
+      description: "",
+      company: "",
+      isVerified: false,
+      companyLogo: "",
+    };
+    setExperience([...experience, newExperience]);
+  };
 
-    if (!exp.jobTitle) newErrors["jobTitle"] = "Job title is required";
-    if (!exp.employmentType)
-      newErrors["employmentType"] = "Employment type is required";
-    if (!exp.companyName) newErrors["companyName"] = "Company name is required";
-    if (!exp.location) newErrors["location"] = "Location is required";
-    if (!exp.startDate) newErrors["startDate"] = "Start date is required";
-    if (!exp.currentlyWorking && !exp.endDate) {
-      newErrors["endDate"] = "End date is required when not currently working";
+  const handleDeleteExperience = async (index: number) => {
+
+    const experienceToDelete = experience[index];
+    if (experienceToDelete._id) {
+      try {
+        await deleteExperience(experienceToDelete._id).unwrap();
+        toast.success("Experience entry delete successfully")
+      } catch (error) {
+        console.error("Failed to delete experience:", error);
+        setErrors({ ...errors, delete: "Failed to delete experience" });
+        toast.error("Failed to delete experience entry");
+        return;
+      }
     }
-    if (!exp.description) newErrors["description"] = "Description is required";
+    const updatedExperience = experience.filter((_, i) => i !== index);
+    setExperience(updatedExperience);
+  };
 
-    return newErrors;
+  const validateForm = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+    let isValid = true;
+
+    experience.forEach((exp, index) => {
+      if (!exp.title.trim()) {
+        newErrors[`experience.${index}.title`] = "Job title is required";
+        isValid = false;
+      }
+      if (!exp.employment_type) {
+        newErrors[`experience.${index}.employment_type`] =
+          "Employment type is required";
+        isValid = false;
+      }
+      if (!exp.company.trim()) {
+        newErrors[`experience.${index}.company`] = "Company name is required";
+        isValid = false;
+      }
+      if (!exp.location.trim()) {
+        newErrors[`experience.${index}.location`] = "Location is required";
+        isValid = false;
+      }
+      if (!exp.start_date) {
+        newErrors[`experience.${index}.state_date`] = "Start date is required";
+        isValid = false;
+      }
+      if (!exp.currently_working && !exp.end_date) {
+        newErrors[`experience.${index}.end_date`] =
+          "End date is required when not currently working";
+        isValid = false;
+      }
+      if (!exp.description.trim()) {
+        newErrors[`experience.${index}.description`] =
+          "Description is required";
+        isValid = false;
+      }
+    });
+
+    setErrors(newErrors);
+    setTimeout(() => setErrors({}), 2000);
+    return isValid;
   };
 
   const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     try {
-      // const validationErrors = experience.reduce((acc, exp, index) => {
-      //   const errors = validateExperience(exp);
-      //   if (Object.keys(errors).length > 0) {
-      //     Object.keys(errors).forEach((key) => {
-      //       acc[`experience.${index}.${key}`] = errors[key];
-      //     });
-      //   }
-      //   return acc;
-      // }, {} as { [key: string]: string });
+      setIsSaving(true);
 
-      // if (Object.keys(validationErrors).length > 0) {
-      //   setErrors(validationErrors);
-      //   return;
-      // }
+      await Promise.all(
+        experience.map(async (exp) => {
+          const experienceData = {
+            user_id: user._id,
+            title: exp.title,
+            employment_type: exp.employment_type,
+            company: exp.company,
+            location: exp.location,
+            start_date: exp.start_date,
+            end_date: exp.currently_working ? null : exp.end_date,
+            currently_working: exp.currently_working,
+            description: exp.description,
+          };
 
-      // Map the experience data first
-      const experienceData = experience.map((exp) => ({
-        user_id: user._id,
-        title: exp.jobTitle,
-        employment_type: exp.employmentType,
-        company: exp.companyName,
-        location: exp.location,
-        start_date: exp.startDate,
-        end_date: exp.currentlyWorking ? null : exp.endDate,
-        currently_working: exp.currentlyWorking,
-        description: exp.description,
-      }));
+          if (exp._id) {
+            await updateExperience({
+              id: exp._id,
+              updatedExperience: experienceData,
+            }).unwrap();
+            toast.success("Experience entry updated successfully");
+          } else {
+            await addExperience(experienceData).unwrap();
+            toast.success("New experience entry added successfully");
+          }
+        })
+      );
 
-      // Separate experiences into existing and new
-      const existingExperiences = experience.filter((exp) => exp.id);
-      const newExperiences = experience.filter((exp) => !exp.id);
-
-      // Update existing experiences
-      if (existingExperiences.length > 0) {
-        console.log("Updating experiences:", existingExperiences);
-        await Promise.all(
-          existingExperiences.map((exp, index) =>
-            updateExperience({
-              id: exp.id!,
-              updatedExperience: experienceData[index],
-            }).unwrap()
-          )
-        );
-      }
-
-      // Add new experiences
-      if (newExperiences.length > 0) {
-        console.log("Adding new experiences:", newExperiences);
-        await Promise.all(
-          newExperiences.map((exp, index) =>
-            addExperience(
-              experienceData[existingExperiences.length + index]
-            ).unwrap()
-          )
-        );
-      }
-
-      // Call onSave with the updated experiences
       onClose();
     } catch (error) {
       console.error("Failed to save experiences:", error);
-      alert("Failed to save experiences. Please try again.");
+      setErrors({
+        ...errors,
+        saveExperience: "Failed to save experiences",
+      });
+      toast.error("Failed to save experience entries");
+    } finally {
+      setIsSaving(false);
     }
   };
-  if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-hidden"
-      onClick={onClose}
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby="modal-title"
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
     >
-      <div
-        className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 p-8 overflow-auto h-[80vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h2 id="modal-title" className="text-2xl font-semibold">
-            {initialExperience.length > 0
-              ? "Edit Experience Details"
-              : "Add Experience Details"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 focus:outline-none"
-            aria-label="Close modal"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+      <DialogContent className="bg-white rounded-lg max-w-4xl p-[42px] flex flex-col justify-center">
+        <DialogHeader className="w-full flex justify-between items-start">
+          <div className="flex flex-col items-start">
+            <DialogTitle className="text-black text-[20px] font-medium leading-[26px] tracking-[-0.2px] font-ubuntu">
+              {mode === "add" ? "Add Experience" : "Edit Experience"}
+            </DialogTitle>
+            <p
+              className="text-[16px] font-normal leading-6 tracking-[0.24px]"
+              style={{
+                color: "rgba(0, 0, 0, 0.60)",
+                fontFamily: '"SF Pro Display", sans-serif',
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+              {mode === "add"
+                ? "Enter your new experience details"
+                : "Edit your experience details"}
+            </p>
+          </div>
+        </DialogHeader>
+        <div className="max-h-[calc(98vh-300px)] overflow-y-auto pr-6 minimal-scrollbar">
+          <ExperienceForm
+            experience={experience}
+            onChange={handleFormChange}
+            errors={errors}
+            onAddExperience={handleAddExperience}
+            onDeleteExperience={handleDeleteExperience}
+            mode={mode}
+          />
+          {errors.saveExperience && (
+            <p className="text-red-500 text-sm mt-2">{errors.saveExperience}</p>
+          )}
         </div>
-
-        <ExperienceForm
-          experiences={experience}
-          onChange={handleFormChange}
-          errors={errors}
-        />
-
-        <div className="mt-6 border-t pt-6 bg-white text-right">
-          <button
-            onClick={handleSave}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
-          >
-            Save Changes
-          </button>
-        </div>
-      </div>
-    </div>
+        <Button
+          onClick={handleSave}
+          className="w-full mt-6 bg-[#00183D] hover:bg-[#062549] text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+          disabled={isSaving || Object.keys(errors).length > 0}
+        >
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 };
 

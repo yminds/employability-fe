@@ -41,6 +41,14 @@ const authSlice = createSlice({
           ...state.user,
           ...action.payload,
           // Ensure arrays are properly updated
+          bio:
+            action.payload.bio !== undefined
+              ? action.payload.bio
+              : state.user.bio,
+          current_status:
+            action.payload.current_status !== undefined
+              ? action.payload.current_status
+              : state.user.current_status,
           skills: action.payload.skills || state.user.skills,
           education: action.payload.education || state.user.education,
           experience: action.payload.experience || state.user.experience,

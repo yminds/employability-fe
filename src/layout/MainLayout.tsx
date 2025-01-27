@@ -2,6 +2,7 @@ import React from "react";
 import { routes } from "@/Routes";
 import { useLocation } from "react-router-dom";
 import Sidebar from "@/features/sidebar/sidebar";
+import { Toaster } from "sonner";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -53,6 +54,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     >
       {shouldDisplaySidebar() && <Sidebar />}
       <main className="flex-1">{children}</main>
+      <Toaster />
     </div>
   );
 };

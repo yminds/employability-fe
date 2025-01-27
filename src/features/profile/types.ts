@@ -61,36 +61,33 @@ export interface Education {
 // src/features/profile/types.ts
 
 export interface Certification {
-  certificate_s3_url: any;
-  issue_date: ReactNode;
-  expiration_date: string;
-  issued_by: ReactNode;
-  _id: string;
+  _id?: string;
+  user_id?: string;
   title: string;
-  issuedBy: string;
-  issueDate: string;
-  expirationDate: string | null;
-  credentialURL: string;
+  issued_by: string;
+  issue_date: string;
+  expiration_date: string | null;
+  certificate_s3_url: string;
 }
 
 // types.ts (or your designated types file)
 export interface ExperienceItem {
   _id?: string;
   company: string;
-  jobType: string | number | readonly string[] | undefined;
+  // jobType: string | number | readonly string[] | undefined;
   isVerified: boolean | undefined;
-  duration: string | number | readonly string[] | undefined;
+  // duration: string | number | readonly string[] | undefined;
   id: string;
-  jobTitle: string;
-  employmentType: string;
-  companyName: string;
+  title: string;
+  employment_type: string;
+  // companyName: string;
   companyLogo: string;
   location: string;
-  startDate: string;
-  endDate: string | null;
-  currentlyWorking: boolean;
-  currentCTC: string;
-  expectedCTC: string;
+  start_date: string;
+  end_date: string | null;
+  currently_working: boolean;
+  // currentCTC: string;
+  // expectedCTC: string;
   description: string;
 }
 

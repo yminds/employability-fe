@@ -386,7 +386,7 @@ export default function CompleteProfileModal({
           </div>
 
           {/* Education Section */}
-          <div ref={sectionRefs.education} className="py-6">
+          {/* <div ref={sectionRefs.education} className="py-6">
             <EducationForm
               education={formData.education}
               onChange={(education: any) => {
@@ -400,16 +400,16 @@ export default function CompleteProfileModal({
                 throw new Error("Function not implemented.");
               }}
             />
-          </div>
+          </div> */}
 
           <div ref={sectionRefs.certification} className="py-6">
-            <CertificationsForm
+            {/* <CertificationsForm
               certifications={formData.certifications}
               onChange={(certification) => {
                 updateFormData("certifications", certification);
               }}
               errors={errors}
-            />
+            /> */}
           </div>
         </div>
 
