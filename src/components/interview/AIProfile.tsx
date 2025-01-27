@@ -4,9 +4,10 @@ import logoIconWithGradient from "@/assets/branding/logo_icon_with_gradient.svg?
 
 interface AIProfileProps {
   frequency: number; // Normalized frequency (0 to 1)
+  height?: string;
 }
 
-const AIProfile: React.FC<AIProfileProps> = ({ frequency }) => {
+const AIProfile: React.FC<AIProfileProps> = ({ frequency, height = '25vh' }) => {
   // Stability management
   const [isStable, setIsStable] = useState(false);
   const prevFrequencyRef = useRef<number>(frequency);
@@ -123,7 +124,9 @@ const AIProfile: React.FC<AIProfileProps> = ({ frequency }) => {
   };
 
   return (
-    <div className="relative h-[25vh] w-full flex flex-col items-center justify-center overflow-hidden border border-[#0000001A] rounded-[6.789px] bg-white">
+    <div
+      className={`relative h-[${height}] w-full flex flex-col items-center justify-center overflow-hidden border border-[#0000001A] rounded-[6.789px] bg-white`}
+    >
       {/* Secondary Blob */}
       <animated.div
         style={{

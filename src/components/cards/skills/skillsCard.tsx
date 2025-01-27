@@ -10,6 +10,7 @@ import DefaultImg from "@/assets/skills/DefaultSkillImg.svg";
 interface SkillCardProps {
   skillId: string;
   skill: string;
+  skillPoolId: string;
   skillImg: string | undefined;
   verified_rating: number;
   selfRating: number;
@@ -24,6 +25,7 @@ interface SkillCardProps {
 const SkillCard: React.FC<SkillCardProps> = ({
   skillId,
   skill,
+  skillPoolId,
   skillImg,
   verified_rating,
   selfRating,
@@ -123,6 +125,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       title: `${skill} Interview`,
       type: "Skill",
       user_skill_id: skillId,
+      skill_id: skillPoolId,
     });
     navigate(`/interview/${interviewId}`);
   };

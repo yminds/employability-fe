@@ -43,6 +43,7 @@ const useCreateInterview = () => {
       title: string;
       type: string;
       user_skill_id?: string;
+      skill_id?: string;
     }) => {
       try {
         const thread_id = await createThread({
@@ -52,6 +53,7 @@ const useCreateInterview = () => {
           title: interviewData.title,
           type: interviewData.type,
           user_skill_id: interviewData.user_skill_id,
+          skill_id: interviewData.skill_id,
           user_id,
           thread_id,
         }).unwrap();
