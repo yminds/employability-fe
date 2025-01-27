@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import SkillsHeader from "@/components/skills/skillsheader";
 import SkillList from "@/components/skills/skillslist";
-import SuggestedSkills from "@/components/skills/suggestedskills";
+// import SuggestedSkills from "@/components/skills/suggestedskills";
 import EmployabilityScore from "@/components/skills/employabiltyscore";
 import SkillSummary from "@/components/skills/skillssummary";
 import { useSelector } from "react-redux";
@@ -84,7 +84,7 @@ const SkillsContainer: React.FC = () => {
               </div>
               <div className="mt-[70px] sm:min-w-[100%]  overflow-y-auto sm:mt-4">
                 <SkillList isDashboard={false} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated}  goals={goalData}/>
-                <SuggestedSkills userId={userId} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} />
+                {/* <SuggestedSkills userId={userId} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} /> */}
               </div>
             </div>
             {/* Right Section */}

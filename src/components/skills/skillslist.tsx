@@ -73,14 +73,14 @@ const SkillList: React.FC<SkillListProps> = ({
       fetchSkills(userId, goalId);
     }
   }, [userId, goalId]);
- 
+
   useEffect(() => {
     if (isSkillsUpdated && userId && goalId) {
       console.log("isSkillsUpdateduseEffect")
       fetchSkills(userId, goalId);
     }
   }, [isSkillsUpdated]);
-  
+
   const fetchSkills = async (userId: string | undefined, goalId: string | null) => {
     try {
       await getUserSkills({ userId, goalId }).unwrap();
@@ -198,11 +198,10 @@ const SkillList: React.FC<SkillListProps> = ({
             <button
               key={category.id}
               onClick={() => handleCategorySelect(category.id as SkillCategory)}
-              className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all sm:px-2 sm:py-2 ${
-                selectedCategory === category.id
+              className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all sm:px-2 sm:py-2 ${selectedCategory === category.id
                   ? 'bg-[#001630] text-white hover:bg-[#062549]'
                   : 'text-gray-600'
-              }`}
+                }`}
             >
               {category.label}
             </button>
@@ -223,12 +222,12 @@ const SkillList: React.FC<SkillListProps> = ({
             </div>
           </div>
           <div>
-          <button
-            onClick={handleOpenModal}
-            className=" hidden py-2 text-sm w-[138px] h-[38px] md:h[50px] md:w[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC] sm:block"
-          >
-            Add Skills
-          </button>
+            <button
+              onClick={handleOpenModal}
+              className=" hidden py-2 text-sm w-[138px] h-[38px] md:h[50px] md:w[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC] sm:block"
+            >
+              Add Skills
+            </button>
           </div>
         </div>
       </div>
@@ -333,11 +332,11 @@ const SkillList: React.FC<SkillListProps> = ({
         {renderSkillChips()}
 
         {isLoading
-          ? Array.from({ length: 3 }).map((_, index) => renderLoadingSkeleton())
+          ? Array.from({ length: 3 }).map((_) => renderLoadingSkeleton())
           : renderSkills(filteredSkills)}
       </div>
-            {/* AddSkillsModal */}
-            {isModalOpen && goalId && (
+      {/* AddSkillsModal */}
+      {isModalOpen && goalId && (
         <AddSkillsModal
           goalId={goalId}
           onClose={handleCloseModal}
