@@ -55,7 +55,7 @@ const SkillsContainer: React.FC = () => {
   return (
     (isModalOpen) ? <GoalDialog isOpen={isModalOpen} onClose={handleGoalModal} /> : (
       <>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 sm:mt-3">
           <div className="flex items-center space-x-2 gap-3">
             <button
               onClick={handleBackToDashboard}
@@ -69,10 +69,10 @@ const SkillsContainer: React.FC = () => {
           </div>
         </div>
         <section className="w-full h-[90vh] flex bg-[#F5F5F5] justify-center">
-          <div className="flex w-full max-w-[1800px] gap-6 md:flex-col-reverse md:overflow-y-auto md:space-y-6 md:gap-0 md:scrollbar-hide  sm:flex-col-reverse sm:overflow-y-auto sm:space-y-6 sm:gap-0 sm:scrollbar-hide">
+          <div className="flex w-full max-w-[1800px] gap-6 md:flex-col-reverse md:overflow-y-auto md:space-y-6 md:gap-0 md:scrollbar-hide  sm:flex-col-reverse sm:overflow-y-auto sm:space-y-6 sm:gap-0 sm:scrollbar-hide  sm:scroll-align-top">
             {/* Left Section */}
             <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] w-full xl:h-full lg:h-full xl:overflow-y-auto 2xl:h-full 2xl:overflow-y-auto lg:overflow-y-auto scrollbar-hide">
-              <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:min-w-[200px]">
+              <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:min-w-[200px] sm:relative">
                 <SkillsHeader
                   userId={userId}
                   goals={goalData}
@@ -82,13 +82,13 @@ const SkillsContainer: React.FC = () => {
                   selectedGoalExperienceLevel={selectedGoalExperienceLevel} // Pass experience level
                 />
               </div>
-              <div className="mt-[70px] sm:min-w-[280px] sm:mt-[8rem] overflow-y-auto">
-                <SkillList isDashboard={false} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} />
+              <div className="mt-[70px] sm:min-w-[100%]  overflow-y-auto sm:mt-4">
+                <SkillList isDashboard={false} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated}  goals={goalData}/>
                 <SuggestedSkills userId={userId} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} />
               </div>
             </div>
             {/* Right Section */}
-            <div className="flex-[3] w-full space-y-4">
+            <div className="flex-[3] w-full space-y-4 sm:mt-0 ">
               <div className="flex flex-col gap-6">
                 <EmployabilityScore 
                   goalId={selectedGoal?._id || ""}

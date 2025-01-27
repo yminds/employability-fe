@@ -27,8 +27,8 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalNam
   const userId = useSelector((state: RootState) => state.auth.user?._id);
   const userName = useSelector((state: RootState) => state.auth.user?.name);
   const user = useSelector((state: any) => state.auth.user);
-  const [getUserSkills, { data: skillsData, isLoading, isError, error }] =
-    useGetUserSkillsMutation();
+  const [getUserSkills, { data: skillsData }] =
+    useGetUserSkillsMutation();  // isLoading, isError, error
 
   const fetchSkills = async (userId: string, goalId: string) => {
     try {
@@ -58,7 +58,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalNam
   
 
   const totalVerifiedRating = skillsData
-    ? skillsData?.data?.mandatory.reduce((acc: number, skill: Skill) => acc + skill.verified_rating, 0)
+    ? skillsData?.data?.mandatory.map((skill:Skill)=> skill.verified_rating).reduce((acc: number, rating: number) => acc + rating, 0)
     : 0;
 
   const averageVerifiedRating =

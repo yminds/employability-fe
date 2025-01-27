@@ -28,7 +28,7 @@ const SkillDetails = () => {
 
   return (
 
-    <div className="h-[90vh] w-[88vw] sm:px-[10%]">
+    <div className="h-[90vh] w-[88vw] max-w-[1800px] sm:px-[10%]">
       {/* Title Section */}
       <div className="flex items-center mb-2 pl-4 space-x-2">
         <button

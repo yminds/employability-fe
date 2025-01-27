@@ -12,7 +12,7 @@ const noSidebarRoutes = [
   "/interview",
   "/signup",
   "/setgoal",
-   "/example",
+  "/example",
   "/setexperience",
   "/addphone",
   "/auth/github/callback",
@@ -46,16 +46,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <>
-      <div
-        className={`flex min-h-screen ${
-          shouldDisplaySidebar() ? "bg-gray-100" : ""
-        }`}
-      >
-        {shouldDisplaySidebar() && <Sidebar />}
-        {children}
-      </div>
-    </>
+    <div
+      className={`flex flex-row sm:flex-col min-h-screen ${
+        shouldDisplaySidebar() ? "bg-gray-100" : ""
+      }`}
+    >
+      {shouldDisplaySidebar() && <Sidebar />}
+      <main className="flex-1">{children}</main>
+    </div>
   );
 };
 

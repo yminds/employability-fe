@@ -8,27 +8,27 @@ interface SuggestedSkillsProps {
   userId: string | undefined
   goalId: string | null;
   onSkillsUpdate: (isUpdated: boolean) => void;
-  isSkillsUpdated:boolean
+  isSkillsUpdated: boolean
 }
 
 const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSkillsUpdate, isSkillsUpdated }) => {
   const [getUserSkills] = useGetUserSkillsMutation();
   const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
-  
+
   const [suggestedSkillsData, setSuggestedSkillsData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if ( userId && goalId ) {
+    if (userId && goalId) {
       fetchData();
     }
   }, [userId, goalId]);
 
   useEffect(() => {
-    if ( isSkillsUpdated ) {
+    if (isSkillsUpdated) {
       fetchData();
     }
-  }, [ isSkillsUpdated]);
+  }, [isSkillsUpdated]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -37,7 +37,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
       const userSkills = await getUserSkills({ userId, goalId }).unwrap();
       const allSkillNames = getSkillNames(userSkills.data.all);
 
-      const suggestedSkills = await getSuggestedSkills({ query:allSkillNames }).unwrap();
+      const suggestedSkills = await getSuggestedSkills({ query: allSkillNames }).unwrap();
       setSuggestedSkillsData(suggestedSkills);
     } catch (err) {
       console.error('Error fetching skills:', err);
@@ -50,7 +50,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
 
   const getSkillNames = (skills: any[]) => {
     return skills.map(skill => skill.skill_pool_id.name).join(',');
-   };
+  };
 
   const [showAll, setShowAll] = useState(false);
 
@@ -61,7 +61,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
   const handleOpenModal = (skill: any) => {
     setSelectedSkills([skill]); // Set the selected skill to prefill
     setIsModalOpen(true); // Open the modal
-  };    
+  };
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedSkills([]);
@@ -70,8 +70,8 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
 
   if (isLoading) {
     return (
-      <div className='sm:max-w-[90vw] overflow-auto'>
-        <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start sm:w-[68vw] sm:p-4">
+      <div className='sm:max-w-[100vw] overflow-auto'>
+        <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start sm:w-[100%] sm:p-4">
           <div className="flex justify-between items-start mb-6 w-full sm:max-w-[90vw]">
             <Skeleton width={200} height={30} />
             <Skeleton width={100} height={20} />
@@ -97,8 +97,8 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
   }
 
   return (
-    <div className='sm:max-w-[90vw] overflow-auto'>
-      <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start sm:w-[68vw] sm:p-4">
+    <div className='sm:max-w-[100vw] overflow-auto'>
+      <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start sm:w-[100%] sm:p-4">
         <div className="flex justify-between items-start mb-6 w-full sm:max-w-[90vw]">
           <h2 className="text-[20px] font-medium leading-[26px] sm:text-sm">
             Suggested Skills ({suggestedSkillsData?.length || 0})
@@ -137,11 +137,11 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
       {/* AddSkillsModal Component */}
       {isModalOpen && (
         <AddSkillsModal
-            userId={userId}
-            goalId={goalId}
-            onClose={handleCloseModal}
-            onSkillsUpdate={onSkillsUpdate} goals={undefined}
-            prefillSkills={selectedSkills}
+          userId={userId}
+          goalId={goalId}
+          onClose={handleCloseModal}
+          onSkillsUpdate={onSkillsUpdate} goals={undefined}
+          prefillSkills={selectedSkills}
         />
       )}
     </div>

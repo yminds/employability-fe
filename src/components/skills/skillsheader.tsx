@@ -86,10 +86,10 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
 
   return (
     <>
-      <div className="bg-[#F5F5F5] w-full md:flex absolute top-0 left-0 z-10">
+      <div className="bg-[#F5F5F5] w-full md:flex absolute top-0 left-0 z-10 sm:relative">
         <div className="flex w-full justify-between items-center mb-6 sm:flex-col sm:justify-normal sm:items-start sm:m-0">
           {/* Goal Section */}
-          <div className="bg-white h-[46px] rounded-lg flex items-center justify-start px-4 border-gray-300 sm:my-3">
+          <div className="bg-white h-[46px] rounded-lg flex items-center justify-start px-4 border-gray-300 sm:my-3 sm:w-full sm:max-w-[320px]">
             <span className="text-[#00000066] font-medium mr-2">Goal:</span>
             {selectedGoal ? (
               <DropdownMenu onOpenChange={(open) => setDropdownOpen(open)}>
@@ -97,7 +97,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
                   className="flex items-center justify-between text-base font-normal leading-6 tracking-[0.015rem] bg-transparent border-none outline-none cursor-pointer w-50"
                 >
                   {/* Display goal name and experience level */}
-                  <span className="font-medium sm:w-[100px] truncate">
+                  <span className="font-medium sm:w-[90%] truncate">
                     {selectedGoal} ({experienceLevelObj[selectedGoalExperienceLevel as unknown as keyof typeof experienceLevelObj]})
                   </span>
                   {dropdownOpen ? (
@@ -127,7 +127,7 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
           </div>
           <button
             onClick={handleOpenModal}
-            className=" py-2 text-sm w-[138px] h-[44px] md:h[50px] md:w[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
+            className=" py-2 text-sm w-[138px] h-[44px] md:h[50px] md:w[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC] sm:hidden"
           >
             Add Skills
           </button>
