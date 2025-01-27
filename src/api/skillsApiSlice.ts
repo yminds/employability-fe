@@ -110,6 +110,7 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
         },
       }),
     }),
+    
     // Update the self_rating of a specific skill
     updateSelfRating: builder.mutation<
       {
