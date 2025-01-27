@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import SkillsIcon from "@/assets/profile/verifiedskills.svg";
-import ProjectsIcon from "@/assets/profile/verifiedProject.svg";
+import ProjectsIcon from "@/assets/profile/verifiedproject.svg";
 import CertificationsIcon from "@/assets/profile/certification.svg";
 
 interface StatsSectionProps {
