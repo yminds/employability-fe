@@ -47,15 +47,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div
-      className={`flex flex-row sm:flex-col min-h-screen ${
-        shouldDisplaySidebar() ? "bg-gray-100" : ""
-      }`}
-    >
-      {shouldDisplaySidebar() && <Sidebar />}
-      <main className="flex-1">{children}</main>
+    <>
+      <div
+        className={`flex flex-row sm:flex-col min-h-screen ${
+          shouldDisplaySidebar() ? "bg-gray-100" : ""
+        }`}
+      >
+        {shouldDisplaySidebar() && <Sidebar />}
+        {children}
+      </div>
       <Toaster />
-    </div>
+    </>
   );
 };
 
