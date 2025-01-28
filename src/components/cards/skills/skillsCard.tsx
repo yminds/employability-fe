@@ -175,7 +175,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                         onChange={handleRatingChange}
                         onKeyDown={handleRatingKeyDown}
                         onBlur={handleRatingUpdate} 
-                        className="w-12 p-1 border-none focus:bg-green-500 appearance-none bg-transparent text-base"
+                        className="w-12 p-1 border-none focus:outline-none appearance-none bg-transparent text-base"
                         style={{
                           MozAppearance: "textfield",
                           WebkitAppearance: "none",
