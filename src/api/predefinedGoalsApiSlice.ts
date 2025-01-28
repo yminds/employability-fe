@@ -1,25 +1,29 @@
 import { apiSlice } from './apiSlice';
-interface Goal {
-  title: string;
+interface Skills{
+  data: Skill[];
+}
+
+export interface SkillPoolId {
   _id: string;
   name: string;
-  description: string;
-  image?: string;
-  skill_pool_id: string[];
-  predefined_goal_id: string;
-  job_market_demand: string;
-  min_salary_range: number;
-  max_salary_range: number;
-  difficulty_level: string;
-  learning_time: string;
-  experience_level: string;
+  icon?: string;
 }
 
-interface GoalsData {
-  data: Goal[];
+export interface Skill {
+  _id: string;
+  skill_pool_id: SkillPoolId;
+  verified_rating: number;
+  self_rating: number | null;
+  level?: string;
+}
+interface Goal {
   message: string;
-}
-
+  data: {
+    experience: string | undefined;
+    _id: string;
+    name: string;
+  }[];
+} ;
 
 export const goalsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -51,7 +55,7 @@ export const { useAddUserGoalMutation } = createGoalApiSlice;
 
 export const skillsPoolNameApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getMultipleSkillsName: builder.query<any[], string>({
+    getMultipleSkillsName: builder.query<Skills, string>({
       query: (searchTerm) => ({
         url: `/api/v1/predefinedGoals/goals/${searchTerm}`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',
@@ -64,7 +68,7 @@ export const { useGetMultipleSkillsNameQuery } = skillsPoolNameApiSlice;
 
 export const userGoalApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getUserGoal: builder.query<GoalsData, string>({
+    getUserGoal: builder.query<Goal, string>({
       query: (searchTerm) => ({
         url: `/api/v1/goals/userGoals/${searchTerm}`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',
@@ -77,7 +81,7 @@ export const { useGetUserGoalQuery } = userGoalApiSlice;
 
 export const searchGoalApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getSearchGoal: builder.query<GoalsData, string>({
+    getSearchGoal: builder.query<Goal, string>({
       query: (searchTerm) => ({
         url: `/api/v1/predefinedGoals/search`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',

@@ -46,7 +46,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      inputRef.current.focus();
+       inputRef.current.focus();
     }
   }, [isEditing]);
 
@@ -174,7 +174,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
                         value={editedSelfRating}
                         onChange={handleRatingChange}
                         onKeyDown={handleRatingKeyDown}
-                        className="w-12 p-1 border-none focus:outline-none appearance-none bg-transparent text-base"
+                        onBlur={handleRatingUpdate} 
+                        className="w-12 p-1 border-none focus:bg-green-500 appearance-none bg-transparent text-base"
                         style={{
                           MozAppearance: "textfield",
                           WebkitAppearance: "none",
@@ -297,7 +298,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                 </span>
               </div>
               <div>
-                <h3 className="text-[16px] font-medium">{skill}</h3>
+                <h3 className="text-[16px] font-medium sm:text-sm sm: w-1/2 truncate">{skill}</h3>
                 <div className="flex items-center space-x-2">
                   {isEditing ? (
                     <div className="flex flex-col">
@@ -420,133 +421,3 @@ const SkillCard: React.FC<SkillCardProps> = ({
 };
 
 export default SkillCard;
-
-
-// {/* Row 1: Skill Name, Self Rating, and Skill Level */}
-// <div className="flex flex-wrap items-center justify-between w-full mb-4">
-//   {/* Left Section: Skill Name and Self Rating */}
-//   <div className="flex items-center space-x-4">
-//     <span className="flex w-[52px] h-[52px] p-[9.75px] px-[10.833px] justify-center items-center rounded-full border border-black/5 bg-[rgba(250,250,250,0.98)]">
-//       <img
-//         src={skillImg || DefaultImg}
-//         alt="Skill Icon"
-//         className="w-[30px] h-[30px]"
-//         onError={(e) => (e.currentTarget.src = DefaultImg)}
-//       />
-//     </span>
-//     <div>
-//       <h3 className="text-[16px] font-medium">{skill}</h3>
-//       <div className="flex items-center space-x-2">
-//         {isEditing ? (
-//           <div className="flex flex-col">
-//             <div className="flex items-center space-x-2">
-//               <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
-//                 Self rating:
-//               </p>
-//               <input
-//                 ref={inputRef}
-//                 type="number"
-//                 min="0"
-//                 max="10"
-//                 value={editedSelfRating}
-//                 onChange={handleRatingChange}
-//                 onKeyDown={handleRatingKeyDown}
-//                 className="w-12 p-1 border-none focus:outline-none appearance-none bg-transparent text-base"
-//                 style={{
-//                   MozAppearance: "textfield",
-//                   WebkitAppearance: "none",
-//                 }}
-//               />
-//               <span>/10</span>
-//             </div>
-//             {ratingError && (
-//               <p className="text-red-500 text-xs mt-1">{ratingError}</p>
-//             )}
-//           </div>
-//         ) : (
-//           <div className="flex items-center space-x-2">
-//             <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
-//               Self rating: {editedSelfRating}/10
-//             </p>
-//             <button
-//               onClick={() => setIsEditing(true)}
-//               className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600"
-//             >
-//               <Edit2 size={16} />
-//             </button>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   </div>
-
-//   {/* Right Section: Skill Level */}
-//   <div className="flex items-center">
-//     <span
-//       className={`px-4 py-2 rounded-[40px] font-medium leading-6 tracking-[0.24px] ${getBadgeColor(
-//         "proficiency",
-//         level || "1"
-//       )}`}
-//     >
-//       {skillsLevelObj[level as unknown as keyof typeof skillsLevelObj] ??
-//         "Basic"}
-//     </span>
-//   </div>
-// </div>
-
-{/* Row 2: Verified Rating and Action Buttons */ }
-// <div className="flex flex-wrap items-center justify-between w-full mt-2">
-//   {/* Left Section: Verified Rating */}
-//   <div className="flex items-center space-x-2">
-//     {status === "Verified" && (
-//       <p className="text-lg font-medium">
-//         {verified_rating}
-//         <span className="text-[#909091]">/10</span>
-//       </p>
-//     )}
-//     <div className="flex items-center space-x-2">
-//       <img src={imgSrc} alt={status} className="w-4 h-4" />
-// <span
-//   className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-green-600" : "text-yellow-600"
-//     }`}
-// >
-//   {status}
-// </span>
-//     </div>
-//   </div>
-
-//   {/* Right Section: Action Buttons */}
-//   <div className="flex space-x-2">
-//     {status === "Verified" ? (
-//       <>
-//         <button
-//           onClick={handleViewReport}
-//           className="px-4 py-2 text-sm font-medium rounded-md text-[#001630] underline hover:text-[#001630CC]"
-//         >
-//           View report
-//         </button>
-//         <button
-//           onClick={handleImproveScore}
-//           className="py-2 text-sm font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
-//         >
-//           Improve score
-//         </button>
-//       </>
-//     ) : (
-//       <>
-//         <button
-//           onClick={handleLearn}
-//           className="px-4 py-2 text-sm font-medium rounded-md text-[#001630] underline"
-//         >
-//           Learn
-//         </button>
-//         <button
-//           onClick={handleVerifySkill}
-//           className="px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md"
-//         >
-//           Verify skill
-//         </button>
-//       </>
-//     )}
-//   </div>
-// </div>

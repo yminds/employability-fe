@@ -13,7 +13,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import search from '@/assets/skills/search.svg';
 import AddSkillsModal from './addskills';
 
-interface SkillPoolId {
+export interface SkillPoolId {
   _id: string;
   name: string;
   icon?: string;
