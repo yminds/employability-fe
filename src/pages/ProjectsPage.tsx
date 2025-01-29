@@ -62,8 +62,8 @@ const ProjectsPage: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
-        <ProjectUploadModal open={isModalOpen} onOpenChange={setIsModalOpen} 
-        onSuccess={hanldeProjectSuccess}/>
+        <ProjectUploadModal open={isModalOpen} onOpenChange={setIsModalOpen}
+        onSuccess={hanldeProjectSuccess} selectedGoalId={""}/>
 
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-3xl font-ubuntu font-bold text-gray-900">
