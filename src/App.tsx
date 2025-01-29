@@ -13,7 +13,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const App: React.FC = () => {
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || " "}>
       <MainLayout>
         <AppRoutes />
       </MainLayout>

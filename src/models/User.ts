@@ -32,6 +32,8 @@ export type User = {
   linkedIn: string;
   resume: Resume[];
   profile_image?: string;
+  bio?: string;
+  current_status?: string;
 };
 
 // Optional: Define separate interfaces for nested objects if needed

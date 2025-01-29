@@ -84,6 +84,9 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
         body: formData, // Don't set Content-Type header, browser will set it
       });
 
+      console.log("S3 response", s3Response);
+      
+
       if (!s3Response.ok) {
         throw new Error("Failed to upload to S3");
       }
