@@ -1,27 +1,39 @@
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import React from "react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import GoalSelect from "../GoalSelect"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/store"
+import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice"
 
 interface ProjectDetailsStepProps {
-  projectName: string;
-  description: string;
-  onChange: (field: string, value: string) => void;
+  projectName: string
+  description: string
+  goalId:string
+  onChange: (field: string, value: string) => void
   errors: {
-    projectName?: string[];
-    description?: string[];
-  };
-  isEditing:Boolean
+    projectName?: string[]
+    description?: string[]
+    goalId?:string[]
+  }
+  isEditing: Boolean
 }
 
 const ProjectDetailsStep: React.FC<ProjectDetailsStepProps> = ({
   projectName,
   description,
+  goalId,
   onChange,
   errors,
   isEditing
 }) => {
+  const userId = useSelector((state: RootState) => state.auth.user?._id)
+  const{data:projectsData} = useGetProjectsByUserIdQuery(userId ?? "")
+  const projectsCount = projectsData?.data.length || 0
+  console.log(projectsCount)
   return (
+    
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="projectName" className="flex items-center gap-1">
@@ -34,7 +46,7 @@ const ProjectDetailsStep: React.FC<ProjectDetailsStepProps> = ({
           value={projectName}
           onChange={(e) => onChange("projectName", e.target.value)}
           required
-          className={errors.projectName ? "border-red-500" : ""}
+          className={`${errors.projectName ? "border-red-500" : ""}`}
           maxLength={100}
         />
         <div className="flex justify-between items-center mt-1">
@@ -46,7 +58,13 @@ const ProjectDetailsStep: React.FC<ProjectDetailsStepProps> = ({
           </span>
         </div>
       </div>
-
+      {!isEditing && projectsCount === 0 && (
+        <GoalSelect
+          selectedGoal={goalId}
+          onGoalSelect={(value) => onChange("goalId", value)}
+          userId={userId!}
+        />
+      )}
       <div className="space-y-2">
         <Label htmlFor="description" className="flex items-center gap-1">
           Description
@@ -71,7 +89,7 @@ const ProjectDetailsStep: React.FC<ProjectDetailsStepProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProjectDetailsStep;
+export default ProjectDetailsStep

@@ -1,17 +1,11 @@
 import * as React from "react"
-import { Loader2 } from "lucide-react"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useSelector } from "react-redux"
-import { RootState } from "@/store/store"
-import { 
-  useAddProjectMutation, 
-  useHandleProjectFilesMutation, 
+import type { RootState } from "@/store/store"
+import {
+  useAddProjectMutation,
+  useGetProjectQuery,
+  useHandleProjectFilesMutation,
   useUpdateProjectMutation,
   useUpdateProjectTechMutation,
 } from "@/api/projectApiSlice"
@@ -32,12 +26,16 @@ interface Skill {
 interface FormData {
   projectName: string
   description: string
+  goalId:string
   skills: Skill[]
   images: File[]
-  synopsisPdf: File | null
+  uploadedFiles: {
+    [key: string]: { url: string; key: string }
+  }
+  synopsisDoc: File | ''
   githubLinks: string[]
   liveLink: string
-  coverImage: File | null
+  thumbnail: File | ''
 }
 
 interface FormErrors {
@@ -49,7 +47,8 @@ interface FormErrors {
 interface ProjectUploadModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSuccess?:()=>Promise<void>;
+  onSuccess?: () => Promise<void>
+  selectedGoalId: string
   existingProject?: {
     _id: string
     name: string
@@ -69,105 +68,139 @@ interface ProjectUploadModalProps {
   } | null
 }
 
-const STEPS = [
-  "Enter Project Details",
-  "Project Skills",
-  "Upload Files & Links",
-  "Review Your Project",
-]
-
-// const SuccessAlert = () => (
-//   <Alert className="bg-green-50 border-green-200 mb-4">
-//     <AlertDescription className="text-green-800">
-//       Project details saved successfully!
-//     </AlertDescription>
-//   </Alert>
-// )
+const STEPS = ["Enter Project Details", "Project Skills", "Upload Files & Links", "Review Your Project"]
 
 export function ProjectUploadModal({
   open,
   onOpenChange,
   existingProject,
   onSuccess,
+  selectedGoalId,
 }: ProjectUploadModalProps) {
   const [currentStep, setCurrentStep] = React.useState(0)
-  // const [showSuccess, setShowSuccess] = React.useState(false)
   const [errors, setErrors] = React.useState<FormErrors>({})
   const [projectId, setProjectId] = React.useState<string | null>(null)
-  const [repoStatuses, setRepoStatuses] = React.useState<{ [key: string]: boolean | undefined }>({})
-  const [isCheckingRepo, setIsCheckingRepo] = React.useState(false)
   const [isSuccessModalOpen, setIsSuccessModalOpen] = React.useState(false)
   const [isEditing, setIsEditing] = React.useState(false)
-
+  const [uploadedFiles, setUploadedFiles] = React.useState<{
+    [key: string]: { url: string; key: string }
+  }>({})
   const [formData, setFormData] = React.useState<FormData>({
     projectName: "",
     description: "",
+    goalId:"",
     skills: [],
     images: [],
-    synopsisPdf: null,
-    githubLinks: [''],
+    synopsisDoc: "",
+    githubLinks: [""],
     liveLink: "",
-    coverImage: null,
+    thumbnail: "",
+    uploadedFiles: {},
   })
+
+  
+  const [persistedFiles, setPersistedFiles] = React.useState<{
+    [key: string]: { url: string; key: string }
+  }>({})
+  // const [filePreviewState, setFilePreviewState] = React.useState<FilePreviewState>({
+  //   thumbnailPreview: {
+  //     file: null,
+  //     status: "idle",
+  //     progress: 0,
+  //   },
+  //   synopsisPreview: {
+  //     file: null,
+  //     status: "idle",
+  //     progress: 0,
+  //   },
+  //   imagePreview: {
+  //     files: {}
+  //   }
+  // })
 
   const user = useSelector((state: RootState) => state?.auth.user)
   const user_id = user?._id
-  
+
   const [addProject, { isLoading: isSubmitting }] = useAddProjectMutation()
   const [updateProject, { isLoading: isUpdating }] = useUpdateProjectMutation()
   const [updateProjectTech, { isLoading: isTechUpdating }] = useUpdateProjectTechMutation()
   const [handleProjectFiles, { isLoading: isFilesUploading }] = useHandleProjectFilesMutation()
+  const{data:projectDetails} = useGetProjectQuery(projectId || "")
 
+  console.log("projectDetails",projectDetails)
+
+
+  console.log("persisted data",persistedFiles)
+  console.log("uploaded files", uploadedFiles)
+  
   // Initialize form with existing project data or reset when modal closes
   React.useEffect(() => {
     if (existingProject && open) {
       setFormData({
         projectName: existingProject.name,
         description: existingProject.description,
+        goalId: selectedGoalId || "",
         skills: existingProject.tech,
-        githubLinks: existingProject.githubLink.length > 0 ? existingProject.githubLink : [''],
+        githubLinks: existingProject.githubLink.length > 0 ? existingProject.githubLink : [""],
         liveLink: existingProject.liveLink || "",
-        images: [],
-        synopsisPdf: null,
-        coverImage: null,
+        images: existingProject.images ||[],
+        synopsisDoc: existingProject.synopsis || "",
+        thumbnail: existingProject.thumbnail || "",
+        uploadedFiles: {
+          images: { url: existingProject.images || "", key: "" },
+          synopsisDoc: { url: existingProject.synopsisDoc || "", key: "" },
+          thumbnail: { url: existingProject.thumbnail || "", key: "" },
+        },
       })
       setProjectId(existingProject._id)
       setIsEditing(true)
       
+      // Set persisted files
+      setPersistedFiles({
+        thumbnail: existingProject.thumbnail ? { url: existingProject.thumbnail, key: "" } : { url: "", key: "" },
+        synopsisDoc: existingProject.synopsisDoc ? { url: existingProject.synopsisDoc, key: "" } : { url: "", key: "" },
+        images: existingProject.images ? { url: existingProject.images, key: "" } : { url: "", key: "" },
+      })
+
       // Determine current step based on project status
-      switch(existingProject.status) {
-        case 'Incomplete':
+      switch (existingProject.status) {
+        case "Incomplete":
           setCurrentStep(0)
           break
-        case 'In-review':
+        case "In-review":
           setCurrentStep(3)
           break
         default:
           setCurrentStep(0)
       }
-    } 
-    
+    }
+
     if (!open) {
       // Reset all form states when modal closes
       setFormData({
         projectName: "",
         description: "",
+        goalId:"",
         skills: [],
         images: [],
-        synopsisPdf: null,
-        githubLinks: [''],
+        synopsisDoc: "",
+        githubLinks: [""],
         liveLink: "",
-        coverImage: null,
+        thumbnail: "",
+        uploadedFiles: {},
       })
       setProjectId(null)
       setCurrentStep(0)
       setIsEditing(false)
+      setUploadedFiles({})
+      setPersistedFiles({})
     }
   }, [existingProject, open])
 
-  // Reset repo statuses when changing steps
+  console.log("formData after existing project:"  ,formData);
+
+  // Reset errors when changing steps
   React.useEffect(() => {
-    setRepoStatuses({})
     setErrors({})
   }, [currentStep])
 
@@ -193,6 +226,9 @@ export function ProjectUploadModal({
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
+  console.log("existingProject",existingProject);
+  console.log("persistedFiles",persistedFiles);
+  
 
   const handleNext = async () => {
     try {
@@ -204,8 +240,8 @@ export function ProjectUploadModal({
         // Check if we're editing an existing project
         if (isEditing && projectId) {
           // Check if project details have changed
-          const detailsChanged = 
-            formData.projectName.trim() !== existingProject?.name || 
+          const detailsChanged =
+            formData.projectName.trim() !== existingProject?.name ||
             formData.description.trim() !== existingProject?.description
 
           if (!detailsChanged) {
@@ -220,18 +256,17 @@ export function ProjectUploadModal({
             payload: {
               name: formData.projectName.trim(),
               description: formData.description.trim(),
-              status: 'Incomplete'
-            }
+              status: "Incomplete",
+            },
           }).unwrap()
 
           if (response.success) {
             toast.success("Project details updated successfully")
-            setCurrentStep((prev)=>prev + 1)
+            setCurrentStep((prev) => prev + 1)
           }
         } else {
-
-          if(projectId){
-            setCurrentStep((prev)=> prev + 1)
+          if (projectId) {
+            setCurrentStep((prev) => prev + 1)
             return
           }
           // Create new project
@@ -239,13 +274,14 @@ export function ProjectUploadModal({
             userId: user_id!,
             name: formData.projectName.trim(),
             description: formData.description.trim(),
-            status: 'Incomplete'
+            status: "Incomplete",
+            goal_id: selectedGoalId || formData.goalId,
           }).unwrap()
 
           if (response.success) {
             setProjectId(response.data._id)
             toast.success("Project detail saved successfully!")
-            setCurrentStep((prev)=> prev + 1)
+            setCurrentStep((prev) => prev + 1)
           }
         }
       } else if (currentStep === 1) {
@@ -254,74 +290,98 @@ export function ProjectUploadModal({
         }
 
         if (formData.skills.length > 0) {
-          const technologies = formData.skills.map(skill => skill._id)
+          const technologies = formData.skills.map((skill) => skill._id)
           await updateProjectTech({
             projectId,
             technologies,
           }).unwrap()
         }
 
-          // Always move to the next step
-  setCurrentStep((prev) => prev + 1)
+        // Always move to the next step
+        setCurrentStep((prev) => prev + 1)
 
-
-  // Update project status to Incomplete to track progress
-  await updateProject({
-    projectId,
-    payload: { status: 'Incomplete' }
-  }).unwrap()
-
+        // Update project status to Incomplete to track progress
+        await updateProject({
+          projectId,
+          payload: { status: "Incomplete" },
+        }).unwrap()
       } else if (currentStep === 2) {
-        const validLinks = formData.githubLinks.filter(link => link.trim() !== '')
-        if (validLinks.length > 0) {
-          const areReposValid = await validateGithubLinks()
-          if (!areReposValid) {
-            return
-          }
-        }
-
         if (!projectId) return
 
+      
+        
         const formDataToUpload = new FormData()
-        formDataToUpload.append('githubLinks', JSON.stringify(validLinks))
+
+        console.log("formDataToUpload",formDataToUpload);
+        const validLinks = formData.githubLinks.filter((link) => link.trim() !== "")
+        formDataToUpload.append("githubLinks", JSON.stringify(validLinks))
 
         if (formData.liveLink) {
-          formDataToUpload.append('liveLink', formData.liveLink)
+          formDataToUpload.append("liveLink", formData.liveLink)
         }
 
-        if (formData.images.length > 0) {
-          formData.images.forEach((image) => {
-            formDataToUpload.append('images', image)
+        // Only append files if they have been changed
+        if (uploadedFiles.thumbnail?.url) {
+          console.log("uploadedFiles.thumbnail?.url",uploadedFiles.thumbnail?.url);
+          
+          formDataToUpload.append("fileUrls[thumbnail]", uploadedFiles.thumbnail.url)
+        }else if(existingProject?.thumbnail && !persistedFiles.thumbnail.url){
+          formDataToUpload.append("fileUrls[thumbnail]",  "")
+        }
+        else{
+          console.log("existingProject?.thumbnail",existingProject?.thumbnail);
+          formDataToUpload.append("fileUrls[thumbnail]", existingProject?.thumbnail || "")
+        }
+ 
+        if (uploadedFiles.synopsisDoc?.url) {
+          console.log("uploadedFiles.synopsisDoc?.url",uploadedFiles.synopsisDoc?.url);
+          
+          formDataToUpload.append("fileUrls[synopsisDoc]", uploadedFiles.synopsisDoc.url)
+        }
+        else if(existingProject?.synopsisDoc && !persistedFiles.synopsisDoc.url){
+          formDataToUpload.append("fileUrls[synopsisDoc]",  "")
+        }
+        else  {
+          console.log("existingProject?.synopsisDoc",existingProject?.synopsisDoc);
+          formDataToUpload.append("fileUrls[synopsisDoc]", existingProject?.synopsisDoc || "")
+        }
+
+        if (uploadedFiles.images?.url) {
+          const imageUrls = JSON.parse(uploadedFiles.images.url)
+          imageUrls.forEach((url: string, index: number) => {
+            formDataToUpload.append(`fileUrls[images][${index}]`, url)
+          })
+        }else if(existingProject?.images && !persistedFiles.images.url){
+          formDataToUpload.append("fileUrls[images]",  "")
+          }
+        else{
+          console.log("existingProject?.images",existingProject?.images);
+          const imageUrls = existingProject?.images|| []
+          imageUrls.forEach((url: string, index: number) => {
+            formDataToUpload.append(`fileUrls[images][${index}]`, url)
           })
         }
 
-        if (formData.synopsisPdf) {
-          formDataToUpload.append('synopsisDoc', formData.synopsisPdf)
-        }
+        if (formDataToUpload.has("fileUrls[thumbnail]") || formDataToUpload.has("fileUrls[synopsisDoc]") || formDataToUpload.has("fileUrls[images][0]")) {
+          try {
+            const filesResponse = await handleProjectFiles({
+              projectId,
+              formData: formDataToUpload,
+            }).unwrap()
 
-        if (formData.coverImage) {
-          formDataToUpload.append('thumbnail', formData.coverImage)
-        }
-
-        formDataToUpload.append('action', 'submit')
-
-        try {
-          const filesResponse = await handleProjectFiles({
-            projectId,
-            formData: formDataToUpload
-          }).unwrap()
-
-          if (filesResponse.success) {
-            setCurrentStep((prev) => prev + 1)
+            if (filesResponse.success) {
+              setCurrentStep((prev) => prev + 1)
+            }
+          } catch (error: any) {
+            if (error.status === 400) {
+              return
+            }
+            throw error
           }
-        } catch (error: any) {
-          if (error.status === 400) {
-            return
-          }
-          throw error
+        } else {
+          // If no files were changed, simply move to the next step
+          setCurrentStep((prev) => prev + 1)
         }
-      } else if (currentStep === 3) {
-        return
       }
     } catch (error: any) {
       console.error("Error in project upload:", error)
@@ -335,7 +395,6 @@ export function ProjectUploadModal({
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1)
       setErrors({})
-      setRepoStatuses({})
     }
   }
 
@@ -344,26 +403,30 @@ export function ProjectUploadModal({
       ...prev,
       [field]: value,
     }))
+    if (field === "images" || field === "synopsisDoc" || field === "thumbnail") {
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [field]: { url: "", key: "" },
+      }))
+      setPersistedFiles((prev) => ({
+        ...prev,
+        [field]: { url: "", key: "" },
+      }))
+    }
     setErrors((prev) => ({
       ...prev,
       [field]: undefined,
     }))
-    if (field === 'githubLinks') {
-      setRepoStatuses({})
-    }
   }
 
   const handleSetSelectedSkills: React.Dispatch<React.SetStateAction<Skill[]>> = React.useCallback(
     (skillsOrFn) => {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        skills:
-          typeof skillsOrFn === "function"
-            ? skillsOrFn(prevFormData.skills)
-            : skillsOrFn,
+        skills: typeof skillsOrFn === "function" ? skillsOrFn(prevFormData.skills) : skillsOrFn,
       }))
     },
-    [setFormData]
+    [setFormData],
   )
 
   const handleSaveDraft = async () => {
@@ -379,101 +442,128 @@ export function ProjectUploadModal({
         return
       }
 
+      // Prevent duplicate save if we're already processing
+      if (isSubmitting || isUpdating || isTechUpdating || isFilesUploading) {
+        return
+      }
+
       // Create or update project as a draft
-      const payload = {
-        name: formData.projectName.trim(),
-        description: formData.description.trim(),
-        status: 'Incomplete'
-      }
+      // const payload = {
+      //   name: formData.projectName.trim(),
+      //   description: formData.description.trim(),
+      //   status: "Incomplete",
+      // }
 
-      if (isEditing && projectId) {
-        // Update existing project
-        await updateProject({
-          projectId,
-          payload
-        }).unwrap()
+      // if (isEditing && projectId) {
+      //   // Update existing project
+      //   console.log("payload",payload);
+        
+      //   await updateProject({
+      //     projectId,
+      //     payload,
+      //   }).unwrap()
 
-        if(formData.skills.length > 0){
-          const technologies = formData.skills.map(skill=>skill._id)
-          await updateProjectTech({
-            projectId,
-            technologies
-          }).unwrap()
-        }
+      //   if (formData.skills.length > 0) {
+      //     const technologies = formData.skills.map((skill) => skill._id)
+      //     await updateProjectTech({
+      //       projectId,
+      //       technologies,
+      //     }).unwrap()
+      //   }
 
-        if (formData.images.length > 0 || formData.synopsisPdf || formData.coverImage) {
-          const formDataToUpload = new FormData()
+      //   if (formData.images.length > 0 || formData.synopsisPdf || formData.coverImage) {
+      //     const formDataToUpload = new FormData()
+
+      //     if (formData.githubLinks.length > 0) {
+      //       formDataToUpload.append(
+      //         "githubLinks",
+      //         JSON.stringify(formData.githubLinks.filter((link) => link.trim() !== "")),
+      //       )
+      //     }
+
+      //     if (formData.liveLink) {
+      //       formDataToUpload.append("liveLink", formData.liveLink)
+      //     }
+
+      //     if (formData.images.length > 0) {
+      //       formData.images.forEach((image) => {
+      //         formDataToUpload.append("images", image)
+      //       })
+      //     }
+
+      //     // if (formData.synopsisPdf) {
+      //     //   formDataToUpload.append("fileUrls[synopsisDoc]", formData.synopsisPdf)
+      //     // }
+
+      //     if (formData.coverImage) {
+      //       formDataToUpload.append("fileUrls[thumbnail]", formData.coverImage)
+      //     }
+
+
+      //     console.log("formDataToUpload",formDataToUpload);
+        
           
-          if (formData.githubLinks.length > 0) {
-            formDataToUpload.append('githubLinks', JSON.stringify(formData.githubLinks.filter(link => link.trim() !== '')))
-          }
-  
-          if (formData.liveLink) {
-            formDataToUpload.append('liveLink', formData.liveLink)
-          }
-  
-          if (formData.images.length > 0) {
-            formData.images.forEach((image) => {
-              formDataToUpload.append('images', image)
-            })
-          }
-  
-          if (formData.synopsisPdf) {
-            formDataToUpload.append('synopsisDoc', formData.synopsisPdf)
-          }
-  
-          if (formData.coverImage) {
-            formDataToUpload.append('thumbnail', formData.coverImage)
-          }
-  
-          await handleProjectFiles({
-            projectId,
-            formData: formDataToUpload
-          }).unwrap()
+      //     for (let [key, value] of formDataToUpload.entries()) {
+      //       console.log(`${key}: ${value}`); 
+      //     }
+      //     await handleProjectFiles({
+      //       projectId,
+      //       formData: formDataToUpload ,
+      //     }).unwrap()
+      //   }
+      // } else {
+      //   // Only create a new project if we don't have a projectId
+      //   if (!projectId) {
+      //     const response = await addProject({
+      //       userId: user_id,
+      //       ...payload,
+      //     }).unwrap()
 
-      } else {
-        // Create new project
-        const response = await addProject({
-          userId: user_id,
-          ...payload
-        }).unwrap()
+      //     if (response.success) {
+      //       setProjectId(response.data._id)
 
-        if (response.success) {
-          setProjectId(response.data._id)
+      //       if (formData.skills.length > 0) {
+      //         const technologies = formData.skills.map((skill) => skill._id)
+      //         await updateProjectTech({
+      //           projectId: response.data._id,
+      //           technologies,
+      //         }).unwrap()
+      //       }
+      //     }
+      //   } else {
+      //     // If we have a projectId, update the existing project
+      //     await updateProject({
+      //       projectId,
+      //       payload,
+      //     }).unwrap()
 
-          if(formData.skills.length > 0){
-            const technologies = formData.skills.map(skill=>skill._id)
-            await updateProjectTech({
-              projectId: response.data._id,
-              technologies
-            }).unwrap()
-          }
-        }
+      //     if (formData.skills.length > 0) {
+      //       const technologies = formData.skills.map((skill) => skill._id)
+      //       await updateProjectTech({
+      //         projectId,
+      //         technologies,
+      //       }).unwrap()
+      //     }
+      //   }
+      // }
+
+      toast.success("Project saved as draft successfully!")
+
+      // Refresh the project list and close the modal
+      if (onSuccess) {
+        await onSuccess()
       }
-    }
-      // Close the modal
       onOpenChange(false)
     } catch (error: any) {
       console.error("Error saving draft:", error)
-      alert(error.data?.message || "Failed to save project draft")
+      toast.error(error.data?.message || "Failed to save project draft")
     }
-  }
-
-  const isSubmitReady = () => {
-    // Check if technologies and github links are added
-    return formData.githubLinks.some(link => link.trim() !== '')
   }
 
   const handleSubmitForReview = async () => {
     try {
       // Validate project details first
       if (!validateProjectDetails()) {
-        return
-      }
-
-      // Check if technologies and GitHub links are added
-      if (!isSubmitReady()) {
-        alert("Please add technologies and GitHub links before submitting for review.")
         return
       }
 
@@ -484,59 +574,55 @@ export function ProjectUploadModal({
       }
 
       // Update technologies if added
-      const technologies = formData.skills.map(skill => skill._id)
-      await updateProjectTech({
-        projectId,
-        technologies,
-      }).unwrap()
+      // const technologies = formData.skills.map((skill) => skill._id)
+      // await updateProjectTech({
+      //   projectId,
+      //   technologies,
+      // }).unwrap()
 
-      // Validate and handle GitHub links
-      const validLinks = formData.githubLinks.filter(link => link.trim() !== '')
-      if (validLinks.length > 0) {
-        const areReposValid = await validateGithubLinks()
-        if (!areReposValid) {
-          alert("Please ensure all GitHub repositories are public")
-          return
-        }
+      // // Handle GitHub links and file uploads
+      // const validLinks = formData.githubLinks.filter((link) => link.trim() !== "")
+      // const formDataToUpload = new FormData()
+      // formDataToUpload.append("githubLinks", JSON.stringify(validLinks))
 
-        const formDataToUpload = new FormData()
-        formDataToUpload.append('githubLinks', JSON.stringify(validLinks))
-        
-        // Upload files if any
-        if (formData.images.length > 0) {
-          formData.images.forEach((image) => {
-            formDataToUpload.append('images', image)
-          })
-        }
+      // if (formData.liveLink) {
+      //   formDataToUpload.append("liveLink", formData.liveLink)
+      // }
 
-        if (formData.synopsisPdf) {
-          formDataToUpload.append('synopsisDoc', formData.synopsisPdf)
-        }
+      // if (formData.images.length > 0) {
+      //   formData.images.forEach((image) => {
+      //     formDataToUpload.append("images", image)
+      //   })
+      // }
 
-        if (formData.coverImage) {
-          formDataToUpload.append('thumbnail', formData.coverImage)
-        }
+      // if (formData.synopsisPdf) {
+      //   formDataToUpload.append("synopsisDoc", formData.synopsisPdf)
+      // }
 
-        await handleProjectFiles({
-          projectId,
-          formData: formDataToUpload
-        }).unwrap()
-      }
+      // if (formData.coverImage) {
+      //   formDataToUpload.append("thumbnail", formData.coverImage)
+      // }
 
-      // Submit for review
-      await updateProject({
-        projectId,
-        payload: { 
-          name: formData.projectName.trim(),
-          description: formData.description.trim(),
-          status: 'In-review' 
-        }
-      }).unwrap()
-      
+      // await handleProjectFiles({
+      //   projectId,
+      //   formData: formDataToUpload,
+      // }).unwrap()
+
+      // // Submit for review
+      // await updateProject({
+      //   projectId,
+      //   payload: {
+      //     name: formData.projectName.trim(),
+      //     description: formData.description.trim(),
+      //     status: "In-review",
+      //   },
+      // }).unwrap()
+
+      toast.success("Project submitted for review successfully!")
       onOpenChange(false)
       setIsSuccessModalOpen(true)
 
-      if(onSuccess){
+      if (onSuccess) {
         await onSuccess()
       }
     } catch (error: any) {
@@ -545,70 +631,44 @@ export function ProjectUploadModal({
     }
   }
 
-  const validateGithubLinks = async (): Promise<boolean> => {
-    setIsCheckingRepo(true)
-    try {
-      const validLinks = formData.githubLinks.filter(link => link.trim() !== '')
-      if (validLinks.length === 0) return true
-
-      const newStatuses: { [key: string]: boolean } = {}
-      let allValid = true
-
-      for (const link of validLinks) {
-        try {
-          const cleanLink = link
-          .trim()
-          .replace(/\.git$/, '') // Remove .git extension
-          .replace(/\/$/, '') // Remove trailing slash
-          .replace(/^(https?:\/\/)?(www\.)?github\.com\//, '') // Remove github.com prefix
-
-          const repoRegex = /^[a-zA-Z0-9-]+\/[a-zA-Z0-9-_.]+$/
-        if (!repoRegex.test(cleanLink)) {
-          newStatuses[link] = false
-          allValid = false
-          continue
-        }
-
-        const response = await fetch(`https://api.github.com/repos/${cleanLink}`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/vnd.github.v3+json'
-          }
-        })
-
-          const data = await response.json()
-          const isPublic = response.ok && !data.private
-
-          newStatuses[link] = isPublic
-          if (!isPublic) allValid = false
-        } catch (error) {
-          console.error(`Error checking repository ${link}:`, error)
-          newStatuses[link] = false
-          allValid = false
-        }
-      }
-
-      setRepoStatuses(newStatuses)
-      return allValid
-    } finally {
-      setIsCheckingRepo(false)
-    }
-  }
+  // const handleFileDelete = (type: string) => {
+  //   if (projectId) {
+  //     const formDataToUpload = new FormData()
+      
+  //     if (type === "thumbnail") {
+  //       formDataToUpload.append("fileUrls[thumbnail]", "")
+  //     } else if (type === "synopsisDoc") {
+  //       formDataToUpload.append("fileUrls[synopsisDoc]", "")  
+  //     } else if (type === "images") {
+  //       formDataToUpload.append("fileUrls[images]", "")
+  //     }
+      
+  //     formDataToUpload.append("action", "update")
+      
+  //     handleProjectFiles({
+  //       projectId,
+  //       formData: formDataToUpload,
+  //     }).unwrap()
+  //   }
+    
+  //   setPersistedFiles((prev) => ({
+  //     ...prev,
+  //     [type]: { url: "", key: "" },
+  //   }))
+  // }
 
   const renderSubmitButtons = () => {
     return (
-      <div className="flex space-x-4">
-        <button
-          type="button"
+      <div className="flex items-center gap-4">
+        <span
           onClick={handleSaveDraft}
-          className="flex px-8 py-2 justify-center items-center gap-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+          className="text-gray-500 hover:text-gray-700 cursor-pointer underline text-sm font-medium"
         >
           Save as Draft
-        </button>
+        </span>
         <button
           type="button"
           onClick={handleSubmitForReview}
-          disabled={!isSubmitReady()}
           className="flex px-8 py-2 justify-center items-center gap-2 rounded-md bg-black text-white hover:bg-gray-600 disabled:opacity-50"
         >
           Submit for Review
@@ -618,36 +678,37 @@ export function ProjectUploadModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        // Reset form when closing
-        setFormData({
-          projectName: "",
-          description: "",
-          skills: [],
-          images: [],
-          synopsisPdf: null,
-          githubLinks: [''],
-          liveLink: "",
-          coverImage: null,
-        })
-        setCurrentStep(0)
-        setErrors({})
-        setRepoStatuses({})
-      }
-      onOpenChange(isOpen)
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setFormData({
+            projectName: "",
+            description: "",
+            goalId:"",
+            skills: [],
+            images: [],
+            synopsisDoc: "",
+            githubLinks: [""],
+            liveLink: "",
+            thumbnail: "",
+            uploadedFiles: {},
+          })
+          setCurrentStep(0)
+          setErrors({})
+          setUploadedFiles({})
+        }
+        onOpenChange(isOpen)
+      }}
+    >
       <DialogContent className="!p-8 !pb-10 w-[700px] !max-w-[700px] min-h-[615px] max-h-[90vh] flex flex-col">
         <DialogHeader className="text-left !p-0 !m-0">
-          <DialogTitle className="text-xl font-semibold">
-            {STEPS[currentStep]}
-          </DialogTitle>
+          <DialogTitle className="text-xl font-semibold">{STEPS[currentStep]}</DialogTitle>
         </DialogHeader>
 
         <ProgressBar steps={STEPS} currentStep={currentStep} />
 
-
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto pr-2 scroll-smooth">
           <form onSubmit={(e) => e.preventDefault()} className="flex flex-col h-full">
             <div className="flex-1">
               {currentStep === 0 && (
@@ -657,47 +718,71 @@ export function ProjectUploadModal({
                   onChange={(field, value) => handleUpdateFormData(field as keyof FormData, value)}
                   errors={errors}
                   isEditing={isEditing}
+                  goalId={formData.goalId}
                 />
               )}
               {currentStep === 1 && (
-                <ProjectSkillsStep
-                  selectedSkills={formData.skills}
-                  setSelectedSkills={handleSetSelectedSkills}
-                />
+                <ProjectSkillsStep selectedSkills={formData.skills} setSelectedSkills={handleSetSelectedSkills} />
               )}
               {currentStep === 2 && (
                 <UploadLinksStep
                   images={formData.images}
-                  setImages={(images) => handleUpdateFormData('images', images)}
-                  synopsisPdf={formData.synopsisPdf}
-                  setSynopsisPdf={(pdf) => handleUpdateFormData('synopsisPdf', pdf)}
+                  setImages={(images) => handleUpdateFormData("images", images)}
+                  synopsisDoc={formData.synopsisDoc}
+                  setSynopsisDoc={(pdf) => handleUpdateFormData("synopsisDoc", pdf)}
                   githubLinks={formData.githubLinks}
-                  setGithubLinks={(links) => handleUpdateFormData('githubLinks', links)}
-                  repoStatuses={repoStatuses}
+                  setGithubLinks={(links) => handleUpdateFormData("githubLinks", links)}
                   liveLink={formData.liveLink}
-                  setLiveLink={(value) => handleUpdateFormData('liveLink', value)}
-                  coverImage={formData.coverImage}
-                  setCoverImage={(image) => handleUpdateFormData('coverImage', image)}
-                  existingImages={existingProject?.images}
+                  setLiveLink={(value) => handleUpdateFormData("liveLink", value)}
+                  thumbnail={formData.thumbnail}
+                  setThumbnail={(image) => handleUpdateFormData("thumbnail", image)}
+                  existingImages={formData.uploadedFiles.images?.url || existingProject?.images}
                   existingSynopsis={existingProject?.synopsis}
-                  existingSynopsisDoc={existingProject?.synopsisDoc}
-                  existingThumbnail={existingProject?.thumbnail}
-                />
+                  existingSynopsisDoc={formData.uploadedFiles.synopsisDoc?.url || existingProject?.synopsisDoc}
+                  existingThumbnail={formData.uploadedFiles.thumbnail?.url || existingProject?.thumbnail}
+                  projectId={projectId!}
+                  onFileUploaded={(type, url, key) => {
+                    setUploadedFiles((prev) => ({
+                      ...prev,
+                      [type]: { url, key },
+                    }))
+                    setPersistedFiles((prev) => ({
+                      ...prev,
+                      [type]: { url, key },
+                    }))
+                    if (type === "images") {
+                      setFormData((prev) => ({
+                        ...prev,
+                        images: [], // Clear the images array when new images are uploaded
+                      }))
+                    } else if (type === "synopsisDoc") {
+                      setFormData((prev) => ({
+                        ...prev,
+                        synopsisDoc: "", // Clear the synopsisPdf when a new one is uploaded
+                      }))
+                    } else if (type === "thumbnail") {
+                      console.log("Clearing coverImage");
+                      
+                      setFormData((prev) => ({
+                        ...prev,
+                        thumbnail: "", // Clear the coverImage when a new one is uploaded
+                      }))
+                    }
+                  } }
+                  repoStatuses={{}}
+                  persistedFiles={persistedFiles}
+                  onDeleteFile={(type) => {
+                    setPersistedFiles((prev) => ({
+                      ...prev,
+                      [type]: { url: "", key: "" },
+                    }))
+                  } }
+                  setPersistedFiles={setPersistedFiles}               />
               )}
               {currentStep === 3 && (
-                <div className="p-4 text-center">
-                  <ReviewStep formData={formData} />
-                </div>
+                <ReviewStep existingProject={projectDetails} onEdit={(step) => setCurrentStep(step)} />
               )}
             </div>
-
-            {errors.githubLinks && (
-              <div className="mt-4 text-red-500 text-sm">
-                {errors.githubLinks.map((error, index) => (
-                  <p key={index}>{error}</p>
-                ))}
-              </div>
-            )}
           </form>
         </div>
 
@@ -717,13 +802,9 @@ export function ProjectUploadModal({
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={isSubmitting || isTechUpdating || isFilesUploading || isCheckingRepo || isUpdating}
                 className="flex px-[32px] py-[10px] justify-center items-center gap-2 self-stretch bg-black text-white rounded-md hover:bg-gray-600 disabled:opacity-50"
               >
-                {(isSubmitting || isTechUpdating || isFilesUploading || isCheckingRepo || isUpdating) && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {isCheckingRepo ? 'Checking Repositories...' : 'Next'}
+                Next
               </button>
             )}
           </div>
@@ -731,15 +812,13 @@ export function ProjectUploadModal({
       </DialogContent>
 
       {isSuccessModalOpen && (
-        <SuccessModal 
+        <SuccessModal
           onClose={() => {
-            setIsSuccessModalOpen(false);
-          }} 
+            setIsSuccessModalOpen(false)
+          }}
           onRefresh={onSuccess}
         />
       )}
-    </Dialog>
+    </Dialog> 
   )
 }
-
-export default ProjectUploadModal

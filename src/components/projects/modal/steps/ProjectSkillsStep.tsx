@@ -14,22 +14,22 @@ interface ProjectSkillsStepProps {
   setSelectedSkills: React.Dispatch<React.SetStateAction<Skill[]>>;
 }
 
-const ProjectSkillsStep: React.FC<ProjectSkillsStepProps> = ({
-  selectedSkills,
-  setSelectedSkills,
-}) => {
-  return (
-    <div className="space-y-6">
-        
-        <SkillSelector
-          selectedSkills={selectedSkills}
-          setSelectedSkills={setSelectedSkills}
-          label="Pick Your Skills"
-          placeholder="Search for skills..."
-        />
+  const ProjectSkillsStep: React.FC<ProjectSkillsStepProps> = ({
+    selectedSkills,
+    setSelectedSkills,
+  }) => {
+    return (
+      <div className="space-y-6">
+          
+          <SkillSelector
+            selectedSkills={selectedSkills}
+            setSelectedSkills={setSelectedSkills}
+            label="Pick Your Skills"
+            placeholder="Search for skills..."
+          />
 
-    </div>
-  );
-};
+      </div>
+    );
+  };
 
 export default ProjectSkillsStep;

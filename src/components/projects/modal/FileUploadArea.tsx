@@ -5,7 +5,9 @@ interface FileUploadAreaProps {
   onFilesSelected: (files: FileList | null) => void;
   label: string;
   accept?: string;
+  className?: string; // Added className property
   children?: ReactNode;
+  multiple?: boolean;
 }
 
 const FileUploadArea: React.FC<FileUploadAreaProps> = ({
@@ -13,10 +15,11 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
   onFilesSelected,
   label,
   accept,
+  className, // Destructure className
   children,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:border-green-500 transition-colors relative">
+    <div className={`flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:border-green-500 transition-colors relative ${className}`}>
       <input
         type="file"
         id={id}
