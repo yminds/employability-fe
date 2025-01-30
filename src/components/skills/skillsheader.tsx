@@ -24,6 +24,8 @@ interface SkillsHeaderProps {
   onSkillsStatusChange: (isUpdated: boolean) => void;
   onGoalChange: (goalId: string) => void;
   selectedGoalExperienceLevel: string | null;
+  hideAddSkillsButton?:Boolean
+  onAddCreate?: () => void
 }
  
 const SkillsHeader: React.FC<SkillsHeaderProps> = ({
@@ -32,7 +34,9 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
   selectedGoalName,
   onSkillsStatusChange,
   onGoalChange,
-  selectedGoalExperienceLevel
+  selectedGoalExperienceLevel,
+  hideAddSkillsButton = false,
+  onAddCreate
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [skillsUpdated, setSkillsUpdated] = useState(false);
@@ -125,12 +129,21 @@ const SkillsHeader: React.FC<SkillsHeaderProps> = ({
               <span className="text-gray-500 italic">Loading...</span>
             )}
           </div>
-          <button
-            onClick={handleOpenModal}
-            className=" py-2 text-sm w-[138px] h-[44px] md:h[50px] md:w[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC] sm:hidden"
-          >
-            Add Skills
-          </button>
+          {hideAddSkillsButton ? (
+            <button
+              onClick={onAddCreate}
+              className="py-2 text-sm w-[138px] h-[44px] md:h-[50px] md:w-[150px] md:px-2 md:py-0.5 font-medium text-white bg-black rounded-md hover:bg-gray-600"
+            >
+              Add/Create
+            </button>
+          ) : (
+            <button
+              onClick={handleOpenModal}
+              className="py-2 text-sm w-[138px] h-[44px] md:h-[50px] md:w-[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
+            >
+              Add Skills
+            </button>
+          )}
         </div>
       </div>
  

@@ -2,7 +2,10 @@ import type React from "react";
 import { Github, GlobeLock, ImageIcon, FileText } from "lucide-react";
 import EditIcon from "../../../../assets/projects/edit.svg";
 import { useGetProjectQuery } from "@/api/projectApiSlice";
-import { useEffect } from "react";
+import {
+  extractFileNameFromUrl,
+  getFileType,
+} from "@/utils/projects/fileUtils";
 
 interface Skill {
   _id: string;
@@ -24,7 +27,7 @@ interface ReviewStepProps {
       synopsisDoc: string;
       synopsis: string;
     };
-  };
+  } | undefined;
   onEdit: (step: number) => void;
 }
 
@@ -35,29 +38,32 @@ type imageData =
   | string;
 
 const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
-  let i = 0;
-  // chnage console color to yellow
-  console.log(`%c rendering  ${++i} times`, "color: yellow;");
-
-  console.log("projectDetailsin review :", existingProject?.data);
-  const { data: projectInfo } = useGetProjectQuery(existingProject?.data._id, {
+  const { data: projectInfo } = useGetProjectQuery(existingProject?.data?._id ?? "", {
     refetchOnMountOrArgChange: true,
   });
 
-  //   useEffect(() => {
-  //     console.log('Component mounted, projectId:', existingProject?.data._id);
-  // }, [existingProject?.data._id])
   const projectDetails = projectInfo?.data;
 
-  console.log("projectDetailsin review :", projectInfo);
+  const renderFileIcon = (url: string) => {
+    const fileType = getFileType(url);
+    switch (fileType) {
+      case "image":
+        return <ImageIcon className="w-6 h-6 text-[#10b753]" />;
+      case "document":
+        return <FileText className="w-6 h-6 text-[#10b753]" />;
+      default:
+        return <FileText className="w-6 h-6 text-[#10b753]" />;
+    }
+  };
+
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
       {/* Project Details */}
       <div className="bg-white rounded-xl border border-black/10">
         <div className="p-4">
           <div className="flex justify-between items-start">
-            <div className="space-y-2 ">
+            <div className="space-y-2">
               <div className="text-gray-400 text-sm">Project Name</div>
               <div className="text-gray-900 text-base font-medium">
                 {projectDetails?.name}
@@ -85,10 +91,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
       </div>
 
       {/* Skills */}
-      <div className="h-[222px] px-5 pt-5 pb-6 bg-white rounded-xl border border-black/10 flex flex-col justify-start items-start gap-7">
-        <div className="h-[178px] flex flex-col justify-start items-start gap-6 w-full">
-          <div className="self-stretch h-[22px] flex justify-between items-start">
-            <div className="text-black text-base font-['Ubuntu'] font-medium leading-[22px]">
+      <div className="px-5 pt-5 pb-6 bg-white rounded-xl border border-black/10">
+        <div className="flex flex-col gap-6">
+          <div className="flex justify-between items-start">
+            <div className="text-black text-base font-['Ubuntu'] font-medium">
               Project Type & Tech Stack
             </div>
             <div
@@ -104,30 +110,19 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
             </div>
           </div>
 
-          <div className="flex flex-col justify-start items-start gap-2">
-            <div className="self-stretch text-[#8f9091] text-sm font-['SF Pro Display']">
-              Project Name
-            </div>
-            <div className="self-stretch text-[#1f2226] text-base font-medium font-['SF Pro Display']">
-              {projectDetails?.name}
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-start items-start gap-2">
-            <div className="self-stretch text-[#8f9091] text-sm font-['SF Pro Display']">
-              Tech Stack
-            </div>
-            <div className="self-stretch flex flex-wrap items-start gap-2">
-              {projectDetails?.tech.map((skill) => (
-                <div
-                  key={skill._id}
-                  className="px-4 py-1 bg-[#e6eeeb] rounded-[33px] border flex justify-center items-center"
-                >
-                  <div className="text-[#03963e] text-sm font-['SF Pro Display']">
-                    {skill.name}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <div className="text-[#8f9091] text-sm">Tech Stack</div>
+              <div className="flex flex-wrap gap-2">
+                {projectDetails?.tech.map((skill) => (
+                  <div
+                    key={skill._id}
+                    className="px-4 py-1 bg-[#e6eeeb] rounded-[33px] border"
+                  >
+                    <div className="text-[#03963e] text-sm">{skill.name}</div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -153,7 +148,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
         </div>
 
         <div className="w-full flex flex-col justify-start items-start gap-3">
-          {projectDetails?.githubLink.length > 0 ? (
+          {projectDetails?.githubLink && projectDetails?.githubLink.length > 0 ? (
             projectDetails?.githubLink.map((link, index) => (
               <div
                 key={index}
@@ -220,20 +215,17 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
 
           <div className="w-full flex flex-col justify-start items-start gap-3">
             <div className="w-full h-[50px] px-4 py-2 bg-white rounded-md border border-black/10 flex items-center gap-4">
-              <ImageIcon className="w-6 h-6 text-[#10b753]" />
+              {renderFileIcon(projectDetails.thumbnail)}
               <span className="text-[#10b753] text-base font-normal font-['SF Pro Display']">
-                {projectDetails.thumbnail
-                  ? projectDetails.thumbnail.split("/").pop()
-                  : "No cover image provided"}
+                {extractFileNameFromUrl(projectDetails.thumbnail)}
               </span>
             </div>
           </div>
         </div>
       )}
 
-      
       {/* Project Images */}
-      {projectDetails?.images && (
+      {projectDetails?.images && projectDetails.images.length > 0 && (
         <div className="w-full px-5 pt-5 pb-6 bg-white rounded-xl border border-black/10 flex flex-col justify-start items-start gap-7">
           <div className="self-stretch h-[22px] flex justify-between items-start">
             <div className="text-black text-base font-medium font-['Ubuntu']">
@@ -253,32 +245,34 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
           </div>
 
           <div className="w-full grid grid-cols-2 gap-4">
-            {(() => {
-              try {
-                const parsedImages = JSON.parse(projectDetails.images);
-                return parsedImages.map((image: imageData, index: number) => (
-                  <div key={index} className="w-full flex flex-col gap-2">
-                    <div className="w-full h-[50px] px-4 py-2 bg-white rounded-md border border-black/10 flex items-center gap-4">
-                      <ImageIcon className="w-6 h-6 text-[#10b753]" />
-                      <span className="text-[#10b753] text-base font-normal font-['SF Pro Display'] truncate">
-                        {typeof image === "string"
-                          ? image.split("/").pop()
-                          : image.name}
-                      </span>
-                    </div>
+            {Array.isArray(projectDetails.images) ? (
+              projectDetails.images.map((imageUrl: string, index: number) => (
+                <div key={index} className="w-full flex flex-col gap-2">
+                  <div className="w-full h-[50px] px-4 py-2 bg-white rounded-md border border-black/10 flex items-center gap-4">
+                    {renderFileIcon(imageUrl)}
+                    <span className="text-[#10b753] text-base font-normal font-['SF Pro Display'] truncate">
+                      {extractFileNameFromUrl(imageUrl)}
+                    </span>
                   </div>
-                ));
-              } catch (error) {
-                console.error("Error parsing images:", error);
-                return null;
-              }
-            })()}
+                </div>
+              ))
+            ) : (
+              // Handle the case where images is a single string
+              <div className="w-full flex flex-col gap-2">
+                <div className="w-full h-[50px] px-4 py-2 bg-white rounded-md border border-black/10 flex items-center gap-4">
+                  {renderFileIcon(projectDetails.images)}
+                  <span className="text-[#10b753] text-base font-normal font-['SF Pro Display'] truncate">
+                    {extractFileNameFromUrl(projectDetails.images)}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Synopsis PDF */}
-      {(projectDetails?.synopsisDoc || projectDetails?.synopsisDoc) && (
+      {(projectDetails?.synopsisDoc || projectDetails?.synopsis) && (
         <div className="w-full px-5 pt-5 pb-6 bg-white rounded-xl border border-black/10 flex flex-col justify-start items-start gap-7">
           <div className="self-stretch h-[22px] flex justify-between items-start">
             <div className="text-black text-base font-medium font-['Ubuntu']">
@@ -299,10 +293,11 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
 
           <div className="w-full flex flex-col justify-start items-start gap-3">
             <div className="w-full h-[50px] px-4 py-2 bg-white rounded-md border border-black/10 flex items-center gap-4">
-              <FileText className="w-6 h-6 text-[#10b753]" />
+              {projectDetails.synopsisDoc &&
+                renderFileIcon(projectDetails.synopsisDoc)}
               <span className="text-[#10b753] text-base font-normal font-['SF Pro Display']">
                 {projectDetails.synopsisDoc
-                  ? projectDetails.synopsisDoc.split("/").pop()
+                  ? extractFileNameFromUrl(projectDetails.synopsisDoc)
                   : "No synopsis document provided"}
               </span>
             </div>
@@ -310,6 +305,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
         </div>
       )}
     </div>
+    
   );
 };
 
