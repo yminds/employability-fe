@@ -24,8 +24,48 @@ export const resumeUploadApiSlice = createApi({
       },
     }),
     // Add more endpoints as needed
+
+    bulkUploadResumes: builder.mutation({
+      query: ({ files }) => {
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+          const element = files[i];
+          formData.append("resumes", element);
+        }
+        formData.append("name", "dilshad");
+        return {
+          url: "/api/v1/resume/bulkUpload-resumes",
+          method: "POST",
+          body: formData,
+        };
+      },
+      // invalidatesTags: ["Resumes" as any]
+    }),
+
+    getResumesParsedStatus: builder.query({
+      query: (uploadId) => ({
+        url: `/api/v1/resume/upload-status/${uploadId}`,
+        method: "GET",
+      }),
+      keepUnusedDataFor:0
+    }),
+    getAllResumes: builder.query({
+      query: () => ({
+        url: `/api/v1/resume/getAll-resumes`,
+        method: "GET",
+      }),
+      keepUnusedDataFor:0
+    }),
+
+    getSingleResume: builder.query({
+      query: (resumeId) => ({
+        url: `/api/v1/resume/getResume/${resumeId}`,
+        method: "GET",
+      }),
+      keepUnusedDataFor:0
+    }),
   }),
-  
 });
 
-export const { useUploadResumeMutation } = resumeUploadApiSlice;
+export const { useUploadResumeMutation, useBulkUploadResumesMutation,useGetResumesParsedStatusQuery,useGetAllResumesQuery,useGetSingleResumeQuery } =
+  resumeUploadApiSlice;

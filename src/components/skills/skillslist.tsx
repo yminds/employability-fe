@@ -13,7 +13,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import search from '@/assets/skills/search.svg';
 import AddSkillsModal from './addskills';
 
-interface SkillPoolId {
+export interface SkillPoolId {
   _id: string;
   name: string;
   icon?: string;
@@ -192,7 +192,7 @@ const SkillList: React.FC<SkillListProps> = ({
     };
 
     return (
-      <div className="flex gap-1 items-center mb-4 sm:max-w-[100%] sm:flex sm:flex-col-reverse sm:items-start md:items-start">
+      <div className="flex gap-1 items-center mb-4 sm:max-w-[100%] sm:flex sm:flex-col-reverse sm:items-start md:items-start sm:gap-5">
         <div className="sm:flex h-[46px]">
           {categories.map((category) => (
             <button

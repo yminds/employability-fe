@@ -94,9 +94,10 @@ export const uploadResume = createAsyncThunk(
         throw new Error(data.error || "Failed to upload resume");
       }
 
+
       // Return the parsed data from the backend
       // console.log(data.parsedData);
-      return data.parsedData;
+      return data;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }

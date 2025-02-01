@@ -22,11 +22,9 @@ import { cn } from "@/lib/utils";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-import plusicon from "@/assets/skills/add_icon.png";
 import icon from "@/assets/skills/icon.svg";
 import addicon from "@/assets/skills/add_circle.svg";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice";
 
 interface Skill {
   skill_Id: string;
@@ -234,7 +232,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         }
       }}
     >
-      <DialogContent className="bg-white rounded-lg p-[42px] w-full gap-2 max-w-2xl max-h-[98vh]">
+      <DialogContent className="bg-white rounded-lg p-[42px] sm:p-[24px] w-full gap-2 max-w-2xl max-h-[98vh]">
         <DialogHeader className="flex justify-between items-start max-h-[54px] mb-6">
           <div className=" flex flex-col items-start">
             <DialogTitle className="text-xl font-bold">Add Skills</DialogTitle>
@@ -300,7 +298,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 
         <div
           ref={skillsRef}
-          className="max-h-[354px] xl:max-h-[236px] overflow-y-auto space-y-4 snap-y p-1 snap-proximity minimal-scrollbar"
+          className="max-h-[354px] xl:max-h-[236px] sm:max-h-[395px] overflow-y-auto space-y-4 snap-y p-1 snap-proximity minimal-scrollbar"
         >
           {skills.map((skill, index) => (
             <div
@@ -308,7 +306,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
               className="bg-gray-50 rounded-lg border p-4 snap-start m-1"
             >
               <div className="grid grid-cols-3 gap-4 relative">
-                <div>
+                <div className="sm:grid sm:col-span-3">
                   <label className="text-sm font-medium mb-2 block">
                     Skill {index + 1}
                   </label>
@@ -402,7 +400,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   )}
                 </div>
 
-                <div>
+                <div >
                   <label className="text-sm font-medium mb-2 block">
                     Self rating
                   </label>
@@ -477,7 +475,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                     </Popover>
                   )}
                 </div>
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-sm font-medium mb-2 block">
                     Skill level
                   </label>

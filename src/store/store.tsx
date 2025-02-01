@@ -42,7 +42,7 @@ const rootReducer = combineReducers({
   [educationApiSlice.reducerPath]: educationApiSlice.reducer, // Added education reducer
   [experienceApiSlice.reducerPath]: experienceApiSlice.reducer,
   [certificationsApiSlice.reducerPath]: certificationsApiSlice.reducer,
-  [projectApiSlice.reducerPath] : projectApiSlice.reducer,
+  // [projectApiSlice.reducerPath] : projectApiSlice.reducer,
   [resumeUploadApiSlice.reducerPath]:resumeUploadApiSlice.reducer,
   auth: authReducer,
   goals: goalReducer,
@@ -79,7 +79,7 @@ export const store = configureStore({
       educationApiSlice.middleware, // Added education middleware
       experienceApiSlice.middleware,
       certificationsApiSlice.middleware,
-      projectApiSlice.middleware,
+      // projectApiSlice.middleware,
       errorMiddleware
     ),
   devTools: true,

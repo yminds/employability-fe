@@ -44,7 +44,7 @@ const Dashboard: React.FC<Props> = () => {
       <main className="h-screen overflow-y-auto minimal-scrollbar font-ubuntu ">
         <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
-            {goalsData?.data.length > 0 ? (
+            {goalsData?.data && goalsData.data.length > 0 ? (
               <main>
                 <header className="mb-7">
                   <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight flex items-center gap-3">
@@ -87,7 +87,7 @@ const Dashboard: React.FC<Props> = () => {
 
                     {/* Skills */}
                     <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      <SkillList isDashboard={true} goalId={goalId} />
+                      <SkillList isDashboard={true} goalId={goalId} onSkillsUpdate={()=>{}} isSkillsUpdated={false} goals={goalsData}/>
                     </section>
 
                     <EmployabilityBannerSection

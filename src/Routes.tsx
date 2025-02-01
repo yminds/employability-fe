@@ -19,7 +19,6 @@ import Login from "./pages/LoginPage.tsx";
 import UserProfilePage from "./pages/UserProfilePage.tsx";
 import Skills from "./pages/SkillsPage.tsx";
 import SkillDetailPage from "./pages/SkillDetailPage.tsx";
-import SelectedSkill from "@/components/skills/selectedskill.tsx";
 import SignupForm from "./pages/SignUpPage.tsx";
 import ProjectsPage from "./pages/ProjectsPage.tsx";
 import JobsPage from "./pages/JobsPage.tsx";
@@ -29,6 +28,9 @@ import GitHubCallback from "./features/authentication/GithubCallback.tsx";
 import ExperienceLevel from "./pages/SetExperience.tsx";
 import AddPhone from "./pages/AddPhoneNumber.tsx";
 import Example from "./features/cap/Example.tsx";
+import Mentor from "./pages/Mentor.tsx";
+import Canidates from "./pages/Canidates.tsx";
+import Candidate from "./pages/Candidate.tsx";
 
 interface RouteConfig {
   route: string;
@@ -92,11 +94,6 @@ export const routes: RouteConfig[] = [
     roles: ["CANDIDATE"],
   },
   {
-    route: "/skills/suggestedskills/:id",
-    component: <SelectedSkill skill={""} icon={""} description={""} />,
-    roles: ["CANDIDATE"],
-  },
-  {
     route: "*",
     component: <NotFound />,
   },
@@ -119,6 +116,18 @@ export const routes: RouteConfig[] = [
   {
     route: "/project-listing",
     component: <ProjectListing />,
+  },
+  {
+    route: "/mentor/learn/:id",
+    component: <Mentor />
+  },
+  {
+    route: "/candidates",
+    component: <Canidates />,
+  },
+  {
+    route: "/candidates/:id",
+    component: <Candidate />,
   },
 ];
 
