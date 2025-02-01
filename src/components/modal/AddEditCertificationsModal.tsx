@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import CertificationsForm from "../forms/certification-form";
 import type { Certification } from "@/features/profile/types";
 import { toast } from "sonner";
+import { validateCertifications } from "@/features/profile/validation/validateCertification";
 
 interface AddEditCertificationsModalProps {
   isOpen: boolean;
@@ -92,33 +93,10 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-    let isValid = true;
-
-    certifications.forEach((cert, index) => {
-      if (!cert.title.trim()) {
-        newErrors[`certifications.${index}.title`] = "Title is required";
-        isValid = false;
-      }
-      if (!cert.issued_by.trim()) {
-        newErrors[`certifications.${index}.issued_by`] = "Issuer is required";
-        isValid = false;
-      }
-      if (!cert.issue_date) {
-        newErrors[`certifications.${index}.issue_date`] =
-          "Issue date is required";
-        isValid = false;
-      }
-      if (!cert.certificate_s3_url.trim()) {
-        newErrors[`certifications.${index}.certificate_s3_url`] =
-          "Certificate URL is required";
-        isValid = false;
-      }
-    });
-
+    const newErrors = validateCertifications(certifications);
     setErrors(newErrors);
     setTimeout(() => setErrors({}), 2000);
-    return isValid;
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
@@ -129,6 +107,9 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
     try {
       setIsSaving(true);
 
+      let addedCount = 0;
+      let updatedCount = 0;
+
       await Promise.all(
         certifications.map(async (cert) => {
           if (cert._id) {
@@ -136,16 +117,30 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
               id: cert._id,
               updatedCertification: cert,
             }).unwrap();
-            toast.success("Certification entry updated successfully");
+            updatedCount++;
           } else {
             await addCertification({
               ...cert,
               user_id: user._id,
             }).unwrap();
-            toast.success("New certification entry added successfully");
+            addedCount++;
           }
         })
       );
+
+      if (addedCount > 0) {
+        toast.success(
+          `${addedCount} certificate ${
+            addedCount === 1 ? "entry" : "entries"
+          } added successfully`
+        );
+      } else if (updatedCount > 0) {
+        toast.success(
+          `Certificate ${
+            updatedCount === 1 ? "entry" : "entries"
+          } updated successfully`
+        );
+      }
 
       onClose();
     } catch (error) {

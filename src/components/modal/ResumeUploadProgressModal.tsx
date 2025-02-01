@@ -1,84 +1,128 @@
-import { X } from 'lucide-react'
-
+import { Loader2, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import pdfIcon from "@/assets/profile/pdfIcon.svg";
 
 interface ResumeUploadProgressModalProps {
-  onClose: () => void
-  onContinue: ()=> void
-  fileName: any
-  fileSize: any
-  uploadProgress: number
-  isUploading: any
+  isOpen: boolean;
+  onClose: () => void;
+  onContinue: () => Promise<void>;
+  fileName: string;
+  fileSize: string;
+  uploadProgress: number;
+  isUploading: boolean;
+  onRemove: () => Promise<void>;
+  uploadType: "resume" | "linkedin";
 }
 
 export default function ResumeUploadProgressModal({
+  isOpen,
   onClose,
   onContinue,
   fileName,
   fileSize,
   uploadProgress,
-  isUploading
+  isUploading,
+  onRemove,
+  uploadType,
 }: ResumeUploadProgressModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRemove = async () => {
+    await onRemove();
+  };
+
+  const handleContinue = async () => {
+    setIsLoading(true);
+    try {
+      await onContinue();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg p-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-semibold">Upload your Resume</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-white rounded-lg max-w-2xl p-[42px] flex flex-col justify-center">
+        <DialogHeader className="w-full flex justify-between items-start">
+          <DialogTitle className="text-black text-[20px] font-medium leading-[26px] tracking-[-0.2px] font-ubuntu mb-6">
+            {uploadType === "resume"
+              ? "Upload your Resume"
+              : "Upload your LinkedIn Profile"}
+          </DialogTitle>
+        </DialogHeader>
 
         {/* Upload Progress Container */}
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-[#F0F5F3] rounded-lg p-4">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               {/* PDF Icon */}
-              <div className="w-10 h-10 bg-red-100 rounded flex items-center justify-center">
-                <span className="text-red-700 text-sm font-medium">PDF</span>
+              <div className="w-10 h-10 bg-[#fff] rounded flex items-center justify-center">
+                <img src={pdfIcon} alt="" />
               </div>
               {/* File Details */}
               <div>
-                <p className="font-medium text-gray-900">{fileName}</p>
-                <p className="text-sm text-gray-500">{fileSize}</p>
+                <p className="font-medium text-md text-[#0C0F12] leading-[24px] tracking-[0.24px]">
+                  {fileName}
+                </p>
+                <p className="text-sm text-[#909091]">{fileSize}</p>
               </div>
             </div>
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+            {/* Remove Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRemove}
               aria-label="Remove file"
             >
-              <X className="w-5 h-5" />
-            </button>
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div
-              className="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            />
+          {/* Progress Bar and Percentage Container */}
+          <div className="flex items-center gap-4">
+            {/* Progress Bar */}
+            <div className="flex-1 bg-[#D6D7D9] rounded-full h-1">
+              <div
+                className="bg-[#2EE578] h-1 rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+            {/* Progress Percentage */}
+            <span className="text-[#414447] font-ubuntu text-sm font-medium">
+              {uploadProgress}%
+            </span>
           </div>
-          {/* Progress Percentage */}
-          <p className="text-right text-sm text-gray-600 mt-1">
-            {uploadProgress}%
-          </p>
         </div>
 
         {/* Footer */}
         <div className="flex justify-end mt-6">
-          <button
-            className="px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-900 transition-colors"
+          <Button
+            className="h-[44px] flex justify-center items-center gap-2 px-8 py-4 
+            bg-[#062549] text-white font-medium rounded-[4px] 
+            hover:bg-[#083264] transition-colors duration-200 ease-in-out"
+            style={{
+              boxShadow: "0px 10px 16px -2px rgba(6, 90, 216, 0.15)",
+            }}
+            onClick={handleContinue}
+            disabled={isUploading || uploadProgress < 100 || isLoading}
           >
-            Continue
-          </button>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Continue"
+            )}
+          </Button>
         </div>
-      </div>
-    </div>
-  )
+      </DialogContent>
+    </Dialog>
+  );
 }
-

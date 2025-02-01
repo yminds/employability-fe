@@ -1,20 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { uploadResume } from "@/store/slices/resumeSlice";
+import { resetResumeState, uploadResume } from "@/store/slices/resumeSlice";
 import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
 import { X, Upload } from "lucide-react";
 import { ProfileFormData } from "@/features/profile/types";
+import axios from "axios";
+import { updateUserProfile } from "@/features/authentication/authSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+//Images
+import VectorFile from "@/assets/profile/completeprofile/file.svg";
+import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
 
 interface ResumeUploadModalProps {
+  isOpen: boolean;
   onClose: () => void;
   onUpload: () => void;
   userId: string;
 }
 
 const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
+  isOpen,
   onClose,
   userId,
 }) => {
@@ -25,7 +39,13 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
     file?: File;
     progress: number;
   }>({ progress: 0 });
+  const [uploadResume] = useUploadResumeMutation();
+  const [parsingError, setParsingError] = useState<string | null>(null);
+  const [resume, setResume] = useState({
+    resumeUrl: "",
+  });
   const [showCompleteProfile, setShowCompleteProfile] = useState(false);
+  const [parsedData, setParsedData] = useState(null);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -70,26 +90,27 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
 
     try {
       // First dispatch the Redux action to handle resume parsing
-      await dispatch(uploadResume({ file, userId })).unwrap();
+      // await dispatch(uploadResume({ file, userId })).unwrap();
 
       // Then make the S3 upload call using FormData
       const formData = new FormData();
-      formData.append("file", file); // This will be req.file in controller
+      formData.append("files", file); // This will be req.file in controller
       formData.append("userId", userId); // This will be req.body.userId
       formData.append("folder", "resume"); // This will be req.body.fileType
       formData.append("name", file.name); // This will be req.body.name
 
-      const s3Response = await fetch("http://localhost:3000/api/v1/s3/upload", {
+      const s3Response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`, {
         method: "POST",
         body: formData, // Don't set Content-Type header, browser will set it
       });
 
-      console.log("S3 response", s3Response);
-      
-
       if (!s3Response.ok) {
         throw new Error("Failed to upload to S3");
       }
+
+      const result = await s3Response.json();
+
+      setResume({ resumeUrl: result.data[0].fileUrl });
 
       // Smoothly complete progress to 100% after both operations are done
       setUploadState((prev) => ({ ...prev, progress: 100 }));
@@ -98,6 +119,59 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       setUploadState((prev) => ({ ...prev, progress: 0 }));
     } finally {
       clearInterval(simulatedProgress);
+    }
+  };
+
+  const removeFile = async () => {
+    try {
+      if (resume.resumeUrl && userId) {
+        const bucketBaseUrl =
+          "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
+        const key = resume.resumeUrl.replace(bucketBaseUrl, "");
+        console.log("Deleting image with key:", key, "for user:", userId);
+        const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            key,
+            userId: userId,
+            folder: "resume",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete file from S3");
+        }
+      }
+
+      setResume({ resumeUrl: "" });
+      setUploadState(() => ({ progress: 0 }));
+    } catch (error) {
+      console.error("Error removing file:", error);
+    }
+  };
+
+  const handleContinue = async () => {
+    if (uploadState.file) {
+      try {
+        const formData = new FormData();
+        formData.append("resume", uploadState.file);
+        formData.append("userId", userId);
+
+        const response = await uploadResume({ file: uploadState.file, userId });
+        const parsedData = response.data
+        setParsedData(parsedData.data.parsedData);
+        console.log("Parsed Data", parsedData);
+
+        // dispatch(updateUserProfile({ parsedData: parsedData.data.parsedData }));
+        dispatch(resetResumeState({parsedData: parsedData.data.parsedData}))
+
+        setShowCompleteProfile(true);
+      } catch (error) {
+        console.error("Error parsing resume:", error);
+      }
     }
   };
 
@@ -119,6 +193,8 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
         onClose={onClose}
         userId={userId}
         onSave={() => console.log("")}
+        parsedData={parsedData}
+        isParsed={true}
       />
     );
   }
@@ -126,45 +202,61 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
   if (uploadState.file) {
     return (
       <ResumeUploadProgressModal
+        isOpen={isOpen}
         onClose={onClose}
         fileName={uploadState.file.name}
         fileSize={`${(uploadState.file.size / (1024 * 1024)).toFixed(2)} MB`}
         uploadProgress={uploadState.progress}
         isUploading={uploading}
-        onContinue={function (): void {
-          throw new Error("Function not implemented.");
-        }}
+        onContinue={handleContinue}
+        onRemove={removeFile}
+        uploadType="resume"
       />
     );
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-semibold">Upload your Resume</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="bg-white rounded-lg max-w-2xl p-[42px] flex flex-col justify-center">
+        <DialogHeader className="w-full flex justify-between items-start">
+          <DialogTitle className="text-black text-[20px] font-medium leading-[26px] tracking-[-0.2px] font-ubuntu mb-2">
+            Upload your Resume
+          </DialogTitle>
+        </DialogHeader>
         <div
-          className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center ${
-            dragActive ? "border-blue-500 bg-blue-50" : "border-blue-200"
+          className={`flex flex-col justify-center items-center h-[222px] gap-4 self-stretch rounded-[13px] border border-dashed border-[#909091] ${
+            dragActive ? "border-blue-500 bg-blue-50" : ""
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          <p className="text-gray-600 text-center mb-2">
-            Drag and drop a PDF, or
+          <div className="relative mb-4">
+            <img
+              src={VectorFile || "/placeholder.svg"}
+              alt="Upload"
+              className="w-16 h-16 opacity-80"
+            />
+            <div className="absolute -bottom-2 -right-2 bg-[#10b754] rounded-full p-2">
+              <img
+                src={UploadFileArrow || "/placeholder.svg"}
+                alt="Upload arrow"
+                className="w-4 h-4"
+              />
+            </div>
+          </div>
+          <p className="text-[#000] text-center font-sf-pro text-[15px] font-normal leading-[24px] tracking-[0.21px]">
+            Drag and drop a pdf or
           </p>
-          <label className="text-emerald-600 hover:text-emerald-700 cursor-pointer">
+          <label className="text-[#03963F] font-sf-pro text-[14px] font-normal leading-[24px] tracking-[0.21px] underline underline-offset-2 cursor-pointer hover:text-[#03963F]/90">
             Select from files
             <input
               type="file"
@@ -174,8 +266,8 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
             />
           </label>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

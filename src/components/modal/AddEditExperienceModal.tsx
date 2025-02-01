@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import ExperienceForm from "@/features/profile/forms/experience-form";
 import type { ExperienceItem } from "@/features/profile/types";
 import { toast } from "sonner";
+import { validateExperience } from "@/features/profile/validation/validateExperience";
 
 interface AddEditExperienceModalProps {
   isOpen: boolean;
@@ -56,6 +57,8 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
                 company: "",
                 isVerified: false,
                 companyLogo: "",
+                current_ctc: 0,
+                expected_ctc: 0,
               },
             ]
           : initialExperience
@@ -82,17 +85,18 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
       company: "",
       isVerified: false,
       companyLogo: "",
+      current_ctc: 0,
+      expected_ctc: 0,
     };
     setExperience([...experience, newExperience]);
   };
 
   const handleDeleteExperience = async (index: number) => {
-
     const experienceToDelete = experience[index];
     if (experienceToDelete._id) {
       try {
         await deleteExperience(experienceToDelete._id).unwrap();
-        toast.success("Experience entry delete successfully")
+        toast.success("Experience entry delete successfully");
       } catch (error) {
         console.error("Failed to delete experience:", error);
         setErrors({ ...errors, delete: "Failed to delete experience" });
@@ -105,46 +109,10 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-    let isValid = true;
-
-    experience.forEach((exp, index) => {
-      if (!exp.title.trim()) {
-        newErrors[`experience.${index}.title`] = "Job title is required";
-        isValid = false;
-      }
-      if (!exp.employment_type) {
-        newErrors[`experience.${index}.employment_type`] =
-          "Employment type is required";
-        isValid = false;
-      }
-      if (!exp.company.trim()) {
-        newErrors[`experience.${index}.company`] = "Company name is required";
-        isValid = false;
-      }
-      if (!exp.location.trim()) {
-        newErrors[`experience.${index}.location`] = "Location is required";
-        isValid = false;
-      }
-      if (!exp.start_date) {
-        newErrors[`experience.${index}.state_date`] = "Start date is required";
-        isValid = false;
-      }
-      if (!exp.currently_working && !exp.end_date) {
-        newErrors[`experience.${index}.end_date`] =
-          "End date is required when not currently working";
-        isValid = false;
-      }
-      if (!exp.description.trim()) {
-        newErrors[`experience.${index}.description`] =
-          "Description is required";
-        isValid = false;
-      }
-    });
-
+    const newErrors = validateExperience(experience);
     setErrors(newErrors);
     setTimeout(() => setErrors({}), 2000);
-    return isValid;
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
@@ -154,6 +122,9 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
 
     try {
       setIsSaving(true);
+
+      let addedCount = 0;
+      let updatedCount = 0;
 
       await Promise.all(
         experience.map(async (exp) => {
@@ -167,6 +138,8 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
             end_date: exp.currently_working ? null : exp.end_date,
             currently_working: exp.currently_working,
             description: exp.description,
+            current_ctc: exp.current_ctc,
+            expected_ctc: exp.expected_ctc,
           };
 
           if (exp._id) {
@@ -174,13 +147,27 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
               id: exp._id,
               updatedExperience: experienceData,
             }).unwrap();
-            toast.success("Experience entry updated successfully");
+            updatedCount++;
           } else {
             await addExperience(experienceData).unwrap();
-            toast.success("New experience entry added successfully");
+            addedCount++;
           }
         })
       );
+
+      if (addedCount > 0) {
+        toast.success(
+          `${addedCount} experience ${
+            addedCount === 1 ? "entry" : "entries"
+          } added successfully`
+        );
+      } else if (updatedCount > 0) {
+        toast.success(
+          `Experience ${
+            updatedCount === 1 ? "entry" : "entries"
+          } updated successfully`
+        );
+      }
 
       onClose();
     } catch (error) {

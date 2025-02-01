@@ -120,7 +120,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   const handleLearn = () => {
-    navigate(`/mentor/${skillId}`, { state: { skill } });
+    navigate(`/mentor/learn/${skillId}`, { state: { skill, skillId, skillPoolId } });
   };
 
   const handleVerifySkill = async () => {
@@ -273,7 +273,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
         </div>
       </div>
 
-      <div className="group relative sm:flex flex-wrap bg-white p-4 rounded-md transition hidden">
+      <div className="group relative sm:flex flex-wrap bg-white rounded-md transition hidden">
         {/* Delete Button */}
         {!isMandatory && onDelete && (
           <button
