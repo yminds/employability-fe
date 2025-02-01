@@ -29,6 +29,7 @@ import GitHubCallback from "./features/authentication/GithubCallback.tsx";
 import ExperienceLevel from "./pages/SetExperience.tsx";
 import AddPhone from "./pages/AddPhoneNumber.tsx";
 import Example from "./features/cap/Example.tsx";
+import Canidates from "./pages/Canidates.tsx";
 
 interface RouteConfig {
   route: string;
@@ -119,6 +120,10 @@ export const routes: RouteConfig[] = [
   {
     route: "/project-listing",
     component: <ProjectListing />,
+  },
+  {
+    route: "/canidates",
+    component: <Canidates />,
   },
 ];
 
