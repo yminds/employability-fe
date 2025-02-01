@@ -869,7 +869,7 @@ export function ProjectUploadModal({
         onOpenChange(isOpen);
       }}
     >
-      <DialogContent className="!p-8 !pb-10 w-[700px] !max-w-[700px] min-h-[615px] max-h-[90vh] flex flex-col">
+      <DialogContent className="!p-8 !pb-10 w-[700px] !max-w-[700px] min-h-[615px] max-h-[90vh] flex flex-col rounded-2xl">
         <DialogHeader className="text-left !p-0 !m-0">
           <DialogTitle className="text-xl font-semibold">
             {STEPS[currentStep]}

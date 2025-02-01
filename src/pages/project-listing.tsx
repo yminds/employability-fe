@@ -1,51 +1,93 @@
-import React, { useEffect, useState } from "react";
-import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store/store";
-import ProjectCard from "@/components/projects/ProjectCard";
-import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
-import { ProjectUploadModal } from "@/components/projects/modal/ProjectUploadModal";
-import ProjectDeleteModal from "@/components/projects/modal/ProjectDeleteModal";
-import SkillsHeader from "@/components/skills/skillsheader";
-import ProjectInsights from "@/components/projects/ProjectInsights";
-import { useNavigate } from "react-router-dom";
-import arrow from "@/assets/skills/arrow.svg";
+import type React from "react"
+import { useEffect, useState } from "react"
+import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice"
+import { useSelector } from "react-redux"
+import type { RootState } from "@/store/store"
+import ProjectCard, { ProjectCardSkeleton } from "@/components/projects/ProjectCard"
+import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice"
+import { ProjectUploadModal } from "@/components/projects/modal/ProjectUploadModal"
+import ProjectDeleteModal from "@/components/projects/modal/ProjectDeleteModal"
+import SkillsHeader from "@/components/skills/skillsheader"
+import ProjectInsights from "@/components/projects/ProjectInsights"
+import { useNavigate } from "react-router-dom"
+import arrow from "@/assets/skills/arrow.svg"
+import Skeleton from "react-loading-skeleton"
+import "react-loading-skeleton/dist/skeleton.css"
 
 
+// Update Project interface
 interface Project {
-  _id: string;
-  name: string;
-  description: string;
-  tech: Array<{
-    _id: string;
-    name: string;
-    description: string;
-  }>;
-  githubLink: string[];
-  liveLink: string;
-  thumbnail?: { url: string; fileName: string };
-  images?: Array<{ url: string; fileName: string }>;
-  synopsisDoc?: { url: string; fileName: string };
-  status: "Incomplete" | "In-review" | "Unverified" | "Verified";
-  score?: number;
-  lastCompletedStep?: number;
+  _id: string
+  name: string
+  description: string
+  tech: {
+    _id: string
+    name: string
+    icon: string
+  }[]
+  githubLink: string[]
+  liveLink: string
+  thumbnail?: string // Changed from object to string
+  images?: string  // Changed from array of objects to string array
+  synopsisDoc?: string // Changed from object to string
+  synopsis?: string
+  status: string
+  score?: number
+  lastCompletedStep?: number
 }
 
+
+
+
+export const ProjectListingSkeleton: React.FC = () => {
+  return (
+    <div className="w-full h-screen overflow-hidden bg-[#F5F5F5]">
+      <div className="h-full flex justify-center">
+        <div className="w-full flex gap-6 p-6">
+          <div className="flex-[7] flex flex-col h-full">
+            <div className="flex justify-between items-center mb-4 sm:mt-3">
+              <div className="flex items-center space-x-2 gap-3">
+                <Skeleton circle width={30} height={30} />
+                <Skeleton width={100} height={26} />
+              </div>
+            </div>
+            
+            <div className="sticky top-0 bg-[#F5F5F5] z-10">
+              <Skeleton height={50} />
+            </div>
+
+            <div className="mt-[70px] sm:min-w-[100%] sm:mt-4 overflow-y-auto scrollbar-hide">
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <ProjectCardSkeleton key={index} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-[3] w-full space-y-4">
+            <div className="flex flex-col gap-6 sticky top-[70px]">
+              <Skeleton height={400} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ProjectListing: React.FC = () => {
-  const navigate = useNavigate();
-  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [skillsUpdated, setSkillsUpdated] = useState(false);
+  const navigate = useNavigate()
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [skillsUpdated, setSkillsUpdated] = useState(false)
 
-  const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const userId = useSelector((state: RootState) => state.auth.user?._id)
 
-  const { data: goalData } = useGetGoalsbyuserQuery(userId);
-
-  console.log("goalDetails",goalData?.data)
-
+  const { data: goalData } = useGetGoalsbyuserQuery(userId)
   const goalDetails = goalData?.data
 
   const {
@@ -53,67 +95,67 @@ const ProjectListing: React.FC = () => {
     isLoading: projectsLoading,
     error: projectsError,
     refetch: refetchProjects,
-  } = useGetProjectsByUserIdQuery(userId ?? "");
+  } = useGetProjectsByUserIdQuery(userId ?? "")
 
   useEffect(() => {
     if (goalData?.data?.length && selectedGoalId === null) {
-      setSelectedGoalId(goalData.data[0]._id);
+      setSelectedGoalId(goalData.data[0]._id)
     }
-  }, [goalData, selectedGoalId]);
+  }, [goalData, selectedGoalId])
 
   const handleOpenUploadModal = (project?: Project) => {
-    if (project) {
-      setSelectedProject(project);
-    } else {
-      setSelectedProject(null);
-    }
-    setIsModalOpen(true);
-  };
+    setSelectedProject(project || null)
+    setIsModalOpen(true)
+  }
 
   const handleCloseModal = async () => {
-    setIsModalOpen(false);
-    setSelectedProject(null);
-    await refetchProjects();
-  };
+    setIsModalOpen(false)
+    setSelectedProject(null)
+    await refetchProjects()
+  }
 
   const handleOpenDeleteModal = (projectId: string) => {
-    setProjectToDelete(projectId);
-    setIsDeleteModalOpen(true);
-  };
+    setProjectToDelete(projectId)
+    setIsDeleteModalOpen(true)
+  }
 
   const handleCloseDeleteModal = async () => {
-    setProjectToDelete(null);
-    setIsDeleteModalOpen(false);
-    await refetchProjects();
-  };
+    setProjectToDelete(null)
+    setIsDeleteModalOpen(false)
+    await refetchProjects()
+  }
 
   const handleSkillsStatusChange = (isUpdated: boolean) => {
-    setSkillsUpdated(isUpdated);
-  };
+    setSkillsUpdated(isUpdated)
+  }
 
   const handleGoalChange = (goalId: string) => {
-    setSelectedGoalId(goalId);
-  };
+    setSelectedGoalId(goalId)
+  }
 
   const handleBackToDashboard = () => {
-    navigate("/");
-  };
+    navigate("/")
+  }
 
-  const selectedGoalName = goalData?.data.find((goal) => goal._id === selectedGoalId)?.name || "";
-  const selectedGoalExperience = goalData?.data.find((goal) => goal._id === selectedGoalId)?.experience || null;
+  if (projectsLoading) {
+    return <ProjectListingSkeleton />
+  }
+
+  const selectedGoal = goalData?.data.find((goal) => goal._id === selectedGoalId)
+  const selectedGoalName = selectedGoal?.name || ""
+  const selectedGoalExperience = selectedGoal?.experience || null
 
   return (
     <div className="w-full h-screen overflow-hidden bg-[#F5F5F5]">
-      {/* Modals */}
       <ProjectUploadModal
         open={isModalOpen}
         onOpenChange={handleCloseModal}
-        selectedGoalId={selectedGoalId}
+        selectedGoalId={selectedGoalId || ""}
         existingProject={selectedProject}
         onSuccess={async () => {
-          await refetchProjects();
-          setIsModalOpen(false);
-          setSelectedProject(null);
+          await refetchProjects()
+          setIsModalOpen(false)
+          setSelectedProject(null)
         }}
       />
 
@@ -123,19 +165,16 @@ const ProjectListing: React.FC = () => {
           onOpenChange={handleCloseDeleteModal}
           projectId={projectToDelete}
           onSuccess={async () => {
-            await refetchProjects();
-            setIsDeleteModalOpen(false);
-            setProjectToDelete(null);
+            await refetchProjects()
+            setIsDeleteModalOpen(false)
+            setProjectToDelete(null)
           }}
         />
       )}
 
-      {/* Main Content */}
       <div className="h-full flex justify-center">
         <div className="w-full flex gap-6 p-6">
-          {/* Left Section - Projects List */}
           <div className="flex-[7] flex flex-col h-full">
-            {/* Header with Back Button and Title */}
             <div className="flex justify-between items-center mb-4 sm:mt-3">
               <div className="flex items-center space-x-2 gap-3">
                 <button
@@ -150,26 +189,26 @@ const ProjectListing: React.FC = () => {
               </div>
             </div>
 
-            {/* Goal Selection and Add Project Button */}
-            <div className="sticky top-0 bg-[#F5F5F5]  z-10">
-              <SkillsHeader
-                userId={userId}
-                goals={goalData}
-                selectedGoalName={selectedGoalName}
-                onSkillsStatusChange={handleSkillsStatusChange}
-                onGoalChange={handleGoalChange}
-                selectedGoalExperienceLevel={selectedGoalExperience}
-                hideAddSkillsButton={true}
-                onAddCreate={() => handleOpenUploadModal()}
-              />
+            <div className="sticky top-0 bg-[#F5F5F5] z-10">
+              {goalData ? (
+                <SkillsHeader
+                  userId={userId}
+                  goals={goalData}
+                  selectedGoalName={selectedGoalName}
+                  onSkillsStatusChange={handleSkillsStatusChange}
+                  onGoalChange={handleGoalChange}
+                  selectedGoalExperienceLevel={selectedGoalExperience}
+                  hideAddSkillsButton={true}
+                  onAddCreate={() => handleOpenUploadModal()}
+                />
+              ) : (
+                <Skeleton height={50} />
+              )}
             </div>
 
-            {/* Scrollable Projects List */}
-            <div className="mt-[70px] sm:min-w-[100%] sm:mt-4  overflow-y-auto scrollbar-hide">
+            <div className="mt-[70px] sm:min-w-[100%] sm:mt-4 overflow-y-auto scrollbar-hide">
               <div className="space-y-4">
-                {projectsLoading ? (
-                  <div className="text-center text-gray-500 py-4">Loading projects...</div>
-                ) : projectsError ? (
+                {projectsError ? (
                   <div className="text-center text-red-500 py-4">Error loading projects</div>
                 ) : projectsData?.data.length === 0 ? (
                   <div className="text-center text-gray-500 py-4">
@@ -192,16 +231,15 @@ const ProjectListing: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Section - Project Insights */}
           <div className="flex-[3] w-full space-y-4 sm:mt-0">
-            <div className="flex flex-col gap-6">
-              <ProjectInsights goalId={selectedGoalId} userId={userId} goalDetails={goalDetails} />
+            <div className="flex flex-col gap-6 sticky top-[70px]">
+              <ProjectInsights goalId={selectedGoalId || ""} userId={userId || ""} goalDetails={goalDetails} />
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProjectListing;
+export default ProjectListing
