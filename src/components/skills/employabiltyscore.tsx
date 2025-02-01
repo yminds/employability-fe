@@ -74,7 +74,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalNam
           <p className='text-[#414447] font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.2px]'>{userName}</p>
           <p className='text-[#909091]0 text-[14px] font-medium leading-[24px] tracking-[-0.2px]'>{goalName}</p>
         </div>
-      </div>
+      </div>            
 
       {/* Employability Score Section */}
       <div className="p-4 w-[100%] h-[92px] bg-green-50 rounded-lg flex items-center space-x-4">

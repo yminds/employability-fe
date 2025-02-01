@@ -29,6 +29,8 @@ import ExperienceLevel from "./pages/SetExperience.tsx";
 import AddPhone from "./pages/AddPhoneNumber.tsx";
 import Example from "./features/cap/Example.tsx";
 import Mentor from "./pages/Mentor.tsx";
+import Canidates from "./pages/Canidates.tsx";
+import Candidate from "./pages/Candidate.tsx";
 
 interface RouteConfig {
   route: string;
@@ -118,7 +120,15 @@ export const routes: RouteConfig[] = [
   {
     route: "/mentor/learn/:id",
     component: <Mentor />
-  }
+  },
+  {
+    route: "/candidates",
+    component: <Canidates />,
+  },
+  {
+    route: "/candidates/:id",
+    component: <Candidate />,
+  },
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {
