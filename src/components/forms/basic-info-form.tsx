@@ -164,14 +164,8 @@ export default function BasicInfoForm({
       formData.append("folder", "profile-image");
       formData.append("name", file.name);
 
-      // Upload to S3
-      // const response = await fetch("http://localhost:3000/api/v1/s3/upload", {
-      //   method: "POST",
-      //   body: formData,
-      // });
-
       const response = await axios.post(
-        "http://localhost:3000/api/v1/s3/upload",
+       `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
         formData,
         {
           onUploadProgress: (progressEvent) => {
@@ -215,7 +209,7 @@ export default function BasicInfoForm({
           "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
         const key = formData.profile_image.replace(bucketBaseUrl, "");
         console.log("Deleting image with key:", key, "for user:", user._id);
-        const response = await fetch("http://localhost:3000/api/v1/s3/delete", {
+        const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",

@@ -257,18 +257,12 @@ export default function CompleteProfileModal({
   useEffect(() => {
     const initializeData = async () => {
       if (data) {
-        console.log("==============================");
-
         try {
           const transformedData = await transformData(data);
           setFormData((prevData: any) => ({
             ...prevData,
             ...transformedData,
           }));
-          console.log("Transformed data:", transformedData);
-          console.log("Form data", formData);
-
-          console.log("==============================");
         } catch (error) {
           console.error("Error transforming data:", error);
         }
@@ -530,7 +524,7 @@ export default function CompleteProfileModal({
         transformedData;
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/user/update/${userId}`,
+        `${process.env.VITE_API_BASE_URL}/api/v1/user/update/${userId}`,
         {
           method: "PUT",
           headers: {

@@ -30,7 +30,7 @@ export default function SkillsForm({
     const fetchSkills = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/v1/skills_pool/skills"
+          `${process.env.VITE_API_BASE_URL}/api/v1/skills_pool/skills`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch skills");

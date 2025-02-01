@@ -99,7 +99,7 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       formData.append("folder", "resume"); // This will be req.body.fileType
       formData.append("name", file.name); // This will be req.body.name
 
-      const s3Response = await fetch("http://localhost:3000/api/v1/s3/upload", {
+      const s3Response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`, {
         method: "POST",
         body: formData, // Don't set Content-Type header, browser will set it
       });
@@ -129,7 +129,7 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
           "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
         const key = resume.resumeUrl.replace(bucketBaseUrl, "");
         console.log("Deleting image with key:", key, "for user:", userId);
-        const response = await fetch("http://localhost:3000/api/v1/s3/delete", {
+        const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",

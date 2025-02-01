@@ -67,7 +67,7 @@ const LinkedInImportModal: React.FC<LinkedInImportModalProps> = ({
       formData.append("folder", "linkedin");
       formData.append("name", file.name);
 
-      const s3Response = await fetch("http://localhost:3000/api/v1/s3/upload", {
+      const s3Response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`, {
         method: "POST",
         body: formData,
       });
@@ -98,15 +98,6 @@ const LinkedInImportModal: React.FC<LinkedInImportModalProps> = ({
         formData.append("userId", userId);
 
         const response = await uploadResume({ file: uploadState.file, userId });
-        // const parse = await fetch(
-        //   "http://localhost:3000/api/v1/resume/upload-resume",
-        //   {
-        //     method: "POST",
-        //     body: formData,
-        //   }
-        // );
-
-        // const parsedData = await parse.json();
         const parsedData = response.data
         setParsedData(parsedData.data.parsedData);
         console.log("Parsed Data", parsedData);
@@ -128,7 +119,7 @@ const LinkedInImportModal: React.FC<LinkedInImportModalProps> = ({
           "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
         const key = resume.resumeUrl.replace(bucketBaseUrl, "");
         console.log("Deleting image with key:", key, "for user:", userId);
-        const response = await fetch("http://localhost:3000/api/v1/s3/delete", {
+        const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
