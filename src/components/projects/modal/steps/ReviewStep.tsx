@@ -92,10 +92,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
 
       {/* Skills */}
       <div className="px-5 pt-5 pb-6 bg-white rounded-xl border border-black/10">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col ">
           <div className="flex justify-between items-start">
             <div className="text-black text-base font-['Ubuntu'] font-medium">
-              Project Type & Tech Stack
+              Project Tech Stack
             </div>
             <div
               className="w-10 h-10 relative bg-[#dbffea] rounded-3xl flex items-center justify-center cursor-pointer"
@@ -110,7 +110,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4">
+          
             <div className="flex flex-col gap-2">
               <div className="text-[#8f9091] text-sm">Tech Stack</div>
               <div className="flex flex-wrap gap-2">
@@ -124,7 +124,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ existingProject, onEdit }) => {
                 ))}
               </div>
             </div>
-          </div>
         </div>
       </div>
 

@@ -155,21 +155,6 @@ export function ProjectUploadModal({
   thumbnail: { url: '', key: '' },
   synopsisDoc: { url: '', key: '' },
   });
-  // const [filePreviewState, setFilePreviewState] = React.useState<FilePreviewState>({
-  //   thumbnailPreview: {
-  //     file: null,
-  //     status: "idle",
-  //     progress: 0,
-  //   },
-  //   synopsisPreview: {
-  //     file: null,
-  //     status: "idle",
-  //     progress: 0,
-  //   },
-  //   imagePreview: {
-  //     files: {}
-  //   }
-  // })
 
   const user = useSelector((state: RootState) => state?.auth.user);
   const user_id = user?._id;
@@ -601,105 +586,6 @@ export function ProjectUploadModal({
       if (isSubmitting || isUpdating || isTechUpdating || isFilesUploading) {
         return;
       }
-
-      // Create or update project as a draft
-      // const payload = {
-      //   name: formData.projectName.trim(),
-      //   description: formData.description.trim(),
-      //   status: "Incomplete",
-      // }
-
-      // if (isEditing && projectId) {
-      //   // Update existing project
-      //   console.log("payload",payload);
-
-      //   await updateProject({
-      //     projectId,
-      //     payload,
-      //   }).unwrap()
-
-      //   if (formData.skills.length > 0) {
-      //     const technologies = formData.skills.map((skill) => skill._id)
-      //     await updateProjectTech({
-      //       projectId,
-      //       technologies,
-      //     }).unwrap()
-      //   }
-
-      //   if (formData.images.length > 0 || formData.synopsisPdf || formData.coverImage) {
-      //     const formDataToUpload = new FormData()
-
-      //     if (formData.githubLinks.length > 0) {
-      //       formDataToUpload.append(
-      //         "githubLinks",
-      //         JSON.stringify(formData.githubLinks.filter((link) => link.trim() !== "")),
-      //       )
-      //     }
-
-      //     if (formData.liveLink) {
-      //       formDataToUpload.append("liveLink", formData.liveLink)
-      //     }
-
-      //     if (formData.images.length > 0) {
-      //       formData.images.forEach((image) => {
-      //         formDataToUpload.append("images", image)
-      //       })
-      //     }
-
-      //     // if (formData.synopsisPdf) {
-      //     //   formDataToUpload.append("fileUrls[synopsisDoc]", formData.synopsisPdf)
-      //     // }
-
-      //     if (formData.coverImage) {
-      //       formDataToUpload.append("fileUrls[thumbnail]", formData.coverImage)
-      //     }
-
-      //     console.log("formDataToUpload",formDataToUpload);
-
-      //     for (let [key, value] of formDataToUpload.entries()) {
-      //       console.log(`${key}: ${value}`);
-      //     }
-      //     await handleProjectFiles({
-      //       projectId,
-      //       formData: formDataToUpload ,
-      //     }).unwrap()
-      //   }
-      // } else {
-      //   // Only create a new project if we don't have a projectId
-      //   if (!projectId) {
-      //     const response = await addProject({
-      //       userId: user_id,
-      //       ...payload,
-      //     }).unwrap()
-
-      //     if (response.success) {
-      //       setProjectId(response.data._id)
-
-      //       if (formData.skills.length > 0) {
-      //         const technologies = formData.skills.map((skill) => skill._id)
-      //         await updateProjectTech({
-      //           projectId: response.data._id,
-      //           technologies,
-      //         }).unwrap()
-      //       }
-      //     }
-      //   } else {
-      //     // If we have a projectId, update the existing project
-      //     await updateProject({
-      //       projectId,
-      //       payload,
-      //     }).unwrap()
-
-      //     if (formData.skills.length > 0) {
-      //       const technologies = formData.skills.map((skill) => skill._id)
-      //       await updateProjectTech({
-      //         projectId,
-      //         technologies,
-      //       }).unwrap()
-      //     }
-      //   }
-      // }
-
       toast.success("Project saved as draft successfully!");
 
       // Refresh the project list and close the modal
@@ -737,51 +623,6 @@ export function ProjectUploadModal({
         return;
       }
 
-      // Update technologies if added
-      // const technologies = formData.skills.map((skill) => skill._id)
-      // await updateProjectTech({
-      //   projectId,
-      //   technologies,
-      // }).unwrap()
-
-      // // Handle GitHub links and file uploads
-      // const validLinks = formData.githubLinks.filter((link) => link.trim() !== "")
-      // const formDataToUpload = new FormData()
-      // formDataToUpload.append("githubLinks", JSON.stringify(validLinks))
-
-      // if (formData.liveLink) {
-      //   formDataToUpload.append("liveLink", formData.liveLink)
-      // }
-
-      // if (formData.images.length > 0) {
-      //   formData.images.forEach((image) => {
-      //     formDataToUpload.append("images", image)
-      //   })
-      // }
-
-      // if (formData.synopsisPdf) {
-      //   formDataToUpload.append("synopsisDoc", formData.synopsisPdf)
-      // }
-
-      // if (formData.coverImage) {
-      //   formDataToUpload.append("thumbnail", formData.coverImage)
-      // }
-
-      // await handleProjectFiles({
-      //   projectId,
-      //   formData: formDataToUpload,
-      // }).unwrap()
-
-      // // Submit for review
-      // await updateProject({
-      //   projectId,
-      //   payload: {
-      //     name: formData.projectName.trim(),
-      //     description: formData.description.trim(),
-      //     status: "In-review",
-      //   },
-      // }).unwrap()
-
       toast.success("Project submitted for review successfully!");
       onOpenChange(false);
       setIsSuccessModalOpen(true);
@@ -794,32 +635,6 @@ export function ProjectUploadModal({
       toast.error(error.data?.message || "Failed to submit project for review");
     }
   };
-
-  // const handleFileDelete = (type: string) => {
-  //   if (projectId) {
-  //     const formDataToUpload = new FormData()
-
-  //     if (type === "thumbnail") {
-  //       formDataToUpload.append("fileUrls[thumbnail]", "")
-  //     } else if (type === "synopsisDoc") {
-  //       formDataToUpload.append("fileUrls[synopsisDoc]", "")
-  //     } else if (type === "images") {
-  //       formDataToUpload.append("fileUrls[images]", "")
-  //     }
-
-  //     formDataToUpload.append("action", "update")
-
-  //     handleProjectFiles({
-  //       projectId,
-  //       formData: formDataToUpload,
-  //     }).unwrap()
-  //   }
-
-  //   setPersistedFiles((prev) => ({
-  //     ...prev,
-  //     [type]: { url: "", key: "" },
-  //   }))
-  // }
 
   const renderSubmitButtons = () => {
     return (
@@ -869,7 +684,7 @@ export function ProjectUploadModal({
         onOpenChange(isOpen);
       }}
     >
-      <DialogContent className="!p-8 !pb-10 w-[700px] !max-w-[700px] min-h-[615px] max-h-[90vh] flex flex-col">
+      <DialogContent className="!p-8 !pb-10 w-[700px] !max-w-[700px] min-h-[615px] max-h-[90vh] flex flex-col rounded-2xl">
         <DialogHeader className="text-left !p-0 !m-0">
           <DialogTitle className="text-xl font-semibold">
             {STEPS[currentStep]}
