@@ -28,7 +28,7 @@ interface ThreadData {
   __v: number;
 }
 
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = "https://employability.ai";
 
 interface MentorContainerProps {
   skill: string;
