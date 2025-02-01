@@ -21,15 +21,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
 interface IContact {
   email: string;
 }
 interface IPerson {
+  _id: string;
   name: string;
   contact: IContact;
 }
 const Canidates: React.FC = () => {
-  
   const [UploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [resumes, setResumes] = useState<any[]>([1, 2]);
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
@@ -38,7 +39,7 @@ const Canidates: React.FC = () => {
   const [progressionParsing, setProgressionParsing] = useState<number | string>(0);
   const [parsedReSumesCount, setParsedReSumesCount] = useState<number | string>("0/0");
   const [isParsingComplete, setIsParsingComplete] = useState<boolean>(false);
-
+  const [isUploadStart, setIsUploadStart] = useState<boolean>(false);
   const { data: allResumes, isLoading, refetch: refetchAllResumes } = useGetAllResumesQuery({});
   const [bulkUploadResumes] = useBulkUploadResumesMutation();
   const { data: status, refetch } = useGetResumesParsedStatusQuery(uploadId, {
@@ -52,6 +53,7 @@ const Canidates: React.FC = () => {
   const handleUploads = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
+      setIsUploadStart(true);
       const result = await bulkUploadResumes({
         files: Array.from(selectedFiles),
       }).unwrap();
@@ -85,6 +87,7 @@ const Canidates: React.FC = () => {
         setParsedReSumesCount(`${status.total}/${status.total}`);
         setIsParsingComplete(true);
         setPollingActive(false);
+
         refetchAllResumes();
       }
     }
@@ -98,6 +101,7 @@ const Canidates: React.FC = () => {
         setParsedReSumesCount(`${status.total}/${status.total}`);
         setPollingActive(false);
         setIsParsingComplete(true);
+        setIsUploadStart(false);
         await refetchAllResumes();
         clearInterval(interval);
       } else if (status?.completed && status?.completed + status?.failed >= status?.total) {
@@ -160,7 +164,7 @@ const Canidates: React.FC = () => {
             <Card className="w-full h-full rounded-lg bg-white border border-gray-200 flex flex-col gap-4">
               {isResumesEmpty ? (
                 <div className="flex items-center justify-center w-full h-full">
-                  <p className="text-gray-300 text-4xl">no resumes are there </p>
+                 <p className="text-gray-300 text-5xl capitalize">No resume uploaded</p>
                 </div>
               ) : (
                 <section className="rounded-lg">
@@ -190,10 +194,12 @@ const Canidates: React.FC = () => {
                           <TableCell className="text-gray-600">Mern</TableCell>
 
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" className="hover:bg-gray-100 text-sm">
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
+                            <Link to={`/candidates/${person?._id}`}>
+                              <Button variant="ghost" size="sm" className="hover:bg-gray-100 text-sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                            </Link>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -208,17 +214,19 @@ const Canidates: React.FC = () => {
             <div className="right flex-[1] overflow-hidden ">
               <Card className="w-full shadow-sm rounded-lg bg-white">
                 <CardContent className="p-6">
-                  <div className="space-y-4 border-2 rounded-md border-dashed border-gray-200 mb-4">
-                    <button
-                      onClick={() => setSelectedFiles([])}
-                      className="flex items-center space-x-3 w-full text-[#414447] hover:text-[#000000] transition-colors"
-                    >
-                      <div className="p-2">
-                        <X className="w-5 h-5" />
-                      </div>
-                      <span className="text-base font-normal leading-6 tracking-[0.24px]">Cancel Upload</span>
-                    </button>
-                  </div>
+                  {!isUploadStart && (
+                    <div className="space-y-4 border-2 rounded-md border-dashed border-gray-200 mb-4">
+                      <button
+                        onClick={() => setSelectedFiles([])}
+                        className="flex items-center space-x-3 w-full text-[#414447] hover:text-[#000000] transition-colors"
+                      >
+                        <div className="p-2">
+                          <X className="w-5 h-5" />
+                        </div>
+                        <span className="text-base font-normal leading-6 tracking-[0.24px]">Cancel Upload</span>
+                      </button>
+                    </div>
+                  )}
 
                   <div className="flex items-center space-x-2 mb-4">
                     <div className="flex-grow bg-gray-200 h-2 rounded-full overflow-hidden">
@@ -261,8 +269,12 @@ const Canidates: React.FC = () => {
                         Completed
                       </Button>
                     ) : (
-                      <Button onClick={handleUploads} className="bg-[#188644] hover:bg-[#03963F]">
-                        Save
+                      <Button
+                        onClick={handleUploads}
+                        disabled={isUploadStart}
+                        className="bg-[#188644] hover:bg-[#03963F]"
+                      >
+                        {isUploadStart ? "uploading" : "save"}
                       </Button>
                     )}
                   </div>

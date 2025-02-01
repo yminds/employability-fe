@@ -30,6 +30,7 @@ import ExperienceLevel from "./pages/SetExperience.tsx";
 import AddPhone from "./pages/AddPhoneNumber.tsx";
 import Example from "./features/cap/Example.tsx";
 import Canidates from "./pages/Canidates.tsx";
+import Candidate from "./pages/Candidate.tsx";
 
 interface RouteConfig {
   route: string;
@@ -122,8 +123,12 @@ export const routes: RouteConfig[] = [
     component: <ProjectListing />,
   },
   {
-    route: "/canidates",
+    route: "/candidates",
     component: <Canidates />,
+  },
+  {
+    route: "/candidates/:id",
+    component: <Candidate />,
   },
 ];
 
