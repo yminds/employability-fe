@@ -56,8 +56,16 @@ export const resumeUploadApiSlice = createApi({
       }),
       keepUnusedDataFor:0
     }),
+
+    getSingleResume: builder.query({
+      query: (resumeId) => ({
+        url: `/api/v1/resume/getResume/${resumeId}`,
+        method: "GET",
+      }),
+      keepUnusedDataFor:0
+    }),
   }),
 });
 
-export const { useUploadResumeMutation, useBulkUploadResumesMutation,useGetResumesParsedStatusQuery,useGetAllResumesQuery } =
+export const { useUploadResumeMutation, useBulkUploadResumesMutation,useGetResumesParsedStatusQuery,useGetAllResumesQuery,useGetSingleResumeQuery } =
   resumeUploadApiSlice;
