@@ -108,10 +108,11 @@ const resumeSlice = createSlice({
   initialState,
   reducers: {
     // Reset state when needed
-    resetResumeState: (state) => {
+    resetResumeState: (state, action) => {
+      const { parsedData } = action.payload;
       state.uploading = false;
       state.error = null;
-      state.parsedData = null;
+      state.parsedData = parsedData;
     },
   },
   extraReducers: (builder) => {

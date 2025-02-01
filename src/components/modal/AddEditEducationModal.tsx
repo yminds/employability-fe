@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import EducationForm from "../forms/education-form";
 import type { Education } from "@/features/profile/types";
 import { toast } from "sonner";
+import { validateEducation } from "@/features/profile/validation/validateEducation";
 
 interface AddEducationModalProps {
   isOpen: boolean;
@@ -100,40 +101,10 @@ const AddEditEducationModal: React.FC<AddEducationModalProps> = ({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-    let isValid = true;
-
-    education.forEach((edu, index) => {
-      if (!edu.education_level.trim()) {
-        newErrors[`education.${index}.education_level`] =
-          "Education level is required";
-        isValid = false;
-      }
-      if (!edu.degree.trim()) {
-        newErrors[`education.${index}.degree`] = "Degree is required";
-        isValid = false;
-      }
-      if (!edu.institute.trim()) {
-        newErrors[`education.${index}.institute`] = "Institute is required";
-        isValid = false;
-      }
-      if (!edu.from_date) {
-        newErrors[`education.${index}.from_date`] = "From date is required";
-        isValid = false;
-      }
-      if (
-        !edu.cgpa_or_marks ||
-        (typeof edu.cgpa_or_marks === "string" && !edu.cgpa_or_marks.trim())
-      ) {
-        newErrors[`education.${index}.cgpa_or_marks`] =
-          "CGPA/Marks are required";
-        isValid = false;
-      }
-    });
-
+    const newErrors = validateEducation(education);
     setErrors(newErrors);
     setTimeout(() => setErrors({}), 2000);
-    return isValid;
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
@@ -144,6 +115,9 @@ const AddEditEducationModal: React.FC<AddEducationModalProps> = ({
     try {
       setIsSaving(true);
 
+      let addedCount = 0;
+      let updatedCount = 0;
+
       await Promise.all(
         education.map(async (edu) => {
           if (edu._id) {
@@ -151,16 +125,30 @@ const AddEditEducationModal: React.FC<AddEducationModalProps> = ({
               id: edu._id,
               updatedEducation: edu,
             }).unwrap();
-            toast.success("Education entry updated successfully");
+            updatedCount++;
           } else {
             await addEducation({
               ...edu,
               user_id: user._id,
             }).unwrap();
-            toast.success("New education entry added successfully");
+            addedCount++;
           }
         })
       );
+
+      if(addedCount > 0) {
+        toast.success(
+          `${addedCount} education ${
+            addedCount === 1 ? "entry" : "entries"
+          } added successfully`
+        );
+      } else if (updatedCount > 0) {
+        toast.success(
+          `Education ${
+            updatedCount === 1 ? "entry" : "entries"
+          } updated successfully`
+        );
+      }
 
       onClose();
     } catch (error) {

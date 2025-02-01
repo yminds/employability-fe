@@ -6,7 +6,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SkillList from "@/components/skills/skillslist";
-import ProfileCompletionCard from "@/components/cards/ProfileCompletionCard";
 import TryThingsSection from "@/features/dashboard/TryThingsSection";
 import MyActivityCard from "@/features/dashboard/MyActivity";
 import CircularProgress from "@/components/ui/circular-progress-bar";
@@ -16,6 +15,7 @@ import GoalCyborgImg from "@/assets/dashboard/set_goal_cyborg.svg";
 import ProfessionalGoalsImg from "@/assets/dashboard/professional_goals.svg";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import EmployabilityBannerSection from "@/features/dashboard/EmployabilityBanner";
+import CompleteProfileSection from "@/features/profile/CompleteProfileSection";
 
 interface Props {
   isDashboard: boolean; // Define the prop type here
@@ -98,7 +98,8 @@ const Dashboard: React.FC<Props> = () => {
 
                   <div className="flex flex-col items-start gap-6 flex-1">
                     {/* Profile Sidebar */}
-                    <ProfileCompletionCard />
+                    {/* <ProfileCompletionCard /> */}
+                    <CompleteProfileSection userId={user_id} isDashboard={true}/>
 
                     {/* My Activity Sidebar */}
                     <MyActivityCard displayScore={true} goalId={goalId} />

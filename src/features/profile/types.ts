@@ -4,43 +4,43 @@ export interface ProfileFormData {
     name: string;
     mobile: string;
     email: string;
-    dateOfBirth: string;
+    date_of_birth: string;
     gender: string;
     country: string;
     state: string;
     city: string;
-    profileImage?: File;
+    profile_image?: string;
   };
   socialProfiles: {
-    github: string;
-    linkedin: string;
-    dribbble: string;
-    behance: string;
+    gitHub: string;
+    linkedIn: string;
     portfolio: string;
   };
   skills: Array<{
     name: string;
     rating: number;
   }>;
-  experience: Array<{
-    title: string;
-    company: string;
-    employmentType: string;
-    location: string;
-    startDate: string;
-    endDate: string;
-    currentlyWorking: boolean;
-    currentCTC: string;
-    expectedCTC: string;
-  }>;
+  experience: ExperienceItem[];
 
-  certifications: Array<{
-    title: string;
-    issuedBy: string;
-    issueDate: string;
-    expirationDate: string;
-    credentialURL: string;
-  }>;
+  certifications: Certification[];
+}
+
+export interface BasicInfo {
+  name: string;
+  mobile: string;
+  email: string;
+  date_of_birth: string;
+  gender: string;
+  country: string;
+  state: string;
+  city: string;
+  profile_image?: string;
+}
+
+export interface SocialProfiles {
+  gitHub: string;
+  linkedIn: string;
+  portfolio: string;
 }
 
 // src/types.ts
@@ -86,8 +86,8 @@ export interface ExperienceItem {
   start_date: string;
   end_date: string | null;
   currently_working: boolean;
-  // currentCTC: string;
-  // expectedCTC: string;
+  current_ctc: number;
+  expected_ctc: number;
   description: string;
 }
 
