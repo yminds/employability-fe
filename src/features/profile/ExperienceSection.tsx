@@ -217,19 +217,16 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
               ))}
             </div>
             {experiences?.length > 3 && (
-              <div className="flex justify-center p-6">
+              <div className="flex justify-center py-4">
                 <button
+                  className="flex items-center text-sm text-gray-600 hover:text-gray-900"
                   onClick={toggleExpand}
-                  className="flex items-center gap-2"
                 >
+                  {isExpanded ? "Show less" : "View all"}
                   {isExpanded ? (
-                    <span>
-                      Show Less <ChevronUp size={20} />
-                    </span>
+                    <ChevronUp className="h-4 w-4 ml-1" />
                   ) : (
-                    <span>
-                      Show More <ChevronDown size={20} />
-                    </span>
+                    <ChevronDown className="h-4 w-4 ml-1" />
                   )}
                 </button>
               </div>

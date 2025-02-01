@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import threeDots from "@/assets/profile/threedots.svg";
 import { Pencil } from "lucide-react";
 import EditBioModal from "@/components/modal/EditBioModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Country, State } from "country-state-city";
 
 interface ProfileBannerProps {
   user: any;
@@ -13,6 +14,12 @@ interface ProfileBannerProps {
 
 const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
   console.log("Current Status:", user.current_status);
+
+  const country = user.address?.country ? Country.getCountryByCode(user.address.country) : null
+  const state =
+    user.address?.state && user.address?.country
+      ? State.getStateByCodeAndCountry(user.address.state, user.address.country)
+      : null
 
   const [isEditBioOpen, setIsEditBioOpen] = useState(false);
 
@@ -55,7 +62,9 @@ const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
                   {user.name}
                 </h1>
                 <p className="text-[#414447] text-l font-normal font-ubuntu leading-[24px] tracking-[0.24px]">
-                  {user?.address?.city || "Bengaluru, India"}
+                  {user?.address
+                    ? `${state?.name}, ${country?.name}`
+                    : ""}
                 </p>
                 {/* <div className="flex items-center gap-2">
                   <svg

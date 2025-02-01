@@ -12,6 +12,7 @@ import logo from "@/assets/branding/logo.svg";
 import man from "@/assets/sign-up/man.png";
 import grid from "@/assets/sign-up/grid.svg";
 import arrow from "@/assets/skills/arrow.svg";
+import { Button } from "@/components/ui/button";
 interface SignupData {
   email: string;
   password: string;
@@ -26,17 +27,20 @@ const SignupForm = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [login] = useLoginMutation();
-  const [signup, { isLoading: isSignupLoading }] = useRegisterUserMutation();
+  const [signup] = useRegisterUserMutation();
   const [name, setName] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCustomSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setIsLoading(true);
 
     if (password !== confirmPassword) {
       setError("Passwords do not match!");
+      setIsLoading(false);
       return;
     }
 
@@ -49,7 +53,7 @@ const SignupForm = () => {
     try {
       const result = await signup(signupData);
       console.log("Signup successful:", result);
-      
+
       if (result.data && result.data.success === true) {
         const loginResponse = await login({ email, password });
 
@@ -62,11 +66,13 @@ const SignupForm = () => {
     } catch (err: any) {
       if (err.data?.message) {
         console.log("Signup failed:", err);
-        
+
         setError(err.data.message);
       } else {
         setError("An error occurred. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -101,8 +107,6 @@ const SignupForm = () => {
   //     console.error("Signup failed:", err);
   //   }
   // };
-
-  const isLoading = isSignupLoading;
 
   useEffect(() => {
     if (error) {
@@ -237,7 +241,7 @@ const SignupForm = () => {
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
               className="w-full h-[44px] flex justify-center items-center gap-2 px-8 py-4 
@@ -255,7 +259,7 @@ const SignupForm = () => {
               ) : (
                 "Sign Up"
               )}
-            </button>
+            </Button>
             {/* Social Login */}
             <SocialLogin onSocialLogin={handleSocialLogin} />
           </form>

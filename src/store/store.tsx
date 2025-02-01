@@ -25,7 +25,7 @@ import { educationApiSlice } from "@/api/educationSlice";
 import { experienceApiSlice } from "@/api/experienceApiSlice";
 import { certificationsApiSlice } from "@/api/certificatesApiSlice";
 import { projectApiSlice } from "@/api/projectApiSlice";
-import {resumeUploadApiSlice } from '@/api/resumeUploadApiSlice'
+import { resumeUploadApiSlice } from '@/api/resumeUploadApiSlice'
 // Redux persist config
 const persistConfig = {
   key: "root",

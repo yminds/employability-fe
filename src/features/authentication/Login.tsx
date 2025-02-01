@@ -14,19 +14,22 @@ import arrow from "@/assets/skills/arrow.svg";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
 import SocialLogin from "./SocialAuth";
+import { Loader2 } from "lucide-react";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [login, { isSuccess, isLoading, isError }] = useLoginMutation();
+  const [login, { isSuccess, isError }] = useLoginMutation();
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage(null);
+    setIsLoading(true);
     try {
       await login({ email, password }).unwrap();
     } catch (err: any) {
@@ -35,6 +38,8 @@ const Login: React.FC = () => {
       } else {
         setErrorMessage("An error occurred. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,6 +61,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (isSuccess || token) {
+      setIsLoading(false);
       if (user && user.experience_level === "") {
         navigate("/setexperience");
       } else {
@@ -174,7 +180,14 @@ const Login: React.FC = () => {
               }}
               disabled={isLoading}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Logging In...
+                </>
+              ) : (
+                "Login"
+              )}
             </Button>
 
             {/* Social Login */}
