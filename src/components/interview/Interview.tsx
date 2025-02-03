@@ -46,11 +46,14 @@ const Interview: React.FC<{
     question: string;
     codeSnippet: string;
     isCodeSnippetMode: boolean;
+    concept: string;
   }>({
     question: "",
     codeSnippet: "",
-    isCodeSnippetMode: false
+    isCodeSnippetMode: false,
+    concept: "",
   });
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [layoutType, setLayoutType] = useState<1 | 2>(1);
   const [isInterviewEnded, setIsInterviewEnded] = useState(false);
@@ -95,14 +98,16 @@ const Interview: React.FC<{
       }));
     };
 
-    const handleGenerateQuestion = (question: string, codeSnippet: string) => {
-      console.log("Generate Question", question, codeSnippet);
+    const handleGenerateQuestion = (question: string, codeSnippet: string, concept: string) => {
+      console.log("Generate Question", question, codeSnippet, concept);
       setQuestion({
         question,
         codeSnippet,
-        isCodeSnippetMode: true  // Enter code snippet mode
+        isCodeSnippetMode: true, // Enter code snippet mode
+        concept,
       });
     };
+
 
     const handleEndInterview = () => {
       setIsInterviewEnded(true);
@@ -139,13 +144,15 @@ const Interview: React.FC<{
 
   const handleDoneAnswering = () => {
     if (isUserAnswering) {
-      setQuestion({
-        question: "",
-        codeSnippet: "",
-        isCodeSnippetMode: false  // Exit code snippet mode
-      });
+      // setQuestion({
+      //   question: "",
+      //   codeSnippet: "",
+      //   isCodeSnippetMode: false, // Exit code snippet mode
+      //   concept: "",
+      // });
       stopRecording();
       setIsUserAnswering(false);
+
     }
   };
 
@@ -184,10 +191,10 @@ const Interview: React.FC<{
 
     interviewStream({
       prompt,
-      model: "gpt-4o",
-      provider: "openai",
-      // model: "claude-3-5-sonnet-latest",
-      // provider: "anthropic",
+      // model: "gpt-4o",
+      // provider: "openai",
+      model: "claude-3-5-sonnet-latest",
+      provider: "anthropic",
       // model: "gemini-2.0-flash-exp",
       // model: "gemini-1.5-flash-latest",
       // provider: "google",
@@ -200,6 +207,7 @@ const Interview: React.FC<{
       skill_id: interviewDetails.data.skill_id,
       code_snippet: question.codeSnippet,
       question: question.question,
+      concept: question.concept,
     });
   };
 
@@ -219,7 +227,7 @@ const Interview: React.FC<{
             question={question}
             frequencyData={frequencyData}
             messages={messages}
-            layoutType={layoutType}
+            layoutType={2}
           />
         )}
       </div>
