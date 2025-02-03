@@ -103,12 +103,22 @@ const Interview: React.FC<{
       setQuestion({
         question,
         codeSnippet,
-        isCodeSnippetMode: true, // Enter code snippet mode
+        isCodeSnippetMode: false, // Enter code snippet mode
         concept,
       });
     };
 
-
+    // New listener to handle code snippet generation separately
+    const handleGenerateCodeSnippet = (codeSnippet: string, concept: string) => {
+      console.log("Generate Code Snippet", codeSnippet, concept);
+      setQuestion((prev) => ({
+        ...prev,
+        codeSnippet,
+        isCodeSnippetMode: true,
+        concept,
+      }));
+    };
+    
     const handleEndInterview = () => {
       setIsInterviewEnded(true);
     };
@@ -118,6 +128,10 @@ const Interview: React.FC<{
     newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
     newSocket.on(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
     newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
+    newSocket.on(
+      `generateCodeSnippet${interviewDetails.data._id}`,
+      handleGenerateCodeSnippet
+    );
     newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
     return () => {
       isComponentMounted.current = false;
@@ -125,6 +139,10 @@ const Interview: React.FC<{
       newSocket.off(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
       newSocket.off(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
       newSocket.off(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
+      newSocket.off(
+        `generateCodeSnippet${interviewDetails.data._id}`,
+        handleGenerateCodeSnippet
+      );
       newSocket.disconnect();
     };
   }, [isInterviewLoaded, interviewDetails]);
@@ -191,10 +209,10 @@ const Interview: React.FC<{
 
     interviewStream({
       prompt,
-      // model: "gpt-4o",
-      // provider: "openai",
-      model: "claude-3-5-sonnet-latest",
-      provider: "anthropic",
+      model: "gpt-4o",
+      provider: "openai",
+      // model: "claude-3-5-sonnet-latest",
+      // provider: "anthropic",
       // model: "gemini-2.0-flash-exp",
       // model: "gemini-1.5-flash-latest",
       // provider: "google",
