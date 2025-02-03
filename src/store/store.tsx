@@ -25,7 +25,8 @@ import { educationApiSlice } from "@/api/educationSlice";
 import { experienceApiSlice } from "@/api/experienceApiSlice";
 import { certificationsApiSlice } from "@/api/certificatesApiSlice";
 import { projectApiSlice } from "@/api/projectApiSlice";
-import {resumeUploadApiSlice } from '@/api/resumeUploadApiSlice'
+import {resumeUploadApiSlice } from '@/api/resumeUploadApiSlice';
+import {fundamentalsApiSlice}   from '@/api/fundementalSlice';
 // Redux persist config
 const persistConfig = {
   key: "root",
@@ -44,6 +45,7 @@ const rootReducer = combineReducers({
   [certificationsApiSlice.reducerPath]: certificationsApiSlice.reducer,
   [projectApiSlice.reducerPath] : projectApiSlice.reducer,
   [resumeUploadApiSlice.reducerPath]:resumeUploadApiSlice.reducer,
+
   auth: authReducer,
   goals: goalReducer,
   error: errorReducer,

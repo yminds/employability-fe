@@ -8,6 +8,7 @@ import unverifiedImg from "@/assets/skills/unverifies.svg";
 import DefaultImg from "@/assets/skills/DefaultSkillImg.svg";
 import verifiedWhite from "@/assets/skills/verified_whiteBG.svg";
 import backGround from "@/assets/skills/verifiedBg.png"
+import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 
 interface SkillCardProps {
   skillId: string;
@@ -43,12 +44,15 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const [editedSelfRating, setEditedSelfRating] = useState(selfRating);
   const inputRef = useRef<HTMLInputElement>(null);
   const [ratingError, setRatingError] = useState("");
+  
+ 
+    useEffect(() => {
+      if (isEditing && inputRef.current) {
+         inputRef.current.focus();
+      }
+    }, [isEditing]);
 
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-       inputRef.current.focus();
-    }
-  }, [isEditing]);
+  
 
   const handleRatingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -76,7 +80,6 @@ const SkillCard: React.FC<SkillCardProps> = ({
       onEdit(skillId, parsedRating);
     }
   };
-
   const status = initialStatus === "Verified" ? "Verified" : "Unverified";
   const imgSrc = status === "Verified" ? verifiedImg : unverifiedImg;
   const smImgSrc = status === "Verified" ? verifiedWhite : unverifiedImg;
@@ -130,7 +133,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       user_skill_id: skillId,
       skill_id: skillPoolId,
     });
-    navigate(`/interview/${interviewId}`);
+    navigate(`/interview/${interviewId}`,{state:{title:skill ,skillPoolId,level}});
   };
 
   return (

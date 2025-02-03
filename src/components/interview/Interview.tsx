@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { io } from "socket.io-client";
 import { useParams } from "react-router-dom";
 
@@ -16,6 +16,7 @@ import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 import { useTTS } from "@/hooks/useTTS";
 import { useSTT } from "@/hooks/useSTT";
 import CodeSnippetQuestion from "./CodeSnippetQuestion";
+import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 
 // Constants and Types
 const SOCKET_URL = "http://localhost:3000";
@@ -29,7 +30,10 @@ export interface IMessage {
 const Interview: React.FC<{
   id: string;
   cameraScale: number;
-}> = () => {
+  interviewTopic:string;
+  concepts:any[]
+}> = ({interviewTopic,concepts}) => {
+  
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
 
@@ -51,9 +55,12 @@ const Interview: React.FC<{
     codeSnippet: "",
     isCodeSnippetMode: false
   });
+
+  console.log("+++++++++",concepts);
   const [isInitialized, setIsInitialized] = useState(false);
   const [layoutType, setLayoutType] = useState<1 | 2>(1);
   const [isInterviewEnded, setIsInterviewEnded] = useState(false);
+
 
   const isComponentMounted = useRef(true);
 
@@ -66,6 +73,8 @@ const Interview: React.FC<{
       }, 50);
     },
   });
+
+
 
   // Socket Connection
   useEffect(() => {
@@ -176,6 +185,7 @@ const Interview: React.FC<{
     });
   };
 
+
   const addMessage = (prompt: string) => {
     if (!interviewDetails?.data?._id) {
       console.error("Interview details not available");
@@ -200,6 +210,9 @@ const Interview: React.FC<{
       skill_id: interviewDetails.data.skill_id,
       code_snippet: question.codeSnippet,
       question: question.question,
+
+      skill_name:interviewTopic,
+      concepts:concepts
     });
   };
 
