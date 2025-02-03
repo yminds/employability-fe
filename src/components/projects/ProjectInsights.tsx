@@ -137,7 +137,7 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
   }
 
   return (
-    <div className={`bg-white flex flex-col w-[90%] h-[100%] rounded-lg p-[30px] gap-6 md:mt-0 sm:mt-0 ${className}`}>
+    <div className={`bg-white flex flex-col w-[100%] h-[100%] rounded-lg p-[30px] gap-6 md:mt-0 sm:mt-0 ${className}`}>
       <div className="flex items-center gap-2">
         <div>
           <img className="w-[50px] h-[50px] rounded-full" src={user?.profile_image || "/placeholder.svg"} alt="user" />

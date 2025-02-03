@@ -50,13 +50,16 @@ const Interview: React.FC<{
     question: string;
     codeSnippet: string;
     isCodeSnippetMode: boolean;
+    concept: string;
   }>({
     question: "",
     codeSnippet: "",
-    isCodeSnippetMode: false
+    isCodeSnippetMode: false,
+    concept: "",
   });
 
   console.log("+++++++++",concepts);
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [layoutType, setLayoutType] = useState<1 | 2>(1);
   const [isInterviewEnded, setIsInterviewEnded] = useState(false);
@@ -104,15 +107,27 @@ const Interview: React.FC<{
       }));
     };
 
-    const handleGenerateQuestion = (question: string, codeSnippet: string) => {
-      console.log("Generate Question", question, codeSnippet);
+    const handleGenerateQuestion = (question: string, codeSnippet: string, concept: string) => {
+      console.log("Generate Question", question, codeSnippet, concept);
       setQuestion({
         question,
         codeSnippet,
-        isCodeSnippetMode: true  // Enter code snippet mode
+        isCodeSnippetMode: false, // Enter code snippet mode
+        concept,
       });
     };
 
+    // New listener to handle code snippet generation separately
+    const handleGenerateCodeSnippet = (codeSnippet: string, concept: string) => {
+      console.log("Generate Code Snippet", codeSnippet, concept);
+      setQuestion((prev) => ({
+        ...prev,
+        codeSnippet,
+        isCodeSnippetMode: true,
+        concept,
+      }));
+    };
+    
     const handleEndInterview = () => {
       setIsInterviewEnded(true);
     };
@@ -122,6 +137,10 @@ const Interview: React.FC<{
     newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
     newSocket.on(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
     newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
+    newSocket.on(
+      `generateCodeSnippet${interviewDetails.data._id}`,
+      handleGenerateCodeSnippet
+    );
     newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
     return () => {
       isComponentMounted.current = false;
@@ -129,6 +148,10 @@ const Interview: React.FC<{
       newSocket.off(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
       newSocket.off(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
       newSocket.off(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
+      newSocket.off(
+        `generateCodeSnippet${interviewDetails.data._id}`,
+        handleGenerateCodeSnippet
+      );
       newSocket.disconnect();
     };
   }, [isInterviewLoaded, interviewDetails]);
@@ -148,13 +171,15 @@ const Interview: React.FC<{
 
   const handleDoneAnswering = () => {
     if (isUserAnswering) {
-      setQuestion({
-        question: "",
-        codeSnippet: "",
-        isCodeSnippetMode: false  // Exit code snippet mode
-      });
+      // setQuestion({
+      //   question: "",
+      //   codeSnippet: "",
+      //   isCodeSnippetMode: false, // Exit code snippet mode
+      //   concept: "",
+      // });
       stopRecording();
       setIsUserAnswering(false);
+
     }
   };
 
@@ -232,7 +257,7 @@ const Interview: React.FC<{
             question={question}
             frequencyData={frequencyData}
             messages={messages}
-            layoutType={layoutType}
+            layoutType={2}
           />
         )}
       </div>

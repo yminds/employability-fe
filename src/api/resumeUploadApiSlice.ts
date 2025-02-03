@@ -17,7 +17,7 @@ export const resumeUploadApiSlice = createApi({
         formData.append("userId", userId);
 
         return {
-          url: "resume/upload-resume", // Specify the endpoint
+          url: "/api/v1/resume/upload-resume", // Specify the endpoint
           method: "POST",
           body: formData,
         };

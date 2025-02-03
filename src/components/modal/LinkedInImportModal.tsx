@@ -1,56 +1,185 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState, useCallback } from "react";
 import { X, Upload } from "lucide-react";
-import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
 import { useDispatch } from "react-redux";
 import { resetResumeState } from "@/store/slices/resumeSlice";
+import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
+import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
+import { updateUserProfile } from "@/features/authentication/authSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
 
-// LinkedInImportModal Component
-const LinkedInImportModal: React.FC<{ onClose: () => void }> = ({
+interface LinkedInImportModalProps {
+  onClose: () => void;
+  userId: string;
+}
+
+const LinkedInImportModal: React.FC<LinkedInImportModalProps> = ({
   onClose,
+  userId,
 }) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
   const dispatch = useDispatch();
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
-    }
-  };
+  const [uploadResume] = useUploadResumeMutation();
+  const [uploadState, setUploadState] = useState<{
+    file?: File;
+    progress: number;
+  }>({ progress: 0 });
+  const [resume, setResume] = useState({
+    resumeUrl: "",
+  });
+  const [showCompleteProfile, setShowCompleteProfile] = useState(false);
+  const [parsedData, setParsedData] = useState(null);
 
-  const handleUpload = async () => {
-    if (selectedFile) {
-      try {
-        // Await the dispatch of resetResumeState
-        await dispatch(resetResumeState());
-
-        // Proceed with the file upload logic
-        console.log("File uploaded:", selectedFile);
-        setIsProgressModalOpen(true);
-      } catch (error) {
-        console.error("Error resetting resume state:", error);
-        alert("An error occurred while resetting the resume state.");
+  const handleFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.files && event.target.files[0]) {
+        const file = event.target.files[0];
+        if (file.type === "application/pdf") {
+          startUpload(file);
+        }
       }
-    } else {
-      alert("Please select a file to upload.");
+    },
+    []
+  );
+
+  const startUpload = async (file: File) => {
+    setUploadState({ file, progress: 0 });
+
+    const simulatedProgress = setInterval(() => {
+      setUploadState((prev) => {
+        if (prev.progress >= 90) {
+          clearInterval(simulatedProgress);
+          return prev;
+        }
+        return { ...prev, progress: prev.progress + 5 };
+      });
+    }, 300);
+
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+      formData.append("userId", userId);
+      formData.append("folder", "linkedin");
+      formData.append("name", file.name);
+
+      const s3Response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!s3Response.ok) {
+        throw new Error("Failed to upload to S3");
+      }
+
+      const result = await s3Response.json();
+
+      setResume({ resumeUrl: result.data[0].fileUrl });
+
+      // Smoothly complete progress to 100% after both operations are done
+      setUploadState((prev) => ({ ...prev, progress: 100 }));
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setUploadState((prev) => ({ ...prev, progress: 0 }));
+    } finally {
+      clearInterval(simulatedProgress);
     }
   };
+
+  const handleContinue = async () => {
+    if (uploadState.file) {
+      try {
+        const formData = new FormData();
+        formData.append("resume", uploadState.file);
+        formData.append("userId", userId);
+
+        const response = await uploadResume({ file: uploadState.file, userId });
+        const parsedData = response.data
+        setParsedData(parsedData.data.parsedData);
+        console.log("Parsed Data", parsedData);
+
+        // dispatch(updateUserProfile({ parsedData: parsedData.data.parsedData }));
+        dispatch(resetResumeState({ parsedData: parsedData.data.parsedData }));
+
+        setShowCompleteProfile(true);
+      } catch (error) {
+        console.error("Error parsing LinkedIn profile:", error);
+      }
+    }
+  };
+
+  const removeFile = async () => {
+    try {
+      if (resume.resumeUrl && userId) {
+        const bucketBaseUrl =
+          "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
+        const key = resume.resumeUrl.replace(bucketBaseUrl, "");
+        console.log("Deleting image with key:", key, "for user:", userId);
+        const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            key,
+            userId: userId,
+            folder: "resume",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete file from S3");
+        }
+      }
+
+      setResume({ resumeUrl: "" });
+      setUploadState(() => ({ progress: 0 }));
+    } catch (error) {
+      console.error("Error removing file:", error);
+    }
+  };
+
+  if (showCompleteProfile) {
+    return (
+      <CompleteProfileModal
+        type="linkedinUpload"
+        onClose={onClose}
+        userId={userId}
+        onSave={() => console.log("Save profile")}
+        parsedData={parsedData}
+        isParsed={true}
+      />
+    );
+  }
+
+  if (uploadState.file) {
+    return (
+      <ResumeUploadProgressModal
+        isOpen={true}
+        onClose={onClose}
+        fileName={uploadState.file.name}
+        fileSize={`${(uploadState.file.size / (1024 * 1024)).toFixed(2)} MB`}
+        uploadProgress={uploadState.progress}
+        isUploading={uploadState.progress < 100}
+        onContinue={handleContinue}
+        onRemove={removeFile}
+        uploadType="linkedin"
+      />
+    );
+  }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-xl p-8 relative">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-semibold">
+    <Dialog open={true} onOpenChange={() => onClose()}>
+      <DialogContent className="bg-white rounded-lg max-w-2xl p-[42px] flex flex-col justify-center">
+        <DialogHeader className="w-full flex justify-between items-start">
+          <DialogTitle className="text-black text-[20px] font-medium leading-[26px] tracking-[-0.2px] font-ubuntu mb-2">
             Import your profile from LinkedIn
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 p-1"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          </DialogTitle>
+        </DialogHeader>
 
         {/* Content */}
         <div className="space-y-8">
@@ -60,11 +189,11 @@ const LinkedInImportModal: React.FC<{ onClose: () => void }> = ({
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-sm font-medium">
                 1
               </span>
-              <p className="text-gray-900">
+              <p className="text-[#000] font-sf-pro text-[15px] font-normal leading-[24px] tracking-[0.21px]">
                 Go to your{" "}
                 <a
-                  href="https://linkedin.com/profile"
-                  className="text-blue-600 hover:underline"
+                  href="https://linkedin.com/"
+                  className="text-[#3888FF] hover:underline "
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -88,13 +217,13 @@ const LinkedInImportModal: React.FC<{ onClose: () => void }> = ({
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-sm font-medium">
                 2
               </span>
-              <p className="text-gray-900">
+              <p className="text-[#000] font-sf-pro text-[15px] font-normal leading-[24px] tracking-[0.21px]">
                 Upload the downloaded PDF by clicking the button below.
               </p>
             </div>
             <div className="flex items-center gap-4">
               <label
-                htmlFor="file-upload"
+                htmlFor="linkedin-file-upload"
                 className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
               >
                 <Upload className="w-4 h-4" />
@@ -102,39 +231,16 @@ const LinkedInImportModal: React.FC<{ onClose: () => void }> = ({
               </label>
               <input
                 type="file"
-                id="file-upload"
+                id="linkedin-file-upload"
                 accept=".pdf"
-                onChange={handleFileChange}
                 className="hidden"
+                onChange={handleFileChange}
               />
-              {selectedFile && (
-                <span className="text-gray-600">{selectedFile.name}</span>
-              )}
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="mt-8 flex justify-end">
-          <button
-            onClick={handleUpload}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
-          >
-            Continue
-          </button>
-        </div>
-
-        {isProgressModalOpen && (
-          <ResumeUploadProgressModal
-            onClose={() => setIsProgressModalOpen(false)}
-            fileName={selectedFile?.name}
-            fileSize={selectedFile?.size}
-            uploadProgress={0} onContinue={function (): void {
-              throw new Error("Function not implemented.");
-            } } isUploading={undefined}          />
-        )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

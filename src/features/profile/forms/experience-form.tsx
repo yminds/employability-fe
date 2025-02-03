@@ -34,7 +34,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
     index: number,
     field: keyof ExperienceItem,
     value: string | boolean
-  ) => {
+  ) => {  
     const updatedExperience = experience.map((exp, i) =>
       i === index ? { ...exp, [field]: value } : exp
     );
@@ -242,6 +242,56 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 )}
               </div>
             )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Current CTC <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="number"
+                value={exp.current_ctc}
+                onChange={(e) =>
+                  updateExperience(index, "current_ctc", e.target.value)
+                }
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                  getError(`experience.${index}.current_ctc`)
+                    ? "border-red-500"
+                    : ""
+                }`}
+                placeholder="Enter current CTC"
+              />
+              {getError(`experience.${index}.current_ctc`) && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getError(`experience.${index}.current_ctc`)}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Expected CTC <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="number"
+                value={exp.expected_ctc}
+                onChange={(e) =>
+                  updateExperience(index, "expected_ctc", e.target.value)
+                }
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                  getError(`experience.${index}.expected_ctc`)
+                    ? "border-red-500"
+                    : ""
+                }`}
+                placeholder="Enter expected CTC"
+              />
+              {getError(`experience.${index}.expected_ctc`) && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getError(`experience.${index}.expected_ctc`)}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">

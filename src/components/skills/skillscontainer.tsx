@@ -89,7 +89,7 @@ const SkillsContainer: React.FC = () => {
               </div>
             </div>
             {/* Right Section */}
-            <div className="flex-[3] w-full space-y-4 sm:mt-0 ">
+            <div className="flex-[3] w-full space-y-4 sm:my-0 ">
               <div className="flex flex-col gap-6">
                 <EmployabilityScore 
                   goalId={selectedGoal?._id || ""}

@@ -13,18 +13,9 @@ import type { RootState } from "@/store/store"
 import Skeleton from "react-loading-skeleton"
 import "react-loading-skeleton/dist/skeleton.css"
 
-interface Skill {
+
+interface Project {
   _id: string
-  name: string
-  description: string
-  icon?: string
-}
-
-type ProjectStatus = "Verified" | "In-review" | "Unverified" | "Incomplete";
-
-interface ProjectCardProps {
-  project: {
-    _id: string
   name: string
   description: string
   tech: {
@@ -34,46 +25,51 @@ interface ProjectCardProps {
   }[]
   githubLink: string[]
   liveLink: string
-  thumbnail?: string // Changed from object to string
-  images?: string  // Changed from array of objects to string array
-  synopsisDoc?: string // Changed from object to string
+  thumbnail?: string
+  images?: string
+  synopsisDoc?: string
   synopsis?: string
-  status: ProjectStatus
+  status: "Verified" | "In-review" | "Unverified" | "Incomplete"
   score?: number
   lastCompletedStep?: number
-  } | null
-  onOpenUploadModal?: (project: ProjectCardProps["project"]) => void
+}
+
+type ProjectStatus = "Verified" | "In-review" | "Unverified" | "Incomplete";
+
+interface ProjectCardProps {
+  project: Project | null
+  onOpenUploadModal?: (project: Project | null) => void
   onOpenDeleteModal?: (projectId: string) => void
 }
 
 export const ProjectCardSkeleton: React.FC = () => {
   return (
-    <Card className="flex flex-col items-start gap-7 p-5 pr-8 pb-7 bg-white rounded-lg border border-black/10 self-stretch mb-4">
-      <div className="flex items-start gap-5 w-full">
-        <Skeleton width={150} height={100} />
-        <div className="flex items-start justify-between flex-1">
+    <Card className="flex flex-col items-start gap-7 p-5 pr-8 pb-7 bg-white rounded-lg border border-black/10 self-stretch mb-4 sm:p-4">
+      <div className="flex items-start gap-5 w-full md:flex-col sm:flex-col">
+        <Skeleton width={150} height={100} className="md:w-full sm:w-full md:h-[200px] sm:h-[200px]" />
+        <div className="flex items-start justify-between flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full">
           <div className="flex flex-col gap-4">
             <Skeleton width={200} height={20} />
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Skeleton width={60} height={24} />
               <Skeleton width={60} height={24} />
               <Skeleton width={60} height={24} />
             </div>
           </div>
-          <div className="flex items-center mt-5">
-            <div className="w-32">
+          <div className="flex items-center mt-5 md:flex-col sm:flex-col md:items-start sm:items-start md:w-full sm:w-full md:gap-4 sm:gap-4">
+            <div className="w-32 md:w-full sm:w-full">
               <Skeleton width={80} height={40} />
             </div>
-            <div className="flex gap-8">
-              <Skeleton width={112} height={36} />
-              <Skeleton width={112} height={36} />
+            <div className="flex gap-8 md:flex-col sm:flex-col md:w-full sm:w-full md:gap-2 sm:gap-2">
+              <Skeleton width={112} height={36} className="md:w-full sm:w-full" />
+              <Skeleton width={112} height={36} className="md:w-full sm:w-full" />
             </div>
           </div>
         </div>
       </div>
       <CardContent className="flex flex-col px-0 w-full">
         <Skeleton count={3} />
-        <div className="flex gap-6 mt-3">
+        <div className="flex gap-6 mt-3 md:flex-col sm:flex-col md:gap-2 sm:gap-2">
           <Skeleton width={100} height={20} />
           <Skeleton width={100} height={20} />
         </div>
@@ -96,20 +92,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, o
     }
   }
 
-  const renderThumbnail = () => {
-    if (!project?.thumbnail) return null
-
-    return (
-      <div className="relative w-[150px] h-[100px] bg-[#fcfcfc] rounded overflow-hidden">
-        <img
-          src={project.thumbnail || "/placeholder.svg?height=100&width=150"}
-          alt={`${project.name} Thumbnail`}
-          className="w-full h-full object-cover"
-        />
-      </div>
-    )
-  }
-
   type StatusConfigType = {
     [K in ProjectStatus]: {
       imgSrc?: string;
@@ -118,9 +100,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, o
       showScore: boolean;
       action: string;
     }
-   }
+  }
    
-   const statusConfig: StatusConfigType = {
+  const statusConfig: StatusConfigType = {
     Verified: {
       imgSrc: verifyImg,
       color: "text-[#10b753]",
@@ -145,23 +127,31 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, o
       showScore: false,
       action: "Complete Project", 
     },
-   };
+  };
 
   const config = statusConfig[project.status]
   const StatusIcon = config?.component
 
   return (
-    <Card className="flex flex-col items-start gap-7 p-5 pr-8 pb-7 bg-white rounded-lg border border-black/10 self-stretch mb-4">
-      <div className="flex items-start gap-5 w-full">
-        {project.thumbnail && renderThumbnail()}
+    <Card className="flex flex-col items-start gap-7 p-5 pr-8 pb-7 bg-white rounded-lg border border-black/10 self-stretch mb-4 sm:p-4">
+      <div className="flex items-start gap-5 w-full md:flex-col sm:flex-col">
+        {project.thumbnail && (
+          <div className="relative w-[150px] h-[100px] bg-[#fcfcfc] rounded overflow-hidden md:w-full sm:w-full md:h-[200px] sm:h-[200px]">
+            <img
+              src={project.thumbnail || "/placeholder.svg?height=100&width=150"}
+              alt={`${project.name} Thumbnail`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
 
-        <div className="flex items-start justify-between flex-1">
+        <div className="flex items-start justify-between flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full">
           <div className="flex flex-col gap-4">
             <h2 className="text-[#1f2226] text-base font-medium font-['Ubuntu'] leading-snug">{project.name}</h2>
             <div className="flex flex-col gap-2">
               {project.thumbnail ? (
                 <>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {project.tech.slice(0, 3).map((tech) => (
                       <Badge
                         key={tech._id}
@@ -174,7 +164,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, o
                       </Badge>
                     ))}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {project.tech.slice(3, 5).map((tech) => (
                       <Badge
                         key={tech._id}
@@ -199,7 +189,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, o
                   </div>
                 </>
               ) : (
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   {project.tech.slice(0, 5).map((tech) => (
                     <Badge
                       key={tech._id}
@@ -226,9 +216,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, o
             </div>
           </div>
 
-          <div className="flex items-center mt-5">
-            <div className="w-32">
-              {project.status === "Verified" && project.score &&  (
+          <div className="flex items-center mt-5 md:flex-col sm:flex-col md:items-start sm:items-start md:w-full sm:w-full md:gap-4 sm:gap-4">
+            <div className="w-32 md:w-full sm:w-full">
+              {project.status === "Verified" && project.score && (
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center text-xl">
                     <span className="text-[#0b0e12] font-medium">{project.score.toFixed(1)}</span>
@@ -262,16 +252,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, o
               )}
             </div>
 
-            <div className="flex gap-8">
+            <div className="flex gap-8 md:flex-col sm:flex-col md:w-full sm:w-full md:gap-2 sm:gap-2">
               <Button
                 variant="link"
-                className="text-[#67696b] underline w-28 justify-center"
+                className="text-[#67696b] underline w-28 justify-center md:w-full sm:w-full"
                 onClick={project.status === "Incomplete" ? handleIncompleteClick : undefined}
               >
                 {config.action}
               </Button>
 
-              <Button variant="outline" className="border-[#67696b] text-[#67696b] w-28 justify-center">
+              <Button 
+                variant="outline" 
+                className="border-[#67696b] text-[#67696b] w-28 justify-center md:w-full sm:w-full"
+              >
                 View Project
               </Button>
             </div>
@@ -279,12 +272,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenUploadModal, o
         </div>
       </div>
 
-      <CardContent className="flex flex-col px-0">
+      <CardContent className="flex flex-col px-0 w-full">
         <p className="text-[#67696b] text-base font-normal font-['SF Pro Display'] leading-7 tracking-tight">
           {project.description}
         </p>
         {(project.githubLink.length > 0 || project.liveLink) && (
-          <div className="flex gap-6 mt-3">
+          <div className="flex gap-6 mt-3 md:flex-col sm:flex-col md:gap-2 sm:gap-2">
             {project.githubLink.length > 0 && (
               <Button variant="link" className="text-[#67696b] underline p-0 h-auto" asChild>
                 <a href={project.githubLink[0]} target="_blank" rel="noopener noreferrer">
