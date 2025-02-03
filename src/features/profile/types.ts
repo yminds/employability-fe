@@ -4,43 +4,43 @@ export interface ProfileFormData {
     name: string;
     mobile: string;
     email: string;
-    dateOfBirth: string;
+    date_of_birth: string;
     gender: string;
     country: string;
     state: string;
     city: string;
-    profileImage?: File;
+    profile_image?: string;
   };
   socialProfiles: {
-    github: string;
-    linkedin: string;
-    dribbble: string;
-    behance: string;
+    gitHub: string;
+    linkedIn: string;
     portfolio: string;
   };
   skills: Array<{
     name: string;
     rating: number;
   }>;
-  experience: Array<{
-    title: string;
-    company: string;
-    employmentType: string;
-    location: string;
-    startDate: string;
-    endDate: string;
-    currentlyWorking: boolean;
-    currentCTC: string;
-    expectedCTC: string;
-  }>;
+  experience: ExperienceItem[];
 
-  certifications: Array<{
-    title: string;
-    issuedBy: string;
-    issueDate: string;
-    expirationDate: string;
-    credentialURL: string;
-  }>;
+  certifications: Certification[];
+}
+
+export interface BasicInfo {
+  name: string;
+  mobile: string;
+  email: string;
+  date_of_birth: string;
+  gender: string;
+  country: string;
+  state: string;
+  city: string;
+  profile_image?: string;
+}
+
+export interface SocialProfiles {
+  gitHub: string;
+  linkedIn: string;
+  portfolio: string;
 }
 
 // src/types.ts
@@ -61,36 +61,33 @@ export interface Education {
 // src/features/profile/types.ts
 
 export interface Certification {
-  certificate_s3_url: any;
-  issue_date: ReactNode;
-  expiration_date: string;
-  issued_by: ReactNode;
-  _id: string;
+  _id?: string;
+  user_id?: string;
   title: string;
-  issuedBy: string;
-  issueDate: string;
-  expirationDate: string | null;
-  credentialURL: string;
+  issued_by: string;
+  issue_date: string;
+  expiration_date: string | null;
+  certificate_s3_url: string;
 }
 
 // types.ts (or your designated types file)
 export interface ExperienceItem {
   _id?: string;
   company: string;
-  jobType: string | number | readonly string[] | undefined;
+  // jobType: string | number | readonly string[] | undefined;
   isVerified: boolean | undefined;
-  duration: string | number | readonly string[] | undefined;
+  // duration: string | number | readonly string[] | undefined;
   id: string;
-  jobTitle: string;
-  employmentType: string;
-  companyName: string;
+  title: string;
+  employment_type: string;
+  // companyName: string;
   companyLogo: string;
   location: string;
-  startDate: string;
-  endDate: string | null;
-  currentlyWorking: boolean;
-  currentCTC: string;
-  expectedCTC: string;
+  start_date: string;
+  end_date: string | null;
+  currently_working: boolean;
+  current_ctc: number;
+  expected_ctc: number;
   description: string;
 }
 

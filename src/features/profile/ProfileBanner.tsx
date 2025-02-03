@@ -1,13 +1,31 @@
 import { currentStatusSVG } from "./svg/currentStatusSVG";
 import { Button } from "@/components/ui/button";
+import threeDots from "@/assets/profile/threedots.svg";
+import { Pencil } from "lucide-react";
+import EditBioModal from "@/components/modal/EditBioModal";
+import { useEffect, useState } from "react";
+import { Country, State } from "country-state-city";
 
 interface ProfileBannerProps {
   user: any;
   bio: string;
+  onBioUpdate: (newBio: string) => void;
 }
 
-const ProfileBanner = ({ user, bio }: ProfileBannerProps) => {
-  console.log(user);
+const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
+  console.log("Current Status:", user.current_status);
+
+  const country = user.address?.country ? Country.getCountryByCode(user.address.country) : null
+  const state =
+    user.address?.state && user.address?.country
+      ? State.getStateByCodeAndCountry(user.address.state, user.address.country)
+      : null
+
+  const [isEditBioOpen, setIsEditBioOpen] = useState(false);
+
+  const handleBioSave = (newBio: string) => {
+    onBioUpdate(newBio);
+  };
 
   return (
     <div
@@ -32,18 +50,23 @@ const ProfileBanner = ({ user, bio }: ProfileBannerProps) => {
                   className="w-full h-full rounded-full object-cover"
                 />
                 {/* SVG Semi-Circle */}
-                {currentStatusSVG}
+                {user.current_status === "Actively seeking job" &&
+                  currentStatusSVG}
                 <div className="mb-[]">
                   <span className=" bg-slate-600 "></span>
                 </div>
               </div>
 
               <div className="flex flex-col gap-2 items-start justify-end">
-                <h1 className="text-4xl font-semibold text-gray-900">
+                <h1 className="text-[#202326] text-3xl font-medium font-ubuntu leading-[26px] tracking-[-0.2px]">
                   {user.name}
                 </h1>
-                <p className="text-xl text-gray-600">{user?.address?.city}</p>
-                <div className="flex items-center gap-2">
+                <p className="text-[#414447] text-l font-normal font-ubuntu leading-[24px] tracking-[0.24px]">
+                  {user?.address
+                    ? `${state?.name}, ${country?.name}`
+                    : ""}
+                </p>
+                {/* <div className="flex items-center gap-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="17"
@@ -61,12 +84,14 @@ const ProfileBanner = ({ user, bio }: ProfileBannerProps) => {
                       strokeWidth="2"
                     />
                   </svg>
-                  <span className="text-gray-600">Actively seeking work</span>
-                </div>
+                  <span className="text-[#000] text-base font-normal font-sf-pro leading-6 tracking-[0.24px]">
+                    {currentStatus}
+                  </span>
+                </div> */}
               </div>
             </div>
             <div className="flex flex-col items-start justify-end gap-2 ">
-              <h2 className="text-2xl font-medium text-gray-900">
+              <h2 className="text-[#414447] text-2xl font-medium leading-[26px] tracking-[-0.2px] font-ubuntu">
                 Full Stack developer
               </h2>
               <div className="flex items-center gap-2  rounded-lg">
@@ -98,28 +123,41 @@ const ProfileBanner = ({ user, bio }: ProfileBannerProps) => {
           </div>
 
           {/* Bio */}
-          <p className="text-lg text-gray-600 max-w-3xl">
-            {user?.summary ||
-              "Full-stack developer with a strong foundation in React, Python, and MongoDB. A quick learner passionate about building user-friendly web applications, eager to apply skills in a professional environment."}
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <p className="text-[#414447] text-base font-normal font-sf-pro leading-6 tracking-[0.24px] flex-1">
+              {bio}
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mt-1"
+              onClick={() => setIsEditBioOpen(true)}
+            >
+              <Pencil className="h-4 w-4 text-[#414447]" />
+            </Button>
+          </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4">
-            <Button
-              variant="default"
-              className="bg-[#001F3F] text-white hover:bg-[#001F3F]/90 px-8"
-            >
-              Contact
-            </Button>
+          <div className="flex items-center gap-4">
             <Button
               variant="outline"
-              className="border-[#001F3F] text-[#001F3F] hover:bg-[#001F3F]/10 px-8"
+              className="flex w-[187px] h-[40px] px-3 py-2 justify-center items-center gap-3 bg-white text-black rounded-[11px] border border-[#001630] font-sf-pro"
             >
-              Schedule AI interview
+              Share Profile
             </Button>
+
+            <div className="w-6 h-6 flex items-center justify-center">
+              <img src={threeDots} alt="Three Dots" />
+            </div>
           </div>
         </div>
       </div>
+      <EditBioModal
+        isOpen={isEditBioOpen}
+        onClose={() => setIsEditBioOpen(false)}
+        onSave={handleBioSave}
+        currentBio={bio}
+      />
     </div>
   );
 };

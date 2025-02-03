@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useGetAllPreDefinedGoalsQuery, useFilterGoalsMutation } from "@/api/predefinedGoalsApiSlice";
-import PredefinedGoalDialog from "./PredefinedGoalDialog";
+import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
 import GoalListSkeleton from "./GoalListSkeleton";
 import { useLocation } from "react-router-dom";
 import GoalsBanner from "@/components/setgoals/GoalsBanner";
@@ -11,7 +11,7 @@ interface Goal {
     name: string;
     description: string;
     image?: string;
-    skill_pool_id: string[];
+    skill_pool_id: string[]; // Array of skill IDs associated with the goal
     predefined_goal_id: string;
     job_market_demand: string;
     min_salary_range: number;
@@ -22,13 +22,13 @@ interface Goal {
 }
 
 interface GoalsData {
-    data: Goal[];
+    data: Goal[]; // Array of Goal objects
 }
 
 interface Props {
     isLoading: boolean;
     error: boolean;
-    data?: GoalsData;
+    data?: GoalsData; // The data could be undefined if the API request hasn't completed yet
     setJourneyDialog: boolean;
     searchGoals: any[] | undefined;
     displayTitle: boolean;
@@ -45,17 +45,7 @@ const colorPalette = [
 
 const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters }) => {
     const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery() as { data: GoalsData | undefined, error: any, isLoading: boolean };
-    const [fetchFilteredGoals, { isLoading: isFetchingFilteredGoals }] = useFilterGoalsMutation();
-
-    const [data, setData] = useState<any[]>([]);
-    const [searchTitle, setSearchTitle] = useState("");
-    const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [bannerColors, setBannerColors] = useState<string[]>([]);
-    const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-
-    const location = useLocation();
-    const isSetGoalsPage = location.pathname === "/setgoal";
+    const [fetchFilteredGoals] = useFilterGoalsMutation();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -83,6 +73,12 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
         fetchData();
     }, [filters, allGoals, fetchFilteredGoals]);
 
+
+    const [data, setData] = useState<any[]>([]); // State to store the final data
+
+    const [searchTitle, setSearchTitle] = useState("");
+    // const [BannerColor, setBannerCollor] = useState("")
+
     useEffect(() => {
         if (searchGoals && searchGoals.data.length > 0) {
             setData(searchGoals.data);
@@ -96,6 +92,11 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
         }
     }, [searchGoals, allGoals]);
 
+    const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // State to store selected goal
+    const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
+
+    const [bannerColors, setBannerColors] = useState<string[]>([]);
+
     useEffect(() => {
         if (data.length > 0) {
             const colors = data.map((_, index) => colorPalette[index % colorPalette.length]);
@@ -103,45 +104,62 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
         }
     }, [data]);
 
+    // Function to open the dialog with selected goal
     const handleGoalClick = (goal: Goal) => {
-        setSelectedGoal(goal);
-        setIsDialogOpen(true);
+        setSelectedGoal(goal); // Set the selected goal
+        setIsDialogOpen(true); // Open the dialog
     };
+
+    const [hoveredCard, setHoveredCard] = useState(null); // Track the hovered card by ID
+
+    const location = useLocation(); // Get current location
+
+    // Check if the URL is `/setgoals`
+    const isSetGoalsPage = location.pathname === "/setgoal";
 
     return (
         <>
-            {isDialogOpen && selectedGoal && (
+            {isDialogOpen && selectedGoal  && (
                 <PredefinedGoalDialog
                     isOpen={isDialogOpen}
                     setIsOpen={setIsDialogOpen}
                     selectedGoal={selectedGoal}
                     setJourneyDialog={setJourneyDialog}
-                    isSetGoalsPage={isSetGoalsPage}
-                    bannerColor={bannerColors[data.findIndex(goal => goal._id === selectedGoal._id)] || colorPalette[0]}
+                    isSetGoalsPage={isSetGoalsPage} // Pass the flag to control the appearance
+                    bannerColor={bannerColors[data.findIndex(goal => goal._id === selectedGoal._id)] || colorPalette[0]} // Ensure a default color
                 />
             )}
 
             <h5 className={`text-[20px] font-medium leading-[26px] tracking[-0.2px] ${displayTitle ? "" : "hidden"}`}>{searchTitle}</h5>
 
+            {/* Grid displaying the list of goals */}
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full">
-                {isFetchingFilteredGoals && <GoalListSkeleton />}
-                {!isFetchingFilteredGoals && fetchError && <p>Oops! Something went wrong while loading goals.</p>}
+                {/* Loading and Error States */}
+                {isFetching && <GoalListSkeleton />}
+                {fetchError && <p>Oops! Something went wrong while loading goals.</p>}
 
-                {!isFetchingFilteredGoals && data?.map((goal, index) => (
+                {/* No Goals Found */}
+                {/* {data.length === 0 && !isFetching && !fetchError && <p>No goals match your filters.</p>} */}
+
+                {/* Render Goal Cards */}
+                {data?.map((goal, index) => (
                     <div
                         key={goal._id}
                         className="relative cursor-pointer"
-                        onMouseEnter={() => setHoveredCard(goal._id)}
-                        onMouseLeave={() => setHoveredCard(null)}
-                        onClick={() => handleGoalClick(goal)}
+                        onMouseEnter={() => setHoveredCard(goal._id)} // Set hovered card ID
+                        onMouseLeave={() => setHoveredCard(null)} // Reset hover state
+                        onClick={() => handleGoalClick(goal)} // Handle card click
                     >
+                        {/* Default Block */}
                         <div
                             className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
                         >
+                            {/* Add an Image or Placeholder */}
+
                             <GoalsBanner
-                                className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover relative"
+                                className="rounded-tl-[9px] rounded-tr-[9px] w-full h-[90px] object-cover relative "
                                 data={goal}
-                                color={bannerColors[index] || colorPalette[0]}
+                                color={bannerColors[index] || colorPalette[0]} // Ensure a default color
                                 isGoalsList={true}
                             />
 
@@ -163,6 +181,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                                 </div>
                             </div>
                         </div>
+
                         {/* Hovered Block */}
                         <div
                             className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}

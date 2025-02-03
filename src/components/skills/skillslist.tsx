@@ -11,8 +11,9 @@ import { useNavigate } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import search from '@/assets/skills/search.svg';
+import AddSkillsModal from './addskills';
 
-interface SkillPoolId {
+export interface SkillPoolId {
   _id: string;
   name: string;
   icon?: string;
@@ -31,6 +32,16 @@ interface SkillListProps {
   goalId: string | null;
   onSkillsUpdate: (isUpdated: boolean) => void;
   isSkillsUpdated?: boolean;
+  goals: {
+    message: string;
+    data: [
+      {
+        experience: string | undefined;
+        _id: string;
+        name: string;
+      }
+    ];
+  } | undefined;
 }
 
 type SkillCategory = 'mandatory' | 'optional' | 'all';
@@ -40,6 +51,7 @@ const SkillList: React.FC<SkillListProps> = ({
   goalId,
   onSkillsUpdate,
   isSkillsUpdated,
+  goals
 }) => {
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
@@ -54,13 +66,14 @@ const SkillList: React.FC<SkillListProps> = ({
   // Mutation hooks
   const [removeGoalFromSkill] = useRemoveGoalFromSkillMutation();
   const [updateSelfRating] = useUpdateSelfRatingMutation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (userId && goalId) {
       fetchSkills(userId, goalId);
     }
   }, [userId, goalId]);
- 
+
   useEffect(() => {
     if (isSkillsUpdated && userId && goalId) {
       console.log("isSkillsUpdateduseEffect")
@@ -174,26 +187,29 @@ const SkillList: React.FC<SkillListProps> = ({
       }
     }, [isSelfRatingEdited]);
 
+    const handleOpenModal = () => {
+      setIsModalOpen(true);
+    };
+
     return (
-      <div className="flex gap-1 items-center mb-4 sm:max-w-[280px] sm:flex sm:flex-col-reverse sm:items-start md:items-start">
+      <div className="flex gap-1 items-center mb-4 sm:max-w-[100%] sm:flex sm:flex-col-reverse sm:items-start md:items-start sm:gap-5">
         <div className="sm:flex h-[46px]">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => handleCategorySelect(category.id as SkillCategory)}
-              className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all sm:px-2 sm:py-2 ${
-                selectedCategory === category.id
+              className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all sm:px-2 sm:py-2 ${selectedCategory === category.id
                   ? 'bg-[#001630] text-white hover:bg-[#062549]'
                   : 'text-gray-600'
-              }`}
+                }`}
             >
               {category.label}
             </button>
           ))}
         </div>
 
-        <div className="flex items-center ml-auto sm:ml-0">
-          <div className="relative w-64 sm:max-w-[200px]">
+        <div className="flex items-center justify-between ml-auto sm:ml-0 sm:w-[100%] gap-2">
+          <div className="relative w-64 sm:max-w-[100%] ">
             <input
               type="text"
               placeholder="Search"
@@ -204,6 +220,14 @@ const SkillList: React.FC<SkillListProps> = ({
             <div className="absolute inset-y-0 left-3 flex items-center">
               <img src={search} alt="Search Icon" className="w-4 h-4 text-gray-400" />
             </div>
+          </div>
+          <div>
+            <button
+              onClick={handleOpenModal}
+              className=" hidden py-2 text-sm w-[138px] h-[38px] md:h[50px] md:w[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC] sm:block"
+            >
+              Add Skills
+            </button>
           </div>
         </div>
       </div>
@@ -279,8 +303,17 @@ const SkillList: React.FC<SkillListProps> = ({
     );
   };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSkillsUpdate = (isUpdated: boolean) => {
+    onSkillsUpdate(isUpdated);
+  };
+
+
   return (
-    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] mb-4 overflow-x-auto scrollbar-hide">
+    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] sm:p-6 mb-4 overflow-x-auto scrollbar-hide">
       <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
         {isDashboard && (
           <div className="flex justify-between items-center mb-5">
@@ -299,9 +332,20 @@ const SkillList: React.FC<SkillListProps> = ({
         {renderSkillChips()}
 
         {isLoading
-          ? Array.from({ length: 3 }).map((_, index) => renderLoadingSkeleton())
+          ? Array.from({ length: 3 }).map((_) => renderLoadingSkeleton())
           : renderSkills(filteredSkills)}
       </div>
+      {/* AddSkillsModal */}
+      {isModalOpen && goalId && (
+        <AddSkillsModal
+          goalId={goalId}
+          onClose={handleCloseModal}
+          userId={userId}
+          onSkillsUpdate={handleSkillsUpdate}
+          goals={goals}
+          prefillSkills={[]}
+        />
+      )}
     </section>
   );
 };

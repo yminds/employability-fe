@@ -1,4 +1,29 @@
 import { apiSlice } from './apiSlice';
+interface Skills{
+  data: Skill[];
+}
+
+export interface SkillPoolId {
+  _id: string;
+  name: string;
+  icon?: string;
+}
+
+export interface Skill {
+  _id: string;
+  skill_pool_id: SkillPoolId;
+  verified_rating: number;
+  self_rating: number | null;
+  level?: string;
+}
+interface Goal {
+  message: string;
+  data: {
+    experience: string | undefined;
+    _id: string;
+    name: string;
+  }[];
+} ;
 
 export const goalsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -30,7 +55,7 @@ export const { useAddUserGoalMutation } = createGoalApiSlice;
 
 export const skillsPoolNameApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getMultipleSkillsName: builder.query<any[], string>({
+    getMultipleSkillsName: builder.query<Skills, string>({
       query: (searchTerm) => ({
         url: `/api/v1/predefinedGoals/goals/${searchTerm}`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',
@@ -43,7 +68,7 @@ export const { useGetMultipleSkillsNameQuery } = skillsPoolNameApiSlice;
 
 export const userGoalApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getUserGoal: builder.query<any[], string>({
+    getUserGoal: builder.query<Goal, string>({
       query: (searchTerm) => ({
         url: `/api/v1/goals/userGoals/${searchTerm}`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',
@@ -56,7 +81,7 @@ export const { useGetUserGoalQuery } = userGoalApiSlice;
 
 export const searchGoalApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getSearchGoal: builder.query<any[], string>({
+    getSearchGoal: builder.query<Goal, string>({
       query: (searchTerm) => ({
         url: `/api/v1/predefinedGoals/search`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',

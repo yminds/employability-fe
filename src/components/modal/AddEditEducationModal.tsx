@@ -1,198 +1,219 @@
-  import React, { useState, useEffect } from "react";
-  import EducationForm from "../forms/education-form";
-  import { Education } from "./../../features/profile/types";
-  import {
-    useUpdateEducationMutation,
-    useDeleteEducationMutation,
-    useAddEducationMutation,
-  } from "../../api/educationSlice";
-  import { useSelector } from "react-redux";
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import {
+  useAddEducationMutation,
+  useUpdateEducationMutation,
+  useDeleteEducationMutation,
+} from "@/api/educationSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import EducationForm from "../forms/education-form";
+import type { Education } from "@/features/profile/types";
+import { toast } from "sonner";
+import { validateEducation } from "@/features/profile/validation/validateEducation";
 
-  interface AddEditEducationModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    initialEducation: Education[];
-    onSave: (education: Education[]) => void;
-  }
+interface AddEducationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  initialEducation: Education[];
+  mode: "add" | "edit" | null;
+}
 
-  const AddEditEducationModal: React.FC<AddEditEducationModalProps> = ({
-    isOpen,
-    onClose,
-    initialEducation,
-    onSave,
-  }) => {
-    const [isSaving, setIsSaving] = useState(false);
-    const [education, setEducation] = useState<Education[]>([]);
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const user = useSelector((state: any) => state.auth.user);
+const AddEditEducationModal: React.FC<AddEducationModalProps> = ({
+  isOpen,
+  onClose,
+  initialEducation,
+  mode,
+}) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [education, setEducation] = useState<Education[]>([]);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const user = useSelector((state: any) => state.auth.user);
 
-    const [updateEducation, { isLoading: isUpdating }] =
-      useUpdateEducationMutation();
-    const [deleteEducation, { isLoading: isDeleting }] =
-      useDeleteEducationMutation();
-    const [addEducation, { isLoading: isAdding }] = useAddEducationMutation();
+  const [addEducation] = useAddEducationMutation();
+  const [updateEducation] = useUpdateEducationMutation();
+  const [deleteEducation] = useDeleteEducationMutation();
 
-    useEffect(() => {
-      if (isOpen) {
-        setEducation(initialEducation);
-        setErrors({});
-        setIsSaving(false); // Reset saving state
-      }
-    }, [isOpen, initialEducation]);
-    const handleFormChange = (updatedEducation: Education[]) => {
-      setEducation(updatedEducation);
-    };
+  useEffect(() => {
+    if (isOpen) {
+      setEducation(
+        mode === "add"
+          ? [
+              {
+                id: "",
+                highest_education_level: "",
+                education_level: "",
+                degree: "",
+                institute: "",
+                board_or_certification: "",
+                from_date: "",
+                till_date: "",
+                cgpa_or_marks: "",
+              },
+            ]
+          : initialEducation
+      );
+      setErrors({});
+      setIsSaving(false);
+    }
+  }, [isOpen, initialEducation, mode]);
 
-    const handleAddEducation = async (newEducation: Education) => {
-      // Update the local state first to show the new form immediately
-      setEducation((prevEducation) => [...prevEducation, newEducation]);
-
-      // Optional: If you want to save to API immediately
-      try {
-        const result = await addEducation({
-          ...newEducation,
-          user_id: user._id,
-        }).unwrap();
-
-        // Update the education array with the returned data from API
-        setEducation((prevEducation) =>
-          prevEducation.map((edu) =>
-            edu._id === newEducation._id ? result : edu
-          )
-        );
-      } catch (err) {
-        console.error("Failed to save new education entry:", err);
-        // Optionally show error message
-        setErrors((prev) => ({
-          ...prev,
-          addEducation: "Failed to add education entry",
-        }));
-      }
-    };
-
-    const handleDeleteEducation = async (educationId: string) => {
-      try {
-        await deleteEducation(educationId).unwrap();
-        setEducation(education.filter((edu) => edu._id !== educationId));
-      } catch (error) {
-        console.error("Failed to delete education:", error);
-        setErrors({ ...errors, deleteEducation: "Failed to delete education" });
-      }
-    };
-
-    const handleSave = async () => {
-      try {
-        setIsSaving(true);
-        console.log("Starting save process with education:", education);
-
-        const updatedEducations = await Promise.all(
-          education.map(async (edu) => {
-            if (edu._id) {
-              console.log("Updating existing education:", edu);
-              const result = await updateEducation({
-                id: edu._id,
-                updatedEducation: edu,
-              }).unwrap();
-              console.log("Update result:", result);
-              return result;
-            } else {
-              console.log("Adding new education:", edu);
-              const result = await addEducation({
-                ...edu,
-                user_id: user._id,
-              }).unwrap();
-              console.log("Add result:", result);
-              return result;
-            }
-          })
-        );
-
-        console.log("All educations saved:", updatedEducations);
-        onSave(updatedEducations);
-        onClose();
-      } catch (error) {
-        console.error("Failed to save education:", error);
-        setErrors({ ...errors, saveEducation: "Failed to save education" });
-      } finally {
-        setIsSaving(false);
-      }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-hidden"
-        onClick={onClose}
-        aria-modal="true"
-        role="dialog"
-        aria-labelledby="modal-title"
-      >
-        <div
-          className="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 flex flex-col h-[90vh]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Sticky Header */}
-          <div className="sticky top-0 bg-white z-10 px-10 py-4 border-b mt-4 mb-4  border-gray-200 ">
-            <div className="flex justify-between items-center">
-              <h2 id="modal-title" className="text-2xl font-semibold">
-                {initialEducation.length > 0
-                  ? "Edit Education Details"
-                  : "Add Education Details"}
-              </h2>
-              <button
-                onClick={onClose}
-                className="text-gray-500 hover:text-gray-700 focus:outline-none"
-                aria-label="Close modal"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Scrollable Content */}
-          <div className="flex-grow overflow-y-auto px-8 py-4">
-            <EducationForm
-              education={education}
-              onChange={handleFormChange}
-              errors={errors}
-              onAddEducation={handleAddEducation}
-              onDeleteEducation={handleDeleteEducation}
-            />
-
-            {errors.saveEducation && (
-              <p className="text-red-500 text-sm mt-2">{errors.saveEducation}</p>
-            )}
-          </div>
-
-          {/* Sticky Footer */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-8 py-4">
-            <div className="flex justify-end">
-              <button
-                onClick={handleSave}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
-                disabled={isSaving}
-              >
-                {isSaving ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  const handleFormChange = (updatedEducation: Education[]) => {
+    setEducation(updatedEducation);
   };
 
-  export default AddEditEducationModal;
+  const handleAddEducation = () => {
+    const newEducation: Education = {
+      education_level: "",
+      degree: "",
+      institute: "",
+      board_or_certification: "",
+      from_date: "",
+      till_date: "",
+      cgpa_or_marks: "",
+      id: "",
+      highest_education_level: undefined,
+    };
+    setEducation([...education, newEducation]);
+  };
+
+  const handleDeleteEducation = async (index: number) => {
+    const educationToDelete = education[index];
+    if (educationToDelete._id) {
+      try {
+        await deleteEducation(educationToDelete._id).unwrap();
+        toast.success("Education entry deleted successfully");
+      } catch (error) {
+        console.error("Failed to delete education:", error);
+        setErrors({ ...errors, delete: "Failed to delete education" });
+        toast.error("Failed to delete education entry");
+        return;
+      }
+    }
+    const updatedEducation = education.filter((_, i) => i !== index);
+    setEducation(updatedEducation);
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors = validateEducation(education);
+    setErrors(newErrors);
+    setTimeout(() => setErrors({}), 2000);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      let addedCount = 0;
+      let updatedCount = 0;
+
+      await Promise.all(
+        education.map(async (edu) => {
+          if (edu._id) {
+            await updateEducation({
+              id: edu._id,
+              updatedEducation: edu,
+            }).unwrap();
+            updatedCount++;
+          } else {
+            await addEducation({
+              ...edu,
+              user_id: user._id,
+            }).unwrap();
+            addedCount++;
+          }
+        })
+      );
+
+      if(addedCount > 0) {
+        toast.success(
+          `${addedCount} education ${
+            addedCount === 1 ? "entry" : "entries"
+          } added successfully`
+        );
+      } else if (updatedCount > 0) {
+        toast.success(
+          `Education ${
+            updatedCount === 1 ? "entry" : "entries"
+          } updated successfully`
+        );
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Failed to save education:", error);
+      setErrors({
+        ...errors,
+        saveEducation: "Failed to save education",
+      });
+      toast.error("Failed to save education entries");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="bg-white rounded-lg max-w-4xl p-[42px] flex flex-col justify-center">
+        <DialogHeader className="w-full flex justify-between items-start">
+          <div className="flex flex-col items-start">
+            <DialogTitle className="text-black text-[20px] font-medium leading-[26px] tracking-[-0.2px] font-ubuntu">
+              {mode === "add" ? "Add Education" : "Edit Education"}
+            </DialogTitle>
+            <p
+              className="text-[16px] font-normal leading-6 tracking-[0.24px]"
+              style={{
+                color: "rgba(0, 0, 0, 0.60)",
+                fontFamily: '"SF Pro Display", sans-serif',
+              }}
+            >
+              {mode === "add"
+                ? "Enter your new education details"
+                : "Edit your education details"}
+            </p>
+          </div>
+        </DialogHeader>
+        <div className="max-h-[calc(98vh-300px)] overflow-y-auto pr-6 minimal-scrollbar">
+          <EducationForm
+            education={education}
+            onChange={handleFormChange}
+            errors={errors}
+            onAddEducation={handleAddEducation}
+            onDeleteEducation={handleDeleteEducation}
+            mode={mode}
+          />
+          {errors.saveEducation && (
+            <p className="text-red-500 text-sm mt-2">{errors.saveEducation}</p>
+          )}
+        </div>
+        <Button
+          onClick={handleSave}
+          className="w-full mt-6 bg-[#00183D] hover:bg-[#062549] text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+          disabled={isSaving || Object.keys(errors).length > 0}
+        >
+          {isSaving ? "Saving..." : "Save Changes"}
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AddEditEducationModal;

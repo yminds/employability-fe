@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from "react-redux";
+import { Menu } from 'lucide-react'; // Import Menu icon from lucide-react
 import LogoIcon from '../../assets/sidebar/logo.svg';
 import DashboardIcon from '../../assets/sidebar/dashboard.svg';
 import MentorIcon from '../../assets/sidebar/mentor.svg';
@@ -15,21 +16,23 @@ import { RootState } from '@/store/store';
 
 const Sidebar: React.FC = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false); // State to control menu visibility on small screens
+
     const getActiveClass = (path: string) => {
         return window.location.pathname === path ? 'bg-[#DBFFEA] text-[#10B754]' : '';
     };
 
-    const user_name = useSelector((state:RootState) => state.auth.user?.name);
-    const user_email = useSelector((state:RootState) => state.auth.user?.email);
-    
+    const user_name = useSelector((state: RootState) => state.auth.user?.name);
+    const user_email = useSelector((state: RootState) => state.auth.user?.email);
+
     const handleLogout = () => {
         localStorage.clear();
-        window.location.href = "/login"; 
+        window.location.href = "/login";
     };
 
     return (
         <div className="relative group">
-            <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden scrollbar-default transition-all ${isCollapsed ? 'w-20' : 'w-64'}`}>
+            <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden scrollbar-default transition-all ${isCollapsed ? 'w-20' : 'w-64'} sm:hidden`}>
                 <Link to="/" className={`flex items-center gap-2 self-stretch ${isCollapsed ? 'justify-center' : ''}`}>
                     <img src={LogoIcon} alt='' />
                     {!isCollapsed && (
@@ -89,7 +92,7 @@ const Sidebar: React.FC = () => {
                         </li>
                     </ul>
                 </nav>
-                
+
                 <div className="mt-6 w-full">
                     <button onClick={handleLogout} className={`p-2 bg-gray-100 border mb-4 w-full ${isCollapsed ? 'hidden' : ''}`}>
                         Logout
@@ -105,17 +108,115 @@ const Sidebar: React.FC = () => {
                     </div>
                 </div>
             </aside>
-            
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:hidden"
             >
                 {isCollapsed ? (
-                <img src={OpenIcon} alt="Expand" />
+                    <img src={OpenIcon} alt="Expand" />
                 ) : (
-                <img src={CloseIcon} alt="Collapse" />
+                    <img src={CloseIcon} alt="Collapse" />
                 )}
             </button>
+            <div className="sm:flex sm:items-center sm:justify-between sm:bg-white sm:shadow-md sm:p-4 sm:px-6 hidden">
+                <Link to="/" className="flex items-center gap-2">
+                    <img src={LogoIcon} alt="" />
+                    <div className="text-[#001630] text-[20px] font-bold leading-normal">
+                        <span>Employ</span>
+                        <span className="text-[#0AD472]">Ability.AI</span>
+                    </div>
+                </Link>
+                <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)} // Toggle menu visibility
+                    className="p-2 bg-white rounded-md focus:outline-none"
+                >
+                    <Menu size={24} />
+                </button>
+            </div>
+
+            {isMenuOpen && (
+                <div className="sm:flex sm:flex-col sm:bg-white sm:shadow-md sm:p-4 sm:px-6 hidden">
+                    <nav className="flex-1 w-full">
+                        <ul className="space-y-3">
+                            <li>
+                                <Link
+                                    to="/"
+                                    onClick={() => setIsMenuOpen(false)} // Close menu on navigation
+                                    className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/')}`}
+                                >
+                                    <img src={DashboardIcon} alt="Dashboard" />
+                                    <span className="text-gray-500 text-base font-medium leading-normal">Dashboard</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/mentor"
+                                    onClick={() => setIsMenuOpen(false)} // Close menu on navigation
+                                    className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/mentor')}`}
+                                >
+                                    <img src={MentorIcon} alt="Mentor" />
+                                    <span className="text-gray-500 text-base font-medium leading-normal">Mentor</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/user-profile"
+                                    onClick={() => setIsMenuOpen(false)} // Close menu on navigation
+                                    className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/user-profile')}`}
+                                >
+                                    <img src={ProfileIcon} alt="Profile" />
+                                    <span className="text-gray-500 text-base font-medium leading-normal">Profile</span>
+                                </Link>
+                            </li>
+
+                            <div className={`h-1 pt-4 border-b-[1px] border-b-[rgba(0,0,0,0.10)]`}></div>
+
+                            <label className="flex p-2 pt-4 px-4 text-gray-400 text-sm font-medium normal-case">Career</label>
+                            <li>
+                                <Link
+                                    to="/skills"
+                                    onClick={() => setIsMenuOpen(false)} // Close menu on navigation
+                                    className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/skills')}`}
+                                >
+                                    <img src={SkillsIcon} alt="Skills" />
+                                    <span className="text-gray-500 text-base font-medium leading-normal">Skills</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/projects"
+                                    onClick={() => setIsMenuOpen(false)} // Close menu on navigation
+                                    className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/projects')}`}
+                                >
+                                    <img src={ProjectsIcon} alt="Projects" />
+                                    <span className="text-gray-500 text-base font-medium leading-normal">Projects</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/interviews"
+                                    onClick={() => setIsMenuOpen(false)} // Close menu on navigation
+                                    className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/interviews')}`}
+                                >
+                                    <img src={InterviewsIcon} alt="Interviews" />
+                                    <span className="text-gray-500 text-base font-medium leading-normal">Interviews</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/jobs"
+                                    onClick={() => setIsMenuOpen(false)} // Close menu on navigation
+                                    className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass('/jobs')}`}
+                                >
+                                    <img src={JobsIcon} alt="Jobs" />
+                                    <span className="text-gray-500 text-base font-medium leading-normal">Jobs</span>
+                                </Link>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            )}
+
         </div>
     );
 };

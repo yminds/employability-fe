@@ -94,9 +94,10 @@ export const uploadResume = createAsyncThunk(
         throw new Error(data.error || "Failed to upload resume");
       }
 
+
       // Return the parsed data from the backend
       // console.log(data.parsedData);
-      return data.parsedData;
+      return data;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -108,10 +109,11 @@ const resumeSlice = createSlice({
   initialState,
   reducers: {
     // Reset state when needed
-    resetResumeState: (state) => {
+    resetResumeState: (state, action) => {
+      const { parsedData } = action.payload;
       state.uploading = false;
       state.error = null;
-      state.parsedData = null;
+      state.parsedData = parsedData;
     },
   },
   extraReducers: (builder) => {

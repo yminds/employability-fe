@@ -1,12 +1,6 @@
-import React, { useEffect, useState } from "react";
-import LinkedInImportModal from "../../components/modal/LinkedInImportModal";
-import ResumeUploadModal from "../../components/modal/ResumeUploadModal";
-import ResumeUploadProgressModal from "../../components/modal/ResumeUploadProgressModal";
-import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
+import React, { useState } from "react";
 import { ProfileFormData } from "./types";
 import EducationSection from "./EducationSection";
-import { RootState } from "@/store/store";
-import { Button } from "@/components/ui/button";
 import {
   Education,
   Certification,
@@ -14,457 +8,179 @@ import {
 } from "../../features/profile/types";
 import ExperienceSection from "./ExperienceSection";
 import CertificationsSection from "./CertificationsSection";
-import { useSelector } from "react-redux";
-import { currentStatusSVG } from "./svg/currentStatusSVG";
+import { useSelector, useDispatch } from "react-redux";
 import SkillList from "@/components/skills/skillslist";
 import ProfileBanner from "./ProfileBanner";
 import { useNavigate } from "react-router-dom";
-// import useGetUser
+import MockInterviewSection from "./MockInterviewSection";
+import MockInterivewImage from "@/assets/profile/MockInterview.svg";
+import StatsSection from "./StatsSection";
+import CurrentStatusSection from "./CurrentStatusSection";
+import ContactInformationSection from "./ContactInformationSection";
+import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
+import { useUpdateUserMutation } from "@/api/userApiSlice";
+import { updateUserProfile } from "../authentication/authSlice";
+import CompleteProfileSection from "./CompleteProfileSection";
+import arrow from "@/assets/skills/arrow.svg";
 
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
+  console.log("user in complete modal", user);
+
   const navigate = useNavigate();
-  const initialExperiences: ExperienceItem[] = [];
-  const [contactInfo, setContactInfo] = useState({});
+  const dispatch = useDispatch();
+  const { data: goalsData } = useGetUserGoalQuery(user._id) || "";
+  const [updateUser] = useUpdateUserMutation();
+
+  const educationEntries: Education[] = [];
+  const experiences: ExperienceItem[] = [];
+  const certifications: Certification[] = [];
+
+  const goalId = goalsData?.data?.[0]?._id || "";
 
   const [bio, setBio] = useState<string>(
-    "Full-stack developer with a strong foundation in React, Python, and MongoDB. A quick learner passionate about building user-friendly web applications, eager to apply skills in a professional environment."
+    user.bio ||
+      "Full-stack developer with a strong foundation in React, Python, and MongoDB. A quick learner passionate about building user-friendly web applications, eager to apply skills in a professional environment."
   );
-  const handleEditBio = (updatedBio: string) => {
-    setBio(updatedBio);
-  };
-  const [educationEntries, setEducationEntries] = useState<Education[]>();
-  const [experiences, setExperiences] =
-    useState<ExperienceItem[]>(initialExperiences);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false);
-  const [selectedExperience, setSelectedExperience] =
-    useState<ExperienceItem | null>(null);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-  // Handle Experience Save
-  const handleSaveExperience = (updatedExperiences: ExperienceItem[]) => {
-    setExperiences(updatedExperiences);
-    // console.log("Experiences updated:", updatedExperiences);
-    // Optionally, perform API calls or other side effects here
-  };
-
-  const handleAddExperience = () => {
-    setSelectedExperience(null); // No experience selected for adding
-    setIsExperienceModalOpen(true);
-  };
-  const handleExperiencesChange = (updatedExperiences: ExperienceItem[]) => {
-    setExperiences(updatedExperiences);
-  };
-  const handleEditExperience = (experience: ExperienceItem) => {
-    setSelectedExperience(experience); // Set the experience to edit
-    setIsExperienceModalOpen(true);
-  };
-
-  // Handle Education Save
-  const handleSaveEducation = (updatedEducation: Education[]) => {
-    setEducationEntries(updatedEducation);
-    // Optionally, perform API calls or other actions here
-  };
-
-  // Handle Certifications Save
-  const handleSaveCertifications = (updatedCertifications: Certification[]) => {
-    setCertifications(updatedCertifications);
-    // Optionally, perform API calls or other actions here
-  };
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  // ...
-  const [certifications, setCertifications] = useState<Certification[]>([]);
-
-  console.log(certifications);
-
-  // Example handler that updates state when new certifications are saved
-  const handleCertificationsSave = (updatedCerts: Certification[]) => {
-    setCertifications(updatedCerts);
-    // You could also do an API call here to persist the changes, etc.
-  };
-
-  const handleAddCertification = () => {
-    // If you want to do something special before the add modal opens
-    console.log("Add Certification button clicked!");
-  };
-
-  const handleEditCertification = (index: number) => {
-    // If you want to do something special when editing
-    console.log("Edit Certification index:", index);
-  };
-  // ...
-
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [fileDetails, setFileDetails] = useState<{
-    name: string;
-    size: string;
-  }>({ name: "", size: "" });
-
-  const handleUpload = (file: File) => {
-    setFileDetails({
-      name: file.name,
-      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-    });
-    setIsUploadModalOpen(false);
-    setIsProgressModalOpen(true);
-
-    // Simulate upload progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      setUploadProgress((prevProgress) => {
-        if (prevProgress >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return progress;
-      });
-    }, 300);
-  };
-
-  const handleProgressContinue = () => {
-    if (uploadProgress === 100) {
-      setIsProgressModalOpen(false);
-      setIsProfileModalOpen(true); // Open the CompleteProfileModal
+  const handleEditBio = async (updatedBio: string) => {
+    try {
+      await updateUser({
+        userId: user._id,
+        data: { bio: updatedBio },
+      }).unwrap();
+      setBio(updatedBio);
+      dispatch(updateUserProfile({ bio: updatedBio }));
+    } catch (error) {
+      console.error("Failed to update bio:", error);
     }
   };
 
+  const handleEditStatus = async (updatedStatus: string) => {
+    try {
+      await updateUser({
+        userId: user._id,
+        data: { currentStatus: updatedStatus },
+      }).unwrap();
+      dispatch(updateUserProfile({ current_status: updatedStatus }));
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
+
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // const handleOpenModal = () => {
+  //   setIsModalOpen(true);
+  // };
+
+  // const handleCloseModal = () => {
+  //   setIsModalOpen(false);
+  // };
+
+  // const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  // const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
+  // const [uploadProgress, setUploadProgress] = useState(0);
+  // const [fileDetails, setFileDetails] = useState<{
+  //   name: string;
+  //   size: string;
+  // }>({ name: "", size: "" });
+
+  // const handleUpload = (file: File) => {
+  //   setFileDetails({
+  //     name: file.name,
+  //     size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+  //   });
+  //   setIsUploadModalOpen(false);
+  //   setIsProgressModalOpen(true);
+
+  //   // Simulate upload progress
+  //   let progress = 0;
+  //   const interval = setInterval(() => {
+  //     progress += 10;
+  //     setUploadProgress((prevProgress) => {
+  //       if (prevProgress >= 100) {
+  //         clearInterval(interval);
+  //         return 100;
+  //       }
+  //       return progress;
+  //     });
+  //   }, 300);
+  // };
+
+  // const handleProgressContinue = () => {
+  //   if (uploadProgress === 100) {
+  //     setIsProgressModalOpen(false);
+  //     setIsProfileModalOpen(true); // Open the CompleteProfileModal
+  //   }
+  // };
+
+  // const handleSaveProfile = (data: ProfileFormData) => {
+  //   console.log("profile Data Saved: ", data);
+  // };
+
   return (
-    <div className="w-full max-w-screen-xl mx-auto px-6 py-8">
-      {/* Left Section */}
-      <div className="col-span-2 ">
-        <button
-          className="text-gray-600 hover:text-gray-800 flex items-center space-x-4 mb-6"
-          onClick={() => navigate("/")}
-        >
-          <div className="p-3 border bg-white border-gray-300 rounded-full">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="white"
-            >
-              <path
-                id="Vector 84"
-                d="M0.505025 5.50503C0.231658 5.77839 0.231658 6.22161 0.505025 6.49497L4.9598 10.9497C5.23316 11.2231 5.67638 11.2231 5.94975 10.9497C6.22311 10.6764 6.22311 10.2332 5.94975 9.9598L1.98995 6L5.94975 2.0402C6.22311 1.76684 6.22311 1.32362 5.94975 1.05025C5.67638 0.776886 5.23316 0.776886 4.9598 1.05025L0.505025 5.50503ZM1 6.7H12V5.3H1V6.7Z"
-                fill="#666666"
-              />
-            </svg>
-          </div>
-          <span>Back to Home</span>
-        </button>
-
-        <ProfileBanner user={user} bio={bio} />
-
-        <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <EducationSection
-              initialEducation={educationEntries} // Pass the initial education entries
-            />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg mt-6 mb-10">
-          <ExperienceSection experiences={experiences} />
-        </div>
-        <div className="bg-white rounded-lg mt-6 mb-10">
-          <CertificationsSection
-            certifications={certifications}
-            onAdd={handleAddCertification}
-            onEdit={handleEditCertification}
-            onSave={handleCertificationsSave}
-          />
-        </div>
-        <div className="bg-white rounded-lg mt-6 mb-10  max-h-[700px] overflow-hidden">
-          <div className="flex justify-between items-center mt-4 px-8 p-4">
-            <h3 className="font-medium text-lg">Skills</h3>
-          </div>
-          <SkillList isDashboard={false} />
+    <div className="w-full max-w-screen-xl mx-auto p-0">
+      <div className="flex justify-between items-center mb-4 sm:mt-3">
+        <div className="flex items-center space-x-2 gap-3">
+          <button
+            onClick={() => navigate("/")}
+            className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
+          >
+            <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
+          </button>
+          <h1 className="text-black font-ubuntu text-[20px] font-bold leading-[26px] tracking-[-0.025rem]">
+            Profile
+          </h1>
         </div>
       </div>
+      <div className="grid grid-cols-10 gap-6">
+        {/* Left Section */}
+        <div className="flex flex-col col-span-7">
+          <ProfileBanner user={user} bio={bio} onBioUpdate={handleEditBio} />
 
-      {/* Right Section */}
-      <div className="space-y-6 ">
-        <div className="bg-white p-6 rounded-lg mt-8">
-          <h2 className="font-semibold text-gray-700 mb-4">Current Status</h2>
-          <select className="block w-full border border-gray-300 rounded-md py-2 px-4">
-            <option>Actively seeking job</option>
-            <option>Open to offers</option>
-            <option>Not looking</option>
-          </select>
+          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+            <SkillList isDashboard={true} goalId={goalId} />
+          </div>
+
+          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+            <ExperienceSection intialExperiences={experiences} />
+          </div>
+
+          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+            <EducationSection initialEducation={educationEntries} />
+          </div>
+
+          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+            <CertificationsSection certifications={certifications} />
+          </div>
+          <div className="mb-6"></div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg">
-          <h2 className="font-semibold text-gray-700 mb-4 pl-4 pt-2">
-            Contact Information
-          </h2>
-          <div className="space-y-4 p-4">
-            {/* Profile URL */}
-            <div className="flex items-center space-x-4 pb-4 border-b border-gray-300">
-              <div className="p-3 border bg-white rounded-lg">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="23"
-                  height="22"
-                  viewBox="0 0 23 22"
-                  fill="none"
-                >
-                  <g clipPath="url(#clip0_40000365_1179)">
-                    <path
-                      d="M7.68324 14.8211C7.47241 14.6103 7.27441 14.3793 7.09566 14.1355C6.79774 13.7266 6.88757 13.1528 7.29732 12.8549C7.70616 12.557 8.27907 12.6468 8.57791 13.0556C8.69616 13.2188 8.82907 13.3755 8.97849 13.524C9.71457 14.2601 10.6927 14.6653 11.7331 14.6653C12.7735 14.6653 13.7525 14.2601 14.4877 13.524L19.5293 8.48238C21.0482 6.96346 21.0482 4.49121 19.5293 2.97229C18.0104 1.45337 15.5382 1.45337 14.0192 2.97229L13.0494 3.94213C12.691 4.30054 12.1117 4.30054 11.7532 3.94213C11.3948 3.58371 11.3948 3.00437 11.7532 2.64596L12.7231 1.67613C14.957 -0.558708 18.5916 -0.558708 20.8255 1.67613C23.0594 3.91004 23.0594 7.54462 20.8255 9.77854L15.7838 14.8202C14.7022 15.9028 13.263 16.4986 11.7331 16.4986C10.2032 16.4986 8.76399 15.9028 7.68324 14.8211ZM6.23307 21.9986C7.76391 21.9986 9.20216 21.4028 10.2838 20.3202L11.2537 19.3504C11.6121 18.9929 11.6121 18.4126 11.2537 18.0542C10.8962 17.6958 10.3159 17.6967 9.95749 18.0542L8.98674 19.024C8.25066 19.7601 7.27257 20.1653 6.23216 20.1653C5.19174 20.1653 4.21366 19.7601 3.47757 19.024C2.74149 18.288 2.33632 17.3099 2.33632 16.2695C2.33632 15.229 2.74149 14.25 3.47757 13.5149L8.51924 8.47321C9.25532 7.73712 10.2334 7.33196 11.2738 7.33196C12.3142 7.33196 13.2932 7.73712 14.0284 8.47321C14.1751 8.62079 14.3089 8.77754 14.4281 8.94071C14.7251 9.35046 15.298 9.44213 15.7087 9.14329C16.1184 8.84538 16.2092 8.27246 15.9112 7.86271C15.7371 7.62254 15.54 7.39246 15.3255 7.17796C14.2429 6.09446 12.8037 5.49862 11.2738 5.49862C9.74391 5.49862 8.30474 6.09446 7.22307 7.17704L2.18232 12.2187C1.09974 13.3004 0.503906 14.7395 0.503906 16.2695C0.503906 17.7994 1.09974 19.2385 2.18232 20.3202C3.26399 21.4028 4.70224 21.9986 6.23307 21.9986Z"
-                      fill="black"
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_40000365_1179">
-                      <rect
-                        width="22"
-                        height="22"
-                        fill="white"
-                        transform="translate(0.5)"
-                      />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-gray-700 font-medium">Profile URL</h3>
-                <p className="text-gray-600">{}</p>
-              </div>
-            </div>
+        {/* Right Section */}
+        <div className="space-y-6 flex flex-col flex-1 col-span-3">
+          {/* MockInterview Section */}
+          <MockInterviewSection
+            duration="5m 32s"
+            timeAgo="3 weeks ago"
+            role="Full stack developer"
+            percentile={60}
+            thumbnailUrl={MockInterivewImage || ""}
+          />
 
-            {/* Mobile Number */}
-            <div className="flex items-center space-x-4 pb-4 border-b border-gray-300 ">
-              <div className="p-3 border bg-white rounded-lg">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="23"
-                  height="22"
-                  viewBox="0 0 23 22"
-                  fill="none"
-                >
-                  <g clipPath="url(#clip0_40000365_1187)">
-                    <path
-                      d="M20.8221 1.66604L19.8596 0.831875C18.7505 -0.277292 16.9538 -0.277292 15.8446 0.831875C15.8171 0.859375 14.1213 3.06854 14.1213 3.06854C13.0763 4.16854 13.0763 5.90104 14.1213 6.99188L15.1846 8.33021C13.8463 11.3644 11.7655 13.4544 8.83212 14.701L7.49379 13.6285C6.40296 12.5744 4.66129 12.5744 3.57046 13.6285C3.57046 13.6285 1.36129 15.3244 1.33379 15.3519C0.224622 16.461 0.224622 18.2577 1.28796 19.321L2.20462 20.3752C3.25879 21.4294 4.67962 22.0069 6.21962 22.0069C13.223 22.0069 22.4996 12.721 22.4996 5.72688C22.4996 4.19604 21.9221 2.76604 20.8221 1.67521V1.66604ZM6.21962 20.1644C5.17462 20.1644 4.21212 19.7794 3.55212 19.1102L2.63546 18.056C2.25962 17.6802 2.24129 17.066 2.59879 16.6719C2.59879 16.6719 4.78962 14.9852 4.81712 14.9577C5.19296 14.5819 5.85296 14.5819 6.23796 14.9577C6.26546 14.9852 8.10796 16.461 8.10796 16.461C8.36462 16.6627 8.70379 16.7177 9.00629 16.5985C12.8013 15.1502 15.5238 12.4369 17.0913 8.52271C17.2105 8.22021 17.1646 7.87188 16.9538 7.60604C16.9538 7.60604 15.478 5.75438 15.4596 5.73604C15.0655 5.34188 15.0655 4.70938 15.4596 4.31521C15.4871 4.28771 17.1738 2.09688 17.1738 2.09688C17.568 1.73938 18.1821 1.74854 18.6038 2.17021L19.5663 3.00438C20.2721 3.71021 20.6663 4.67271 20.6663 5.71771C20.6663 12.0977 11.7105 20.1644 6.21962 20.1644Z"
-                      fill="#0C0F12"
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_40000365_1187">
-                      <rect
-                        width="22"
-                        height="22"
-                        fill="white"
-                        transform="translate(0.5)"
-                      />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-gray-700 font-medium">Mobile number</h3>
-                <p className="text-gray-600">{}</p>
-              </div>
-            </div>
+          {/* Stats Section */}
+          <StatsSection skills={6} projects={4} certifications={2} />
 
-            {/* Email ID */}
-            <div className="flex items-center space-x-4">
-              <div className="p-3 border bg-white rounded-lg">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="23"
-                  height="22"
-                  viewBox="0 0 23 22"
-                  fill="none"
-                >
-                  <g clipPath="url(#clip0_40000365_1195)">
-                    <path
-                      d="M11.501 0C8.58455 0.00315432 5.78849 1.16309 3.72627 3.22531C1.66405 5.28753 0.504113 8.08359 0.500959 11C0.385459 19.7752 10.73 25.1432 17.826 19.9989C17.9279 19.9311 18.0153 19.8435 18.0828 19.7414C18.1504 19.6392 18.1968 19.5246 18.2193 19.4042C18.2418 19.2838 18.24 19.1601 18.2139 19.0405C18.1878 18.9208 18.138 18.8076 18.0675 18.7075C17.9969 18.6074 17.907 18.5225 17.803 18.4577C17.6991 18.3929 17.5832 18.3496 17.4623 18.3304C17.3413 18.3112 17.2178 18.3163 17.0988 18.3457C16.9799 18.375 16.8681 18.4278 16.77 18.5011C10.8593 22.7847 2.24263 18.3132 2.33429 11C2.83754 -1.1605 20.1662 -1.15775 20.6676 11V12.8333C20.6676 13.3196 20.4745 13.7859 20.1307 14.1297C19.7868 14.4735 19.3205 14.6667 18.8343 14.6667C18.3481 14.6667 17.8817 14.4735 17.5379 14.1297C17.1941 13.7859 17.001 13.3196 17.001 12.8333V11C16.77 3.73175 6.23104 3.73267 6.00096 11C6.01163 12.1147 6.35979 13.1999 6.99956 14.1128C7.63933 15.0256 8.54068 15.7232 9.58481 16.1135C10.6289 16.5039 11.7668 16.5687 12.8486 16.2995C13.9303 16.0302 14.905 15.4395 15.6443 14.6052C16.0419 15.3071 16.6599 15.8582 17.4025 16.1732C18.1451 16.4882 18.9709 16.5496 19.7519 16.3477C20.5329 16.1459 21.2255 15.6922 21.7225 15.0568C22.2195 14.4215 22.4931 13.6399 22.501 12.8333V11C22.4978 8.08359 21.3379 5.28753 19.2757 3.22531C17.2134 1.16309 14.4174 0.00315432 11.501 0ZM11.501 14.6667C10.5285 14.6667 9.59587 14.2804 8.90823 13.5927C8.2206 12.9051 7.83429 11.9725 7.83429 11C7.83429 10.0275 8.2206 9.09491 8.90823 8.40727C9.59587 7.71964 10.5285 7.33333 11.501 7.33333C12.4734 7.33333 13.4061 7.71964 14.0937 8.40727C14.7813 9.09491 15.1676 10.0275 15.1676 11C15.1676 11.9725 14.7813 12.9051 14.0937 13.5927C13.4061 14.2804 12.4734 14.6667 11.501 14.6667Z"
-                      fill="#0C0F12"
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_40000365_1195">
-                      <rect
-                        width="22"
-                        height="22"
-                        fill="white"
-                        transform="translate(0.5)"
-                      />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-gray-700 font-medium">Email Id</h3>
-                <p className="text-gray-600">{user.email}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Current Status Section */}
+          <CurrentStatusSection onStatusChange={handleEditStatus} user={user} />
 
-        <div className="bg-white p-6 rounded-lg">
-          <h2 className="font-semibold text-gray-700 mb-4">
-            Complete your profile
-          </h2>
-          <div className="flex items-center space-x-2 mb-4">
-            <div className="flex-grow bg-gray-200 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-green-500 h-full"
-                style={{ width: "30%" }}
-              ></div>
-            </div>
-            <span className="text-gray-700 text-sm font-medium">30%</span>
-          </div>
-          <p className="text-gray-600 text-sm mb-6">
-            Employers are{" "}
-            <span className="text-green-600 font-semibold">3 times</span> more
-            likely to hire a candidate with a complete profile.
-          </p>
-          <div className="space-y-4">
-            <button
-              onClick={handleOpenModal} // <-- Added onClick handler
-              className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
-            >
-              <div className="p-2 ">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M2.03111 0C1.22 0 0.5625 0.641645 0.5625 1.43268V18.5673C0.5625 19.3586 1.22 20 2.03111 20H18.9673C19.7784 20 20.4359 19.3586 20.4359 18.5673V1.43268C20.4359 0.641645 19.7784 0 18.9673 0H2.03111ZM6.58665 7.70517V16.7363H3.58495V7.70517H6.58665ZM6.78406 4.91198C6.78406 5.77864 6.13254 6.47213 5.08578 6.47213H5.06622C4.05888 6.47213 3.40751 5.77864 3.40751 4.91198C3.40751 4.02581 4.07885 3.35156 5.10564 3.35156C6.13254 3.35156 6.76455 4.02581 6.78406 4.91198ZM11.2492 16.7363H8.24754C8.24754 16.7363 8.28702 8.55259 8.24763 7.70517H11.2493V8.98381L11.2293 9.01492H11.2493V8.98381C11.6482 8.36843 12.3622 7.49325 13.9544 7.49325C15.9293 7.49325 17.4102 8.78402 17.4102 11.558V16.7363H14.4088V11.9049C14.4088 10.6908 13.9743 9.86261 12.8881 9.86261C12.0589 9.86261 11.565 10.4211 11.348 10.9604C11.2687 11.1534 11.2492 11.423 11.2492 11.6929V16.7363Z"
-                    fill="#414447"
-                  />
-                </svg>
-              </div>
-              <span>Import from LinkedIn</span>
-            </button>
-
-            {/* LinkedIn Import Modal */}
-            {isModalOpen && <LinkedInImportModal onClose={handleCloseModal} />}
-
-            {isProgressModalOpen && (
-              <ResumeUploadProgressModal
-                onClose={() => setIsProgressModalOpen(false)}
-                fileName={fileDetails.name}
-                fileSize={fileDetails.size}
-                uploadProgress={uploadProgress}
-                onContinue={function (): void {
-                  throw new Error("Function not implemented.");
-                }}
-                isUploading={undefined}
-              />
-            )}
-            <button
-              onClick={() => setIsUploadModalOpen(true)}
-              className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
-            >
-              <div className="p-2 ">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="25"
-                  height="24"
-                  viewBox="0 0 25 24"
-                  fill="none"
-                >
-                  <mask
-                    id="mask0_40000636_3427"
-                    maskUnits="userSpaceOnUse"
-                    x="0"
-                    y="0"
-                    width="25"
-                    height="24"
-                  >
-                    <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
-                  </mask>
-                  <g mask="url(#mask0_40000636_3427)">
-                    <path
-                      d="M6.5 20.0008C5.95 20.0008 5.47917 19.8049 5.0875 19.4133C4.69583 19.0216 4.5 18.5508 4.5 18.0008V16.0008C4.5 15.7174 4.59583 15.4799 4.7875 15.2883C4.97917 15.0966 5.21667 15.0008 5.5 15.0008C5.78333 15.0008 6.02083 15.0966 6.2125 15.2883C6.40417 15.4799 6.5 15.7174 6.5 16.0008V18.0008H18.5V16.0008C18.5 15.7174 18.5958 15.4799 18.7875 15.2883C18.9792 15.0966 19.2167 15.0008 19.5 15.0008C19.7833 15.0008 20.0208 15.0966 20.2125 15.2883C20.4042 15.4799 20.5 15.7174 20.5 16.0008V18.0008C20.5 18.5508 20.3042 19.0216 19.9125 19.4133C19.5208 19.8049 19.05 20.0008 18.5 20.0008H6.5ZM11.5 7.85078L9.625 9.72578C9.425 9.92578 9.1875 10.0216 8.9125 10.0133C8.6375 10.0049 8.4 9.90078 8.2 9.70078C8.01667 9.50078 7.92083 9.26745 7.9125 9.00078C7.90417 8.73411 8 8.50078 8.2 8.30078L11.8 4.70078C11.9 4.60078 12.0083 4.52995 12.125 4.48828C12.2417 4.44661 12.3667 4.42578 12.5 4.42578C12.6333 4.42578 12.7583 4.44661 12.875 4.48828C12.9917 4.52995 13.1 4.60078 13.2 4.70078L16.8 8.30078C17 8.50078 17.0958 8.73411 17.0875 9.00078C17.0792 9.26745 16.9833 9.50078 16.8 9.70078C16.6 9.90078 16.3625 10.0049 16.0875 10.0133C15.8125 10.0216 15.575 9.92578 15.375 9.72578L13.5 7.85078V15.0008C13.5 15.2841 13.4042 15.5216 13.2125 15.7133C13.0208 15.9049 12.7833 16.0008 12.5 16.0008C12.2167 16.0008 11.9792 15.9049 11.7875 15.7133C11.5958 15.5216 11.5 15.2841 11.5 15.0008V7.85078Z"
-                      fill="#414447"
-                    />
-                  </g>
-                </svg>
-              </div>
-              <span>Upload your resume</span>
-            </button>
-            {isUploadModalOpen && (
-              <ResumeUploadModal
-                onClose={() => setIsUploadModalOpen(false)}
-                onUpload={() => {
-                  console.log();
-                }}
-                userId={user._id}
-              />
-            )}
-
-            {isProgressModalOpen && (
-              <ResumeUploadProgressModal
-                onClose={() => setIsProgressModalOpen(false)}
-                onContinue={handleProgressContinue} // Hooked to handle state transition
-                fileName={fileDetails.name}
-                fileSize={fileDetails.size}
-                uploadProgress={uploadProgress}
-                isUploading={uploadProgress < 100} // Indicates upload is ongoing
-              />
-            )}
-            <button
-              onClick={() => setIsProfileModalOpen(true)}
-              className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
-            >
-              <div className="p-2 ">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="25"
-                  height="24"
-                  viewBox="0 0 25 24"
-                  fill="none"
-                >
-                  <mask
-                    id="mask0_40000636_3438"
-                    maskUnits="userSpaceOnUse"
-                    x="0"
-                    y="0"
-                    width="25"
-                    height="24"
-                  >
-                    <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
-                  </mask>
-                  <g mask="url(#mask0_40000636_3438)">
-                    <path
-                      d="M16.85 16.1739L20.4 12.6239C20.6 12.4239 20.8333 12.3281 21.1 12.3364C21.3667 12.3448 21.6 12.4489 21.8 12.6489C21.9833 12.8489 22.075 13.0823 22.075 13.3489C22.075 13.6156 21.9833 13.8489 21.8 14.0489L17.575 18.2989C17.375 18.4989 17.1417 18.5989 16.875 18.5989C16.6083 18.5989 16.375 18.4989 16.175 18.2989L14.025 16.1489C13.8417 15.9656 13.75 15.7323 13.75 15.4489C13.75 15.1656 13.8417 14.9323 14.025 14.7489C14.2083 14.5656 14.4417 14.4739 14.725 14.4739C15.0083 14.4739 15.2417 14.5656 15.425 14.7489L16.85 16.1739ZM16.85 8.17394L20.4 4.62394C20.6 4.42394 20.8333 4.3281 21.1 4.33644C21.3667 4.34477 21.6 4.44894 21.8 4.64894C21.9833 4.84894 22.075 5.08227 22.075 5.34894C22.075 5.6156 21.9833 5.84894 21.8 6.04894L17.575 10.2989C17.375 10.4989 17.1417 10.5989 16.875 10.5989C16.6083 10.5989 16.375 10.4989 16.175 10.2989L14.025 8.14894C13.8417 7.9656 13.75 7.73227 13.75 7.44894C13.75 7.1656 13.8417 6.93227 14.025 6.74894C14.2083 6.5656 14.4417 6.47394 14.725 6.47394C15.0083 6.47394 15.2417 6.5656 15.425 6.74894L16.85 8.17394ZM3.5 16.9989C3.21667 16.9989 2.97917 16.9031 2.7875 16.7114C2.59583 16.5198 2.5 16.2823 2.5 15.9989C2.5 15.7156 2.59583 15.4781 2.7875 15.2864C2.97917 15.0948 3.21667 14.9989 3.5 14.9989H10.5C10.7833 14.9989 11.0208 15.0948 11.2125 15.2864C11.4042 15.4781 11.5 15.7156 11.5 15.9989C11.5 16.2823 11.4042 16.5198 11.2125 16.7114C11.0208 16.9031 10.7833 16.9989 10.5 16.9989H3.5ZM3.5 8.99894C3.21667 8.99894 2.97917 8.9031 2.7875 8.71144C2.59583 8.51977 2.5 8.28227 2.5 7.99894C2.5 7.7156 2.59583 7.4781 2.7875 7.28644C2.97917 7.09477 3.21667 6.99894 3.5 6.99894H10.5C10.7833 6.99894 11.0208 7.09477 11.2125 7.28644C11.4042 7.4781 11.5 7.7156 11.5 7.99894C11.5 8.28227 11.4042 8.51977 11.2125 8.71144C11.0208 8.9031 10.7833 8.99894 10.5 8.99894H3.5Z"
-                      fill="#414447"
-                    />
-                  </g>
-                </svg>
-              </div>
-              <span>Fill out manually</span>
-            </button>
-            {isProfileModalOpen && (
-              <CompleteProfileModal
-                type="resume"
-                onClose={() => setIsProfileModalOpen(false)}
-                onSave={function (data: ProfileFormData): void {
-                  throw new Error("Function not implemented.");
-                }}
-              />
-            )}
-          </div>
+          <ContactInformationSection
+            profileUrl="employability.ai"
+            phoneNumber={user.phone_number}
+            email={user.email}
+          />
+          {/* Complete your profile */}
+          <CompleteProfileSection userId={user._id} isDashboard={false} />
         </div>
       </div>
     </div>

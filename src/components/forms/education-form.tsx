@@ -1,149 +1,100 @@
-import React from "react";
-import { Plus, Trash2 } from "lucide-react";
+import type React from "react";
+import { X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import plusIcon from "@/assets/profile/plusicon.svg";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Education } from "@/features/profile/types";
 
 interface EducationFormProps {
   education: Education[];
   onChange: (education: Education[]) => void;
-  errors?: { [key: string]: string };
-  onAddEducation?: (newEducation: Education) => void;
-  onDeleteEducation?: (educationId: string) => void;
+  errors: { [key: string]: string };
+  onAddEducation: () => void;
+  onDeleteEducation: (index: number) => void;
+  mode: "add" | "edit" | null;
 }
 
 const EducationForm: React.FC<EducationFormProps> = ({
-  education = [], // Add default empty array
+  education,
   onChange,
-  errors = {},
+  errors,
   onAddEducation,
   onDeleteEducation,
+  mode,
 }) => {
-  const checkFormValidity = (edu: Education) => {
-    const requiredFields = {
-      education_level: "Education Level",
-      degree: "Degree",
-      institute: "Institute/University",
-      from_date: "From Date",
-      till_date: "Till Date",
-      cgpa_or_marks: "CGPA/Marks",
-    };
-
-    const missingFields = Object.entries(requiredFields)
-      .filter(([key]) => !edu[key as keyof Education])
-      .map(([_, label]) => label);
-
-    return missingFields.length === 0 ? true : missingFields;
-  };
-
-  const addEducation = () => {
-    // If there are existing education entries
-    if (education.length > 0) {
-      // Check the last education entry
-      const lastEducation = education[education.length - 1];
-      const formValidity = checkFormValidity(lastEducation);
-    }
-
-    const newEducation: Education = {
-      // _id: Date.now().toString(),
-      education_level: "",
-      degree: "",
-      institute: "",
-      board_or_certification: "",
-      from_date: "",
-      till_date: "",
-      cgpa_or_marks: "",
-      highest_education_level: undefined,
-    };
-
-    if (onAddEducation) {
-      onAddEducation(newEducation);
-    } else {
-      onChange([...(education || []), newEducation]);
-    }
-  };
   const updateEducation = (
     index: number,
     field: keyof Education,
-    value: string | number
+    value: string
   ) => {
-    if (!education) return;
-
-    const updatedEducation = education.map((edu, i) => {
-      if (i === index) {
-        const updatedEdu = { ...edu, [field]: value };
-        if (field === "institute") {
-          updatedEdu.institute = value as string;
-        } else if (field === "education_level") {
-          updatedEdu.institute = value as string;
-        }
-        return updatedEdu;
-      }
-      return edu;
-    });
+    const updatedEducation = education.map((edu, i) =>
+      i === index ? { ...edu, [field]: value } : edu
+    );
     onChange(updatedEducation);
-  };
-
-  const handleDeleteEducation = (index: number, id?: string) => {
-    if (id && onDeleteEducation) {
-      onDeleteEducation(id);
-    } else {
-      const updatedEducation = education.filter((_, i) => i !== index);
-      onChange(updatedEducation);
-    }
   };
 
   const getError = (path: string) => {
     return errors[path] || "";
   };
 
-  if (!education) {
-    return null;
-  }
+  const formatDateForInput = (isoDate: string) => {
+    if (!isoDate) return "";
+    return isoDate.split("T")[0];
+  };
 
   return (
-    <div className="space-y-6">
-      <h3 className="font-medium">Education</h3>
-
+    <div className="space-y-6 w-full">
       {education.map((edu, index) => (
         <div
           key={edu._id || index}
-          className="bg-gray-50 rounded-lg p-6 space-y-4 mb-4 relative"
+          className="bg-white rounded-lg p-8 space-y-6 relative border border-[#E5E7EB]"
         >
-          {/* Delete Button */}
           <button
-            onClick={() => handleDeleteEducation(index, edu._id)}
-            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
             type="button"
-            aria-label="Delete education"
+            onClick={() => onDeleteEducation(index)}
+            className="absolute right-4 top-4"
+            aria-label={`Remove education ${index + 1}`}
           >
-            <Trash2 className="w-5 h-5" />
+            <X className="h-4 w-4 text-gray-500" />
           </button>
 
-          {/* Education Level and Degree Fields */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Select your highest level of education{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <select
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Education Level <span className="text-red-500">*</span>
+              </Label>
+              <Select
                 value={edu.education_level}
-                onChange={(e) =>
-                  updateEducation(index, "education_level", e.target.value)
+                onValueChange={(value) =>
+                  updateEducation(index, "education_level", value)
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  getError(`education.${index}.education_level`)
-                    ? "border-red-500"
-                    : ""
-                }`}
               >
-                <option value="">Select Education Level</option>
-                <option value="bachelors">Bachelor's Degree</option>
-                <option value="masters">Master's Degree</option>
-                <option value="phd">Ph.D.</option>
-                <option value="associate degree">Associate Degree</option>
-                <option value="diploma">Diploma</option>
-                <option value="certificate">Certificate</option>
-              </select>
+                <SelectTrigger
+                  className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                    getError(`education.${index}.education_level`)
+                      ? "border-red-500"
+                      : ""
+                  }`}
+                >
+                  <SelectValue placeholder="Select Education Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
+                  <SelectItem value="masters">Master's Degree</SelectItem>
+                  <SelectItem value="phd">Ph.D.</SelectItem>
+                  <SelectItem value="associate degree">Associate Degree</SelectItem>
+                  <SelectItem value="diploma">Diploma</SelectItem>
+                  <SelectItem value="certificate">Certificate</SelectItem>
+                </SelectContent>
+              </Select>
               {getError(`education.${index}.education_level`) && (
                 <p className="text-red-500 text-xs mt-1">
                   {getError(`education.${index}.education_level`)}
@@ -151,20 +102,20 @@ const EducationForm: React.FC<EducationFormProps> = ({
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                 Degree/Board <span className="text-red-500">*</span>
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
                 value={edu.degree}
                 onChange={(e) =>
                   updateEducation(index, "degree", e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
                   getError(`education.${index}.degree`) ? "border-red-500" : ""
                 }`}
-                placeholder="Enter your degree or board"
+                placeholder="Enter degree"
               />
               {getError(`education.${index}.degree`) && (
                 <p className="text-red-500 text-xs mt-1">
@@ -174,40 +125,43 @@ const EducationForm: React.FC<EducationFormProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Institute/University <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={edu.institute || ""}
-              onChange={(e) =>
-                updateEducation(index, "institute", e.target.value)
-              }
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                getError(`education.${index}.institute`) ? "border-red-500" : ""
-              }`}
-              placeholder="Enter the name of your institute or university"
-            />
-            {getError(`education.${index}.institute`) && (
-              <p className="text-red-500 text-xs mt-1">
-                {getError(`education.${index}.institute`)}
-              </p>
-            )}
-          </div>
+          <div className="grid grid-cols-4 gap-6">
+            <div className="space-y-2 col-span-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Institute/University <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="text"
+                value={edu.institute}
+                onChange={(e) =>
+                  updateEducation(index, "institute", e.target.value)
+                }
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                  getError(`education.${index}.institute`)
+                    ? "border-red-500"
+                    : ""
+                }`}
+                placeholder="Enter institute name"
+              />
+              {getError(`education.${index}.institute`) && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getError(`education.${index}.institute`)}
+                </p>
+              )}
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                From <span className="text-red-500">*</span>
-              </label>
-              <input
+            <div className="space-y-2 col-span-1">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                From Date <span className="text-red-500">*</span>
+              </Label>
+              <Input
                 type="date"
-                value={edu.from_date || ""}
+                value={formatDateForInput(edu.from_date)}
                 onChange={(e) =>
                   updateEducation(index, "from_date", e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
+                max={new Date().toISOString().split("T")[0]}
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
                   getError(`education.${index}.from_date`)
                     ? "border-red-500"
                     : ""
@@ -220,19 +174,18 @@ const EducationForm: React.FC<EducationFormProps> = ({
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Till <span className="text-red-500">*</span>
-              </label>
-              <input
+            <div className="space-y-2 col-span-1">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Till Date
+              </Label>
+              <Input
                 type="date"
-                value={edu.till_date || ""}
+                value={formatDateForInput(edu.till_date)}
                 onChange={(e) =>
                   updateEducation(index, "till_date", e.target.value)
                 }
-                min={edu.from_date}
-                max={new Date().toISOString().split("T")[0]}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
+                min={formatDateForInput(edu.from_date)}
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
                   getError(`education.${index}.till_date`)
                     ? "border-red-500"
                     : ""
@@ -246,22 +199,22 @@ const EducationForm: React.FC<EducationFormProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              CGPA/Marks Scored <span className="text-red-500">*</span>
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+              CGPA/Marks <span className="text-red-500">*</span>
+            </Label>
+            <Input
               type="text"
-              value={edu.cgpa_or_marks || ""}
+              value={edu.cgpa_or_marks}
               onChange={(e) =>
                 updateEducation(index, "cgpa_or_marks", e.target.value)
               }
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
+              className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
                 getError(`education.${index}.cgpa_or_marks`)
                   ? "border-red-500"
                   : ""
               }`}
-              placeholder="Enter your CGPA or marks scored"
+              placeholder="Enter CGPA or marks"
             />
             {getError(`education.${index}.cgpa_or_marks`) && (
               <p className="text-red-500 text-xs mt-1">
@@ -272,14 +225,21 @@ const EducationForm: React.FC<EducationFormProps> = ({
         </div>
       ))}
 
-      <button
-        onClick={addEducation}
-        className="inline-flex items-center text-emerald-600 hover:text-emerald-700"
-        type="button"
-      >
-        <Plus className="w-4 h-4 mr-1" />
-        Add New Education
-      </button>
+      {mode === "add" && (
+        <Button
+          type="button"
+          onClick={onAddEducation}
+          variant="ghost"
+          className="text-[#03963F] hover:text-[#03963F]/90 hover:bg-transparent p-0 font-sf-pro text-base font-medium leading-6 tracking-[0.24px]"
+        >
+          <img
+            src={plusIcon || "/placeholder.svg"}
+            alt="Plus Icon"
+            className="mr-2"
+          />
+          Add Education
+        </Button>
+      )}
     </div>
   );
 };

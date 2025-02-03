@@ -1,81 +1,43 @@
-import React from "react";
-import { Plus } from "lucide-react";
-
-interface Experience {
-  jobTitle: string | number | readonly string[] | undefined;
-  company: string;
-  employmentType: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  currentlyWorking: boolean;
-  currentCTC: string;
-  expectedCTC: string;
-}
+import type React from "react";
+import { X } from "lucide-react";
+import type { ExperienceItem } from "@/features/profile/types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import plusIcon from "@/assets/profile/plusicon.svg";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ExperienceFormProps {
-  experience: Experience[];
-  onChange: (experience: Experience[]) => void;
+  experience: ExperienceItem[];
+  onChange: (experience: ExperienceItem[]) => void;
   errors: { [key: string]: string };
+  onAddExperience: () => void;
+  onDeleteExperience: (index: number) => void;
+  mode: "add" | "edit" | null;
 }
 
-export default function ExperienceForm({
+const ExperienceForm: React.FC<ExperienceFormProps> = ({
   experience,
   onChange,
   errors,
-}: ExperienceFormProps) {
-  const formatMonthYear = (dateString: string) => {
-    if (!dateString) return "";
-
-    try {
-      const [month, year] = dateString.split(" ");
-      const monthNum = new Date(Date.parse(month + " 1, 2000")).getMonth() + 1;
-      return `${year}-${monthNum.toString().padStart(2, "0")}`;
-    } catch {
-      return dateString;
-    }
-  };
-
-  const formatToMonthYear = (dateString: string) => {
-    if (!dateString) return "";
-
-    try {
-      const [year, month] = dateString.split("-");
-      const date = new Date(parseInt(year), parseInt(month) - 1);
-      return date.toLocaleString("en-US", { month: "long", year: "numeric" });
-    } catch {
-      return dateString;
-    }
-  };
-
-  const addExperience = () => {
-    onChange([
-      ...experience,
-      {
-        jobTitle: "",
-        company: "",
-        employmentType: "",
-        location: "",
-        startDate: "",
-        endDate: "",
-        currentlyWorking: false,
-        currentCTC: "",
-        expectedCTC: "",
-      },
-    ]);
-  };
-
+  onAddExperience,
+  onDeleteExperience,
+  mode,
+}) => {
   const updateExperience = (
     index: number,
-    field: keyof Experience,
+    field: keyof ExperienceItem,
     value: string | boolean
-  ) => {
-    const updatedExperience = experience.map((exp, i) => {
-      if (i === index) {
-        return { ...exp, [field]: value };
-      }
-      return exp;
-    });
+  ) => {  
+    const updatedExperience = experience.map((exp, i) =>
+      i === index ? { ...exp, [field]: value } : exp
+    );
     onChange(updatedExperience);
   };
 
@@ -83,87 +45,102 @@ export default function ExperienceForm({
     return errors[path] || "";
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium">Experience</h3>
-        <label className="inline-flex items-center">
-          <input
-            type="checkbox"
-            className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-          />
-          <span className="ml-2 text-sm text-gray-600">I am a fresher</span>
-        </label>
-      </div>
+  const formatDateForInput = (isoDate: string) => {
+    if (!isoDate) return "";
+    return isoDate.split("T")[0];
+  };
 
+  return (
+    <div className="space-y-6 w-full">
       {experience.map((exp, index) => (
-        <div key={index} className="bg-gray-50 rounded-lg p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Title</label>
-              <input
+        <div
+          key={exp.id || index}
+          className="bg-white rounded-lg p-8 space-y-6 relative border border-[#E5E7EB]"
+        >
+          <button
+            type="button"
+            onClick={() => onDeleteExperience(index)}
+            className="absolute right-4 top-4"
+            aria-label={`Remove experience ${index + 1}`}
+          >
+            <X className="h-4 w-4 text-gray-500" />
+          </button>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Job Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
                 type="text"
-                value={exp.jobTitle}
+                value={exp.title}
                 onChange={(e) =>
-                  updateExperience(index, "jobTitle", e.target.value)
+                  updateExperience(index, "title", e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  getError(`experience.${index}.jobTitle`)
-                    ? "border-red-500"
-                    : ""
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                  getError(`experience.${index}.title`) ? "border-red-500" : ""
                 }`}
-                placeholder="Enter here"
+                placeholder="Enter job title"
               />
-              {getError(`experience.${index}.jobTitle`) && (
+              {getError(`experience.${index}.title`) && (
                 <p className="text-red-500 text-xs mt-1">
-                  {getError(`experience.${index}.jobTitle`)}
+                  {getError(`experience.${index}.title`)}
                 </p>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Employment type
-              </label>
-              <select
-                value={exp.employmentType}
-                onChange={(e) =>
-                  updateExperience(index, "employmentType", e.target.value)
+
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Employment Type <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={exp.employment_type}
+                onValueChange={(value) =>
+                  updateExperience(index, "employment_type", value)
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  getError(`experience.${index}.employmentType`)
-                    ? "border-red-500"
-                    : ""
-                }`}
               >
-                <option value="">Select</option>
-                <option value="full-time">Full-time</option>
-                <option value="part-time">Part-time</option>
-                <option value="contract">Contract</option>
-                <option value="internship">Internship</option>
-              </select>
-              {getError(`experience.${index}.employmentType`) && (
+                <SelectTrigger
+                  className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                    getError(`experience.${index}.employment_type`)
+                      ? "border-red-500"
+                      : ""
+                  }`}
+                >
+                  <SelectValue placeholder="Select Employment Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Full-time">Full-time</SelectItem>
+                  <SelectItem value="Part-time">Part-time</SelectItem>
+                  <SelectItem value="Contract">Contract</SelectItem>
+                  <SelectItem value="Internship">Internship</SelectItem>
+                  <SelectItem value="Freelance">Freelance</SelectItem>
+                </SelectContent>
+              </Select>
+              {getError(`experience.${index}.employment_type`) && (
                 <p className="text-red-500 text-xs mt-1">
-                  {getError(`experience.${index}.employmentType`)}
+                  {getError(`experience.${index}.employment_type`)}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Company</label>
-              <input
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Company Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
                 type="text"
                 value={exp.company}
                 onChange={(e) =>
                   updateExperience(index, "company", e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
                   getError(`experience.${index}.company`)
                     ? "border-red-500"
                     : ""
                 }`}
-                placeholder="Enter here"
+                placeholder="Enter company name"
               />
               {getError(`experience.${index}.company`) && (
                 <p className="text-red-500 text-xs mt-1">
@@ -171,20 +148,23 @@ export default function ExperienceForm({
                 </p>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Location</label>
-              <input
+
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Location <span className="text-red-500">*</span>
+              </Label>
+              <Input
                 type="text"
                 value={exp.location}
                 onChange={(e) =>
                   updateExperience(index, "location", e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
                   getError(`experience.${index}.location`)
                     ? "border-red-500"
                     : ""
                 }`}
-                placeholder="Enter here"
+                placeholder="Enter location"
               />
               {getError(`experience.${index}.location`) && (
                 <p className="text-red-500 text-xs mt-1">
@@ -194,139 +174,169 @@ export default function ExperienceForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Start date
-              </label>
-              <input
-                type="month"
-                value={formatMonthYear(exp.startDate)}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id={`currentlyWorking-${index}`}
+              checked={exp.currently_working}
+              onChange={(e) =>
+                updateExperience(index, "currently_working", e.target.checked)
+              }
+              className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            <label
+              htmlFor={`currently_working-${index}`}
+              className="text-sm text-gray-600"
+            >
+              I currently work here
+            </label>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Start Date <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="date"
+                value={formatDateForInput(exp.start_date)}
                 onChange={(e) =>
-                  updateExperience(
-                    index,
-                    "startDate",
-                    formatToMonthYear(e.target.value)
-                  )
+                  updateExperience(index, "start_date", e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  getError(`experience.${index}.startDate`)
+                max={new Date().toISOString().split("T")[0]}
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                  getError(`experience.${index}.start_date`)
                     ? "border-red-500"
                     : ""
                 }`}
               />
-              {getError(`experience.${index}.startDate`) && (
+              {getError(`experience.${index}.start_date`) && (
                 <p className="text-red-500 text-xs mt-1">
-                  {getError(`experience.${index}.startDate`)}
+                  {getError(`experience.${index}.start_date`)}
                 </p>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">End date</label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="month"
-                  value={formatMonthYear(exp.endDate)}
+            {!exp.currently_working && (
+              <div className="space-y-2">
+                <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                  End Date <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  type="date"
+                  value={formatDateForInput(exp.end_date || "")}
                   onChange={(e) =>
-                    updateExperience(
-                      index,
-                      "endDate",
-                      formatToMonthYear(e.target.value)
-                    )
+                    updateExperience(index, "end_date", e.target.value)
                   }
-                  disabled={exp.currentlyWorking}
-                  className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                    getError(`experience.${index}.endDate`)
+                  min={exp.start_date}
+                  max={new Date().toISOString().split("T")[0]}
+                  className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                    getError(`experience.${index}.end_date`)
                       ? "border-red-500"
                       : ""
                   }`}
                 />
-                {getError(`experience.${index}.endDate`) && (
+                {getError(`experience.${index}.end_date`) && (
                   <p className="text-red-500 text-xs mt-1">
-                    {getError(`experience.${index}.endDate`)}
+                    {getError(`experience.${index}.end_date`)}
                   </p>
                 )}
-                <label className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={exp.currentlyWorking}
-                    onChange={(e) =>
-                      updateExperience(
-                        index,
-                        "currentlyWorking",
-                        e.target.checked
-                      )
-                    }
-                    className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-600">
-                    Currently working
-                  </span>
-                </label>
               </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Current CTC <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="number"
+                value={exp.current_ctc}
+                onChange={(e) =>
+                  updateExperience(index, "current_ctc", e.target.value)
+                }
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                  getError(`experience.${index}.current_ctc`)
+                    ? "border-red-500"
+                    : ""
+                }`}
+                placeholder="Enter current CTC"
+              />
+              {getError(`experience.${index}.current_ctc`) && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getError(`experience.${index}.current_ctc`)}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+                Expected CTC <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="number"
+                value={exp.expected_ctc}
+                onChange={(e) =>
+                  updateExperience(index, "expected_ctc", e.target.value)
+                }
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                  getError(`experience.${index}.expected_ctc`)
+                    ? "border-red-500"
+                    : ""
+                }`}
+                placeholder="Enter expected CTC"
+              />
+              {getError(`experience.${index}.expected_ctc`) && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getError(`experience.${index}.expected_ctc`)}
+                </p>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Current CTC
-              </label>
-              <input
-                type="text"
-                value={exp.currentCTC}
-                onChange={(e) =>
-                  updateExperience(index, "currentCTC", e.target.value)
-                }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  getError(`experience.${index}.currentCTC`)
-                    ? "border-red-500"
-                    : ""
-                }`}
-                placeholder="Enter here"
-              />
-              {getError(`experience.${index}.currentCTC`) && (
-                <p className="text-red-500 text-xs mt-1">
-                  {getError(`experience.${index}.currentCTC`)}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Expected CTC
-              </label>
-              <input
-                type="text"
-                value={exp.expectedCTC}
-                onChange={(e) =>
-                  updateExperience(index, "expectedCTC", e.target.value)
-                }
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                  getError(`experience.${index}.expectedCTC`)
-                    ? "border-red-500"
-                    : ""
-                }`}
-                placeholder="Enter here"
-              />
-              {getError(`experience.${index}.expectedCTC`) && (
-                <p className="text-red-500 text-xs mt-1">
-                  {getError(`experience.${index}.expectedCTC`)}
-                </p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+              Description <span className="text-red-500">*</span>
+            </Label>
+            <textarea
+              value={exp.description}
+              onChange={(e) =>
+                updateExperience(index, "description", e.target.value)
+              }
+              rows={4}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
+                getError(`experience.${index}.description`)
+                  ? "border-red-500"
+                  : ""
+              }`}
+              placeholder="Describe your responsibilities and achievements"
+            />
+            {getError(`experience.${index}.description`) && (
+              <p className="text-red-500 text-xs mt-1">
+                {getError(`experience.${index}.description`)}
+              </p>
+            )}
           </div>
         </div>
       ))}
 
-      {/* Add Experience Button */}
-      <button
-        onClick={addExperience}
-        className="inline-flex items-center text-emerald-600 hover:text-emerald-700"
-        type="button"
-      >
-        <Plus className="w-4 h-4 mr-1" />
-        Add experience
-      </button>
+      {mode === "add" && (
+        <Button
+          type="button"
+          onClick={onAddExperience}
+          variant="ghost"
+          className="text-[#03963F] hover:text-[#03963F]/90 hover:bg-transparent p-0 font-sf-pro text-base font-medium leading-6 tracking-[0.24px]"
+        >
+          <img
+            src={plusIcon || "/placeholder.svg"}
+            alt="Plus Icon"
+            className="mr-2"
+          />
+          Add Experience
+        </Button>
+      )}
     </div>
   );
-}
+};
+
+export default ExperienceForm;

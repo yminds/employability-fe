@@ -6,7 +6,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SkillList from "@/components/skills/skillslist";
-import ProfileCompletionCard from "@/components/cards/ProfileCompletionCard";
 import TryThingsSection from "@/features/dashboard/TryThingsSection";
 import MyActivityCard from "@/features/dashboard/MyActivity";
 import CircularProgress from "@/components/ui/circular-progress-bar";
@@ -16,6 +15,7 @@ import GoalCyborgImg from "@/assets/dashboard/set_goal_cyborg.svg";
 import ProfessionalGoalsImg from "@/assets/dashboard/professional_goals.svg";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import EmployabilityBannerSection from "@/features/dashboard/EmployabilityBanner";
+import CompleteProfileSection from "@/features/profile/CompleteProfileSection";
 
 interface Props {
   isDashboard: boolean; // Define the prop type here
@@ -44,7 +44,7 @@ const Dashboard: React.FC<Props> = () => {
       <main className="h-screen overflow-y-auto minimal-scrollbar font-ubuntu ">
         <div className="bg-[#F5F5F5] flex flex-col items-start gap-7 p-[55px] pt-[55px] pb-[42px] flex-1 self-stretch">
           <div className="mx-auto">
-            {goalsData?.data.length > 0 ? (
+            {goalsData?.data && goalsData.data.length > 0 ? (
               <main>
                 <header className="mb-7">
                   <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight flex items-center gap-3">
@@ -87,7 +87,7 @@ const Dashboard: React.FC<Props> = () => {
 
                     {/* Skills */}
                     <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      <SkillList isDashboard={true} goalId={goalId} />
+                      <SkillList isDashboard={true} goalId={goalId} onSkillsUpdate={()=>{}} isSkillsUpdated={false} goals={goalsData}/>
                     </section>
 
                     <EmployabilityBannerSection
@@ -98,7 +98,8 @@ const Dashboard: React.FC<Props> = () => {
 
                   <div className="flex flex-col items-start gap-6 flex-1">
                     {/* Profile Sidebar */}
-                    <ProfileCompletionCard />
+                    {/* <ProfileCompletionCard /> */}
+                    <CompleteProfileSection userId={user_id} isDashboard={true}/>
 
                     {/* My Activity Sidebar */}
                     <MyActivityCard displayScore={true} goalId={goalId} />

@@ -29,9 +29,15 @@ export type User = {
   certificates: string[]; // Array of certificate IDs
   date_of_birth: string;
   gender: string;
-  linkedIn: string;
   resume: Resume[];
   profile_image?: string;
+  bio?: string;
+  current_status?: string;
+  phone_number?: string;
+  gitHub: string;
+  linkedIn: string;
+  portfolio: string;
+  parsedData: any;
 };
 
 // Optional: Define separate interfaces for nested objects if needed
