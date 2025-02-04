@@ -1,17 +1,13 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { X } from "lucide-react";
-import { Education, type ProfileFormData } from "../../features/profile/types";
+import { type ProfileFormData } from "../../features/profile/types";
 import BasicInfoForm from "../forms/basic-info-form";
 import SkillsForm from "../forms/skills-form";
 import ExperienceForm from "@/features/profile/forms/experience-form";
 import EducationForm from "../forms/education-form";
-import { profileFormSchema } from "../../features/profile/shemas/profileFormSchema";
 import CertificationsForm from "../forms/certification-form";
 import { ZodError } from "zod";
 import throttle from "lodash.throttle"; // Install lodash.debounce
-import type { RootState } from "@/store/store";
 import { useSelector, useDispatch } from "react-redux";
-import { useVerifySkillsMutation } from "@/api/skillApiSlice";
 import { transformFormDataForDB } from "@/utils/transformData";
 import { useUpdateUserMutation } from "@/api/userApiSlice";
 import { useAddExperienceMutation } from "@/api/experienceApiSlice";
@@ -36,6 +32,12 @@ import { useGetExperiencesByUserIdQuery } from "@/api/experienceApiSlice";
 import { useGetEducationByIdQuery } from "@/api/educationSlice";
 import { useGetCertificationsByUserIdQuery } from "@/api/certificatesApiSlice";
 import { parseAddress } from "@/utils/addressParser";
+import {
+  useCreateUserSkillsMutation,
+  useGetUserSkillsMutation,
+} from "@/api/skillsApiSlice";
+import { useVerifyMultipleSkillsMutation } from "@/api/skillsPoolApiSlice";
+import { parsedTransformData } from "@/utils/parsedTransformData";
 
 interface CompleteProfileModalProps {
   onClose: () => void;
@@ -44,11 +46,7 @@ interface CompleteProfileModalProps {
   userId: string; // or userId: string if always required
   parsedData?: any;
   isParsed: boolean;
-}
-interface VerifiedSkill {
-  _id: string;
-  name: string;
-  description: string;
+  goalId: string;
 }
 
 export default function CompleteProfileModal({
@@ -58,12 +56,10 @@ export default function CompleteProfileModal({
   userId,
   parsedData,
   isParsed,
+  goalId,
 }: CompleteProfileModalProps) {
   const user = useSelector((state: any) => state.auth.user);
-  const resume = useSelector((state:any) => state.resume.parsedData)
-
-  console.log("Resume", resume);
-  
+  const resume = useSelector((state: any) => state.resume.parsedData);
 
   const data = parsedData;
 
@@ -71,7 +67,8 @@ export default function CompleteProfileModal({
   const { data: fetchedEducation } = useGetEducationByIdQuery(userId);
   const { data: fetchedCertification } =
     useGetCertificationsByUserIdQuery(userId);
-
+  const [getUserSkills] = useGetUserSkillsMutation();
+  const [getVerifySkills] = useVerifyMultipleSkillsMutation();
   const [updateUser] = useUpdateUserMutation();
   const [addExperience] = useAddExperienceMutation();
   const [updateExperience] = useUpdateExperienceMutation();
@@ -79,186 +76,64 @@ export default function CompleteProfileModal({
   const [updateEducation] = useUpdateEducationMutation();
   const [addCertification] = useAddCertificationMutation();
   const [updateCertification] = useUpdateCertificationMutation();
+  const [createUserSkills] = useCreateUserSkillsMutation();
   const dispatch = useDispatch();
-
-  const [verifySkills, { isLoading: isVerifyingSkills }] =
-    useVerifySkillsMutation();
-  const [verifiedSkills, setVerifiedSkills] = useState<VerifiedSkill[]>([]);
-
-  // const [verifiedSkills, setVerifiedSkills] = useState<VerifiedSkill[]>([]);
-  // const [isVerifyingSkills, setIsVerifyingSkills] = useState(false);
 
   const [activeTab, setActiveTab] = useState("basic");
   const [formData, setFormData] = useState<any>({});
 
   const parsedBasicData = isParsed
-  ? (() => {
-      const address = resume?.contact.address || ""
-      const { city, stateCode, countryCode } = parseAddress(address)
-      
-      return {
+    ? (() => {
+        const address = resume?.contact.address || "";
+        const { city, stateCode, countryCode } = parseAddress(address);
+
+        return {
+          basicInfo: {
+            name: resume?.name || "",
+            mobile: resume?.contact?.phone || "",
+            email: user.email || "",
+            date_of_birth: resume?.date_of_birth || "",
+            gender: resume?.gender || "",
+            country: countryCode,
+            state: stateCode,
+            city: city,
+            profile_image: resume?.profile_image || "",
+          },
+          socialProfiles: {
+            gitHub: resume?.contact?.github || "",
+            linkedIn: resume?.contact?.linkedin || "",
+            portfolio: resume?.contact?.portfolio || "",
+          },
+        };
+      })()
+    : {
         basicInfo: {
-          name: resume?.name || "",
-          mobile: resume?.contact?.phone || "",
+          name: user.name || "",
+          mobile: user.phone_number || "",
           email: user.email || "",
-          date_of_birth: resume?.date_of_birth || "",
-          gender: resume?.gender || "",
-          country: countryCode,
-          state: stateCode,
-          city: city,
-          profile_image: resume?.profile_image || "",
+          date_of_birth: user.date_of_birth || "",
+          gender: user.gender || "",
+          country: user.address.country || "",
+          state: user.address.state || "",
+          city: user.address.city || "",
+          profile_image: user.profile_image || "",
         },
         socialProfiles: {
-          gitHub: resume?.contact?.github || "",
-          linkedIn: resume?.contact?.linkedin || "",
-          portfolio: resume?.contact?.portfolio || "",
+          gitHub: user.github || "",
+          linkedIn: user.linkedIn || "",
+          portfolio: user.portfolio || "",
         },
-      }
-    })()
-  : {
-      basicInfo: {
-        name: user.name || "",
-        mobile: user.phone_number || "",
-        email: user.email || "",
-        date_of_birth: user.date_of_birth || "",
-        gender: user.gender || "",
-        country: user.address.country || "",
-        state: user.address.state || "",
-        city: user.address.city || "",
-        profile_image: user.profile_image || "",
-      },
-      socialProfiles: {
-        gitHub: user.github || "",
-        linkedIn: user.linkedIn || "",
-        portfolio: user.portfolio || "",
-      },
-    }
+      };
 
   const [isScrolling, setIsScrolling] = useState(false);
-
-  const transformData = async (data: any) => {
-    // let validatedSkills: VerifiedSkill[] = [];
-    // if (data.skills && data.skills.length > 0) {
-    //   try {
-    //     const normalizedSkills = data.skills.map((skill: string) =>
-    //       skill.toLowerCase()
-    //     );
-    //     const response = await verifySkills(normalizedSkills).unwrap();
-    //     validatedSkills = response.data;
-    //   } catch (error) {
-    //     console.error("Error verifying skills:", error);
-    //   }
-    // }
-
-    // Helper function to transform date from "Month, Year" to "YYYY-MM"
-    const transformDate = (dateStr: string) => {
-      if (!dateStr) return "";
-      if (dateStr === "Present") return null;
-
-      try {
-        // Handle dates in "Month Year" or "Month, Year" format
-        const parts = dateStr.replace(",", "").trim().split(" ");
-        if (parts.length !== 2) {
-          // console.error("Invalid date format:", dateStr);
-          return "";
-        }
-
-        const [monthStr, yearStr] = parts;
-        const monthNames: { [key: string]: string } = {
-          January: "01",
-          February: "02",
-          March: "03",
-          April: "04",
-          May: "05",
-          June: "06",
-          July: "07",
-          August: "08",
-          September: "09",
-          October: "10",
-          November: "11",
-          December: "12",
-        };
-
-        const month = monthNames[monthStr];
-        if (!month) {
-          console.error("Invalid month:", monthStr);
-          return "";
-        }
-
-        return `${yearStr}-${month}`;
-      } catch (error) {
-        console.error("Error parsing date:", dateStr);
-        return "";
-      }
-    };
-
-    return {
-      basicInfo: {
-        name: data.name || "",
-        mobile: data.contact?.phone || "",
-        email: data.contact?.email || "",
-        date_of_birth: "",
-        gender: "",
-        country: "",
-        state: "",
-        city: "",
-        profile_image: "",
-      },
-      socialProfiles: {
-        gitHub: data.contact?.github || "",
-        linkedIn: data.contact?.linkedIn || "",
-        portfolio: data.contact?.portfolio || "",
-      },
-      // skills: validatedSkills,
-      skills: [],
-      experience:
-        data.experience?.map((exp: any) => {
-          const startDate = transformDate(exp.startDate);
-          const endDate =
-            exp.endDate === "Present" ? null : transformDate(exp.endDate);
-          return {
-            title: exp.jobTitle || "",
-            employment_type: "",
-            company: exp.company || "",
-            location: exp.location || "",
-            start_date: startDate,
-            end_date: endDate,
-            currently_working: exp.endDate === "Present",
-            description: exp.responsibilities?.join("\n") || "",
-            current_ctc: "",
-            expected_ctc: "",
-            companyLogo: "",
-            isVerified: undefined,
-          };
-        }) || [],
-      education:
-        data.education?.map((edu: any) => ({
-          education_level: "",
-          degree: edu.degree || "",
-          institute: edu.institution || "",
-          board_or_certification: "",
-          from_date: "",
-          till_date: "",
-          cgpa_or_marks: "",
-          // location: edu.location || "",
-          // till_date: edu.graduationYear || "",
-        })) || [],
-      certifications:
-        data.certifications?.map((cert: any) => ({
-          title: cert.name || "",
-          issued_by: cert.issuer || "",
-          issue_date: transformDate(cert.dateObtained) || "",
-          expiration_date: transformDate(cert.expiryDate) || "",
-          certificate_s3_url: "",
-        })) || [],
-    };
-  };
 
   useEffect(() => {
     const initializeData = async () => {
       if (data) {
         try {
-          const transformedData = await transformData(data);
+          const result = await getVerifySkills(data.skills).unwrap();
+          const transformedData = await parsedTransformData(data, result.data);
+
           setFormData((prevData: any) => ({
             ...prevData,
             ...transformedData,
@@ -271,6 +146,32 @@ export default function CompleteProfileModal({
 
     initializeData();
   }, [data]);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        if (userId && goalId && !isParsed) {
+          const response = await getUserSkills({ userId, goalId }).unwrap();
+          if (response?.data.optional) {
+            setFormData((prevData: any) => ({
+              ...prevData,
+              skills: response.data.optional.map((skill: any) => ({
+                skill_Id: skill.skill_pool_id._id,
+                name: skill.skill_pool_id.name,
+                rating: skill.self_rating,
+                level: skill.level,
+                visibility: "All users",
+              })),
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching skills:", error);
+      }
+    };
+
+    fetchSkills();
+  }, [userId, goalId, getUserSkills]);
 
   useEffect(() => {
     if (fetchedExperiences) {
@@ -417,23 +318,26 @@ export default function CompleteProfileModal({
   };
 
   const handleSave = async () => {
-    console.log(formData);
-
     try {
-      console.log("button clicked");
-
       if (!validateForm()) {
         return;
       }
 
       const transformedData = transformFormDataForDB(formData);
 
+      if (transformedData.skills && transformedData.skills.length > 0) {
+        const skillsPayload = {
+          user_id: userId,
+          skills: transformedData.skills,
+          goal_id: goalId,
+        };
+        await createUserSkills(skillsPayload).unwrap();
+      }
+
       // Add new experiences
       if (transformedData.experience && transformedData.experience.length > 0) {
         await Promise.all(
           transformedData.experience.map(async (exp: any) => {
-            console.log("exp", exp);
-
             const experienceData = {
               user_id: userId,
               title: exp.title,
@@ -518,26 +422,13 @@ export default function CompleteProfileModal({
         );
       }
 
-      console.log("Transformde data complete", transformedData);
-
       const { experience, education, certificates, ...updatedUserData } =
         transformedData;
 
-      const response = await fetch(
-        `${process.env.VITE_API_BASE_URL}/api/v1/user/update/${userId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedUserData),
-        }
-      );
-
-      // const response = await updateUser({
-      //   userId,
-      //   data: updatedUserData,
-      // }).unwrap();
+      const response = await updateUser({
+        userId,
+        data: updatedUserData,
+      }).unwrap();
 
       dispatch(
         updateUserProfile({
@@ -546,16 +437,10 @@ export default function CompleteProfileModal({
         })
       );
 
-      if (!response.ok) {
+      if (response.error) {
         throw new Error("Failed to update user");
       }
-
-      // const result = await response.json();
-      // console.log("API Response:", result);
-
-      // console.log("Update successful:", result);
-      onClose(); // to close the modal after submission
-      // onSave(formData);
+      onClose();
     } catch (err) {
       if (err instanceof ZodError) {
         const fieldErrors: { [key: string]: string } = {};
@@ -591,7 +476,6 @@ export default function CompleteProfileModal({
     { id: "education", label: "Education" },
     { id: "certification", label: "Certifications" },
   ];
-  console.log("Form Data in complete last", formData);
 
   return (
     <Dialog
@@ -668,18 +552,28 @@ export default function CompleteProfileModal({
             <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
               Skills
             </h2>
-            {isVerifyingSkills ? (
+
+            {/* <SkillsForms
+                goalId={goalId}
+                onClose={() => setIsModalOpen(false)}
+                userId={userId}
+                prefillSkills={[]}
+              /> */}
+
+            {/* {isVerifyingSkills ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
                 <span className="ml-2 text-gray-600">Verifying skills...</span>
               </div>
-            ) : (
-              <SkillsForm
-                skills={formData?.skills}
-                onChange={(skills) => updateFormData("skills", skills)}
-                errors={errors}
-              />
-            )}
+            ) : ( */}
+            <SkillsForm
+              skills={formData?.skills}
+              onChange={(skills) => updateFormData("skills", skills)}
+              errors={errors}
+              goalId={goalId}
+              userId={userId}
+            />
+            {/* )} */}
           </div>
 
           {/* Experience Section */}

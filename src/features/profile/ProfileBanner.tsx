@@ -5,6 +5,8 @@ import { Pencil } from "lucide-react";
 import EditBioModal from "@/components/modal/EditBioModal";
 import { useEffect, useState } from "react";
 import { Country, State } from "country-state-city";
+import backgroundImage from "@/assets/images/Frame 1410078135.jpg";
+
 
 interface ProfileBannerProps {
   user: any;
@@ -31,7 +33,7 @@ const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
     <div
       className=" rounded-lg sm:bg-cover md:bg-contain lg:bg-auto "
       style={{
-        backgroundImage: "url('src/assets/images/Frame 1410078135.jpg')",
+        backgroundImage: `url(${backgroundImage})`,
         backgroundRepeat: "no-repeat", // Prevents the background from repeating
         backgroundSize: "cover", // Ensures the image covers the div
         backgroundPosition: "center", // Centers the background image
@@ -62,7 +64,7 @@ const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
                   {user.name}
                 </h1>
                 <p className="text-[#414447] text-l font-normal font-ubuntu leading-[24px] tracking-[0.24px]">
-                  {user?.address
+                  {user?.address.country !== ""
                     ? `${state?.name}, ${country?.name}`
                     : ""}
                 </p>

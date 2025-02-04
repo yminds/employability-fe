@@ -25,12 +25,14 @@ interface ResumeUploadModalProps {
   onClose: () => void;
   onUpload: () => void;
   userId: string;
+  goalId: string;
 }
 
 const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
   isOpen,
   onClose,
   userId,
+  goalId,
 }) => {
   const dispatch = useDispatch();
   const { uploading, error } = useSelector((state: RootState) => state.resume);
@@ -195,6 +197,7 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
         onSave={() => console.log("")}
         parsedData={parsedData}
         isParsed={true}
+        goalId={goalId}
       />
     );
   }
