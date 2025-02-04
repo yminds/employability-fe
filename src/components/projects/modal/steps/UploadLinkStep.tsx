@@ -390,7 +390,7 @@ const UploadLinksStep: React.FC<UploadLinksStepProps> = ({
         formData.append("folder", `projects/${projectId}/thumbnail`)
         formData.append("userId", user_id!)
 
-        const response = await axios.post("http://localhost:3000/api/v1/s3/upload", formData, {
+        const response = await axios.post(`https://employability.ai/api/v1/s3/upload`, formData, {
           onUploadProgress: (progressEvent) => {
             const progress = progressEvent.total ? Math.round((progressEvent.loaded * 100) / progressEvent.total) : 0
             setThumbnailUploadState((prev) => ({
@@ -449,7 +449,7 @@ const UploadLinksStep: React.FC<UploadLinksStepProps> = ({
           formData.append("folder", `projects/${projectId}/synopsisDoc`)
           formData.append("userId", user_id!)
 
-          const response = await axios.post("http://localhost:3000/api/v1/s3/upload", formData, {
+          const response = await axios.post(`https://employability.ai/api/v1/s3/upload`, formData, {
             onUploadProgress: (progressEvent) => {
               const progress = progressEvent.total ? Math.round((progressEvent.loaded * 100) / progressEvent.total) : 0
               setSynopsisUploadState((prev) => ({
@@ -521,7 +521,7 @@ const UploadLinksStep: React.FC<UploadLinksStepProps> = ({
         formData.append("folder", `projects/${projectId}/images`)
         formData.append("userId", user_id!)
 
-        const response = await axios.post("http://localhost:3000/api/v1/s3/upload", formData, {
+        const response = await axios.post(`https://employability.ai/api/v1/s3/upload`, formData, {
           onUploadProgress: (progressEvent) => {
             const progress = progressEvent.total ? Math.round((progressEvent.loaded * 100) / progressEvent.total) : 0
 
@@ -620,7 +620,7 @@ const UploadLinksStep: React.FC<UploadLinksStepProps> = ({
       if (key) {
         // Delete from S3
         try {
-          await axios.delete("http://localhost:3000/api/v1/s3/delete", {
+          await axios.delete(`https://employability.ai/api/v1/s3/delete`, {
             data: { key },
           })
         } catch (error) {
@@ -668,7 +668,7 @@ const UploadLinksStep: React.FC<UploadLinksStepProps> = ({
       if (key) {
         // Delete from S3
         try {
-          await axios.delete("http://localhost:3000/api/v1/s3/delete", {
+          await axios.delete(`https://employability.ai/api/v1/s3/delete`, {
             data: { key },
           })
         } catch (error) {
@@ -717,7 +717,7 @@ const UploadLinksStep: React.FC<UploadLinksStepProps> = ({
     const imageFile = imageUploadState.files[id]
     if (imageFile && imageFile.s3Key) {
       try {
-        await axios.delete("http://localhost:3000/api/v1/s3/delete", {
+        await axios.delete(`https://employability.ai/api/v1/s3/delete`, {
           data: { key: imageFile.s3Key },
         })
         setImageUploadState((prev) => {

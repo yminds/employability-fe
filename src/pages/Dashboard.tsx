@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useState } from "react";
 import SetGoalCard from "@/features/dashboard/SetGoalCard";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import type { RootState } from "@/store/store";
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SkillList from "@/components/skills/skillslist";
 import TryThingsSection from "@/features/dashboard/TryThingsSection";
@@ -16,10 +17,19 @@ import ProfessionalGoalsImg from "@/assets/dashboard/professional_goals.svg";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import EmployabilityBannerSection from "@/features/dashboard/EmployabilityBanner";
 import CompleteProfileSection from "@/features/profile/CompleteProfileSection";
+import { SkillCard } from "@/features/dashboard/SkillCard";
+import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
+import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
+import ProjectList from "@/components/projects/ProjectList";
+import InterviewList from "@/features/dashboard/InterviewList";
 
 interface Props {
   isDashboard: boolean; // Define the prop type here
   displayScore: boolean;
+}
+
+interface SkillCounts {
+  [key: string]: number;
 }
 
 const Dashboard: React.FC<Props> = () => {
@@ -38,7 +48,61 @@ const Dashboard: React.FC<Props> = () => {
   const completionPercentage = 50;
   const averageVerifiedPercentage = 5;
   const averageVerifiedScore = 0;
-  
+
+  const [getUserSkills, { data: skillsData }] = useGetUserSkillsMutation();
+  const { data: userProjects } = useGetProjectsByUserIdQuery(user_id);
+  console.log("userProjects", userProjects);
+  const [verifiedSkillsCount, setVerifiedSkillsCount] = useState(0);
+  const [totalMandatorySkillsCount, setTotalMandatorySkillsCount] = useState(0);
+  const [totalProjects, setTotalProjects] = useState(0);
+  const [verifiedProjects, setVerifiedProjects] = useState(0);
+
+  const fetchSkills = useCallback(
+    async (userId: string | undefined, goalId: string | null) => {
+      try {
+        await getUserSkills({ userId, goalId }).unwrap();
+      } catch (err) {
+        console.error("Error fetching skills:", err);
+      }
+    },
+    [getUserSkills]
+  );
+
+  useEffect(() => {
+    if (user_id && goalId) {
+      fetchSkills(user_id, goalId);
+    }
+  }, [user_id, goalId]);
+
+  console.log("GetUserSkills", skillsData);
+
+  useEffect(() => {
+    if (userProjects?.data) {
+      const projects = userProjects.data;
+      setTotalProjects(projects.length);
+      const verifiedCount = projects.filter(
+        (project) => project.status === "Verified"
+      ).length;
+      setVerifiedProjects(verifiedCount);
+    }
+  }, [userProjects]);
+
+  useEffect(() => {
+    if (skillsData?.data?.mandatory) {
+      const mandatorySkills = skillsData.data.mandatory;
+      const mandatorySkillsCount = mandatorySkills.length;
+      const verifiedCount = mandatorySkills.filter(
+        (skill) => skill.verified_rating >= 4
+      ).length;
+
+      setTotalMandatorySkillsCount(mandatorySkillsCount);
+      setVerifiedSkillsCount(verifiedCount);
+
+      console.log("Mandatory Skills Count:", mandatorySkillsCount);
+      console.log("Verified Skills Count:", verifiedCount);
+    }
+  }, [skillsData]);
+
   return (
     <>
       <main className="h-screen overflow-y-auto minimal-scrollbar font-ubuntu ">
@@ -50,13 +114,17 @@ const Dashboard: React.FC<Props> = () => {
                   <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight flex items-center gap-3">
                     Welcome Back, {user_name}
                     <span className="wave">
-                      <img src={emojiWavingImg} alt="Emoji" className="w-8" />
+                      <img
+                        src={emojiWavingImg || "/placeholder.svg"}
+                        alt="Emoji"
+                        className="w-8"
+                      />
                     </span>
                   </h1>
                 </header>
 
                 <div className="grid grid-cols-4 gap-4">
-                  <div className="col-span-3 flex flex-col gap-10 shrink-0">
+                  <div className="col-span-3 flex flex-col gap-6 shrink-0">
                     <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
                       <div className="flex flex-col items-start gap-6 self-stretch relative">
                         <div className="flex flex-col items-start gap-2">
@@ -85,10 +153,56 @@ const Dashboard: React.FC<Props> = () => {
                       </div>
                     </section>
 
+                    {/* Skill Cards */}
+                    <div className="flex justify-between space-x-4">
+                      <SkillCard
+                        type="skills"
+                        total={50}
+                        verifiedSkills={verifiedSkillsCount}
+                        totalMandatorySkills={totalMandatorySkillsCount}
+                      />
+                      <SkillCard
+                        type="projects"
+                        total={totalProjects}
+                        verifiedProjects={verifiedProjects}
+                        totalProjects={totalProjects}
+                      />
+                      <SkillCard type="interview" total={38} />
+                    </div>
+
+                    {/* Try These Things Out Section */}
+                    <TryThingsSection />
+
                     {/* Skills */}
                     <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      <SkillList isDashboard={true} goalId={goalId} onSkillsUpdate={()=>{}} isSkillsUpdated={false} goals={goalsData}/>
+                      <SkillList
+                        isDashboard={true}
+                        goalId={goalId}
+                        onSkillsUpdate={() => {}}
+                        isSkillsUpdated={false}
+                        goals={goalsData}
+                      />
                     </section>
+
+                    {/* Projects Section */}
+                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                      <ProjectList
+                        projects={userProjects?.data}
+                        isLoading={false}
+                        isDashboard={true}
+                        onOpenUploadModal={(project) => {
+
+                        }}
+                        onOpenDeleteModal={(projectId) => {
+                          // Handle delete
+                        }}
+                      />
+                    </section>
+
+                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                    <InterviewList isDashboard={true} />
+                    </section>
+                    
 
                     <EmployabilityBannerSection
                       imageSrc={ProfessionalGoalsImg}
@@ -99,7 +213,10 @@ const Dashboard: React.FC<Props> = () => {
                   <div className="flex flex-col items-start gap-6 flex-1">
                     {/* Profile Sidebar */}
                     {/* <ProfileCompletionCard /> */}
-                    <CompleteProfileSection userId={user_id} isDashboard={true}/>
+                    <CompleteProfileSection
+                      userId={user_id}
+                      isDashboard={true}
+                    />
 
                     {/* My Activity Sidebar */}
                     <MyActivityCard displayScore={true} goalId={goalId} />
@@ -112,12 +229,16 @@ const Dashboard: React.FC<Props> = () => {
                   <h1 className="text-gray-600 text-2xl font-medium leading-8 tracking-tight flex items-center gap-3">
                     Hi, {user_name}
                     <span className="wave">
-                      <img src={emojiWavingImg} alt="Emoji" className="w-8" />
+                      <img
+                        src={emojiWavingImg || "/placeholder.svg"}
+                        alt="Emoji"
+                        className="w-8"
+                      />
                     </span>
                   </h1>
                 </header>
                 <div className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 gap-4">
-                  <div className="col-span-3 flex flex-col gap-10 shrink-0">
+                  <div className="col-span-3 flex flex-col gap-6 shrink-0">
                     {/* Set Your Goal Section */}
                     <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
                       <div className="flex w-[417px] flex-col items-start gap-2">
@@ -172,7 +293,7 @@ const Dashboard: React.FC<Props> = () => {
 
                       <div className="flex absolute bottom-0 end-0">
                         <img
-                          src={GoalCyborgImg}
+                          src={GoalCyborgImg || "/placeholder.svg"}
                           alt="Goal"
                           className="w-[500px]"
                         />
@@ -193,7 +314,7 @@ const Dashboard: React.FC<Props> = () => {
                     <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-3">
                       <div className="flex items-center">
                         <img
-                          src={profile_image}
+                          src={profile_image || "/placeholder.svg"}
                           alt="profile"
                           className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold mr-3"
                         />
@@ -208,14 +329,16 @@ const Dashboard: React.FC<Props> = () => {
                         <div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
                           {/* Circular Progress Bar */}
                           <CircularProgress
-                            progress={parseFloat(averageVerifiedPercentage.toFixed(2))}
+                            progress={Number.parseFloat(
+                              averageVerifiedPercentage.toFixed(2)
+                            )}
                             size={60}
                             strokeWidth={6}
                             showText={false}
                           />
                           <img
                             className="absolute w-8 h-8"
-                            src={logo}
+                            src={logo || "/placeholder.svg"}
                             alt="short logo"
                           />
                         </div>
