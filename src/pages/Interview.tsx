@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import useInterviewSetup from "@/hooks/useInterviewSetup";
 import Interview from "@/components/interview/Interview";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import CheckSetup from "../components/setup/CheckSetup";
+import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
+  const location = useLocation();
 
+  const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
+  const [fundamentals, setFundamentals] = useState<any[]>([]);
+
+  const { title ,skillPoolId,level} = location.state || {};
   const {
     isInterviewStarted,
     setIsInterviewStarted,
@@ -22,10 +28,28 @@ const InterviewSetupNew: React.FC = () => {
     isProceedButtonEnabled,
   } = useInterviewSetup();
 
+    // fetching the fundmentals 
+
+  
+    useEffect(()=>{
+      const sync =async ()=>{
+        const fundamentalsResponse = await fetchFundamental({
+          skill_pool_id:skillPoolId,
+          level
+        }).unwrap();  
+        setFundamentals(fundamentalsResponse.data[0]?.concepts)
+      }
+      sync()
+      
+    },[])
+    
+  
+      
+
   return (
     <>
       {/* {!isInterviewStarted ? ( */}
-      { !isInterviewStarted ? (
+      { false && fundamentals.length >0  ? (
        <> <div className="flex items-center h-screen w-[70%] mx-auto sm:w-[95%]">
           <main className="py-4 w-full">
             <div className="flex flex-row items-center justify-between mb-6">
@@ -64,7 +88,7 @@ const InterviewSetupNew: React.FC = () => {
         </div>
         </>
       ) : (
-        <Interview cameraScale={100} id={id as string} />
+        <Interview cameraScale={100} id={id as string} interviewTopic={title} concepts={fundamentals} />
         // <Interview cameraScale={cameraScale} id={id as string} />
       )}
     </>

@@ -23,6 +23,7 @@ export const userFundamentalsApiSlice = apiSlice.injectEndpoints({
         }),
       }
     ),
+    
   }),
 });
 
