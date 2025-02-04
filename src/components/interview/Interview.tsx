@@ -205,6 +205,11 @@ const Interview: React.FC<{
       prompt,
       model: "gpt-4o",
       provider: "openai",
+      // model: "claude-3-5-sonnet-latest",
+      // provider: "anthropic",
+      // model: "gemini-2.0-flash-exp",
+      // model: "gemini-1.5-flash-latest",
+      // provider: "google",
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
       user_id: interviewDetails.data.user_id,
@@ -278,7 +283,7 @@ const LayoutBuilder = ({
         <AIProfile height={"20vh"} frequency={frequencyData} />
         {question.isCodeSnippetMode && question.codeSnippet ? (
           <CodeSnippetQuestion 
-            question={question.question} 
+            question={question.codeSnippet.question} 
             codeSnippet={question.codeSnippet.code}
           />
         ) : (
