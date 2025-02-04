@@ -1,84 +1,99 @@
-import type React from "react"
-import { useState } from "react"
-import LinkedInImportModal from "@/components/modal/LinkedInImportModal"
-import ResumeUploadModal from "@/components/modal/ResumeUploadModal"
-import ResumeUploadProgressModal from "@/components/modal/ResumeUploadProgressModal"
-import CompleteProfileModal from "@/components/modal/CompleteProfileModal"
-import type { ProfileFormData } from "@/features/profile/types"
-import { useSelector } from "react-redux"
-import type { RootState } from "@/store/store"
+import type React from "react";
+import { useState } from "react";
+import LinkedInImportModal from "@/components/modal/LinkedInImportModal";
+import ResumeUploadModal from "@/components/modal/ResumeUploadModal";
+import ResumeUploadProgressModal from "@/components/modal/ResumeUploadProgressModal";
+import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
+import type { ProfileFormData } from "@/features/profile/types";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface CompleteProfileSectionProps {
-  userId: string
+  userId: string;
   isDashboard: boolean;
+  goalId: string;
 }
 
-const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({ userId, isDashboard }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
-  const user_name = useSelector((state: RootState) => state.auth.user?.name)
-  const profile_image = useSelector((state: RootState) => state.auth.user?.profile_image)
+const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
+  userId,
+  isDashboard,
+  goalId,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const user_name = useSelector((state: RootState) => state.auth.user?.name);
+  const profile_image = useSelector(
+    (state: RootState) => state.auth.user?.profile_image
+  );
 
   const handleOpenModal = () => {
-    setIsModalOpen(true)
-  }
+    setIsModalOpen(true);
+  };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false)
-  }
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
-  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
+    setIsModalOpen(false);
+  };
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [fileDetails, setFileDetails] = useState<{
-    name: string
-    size: string
-  }>({ name: "", size: "" })
+    name: string;
+    size: string;
+  }>({ name: "", size: "" });
 
   const handleUpload = (file: File) => {
     setFileDetails({
       name: file.name,
       size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-    })
-    setIsUploadModalOpen(false)
-    setIsProgressModalOpen(true)
+    });
+    setIsUploadModalOpen(false);
+    setIsProgressModalOpen(true);
 
     // Simulate upload progress
-    let progress = 0
+    let progress = 0;
     const interval = setInterval(() => {
-      progress += 10
-      setUploadProgress(progress)
+      progress += 10;
+      setUploadProgress(progress);
       if (progress === 100) {
-        clearInterval(interval)
+        clearInterval(interval);
       }
-    }, 300)
-  }
+    }, 300);
+  };
 
   return (
     <Card className="w-full bg-white rounded-lg shadow-sm">
       <CardContent className="p-8 space-y-8">
-      {isDashboard && (
+        {isDashboard && (
           <div className="flex items-center pb-3 border-b border-[#D9D9D9]">
             <img
               src={profile_image || "/placeholder.svg"}
               alt="profile"
               className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold mr-3"
             />
-            <h3 className="text-gray-600 text-[20px] font-medium leading-[26px] tracking-[-0.2px]">{user_name}</h3>
+            <h3 className="text-gray-600 text-[20px] font-medium leading-[26px] tracking-[-0.2px]">
+              {user_name}
+            </h3>
           </div>
         )}
 
         <div className="space-y-4">
-          <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">Complete your profile</h2>
+          <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">
+            Complete your profile
+          </h2>
           <div className="flex items-center space-x-2">
             <div className="flex-grow bg-gray-200 h-2 rounded-full overflow-hidden">
-              <div className="bg-green-500 h-full" style={{ width: "30%" }}></div>
+              <div
+                className="bg-green-500 h-full"
+                style={{ width: "30%" }}
+              ></div>
             </div>
             <span className="text-gray-700 text-sm font-medium">30%</span>
           </div>
           <p className="text-gray-600 text-sm">
-            Employers are <span className="text-green-600 font-semibold">3 times</span> more likely to hire a candidate
-            with a complete profile.
+            Employers are{" "}
+            <span className="text-green-600 font-semibold">3 times</span> more
+            likely to hire a candidate with a complete profile.
           </p>
         </div>
 
@@ -88,7 +103,13 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({ userId,
             className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
           >
             <div className="p-2 ">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+              >
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -101,15 +122,34 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({ userId,
           </button>
 
           {/* LinkedIn Import Modal */}
-          {isModalOpen && <LinkedInImportModal onClose={handleCloseModal} userId={userId} />}
+          {isModalOpen && (
+            <LinkedInImportModal
+              onClose={handleCloseModal}
+              userId={userId}
+              goalId={goalId}
+            />
+          )}
 
           <button
             onClick={() => setIsUploadModalOpen(true)}
             className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
           >
             <div className="p-2 ">
-              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
-                <mask id="mask0_40000636_3427" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="25"
+                height="24"
+                viewBox="0 0 25 24"
+                fill="none"
+              >
+                <mask
+                  id="mask0_40000636_3427"
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
+                  width="25"
+                  height="24"
+                >
                   <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
                 </mask>
                 <g mask="url(#mask0_40000636_3427)">
@@ -130,6 +170,7 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({ userId,
                 console.log();
               }}
               userId={userId}
+              goalId={goalId}
             />
           )}
 
@@ -146,8 +187,21 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({ userId,
             className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
           >
             <div className="p-2 ">
-              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="24" viewBox="0 0 25 24" fill="none">
-                <mask id="mask0_40000636_3438" maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="25"
+                height="24"
+                viewBox="0 0 25 24"
+                fill="none"
+              >
+                <mask
+                  id="mask0_40000636_3438"
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
+                  width="25"
+                  height="24"
+                >
                   <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
                 </mask>
                 <g mask="url(#mask0_40000636_3438)">
@@ -165,17 +219,17 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({ userId,
               type="resume"
               onClose={() => setIsProfileModalOpen(false)}
               onSave={(data: ProfileFormData): void => {
-                throw new Error("Function not implemented.")
+                throw new Error("Function not implemented.");
               }}
               userId={userId}
               isParsed={false}
+              goalId={goalId}
             />
           )}
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default CompleteProfileSection
-
+export default CompleteProfileSection;

@@ -180,7 +180,7 @@ const UserProfile: React.FC = () => {
             email={user.email}
           />
           {/* Complete your profile */}
-          <CompleteProfileSection userId={user._id} isDashboard={false} />
+          <CompleteProfileSection userId={user._id} isDashboard={false} goalId={goalId}/>
         </div>
       </div>
     </div>

@@ -41,7 +41,6 @@ export default function BasicInfoForm({
   errors = {},
 }: BasicInfoFormProps) {
   const user = useSelector((state: RootState) => state.auth.user);
-  console.log("intial data", initialData);
 
   const [formData, setFormData] = useState(initialData?.basicInfo);
 
@@ -165,7 +164,7 @@ export default function BasicInfoForm({
       formData.append("name", file.name);
 
       const response = await axios.post(
-       `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
+        `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
         formData,
         {
           onUploadProgress: (progressEvent) => {
@@ -209,17 +208,20 @@ export default function BasicInfoForm({
           "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
         const key = formData.profile_image.replace(bucketBaseUrl, "");
         console.log("Deleting image with key:", key, "for user:", user._id);
-        const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            key,
-            userId: user._id,
-            folder: "profile-image.",
-          }),
-        });
+        const response = await fetch(
+          `${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              key,
+              userId: user._id,
+              folder: "profile-image.",
+            }),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to delete file from S3");
