@@ -6,6 +6,27 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Brand Primary Colors
+        button: "#001630",
+        "primary-green": "#24D680",
+        "secondary-green": "#E8F8EE",
+        "background-grey": "#F5F5F5",
+        
+        // Design System Greys
+        grey: {
+          1: "#FAFAFA",
+          2: "#D6D7D9",
+          3: "#B4B4B5",
+          4: "#909091",
+          5: "#68696B",
+          6: "#414447",
+          7: "#202326",
+          8: "#0C0F12",
+          9: "#040609",
+          10: "#000000",
+        },
+
+        // Original Color System (kept for compatibility)
         greens: {
           100: "#DBFFEA",
           200: "#AEFDCE",
@@ -35,7 +56,7 @@ module.exports = {
           200: "#7DFDB1",
           300: "#5AFA9A",
           400: "#2EE578",
-          500: "#2EE578", // Your main primary color
+          500: "#2EE578",
           600: "#1FD167",
           700: "#10B754",
           800: "#03963F",
@@ -48,7 +69,7 @@ module.exports = {
           200: "#B4B4B5",
           300: "#8E8E91",
           400: "#66656B",
-          500: "#66656B", // Your main secondary color
+          500: "#66656B",
           600: "#3E3D47",
           700: "#1D1C26",
           800: "#0B0A12",
@@ -80,35 +101,85 @@ module.exports = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+
+      // Typography System
+      fontSize: {
+        // Title Style
+        'title': ['32px', {
+          lineHeight: '42px',
+          letterSpacing: '-0.015em',
+          fontWeight: '700',
+        }],
+        // Header 1 Style
+        'h1': ['24px', {
+          lineHeight: '32px',
+          letterSpacing: '-1px',
+          fontWeight: '500',
+        }],
+        // Header 2 Style
+        'h2': ['20px', {
+          lineHeight: '26px',
+          letterSpacing: '-0.01em',
+          fontWeight: '500',
+        }],
+        // Sub Header Style
+        'sub-header': ['16px', {
+          lineHeight: '22px',
+          letterSpacing: '0',
+          fontWeight: '500',
+        }],
+        // Body 1 Style
+        'body1': ['18px', {
+          lineHeight: '26px',
+          letterSpacing: '0.015em',
+          fontWeight: '400',
+        }],
+        // Body 2 Style
+        'body2': ['16px', {
+          lineHeight: '24px',
+          letterSpacing: '0.015em',
+          fontWeight: '400',
+        }],
+        // Button Label Style
+        'button': ['16px', {
+          lineHeight: '24px',
+          letterSpacing: '0.015em',
+          fontWeight: '500',
+        }],
       },
+
+      // Font Families
       fontFamily: {
         ubuntu: ["Ubuntu", "sans-serif"],
         'sf-pro': ['SF Pro Display', 'sans-serif'],
       },
       
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
     },
+    
+    // Responsive Breakpoints
     screens: {
-      sm : {
+      sm: {
         min: '320px',
         max: '768px'
       },
-      md : {
+      md: {
         min: '769px',
         max: '1023px'
       },
-      lg : {
+      lg: {
         min: '1024px',
         max: '1279px'
       },
-      xl : {
+      xl: {
         min: '1280px',
         max: '1728px'
       },
-      '2xl' : {
+      '2xl': {
         min: '1729px'
       },
     },
@@ -118,15 +189,13 @@ module.exports = {
     plugin(function ({ addUtilities }) {
       addUtilities({
         ".scrollbar-hide": {
-          /* Hide the scrollbar */
-          "-ms-overflow-style": "none", /* IE and Edge */
-          "scrollbar-width": "none", /* Firefox */
+          "-ms-overflow-style": "none",
+          "scrollbar-width": "none",
           "&::-webkit-scrollbar": {
-            display: "none", /* Chrome, Safari, and Opera */
+            display: "none",
           },
         },
         ".scrollbar-default": {
-          /* Restore default scrollbar */
           "-ms-overflow-style": "auto",
           "scrollbar-width": "auto",
           "&::-webkit-scrollbar": {
