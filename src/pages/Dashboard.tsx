@@ -192,7 +192,7 @@ const Dashboard: React.FC<Props> = () => {
 
                 {/* Sidebar */}
                 <div className="flex flex-col items-start gap-6 flex-1">
-                  <CompleteProfileSection userId={user_id} isDashboard={true} />
+                  <CompleteProfileSection userId={user_id} isDashboard={true} goalId="" />
                   <MyActivityCard displayScore={true} goalId={goalId} />
                 </div>
               </div>
