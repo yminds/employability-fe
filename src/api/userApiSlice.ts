@@ -15,7 +15,11 @@ export const userApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    getUserDetails: builder.query({
+      query: (userId) => `/api/v1/user/getUserDetails/${userId}`,
+      providesTags: ["User"],
+    }),
   }),
 });
 
-export const { useUpdateUserMutation } = userApi;
+export const { useUpdateUserMutation ,useGetUserDetailsQuery } = userApi;

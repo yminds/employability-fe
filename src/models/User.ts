@@ -28,6 +28,10 @@ export type User = {
   experience: string[]; // Array of experience IDs
   certificates: string[]; // Array of certificate IDs
   date_of_birth: string;
+  is_email_verified: boolean;
+  email_verification_token?: string;
+  email_verification_token_expiry?: Date;
+  account_status?: "active" | "disabled";
   gender: string;
   resume: Resume[];
   profile_image?: string;

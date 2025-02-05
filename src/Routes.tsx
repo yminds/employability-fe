@@ -32,6 +32,7 @@ import Mentor from "./pages/Mentor.tsx";
 import Canidates from "./pages/Canidates.tsx";
 import Candidate from "./pages/Candidate.tsx";
 
+
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -73,6 +74,11 @@ export const routes: RouteConfig[] = [
     route: "/signup",
     component: <SignupForm />,
   },
+  // {
+  //   route:"/verify-email/:token",
+  //   component: <EmailVerification/>,
+  //   roles: ["CANDIDATE"]
+  // },
   {
     route: "/setgoal",
     component: <SetGoal />,
