@@ -13,15 +13,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
+import { DialogClose } from "@radix-ui/react-dialog";
+import LinkedinInstruction from "@/assets/images/Frame 1410077928.png"
 
 interface LinkedInImportModalProps {
   onClose: () => void;
   userId: string;
+  goalId: string;
 }
 
 const LinkedInImportModal: React.FC<LinkedInImportModalProps> = ({
   onClose,
   userId,
+  goalId,
 }) => {
   const dispatch = useDispatch();
   const [uploadResume] = useUploadResumeMutation();
@@ -152,6 +156,7 @@ const LinkedInImportModal: React.FC<LinkedInImportModalProps> = ({
         onSave={() => console.log("Save profile")}
         parsedData={parsedData}
         isParsed={true}
+        goalId={goalId}
       />
     );
   }
@@ -204,7 +209,7 @@ const LinkedInImportModal: React.FC<LinkedInImportModalProps> = ({
             </div>
             <div>
               <img
-                src="src/assets/images/Frame 1410077928.png"
+                src={LinkedinInstruction}
                 alt="LinkedIn profile download instructions"
                 className="w-full"
               />

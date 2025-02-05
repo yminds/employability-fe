@@ -16,10 +16,7 @@ export interface ProfileFormData {
     linkedIn: string;
     portfolio: string;
   };
-  skills: Array<{
-    name: string;
-    rating: number;
-  }>;
+  skills: Skill[];
   experience: ExperienceItem[];
 
   certifications: Certification[];
@@ -44,6 +41,14 @@ export interface SocialProfiles {
 }
 
 // src/types.ts
+
+export interface Skill {
+  skill_Id: string;
+  name: string;
+  rating: string;
+  level: string;
+  visibility: string;
+}
 
 export interface Education {
   id: string;

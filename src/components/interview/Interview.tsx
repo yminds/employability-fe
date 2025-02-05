@@ -8,7 +8,6 @@ import WebCam from "@/components/interview/WebCam";
 import Controls from "@/components/interview/Controls";
 import AIProfile from "@/components/interview/AIProfile";
 import Conversation from "@/components/interview/Conversation";
-// import CodeSnippetEditor from "@/components/interview/CodeSnippetEditor";
 
 // Hooks and API
 import { useInterviewStreamMutation } from "@/api/aiApiSlice";
@@ -21,49 +20,51 @@ import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice"
 // Constants and Types
 const SOCKET_URL = "http://localhost:3000";
 
+interface CodeSnippetType {
+  code: string;
+  question: string;
+}
+
 export interface IMessage {
   id: number;
   message: string;
   role: "USER" | "AI";
 }
 
+interface QuestionState {
+  question: string;
+  codeSnippet: CodeSnippetType | null;
+  isCodeSnippetMode: boolean;
+  concept: string;
+}
+
 const Interview: React.FC<{
   id: string;
   cameraScale: number;
-  interviewTopic:string;
-  concepts:any[]
-}> = ({interviewTopic,concepts}) => {
-  
+  interviewTopic: string;
+  concepts: any[];
+}> = ({ interviewTopic, concepts }) => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
 
   // Queries and Speech Hooks
-  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } =
-    useSTT();
+  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
   const { data: interviewDetails, isSuccess: isInterviewLoaded } =
     useGetInterviewbyIdQuery(interviewId as string, { skip: !interviewId });
 
   // State
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [question, setQuestion] = useState<{
-    question: string;
-    codeSnippet: string;
-    isCodeSnippetMode: boolean;
-    concept: string;
-  }>({
+  const [question, setQuestion] = useState<QuestionState>({
     question: "",
-    codeSnippet: "",
+    codeSnippet: null,
     isCodeSnippetMode: false,
     concept: "",
   });
 
-  console.log("+++++++++",concepts);
-
   const [isInitialized, setIsInitialized] = useState(false);
   const [layoutType, setLayoutType] = useState<1 | 2>(1);
   const [isInterviewEnded, setIsInterviewEnded] = useState(false);
-
 
   const isComponentMounted = useRef(true);
 
@@ -76,8 +77,6 @@ const Interview: React.FC<{
       }, 50);
     },
   });
-
-
 
   // Socket Connection
   useEffect(() => {
@@ -97,32 +96,30 @@ const Interview: React.FC<{
     const handleAIResponse = (data: string) => {
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
-
+    
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
-      // Exit code snippet mode when layout shifts
       setQuestion(prev => ({
         ...prev,
         isCodeSnippetMode: false
       }));
     };
 
-    const handleGenerateQuestion = (question: string, codeSnippet: string, concept: string) => {
-      console.log("Generate Question", question, codeSnippet, concept);
+    const handleGenerateQuestion = (question: string, concept: string) => {
+      console.log(question)
       setQuestion({
         question,
-        codeSnippet,
-        isCodeSnippetMode: false, // Enter code snippet mode
+        codeSnippet: null,
+        isCodeSnippetMode: false,
         concept,
       });
     };
 
-    // New listener to handle code snippet generation separately
-    const handleGenerateCodeSnippet = (codeSnippet: string, concept: string) => {
-      console.log("Generate Code Snippet", codeSnippet, concept);
+    const handleGenerateCodeSnippet = (codeSnippetData: CodeSnippetType, concept: string) => {
+      console.log("Generate Code Snippet", codeSnippetData, concept);
       setQuestion((prev) => ({
         ...prev,
-        codeSnippet,
+        codeSnippet: codeSnippetData,
         isCodeSnippetMode: true,
         concept,
       }));
@@ -137,21 +134,16 @@ const Interview: React.FC<{
     newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
     newSocket.on(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
     newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
-    newSocket.on(
-      `generateCodeSnippet${interviewDetails.data._id}`,
-      handleGenerateCodeSnippet
-    );
+    newSocket.on(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
     newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
+
     return () => {
       isComponentMounted.current = false;
       newSocket.off("connect", handleConnect);
       newSocket.off(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
       newSocket.off(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
       newSocket.off(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
-      newSocket.off(
-        `generateCodeSnippet${interviewDetails.data._id}`,
-        handleGenerateCodeSnippet
-      );
+      newSocket.off(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
       newSocket.disconnect();
     };
   }, [isInterviewLoaded, interviewDetails]);
@@ -171,15 +163,8 @@ const Interview: React.FC<{
 
   const handleDoneAnswering = () => {
     if (isUserAnswering) {
-      // setQuestion({
-      //   question: "",
-      //   codeSnippet: "",
-      //   isCodeSnippetMode: false, // Exit code snippet mode
-      //   concept: "",
-      // });
       stopRecording();
       setIsUserAnswering(false);
-
     }
   };
 
@@ -210,7 +195,6 @@ const Interview: React.FC<{
     });
   };
 
-
   const addMessage = (prompt: string) => {
     if (!interviewDetails?.data?._id) {
       console.error("Interview details not available");
@@ -226,18 +210,15 @@ const Interview: React.FC<{
       // model: "gemini-2.0-flash-exp",
       // model: "gemini-1.5-flash-latest",
       // provider: "google",
-      // model: "deepseek-chat",
-      // provider: "deepseek",
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
       user_id: interviewDetails.data.user_id,
       user_skill_id: interviewDetails.data.user_skill_id,
       skill_id: interviewDetails.data.skill_id,
-      code_snippet: question.codeSnippet,
+      code_snippet: question.codeSnippet?.code || "",
       question: question.question,
-
-      skill_name:interviewTopic,
-      concepts:concepts
+      skill_name: interviewTopic,
+      concepts: concepts
     });
   };
 
@@ -245,8 +226,7 @@ const Interview: React.FC<{
     <div className="w-full h-screen pt-12">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
         <Header />
-       {
-        isInterviewEnded ? (
+        {isInterviewEnded ? (
           <div className="text-center text-gray-500">
             <p>Thank you for your time. We will get back to you soon.</p>
           </div>
@@ -265,6 +245,15 @@ const Interview: React.FC<{
   );
 };
 
+interface LayoutBuilderProps {
+  isUserAnswering: boolean;
+  handleDoneAnswering: () => void;
+  question: QuestionState;
+  frequencyData: any;
+  messages: IMessage[];
+  layoutType: 1 | 2;
+}
+
 const LayoutBuilder = ({
   isUserAnswering,
   handleDoneAnswering,
@@ -272,18 +261,7 @@ const LayoutBuilder = ({
   frequencyData,
   messages,
   layoutType,
-}: {
-  isUserAnswering: boolean;
-  handleDoneAnswering: () => void;
-  question: {
-    question: string;
-    codeSnippet: string;
-    isCodeSnippetMode: boolean;
-  };
-  frequencyData: any;
-  messages: IMessage[];
-  layoutType: 1 | 2;
-}) => {
+}: LayoutBuilderProps) => {
   return layoutType === 1 ? (
     <div className="w-full flex gap-8 max-h-screen">
       <div className="w-[60%] flex flex-col gap-8">
@@ -303,10 +281,10 @@ const LayoutBuilder = ({
     <div className="w-full flex gap-8 max-h-screen">
       <div className="w-[45%] flex flex-col gap-8">
         <AIProfile height={"20vh"} frequency={frequencyData} />
-        {question.isCodeSnippetMode ? (
+        {question.isCodeSnippetMode && question.codeSnippet ? (
           <CodeSnippetQuestion 
-            question={question.question} 
-            codeSnippet={question.codeSnippet} 
+            question={question.codeSnippet.question} 
+            codeSnippet={question.codeSnippet.code}
           />
         ) : (
           <Conversation layoutType={2} messages={messages} />
