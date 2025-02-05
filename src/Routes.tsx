@@ -32,6 +32,8 @@ import Mentor from "./pages/Mentor.tsx";
 import Canidates from "./pages/Canidates.tsx";
 import Candidate from "./pages/Candidate.tsx";
 
+import ReportPage from "./pages/SkillsReportPage.tsx";
+
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -129,6 +131,10 @@ export const routes: RouteConfig[] = [
     route: "/candidates/:id",
     component: <Candidate />,
   },
+  {
+    route:"/skill/report/:id",
+    component: <ReportPage/>
+  }
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {
