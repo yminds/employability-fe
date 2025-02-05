@@ -34,6 +34,7 @@ import Candidate from "./pages/Candidate.tsx";
 
 import ReportPage from "./pages/SkillsReportPage.tsx";
 
+
 interface RouteConfig {
   route: string;
   parameterized?: boolean;
@@ -75,6 +76,11 @@ export const routes: RouteConfig[] = [
     route: "/signup",
     component: <SignupForm />,
   },
+  // {
+  //   route:"/verify-email/:token",
+  //   component: <EmailVerification/>,
+  //   roles: ["CANDIDATE"]
+  // },
   {
     route: "/setgoal",
     component: <SetGoal />,
