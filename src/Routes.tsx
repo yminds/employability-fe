@@ -31,6 +31,7 @@ import Example from "./features/cap/Example.tsx";
 import Mentor from "./pages/Mentor.tsx";
 import Canidates from "./pages/Canidates.tsx";
 import Candidate from "./pages/Candidate.tsx";
+import VerifyPhoneOTP from "./pages/VerifyPhoneOTP.tsx";
 
 
 interface RouteConfig {
@@ -73,6 +74,10 @@ export const routes: RouteConfig[] = [
   {
     route: "/signup",
     component: <SignupForm />,
+  },
+  {
+    route:"/verify-otp",
+    component:<VerifyPhoneOTP/>,
   },
   // {
   //   route:"/verify-email/:token",
