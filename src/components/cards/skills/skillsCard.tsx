@@ -7,7 +7,7 @@ import verifiedImg from "@/assets/skills/verified.svg";
 import unverifiedImg from "@/assets/skills/unverifies.svg";
 import DefaultImg from "@/assets/skills/DefaultSkillImg.svg";
 import verifiedWhite from "@/assets/skills/verified_whiteBG.svg";
-import backGround from "@/assets/skills/verifiedBg.png"
+import backGround from "@/assets/skills/verifiedBg.png";
 import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 
 interface SkillCardProps {
@@ -23,6 +23,7 @@ interface SkillCardProps {
   onDelete?: (skillId: string) => void;
   onEdit?: (skillId: string, updatedSelfRating: number) => void;
   userId?: string | undefined;
+  isDashboard: boolean;
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
@@ -37,6 +38,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   isMandatory = false,
   onDelete,
   onEdit,
+  isDashboard,
 }) => {
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
@@ -44,15 +46,12 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const [editedSelfRating, setEditedSelfRating] = useState(selfRating);
   const inputRef = useRef<HTMLInputElement>(null);
   const [ratingError, setRatingError] = useState("");
-  
- 
-    useEffect(() => {
-      if (isEditing && inputRef.current) {
-         inputRef.current.focus();
-      }
-    }, [isEditing]);
 
-  
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
 
   const handleRatingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -96,15 +95,15 @@ const SkillCard: React.FC<SkillCardProps> = ({
       return value === "Basic"
         ? "bg-[#E5F6FF] text-[#1C3FAA] w-fit"
         : value === "Intermediate"
-          ? "bg-[#E5F0FF] text-[#1C2CD8]"
-          : "bg-[#E5E7FF] text-[#1C2CD8]";
+        ? "bg-[#E5F0FF] text-[#1C2CD8]"
+        : "bg-[#E5E7FF] text-[#1C2CD8]";
     }
     if (type === "importance") {
       return value === "Low"
         ? "bg-[#DBFFEA] text-[#10B754]"
         : value === "Medium"
-          ? "bg-[#FFF9DB] text-[#D4B30C]"
-          : "bg-[#FFF2DB] text-[#D48A0C]";
+        ? "bg-[#FFF9DB] text-[#D4B30C]"
+        : "bg-[#FFF2DB] text-[#D48A0C]";
     }
   };
 
@@ -123,7 +122,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   const handleLearn = () => {
-    navigate(`/mentor/learn/${skillId}`, { state: { skill, skillId, skillPoolId } });
+    navigate(`/mentor/learn/${skillId}`, {
+      state: { skill, skillId, skillPoolId },
+    });
   };
 
   const handleVerifySkill = async () => {
@@ -133,7 +134,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
       user_skill_id: skillId,
       skill_id: skillPoolId,
     });
-    navigate(`/interview/${interviewId}`,{state:{title:skill ,skillPoolId,level}});
+    navigate(`/interview/${interviewId}`, {
+      state: { title: skill, skillPoolId, level },
+    });
   };
 
   return (
@@ -177,7 +180,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                         value={editedSelfRating}
                         onChange={handleRatingChange}
                         onKeyDown={handleRatingKeyDown}
-                        onBlur={handleRatingUpdate} 
+                        onBlur={handleRatingUpdate}
                         className="w-12 p-1 border-none focus:outline-none appearance-none bg-transparent text-base"
                         style={{
                           MozAppearance: "textfield",
@@ -208,17 +211,20 @@ const SkillCard: React.FC<SkillCardProps> = ({
           </div>
 
           {/* Middle Section */}
-          <div className="flex w-[30%] flex-col items-center">
-            <span
-              className={`px-4 py-2 rounded-[40px] font-medium leading-6 tracking-[0.24px] ${getBadgeColor(
-                "proficiency",
-                level || "1"
-              )}`}
-            >
-              {skillsLevelObj[level as unknown as keyof typeof skillsLevelObj] ??
-                "Basic"}
-            </span>
-          </div>
+          {!isDashboard && (
+            <div className="flex w-[30%] flex-col items-center">
+              <span
+                className={`px-4 py-2 rounded-[40px] font-medium leading-6 tracking-[0.24px] ${getBadgeColor(
+                  "proficiency",
+                  level || "1"
+                )}`}
+              >
+                {skillsLevelObj[
+                  level as unknown as keyof typeof skillsLevelObj
+                ] ?? "Basic"}
+              </span>
+            </div>
+          )}
 
           {/* Rating and Status */}
           <div className="flex w-[30%] flex-col items-center">
@@ -231,8 +237,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
             <div className="flex items-center space-x-2">
               <img src={imgSrc} alt={status} className="w-4 h-4" />
               <span
-                className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-green-600" : "text-yellow-600"
-                  }`}
+                className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
+                  status === "Verified" ? "text-green-600" : "text-yellow-600"
+                }`}
               >
                 {status}
               </span>
@@ -301,7 +308,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
                 </span>
               </div>
               <div>
-                <h3 className="text-[16px] font-medium sm:text-sm sm: w-1/2 truncate">{skill}</h3>
+                <h3 className="text-[16px] font-medium sm:text-sm sm: w-1/2 truncate">
+                  {skill}
+                </h3>
                 <div className="flex items-center space-x-2">
                   {isEditing ? (
                     <div className="flex flex-col">
@@ -326,7 +335,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
                         <span>/10</span>
                       </div>
                       {ratingError && (
-                        <p className="text-red-500 text-xs mt-1">{ratingError}</p>
+                        <p className="text-red-500 text-xs mt-1">
+                          {ratingError}
+                        </p>
                       )}
                     </div>
                   ) : (
@@ -344,17 +355,20 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   )}
                 </div>
               </div>
-
             </div>
             <div className="">
               <div className="flex flex-wrap items-center justify-between w-full mt-2">
                 {/* Left Section: Verified Rating */}
-                <div className={`flex items-center space-x-2 absolute right-0 top-0 px-2 h-[35px] `} style={{ backgroundImage: `url(${backGround})` }}>
+                <div
+                  className={`flex items-center space-x-2 absolute right-0 top-0 px-2 h-[35px] `}
+                  style={{ backgroundImage: `url(${backGround})` }}
+                >
                   <div className="flex items-center space-x-2">
                     <img src={smImgSrc} alt={status} className="w-4 h-4" />
                     <span
-                      className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-white" : "text-white"
-                        }`}
+                      className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
+                        status === "Verified" ? "text-white" : "text-white"
+                      }`}
                     >
                       {status}
                     </span>
@@ -377,8 +391,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   level || "1"
                 )}`}
               >
-                {skillsLevelObj[level as unknown as keyof typeof skillsLevelObj] ??
-                  "Basic"}
+                {skillsLevelObj[
+                  level as unknown as keyof typeof skillsLevelObj
+                ] ?? "Basic"}
               </span>
             </div>
             {/* Right Section: Action Buttons */}
@@ -418,7 +433,6 @@ const SkillCard: React.FC<SkillCardProps> = ({
           </div>
         </div>
       </div>
-
     </>
   );
 };

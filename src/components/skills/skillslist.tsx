@@ -263,6 +263,7 @@ const SkillList: React.FC<SkillListProps> = ({
                 onDelete={handleDeleteSkill}
                 onEdit={handleEditSkill}
                 isMandatory={isMandatorySkill}
+                isDashboard={isDashboard}
               />
               {index < displaySkills.length - 1 && (
                 <div className="w-full h-[1px] my-4 bg-[#E0E0E0]" />

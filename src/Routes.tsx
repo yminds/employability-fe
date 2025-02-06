@@ -31,6 +31,7 @@ import Example from "./features/cap/Example.tsx";
 import Mentor from "./pages/Mentor.tsx";
 import Canidates from "./pages/Canidates.tsx";
 import Candidate from "./pages/Candidate.tsx";
+import UserPublicProfilePage from "./pages/UserPublicProfilePage.tsx";
 
 interface RouteConfig {
   route: string;
@@ -100,6 +101,10 @@ export const routes: RouteConfig[] = [
   {
     route: "/user-profile",
     component: <UserProfilePage />,
+  },
+  {
+    route: "/profile/:username",
+    component: <UserPublicProfilePage/>
   },
   {
     route: "/jobs",

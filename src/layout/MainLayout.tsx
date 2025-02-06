@@ -18,6 +18,7 @@ const noSidebarRoutes = [
   "/addphone",
   "/auth/github/callback",
   "/auth/linkedin/callback",
+  "/profile"
 ];
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

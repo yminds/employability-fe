@@ -1,6 +1,10 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import ProjectCard, { ProjectCardSkeleton } from './ProjectCard';
+"use client";
+
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ProjectCard, { ProjectCardSkeleton } from "./ProjectCard";
+import noExperience from "@/assets/profile/noeducation.svg";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 interface Project {
   _id: string;
@@ -26,6 +30,7 @@ interface ProjectListProps {
   projects: Project[] | undefined;
   isLoading: boolean;
   isDashboard?: boolean;
+  isPublic?: boolean;
   onOpenUploadModal?: (project: Project | null) => void;
   onOpenDeleteModal?: (projectId: string) => void;
 }
@@ -34,16 +39,28 @@ const ProjectList: React.FC<ProjectListProps> = ({
   projects,
   isLoading,
   isDashboard = false,
+  isPublic = false,
   onOpenUploadModal,
   onOpenDeleteModal,
 }) => {
   const navigate = useNavigate();
-  const displayProjects = isDashboard ? projects?.slice(0, 3) : projects;
+  const [isExpanded, setIsExpanded] = useState(false);
   const totalProjects = projects?.length || 0;
 
+  const displayProjects =
+    isExpanded || !isDashboard ? projects : projects?.slice(0, 3);
+
   const handleProjectClick = () => {
-    if (isDashboard) {
-      navigate('/projects');
+    if (isDashboard && !isPublic) {
+      navigate("/projects");
+    }
+  };
+
+  const handleViewAll = () => {
+    if (isPublic) {
+      setIsExpanded(!isExpanded);
+    } else {
+      navigate("/projects");
     }
   };
 
@@ -51,70 +68,69 @@ const ProjectList: React.FC<ProjectListProps> = ({
     <div className="p-[42px]">
       <div className="flex flex-col gap-8">
         <div className="flex items-center">
-          <h2 className="text-[#1f2226] text-lg font-medium font-['Ubuntu'] leading-snug">
+          <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
             Projects ({totalProjects})
           </h2>
         </div>
 
         <div className="flex flex-col">
           {isLoading ? (
-            Array(3).fill(null).map((_, index) => (
-              <ProjectCardSkeleton key={index} />
-            ))
+            Array(3)
+              .fill(null)
+              .map((_, index) => <ProjectCardSkeleton key={index} />)
           ) : displayProjects?.length ? (
             <>
               {displayProjects.map((project, index) => (
                 <React.Fragment key={project._id}>
-                  <div 
-                    className="cursor-pointer"
-                    onClick={handleProjectClick}
-                  >
+                  <div className="cursor-pointer" onClick={handleProjectClick}>
                     <ProjectCard
                       project={project}
                       onOpenUploadModal={onOpenUploadModal}
                       onOpenDeleteModal={onOpenDeleteModal}
+                      isDashboard={isDashboard}
+                      isPublic={isPublic}
                     />
                   </div>
-                  {index < displayProjects.length - 1 && index !== 2 && (
-                    <div className="w-full h-px bg-[#E0E0E0]" />
+                  {index < displayProjects.length - 1 && (
+                    <div className="w-full h-px bg-[#E0E0E0] mb-4" />
                   )}
                 </React.Fragment>
               ))}
-              {isDashboard && totalProjects > 3 && (
-                <div className="w-full flex justify-center">
+              {isDashboard && projects && projects.length > 3 && (
+                <div className="w-full flex justify-center py-4">
                   <button
-                    onClick={() => navigate("/projects")}
-                    className="flex items-center gap-1 text-[#001630] text-sm font-medium hover:underline py-2 mt-2"
+                    onClick={handleViewAll}
+                    className="flex items-center gap-1 text-[#001630] text-sm font-medium hover:underline"
                   >
-                    View all
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M8 3.33334L8 12.6667"
-                        stroke="#001630"
-                        strokeWidth="1.33333"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M12.6667 8L8.00004 12.6667L3.33337 8"
-                        stroke="#001630"
-                        strokeWidth="1.33333"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    {isPublic
+                      ? isExpanded
+                        ? "Show less"
+                        : "View all"
+                      : "View all"}
+                    {isPublic ? (
+                      isExpanded ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               )}
             </>
           ) : (
-            <div className="text-gray-500 text-center py-4">No projects found</div>
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <img
+                src={noExperience || "/placeholder.svg"}
+                alt="No project entries"
+                className="w-20 h-20 mb-6"
+              />
+              <h3 className="text-base text-[#414447] font-normal mb-2 text-center font-sans leading-6 tracking-[0.24px]">
+                No Projects added yet.
+              </h3>
+            </div>
           )}
         </div>
       </div>
