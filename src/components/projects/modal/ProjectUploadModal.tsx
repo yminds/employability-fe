@@ -641,14 +641,14 @@ export function ProjectUploadModal({
       <div className="flex items-center gap-4">
         <span
           onClick={handleSaveDraft}
-          className="text-gray-500 hover:text-gray-700 cursor-pointer underline text-sm font-medium"
+          className="text-grey-5 hover:text-grey-7 cursor-pointer underline text-body2 font-sf-pro"
         >
           Save as Draft
         </span>
         <button
           type="button"
           onClick={handleSubmitForReview}
-          className="flex px-8 py-2 justify-center items-center gap-2 rounded-md bg-black text-white hover:bg-gray-600 disabled:opacity-50"
+          className="flex px-8 py-2 justify-center items-center gap-2 rounded-md bg-button text-grey-1 hover:bg-grey-6 disabled:opacity-50 font-sf-pro text-button"
         >
           Submit for Review
         </button>
@@ -686,7 +686,7 @@ export function ProjectUploadModal({
     >
       <DialogContent className="!p-8 !pb-10 w-[700px] !max-w-[700px] min-h-[615px] max-h-[90vh] flex flex-col rounded-2xl">
         <DialogHeader className="text-left !p-0 !m-0">
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-h2 font-sf-pro text-grey-7">
             {STEPS[currentStep]}
           </DialogTitle>
         </DialogHeader>
@@ -801,13 +801,13 @@ export function ProjectUploadModal({
           </form>
         </div>
 
-        <div className="pt-6 mt-6 border-t shrink-0">
+        <div className="pt-6 mt-6 border-t border-grey-2">
           <div className="flex justify-between">
             <button
               type="button"
               onClick={() => handleNavigationAttempt("previous")}
               disabled={currentStep === 0}
-              className="flex px-8 py-2 justify-center items-center gap-2 rounded-md border border-gray-300 text-[#555555] hover:border-black disabled:opacity-50 cursor-pointer font-inter text-base font-semibold leading-5 transition-colors"
+              className="flex px-8 py-2 justify-center items-center gap-2 rounded-md border border-grey-2 text-grey-5 hover:border-grey-7 disabled:opacity-50 cursor-pointer font-sf-pro text-button transition-colors"
             >
               Previous
             </button>

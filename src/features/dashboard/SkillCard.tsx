@@ -66,7 +66,6 @@ export function SkillCard({
     return (
       <div className="flex items-baseline">
         <span className="text-[#202326] text-3xl font-bold leading-none">{total}</span>
-        <span className="text-[#68696B] text-sm ml-1">/ 100</span>
       </div>
     )
   }
