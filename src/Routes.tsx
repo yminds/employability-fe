@@ -31,6 +31,9 @@ import Example from "./features/cap/Example.tsx";
 import Mentor from "./pages/Mentor.tsx";
 import Canidates from "./pages/Canidates.tsx";
 import Candidate from "./pages/Candidate.tsx";
+import UserPublicProfilePage from "./pages/UserPublicProfilePage.tsx";
+
+import ReportPage from "./pages/SkillsReportPage.tsx";
 import VerifyPhoneOTP from "./pages/VerifyPhoneOTP.tsx";
 
 
@@ -113,6 +116,10 @@ export const routes: RouteConfig[] = [
     component: <UserProfilePage />,
   },
   {
+    route: "/profile/:username",
+    component: <UserPublicProfilePage/>
+  },
+  {
     route: "/jobs",
     component: <JobsPage />,
   },
@@ -140,6 +147,10 @@ export const routes: RouteConfig[] = [
     route: "/candidates/:id",
     component: <Candidate />,
   },
+  {
+    route:"/skill/report/:id",
+    component: <ReportPage/>
+  }
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {
