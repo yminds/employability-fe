@@ -113,9 +113,9 @@ export default function CompleteProfileModal({
           email: user.email || "",
           date_of_birth: user.date_of_birth || "",
           gender: user.gender || "",
-          country: user.address.country || "",
-          state: user.address.state || "",
-          city: user.address.city || "",
+          country: user?.address?.country || "",
+          state: user?.address?.state || "",
+          city: user?.address?.city || "",
           profile_image: user.profile_image || "",
         },
         socialProfiles: {

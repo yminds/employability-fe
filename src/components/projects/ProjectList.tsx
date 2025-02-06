@@ -128,8 +128,21 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 className="w-20 h-20 mb-6"
               />
               <h3 className="text-base text-[#414447] font-normal mb-2 text-center font-sans leading-6 tracking-[0.24px]">
-                No Projects added yet.
+                {isPublic
+                  ? "No Projects added yet."
+                  : "You haven't added any project yet."}
               </h3>
+              {!isPublic && (
+                <p className="text-[#414447] text-center font-sans text-base font-normal leading-6 tracking-[0.24px]">
+                  <button
+                    onClick={() => navigate("/projects")}
+                    className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
+                  >
+                    Add project
+                  </button>{" "}
+                  to show up here
+                </p>
+              )}
             </div>
           )}
         </div>
