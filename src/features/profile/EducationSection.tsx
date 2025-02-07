@@ -13,13 +13,17 @@ import EducationIcon from "@/assets/profile/educationIcon.svg";
 
 interface EducationSectionProps {
   initialEducation?: Education[];
+  isPublic: boolean;
 }
 
 const EducationSection: React.FC<EducationSectionProps> = ({
   initialEducation,
+  isPublic,
 }) => {
   const user = useSelector((state: any) => state.auth.user);
-  const { data, error } = useGetEducationByIdQuery(user._id);
+  const { data, error } = useGetEducationByIdQuery(user._id, {
+    skip: isPublic,
+  });
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -62,7 +66,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
             Education
           </h2>
         </div>
-        {education?.length > 0 && (
+        {education?.length > 0 && !isPublic && (
           <div className="sticky top-0 bg-white px-6 py-4">
             <div className="flex space-x-2">
               <button
@@ -137,17 +141,21 @@ const EducationSection: React.FC<EducationSectionProps> = ({
               className="w-20 h-20 mb-6"
             />
             <h3 className="text-base text-[#414447] font-normal mb-2 text-center font-sans leading-6 tracking-[0.24px]">
-              You haven't added any education yet.
+              {isPublic
+                ? "No Education added yet."
+                : "You haven't added any education yet."}
             </h3>
-            <p className="text-[#414447] text-center font-sans text-base font-normal leading-6 tracking-[0.24px]">
-              <button
-                onClick={() => handleOpenModal("add")}
-                className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
-              >
-                Add education
-              </button>{" "}
-              to show up here
-            </p>
+            {!isPublic && (
+              <p className="text-[#414447] text-center font-sans text-base font-normal leading-6 tracking-[0.24px]">
+                <button
+                  onClick={() => handleOpenModal("add")}
+                  className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
+                >
+                  Add education
+                </button>{" "}
+                to show up here
+              </p>
+            )}
           </div>
         ) : (
           <>

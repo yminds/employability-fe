@@ -16,8 +16,10 @@ const noSidebarRoutes = [
   "/example",
   "/setexperience",
   "/addphone",
+  "/verify-otp",
   "/auth/github/callback",
   "/auth/linkedin/callback",
+  "/profile"
 ];
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

@@ -5,10 +5,12 @@ interface RegisterUserPayload {
   password: string;
   name: string;
 }
+
 interface SocialAuthPayload {
   provider: "google" | "linkedin" | "github";
   token: string;
 }
+
 interface AuthResponse {
   success: boolean;
   user_info: any;
@@ -16,16 +18,35 @@ interface AuthResponse {
   user: User;
   message: string;
 }
+
 interface UpdateFirstTimeUserPayload {
   user_id: string; 
   phone_number?: string;
   experience_level?: "" | "entry" | "mid" | "senior"; 
 }
+
 interface User {
   id: string;
   name: string;
   email: string;
   [key: string]: any; 
+}
+
+// New interfaces for phone verification
+interface VerifyPhonePayload {
+  userId: string;
+  phoneNumber: string;
+  countryCode: string;
+}
+
+interface VerifyOTPPayload {
+  userId: string;
+  otp: string;
+}
+
+interface PhoneVerificationResponse {
+  success: boolean;
+  message: string;
 }
 
 export const authApiSlice = apiSlice.injectEndpoints({
@@ -58,6 +79,27 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    verifyPhone: builder.mutation<PhoneVerificationResponse, VerifyPhonePayload>({
+      query: (data) => ({
+        url: "/api/v1/phone/verify-phone",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    verifyOTP: builder.mutation<PhoneVerificationResponse, VerifyOTPPayload>({
+      query: (data) => ({
+        url: "/api/v1/phone/verify-otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    resendOTP: builder.mutation<PhoneVerificationResponse, VerifyPhonePayload>({
+      query: (data) => ({
+        url: "/api/v1/phone/resend-otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -65,5 +107,8 @@ export const {
   useLoginMutation,
   useRegisterUserMutation,
   useSocialAuthMutation,
-  useUpdateFirstTimeUserMutation
+  useUpdateFirstTimeUserMutation,
+  useVerifyPhoneMutation,
+  useVerifyOTPMutation,
+  useResendOTPMutation
 } = authApiSlice;

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { OTPInput } from "input-otp";
 import { Dot, Edit2, ArrowLeft } from "lucide-react";
 import { useGetUserDetailsQuery } from "@/api/userApiSlice";
+import logo from "@/assets/skills/e-Logo.svg";
 
 const EmailVerification = () => {
   const [remainingDays, setRemainingDays] = useState(10);
@@ -214,7 +215,9 @@ const EmailVerification = () => {
 
   const renderOtpView = () => (
     <div className="flex flex-col items-center justify-center gap-8 p-6">
-      <div className="w-[58px] h-[58px] p-4 rounded-[54px] border border-black/10" />
+      <div className="w-[58px] h-[58px] p-3 rounded-[54px] border border-black/10">
+        <img src={logo} alt="logo" className="w-8 h-8 object-contain"/>
+      </div>
 
       <div className="text-center">
         <h2 className="text-[32px] font-bold font-ubuntu leading-[42px] mb-4">

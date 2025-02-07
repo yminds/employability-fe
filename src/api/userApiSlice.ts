@@ -1,25 +1,28 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiSlice } from './apiSlice';
 
-const baseUrl = process.env.VITE_API_BASE_URL as string;
-
-export const userApi = createApi({
-  reducerPath: "userApi",
-  baseQuery: fetchBaseQuery({ baseUrl }),
-  tagTypes: ["User"],
+export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     updateUser: builder.mutation({
       query: ({ userId, data }) => ({
         url: `/api/v1/user/update/${userId}`,
-        method: "PUT", // Using PUT method
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["User"],
     }),
     getUserDetails: builder.query({
-      query: (userId) => `/api/v1/user/getUserDetails/${userId}`,
-      providesTags: ["User"],
+      query: (userId) => ({
+        url: `/api/v1/user/getUserDetails/${userId}`,
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
     }),
   }),
+  overrideExisting: false,
 });
 
-export const { useUpdateUserMutation ,useGetUserDetailsQuery } = userApi;
+export const { 
+  useUpdateUserMutation,
+  useGetUserDetailsQuery
+} = userApi;

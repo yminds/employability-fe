@@ -219,7 +219,7 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts.slice(0, 3),
+      concepts: concepts.slice(0,2),
       interview_id: interviewDetails.data._id,
     });
   };
