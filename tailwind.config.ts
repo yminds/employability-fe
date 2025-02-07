@@ -102,49 +102,49 @@ module.exports = {
         ring: "hsl(var(--ring))",
       },
 
-      // Typography System
+      // Updated Typography System
       fontSize: {
-        // Title Style
         'title': ['32px', {
           lineHeight: '42px',
           letterSpacing: '-0.015em',
           fontWeight: '700',
+          fontFamily: 'Ubuntu',
         }],
-        // Header 1 Style
-        'h1': ['24px', {
+        'h1': ['20px', {
           lineHeight: '32px',
           letterSpacing: '-1px',
           fontWeight: '500',
+          fontFamily: 'Ubuntu',
         }],
-        // Header 2 Style
-        'h2': ['20px', {
+        'h2': ['18px', {
           lineHeight: '26px',
           letterSpacing: '-0.01em',
           fontWeight: '500',
+          fontFamily: 'Ubuntu',
         }],
-        // Sub Header Style
         'sub-header': ['16px', {
           lineHeight: '22px',
           letterSpacing: '0',
           fontWeight: '500',
+          fontFamily: 'Ubuntu',
         }],
-        // Body 1 Style
-        'body1': ['18px', {
+        'body1': ['16px', {
           lineHeight: '26px',
           letterSpacing: '0.015em',
           fontWeight: '400',
+          fontFamily: 'SF Pro Display',
         }],
-        // Body 2 Style
-        'body2': ['16px', {
+        'body2': ['14px', {
           lineHeight: '24px',
           letterSpacing: '0.015em',
           fontWeight: '400',
+          fontFamily: 'SF Pro Display',
         }],
-        // Button Label Style
-        'button': ['16px', {
+        'button': ['14px', {
           lineHeight: '24px',
           letterSpacing: '0.015em',
           fontWeight: '500',
+          fontFamily: 'SF Pro Display',
         }],
       },
 
@@ -206,5 +206,3 @@ module.exports = {
     }),
   ],
 };
-
-

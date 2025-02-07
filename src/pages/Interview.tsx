@@ -26,6 +26,7 @@ const InterviewSetupNew: React.FC = () => {
     handleScaleChange,
     cameraScale,
     isProceedButtonEnabled,
+
   } = useInterviewSetup();
 
     // fetching the fundmentals 
@@ -88,7 +89,7 @@ const InterviewSetupNew: React.FC = () => {
         </div>
         </>
       ) : (
-        <Interview cameraScale={100} id={id as string} interviewTopic={title} concepts={fundamentals} />
+        <Interview cameraScale={100} id={id as string} interviewTopic={title} concepts={fundamentals}  />
         // <Interview cameraScale={cameraScale} id={id as string} />
       )}
     </>

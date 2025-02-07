@@ -49,8 +49,9 @@ const Interview: React.FC<{
 
   // Queries and Speech Hooks
   const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
-  const { data: interviewDetails, isSuccess: isInterviewLoaded } =
-    useGetInterviewbyIdQuery(interviewId as string, { skip: !interviewId });
+  const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(interviewId as string, {
+    skip: !interviewId,
+  });
 
   // State
   const [isUserAnswering, setIsUserAnswering] = useState(false);
@@ -96,17 +97,17 @@ const Interview: React.FC<{
     const handleAIResponse = (data: string) => {
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
-    
+
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
-      setQuestion(prev => ({
+      setQuestion((prev) => ({
         ...prev,
-        isCodeSnippetMode: false
+        isCodeSnippetMode: false,
       }));
     };
 
     const handleGenerateQuestion = (question: string, concept: string) => {
-      console.log(question)
+      console.log(question);
       setQuestion({
         question,
         codeSnippet: null,
@@ -124,7 +125,7 @@ const Interview: React.FC<{
         concept,
       }));
     };
-    
+
     const handleEndInterview = () => {
       setIsInterviewEnded(true);
     };
@@ -177,10 +178,7 @@ const Interview: React.FC<{
 
         const lastMessage = prevMessages[prevMessages.length - 1];
         if (lastMessage.role === "AI") {
-          return [
-            ...prevMessages.slice(0, -1),
-            { ...lastMessage, message: `${lastMessage.message} ${message}` },
-          ];
+          return [...prevMessages.slice(0, -1), { ...lastMessage, message: `${lastMessage.message} ${message}` }];
         }
       }
 
@@ -210,6 +208,9 @@ const Interview: React.FC<{
       // model: "gemini-2.0-flash-exp",
       // model: "gemini-1.5-flash-latest",
       // provider: "google",
+      // model: "deepseek-chat",
+      // provider: "deepseek",
+
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
       user_id: interviewDetails.data.user_id,
@@ -240,7 +241,7 @@ const Interview: React.FC<{
             messages={messages}
             layoutType={2}
           />
-        )}
+        )}~
       </div>
     </div>
   );
@@ -265,6 +266,9 @@ const LayoutBuilder = ({
 }: LayoutBuilderProps) => {
   return layoutType === 1 ? (
     <div className="w-full flex gap-8 max-h-screen">
+
+  
+
       <div className="w-[60%] flex flex-col gap-8">
         <WebCam />
         {isUserAnswering ? (
@@ -279,14 +283,11 @@ const LayoutBuilder = ({
       </div>
     </div>
   ) : (
-    <div className="w-full flex gap-8 max-h-screen">
+    <div className="w-full flex gap-8 max-h-screen">     
       <div className="w-[45%] flex flex-col gap-8">
         <AIProfile height={"20vh"} frequency={frequencyData} />
         {question.isCodeSnippetMode && question.codeSnippet ? (
-          <CodeSnippetQuestion 
-            question={question.codeSnippet.question} 
-            codeSnippet={question.codeSnippet.code}
-          />
+          <CodeSnippetQuestion question={question.codeSnippet.question} codeSnippet={question.codeSnippet.code} />
         ) : (
           <Conversation layoutType={2} messages={messages} />
         )}

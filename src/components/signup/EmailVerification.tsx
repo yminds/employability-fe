@@ -62,7 +62,7 @@ const EmailVerification = () => {
     try {
       // First update the email
       const updateResponse = await fetch(
-        `http://localhost:3000/api/v1/user/update-email/${user?._id}`,
+        `https://employability.ai/api/v1/user/update-email/${user?._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -80,7 +80,7 @@ const EmailVerification = () => {
 
       // Then send verification OTP to the new email
       const otpResponse = await fetch(
-        "http://localhost:3000/api/v1/email/send-verification-otp",
+        "https://employability.ai/api/v1/email/send-verification-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -109,7 +109,7 @@ const EmailVerification = () => {
   const handleSendOtp = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/v1/email/send-verification-otp",
+        "https://employability.ai/api/v1/email/send-verification-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -136,7 +136,7 @@ const EmailVerification = () => {
   const handleVerifyOtp = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/v1/email/verify-otp",
+        "https://employability.ai/api/v1/email/verify-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
