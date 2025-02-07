@@ -80,8 +80,8 @@ export function SkillCard({
     if (type === "projects") {
       return (
         <div className="flex items-baseline space-x-1">
-          <span className="text-[#202326] text-xl font-bold">{total}</span>
-          <span className="text-[#68696B] text-sm">/ {total}</span>
+          <span className="text-[#202326] text-xl font-bold">{verifiedProjects}</span>
+          <span className="text-[#68696B] text-sm">/ {totalProjects}</span>
         </div>
       );
     }
