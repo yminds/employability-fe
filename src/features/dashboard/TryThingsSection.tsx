@@ -42,7 +42,6 @@ interface CardType {
         onSkip?: () => void;
     };
     isOptional?: boolean;
-    isMandatory?: boolean;
     progressSection?: keyof Sections;
 }
 
@@ -64,8 +63,9 @@ const TryThingsSection: React.FC = () => {
     // Get user ID and data
     const userId = useSelector((state: RootState) => state.auth?.user?._id);
     const { data: goalsData } = useGetUserGoalQuery(userId || "");
-    const { data: userData, refetch } = useGetUserDetailsQuery(userId || "");
-    const user = userData?.data;
+    const { data: userData, refetch } = useGetUserDetailsQuery(userId || "",{
+        refetchOnMountOrArgChange: true,
+    });
     const [updateUser] = useUpdateUserMutation();
     
     const goalId = goalsData?.data?.[0]?._id || "";
@@ -104,14 +104,57 @@ const TryThingsSection: React.FC = () => {
         return Array.isArray(user?.certificates) && user.certificates.length > 0;
     };
 
+    // Check if parsed resume has data for a section
+    const hasParsedResumeData = (section: string) => {
+        const parsedResume = userData?.data?.parsedResume;
+        if (!parsedResume) return false;
+
+        switch (section) {
+            case 'basicInfo':
+                return !!(parsedResume.name || parsedResume.contact?.email || parsedResume.contact?.phone || parsedResume.address.country || parsedResume.address.city || parsedResume.address.state || parsedResume.gender);
+            case 'experience':
+                return Array.isArray(parsedResume.experience) && parsedResume.experience.length > 0;
+            case 'education':
+                return Array.isArray(parsedResume.education) && parsedResume.education.length > 0;
+            case 'certification':
+                return Array.isArray(parsedResume.certifications) && parsedResume.certifications.length > 0;
+            default:
+                return false;
+        }
+    };
+
+    // Get button text based on section status
+    const getButtonText = (section: string, defaultText: string) => {
+        if (!isComplete(section) && hasParsedResumeData(section)) {
+            return `Review ${section.charAt(0).toUpperCase() + section.slice(1)}`;
+        }
+        return defaultText;
+    };
+
+    // Helper function to check if a section is complete
+    const isComplete = (section: string) => {
+        const user = userData?.data;
+        switch (section) {
+            case 'basicInfo':
+                return isBasicInfoComplete(user);
+            case 'experience':
+                return isExperienceComplete(user);
+            case 'education':
+                return isEducationComplete(user);
+            case 'certification':
+                return isCertificationComplete(user);
+            default:
+                return false;
+        }
+    };
+
     // Calculate profile completion progress
     useEffect(() => {
         if (userData?.data) {
             const user = userData.data;
             let progress = 0;
-            let totalSections = 4; // Total number of sections
+            let totalSections = 4;
 
-            // Basic Info (25%)
             if (isBasicInfoComplete(user)) {
                 progress += 25;
                 setSections(prev => ({
@@ -120,7 +163,6 @@ const TryThingsSection: React.FC = () => {
                 }));
             }
 
-            // Experience (25%)
             if (isExperienceComplete(user)) {
                 progress += 25;
                 setSections(prev => ({
@@ -129,7 +171,6 @@ const TryThingsSection: React.FC = () => {
                 }));
             }
 
-            // Education (25%)
             if (isEducationComplete(user)) {
                 progress += 25;
                 setSections(prev => ({
@@ -138,7 +179,6 @@ const TryThingsSection: React.FC = () => {
                 }));
             }
 
-            // Certification (25%)
             if (isCertificationComplete(user)) {
                 progress += 25;
                 setSections(prev => ({
@@ -204,62 +244,60 @@ const TryThingsSection: React.FC = () => {
 
     const getCards = (): CardType[] => {
         const user = userData?.data;
-        console.log('User data:', user);    
         const defaultCards = [];
 
-        // Add Basic Info card if not complete
-        if (!isBasicInfoComplete(user)) {
+        // Only add Basic Info card if user doesn't have basic info
+        if (!user?.name || !user?.email || !user?.phone_number || !user?.gender || 
+            !user?.address?.country || !user?.address?.state || !user?.address?.city) {
             defaultCards.push({
                 image: Addbioimg,
                 alt: "Basic Info",
                 description: "Add your personal and contact details to complete your profile basics.",
-                buttonText: "Add Basic Info",
+                buttonText: getButtonText('basicInfo', "Add Basic Info"),
                 route: "/basic-info",
-                isMandatory: true,
                 progressSection: 'basicInfo'
             });
         }
 
-        // Only add Experience card if section is not complete
-        if (!isExperienceComplete(user)) {
+        // Only add Experience card if user doesn't have experience and hasn't indicated they're a fresher
+        if (user?.is_experienced !== false && (!user?.experience || user.experience.length === 0)) {
             defaultCards.push({
                 image: AddEducationImg,
                 alt: "Experience",
                 description: "Share your work experience or indicate if you're just starting your career.",
-                buttonText: "Add Experience",
+                buttonText: getButtonText('experience', "Add Experience"),
                 route: "/add-experience",
                 isOptional: true,
                 progressSection: 'experience'
             });
         }
 
-        // Only add Education card if section is not complete
-        if (!isEducationComplete(user)) {
+        // Only add Education card if user doesn't have education entries
+        if (!user?.education || user.education.length === 0) {
             defaultCards.push({
                 image: AddEducationImg,
                 alt: "Education",
                 description: "Add your educational qualifications (required).",
-                buttonText: "Add Education",
+                buttonText: getButtonText('education', "Add Education"),
                 route: "/add-education",
-                isMandatory: true,
                 progressSection: 'education'
             });
         }
 
-        // Only add Certification card based on conditions
-        if (user?.has_certificates !== false && !isCertificationComplete(user)) {
+        // Only add Certification card if user hasn't indicated no certificates and doesn't have any certificates
+        if (user?.has_certificates !== false && (!user?.certificates || user.certificates.length === 0)) {
             defaultCards.push({
                 image: AddPictureimg,
                 alt: "Certification",
                 description: "Add any relevant certifications to enhance your profile.",
-                buttonText: "Add Certification",
+                buttonText: getButtonText('certification', "Add Certification"),
                 route: "/add-certification",
                 isOptional: true,
                 progressSection: 'certification'
             });
         }
 
-        // Add resume card if needed
+        // Only add resume card if user hasn't uploaded a resume and hasn't indicated they don't have one
         if (userData?.data?.has_resume !== false && 
             (!userData?.data?.parsedResume || Object.keys(userData.data.parsedResume).length === 0)) {
             defaultCards.unshift({
@@ -299,26 +337,25 @@ const TryThingsSection: React.FC = () => {
     const renderCard = (card: CardType, index: number) => (
         <div 
             key={index}
-            className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col items-start gap-8 relative"
+            className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col justify-between h-full relative"
         >
-            <div className="h-[100px]">
-                <img
-                    src={card.image}
-                    alt={card.alt}
-                    className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
-                />
+            <div className="flex flex-col gap-8">
+                <div className="h-[100px]">
+                    <img
+                        src={card.image}
+                        alt={card.alt}
+                        className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
+                    />
+                </div>
+
+                <div className="flex flex-col items-start gap-2">
+                    <p className="text-gray-500 text-base font-normal leading-6 tracking-wide font-sf-pro">
+                        {card.description}
+                    </p>
+                </div>
             </div>
 
-            <div className="flex flex-col items-start gap-2">
-                <p className="text-gray-500 text-base font-normal leading-6 tracking-wide font-sf-pro">
-                    {card.description}
-                </p>
-                {card.isMandatory && (
-                    <span className="text-red-500 text-sm">Required</span>
-                )}
-            </div>
-
-            <div className="flex flex-col w-full gap-2">
+            <div className="flex flex-col w-full gap-2 mt-4">
                 <button 
                     className="flex w-full p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-base font-medium leading-6 tracking-wide font-sf-pro hover:bg-gray-50" 
                     onClick={() => {
@@ -330,7 +367,6 @@ const TryThingsSection: React.FC = () => {
                 >
                     {card.buttonText}
                 </button>
-                {/* Only show secondary action for resume card */}
                 {card.alt === "Resume" && card.secondaryAction && (
                     <button 
                         className="text-gray-500 text-sm hover:text-gray-700"
@@ -405,7 +441,7 @@ const TryThingsSection: React.FC = () => {
                     onSave={handleProfileSave}
                     type={currentProfileSection}
                     userId={userId || ""}
-                    isParsed={false}
+                    isParsed={hasParsedResumeData(currentProfileSection)}
                     goalId={goalId}
                 />
             )}

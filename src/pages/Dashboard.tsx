@@ -39,7 +39,9 @@ const Dashboard: React.FC<Props> = () => {
   const userDetails = data?.data;
   const is_Email_Verified = userDetails?.is_email_verified;
 
-  const { data: goalsData } = useGetUserGoalQuery(user_id) || "";
+  const { data: goalsData } = useGetUserGoalQuery(user_id,{
+    refetchOnMountOrArgChange: true,
+  });
   const goalName = goalsData?.data?.[0]?.name || "";
   const goalId = goalsData?.data?.[0]?._id || "";
 
@@ -53,6 +55,39 @@ const Dashboard: React.FC<Props> = () => {
   const [totalMandatorySkillsCount, setTotalMandatorySkillsCount] = useState(0);
   const [totalProjects, setTotalProjects] = useState(0);
   const [verifiedProjects, setVerifiedProjects] = useState(0);
+  const [completedProfileSections, setCompletedProfileSections] = useState(0);
+
+  useEffect(()=>{
+    if(userDetails){
+     let completedCount = 0;
+     if (isBasicInfoComplete(user)) completedCount++;
+      if (isExperienceComplete(user)) completedCount++;
+      if (isEducationComplete(user)) completedCount++;
+      if (isCertificationComplete(user)) completedCount++;
+
+      setCompletedProfileSections(completedCount);
+    }
+  })
+
+  const isBasicInfoComplete = (user: any) => {
+    return !!(user?.name && user?.email && user?.phone_number && user?.gender && 
+      user?.address?.country && user?.address?.state && user?.address?.city);
+  };
+  
+  const isExperienceComplete = (user: any) => {
+    if (user?.is_experienced === false) return true;
+    return Array.isArray(user?.experience) && user.experience.length > 0;
+  };
+  
+  const isEducationComplete = (user: any) => {
+    return Array.isArray(user?.education) && user.education.length > 0;
+  };
+  
+  const isCertificationComplete = (user: any) => {
+    if (user?.has_certificates === false) return true;
+    return Array.isArray(user?.certificates) && user.certificates.length > 0;
+  };
+
 
   const fetchSkills = useCallback(
     async (userId: string | undefined, goalId: string | null) => {
@@ -144,7 +179,8 @@ const Dashboard: React.FC<Props> = () => {
                   <div className="flex justify-between space-x-4">
                     <SkillCard
                     type="profile"
-                    total={5}
+                    total={4}
+                    completedProfileSections={completedProfileSections}
                     />
                     <SkillCard
                       type="skills"
@@ -196,7 +232,7 @@ const Dashboard: React.FC<Props> = () => {
 
                 {/* Sidebar */}
                 <div className="flex flex-col items-start gap-6 flex-1">
-                  <CompleteProfileSection userId={user_id} isDashboard={true} goalId="" />
+                  {/* <CompleteProfileSection userId={user_id} isDashboard={true} goalId="" /> */}
                   <MyActivityCard displayScore={true} goalId={goalId} />
                 </div>
               </div>
@@ -238,7 +274,7 @@ const Dashboard: React.FC<Props> = () => {
                     </div>
                   </section>
 
-                  <TryThingsSection />
+                  <TryThingsSection/>
                   <EmployabilityBannerSection
                     imageSrc={ProfessionalGoalsImg}
                     altText="Professional Goals Image"
