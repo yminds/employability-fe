@@ -12,14 +12,18 @@ import ExperienceIcon from "@/assets/profile/experienceIcon.svg";
 
 interface ExperienceSectionProps {
   intialExperiences?: ExperienceItem[];
+  isPublic: boolean;
 }
 
 const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   intialExperiences,
+  isPublic,
 }) => {
   const user = useSelector((state: any) => state.auth.user);
 
-  const { data, error } = useGetExperiencesByUserIdQuery(user?._id);
+  const { data, error } = useGetExperiencesByUserIdQuery(user?._id, {
+    skip: isPublic,
+  });
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
@@ -64,7 +68,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           </h2>
         </div>
         <div className="sticky top-0 bg-white z-10 px-6 py-4">
-          {experiences?.length > 0 && (
+          {experiences?.length > 0 && !isPublic && (
             <div className="flex space-x-2">
               <button
                 onClick={() => handleOpenModal("add")}
@@ -138,17 +142,21 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
               className="w-20 h-20 mb-6"
             />
             <h3 className="text-base text-[#414447] font-normal mb-2 text-center font-sans leading-6 tracking-[0.24px]">
-              You haven't added any experience yet.
+              {isPublic
+                ? "No Experience added yet."
+                : "You haven't added any experience yet."}
             </h3>
-            <p className="text-[#414447] text-center font-sans text-base font-normal leading-6 tracking-[0.24px]">
-              <button
-                onClick={() => handleOpenModal("add")}
-                className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
-              >
-                Add experience
-              </button>{" "}
-              to show up here
-            </p>
+            {!isPublic && (
+              <p className="text-[#414447] text-center font-sans text-base font-normal leading-6 tracking-[0.24px]">
+                <button
+                  onClick={() => handleOpenModal("add")}
+                  className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
+                >
+                  Add experience
+                </button>{" "}
+                to show up here
+              </p>
+            )}
           </div>
         ) : (
           <>

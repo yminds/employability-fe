@@ -112,7 +112,7 @@ const Dashboard: React.FC<Props> = () => {
 
               <div className="grid grid-cols-4 gap-4">
                 <div className="col-span-3 flex flex-col gap-6 shrink-0">
-                  {/* Goal Progress Section */}
+                  {/* Goal Progress Section
                   <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
                     <div className="flex flex-col items-start gap-6 self-stretch relative">
                       <div className="flex flex-col items-start gap-2">
@@ -138,10 +138,14 @@ const Dashboard: React.FC<Props> = () => {
                         {completionPercentage}%
                       </span>
                     </div>
-                  </section>
+                  </section> */}
 
                   {/* Skill Cards */}
                   <div className="flex justify-between space-x-4">
+                    <SkillCard
+                    type="profile"
+                    total={5}
+                    />
                     <SkillCard
                       type="skills"
                       total={50}
@@ -154,10 +158,10 @@ const Dashboard: React.FC<Props> = () => {
                       verifiedProjects={verifiedProjects}
                       totalProjects={totalProjects}
                     />
-                    <SkillCard type="interview" total={38} />
+                    <SkillCard type="interview" total={10} />
                   </div>
 
-                  {/* Rest of the sections */}
+                  
                   <TryThingsSection />
                   
                   <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">

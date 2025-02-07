@@ -3,31 +3,45 @@ import { Button } from "@/components/ui/button";
 import threeDots from "@/assets/profile/threedots.svg";
 import { Pencil } from "lucide-react";
 import EditBioModal from "@/components/modal/EditBioModal";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Country, State } from "country-state-city";
 import backgroundImage from "@/assets/images/Frame 1410078135.jpg";
-
 
 interface ProfileBannerProps {
   user: any;
   bio: string;
   onBioUpdate: (newBio: string) => void;
+  isPublic: boolean;
+  goalData: any;
 }
 
-const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
-  console.log("Current Status:", user.current_status);
-
-  const country = user.address?.country ? Country.getCountryByCode(user.address.country) : null
+const ProfileBanner = ({
+  user,
+  bio,
+  onBioUpdate,
+  isPublic,
+  goalData,
+}: ProfileBannerProps) => {
+  const country = user.address?.country
+    ? Country.getCountryByCode(user.address.country)
+    : null;
   const state =
     user.address?.state && user.address?.country
       ? State.getStateByCodeAndCountry(user.address.state, user.address.country)
-      : null
+      : null;
 
   const [isEditBioOpen, setIsEditBioOpen] = useState(false);
 
   const handleBioSave = (newBio: string) => {
     onBioUpdate(newBio);
   };
+
+  const handleShareProfile = () => {
+    const publicProfileUrl = `${window.location.origin}/profile/${user.username}`;
+    window.open(publicProfileUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const goalName = goalData?.data?.[0]?.name || "";
 
   return (
     <div
@@ -64,9 +78,7 @@ const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
                   {user.name}
                 </h1>
                 <p className="text-[#414447] text-l font-normal font-ubuntu leading-[24px] tracking-[0.24px]">
-                  {user?.address.country !== ""
-                    ? `${state?.name}, ${country?.name}`
-                    : ""}
+                  {country !== null ? `${state?.name}, ${country?.name}` : ""}
                 </p>
                 {/* <div className="flex items-center gap-2">
                   <svg
@@ -94,7 +106,7 @@ const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
             </div>
             <div className="flex flex-col items-start justify-end gap-2 ">
               <h2 className="text-[#414447] text-2xl font-medium leading-[26px] tracking-[-0.2px] font-ubuntu">
-                Full Stack developer
+                {isPublic ? user.goals?.[0]?.name : goalName}
               </h2>
               <div className="flex items-center gap-2  rounded-lg">
                 <div className="flex items-baseline gap-1">
@@ -129,37 +141,44 @@ const ProfileBanner = ({ user, bio, onBioUpdate }: ProfileBannerProps) => {
             <p className="text-[#414447] text-base font-normal font-sf-pro leading-6 tracking-[0.24px] flex-1">
               {bio}
             </p>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="mt-1"
-              onClick={() => setIsEditBioOpen(true)}
-            >
-              <Pencil className="h-4 w-4 text-[#414447]" />
-            </Button>
+            {!isPublic && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="mt-1"
+                onClick={() => setIsEditBioOpen(true)}
+              >
+                <Pencil className="h-4 w-4 text-[#414447]" />
+              </Button>
+            )}
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              className="flex w-[187px] h-[40px] px-3 py-2 justify-center items-center gap-3 bg-white text-black rounded-[11px] border border-[#001630] font-sf-pro"
-            >
-              Share Profile
-            </Button>
+          {!isPublic && (
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                className="flex w-[187px] h-[40px] px-3 py-2 justify-center items-center gap-3 bg-white text-black rounded-[11px] border border-[#001630] font-sf-pro"
+                onClick={handleShareProfile}
+              >
+                Share Profile
+              </Button>
 
-            <div className="w-6 h-6 flex items-center justify-center">
-              <img src={threeDots} alt="Three Dots" />
+              <div className="w-6 h-6 flex items-center justify-center">
+                <img src={threeDots || "/placeholder.svg"} alt="Three Dots" />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
-      <EditBioModal
-        isOpen={isEditBioOpen}
-        onClose={() => setIsEditBioOpen(false)}
-        onSave={handleBioSave}
-        currentBio={bio}
-      />
+      {!isPublic && (
+        <EditBioModal
+          isOpen={isEditBioOpen}
+          onClose={() => setIsEditBioOpen(false)}
+          onSave={handleBioSave}
+          currentBio={bio}
+        />
+      )}
     </div>
   );
 };

@@ -22,6 +22,8 @@ import { useUpdateUserMutation } from "@/api/userApiSlice";
 import { updateUserProfile } from "../authentication/authSlice";
 import CompleteProfileSection from "./CompleteProfileSection";
 import arrow from "@/assets/skills/arrow.svg";
+import ProjectList from "@/components/projects/ProjectList";
+import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
 
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
@@ -31,12 +33,14 @@ const UserProfile: React.FC = () => {
   const dispatch = useDispatch();
   const { data: goalsData } = useGetUserGoalQuery(user._id) || "";
   const [updateUser] = useUpdateUserMutation();
+  const { data: userProjects } = useGetProjectsByUserIdQuery(user._id);
 
   const educationEntries: Education[] = [];
   const experiences: ExperienceItem[] = [];
   const certifications: Certification[] = [];
 
   const goalId = goalsData?.data?.[0]?._id || "";
+  console.log("goalId ", goalId);
 
   const [bio, setBio] = useState<string>(
     user.bio ||
@@ -59,7 +63,7 @@ const UserProfile: React.FC = () => {
     try {
       await updateUser({
         userId: user._id,
-        data: { currentStatus: updatedStatus },
+        data: { current_status: updatedStatus },
       }).unwrap();
       dispatch(updateUserProfile({ current_status: updatedStatus }));
     } catch (error) {
@@ -137,22 +141,48 @@ const UserProfile: React.FC = () => {
       <div className="grid grid-cols-10 gap-6">
         {/* Left Section */}
         <div className="flex flex-col col-span-7">
-          <ProfileBanner user={user} bio={bio} onBioUpdate={handleEditBio} />
+          <ProfileBanner
+            user={user}
+            bio={bio}
+            onBioUpdate={handleEditBio}
+            isPublic={false}
+            goalData={goalsData}
+          />
 
           <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
             <SkillList isDashboard={true} goalId={goalId} />
           </div>
 
           <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <ExperienceSection intialExperiences={experiences} />
+            <ProjectList
+              projects={userProjects?.data}
+              isLoading={false}
+              isDashboard={true}
+              isPublic={false}
+              onOpenUploadModal={() => {}}
+              onOpenDeleteModal={() => {}}
+            />
           </div>
 
           <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <EducationSection initialEducation={educationEntries} />
+            <ExperienceSection
+              intialExperiences={experiences}
+              isPublic={false}
+            />
           </div>
 
           <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <CertificationsSection certifications={certifications} />
+            <EducationSection
+              initialEducation={educationEntries}
+              isPublic={false}
+            />
+          </div>
+
+          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+            <CertificationsSection
+              certifications={certifications}
+              isPublic={false}
+            />
           </div>
           <div className="mb-6"></div>
         </div>
@@ -180,7 +210,11 @@ const UserProfile: React.FC = () => {
             email={user.email}
           />
           {/* Complete your profile */}
-          <CompleteProfileSection userId={user._id} isDashboard={false} goalId={goalId}/>
+          <CompleteProfileSection
+            userId={user._id}
+            isDashboard={false}
+            goalId={goalId}
+          />
         </div>
       </div>
     </div>
