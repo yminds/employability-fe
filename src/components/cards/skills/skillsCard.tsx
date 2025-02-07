@@ -110,7 +110,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const skillsLevelObj = { 1: "Basic", 2: "Intermediate", 3: "Advanced" };
 
   const handleViewReport = () => {
-    navigate(`/skills/${skillId}`, {
+    navigate(`/skill/report/${skillId}`, {
       state: { skill, verified_rating, selfRating: editedSelfRating },
     });
   };

@@ -26,6 +26,7 @@ const InterviewSetupNew: React.FC = () => {
     handleScaleChange,
     cameraScale,
     isProceedButtonEnabled,
+
   } = useInterviewSetup();
 
     // fetching the fundmentals 
@@ -43,10 +44,13 @@ const InterviewSetupNew: React.FC = () => {
       
     },[])
     
+  
+      
+
   return (
     <>
       {/* {!isInterviewStarted ? ( */}
-      { !isInterviewStarted && fundamentals.length >0  ? (
+      { false && fundamentals.length >0  ? (
        <> <div className="flex items-center h-screen w-[70%] mx-auto sm:w-[95%]">
           <main className="py-4 w-full">
             <div className="flex flex-row items-center justify-between mb-6">
@@ -85,7 +89,7 @@ const InterviewSetupNew: React.FC = () => {
         </div>
         </>
       ) : (
-        <Interview cameraScale={100} id={id as string} interviewTopic={title} concepts={fundamentals} />
+        <Interview cameraScale={100} id={id as string} interviewTopic={title} concepts={fundamentals}  />
         // <Interview cameraScale={cameraScale} id={id as string} />
       )}
     </>
