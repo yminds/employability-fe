@@ -2,12 +2,6 @@ export const parsedTransformData = async (
   data: any,
   skillsData: any
 ) => {
-  console.log("||||||||||||||||||||||||||||||");
-
-  console.log("Data", data);
-  console.log("Skill Data", skillsData);
-
-  console.log("||||||||||||||||||||||||||||||");
 
   const transformDate = (dateStr: string) => {
     if (!dateStr) return "";
