@@ -566,7 +566,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
 
         {/* Save Button */}
         <Button
-          className="w-full mt-6 bg-[#00183D] hover:bg-[#062549]"
+          className="w-full mt-6 bg-[#00183D] hover:bg-[#062549] text-white"
           onClick={handleSave}
           disabled={isSaving}
         >

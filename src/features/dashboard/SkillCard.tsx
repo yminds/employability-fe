@@ -1,16 +1,26 @@
-import { PuzzleIcon, FileText, Users, MessageSquare } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import React from 'react';
+import { PuzzleIcon, FileText, Users, MessageSquare } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import verified from "@/assets/skills/verified.svg";
+import verifiedGrey from "@/assets/skills/verified-grey.svg";
 
 interface SkillCardProps {
-  type: "skills" | "projects" | "interview"
-  total: number | null
-  verifiedSkills?: number
-  totalMandatorySkills?: number
-  verifiedProjects?: number
-  totalProjects?: number
+  type: "profile"|"skills" | "projects" | "interview";
+  total: number | null;
+  verifiedSkills?: number;
+  totalMandatorySkills?: number;
+  verifiedProjects?: number;
+  totalProjects?: number;
+  completedProfileSections?: number;
 }
 
 const cardConfig = {
+  profile:{
+    title: "Profile",
+    icon: Users,
+    iconColor: "text-[#4361ee]",
+    bgColor: "bg-[#eef1ff]",
+  },
   skills: {
     title: "Skills",
     icon: PuzzleIcon,
@@ -29,7 +39,7 @@ const cardConfig = {
     iconColor: "text-[#a855f7]",
     bgColor: "bg-[#f3e8ff]",
   },
-}
+};
 
 export function SkillCard({
   type,
@@ -38,51 +48,83 @@ export function SkillCard({
   totalMandatorySkills,
   verifiedProjects,
   totalProjects,
+  completedProfileSections = 0,
 }: SkillCardProps) {
-  const config = cardConfig[type]
-  const Icon = config.icon
+  const config = cardConfig[type];
+  const Icon = config.icon;
+
+  const isCompleted = () => {
+    if (type === "skills" && verifiedSkills !== undefined && totalMandatorySkills !== undefined) {
+      return verifiedSkills === totalMandatorySkills && totalMandatorySkills > 0;
+    }
+    if (type === "projects" && verifiedProjects !== undefined && totalProjects !== undefined) {
+      return verifiedProjects === totalProjects && totalProjects > 0;
+    }
+    if (type === "profile") {
+      return completedProfileSections === 4;
+    }
+    if (type === "interview") {
+      return total === 10;
+    }
+    return false;
+  };
 
   const renderContent = () => {
     if (type === "skills" && verifiedSkills !== undefined && totalMandatorySkills !== undefined) {
       return (
-        <div className="flex items-baseline">
-          <span className="text-[#202326] text-3xl font-bold leading-none">{verifiedSkills}</span>
-          
-            <span className="text-[#68696B] text-sm ml-1">/ {totalMandatorySkills}</span>
-          
+        <div className="flex items-baseline space-x-1">
+          <span className="text-[#202326] text-xl font-bold">{verifiedSkills}</span>
+          <span className="text-[#68696B] text-sm">/ {totalMandatorySkills}</span>
         </div>
-      )
+      );
     }
-    if (type === "projects" && verifiedProjects !== undefined && totalProjects !== undefined) {
+    if (type === "projects") {
       return (
-        <div className="flex items-baseline">
-          <span className="text-[#202326] text-3xl font-bold leading-none">{verifiedProjects}</span>
-          
-            <span className="text-[#68696B] text-sm ml-1">/ {totalProjects}</span>
-          
+        <div className="flex items-baseline space-x-1">
+          <span className="text-[#202326] text-xl font-bold">{verifiedProjects}</span>
+          <span className="text-[#68696B] text-sm">/ {totalProjects}</span>
         </div>
-      )
+      );
+    }
+    if (type === "profile") {
+      return (
+        <div className="flex items-baseline space-x-1">
+          <span className="text-[#202326] text-xl font-bold">{completedProfileSections}</span>
+          <span className="text-[#68696B] text-sm">/ 4</span>
+        </div>
+      );
     }
     return (
       <div className="flex items-baseline">
-        <span className="text-[#202326] text-3xl font-bold leading-none">{total}</span>
+        <span className="text-[#202326] text-xl font-bold">{total}</span>
       </div>
-    )
-  }
+    );
+  };
 
   return (
-    <Card className="w-full bg-white rounded-xl shadow-sm border border-[#eee] hover:shadow-md transition-shadow">
+    <Card className="flex-1 min-w-0 bg-white rounded-xl shadow-sm border border-[#eee] hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}>
+        <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
               <Icon className={`w-5 h-5 ${config.iconColor}`} />
             </div>
-            <span className="text-[#414447] font-ubuntu text-md font-medium">{config.title}</span>
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <span className="text-[#414447] text-sub-header">{config.title}</span>
+              <img 
+                src={isCompleted() ? verified : verifiedGrey} 
+                alt={isCompleted() ? "verified" : "not verified"} 
+                className="w-4 h-4 flex-shrink-0 transition-all duration-300"
+              />
+            </div>
           </div>
-          {renderContent()}
+          <div className="flex-shrink-0">
+            {renderContent()}
+          </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
+
+export default SkillCard;

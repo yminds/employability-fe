@@ -34,6 +34,7 @@ import Candidate from "./pages/Candidate.tsx";
 import UserPublicProfilePage from "./pages/UserPublicProfilePage.tsx";
 
 import ReportPage from "./pages/SkillsReportPage.tsx";
+import VerifyPhoneOTP from "./pages/VerifyPhoneOTP.tsx";
 
 
 interface RouteConfig {
@@ -76,6 +77,10 @@ export const routes: RouteConfig[] = [
   {
     route: "/signup",
     component: <SignupForm />,
+  },
+  {
+    route:"/verify-otp",
+    component:<VerifyPhoneOTP/>,
   },
   // {
   //   route:"/verify-email/:token",

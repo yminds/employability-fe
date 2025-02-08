@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { OTPInput } from "input-otp";
 import { Dot, Edit2, ArrowLeft } from "lucide-react";
 import { useGetUserDetailsQuery } from "@/api/userApiSlice";
+import logo from "@/assets/skills/e-Logo.svg";
 
 const EmailVerification = () => {
   const [remainingDays, setRemainingDays] = useState(10);
@@ -61,7 +62,7 @@ const EmailVerification = () => {
     try {
       // First update the email
       const updateResponse = await fetch(
-        `http://localhost:3000/api/v1/user/update-email/${user?._id}`,
+        `https://employability.ai/api/v1/user/update-email/${user?._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -79,7 +80,7 @@ const EmailVerification = () => {
 
       // Then send verification OTP to the new email
       const otpResponse = await fetch(
-        "http://localhost:3000/api/v1/email/send-verification-otp",
+        "https://employability.ai/api/v1/email/send-verification-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -108,7 +109,7 @@ const EmailVerification = () => {
   const handleSendOtp = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/v1/email/send-verification-otp",
+        "https://employability.ai/api/v1/email/send-verification-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -135,7 +136,7 @@ const EmailVerification = () => {
   const handleVerifyOtp = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/v1/email/verify-otp",
+        "https://employability.ai/api/v1/email/verify-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -214,7 +215,9 @@ const EmailVerification = () => {
 
   const renderOtpView = () => (
     <div className="flex flex-col items-center justify-center gap-8 p-6">
-      <div className="w-[58px] h-[58px] p-4 rounded-[54px] border border-black/10" />
+      <div className="w-[58px] h-[58px] p-3 rounded-[54px] border border-black/10">
+        <img src={logo} alt="logo" className="w-8 h-8 object-contain"/>
+      </div>
 
       <div className="text-center">
         <h2 className="text-[32px] font-bold font-ubuntu leading-[42px] mb-4">
@@ -303,12 +306,12 @@ const EmailVerification = () => {
     <div className="w-full bg-white rounded-lg shadow p-6 mb-6">
       <div className="flex justify-between items-center">
         <div>
-          <p className="text-lg font-medium">
+          <p className="text-sub-header">
             {remainingDays > 0
               ? `${remainingDays} days left to verify your account`
               : "Your account needs verification to continue"}
           </p>
-          <p className="text-sm text-gray-500 mt-2">{email}</p>
+          <p className="text-body2 text-gray-500 mt-2">{email}</p>
         </div>
         <Button
           onClick={handleSendOtp}
