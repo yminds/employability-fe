@@ -24,6 +24,7 @@ interface SkillCardProps {
   onEdit?: (skillId: string, updatedSelfRating: number) => void;
   userId?: string | undefined;
   isDashboard: boolean;
+  bestInterview:string|undefined;
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
@@ -39,6 +40,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   onDelete,
   onEdit,
   isDashboard,
+  bestInterview,
 }) => {
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
@@ -110,9 +112,11 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const skillsLevelObj = { 1: "Basic", 2: "Intermediate", 3: "Advanced" };
 
   const handleViewReport = () => {
+    console.log("best Interview", bestInterview)
     navigate(`/skill/report/${skillId}`, {
-      state: { skill, verified_rating, selfRating: editedSelfRating },
+      state: { best_interview: bestInterview },
     });
+    console.log("After", bestInterview)
   };
 
   const handleImproveScore = () => {

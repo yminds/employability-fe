@@ -25,6 +25,7 @@ export interface Skill {
   verified_rating: number;
   self_rating: number | null;
   level?: string;
+  best_interview?:string;
 }
 
 interface SkillListProps {
@@ -241,6 +242,8 @@ const SkillList: React.FC<SkillListProps> = ({
       return <div className="text-gray-500 text-center py-4">No skills found</div>;
     }
 
+    console.log("displaySkills",displaySkills)
+
     return (
       <div className="scroll-smooth pr-2 snap-y snap-proximity minimal-scrollbar sm:min-w-[290px]">
         {displaySkills.map((skill: Skill, index: number) => {
@@ -264,6 +267,7 @@ const SkillList: React.FC<SkillListProps> = ({
                 onEdit={handleEditSkill}
                 isMandatory={isMandatorySkill}
                 isDashboard={isDashboard}
+                bestInterview={skill.best_interview}
               />
               {index < displaySkills.length - 1 && (
                 <div className="w-full h-[1px] my-4 bg-[#E0E0E0]" />

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import arrow from "@/assets/skills/arrow.svg";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useGetReportByInterviewIdQuery } from "@/api/reportApiSlice";
 interface Performance {
   criteria: string;
@@ -44,6 +44,9 @@ const LoadingState = () => (
 );
 
 const ReportPage = () => {
+  const location = useLocation();
+  const best_interview = location.state?.best_interview;
+  console.log("best_interview",best_interview)
   const userName = useSelector((state: RootState) => state.auth.user?.name);
   const userExp = useSelector((state: RootState) => state.auth.user?.experience_level);
   console.log(userExp);
@@ -60,7 +63,7 @@ const ReportPage = () => {
     data: fetchReportData,
     isLoading: reportLoading,
     error: reportError,
-  } = useGetReportByInterviewIdQuery("67a5a35c13272447be987fe9");
+  } = useGetReportByInterviewIdQuery(best_interview);
 
   useEffect(() => {
     if (fetchReportData?.data) {
