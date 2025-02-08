@@ -41,8 +41,8 @@ export type User = {
   gitHub: string;
   linkedIn: string;
   portfolio: string;
-  parsedData: any;
   parsedResume: any;
+  resume_s3_url: string;
 };
 
 // Optional: Define separate interfaces for nested objects if needed

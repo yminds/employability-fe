@@ -36,9 +36,7 @@ const Dashboard: React.FC<Props> = () => {
   const user_id = user ? user._id : ""
   const user_name = user ? user.name : ""
   const profile_image = user ? user.profile_image : ""
-  const { data } = useGetUserDetailsQuery(user_id,{
-    refetchOnMountOrArgChange: true
-  }) || {}
+  const { data } = useGetUserDetailsQuery(user_id) || {}
   const userDetails = data?.data
   console.log("userDetails:", userDetails)
   const is_Email_Verified = userDetails?.is_email_verified
@@ -64,6 +62,7 @@ const Dashboard: React.FC<Props> = () => {
   useEffect(() => {
     if (userDetails) {
       let completedCount = 0
+
       if (isBasicInfoComplete(user)) completedCount++
       if (isExperienceComplete(user)) completedCount++
       if (isEducationComplete(user)) completedCount++
@@ -72,6 +71,8 @@ const Dashboard: React.FC<Props> = () => {
       setCompletedProfileSections(completedCount)
     }
   })
+
+
 
   const isBasicInfoComplete = (user: any) => {
     return !!(
@@ -109,6 +110,11 @@ const Dashboard: React.FC<Props> = () => {
     },
     [getUserSkills],
   )
+
+  console.log("isBasicInfo",Boolean(isBasicInfoComplete))
+  console.log("isExperience",Boolean(isExperienceComplete))
+  console.log("isEducation",Boolean(isEducationComplete))
+
 
   useEffect(() => {
     if (user_id && goalId) {

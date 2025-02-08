@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   useAddExperienceMutation,
   useUpdateExperienceMutation,
@@ -17,6 +17,7 @@ import ExperienceForm from "@/features/profile/forms/experience-form";
 import type { ExperienceItem } from "@/features/profile/types";
 import { toast } from "sonner";
 import { validateExperience } from "@/features/profile/validation/validateExperience";
+import { updateUserProfile } from "@/features/authentication/authSlice";
 
 interface AddEditExperienceModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
   const [experience, setExperience] = useState<ExperienceItem[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const user = useSelector((state: any) => state.auth.user);
+  const dispatch = useDispatch();
 
   const [addExperience] = useAddExperienceMutation();
   const [updateExperience] = useUpdateExperienceMutation();
@@ -125,6 +127,7 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
 
       let addedCount = 0;
       let updatedCount = 0;
+      const newExperienceIds: any[] = [];
 
       await Promise.all(
         experience.map(async (exp) => {
@@ -149,11 +152,19 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
             }).unwrap();
             updatedCount++;
           } else {
-            await addExperience(experienceData).unwrap();
+            const response = await addExperience(experienceData).unwrap();
+            newExperienceIds.push(response.data._id);
             addedCount++;
           }
         })
       );
+      if (newExperienceIds.length > 0) {
+        dispatch(
+          updateUserProfile({
+            experience: [...user.experience, ...newExperienceIds],
+          })
+        );
+      }
 
       if (addedCount > 0) {
         toast.success(

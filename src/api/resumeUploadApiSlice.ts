@@ -11,10 +11,11 @@ export const resumeUploadApiSlice = createApi({
   }),
   endpoints: (builder) => ({
     uploadResume: builder.mutation({
-      query: ({ file, userId }) => {
+      query: ({ file, userId, fileUrl }) => {
         const formData = new FormData();
         formData.append("resume", file);
         formData.append("userId", userId);
+        formData.append("fileUrl", fileUrl)
 
         return {
           url: "/api/v1/resume/upload-resume", // Specify the endpoint
