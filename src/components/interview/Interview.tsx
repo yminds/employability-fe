@@ -243,7 +243,7 @@ const Interview: React.FC<{
             messages={messages}
             layoutType={2}
           />
-        )}~
+        )}
       </div>
     </div>
   );
