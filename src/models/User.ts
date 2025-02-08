@@ -42,6 +42,7 @@ export type User = {
   linkedIn: string;
   portfolio: string;
   parsedData: any;
+  parsedResume: any;
 };
 
 // Optional: Define separate interfaces for nested objects if needed

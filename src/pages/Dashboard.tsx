@@ -24,6 +24,7 @@ import ProjectList from "@/components/projects/ProjectList"
 import InterviewList from "@/features/dashboard/InterviewList"
 import { useGetUserDetailsQuery } from "@/api/userApiSlice"
 
+
 interface Props {
   isDashboard: boolean
   displayScore: boolean
@@ -35,8 +36,11 @@ const Dashboard: React.FC<Props> = () => {
   const user_id = user ? user._id : ""
   const user_name = user ? user.name : ""
   const profile_image = user ? user.profile_image : ""
-  const { data } = useGetUserDetailsQuery(user_id) || {}
+  const { data } = useGetUserDetailsQuery(user_id,{
+    refetchOnMountOrArgChange: true
+  }) || {}
   const userDetails = data?.data
+  console.log("userDetails:", userDetails)
   const is_Email_Verified = userDetails?.is_email_verified
 
   const { data: goalsData } = useGetUserGoalQuery(user_id, {
@@ -139,10 +143,10 @@ const Dashboard: React.FC<Props> = () => {
           {goalsData?.data && goalsData.data.length > 0 ? (
             <main>
               <header className="mb-7">
-                <h1 className="text-gray-600 text-[20px] font-medium leading-[32px] tracking-[-1px] flex items-center gap-3 font-ubuntu">
+                <h1 className="text-gray-600 text-h1 flex items-center gap-3">
                   Welcome Back, {user_name}
                   <span className="wave">
-                    <img src={emojiWavingImg || "/placeholder.svg"} alt="Emoji" className="w-8" />
+                    <img src={emojiWavingImg || "/placeholder.svg"} alt="Emoji" className="w-5" />
                   </span>
                 </h1>
               </header>
@@ -227,6 +231,7 @@ const Dashboard: React.FC<Props> = () => {
                 {/* Sidebar */}
                 <div className="flex flex-col items-start gap-6 flex-1">
                   {/* <CompleteProfileSection userId={user_id} isDashboard={true} goalId="" /> */}
+                  {/* <ExampleComponent/> */}
                   <MyActivityCard displayScore={true} goalId={goalId} />
                 </div>
               </div>
@@ -235,7 +240,7 @@ const Dashboard: React.FC<Props> = () => {
             <main>
               {/* Content for users without goals */}
               <header className="mb-7">
-                <h1 className="text-gray-600 text-[20px] font-medium leading-[32px] tracking-[-1px] flex items-center gap-3 font-ubuntu">
+                <h1 className="text-gray-600 text-h1 flex items-center gap-3">
                   Hi, {user_name}
                   <span className="wave">
                     <img src={emojiWavingImg || "/placeholder.svg"} alt="Emoji" className="w-8" />
@@ -248,11 +253,11 @@ const Dashboard: React.FC<Props> = () => {
                 <div className="col-span-3 flex flex-col gap-6 shrink-0">
                   <section className="bg-white shadow-sm rounded-[8px] p-8 border border-1 border-[#eee] relative">
                     <div className="flex w-[417px] flex-col items-start gap-2">
-                      <h2 className="text-[#0C0F12] text-[18px] font-medium leading-[26px] tracking-[-0.01em] font-ubuntu">
+                      <h2 className="text-[#0C0F12] text-h2">
                         Set Your Goal
                       </h2>
                       <div className="flex flex-col items-start gap-[50px] self-stretch">
-                        <p className="text-[#68696B] text-[16px] font-normal leading-[26px] tracking-[0.015em] font-['SF Pro Display']">
+                        <p className="text-[#68696B] text-body1">
                           Define your career aspirations and get a personalized roadmap to success.
                         </p>
                         <Button
@@ -268,7 +273,7 @@ const Dashboard: React.FC<Props> = () => {
                     </div>
                   </section>
 
-                  <TryThingsSection />
+                  {/* <TryThingsSection /> */}
                   <EmployabilityBannerSection imageSrc={ProfessionalGoalsImg} altText="Professional Goals Image" />
                 </div>
 
@@ -282,7 +287,7 @@ const Dashboard: React.FC<Props> = () => {
                         className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold mr-3"
                       />
                       <div>
-                        <h3 className="text-gray-600 text-[16px] font-medium leading-[22px] tracking-[0] font-ubuntu">
+                        <h3 className="text-gray-600 text-sub-header">
                           {user_name}
                         </h3>
                       </div>

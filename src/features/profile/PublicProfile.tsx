@@ -1,5 +1,5 @@
 import type React from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useGetPublicProfileQuery } from "@/api/userPublicApiSlice";
 import ProfileBanner from "./ProfileBanner";
 import SkillsSection from "./SkillsSection";

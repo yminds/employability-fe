@@ -27,6 +27,7 @@ interface SkillsFormProps {
   errors: { [key: string]: string };
   goalId: string | null;
   userId: string | undefined;
+  onDeleteSkill: (index: number) => void;
 }
 
 export default function SkillsForm({
@@ -35,6 +36,7 @@ export default function SkillsForm({
   errors = {},
   goalId,
   userId,
+  onDeleteSkill
 }: SkillsFormProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -113,14 +115,6 @@ export default function SkillsForm({
     setOpenLevelPopovers([...openLevelPopovers, false]);
   };
 
-  const removeSkill = (index: number) => {
-    const updatedSkills = skills.filter((_, i) => i !== index);
-    onChange(updatedSkills);
-    setOpenSkillPopovers(openSkillPopovers.filter((_, i) => i !== index));
-    setOpenRatingPopovers(openRatingPopovers.filter((_, i) => i !== index));
-    setOpenLevelPopovers(openLevelPopovers.filter((_, i) => i !== index));
-  };
-
   const getError = (path: string) => {
     return errors[path] || "";
   };
@@ -151,7 +145,7 @@ export default function SkillsForm({
             variant="ghost"
             size="icon"
             className="absolute top-4 right-4 h-6 w-6 rounded-full bg-[#fafafa] hover:bg-[#e5e7eb]"
-            onClick={() => removeSkill(index)}
+            onClick={() => onDeleteSkill(index)}
           >
             <X className="h-4 w-4 text-[#909091]" />
           </Button>

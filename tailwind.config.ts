@@ -141,7 +141,7 @@ module.exports = {
           fontFamily: 'SF Pro Display',
         }],
         'button': ['14px', {
-          lineHeight: '24px',
+          lineHeight: '20px',
           letterSpacing: '0.015em',
           fontWeight: '500',
           fontFamily: 'SF Pro Display',

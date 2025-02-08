@@ -306,12 +306,12 @@ const EmailVerification = () => {
     <div className="w-full bg-white rounded-lg shadow p-6 mb-6">
       <div className="flex justify-between items-center">
         <div>
-          <p className="text-lg font-medium">
+          <p className="text-sub-header">
             {remainingDays > 0
               ? `${remainingDays} days left to verify your account`
               : "Your account needs verification to continue"}
           </p>
-          <p className="text-sm text-gray-500 mt-2">{email}</p>
+          <p className="text-body2 text-gray-500 mt-2">{email}</p>
         </div>
         <Button
           onClick={handleSendOtp}
