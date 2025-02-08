@@ -25,24 +25,37 @@ import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
 import { updateUserProfile } from "@/features/authentication/authSlice";
 import axios from "axios";
 import UploadProgressBar from "@/features/profile/UploadProgressBar";
+import type { BasicInfo } from "@/features/profile/types";
 
 interface BasicInfoFormProps {
   initialData?: {
-    basicInfo: any;
+    basicInfo: BasicInfo;
     socialProfiles: any;
   };
-  onChange: (basicInfo: any, socialProfiles: any) => void;
+  onChange: (basicInfo: BasicInfo, socialProfiles: any) => void;
   errors: { [key: string]: string };
 }
 
 export default function BasicInfoForm({
   initialData,
   onChange,
-  errors = {},
+  errors,
 }: BasicInfoFormProps) {
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const [formData, setFormData] = useState(initialData?.basicInfo);
+  const [formData, setFormData] = useState<BasicInfo>(
+    initialData?.basicInfo || {
+      name: "",
+      mobile: "",
+      email: "",
+      date_of_birth: "",
+      gender: "",
+      country: "",
+      state: "",
+      city: "",
+      profile_image: "",
+    }
+  );
 
   const [socialProfiles, setSocialProfiles] = useState({
     gitHub: initialData?.socialProfiles?.gitHub || user?.gitHub || "",
@@ -81,7 +94,7 @@ export default function BasicInfoForm({
         formData.state &&
         !countryStates.find((state) => state.isoCode === formData.state)
       ) {
-        setFormData((prev: any) => ({ ...prev, state: "", city: "" }));
+        setFormData((prev) => ({ ...prev, state: "", city: "" }));
       }
     } else {
       setStates([]);
@@ -102,7 +115,7 @@ export default function BasicInfoForm({
         formData.city &&
         !stateCities.find((city) => city.name === formData.city)
       ) {
-        setFormData((prev: any) => ({ ...prev, city: "" }));
+        setFormData((prev) => ({ ...prev, city: "" }));
       }
     } else {
       setCities([]);
@@ -122,7 +135,7 @@ export default function BasicInfoForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     // dispatch(updateUserProfile({ [name]: value }))
   };
 
@@ -185,7 +198,7 @@ export default function BasicInfoForm({
       const result = response.data;
 
       // Update form data with the returned S3 URL
-      setFormData((prev: any) => ({
+      setFormData((prev) => ({
         ...prev,
         profile_image: result.data[0].fileUrl,
       }));
@@ -230,7 +243,7 @@ export default function BasicInfoForm({
 
       setImagePreview(null);
       setImageError("");
-      setFormData((prev: any) => ({ ...prev, profile_image: "" }));
+      setFormData((prev) => ({ ...prev, profile_image: "" }));
       dispatch(updateUserProfile({ profile_image: "" }));
     } catch (error) {
       console.error("Error removing image:", error);
@@ -242,11 +255,13 @@ export default function BasicInfoForm({
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
-    setSocialProfiles((prev: any) => ({ ...prev, [name]: value }));
+    setSocialProfiles((prev) => ({ ...prev, [name]: value }));
     dispatch(updateUserProfile({ ...formData, [name]: value }));
   };
 
-  const getError = (field: string) => errors[field] || "";
+  const getError = (field: string) => {
+    return errors[field] || "";
+  };
 
   return (
     <div className="space-y-6 w-full">
@@ -267,14 +282,12 @@ export default function BasicInfoForm({
                 value={formData.name}
                 onChange={handleBasicInfoChange}
                 className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("basicInfo.name") ? "border-red-500" : ""
+                  getError("name") ? "border-red-500" : ""
                 }`}
                 placeholder="Enter your full name"
               />
-              {getError("basicInfo.name") && (
-                <p className="text-red-500 text-sm">
-                  {getError("basicInfo.name")}
-                </p>
+              {getError("name") && (
+                <p className="text-red-500 text-sm">{getError("name")}</p>
               )}
             </div>
 
@@ -292,14 +305,12 @@ export default function BasicInfoForm({
                 value={formData.mobile}
                 onChange={handleBasicInfoChange}
                 className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("basicInfo.mobile") ? "border-red-500" : ""
+                  getError("mobile") ? "border-red-500" : ""
                 }`}
                 placeholder="+91 1234567891"
               />
-              {getError("basicInfo.mobile") && (
-                <p className="text-red-500 text-sm">
-                  {getError("basicInfo.mobile")}
-                </p>
+              {getError("mobile") && (
+                <p className="text-red-500 text-sm">{getError("mobile")}</p>
               )}
             </div>
 
@@ -377,11 +388,11 @@ export default function BasicInfoForm({
               {isUploading && <UploadProgressBar progress={uploadProgress} />}
 
               {imageError && (
-                <p className="text-red-500 text-xs mt-1">{imageError}</p>
+                <p className="text-red-500 text-sm">{imageError}</p>
               )}
-              {getError("basicInfo.profile_image") && (
-                <p className="text-red-500 text-xs mt-1">
-                  {getError("basicInfo.profile_image")}
+              {getError("profile_image") && (
+                <p className="text-red-500 text-sm">
+                  {getError("profile_image")}
                 </p>
               )}
             </div>
@@ -391,7 +402,6 @@ export default function BasicInfoForm({
           </div>
         </div>
       </div>
-
       <h3 className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
         Basic Info
       </h3>
@@ -408,12 +418,12 @@ export default function BasicInfoForm({
               onChange={handleBasicInfoChange}
               max={new Date().toISOString().split("T")[0]}
               className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                getError("basicInfo.date_of_birth") ? "border-red-500" : ""
+                getError("date_of_birth") ? "border-red-500" : ""
               }`}
             />
-            {getError("basicInfo.date_of_birth") && (
-              <p className="text-red-500 text-xs mt-1">
-                {getError("basicInfo.date_of_birth")}
+            {getError("date_of_birth") && (
+              <p className="text-red-500 text-sm">
+                {getError("date_of_birth")}
               </p>
             )}
           </div>
@@ -433,7 +443,7 @@ export default function BasicInfoForm({
             >
               <SelectTrigger
                 className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("basicInfo.gender") ? "border-red-500" : ""
+                  getError("gender") ? "border-red-500" : ""
                 }`}
               >
                 <SelectValue placeholder="Select gender" />
@@ -444,10 +454,8 @@ export default function BasicInfoForm({
                 <SelectItem value="Others">Others</SelectItem>
               </SelectContent>
             </Select>
-            {getError("basicInfo.gender") && (
-              <p className="text-red-500 text-xs mt-1">
-                {getError("basicInfo.gender")}
-              </p>
+            {getError("gender") && (
+              <p className="text-red-500 text-sm">{getError("gender")}</p>
             )}
           </div>
         </div>
@@ -468,7 +476,7 @@ export default function BasicInfoForm({
             >
               <SelectTrigger
                 className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("basicInfo.country") ? "border-red-500" : ""
+                  getError("country") ? "border-red-500" : ""
                 }`}
               >
                 <SelectValue placeholder="Select country" />
@@ -481,10 +489,8 @@ export default function BasicInfoForm({
                 ))}
               </SelectContent>
             </Select>
-            {getError("basicInfo.country") && (
-              <p className="text-red-500 text-xs mt-1">
-                {getError("basicInfo.country")}
-              </p>
+            {getError("country") && (
+              <p className="text-red-500 text-sm">{getError("country")}</p>
             )}
           </div>
 
@@ -504,7 +510,7 @@ export default function BasicInfoForm({
             >
               <SelectTrigger
                 className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("basicInfo.state") ? "border-red-500" : ""
+                  getError("state") ? "border-red-500" : ""
                 }`}
               >
                 <SelectValue placeholder="Select state" />
@@ -517,10 +523,8 @@ export default function BasicInfoForm({
                 ))}
               </SelectContent>
             </Select>
-            {getError("basicInfo.state") && (
-              <p className="text-red-500 text-xs mt-1">
-                {getError("basicInfo.state")}
-              </p>
+            {getError("state") && (
+              <p className="text-red-500 text-sm">{getError("state")}</p>
             )}
           </div>
 
@@ -540,7 +544,7 @@ export default function BasicInfoForm({
             >
               <SelectTrigger
                 className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("basicInfo.city") ? "border-red-500" : ""
+                  getError("city") ? "border-red-500" : ""
                 }`}
               >
                 <SelectValue placeholder="Select city" />
@@ -553,15 +557,12 @@ export default function BasicInfoForm({
                 ))}
               </SelectContent>
             </Select>
-            {getError("basicInfo.city") && (
-              <p className="text-red-500 text-xs mt-1">
-                {getError("basicInfo.city")}
-              </p>
+            {getError("city") && (
+              <p className="text-red-500 text-sm">{getError("city")}</p>
             )}
           </div>
         </div>
       </div>
-
       <h3 className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
         Social Profiles
       </h3>

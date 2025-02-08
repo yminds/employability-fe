@@ -3,11 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { resetResumeState, uploadResume } from "@/store/slices/resumeSlice";
 import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
-import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
-import { X, Upload } from "lucide-react";
-import { ProfileFormData } from "@/features/profile/types";
-import axios from "axios";
 import { updateUserProfile } from "@/features/authentication/authSlice";
 import {
   Dialog,
@@ -15,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 
 //Images
 import VectorFile from "@/assets/profile/completeprofile/file.svg";
@@ -35,6 +32,7 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
   goalId,
 }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { uploading, error } = useSelector((state: RootState) => state.resume);
   const [dragActive, setDragActive] = useState(false);
   const [uploadState, setUploadState] = useState<{
@@ -42,11 +40,9 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
     progress: number;
   }>({ progress: 0 });
   const [uploadResume] = useUploadResumeMutation();
-  const [parsingError, setParsingError] = useState<string | null>(null);
   const [resume, setResume] = useState({
     resumeUrl: "",
   });
-  const [showCompleteProfile, setShowCompleteProfile] = useState(false);
   const [parsedData, setParsedData] = useState(null);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
@@ -101,10 +97,13 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
       formData.append("folder", "resume"); // This will be req.body.fileType
       formData.append("name", file.name); // This will be req.body.name
 
-      const s3Response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`, {
-        method: "POST",
-        body: formData, // Don't set Content-Type header, browser will set it
-      });
+      const s3Response = await fetch(
+        `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
+        {
+          method: "POST",
+          body: formData, // Don't set Content-Type header, browser will set it
+        }
+      );
 
       if (!s3Response.ok) {
         throw new Error("Failed to upload to S3");
@@ -131,17 +130,20 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
           "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
         const key = resume.resumeUrl.replace(bucketBaseUrl, "");
         console.log("Deleting image with key:", key, "for user:", userId);
-        const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            key,
-            userId: userId,
-            folder: "resume",
-          }),
-        });
+        const response = await fetch(
+          `${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              key,
+              userId: userId,
+              folder: "resume",
+            }),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to delete file from S3");
@@ -163,14 +165,16 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
         formData.append("userId", userId);
 
         const response = await uploadResume({ file: uploadState.file, userId });
-        const parsedData = response.data
+        const parsedData = response.data;
         setParsedData(parsedData.data.parsedData);
         console.log("Parsed Data", parsedData);
 
-        // dispatch(updateUserProfile({ parsedData: parsedData.data.parsedData }));
-        dispatch(resetResumeState({parsedData: parsedData.data.parsedData}))
+        dispatch(
+          updateUserProfile({ parsedResume: parsedData.data.parsedData })
+        );
+        dispatch(resetResumeState({ parsedData: parsedData.data.parsedData }));
 
-        setShowCompleteProfile(true);
+        navigate("/user-profile");
       } catch (error) {
         console.error("Error parsing resume:", error);
       }
@@ -181,26 +185,8 @@ const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
   useEffect(() => {
     if (!uploading && uploadState.file) {
       setUploadState((prev) => ({ ...prev, progress: 100 }));
-      // Add a small delay before showing the CompleteProfileModal
-      setTimeout(() => {
-        setShowCompleteProfile(true);
-      }, 500);
     }
   }, [uploading]);
-
-  if (showCompleteProfile) {
-    return (
-      <CompleteProfileModal
-        type="resumeUpload"
-        onClose={onClose}
-        userId={userId}
-        onSave={() => console.log("")}
-        parsedData={parsedData}
-        isParsed={true}
-        goalId={goalId}
-      />
-    );
-  }
 
   if (uploadState.file) {
     return (
