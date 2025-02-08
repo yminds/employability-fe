@@ -43,6 +43,7 @@ interface SkillListProps {
       }
     ];
   } | undefined;
+  selectedGoalName:string
 }
 
 type SkillCategory = 'mandatory' | 'optional' | 'all';
@@ -52,7 +53,8 @@ const SkillList: React.FC<SkillListProps> = ({
   goalId,
   onSkillsUpdate,
   isSkillsUpdated,
-  goals
+  goals,
+  selectedGoalName
 }) => {
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
@@ -242,8 +244,6 @@ const SkillList: React.FC<SkillListProps> = ({
       return <div className="text-gray-500 text-center py-4">No skills found</div>;
     }
 
-    console.log("displaySkills",displaySkills)
-
     return (
       <div className="scroll-smooth pr-2 snap-y snap-proximity minimal-scrollbar sm:min-w-[290px]">
         {displaySkills.map((skill: Skill, index: number) => {
@@ -268,6 +268,7 @@ const SkillList: React.FC<SkillListProps> = ({
                 isMandatory={isMandatorySkill}
                 isDashboard={isDashboard}
                 bestInterview={skill.best_interview}
+                goalName={selectedGoalName}
               />
               {index < displaySkills.length - 1 && (
                 <div className="w-full h-[1px] my-4 bg-[#E0E0E0]" />
