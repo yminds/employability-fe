@@ -43,7 +43,8 @@ const Interview: React.FC<{
   cameraScale: number;
   interviewTopic: string;
   concepts: any[];
-}> = ({ interviewTopic, concepts }) => {
+  stopScreenSharing: () => void;
+}> = ({ interviewTopic, concepts ,stopScreenSharing}) => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
 
@@ -128,6 +129,7 @@ const Interview: React.FC<{
 
     const handleEndInterview = () => {
       setIsInterviewEnded(true);
+      stopScreenSharing();
     };
 
     // Socket event listeners

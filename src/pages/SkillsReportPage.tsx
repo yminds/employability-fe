@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSelector } from "react-redux";
@@ -6,6 +6,8 @@ import { RootState } from "@/store/store";
 import arrow from "@/assets/skills/arrow.svg";
 import { useNavigate } from "react-router-dom";
 import { useGetReportByInterviewIdQuery } from "@/api/reportApiSlice";
+import InterviewPlayer from "@/components/interview/InterviewPlayer";
+
 interface Performance {
   criteria: string;
   rating: number;
@@ -30,8 +32,8 @@ interface Report {
   }[];
   _id?: string;
   updatedAt?: string;
+  s3_recording_url: [string];
 }
-
 
 // Loading Component
 const LoadingState = () => (
@@ -60,7 +62,8 @@ const ReportPage = () => {
     data: fetchReportData,
     isLoading: reportLoading,
     error: reportError,
-  } = useGetReportByInterviewIdQuery("67a5a35c13272447be987fe9");
+  } = useGetReportByInterviewIdQuery("67a7072c2717d685ae7a760d");
+  // useGetReportByInterviewIdQuery("67a5a35c13272447be987fe9");
 
   useEffect(() => {
     if (fetchReportData?.data) {
@@ -81,6 +84,8 @@ const ReportPage = () => {
   const handleBackToSkillsPage = () => {
     navigate("/skills");
   };
+
+  console.log("reportData", reportData);
 
   if (reportLoading) return <LoadingState />;
   if (reportError) return <div className="text-red-500 text-center mt-10">Error fetching report data</div>;
@@ -111,6 +116,14 @@ const ReportPage = () => {
             <main className="max-w-6xl mx-auto px-4">
               {/* Summary Section */}
               {/* Summary Section */}
+              {/* creat here a video pplayer by react player  */}
+
+              <div className="flex justify-center  ">
+                <div className="continer-player w-full h-[28rem] relative">
+                  <InterviewPlayer urls={reportData.s3_recording_url} />
+                </div>
+              </div>
+
               <section className="bg-white rounded-md shadow-sm p-6 mb-8">
                 <h2 className="text-h2 font-medium text-grey-7 mb-6">Summary</h2>
 
@@ -124,9 +137,7 @@ const ReportPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Strengths */}
                   <div className="bg-grey-1 rounded-lg p-4">
-                    <h3 className="text-sub-header font-medium text-grey-7 mb-3 flex items-center gap-2">
-                      Strengths
-                    </h3>
+                    <h3 className="text-sub-header font-medium text-grey-7 mb-3 flex items-center gap-2">Strengths</h3>
                     <ul className="space-y-2">
                       {reportData.summary?.strengths?.map((strength, index) => (
                         <li key={index} className="flex items-start gap-2">
@@ -159,9 +170,7 @@ const ReportPage = () => {
                       {reportData.summary?.performance_highlights?.map((highlight, index) => (
                         <li key={index} className="flex items-center justify-between p-2 bg-white rounded">
                           <span className="text-body2 text-grey-6">{highlight.criteria}</span>
-                          <Badge className={getRatingColor(highlight.rating)}>
-                            {highlight.rating}/5
-                          </Badge>
+                          <Badge className={getRatingColor(highlight.rating)}>{highlight.rating}/5</Badge>
                         </li>
                       )) || <li className="text-body2 text-grey-5">No performance highlights available</li>}
                     </ul>
@@ -179,9 +188,7 @@ const ReportPage = () => {
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between mb-2">
                             <h3 className="text-sub-header font-medium text-grey-7">{rating.concept}</h3>
-                            <Badge className={`${getRatingColor(rating.rating)} px-3 py-1`}>
-                              {rating.rating}/5
-                            </Badge>
+                            <Badge className={`${getRatingColor(rating.rating)} px-3 py-1`}>{rating.rating}/5</Badge>
                           </div>
                           <p className="text-body2 text-grey-6">{rating.reason}</p>
                         </CardContent>
@@ -201,8 +208,7 @@ const ReportPage = () => {
                   Report ID: <span className="font-medium">{reportData._id || "N/A"}</span>
                 </span>
                 <span>
-                  Last updated:{" "}
-                  {reportData.updatedAt ? new Date(reportData.updatedAt).toLocaleString() : "N/A"}
+                  Last updated: {reportData.updatedAt ? new Date(reportData.updatedAt).toLocaleString() : "N/A"}
                 </span>
               </div>
             </footer>
