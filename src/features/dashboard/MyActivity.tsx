@@ -20,7 +20,7 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
     const [getUserSkillsSummary, { data: skillsSummaryData, error, isLoading }] = useGetUserSkillsSummaryMutation();
 
     let verifiedSkillsCnt = "0";
-    const totalSkills = skillsSummaryData?.data?.totalSkills || "0";
+    const totalSkills:any = skillsSummaryData?.data?.totalSkills || "0";
     const totalVerifiedSkills = skillsSummaryData?.data?.totalVerifiedSkills || "0";
     if(totalSkills > 0){
         verifiedSkillsCnt = totalVerifiedSkills+"/"+totalSkills;
@@ -70,7 +70,7 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
                     </div>
                     <div className="flex flex-col items-start">
                         <span className="text-black text-sub-header">{verifiedSkillsCnt}</span>
-                        <span className="text-gray-600 text-body2">verified skills</span>
+                        <span className="text-gray-600 text-body2 ">verified skills</span>
                     </div>
                 </li>
                 <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -83,7 +83,7 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
                     </div>
                     <div className="flex flex-col items-start">
                         <span className="text-black text-sub-header">0</span>
-                        <span className="text-gray-600 text-body2">projects added</span>
+                        <span className="text-gray-600 text-body2 ">projects added</span>
                     </div>
                 </li>
                 <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -96,7 +96,7 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
                     </div>
                     <div className="flex flex-col items-start">
                         <span className="text-black text-sub-header">0</span>
-                        <span className="text-gray-600 text-body2">upskilling</span>
+                        <span className="text-gray-600 text-body2 ">upskilling</span>
                     </div>
                 </li>
             </ul>

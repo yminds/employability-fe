@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -61,24 +61,19 @@ const TryThingsSection: React.FC = () => {
     certification: { completed: false, skipped: false },
   })
 
-  // Get user ID and data with enhanced query configuration
+  // Get user ID and data
   const userId = useSelector((state: RootState) => state.auth?.user?._id)
   const { data: goalsData } = useGetUserGoalQuery(userId || "")
-  const { 
-    data: userData, 
-    refetch: refetchUserDetails,
-    isFetching 
-  } = useGetUserDetailsQuery(userId || "", {
-    refetchOnMountOrArgChange: true,
-    pollingInterval: 3000, // Poll every 3 seconds
-    skip: !userId,
+  const {data:userDetails,refetch:refetchUserDetails} = useGetUserDetailsQuery(userId || "",{
+    refetchOnMountOrArgChange:true
   })
-
+  console.log("data:", userDetails.data);
   const [updateUser] = useUpdateUserMutation()
+
   const goalId = goalsData?.data?.[0]?._id || ""
 
-  // Utility functions for checking completion status
-  const isBasicInfoComplete = (user: any): boolean => {
+  // Check if basic info is complete
+  const isBasicInfoComplete = (user: any) => {
     return !!(
       user?.name &&
       user?.email &&
@@ -90,22 +85,30 @@ const TryThingsSection: React.FC = () => {
     )
   }
 
-  const isExperienceComplete = (user: any): boolean => {
-    if (user?.is_experienced === false) return true
+  // Check if experience section is complete
+  const isExperienceComplete = (user: any) => {
+    if (user?.is_experienced === false) {
+      return true // Fresher case
+    }
     return Array.isArray(user?.experience) && user.experience.length > 0
   }
 
-  const isEducationComplete = (user: any): boolean => {
+  // Check if education section is complete
+  const isEducationComplete = (user: any) => {
     return Array.isArray(user?.education) && user.education.length > 0
   }
 
-  const isCertificationComplete = (user: any): boolean => {
-    if (user?.has_certificates === false) return true
+  // Check if certification section is complete
+  const isCertificationComplete = (user: any) => {
+    if (user?.has_certificates === false) {
+      return true // No certificates case
+    }
     return Array.isArray(user?.certificates) && user.certificates.length > 0
   }
 
-  const hasParsedResumeData = (section: string): boolean => {
-    const parsedResume = userData?.data?.parsedResume
+  // Check if parsed resume has data for a section
+  const hasParsedResumeData = (section: string) => {
+    const parsedResume = userDetails?.data?.parsedResume
     if (!parsedResume) return false
 
     switch (section) {
@@ -114,9 +117,9 @@ const TryThingsSection: React.FC = () => {
           parsedResume.name ||
           parsedResume.contact?.email ||
           parsedResume.contact?.phone ||
-          parsedResume.address?.country ||
-          parsedResume.address?.city ||
-          parsedResume.address?.state ||
+          parsedResume.address.country ||
+          parsedResume.address.city ||
+          parsedResume.address.state ||
           parsedResume.gender
         )
       case "experience":
@@ -130,17 +133,17 @@ const TryThingsSection: React.FC = () => {
     }
   }
 
-  const getButtonText = (section: string, defaultText: string): string => {
+  // Get button text based on section status
+  const getButtonText = (section: string, defaultText: string) => {
     if (!isComplete(section) && hasParsedResumeData(section)) {
       return `Review ${section.charAt(0).toUpperCase() + section.slice(1)}`
     }
     return defaultText
   }
 
-  const isComplete = (section: string): boolean => {
-    const user = userData?.data
-    if (!user) return false
-
+  // Helper function to check if a section is complete
+  const isComplete = (section: string) => {
+    const user = userDetails.data
     switch (section) {
       case "basicInfo":
         return isBasicInfoComplete(user)
@@ -156,50 +159,46 @@ const TryThingsSection: React.FC = () => {
   }
 
   // Calculate profile completion progress
-  const calculateProfileProgress = (user: any) => {
-    let progress = 0
-
-    if (isBasicInfoComplete(user)) {
-      progress += 25
-      setSections(prev => ({
-        ...prev,
-        basicInfo: { completed: true },
-      }))
-    }
-
-    if (isExperienceComplete(user)) {
-      progress += 25
-      setSections(prev => ({
-        ...prev,
-        experience: { completed: true },
-      }))
-    }
-
-    if (isEducationComplete(user)) {
-      progress += 25
-      setSections(prev => ({
-        ...prev,
-        education: { completed: true },
-      }))
-    }
-
-    if (isCertificationComplete(user)) {
-      progress += 25
-      setSections(prev => ({
-        ...prev,
-        certification: { completed: true },
-      }))
-    }
-
-    setProfileProgress(progress)
-  }
-
-  // Effect to recalculate progress when data changes
   useEffect(() => {
-    if (!isFetching && userData?.data) {
-      calculateProfileProgress(userData.data)
+    if (userDetails) {
+      const user = userDetails.data
+      let progress = 0
+
+      if (isBasicInfoComplete(user)) {
+        progress += 25
+        setSections((prev) => ({
+          ...prev,
+          basicInfo: { completed: true },
+        }))
+      }
+
+      if (isExperienceComplete(user)) {
+        progress += 25
+        setSections((prev) => ({
+          ...prev,
+          experience: { completed: true },
+        }))
+      }
+
+      if (isEducationComplete(user)) {
+        progress += 25
+        setSections((prev) => ({
+          ...prev,
+          education: { completed: true },
+        }))
+      }
+
+      if (isCertificationComplete(user)) {
+        progress += 25
+        setSections((prev) => ({
+          ...prev,
+          certification: { completed: true },
+        }))
+      }
+
+      setProfileProgress(progress)
     }
-  }, [userData, isFetching])
+  }, [userDetails])
 
   const handleLinkClick = (route: string) => {
     if (route === "/upload-resume") {
@@ -230,36 +229,20 @@ const TryThingsSection: React.FC = () => {
             has_resume: false,
           },
         })
-        // Double refetch pattern to ensure data is updated
-        await refetchUserDetails()
-        setTimeout(async () => {
-          await refetchUserDetails()
-        }, 1000)
       } catch (error) {
         console.error("Error updating user:", error)
       }
     }
   }
 
-  const handleProfileSave = async (data: ProfileFormData) => {
-    try {
-      console.log("Saving profile data:", data)
-      setShowProfileModal(false)
-      
-      // Double refetch pattern to ensure data is updated
-      await refetchUserDetails()
-      setTimeout(async () => {
-        await refetchUserDetails()
-      }, 1000)
-      
-    } catch (error) {
-      console.error("Error saving profile:", error)
-    }
+  const handleProfileSave = (data: ProfileFormData) => {
+    console.log("Saving profile data:", data)
+    setShowProfileModal(false)
   }
 
   const handleCardAction = (progressSection: keyof Sections | undefined) => {
     if (progressSection) {
-      setSections(prev => ({
+      setSections((prev) => ({
         ...prev,
         [progressSection]: { completed: true, skipped: false },
       }))
@@ -267,13 +250,18 @@ const TryThingsSection: React.FC = () => {
   }
 
   const getCards = (): CardType[] => {
-    const user = userData?.data
-    const defaultCards: CardType[] = []
-
-    if (!user) return defaultCards
-
-    // Add cards only if sections are incomplete
-    if (!isBasicInfoComplete(user)) {
+    const defaultCards = []
+    const user = userDetails.data
+    // Only add Basic Info card if user doesn't have basic info
+    if (
+      !user?.name ||
+      !user?.email ||
+      !user?.phone_number ||
+      !user?.gender ||
+      !user?.address?.country ||
+      !user?.address?.state ||
+      !user?.address?.city
+    ) {
       defaultCards.push({
         image: Addbioimg,
         alt: "Basic Info",
@@ -284,7 +272,8 @@ const TryThingsSection: React.FC = () => {
       })
     }
 
-    if (user?.is_experienced !== false && !isExperienceComplete(user)) {
+    // Only add Experience card if user doesn't have experience and hasn't indicated they're a fresher
+    if (user?.is_experienced !== false && (!user?.experience || user.experience.length === 0)) {
       defaultCards.push({
         image: AddEducationImg,
         alt: "Experience",
@@ -296,7 +285,8 @@ const TryThingsSection: React.FC = () => {
       })
     }
 
-    if (!isEducationComplete(user)) {
+    // Only add Education card if user doesn't have education entries
+    if (!user?.education || user.education.length === 0) {
       defaultCards.push({
         image: AddEducationImg,
         alt: "Education",
@@ -307,7 +297,8 @@ const TryThingsSection: React.FC = () => {
       })
     }
 
-    if (user?.has_certificates !== false && !isCertificationComplete(user)) {
+    // Only add Certification card if user hasn't indicated no certificates and doesn't have any certificates
+    if (user?.has_certificates !== false && (!user?.certificates || user.certificates.length === 0)) {
       defaultCards.push({
         image: AddPictureimg,
         alt: "Certification",
@@ -319,9 +310,10 @@ const TryThingsSection: React.FC = () => {
       })
     }
 
+    // Only add resume card if user hasn't uploaded a resume and hasn't indicated they don't have one
     if (
-      user?.has_resume !== false &&
-      (!user?.parsedResume || Object.keys(user.parsedResume).length === 0)
+      user.has_resume !== false &&
+      (!user.parsedResume || Object.keys(user.parsedResume).length === 0)
     ) {
       defaultCards.unshift({
         image: AddPictureimg,
@@ -340,21 +332,20 @@ const TryThingsSection: React.FC = () => {
     return defaultCards
   }
 
-  // Memoize cards to prevent unnecessary recalculations
-  const cards = useMemo(() => getCards(), [userData, sections])
+  const cards = getCards()
   const visibleCards = cards.slice(startIndex, startIndex + 3)
   const canScrollLeft = startIndex > 0
   const canScrollRight = startIndex + 3 < cards.length
 
   const handlePrevClick = () => {
     if (canScrollLeft) {
-      setStartIndex(prev => prev - 1)
+      setStartIndex((prev) => prev - 1)
     }
   }
 
   const handleNextClick = () => {
     if (canScrollRight) {
-      setStartIndex(prev => prev + 1)
+      setStartIndex((prev) => prev + 1)
     }
   }
 
@@ -380,18 +371,7 @@ const TryThingsSection: React.FC = () => {
       </div>
 
       <div className="flex flex-col w-full gap-2 mt-4">
-        <button
-          className="flex w-full p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-button hover:bg-gray-50"
-          onClick={() => {
-            handleLinkClick(card.route)
-            if (card.progressSection) {
-              handleCardAction(card.progressSection)
-            }
-          }}
-        >
-          {card.buttonText}
-        </button>
-        {card.alt === "Resume" && card.secondaryAction && (
+      {card.alt === "Resume" && card.secondaryAction && (
           <button
             className="text-gray-500 text-button hover:text-gray-700"
             onClick={() => {
@@ -403,6 +383,17 @@ const TryThingsSection: React.FC = () => {
             {card.secondaryAction.text}
           </button>
         )}
+        <button
+          className="flex w-full p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-button hover:bg-gray-50"
+          onClick={() => {
+            handleLinkClick(card.route)
+            if (card.progressSection) {
+              handleCardAction(card.progressSection)
+            }
+          }}
+        >
+          {card.buttonText}
+        </button>
       </div>
     </div>
   )
@@ -410,10 +401,10 @@ const TryThingsSection: React.FC = () => {
   return (
     <section className="flex flex-col items-start gap-2 self-stretch">
       <h5 className="text-black text-h2">
-        Complete your profile
+        Complete your Basic Details
       </h5>
       {profileProgress < 100 && (
-        <div className="flex flex-col gap-1 w-full">
+        <div className="flex flex-col gap-1  w-full">
           <div className="flex items-center gap-3 self-stretch">
             <div className="relative w-full bg-[#FAFAFA] rounded-full h-[6px]">
               <div
@@ -427,14 +418,14 @@ const TryThingsSection: React.FC = () => {
           <div className="flex justify-between items-center w-full">
             <p className="text-black text-body2">
               Employers are <span className="text-[#03963F]">3 times</span> more likely to hire a candidate with a complete
-              profile.
+              basic details.
             </p>
 
             <div className="flex gap-2">
               <button
                 onClick={handlePrevClick}
                 disabled={!canScrollLeft}
-                className={`p-2 rounded-full ${
+                className={`p-2 rounded-full  ${
                   canScrollLeft ? "text-gray-700 hover:bg-gray-50" : "text-gray-300"
                 }`}
                 aria-label="Previous cards"
@@ -444,7 +435,7 @@ const TryThingsSection: React.FC = () => {
               <button
                 onClick={handleNextClick}
                 disabled={!canScrollRight}
-                className={`p-2 rounded-full ${
+                className={`p-2 rounded-full  ${
                   canScrollRight ? "text-gray-700 hover:bg-gray-50" : "text-gray-300"
                 }`}
                 aria-label="Next cards"
@@ -455,7 +446,6 @@ const TryThingsSection: React.FC = () => {
           </div>
         </div>
       )}
-      
       <div className="relative w-full">
         <div className="grid grid-cols-3 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6 w-full">
           {visibleCards.map((card, index) => renderCard(card, index))}
@@ -471,23 +461,20 @@ const TryThingsSection: React.FC = () => {
           userId={userId || ""}
           isParsed={hasParsedResumeData(currentProfileSection)}
           goalId={goalId}
+          // refetchUserDetails={refetchUserDetails}
         />
       )}
 
       {/* Upload Modal */}
-      <UnifiedUploadModal
+
+      {showUploadModal && (
+        <UnifiedUploadModal
         isOpen={showUploadModal}
-        onClose={async () => {
-          setShowUploadModal(false)
-          // Double refetch pattern to ensure data is updated
-          await refetchUserDetails()
-          setTimeout(async () => {
-            await refetchUserDetails()
-          }, 1000)
-        }}
+        onClose={() => setShowUploadModal(false)}
         userId={userId || ""}
         goalId={goalId}
       />
+      )}
     </section>
   )
 }
