@@ -227,7 +227,7 @@ const Interview: React.FC<{
   return (
     <div className="w-full h-screen pt-12">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-        <Header />
+        <Header SkillName={interviewTopic}/>
         {isInterviewEnded ? (
           <div className="text-center text-gray-500">
             <p>Thank you for your time. We will get back to you soon.</p>
