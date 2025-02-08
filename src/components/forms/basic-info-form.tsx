@@ -303,8 +303,9 @@ export default function BasicInfoForm({
                 type="tel"
                 name="mobile"
                 value={formData.mobile}
+                readOnly
                 onChange={handleBasicInfoChange}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] bg-gray-100${
                   getError("mobile") ? "border-red-500" : ""
                 }`}
                 placeholder="+91 1234567891"

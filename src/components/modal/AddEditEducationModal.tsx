@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   useAddEducationMutation,
   useUpdateEducationMutation,
@@ -17,6 +17,7 @@ import EducationForm from "../forms/education-form";
 import type { Education } from "@/features/profile/types";
 import { toast } from "sonner";
 import { validateEducation } from "@/features/profile/validation/validateEducation";
+import { updateUserProfile } from "@/features/authentication/authSlice";
 
 interface AddEducationModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ const AddEditEducationModal: React.FC<AddEducationModalProps> = ({
   const [education, setEducation] = useState<Education[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const user = useSelector((state: any) => state.auth.user);
+  const dispatch = useDispatch();
 
   const [addEducation] = useAddEducationMutation();
   const [updateEducation] = useUpdateEducationMutation();
@@ -117,6 +119,7 @@ const AddEditEducationModal: React.FC<AddEducationModalProps> = ({
 
       let addedCount = 0;
       let updatedCount = 0;
+      const newEducationIds: any[] = [];
 
       await Promise.all(
         education.map(async (edu) => {
@@ -127,16 +130,24 @@ const AddEditEducationModal: React.FC<AddEducationModalProps> = ({
             }).unwrap();
             updatedCount++;
           } else {
-            await addEducation({
+            const response = await addEducation({
               ...edu,
               user_id: user._id,
             }).unwrap();
+            newEducationIds.push(response.data._id);
             addedCount++;
           }
         })
       );
+      if (newEducationIds.length > 0) {
+        dispatch(
+          updateUserProfile({
+            education: [...user.education, ...newEducationIds],
+          })
+        );
+      }
 
-      if(addedCount > 0) {
+      if (addedCount > 0) {
         toast.success(
           `${addedCount} education ${
             addedCount === 1 ? "entry" : "entries"

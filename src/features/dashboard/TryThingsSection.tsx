@@ -1,65 +1,69 @@
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { useSelector } from "react-redux"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import type React from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Components
-import UnifiedUploadModal from "@/components/modal/UnifiedUploadModal"
-import CompleteProfileModal from "@/components/modal/CompleteProfileModal"
+import UnifiedUploadModal from "@/components/modal/UnifiedUploadModal";
+import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 
 // Assets
-import AddPictureimg from "@/assets/dashboard/add_picture.svg"
-import Addbioimg from "@/assets/dashboard/add_bio.svg"
-import AddEducationImg from "@/assets/dashboard/add_education.svg"
+import AddPictureimg from "@/assets/dashboard/add_picture.svg";
+import Addbioimg from "@/assets/dashboard/add_bio.svg";
+import AddEducationImg from "@/assets/dashboard/add_education.svg";
 
 // Types and API
-import type { RootState } from "@/store/store"
-import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice"
-import { useGetUserDetailsQuery, useUpdateUserMutation } from "@/api/userApiSlice"
-import type { ProfileFormData } from "@/features/profile/types"
+import type { RootState } from "@/store/store";
+import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
+import {
+  useGetUserDetailsQuery,
+  useUpdateUserMutation,
+} from "@/api/userApiSlice";
+import type { ProfileFormData } from "@/features/profile/types";
 
 interface SectionState {
-  completed: boolean
-  skipped?: boolean
+  completed: boolean;
+  skipped?: boolean;
 }
 
 interface Sections {
-  basicInfo: SectionState
-  experience: SectionState
-  education: SectionState
-  certification: SectionState
+  basicInfo: SectionState;
+  experience: SectionState;
+  education: SectionState;
+  certification: SectionState;
 }
 
 interface CardType {
-  image: string
-  alt: string
-  description: string
-  buttonText: string
-  route: string
+  image: string;
+  alt: string;
+  description: string;
+  buttonText: string;
+  route: string;
   secondaryAction?: {
-    text: string
-    route?: string
-    onSkip?: () => void
-  }
-  isOptional?: boolean
-  progressSection?: keyof Sections
+    text: string;
+    route?: string;
+    onSkip?: () => void;
+  };
+  isOptional?: boolean;
+  progressSection?: keyof Sections;
 }
 
 const TryThingsSection: React.FC = () => {
-  const navigate = useNavigate()
-  const [startIndex, setStartIndex] = useState(0)
-  const [profileProgress, setProfileProgress] = useState(0)
-  const [showUploadModal, setShowUploadModal] = useState(false)
-  const [showProfileModal, setShowProfileModal] = useState(false)
-  const [currentProfileSection, setCurrentProfileSection] = useState<string>("")
+  const navigate = useNavigate();
+  const [startIndex, setStartIndex] = useState(0);
+  const [profileProgress, setProfileProgress] = useState(0);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [currentProfileSection, setCurrentProfileSection] =
+    useState<string>("");
 
   const [sections, setSections] = useState<Sections>({
     basicInfo: { completed: false },
     experience: { completed: false, skipped: false },
     education: { completed: false },
     certification: { completed: false, skipped: false },
-  })
+  });
 
   // Get user ID and data
   const userId = useSelector((state: RootState) => state.auth?.user?._id)
@@ -82,8 +86,8 @@ const TryThingsSection: React.FC = () => {
       user?.address?.country &&
       user?.address?.state &&
       user?.address?.city
-    )
-  }
+    );
+  };
 
   // Check if experience section is complete
   const isExperienceComplete = (user: any) => {
@@ -121,42 +125,51 @@ const TryThingsSection: React.FC = () => {
           parsedResume.address.city ||
           parsedResume.address.state ||
           parsedResume.gender
-        )
+        );
       case "experience":
-        return Array.isArray(parsedResume.experience) && parsedResume.experience.length > 0
+        return (
+          Array.isArray(parsedResume.experience) &&
+          parsedResume.experience.length > 0
+        );
       case "education":
-        return Array.isArray(parsedResume.education) && parsedResume.education.length > 0
+        return (
+          Array.isArray(parsedResume.education) &&
+          parsedResume.education.length > 0
+        );
       case "certification":
-        return Array.isArray(parsedResume.certifications) && parsedResume.certifications.length > 0
+        return (
+          Array.isArray(parsedResume.certifications) &&
+          parsedResume.certifications.length > 0
+        );
       default:
-        return false
+        return false;
     }
-  }
+  };
 
   // Get button text based on section status
   const getButtonText = (section: string, defaultText: string) => {
     if (!isComplete(section) && hasParsedResumeData(section)) {
-      return `Review ${section.charAt(0).toUpperCase() + section.slice(1)}`
+      return `Review ${section.charAt(0).toUpperCase() + section.slice(1)}`;
     }
-    return defaultText
-  }
+    return defaultText;
+  };
 
   // Helper function to check if a section is complete
   const isComplete = (section: string) => {
     const user = userDetails.data
     switch (section) {
       case "basicInfo":
-        return isBasicInfoComplete(user)
+        return isBasicInfoComplete(user);
       case "experience":
-        return isExperienceComplete(user)
+        return isExperienceComplete(user);
       case "education":
-        return isEducationComplete(user)
+        return isEducationComplete(user);
       case "certification":
-        return isCertificationComplete(user)
+        return isCertificationComplete(user);
       default:
-        return false
+        return false;
     }
-  }
+  };
 
   // Calculate profile completion progress
   useEffect(() => {
@@ -202,8 +215,8 @@ const TryThingsSection: React.FC = () => {
 
   const handleLinkClick = (route: string) => {
     if (route === "/upload-resume") {
-      setShowUploadModal(true)
-      return
+      setShowUploadModal(true);
+      return;
     }
 
     const routeToSection: { [key: string]: string } = {
@@ -211,14 +224,14 @@ const TryThingsSection: React.FC = () => {
       "/add-experience": "experience",
       "/add-education": "education",
       "/add-certification": "certification",
-    }
+    };
 
-    const section = routeToSection[route]
+    const section = routeToSection[route];
     if (section) {
-      setCurrentProfileSection(section)
-      setShowProfileModal(true)
+      setCurrentProfileSection(section);
+      setShowProfileModal(true);
     }
-  }
+  };
 
   const handleFresherClick = async () => {
     if (userId) {
@@ -230,10 +243,10 @@ const TryThingsSection: React.FC = () => {
           },
         })
       } catch (error) {
-        console.error("Error updating user:", error)
+        console.error("Error updating user:", error);
       }
     }
-  }
+  };
 
   const handleProfileSave = (data: ProfileFormData) => {
     console.log("Saving profile data:", data)
@@ -245,9 +258,9 @@ const TryThingsSection: React.FC = () => {
       setSections((prev) => ({
         ...prev,
         [progressSection]: { completed: true, skipped: false },
-      }))
+      }));
     }
-  }
+  };
 
   const getCards = (): CardType[] => {
     const defaultCards = []
@@ -265,11 +278,12 @@ const TryThingsSection: React.FC = () => {
       defaultCards.push({
         image: Addbioimg,
         alt: "Basic Info",
-        description: "Add your personal and contact details to complete your profile basics.",
+        description:
+          "Add your personal and contact details to complete your profile basics.",
         buttonText: getButtonText("basicInfo", "Add Basic Info"),
         route: "/basic-info",
         progressSection: "basicInfo",
-      })
+      });
     }
 
     // Only add Experience card if user doesn't have experience and hasn't indicated they're a fresher
@@ -277,12 +291,13 @@ const TryThingsSection: React.FC = () => {
       defaultCards.push({
         image: AddEducationImg,
         alt: "Experience",
-        description: "Share your work experience or indicate if you're just starting your career.",
+        description:
+          "Share your work experience or indicate if you're just starting your career.",
         buttonText: getButtonText("experience", "Add Experience"),
         route: "/add-experience",
         isOptional: true,
         progressSection: "experience",
-      })
+      });
     }
 
     // Only add Education card if user doesn't have education entries
@@ -294,7 +309,7 @@ const TryThingsSection: React.FC = () => {
         buttonText: getButtonText("education", "Add Education"),
         route: "/add-education",
         progressSection: "education",
-      })
+      });
     }
 
     // Only add Certification card if user hasn't indicated no certificates and doesn't have any certificates
@@ -307,7 +322,7 @@ const TryThingsSection: React.FC = () => {
         route: "/add-certification",
         isOptional: true,
         progressSection: "certification",
-      })
+      });
     }
 
     // Only add resume card if user hasn't uploaded a resume and hasn't indicated they don't have one
@@ -318,7 +333,8 @@ const TryThingsSection: React.FC = () => {
       defaultCards.unshift({
         image: AddPictureimg,
         alt: "Resume",
-        description: "Upload your resume or create a new one to showcase your professional background.",
+        description:
+          "Upload your resume or create a new one to showcase your professional background.",
         buttonText: "Upload Resume",
         route: "/upload-resume",
         secondaryAction: {
@@ -326,11 +342,11 @@ const TryThingsSection: React.FC = () => {
           onSkip: handleFresherClick,
         },
         isOptional: true,
-      })
+      });
     }
 
-    return defaultCards
-  }
+    return defaultCards;
+  };
 
   const cards = getCards()
   const visibleCards = cards.slice(startIndex, startIndex + 3)
@@ -341,13 +357,13 @@ const TryThingsSection: React.FC = () => {
     if (canScrollLeft) {
       setStartIndex((prev) => prev - 1)
     }
-  }
+  };
 
   const handleNextClick = () => {
     if (canScrollRight) {
       setStartIndex((prev) => prev + 1)
     }
-  }
+  };
 
   const renderCard = (card: CardType, index: number) => (
     <div
@@ -364,9 +380,7 @@ const TryThingsSection: React.FC = () => {
         </div>
 
         <div className="flex flex-col items-start gap-2">
-          <p className="text-gray-500 text-body2">
-            {card.description}
-          </p>
+          <p className="text-gray-500 text-body2">{card.description}</p>
         </div>
       </div>
 
@@ -376,7 +390,7 @@ const TryThingsSection: React.FC = () => {
             className="text-gray-500 text-button hover:text-gray-700"
             onClick={() => {
               if (card.secondaryAction?.onSkip) {
-                card.secondaryAction.onSkip()
+                card.secondaryAction.onSkip();
               }
             }}
           >
@@ -396,7 +410,7 @@ const TryThingsSection: React.FC = () => {
         </button>
       </div>
     </div>
-  )
+  );
 
   return (
     <section className="flex flex-col items-start gap-2 self-stretch">
@@ -412,7 +426,9 @@ const TryThingsSection: React.FC = () => {
                 style={{ width: `${profileProgress}%` }}
               />
             </div>
-            <span className="text-[#1FD167] font-medium">{profileProgress}%</span>
+            <span className="text-[#1FD167] font-medium">
+              {profileProgress}%
+            </span>
           </div>
 
           <div className="flex justify-between items-center w-full">
@@ -476,7 +492,7 @@ const TryThingsSection: React.FC = () => {
       />
       )}
     </section>
-  )
-}
+  );
+};
 
-export default TryThingsSection
+export default TryThingsSection;

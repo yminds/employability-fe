@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   useAddCertificationMutation,
   useUpdateCertificationMutation,
@@ -17,6 +17,7 @@ import CertificationsForm from "../forms/certification-form";
 import type { Certification } from "@/features/profile/types";
 import { toast } from "sonner";
 import { validateCertifications } from "@/features/profile/validation/validateCertification";
+import { updateUserProfile } from "@/features/authentication/authSlice";
 
 interface AddEditCertificationsModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const user = useSelector((state: any) => state.auth.user);
+  const dispatch = useDispatch();
 
   const [addCertification] = useAddCertificationMutation();
   const [updateCertification] = useUpdateCertificationMutation();
@@ -109,6 +111,7 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
 
       let addedCount = 0;
       let updatedCount = 0;
+      const newCertificateIds: any[] = [];
 
       await Promise.all(
         certifications.map(async (cert) => {
@@ -119,14 +122,22 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
             }).unwrap();
             updatedCount++;
           } else {
-            await addCertification({
+            const response = await addCertification({
               ...cert,
               user_id: user._id,
             }).unwrap();
+            newCertificateIds.push(response.data._id);
             addedCount++;
           }
         })
       );
+      if (newCertificateIds.length > 0) {
+        dispatch(
+          updateUserProfile({
+            certificates: [...user.certificates, ...newCertificateIds],
+          })
+        );
+      }
 
       if (addedCount > 0) {
         toast.success(

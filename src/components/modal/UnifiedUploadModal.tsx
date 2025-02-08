@@ -6,11 +6,14 @@ import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { Upload } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
+import { toast } from "sonner";
 
 // Assets
 import VectorFile from "@/assets/profile/completeprofile/file.svg";
 import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
 import LinkedinInstruction from "@/assets/images/Frame 1410077928.png";
+import { updateUserProfile } from "@/features/authentication/authSlice";
+import { useUpdateUserMutation } from "@/api/userApiSlice";
 
 interface UnifiedUploadModalProps {
   isOpen: boolean;
@@ -27,7 +30,8 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [uploadResume] = useUploadResumeMutation();
-  const [activeTab, setActiveTab] = useState<'resume' | 'linkedin'>('resume');
+  const [updateUser] = useUpdateUserMutation();
+  const [activeTab, setActiveTab] = useState<"resume" | "linkedin">("resume");
   const [dragActive, setDragActive] = useState(false);
   const [uploadState, setUploadState] = useState<{
     file?: File;
@@ -36,7 +40,7 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
   const [resume, setResume] = useState({
     resumeUrl: "",
   });
-  const [showCompleteProfile, setShowCompleteProfile] = useState(false);
+  // const [showCompleteProfile, setShowCompleteProfile] = useState(false);
   const [parsedData, setParsedData] = useState(null);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
@@ -84,19 +88,25 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
       const formData = new FormData();
       formData.append("files", file);
       formData.append("userId", userId);
-      formData.append("folder", activeTab === 'resume' ? "resume" : "linkedin");
+      formData.append("folder", activeTab === "resume" ? "resume" : "linkedin");
       formData.append("name", file.name);
 
-      const s3Response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const s3Response = await fetch(
+        `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!s3Response.ok) {
         throw new Error("Failed to upload to S3");
       }
 
       const result = await s3Response.json();
+      await updateUser({
+        userId,
+      });
       setResume({ resumeUrl: result.data[0].fileUrl });
       setUploadState((prev) => ({ ...prev, progress: 100 }));
     } catch (error) {
@@ -110,11 +120,20 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
   const handleContinue = async () => {
     if (uploadState.file) {
       try {
-        const response = await uploadResume({ file: uploadState.file, userId });
+        const response = await uploadResume({
+          file: uploadState.file,
+          userId,
+          fileUrl: resume.resumeUrl,
+        });
         const parsedData = response.data;
         setParsedData(parsedData.data.parsedData);
-        dispatch(resetResumeState({ parsedData: parsedData.data.parsedData }));
-        setShowCompleteProfile(true);
+        dispatch(
+          updateUserProfile({
+            parsedResume: parsedData.data.parsedData,
+            resume_s3_url: resume.resumeUrl,
+          })
+        );
+        toast.success("Resume Uploaded Successfully");
       } catch (error) {
         console.error("Error parsing file:", error);
       }
@@ -124,20 +143,24 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
   const removeFile = async () => {
     try {
       if (resume.resumeUrl && userId) {
-        const bucketBaseUrl = "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
+        const bucketBaseUrl =
+          "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
         const key = resume.resumeUrl.replace(bucketBaseUrl, "");
-        
-        const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            key,
-            userId: userId,
-            folder: activeTab === 'resume' ? "resume" : "linkedin",
-          }),
-        });
+
+        const response = await fetch(
+          `${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              key,
+              userId: userId,
+              folder: activeTab === "resume" ? "resume" : "linkedin",
+            }),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to delete file from S3");
@@ -151,24 +174,11 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
     }
   };
 
-  if (showCompleteProfile) {
-    return (
-      <CompleteProfileModal
-        type={activeTab === 'resume' ? "resumeUpload" : "linkedinUpload"}
-        onClose={onClose}
-        userId={userId}
-        onSave={() => console.log("Save profile")}
-        parsedData={parsedData}
-        isParsed={true}
-        goalId={goalId}
-      />
-    );
-  }
 
   if (uploadState.file) {
     return (
       <ResumeUploadProgressModal
-        isOpen={true}
+        isOpen={isOpen}
         onClose={onClose}
         fileName={uploadState.file.name}
         fileSize={`${(uploadState.file.size / (1024 * 1024)).toFixed(2)} MB`}
@@ -279,24 +289,26 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
       <DialogContent className="bg-white rounded-[20px] max-w-4xl p-0 flex overflow-hidden">
         {/* Sidebar */}
         <div className="w-64 bg-gray-50 p-4 border-r border-gray-200 rounded-l-[20px]">
-          <h2 className="text-lg font-medium text-gray-900 mb-4 px-2">Upload Options</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4 px-2">
+            Upload Options
+          </h2>
           <div className="space-y-2">
             <button
-              onClick={() => setActiveTab('resume')}
+              onClick={() => setActiveTab("resume")}
               className={`w-full text-left px-4 py-2 rounded-lg transition-colors duration-200 ${
-                activeTab === 'resume'
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'text-gray-700 hover:bg-gray-100'
+                activeTab === "resume"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "text-gray-700 hover:bg-gray-100"
               }`}
             >
               Resume Upload
             </button>
             <button
-              onClick={() => setActiveTab('linkedin')}
+              onClick={() => setActiveTab("linkedin")}
               className={`w-full text-left px-4 py-2 rounded-lg transition-colors duration-200 ${
-                activeTab === 'linkedin'
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'text-gray-700 hover:bg-gray-100'
+                activeTab === "linkedin"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "text-gray-700 hover:bg-gray-100"
               }`}
             >
               LinkedIn Import
@@ -307,9 +319,15 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
         {/* Content */}
         <div className="flex-1 p-8 rounded-r-[20px]">
           <h3 className="text-xl font-medium text-gray-900 mb-6">
-            {activeTab === 'resume' ? 'Upload your Resume' : 'Import your profile from LinkedIn'}
+            {activeTab === "resume"
+              ? "Upload your Resume"
+              : "Import your profile from LinkedIn"}
           </h3>
-          {activeTab === 'resume' ? <ResumeUploadContent /> : <LinkedInUploadContent />}
+          {activeTab === "resume" ? (
+            <ResumeUploadContent />
+          ) : (
+            <LinkedInUploadContent />
+          )}
         </div>
       </DialogContent>
     </Dialog>

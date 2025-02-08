@@ -1,38 +1,10 @@
+import { useUpdateReportRecordingMutation } from "@/api/reportApiSlice";
 import { RootState } from "@/store/store";
 import { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
-// const uploadChunkToS3 = async (chunk: Blob, interviewId: string, chunkNumber: number): Promise<void> => {
-//   console.log(`Uploading chunk ${chunkNumber}, size: ${chunk.size} bytes`);
-
-//   const formData = new FormData();
-//   const fileName = `interview_record/interview_chunk_${interviewId}_${chunkNumber}.webm`;
-
-//   formData.append("files", chunk);
-//   formData.append("key", fileName);
-//   formData.append("interviewId", interviewId);
-//   formData.append("chunkNumber", chunkNumber.toString());
-
-//   try {
-//     const s3Response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload-video`, {
-//       method: "POST",
-//       body: formData,
-//     });
-
-//     const responseData = await s3Response.json();
-//     if (!s3Response.ok) {
-//       throw new Error(`Upload failed: ${responseData.message || "Unknown error"}`);
-//     }
-
-//     console.log(`Chunk ${chunkNumber} uploaded successfully`);
-//   } catch (error) {
-//     console.error(`Upload error for chunk ${chunkNumber}:`, error);
-//   }
-// };
-
-
-const getPresignedUrl = async ( interviewId:string, chunkNumber:number,folder = "default") => {
+const getPresignedUrl = async (interviewId: string, chunkNumber: number, folder = "default") => {
   const fileName = `interview_record/interview_chunk_${interviewId}_${chunkNumber}.webm`;
   try {
     const response = await fetch(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload-video`, {
@@ -48,18 +20,27 @@ const getPresignedUrl = async ( interviewId:string, chunkNumber:number,folder = 
     });
 
     const data = await response.json();
-    return data.url;  // Assuming backend returns { url: "presigned-url" }
+    console.log("data", data);
+
+    return data.data.url; // Assuming backend returns { url: "presigned-url" }
   } catch (error) {
     console.error("Error getting presigned URL:", error);
     return null;
   }
 };
 
-
-const uploadFileToS3 = async (file:Blob, interviewId:string, chunkNumber:number,folder = "interviews") => {
+const uploadFileToS3 = async (
+  updateReportRecording: any,
+  file: Blob,
+  interviewId: string,
+  chunkNumber: number,
+  folder = "interviews"
+) => {
   try {
     // Step 1: Get the pre-signed URL
-    const presignedUrl = await getPresignedUrl( interviewId,chunkNumber,folder);
+    const presignedUrl = await getPresignedUrl(interviewId, chunkNumber, folder);
+
+    console.log("presignedUrl", presignedUrl);
 
     if (!presignedUrl) {
       throw new Error("Failed to get pre-signed URL.");
@@ -69,19 +50,24 @@ const uploadFileToS3 = async (file:Blob, interviewId:string, chunkNumber:number,
     const uploadResponse = await fetch(presignedUrl, {
       method: "PUT",
       headers: {
-        "Content-Type": file.type,  // Ensure correct MIME type
+        "Content-Type": file.type, // Ensure correct MIME type
       },
-      body: file,  // Actual file data
+      body: file, // Actual file data
     });
 
     if (!uploadResponse.ok) {
       throw new Error("Failed to upload file to S3.");
     }
 
-    console.log("File uploaded successfully!");
-
-    // Step 3: Optionally return the S3 file URL (without query params)
     const fileUrl = presignedUrl.split("?")[0];
+    console.log("File uploaded successfully! URL:", fileUrl);
+    console.log(fileUrl);
+
+    if (fileUrl) {
+      const respone = await updateReportRecording({ interview_id: interviewId, s3RecordingUrl: fileUrl }).unwrap();
+      console.log("respone", respone);
+    }
+
     return fileUrl;
   } catch (error) {
     console.error("Error uploading file to S3:", error);
@@ -90,6 +76,7 @@ const uploadFileToS3 = async (file:Blob, interviewId:string, chunkNumber:number,
 };
 
 const useInterviewSetup = () => {
+  const [updateReportRecording] = useUpdateReportRecordingMutation();
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
@@ -106,6 +93,7 @@ const useInterviewSetup = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const lastChunkRef = useRef<Promise<void> | null>(null);
   const [allBlobFiles, setAllBlobFiles] = useState<Blob[]>([]);
+  const [chunkNumber, setChunkNumber] = useState(1);
 
   useEffect(() => {
     if (videoRef.current && screenStream) {
@@ -132,107 +120,88 @@ const useInterviewSetup = () => {
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
-        audio: true,
+        audio: true, 
       });
-
+  
+     
       const micStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
       });
-
+  
+      
+      const audioContext = new AudioContext();
+      const destination = audioContext.createMediaStreamDestination();
+  
+     
+      const micSource = audioContext.createMediaStreamSource(micStream);
+      micSource.connect(destination);
+  
+    
+      const systemAudioSource = audioContext.createMediaStreamSource(
+        new MediaStream(screenStream.getAudioTracks())
+      );
+      systemAudioSource.connect(destination);
+  
+     
       const combinedStream = new MediaStream([
-        ...screenStream.getVideoTracks(),
-        ...screenStream.getAudioTracks(),
-        ...micStream.getAudioTracks(),
+        ...screenStream.getVideoTracks(), 
+        ...destination.stream.getAudioTracks(), 
       ]);
+  
 
       setScreenStream(combinedStream);
       setIsScreenSharing(true);
       localStorage.setItem("isScreenSharing", "true");
-      // let mediaHeaderRequested: boolean = false;
-      // let headerBlob: Blob | null = null;
-      // let audioChunkInterval: any = null;
 
-      // if (audioChunkInterval) clearInterval(audioChunkInterval);
-      // if (intervalRef.current) clearInterval(intervalRef.current);
-      // intervalRef.current = setInterval(() => {
-      //   if (recorder) {
-      //     recorder.requestData();
-      //   }
-      // }, 10000);
-      // const recorder = new MediaRecorder(combinedStream, {
-      //   mimeType: "video/webm;", // Simplified MIME type
-
-      // });
-      // recorder.start();
-      let chunkNumber = 1;
       const startRecording = () => {
         const recorder = new MediaRecorder(combinedStream, {
-          mimeType: "video/webm; codecs=vp8,opus", // Ensure proper codecs
+          mimeType: "video/webm; codecs=vp8,opus",
         });
 
         recorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
-                  uploadFileToS3(event.data, interviewId, chunkNumber);
-                  chunkNumber++;  // Upload the recorded chunk
+            uploadFileToS3(updateReportRecording, event.data, interviewId, chunkNumber);
+            setChunkNumber(chunkNumber + 1);
           }
         };
 
         recorder.onstop = () => {
-          // Automatically restart the recording after stopping
-          setTimeout(startRecording, 1000); // 1-second gap between chunks
+          // restart recoding after 1 second
+          setTimeout(startRecording, 1000);
         };
 
         recorder.start();
 
+        recorderRef.current = recorder;
         // Stop recording after 3 minutes (180000ms)
         setTimeout(() => {
           if (recorder && recorder.state !== "inactive") {
             recorder.stop();
           }
-        }, 10000);
-  
+        }, 30000);
       };
 
       // Start the first recording
       startRecording();
-
-      // recorder.onstart = async () => {
-      //   if (!recorder) return;
-      //   recorder.requestData();
-      // };
-
-      // let chunkNumber = 1;
-
-      // recorder.ondataavailable = async (event) => {
-      //   if (event.data.size > 0) {
-      //     if (!mediaHeaderRequested) {
-      //       headerBlob = event.data; // Store the first chunk as header
-      //       mediaHeaderRequested = true;
-      //       return;
-      //     }
-
-      //     // Ensure each chunk starts with the WebM header
-      //     if (headerBlob) {
-      //       const mergedChunk = new Blob([headerBlob, event.data], { type: "video/webm" });
-      //       setAllBlobFiles((prev) => [...prev, mergedChunk]);
-      //       uploadChunkToS3(mergedChunk, interviewId, chunkNumber);
-      //       chunkNumber++;
-
-      //     }
-      //   }
-      // };
-      // audioChunkInterval = setInterval(() => {
-      //   if (recorder) {
-      //     recorder.requestData();
-      //   }
-      // }, 11000);
-      // recorderRef.current = recorder;
     } catch (error) {
       console.error("Error capturing screen and microphone:", error);
     }
   };
 
   const stopScreenSharing = async () => {
+    // we should upload the last chunk to S3 here
+    if (recorderRef.current) {
+      recorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          lastChunkRef.current = uploadFileToS3(updateReportRecording, event.data, interviewId, chunkNumber);
+          setChunkNumber(chunkNumber + 1);
+        }
+      };
+    }
     if (recorderRef.current) {
       recorderRef.current.stop();
       recorderRef.current = null;
@@ -253,6 +222,10 @@ const useInterviewSetup = () => {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+
+    // Clear all recorded chunks
+    recordedChunks.current = [];
+    setAllBlobFiles([]);
   };
 
   const handleScaleChange = (scale: number) => {
