@@ -20,6 +20,8 @@ export interface TransformedData {
   linkedIn: string;
   gitHub?: string;
   profile_image?: string | null;
+  is_basic_info?: boolean;
+  is_experienced?: boolean;
 }
 
 export const transformFormDataForDB = (formData: any): TransformedData => {
@@ -44,6 +46,7 @@ export const transformFormDataForDB = (formData: any): TransformedData => {
     linkedIn: formData.socialProfiles?.linkedIn || "",
     gitHub: formData.socialProfiles?.gitHub || "",
     profile_image: formData.basicInfo?.profile_image || null,
+    is_basic_info: true,
   };
 
   if (Array.isArray(formData.skills)) {
@@ -62,7 +65,7 @@ export const transformFormDataForDB = (formData: any): TransformedData => {
   if (Array.isArray(formData.education)) {
     transformedData.education = formData.education.map((edu: any) => {
       return {
-        _id: edu.id || "",
+        _id: edu._id || "",
         education_level: edu.education_level || "",
         degree: edu.degree || "",
         institute: edu.institute || "",
@@ -79,7 +82,7 @@ export const transformFormDataForDB = (formData: any): TransformedData => {
   if (Array.isArray(formData.certifications)) {
     transformedData.certificates = formData.certifications.map((cert: any) => {
       return {
-        _id: cert.id || "",
+        _id: cert._id || "",
         title: cert.title || "",
         issued_by: cert.issued_by || "",
         issue_date: cert.issue_date || "",
@@ -98,7 +101,7 @@ export const transformFormDataForDB = (formData: any): TransformedData => {
   if (Array.isArray(formData.experience)) {
     transformedData.experience = formData.experience.map((exp: any) => {
       return {
-        _id: exp.id || "",
+        _id: exp._id || "",
         title: exp.title || "",
         company: exp.company || "",
         employment_type: exp.employment_type || "",

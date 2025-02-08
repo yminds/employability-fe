@@ -84,7 +84,7 @@ const SkillsContainer: React.FC = () => {
                 />
               </div>
               <div className="mt-[70px] sm:min-w-[100%]  overflow-y-auto sm:mt-4">
-                <SkillList isDashboard={false} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated}  goals={goalData}/>
+                <SkillList isDashboard={false} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated}  goals={goalData} selectedGoalName={selectedGoal?.name || ""}/>
                 {/* <SuggestedSkills userId={userId} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} /> */}
               </div>
             </div>

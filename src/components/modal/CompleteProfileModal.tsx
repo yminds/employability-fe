@@ -1,22 +1,29 @@
-import { useRef, useState, useEffect, useCallback } from "react";
-import { type ProfileFormData } from "../../features/profile/types";
+"use client";
+
+import { useState, useEffect } from "react";
+import type { ProfileFormData } from "../../features/profile/types";
 import BasicInfoForm from "../forms/basic-info-form";
 import SkillsForm from "../forms/skills-form";
 import ExperienceForm from "@/features/profile/forms/experience-form";
 import EducationForm from "../forms/education-form";
 import CertificationsForm from "../forms/certification-form";
-import { ZodError } from "zod";
-import throttle from "lodash.throttle"; // Install lodash.debounce
 import { useSelector, useDispatch } from "react-redux";
-import { transformFormDataForDB } from "@/utils/transformData";
 import { useUpdateUserMutation } from "@/api/userApiSlice";
-import { useAddExperienceMutation } from "@/api/experienceApiSlice";
-import { useUpdateExperienceMutation } from "@/api/experienceApiSlice";
-import { useAddEducationMutation } from "@/api/educationSlice";
-import { useUpdateEducationMutation } from "@/api/educationSlice";
-import { useAddCertificationMutation } from "@/api/certificatesApiSlice";
-import { useUpdateCertificationMutation } from "@/api/certificatesApiSlice";
-
+import {
+  useAddExperienceMutation,
+  useUpdateExperienceMutation,
+  useGetExperiencesByUserIdQuery,
+} from "@/api/experienceApiSlice";
+import {
+  useAddEducationMutation,
+  useUpdateEducationMutation,
+  useGetEducationByIdQuery,
+} from "@/api/educationSlice";
+import {
+  useAddCertificationMutation,
+  useUpdateCertificationMutation,
+  useGetCertificationsByUserIdQuery,
+} from "@/api/certificatesApiSlice";
 import {
   Dialog,
   DialogContent,
@@ -24,13 +31,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { updateUserProfile } from "@/features/authentication/authSlice";
 import { validateExperience } from "@/features/profile/validation/validateExperience";
 import { validateEducation } from "@/features/profile/validation/validateEducation";
 import { validateCertifications } from "@/features/profile/validation/validateCertification";
-import { useGetExperiencesByUserIdQuery } from "@/api/experienceApiSlice";
-import { useGetEducationByIdQuery } from "@/api/educationSlice";
-import { useGetCertificationsByUserIdQuery } from "@/api/certificatesApiSlice";
 import { parseAddress } from "@/utils/addressParser";
 import {
   useCreateUserSkillsMutation,
@@ -38,12 +41,18 @@ import {
 } from "@/api/skillsApiSlice";
 import { useVerifyMultipleSkillsMutation } from "@/api/skillsPoolApiSlice";
 import { parsedTransformData } from "@/utils/parsedTransformData";
+import { validateBasicInfo } from "@/features/profile/validation/validateBasicInfo";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { updateUserProfile } from "@/features/authentication/authSlice";
+import { ZodError } from "zod";
+import { transformFormDataForDB } from "@/utils/transformData";
 
 interface CompleteProfileModalProps {
   onClose: () => void;
   onSave: (data: ProfileFormData) => void;
   type: string;
-  userId: string; // or userId: string if always required
+  userId: string;
   parsedData?: any;
   isParsed: boolean;
   goalId: string;
@@ -59,14 +68,27 @@ export default function CompleteProfileModal({
   goalId,
 }: CompleteProfileModalProps) {
   const user = useSelector((state: any) => state.auth.user);
-  const resume = useSelector((state: any) => state.resume.parsedData);
+  // const resume = useSelector((state: any) => state.resume.parsedData);
+  const dispatch = useDispatch();
 
-  const data = parsedData;
+  const data = user.parsedResume;
+
+  console.log("data", user.parsedResume);
+
+  const [activeTab, setActiveTab] = useState("basic");
+  const [formData, setFormData] = useState<any>({});
+  const [isFresher, setIsFresher] = useState(!user.is_experienced);
+  const [hasCertifications, setHasCertifications] = useState(
+    !user.has_certificates
+  );
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [parsedSkills, setParsedSkills] = useState<any[]>([]);
 
   const { data: fetchedExperiences } = useGetExperiencesByUserIdQuery(userId);
   const { data: fetchedEducation } = useGetEducationByIdQuery(userId);
   const { data: fetchedCertification } =
     useGetCertificationsByUserIdQuery(userId);
+
   const [getUserSkills] = useGetUserSkillsMutation();
   const [getVerifySkills] = useVerifyMultipleSkillsMutation();
   const [updateUser] = useUpdateUserMutation();
@@ -77,32 +99,28 @@ export default function CompleteProfileModal({
   const [addCertification] = useAddCertificationMutation();
   const [updateCertification] = useUpdateCertificationMutation();
   const [createUserSkills] = useCreateUserSkillsMutation();
-  const dispatch = useDispatch();
 
-  const [activeTab, setActiveTab] = useState("basic");
-  const [formData, setFormData] = useState<any>({});
-
-  const parsedBasicData = isParsed
+  const parsedBasicData = !user.is_basic_info
     ? (() => {
-        const address = resume?.contact.address || "";
+        const address = data?.contact.address || "";
         const { city, stateCode, countryCode } = parseAddress(address);
 
         return {
           basicInfo: {
-            name: resume?.name || "",
-            mobile: resume?.contact?.phone || "",
+            name: data?.name || "",
+            mobile: data?.contact?.phone || "",
             email: user.email || "",
-            date_of_birth: resume?.date_of_birth || "",
-            gender: resume?.gender || "",
+            date_of_birth: data?.date_of_birth || "",
+            gender: data?.gender || "",
             country: countryCode,
             state: stateCode,
             city: city,
-            profile_image: resume?.profile_image || "",
+            profile_image: data?.profile_image || "",
           },
           socialProfiles: {
-            gitHub: resume?.contact?.github || "",
-            linkedIn: resume?.contact?.linkedin || "",
-            portfolio: resume?.contact?.portfolio || "",
+            gitHub: data?.contact?.github || "",
+            linkedIn: data?.contact?.linkedin || "",
+            portfolio: data?.contact?.portfolio || "",
           },
         };
       })()
@@ -125,18 +143,30 @@ export default function CompleteProfileModal({
         },
       };
 
-  const [isScrolling, setIsScrolling] = useState(false);
-
   useEffect(() => {
     const initializeData = async () => {
       if (data) {
         try {
           const result = await getVerifySkills(data.skills).unwrap();
           const transformedData = await parsedTransformData(data, result.data);
+          console.log("TransformedData", transformedData);
+
+          setParsedSkills(transformedData.skills);
 
           setFormData((prevData: any) => ({
             ...prevData,
-            ...transformedData,
+            experience:
+              fetchedExperiences?.data?.length > 0
+                ? fetchedExperiences.data
+                : transformedData.experience,
+            education:
+              fetchedEducation?.data?.length > 0
+                ? fetchedEducation.data
+                : transformedData.education,
+            certifications:
+              fetchedCertification?.data?.length > 0
+                ? fetchedCertification.data
+                : transformedData.certifications,
           }));
         } catch (error) {
           console.error("Error transforming data:", error);
@@ -145,14 +175,20 @@ export default function CompleteProfileModal({
     };
 
     initializeData();
-  }, [data]);
+  }, [
+    data,
+    fetchedExperiences,
+    fetchedEducation,
+    fetchedCertification,
+    getVerifySkills,
+  ]);
 
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        if (userId && goalId && !isParsed) {
+        if (userId && goalId) {
           const response = await getUserSkills({ userId, goalId }).unwrap();
-          if (response?.data.optional) {
+          if (response?.data.optional && response.data.optional.length > 0) {
             setFormData((prevData: any) => ({
               ...prevData,
               skills: response.data.optional.map((skill: any) => ({
@@ -163,6 +199,11 @@ export default function CompleteProfileModal({
                 visibility: "All users",
               })),
             }));
+          } else if (parsedSkills.length > 0) {
+            setFormData((prevData: any) => ({
+              ...prevData,
+              skills: parsedSkills,
+            }));
           }
         }
       } catch (error) {
@@ -171,126 +212,7 @@ export default function CompleteProfileModal({
     };
 
     fetchSkills();
-  }, [userId, goalId, getUserSkills]);
-
-  useEffect(() => {
-    if (fetchedExperiences) {
-      setFormData((prevData: any) => ({
-        ...prevData,
-        experience: fetchedExperiences.data.map((exp: any) => ({
-          id: exp._id,
-          title: exp.title,
-          employment_type: exp.employment_type,
-          company: exp.company,
-          location: exp.location,
-          start_date: exp.start_date,
-          end_date: exp.end_date,
-          currently_working: exp.currently_working,
-          description: exp.description,
-          current_ctc: exp.current_ctc,
-          expected_ctc: exp.expected_ctc,
-          companyLogo: exp.companyLogo || "",
-          isVerified: exp.isVerified || false,
-        })),
-      }));
-    }
-  }, [fetchedExperiences]);
-
-  useEffect(() => {
-    if (fetchedEducation) {
-      setFormData((prevData: any) => ({
-        ...prevData,
-        education: fetchedEducation.data.map((edu: any) => ({
-          id: edu._id,
-          education_level: edu.education_level,
-          degree: edu.degree,
-          institute: edu.institute,
-          board_or_certification: edu.board_or_certification,
-          from_date: edu.from_date,
-          till_date: edu.till_date,
-          cgpa_or_marks: edu.cgpa_or_marks,
-        })),
-      }));
-    }
-  }, [fetchedEducation]);
-
-  useEffect(() => {
-    if (fetchedCertification) {
-      setFormData((prevData: any) => ({
-        ...prevData,
-        certifications: fetchedCertification.data.map((cert: any) => ({
-          id: cert._id,
-          title: cert.title,
-          issued_by: cert.issued_by,
-          issue_date: cert.issue_date,
-          expiration_date: cert.expiration_date,
-          certificate_s3_url: cert.certificate_s3_url,
-        })),
-      }));
-    }
-  }, [fetchedCertification]);
-
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const sectionRefs = {
-    basic: useRef<HTMLDivElement>(null),
-    skills: useRef<HTMLDivElement>(null),
-    experience: useRef<HTMLDivElement>(null),
-    education: useRef<HTMLDivElement>(null),
-    certification: useRef<HTMLDivElement>(null),
-  };
-
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
-    setIsScrolling(true);
-    sectionRefs[tab as keyof typeof sectionRefs]?.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-    setTimeout(() => setIsScrolling(false), 1000); // Adjust the delay as needed
-  };
-
-  const handleScroll = useCallback(
-    throttle(() => {
-      if (!containerRef.current || isScrolling) return;
-
-      const container = containerRef.current;
-      const scrollPosition = container.scrollTop;
-      const offset = 100; // Adjust this value as needed
-
-      let closestSection = "";
-      let minDistance = Number.POSITIVE_INFINITY;
-
-      Object.entries(sectionRefs).forEach(([key, ref]) => {
-        if (!ref.current) return;
-        const element = ref.current;
-        const { top } = element.getBoundingClientRect();
-        const distance = Math.abs(top - offset);
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestSection = key;
-        }
-      });
-
-      if (closestSection !== activeTab) {
-        setActiveTab(closestSection);
-      }
-    }, 100),
-    [activeTab, isScrolling]
-  );
-
-  useEffect(() => {
-    const container = containerRef.current;
-
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => {
-        container.removeEventListener("scroll", handleScroll);
-      };
-    }
-  }, [handleScroll]);
+  }, [userId, goalId, getUserSkills, parsedSkills]);
 
   const updateFormData = (section: keyof ProfileFormData, data: any) => {
     setFormData((prev: any) => ({
@@ -299,149 +221,265 @@ export default function CompleteProfileModal({
     }));
   };
 
-  const validateForm = (): boolean => {
-    const experienceErrors = validateExperience(formData.experience || []);
-    const educationErrors = validateEducation(formData.education || []);
-    const certificationErrors = validateCertifications(
-      formData.certifications || []
-    );
+  const validateSection = (section: string): boolean => {
+    let sectionErrors: { [key: string]: string } = {};
 
-    const newErrors = {
-      ...experienceErrors,
-      ...educationErrors,
-      ...certificationErrors,
-    };
+    switch (section) {
+      case "basic":
+        sectionErrors = validateBasicInfo(formData.basicInfo || {});
+        break;
+      case "skills":
+        // Add skills validation if needed
+        break;
+      case "experience":
+        sectionErrors = validateExperience(formData.experience || []);
+        break;
+      case "education":
+        sectionErrors = validateEducation(formData.education || []);
+        break;
+      case "certification":
+        sectionErrors = validateCertifications(formData.certifications || []);
+        break;
+      default:
+        break;
+    }
 
-    setErrors(newErrors);
-    setTimeout(() => setErrors({}), 2000);
-    return Object.keys(newErrors).length === 0;
+    setErrors(sectionErrors);
+    return Object.keys(sectionErrors).length === 0;
   };
 
-  const handleSave = async () => {
+  const handleSaveSection = async (section: string) => {
+    if (!validateSection(section)) {
+      return;
+    }
+
+    console.log("Clicked");
+
     try {
-      if (!validateForm()) {
-        return;
-      }
-
       const transformedData = transformFormDataForDB(formData);
+      transformedData.is_experienced = !isFresher;
 
-      if (transformedData.skills && transformedData.skills.length > 0) {
-        const skillsPayload = {
-          user_id: userId,
-          skills: transformedData.skills,
-          goal_id: goalId,
-        };
-        await createUserSkills(skillsPayload).unwrap();
-      }
+      switch (section) {
+        case "basic":
+          const {
+            experience,
+            education,
+            certificates,
+            skills,
+            ...updatedUserData
+          } = transformedData;
 
-      // Add new experiences
-      if (transformedData.experience && transformedData.experience.length > 0) {
-        await Promise.all(
-          transformedData.experience.map(async (exp: any) => {
-            const experienceData = {
-              user_id: userId,
-              title: exp.title,
-              employment_type: exp.employment_type,
-              company: exp.company,
-              location: exp.location,
-              start_date: exp.start_date,
-              end_date: exp.currently_working ? null : exp.end_date,
-              currently_working: exp.currently_working,
-              description: exp.description,
-              current_ctc: exp.current_ctc,
-              expected_ctc: exp.expected_ctc,
-            };
-            if (exp._id) {
-              // Update existing experience
+          try {
+            const response = await updateUser({
+              userId,
+              data: updatedUserData,
+            }).unwrap();
 
-              await updateExperience({
-                id: exp._id,
-                updatedExperience: experienceData,
-              }).unwrap();
-            } else {
-              // Add new experience
-              await addExperience(experienceData).unwrap();
+            if (response.error) {
+              throw new Error("Failed to update user");
             }
-          })
-        );
-      }
 
-      // Add new education entries
-      if (transformedData.education && transformedData.education.length > 0) {
-        await Promise.all(
-          transformedData.education.map(async (edu: any) => {
-            const educationData = {
+            dispatch(
+              updateUserProfile({
+                ...updatedUserData,
+                profile_image: transformedData.profile_image ?? "",
+              })
+            );
+          } catch (error) {
+            console.error(
+              "Error saving basic info and social profiles:",
+              error
+            );
+            throw error;
+          }
+          break;
+        case "skills":
+          if (transformedData.skills && transformedData.skills.length > 0) {
+            const skillsPayload = {
               user_id: userId,
-              education_level: edu.education_level,
-              degree: edu.degree,
-              institute: edu.institute,
-              from_date: edu.from_date,
-              till_date: edu.till_date,
-              cgpa_or_marks: edu.cgpa_or_marks,
+              skills: transformedData.skills,
+              goal_id: goalId,
             };
-            if (edu._id) {
-              // Update existing education
-              await updateEducation({
-                id: edu._id,
-                updatedEducation: educationData,
-              }).unwrap();
-            } else {
-              // Add new education
-              await addEducation(educationData).unwrap();
+            await createUserSkills(skillsPayload).unwrap();
+          }
+          break;
+        case "experience":
+          if (isFresher) {
+            transformedData.experience = [];
+            dispatch(
+              updateUserProfile({
+                ...user,
+                is_experienced: false,
+                parsedResume: {
+                  ...user.parsedResume,
+                  experience: [],
+                },
+              })
+            );
+            await updateUser({
+              userId,
+              data: {
+                is_experienced: false,
+                parsedResume: {
+                  ...user.parsedResume,
+                  experience: [],
+                },
+              },
+            }).unwrap();
+          } else {
+            dispatch(
+              updateUserProfile({
+                ...user,
+                is_experienced: true,
+              })
+            );
+            await updateUser({
+              userId,
+              data: {
+                is_experienced: true,
+              },
+            }).unwrap();
+
+            if (
+              transformedData.experience &&
+              transformedData.experience.length > 0
+            ) {
+              await Promise.all(
+                transformedData.experience.map(async (exp: any) => {
+                  console.log("Working experience");
+
+                  const experienceData = {
+                    user_id: userId,
+                    title: exp.title,
+                    employment_type: exp.employment_type,
+                    company: exp.company,
+                    location: exp.location,
+                    start_date: exp.start_date,
+                    end_date: exp.currently_working ? null : exp.end_date,
+                    currently_working: exp.currently_working,
+                    description: exp.description,
+                    current_ctc: exp.current_ctc,
+                    expected_ctc: exp.expected_ctc,
+                  };
+                  if (exp._id) {
+                    await updateExperience({
+                      id: exp._id,
+                      updatedExperience: experienceData,
+                    }).unwrap();
+                  } else {
+                    await addExperience(experienceData).unwrap();
+                  }
+                })
+              );
             }
-          })
-        );
-      }
-
-      // Update or add certification entries
-      if (
-        transformedData.certificates &&
-        transformedData.certificates.length > 0
-      ) {
-        await Promise.all(
-          transformedData.certificates.map(async (cert: any) => {
-            const certificationData = {
-              user_id: userId,
-              title: cert.title,
-              issued_by: cert.issued_by,
-              issue_date: cert.issue_date,
-              expiration_date: cert.expiration_date,
-              certificate_s3_url: cert.certificate_s3_url,
-            };
-            if (cert._id) {
-              // Update existing certification
-              await updateCertification({
-                id: cert._id,
-                updatedCertification: certificationData,
-              }).unwrap();
-            } else {
-              // Add new certification
-              await addCertification(certificationData).unwrap();
+          }
+          break;
+        case "education":
+          if (
+            transformedData.education &&
+            transformedData.education.length > 0
+          ) {
+            await Promise.all(
+              transformedData.education.map(async (edu: any) => {
+                const educationData = {
+                  user_id: userId,
+                  education_level: edu.education_level,
+                  degree: edu.degree,
+                  institute: edu.institute,
+                  from_date: edu.from_date,
+                  till_date: edu.till_date,
+                  cgpa_or_marks: edu.cgpa_or_marks,
+                };
+                if (edu._id) {
+                  await updateEducation({
+                    id: edu._id,
+                    updatedEducation: educationData,
+                  }).unwrap();
+                } else {
+                  await addEducation(educationData).unwrap();
+                }
+              })
+            );
+          }
+          break;
+        case "certification":
+          if (hasCertifications) {
+            transformedData.certificates = [];
+            dispatch(
+              updateUserProfile({
+                ...user,
+                has_certificates: false,
+                parsedResume: {
+                  ...user.parsedResume,
+                  certificates: [],
+                },
+              })
+            );
+            await updateUser({
+              userId,
+              data: {
+                has_certificates: false,
+                parsedResume: {
+                  ...user.parsedResume,
+                  certificates: [],
+                },
+              },
+            }).unwrap();
+          } else {
+            dispatch(
+              updateUserProfile({
+                ...user,
+                has_certificates: true,
+              })
+            );
+            await updateUser({
+              userId,
+              data: {
+                has_certificates: true,
+              },
+            }).unwrap();
+            if (
+              transformedData.certificates &&
+              transformedData.certificates.length > 0
+            ) {
+              await Promise.all(
+                transformedData.certificates.map(async (cert: any) => {
+                  const certificationData = {
+                    user_id: userId,
+                    title: cert.title,
+                    issued_by: cert.issued_by,
+                    issue_date: cert.issue_date,
+                    expiration_date: cert.expiration_date,
+                    certificate_s3_url: cert.certificate_s3_url,
+                  };
+                  if (cert._id) {
+                    await updateCertification({
+                      id: cert._id,
+                      updatedCertification: certificationData,
+                    }).unwrap();
+                  } else {
+                    await addCertification(certificationData).unwrap();
+                  }
+                })
+              );
             }
-          })
-        );
+          }
+          break;
+        default:
+          throw new Error("Invalid section");
       }
 
-      const { experience, education, certificates, ...updatedUserData } =
-        transformedData;
+      console.log(`${section} section saved successfully`);
 
-      const response = await updateUser({
-        userId,
-        data: updatedUserData,
-      }).unwrap();
-
-      dispatch(
-        updateUserProfile({
-          ...updatedUserData,
-          profile_image: transformedData.profile_image ?? "",
-        })
-      );
-
-      if (response.error) {
-        throw new Error("Failed to update user");
+      // Move to the next tab after saving
+      const currentIndex = tabs.findIndex((tab) => tab.id === activeTab);
+      if (currentIndex < tabs.length - 1) {
+        setActiveTab(tabs[currentIndex + 1].id);
+      } else {
+        onClose();
       }
-      onClose();
     } catch (err) {
+      console.error(`Error saving ${section} section:`, err);
       if (err instanceof ZodError) {
         const fieldErrors: { [key: string]: string } = {};
         err.errors.forEach((error) => {
@@ -449,22 +487,6 @@ export default function CompleteProfileModal({
           fieldErrors[path] = error.message;
         });
         setErrors(fieldErrors);
-
-        // Navigate to the first error section
-        const firstError = err.errors[0];
-        const section = firstError.path[0];
-        if (
-          section &&
-          sectionRefs[section as keyof typeof sectionRefs]?.current
-        ) {
-          setActiveTab(section as string);
-          sectionRefs[
-            section as keyof typeof sectionRefs
-          ]?.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
       }
     }
   };
@@ -476,6 +498,58 @@ export default function CompleteProfileModal({
     { id: "education", label: "Education" },
     { id: "certification", label: "Certifications" },
   ];
+
+  const handleDelete = async (
+    section: keyof ProfileFormData,
+    index: number
+  ) => {
+    const updatedData = formData[section].filter(
+      (_: any, i: number) => i !== index
+    );
+    const deletedItem = formData[section][index];
+    updateFormData(section, updatedData);
+
+    try {
+      if (section === "skills") {
+        if (!deletedItem.skill_Id) {
+          await updateUserParsedResume(section, updatedData);
+        }
+      } else if (!deletedItem._id) {
+        await updateUserParsedResume(section, updatedData);
+      }
+    } catch (error) {
+      console.error(`Error deleting ${section}:`, error);
+    }
+  };
+
+  const updateUserParsedResume = async (
+    section: string,
+    updatedData: any[]
+  ) => {
+    const response = await updateUser({
+      userId,
+      data: {
+        parsedResume: {
+          ...user.parsedResume,
+          [section]: updatedData,
+        },
+      },
+    }).unwrap();
+
+    if (response.error) {
+      throw new Error(`Failed to update user ${section}`);
+    }
+
+    dispatch(
+      updateUserProfile({
+        ...user,
+        parsedResume: {
+          ...user.parsedResume,
+          [section]: updatedData,
+        },
+      })
+    );
+  };
 
   return (
     <Dialog
@@ -509,7 +583,7 @@ export default function CompleteProfileModal({
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => handleTabClick(tab.id)}
+              onClick={() => setActiveTab(tab.id)}
               className={`pb-2 pt-2 px-4 relative flex-1 ${
                 activeTab === tab.id
                   ? "text-[#00183D] font-semibold bg-white"
@@ -524,178 +598,217 @@ export default function CompleteProfileModal({
           ))}
         </div>
 
-        {/* Scrollable Content */}
-        <div
-          ref={containerRef}
-          className="flex-1 max-h-[calc(98vh-300px)] overflow-y-auto pr-6 minimal-scrollbar scroll-smooth snap-y snap-mandatory"
-          onScroll={handleScroll}
-        >
-          {/* Basic Info Section */}
-          <div ref={sectionRefs.basic} className="py-6 snap-start">
-            <BasicInfoForm
-              // basicData={formData?.basicInfo}
-              // socialData={formData.socialProfiles}
-              onChange={(basicInfo, socialProfiles) => {
-                updateFormData("basicInfo", basicInfo);
-                updateFormData("socialProfiles", socialProfiles);
-              }}
-              errors={errors}
-              initialData={{
-                basicInfo: parsedBasicData.basicInfo,
-                socialProfiles: parsedBasicData.socialProfiles,
-              }}
-            />
-          </div>
+        {/* Content Area */}
+        <div className="flex-1 max-h-[calc(98vh-300px)] overflow-y-auto pr-6 minimal-scrollbar scroll-smooth snap-y snap-mandatory">
+          {activeTab === "basic" && (
+            <div className="py-6">
+              <BasicInfoForm
+                onChange={(basicInfo, socialProfiles) => {
+                  updateFormData("basicInfo", basicInfo);
+                  updateFormData("socialProfiles", socialProfiles);
+                }}
+                errors={errors}
+                initialData={{
+                  basicInfo: parsedBasicData.basicInfo,
+                  socialProfiles: parsedBasicData.socialProfiles,
+                }}
+              />
+            </div>
+          )}
 
-          {/* Skills Section */}
-          <div ref={sectionRefs.skills} className="snap-start">
-            <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
-              Skills
-            </h2>
-
-            {/* <SkillsForms
+          {activeTab === "skills" && (
+            <div>
+              <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
+                Skills
+              </h2>
+              <SkillsForm
+                skills={formData?.skills}
+                onChange={(skills) => updateFormData("skills", skills)}
+                errors={errors}
                 goalId={goalId}
-                onClose={() => setIsModalOpen(false)}
                 userId={userId}
-                prefillSkills={[]}
-              /> */}
+                onDeleteSkill={(index) => handleDelete("skills", index)}
+              />
+            </div>
+          )}
 
-            {/* {isVerifyingSkills ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-                <span className="ml-2 text-gray-600">Verifying skills...</span>
+          {activeTab === "experience" && (
+            <div>
+              <div className="flex justify-between items-center py-6">
+                <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px]">
+                  Experience
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="checkbox"
+                    id="isFresher"
+                    checked={isFresher}
+                    disabled={fetchedExperiences?.data?.length > 0}
+                    onChange={(e) => {
+                      setIsFresher(e.target.checked);
+                      if (e.target.checked) {
+                        updateFormData("experience", []);
+                      } else {
+                        updateFormData(
+                          "experience",
+                          formData?.experience || []
+                        );
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <Label
+                    htmlFor="isFresher"
+                    className={`text-[#68696B] font-sf-pro text-sm font-normal leading-6 tracking-[0.21px] ${
+                      fetchedExperiences?.data?.length > 0 ? "opacity-50" : ""
+                    }`}
+                  >
+                    I am a Fresher
+                  </Label>
+                </div>
               </div>
-            ) : ( */}
-            <SkillsForm
-              skills={formData?.skills}
-              onChange={(skills) => updateFormData("skills", skills)}
-              errors={errors}
-              goalId={goalId}
-              userId={userId}
-            />
-            {/* )} */}
-          </div>
+              {!isFresher && (
+                <ExperienceForm
+                  experience={formData?.experience || []}
+                  onChange={(updatedExperience) =>
+                    updateFormData("experience", updatedExperience)
+                  }
+                  errors={errors}
+                  onAddExperience={() => {
+                    const newExperience = {
+                      id: "",
+                      title: "",
+                      employment_type: "",
+                      location: "",
+                      start_date: "",
+                      end_date: "",
+                      currently_working: false,
+                      description: "",
+                      company: "",
+                      isVerified: false,
+                      companyLogo: "",
+                      current_ctc: 0,
+                      expected_ctc: 0,
+                    };
+                    updateFormData("experience", [
+                      ...(formData?.experience || []),
+                      newExperience,
+                    ]);
+                  }}
+                  onDeleteExperience={(index) =>
+                    handleDelete("experience", index)
+                  }
+                  mode="add"
+                />
+              )}
+            </div>
+          )}
 
-          {/* Experience Section */}
-          <div ref={sectionRefs.experience} className="snap-start">
-            <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
-              Experience
-            </h2>
-            <ExperienceForm
-              experience={formData?.experience || []}
-              onChange={(updatedExperience) =>
-                updateFormData("experience", updatedExperience)
-              }
-              errors={errors}
-              onAddExperience={() => {
-                const newExperience = {
-                  id: "",
-                  title: "",
-                  employment_type: "",
-                  location: "",
-                  start_date: "",
-                  end_date: "",
-                  currently_working: false,
-                  description: "",
-                  company: "",
-                  isVerified: false,
-                  companyLogo: "",
-                  current_ctc: 0,
-                  expected_ctc: 0,
-                };
-                updateFormData("experience", [
-                  ...(formData?.experience || []),
-                  newExperience,
-                ]);
-              }}
-              onDeleteExperience={(index) => {
-                const updatedExperience = formData?.experience.filter(
-                  (_: any, i: number) => i !== index
-                );
-                updateFormData("experience", updatedExperience);
-              }}
-              mode="add"
-            />
-          </div>
+          {activeTab === "education" && (
+            <div>
+              <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
+                Education
+              </h2>
+              <EducationForm
+                education={formData?.education || []}
+                onChange={(updatedEducation) =>
+                  updateFormData("education", updatedEducation)
+                }
+                errors={errors}
+                onAddEducation={() => {
+                  const newEducation = {
+                    id: "",
+                    education_level: "",
+                    degree: "",
+                    institute: "",
+                    board_or_certification: "",
+                    from_date: "",
+                    till_date: "",
+                    cgpa_or_marks: "",
+                  };
+                  updateFormData("education", [
+                    ...(formData?.education || []),
+                    newEducation,
+                  ]);
+                }}
+                onDeleteEducation={(index) => handleDelete("education", index)}
+                mode="add"
+              />
+            </div>
+          )}
 
-          {/* Education Section */}
-          <div ref={sectionRefs.education} className="snap-start">
-            <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
-              Education
-            </h2>
-            <EducationForm
-              education={formData?.education || []}
-              onChange={(updatedEducation) =>
-                updateFormData("education", updatedEducation)
-              }
-              errors={errors}
-              onAddEducation={() => {
-                const newEducation = {
-                  id: "",
-                  education_level: "",
-                  degree: "",
-                  institute: "",
-                  board_or_certification: "",
-                  from_date: "",
-                  till_date: "",
-                  cgpa_or_marks: "",
-                };
-                updateFormData("education", [
-                  ...(formData?.education || []),
-                  newEducation,
-                ]);
-              }}
-              onDeleteEducation={(index) => {
-                const updatedEducation = formData?.education.filter(
-                  (_: any, i: number) => i !== index
-                );
-                updateFormData("education", updatedEducation);
-              }}
-              mode="add"
-            />
-          </div>
-
-          <div ref={sectionRefs.certification} className="snap-start">
-            <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
-              Certification
-            </h2>
-            <CertificationsForm
-              certifications={formData?.certifications || []}
-              onChange={(updatedCertifications) =>
-                updateFormData("certifications", updatedCertifications)
-              }
-              errors={errors}
-              onAddCertification={() => {
-                const newCertification = {
-                  id: "",
-                  title: "",
-                  issued_by: "",
-                  issue_date: "",
-                  expiration_date: "",
-                  certificate_s3_url: "",
-                };
-                updateFormData("certifications", [
-                  ...(formData?.certifications || []),
-                  newCertification,
-                ]);
-              }}
-              onDeleteCertification={(index) => {
-                const updatedCertifications = formData?.certifications.filter(
-                  (_: any, i: number) => i !== index
-                );
-                updateFormData("certifications", updatedCertifications);
-              }}
-              mode="add"
-            />
-          </div>
+          {activeTab === "certification" && (
+            <div>
+              <div className="flex justify-between items-center py-6">
+                <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px]">
+                  Certification
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="checkbox"
+                    id="hasCertifications"
+                    checked={hasCertifications}
+                    disabled={fetchedCertification?.data.length > 0}
+                    onChange={(e) => {
+                      setHasCertifications(e.target.checked);
+                      if (e.target.checked) {
+                        updateFormData("certifications", []);
+                      } else {
+                        updateFormData(
+                          "certifications",
+                          formData?.certifications || []
+                        );
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <Label
+                    htmlFor="hasCertifications"
+                    className={`text-[#68696B] font-sf-pro text-sm font-normal leading-6 tracking-[0.21px] ${
+                      fetchedCertification?.data?.length > 0 ? "opacity-50" : ""
+                    }`}
+                  >
+                    I have no certifications
+                  </Label>
+                </div>
+              </div>
+              {!hasCertifications && (
+                <CertificationsForm
+                  certifications={formData?.certifications || []}
+                  onChange={(updatedCertifications) =>
+                    updateFormData("certifications", updatedCertifications)
+                  }
+                  errors={errors}
+                  onAddCertification={() => {
+                    const newCertification = {
+                      id: "",
+                      title: "",
+                      issued_by: "",
+                      issue_date: "",
+                      expiration_date: "",
+                      certificate_s3_url: "",
+                    };
+                    updateFormData("certifications", [
+                      ...(formData?.certifications || []),
+                      newCertification,
+                    ]);
+                  }}
+                  onDeleteCertification={(index) =>
+                    handleDelete("certifications", index)
+                  }
+                  mode="add"
+                />
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Sticky Footer */}
+        {/* Save Button */}
         <Button
-          onClick={handleSave}
+          onClick={() => handleSaveSection(activeTab)}
           className="w-full mt-6 bg-[#00183D] hover:bg-[#062549] text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
         >
-          Save Details
+          Save {tabs.find((tab) => tab.id === activeTab)?.label}
         </Button>
       </DialogContent>
     </Dialog>

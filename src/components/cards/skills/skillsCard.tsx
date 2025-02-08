@@ -24,6 +24,8 @@ interface SkillCardProps {
   onEdit?: (skillId: string, updatedSelfRating: number) => void;
   userId?: string | undefined;
   isDashboard: boolean;
+  bestInterview:string|undefined;
+  goalName:string
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
@@ -39,6 +41,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
   onDelete,
   onEdit,
   isDashboard,
+  bestInterview,
+  goalName
 }) => {
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
@@ -111,7 +115,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleViewReport = () => {
     navigate(`/skill/report/${skillId}`, {
-      state: { skill, verified_rating, selfRating: editedSelfRating },
+      state: { best_interview: bestInterview, goal_name:goalName, skillIcon:skillImg },
     });
   };
 
@@ -134,7 +138,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       user_skill_id: skillId,
       skill_id: skillPoolId,
     });
-    navigate(`/interview/${interviewId}`, {
+    navigate(`/interview/${"1234"}`, {
       state: { title: skill, skillPoolId, level },
     });
   };
@@ -257,7 +261,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   View report
                 </button>
                 <button
-                  onClick={handleImproveScore}
+                  onClick={handleVerifySkill}
                   className="py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
                 >
                   Improve score

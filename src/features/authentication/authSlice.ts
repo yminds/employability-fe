@@ -53,7 +53,6 @@ const authSlice = createSlice({
           education: action.payload.education || state.user.education,
           experience: action.payload.experience || state.user.experience,
           certificates: action.payload.certificates || state.user.certificates,
-          parsedData: action.payload.parsedData || state.user.parsedData,
           // Update nested objects
           address: action.payload.address
             ? { ...state.user.address, ...action.payload.address }

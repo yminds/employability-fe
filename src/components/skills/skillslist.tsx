@@ -25,6 +25,7 @@ export interface Skill {
   verified_rating: number;
   self_rating: number | null;
   level?: string;
+  best_interview?:string;
 }
 
 interface SkillListProps {
@@ -42,6 +43,7 @@ interface SkillListProps {
       }
     ];
   } | undefined;
+  selectedGoalName:string
 }
 
 type SkillCategory = 'mandatory' | 'optional' | 'all';
@@ -51,7 +53,8 @@ const SkillList: React.FC<SkillListProps> = ({
   goalId,
   onSkillsUpdate,
   isSkillsUpdated,
-  goals
+  goals,
+  selectedGoalName
 }) => {
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
@@ -264,6 +267,8 @@ const SkillList: React.FC<SkillListProps> = ({
                 onEdit={handleEditSkill}
                 isMandatory={isMandatorySkill}
                 isDashboard={isDashboard}
+                bestInterview={skill.best_interview}
+                goalName={selectedGoalName}
               />
               {index < displaySkills.length - 1 && (
                 <div className="w-full h-[1px] my-4 bg-[#E0E0E0]" />

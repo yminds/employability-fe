@@ -52,7 +52,7 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
                     </div>
                     <div>
                     <p className="text-2xl font-bold text-gray-900">{averageVerifiedScore}/10</p>
-                    <p className="text-base text-[#414447] font-sf-pro">Employability Score</p>
+                    <p className="text-body2 text-[#414447] ">Employability Score</p>
                     </div>
                 </div>
             ) : (
@@ -69,8 +69,8 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
                         />
                     </div>
                     <div className="flex flex-col items-start">
-                        <span className="text-black text-base font-medium leading-5">{verifiedSkillsCnt}</span>
-                        <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">verified skills</span>
+                        <span className="text-black text-sub-header">{verifiedSkillsCnt}</span>
+                        <span className="text-gray-600 text-body2">verified skills</span>
                     </div>
                 </li>
                 <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -82,8 +82,8 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
                         />
                     </div>
                     <div className="flex flex-col items-start">
-                        <span className="text-black text-base font-medium leading-5">0</span>
-                        <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">projects added</span>
+                        <span className="text-black text-sub-header">0</span>
+                        <span className="text-gray-600 text-body2">projects added</span>
                     </div>
                 </li>
                 <li className="flex h-[48px] items-center gap-[14px] self-stretch">
@@ -95,8 +95,8 @@ const MyActivityCard: React.FC<MyActivityProps> = ({ displayScore, goalId}) => {
                         />
                     </div>
                     <div className="flex flex-col items-start">
-                        <span className="text-black text-base font-medium leading-5">0</span>
-                        <span className="text-gray-600 text-base font-normal leading-6 tracking-wide font-sf-pro">upskilling</span>
+                        <span className="text-black text-sub-header">0</span>
+                        <span className="text-gray-600 text-body2">upskilling</span>
                     </div>
                 </li>
             </ul>
