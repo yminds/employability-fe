@@ -73,8 +73,6 @@ export default function CompleteProfileModal({
 
   const data = user.parsedResume;
 
-  console.log("data", user.parsedResume);
-
   const [activeTab, setActiveTab] = useState("basic");
   const [formData, setFormData] = useState<any>({});
   const [isFresher, setIsFresher] = useState(!user.is_experienced);
@@ -102,13 +100,34 @@ export default function CompleteProfileModal({
 
   const parsedBasicData = !user.is_basic_info
     ? (() => {
-        const address = data?.contact.address || "";
+        if (!data) {
+          return {
+            basicInfo: {
+              name: user.name || "",
+              mobile: user.phone_number || "",
+              email: user.email || "",
+              date_of_birth: user.date_of_birth || "",
+              gender: user.gender || "",
+              country: user?.address?.country || "",
+              state: user?.address?.state || "",
+              city: user?.address?.city || "",
+              profile_image: user.profile_image || "",
+            },
+            socialProfiles: {
+              gitHub: user.github || "",
+              linkedIn: user.linkedIn || "",
+              portfolio: user.portfolio || "",
+            },
+          };
+        }
+
+        const address = data?.contact?.address || "";
         const { city, stateCode, countryCode } = parseAddress(address);
 
         return {
           basicInfo: {
             name: data?.name || "",
-            mobile: data?.contact?.phone || "",
+            mobile: user.phone_number || "",
             email: user.email || "",
             date_of_birth: data?.date_of_birth || "",
             gender: data?.gender || "",
@@ -145,38 +164,95 @@ export default function CompleteProfileModal({
 
   useEffect(() => {
     const initializeData = async () => {
+      let transformedData = {
+        skills: [],
+        experience: [],
+        education: [],
+        certifications: [],
+      };
+
       if (data) {
         try {
           const result = await getVerifySkills(data.skills).unwrap();
-          const transformedData = await parsedTransformData(data, result.data);
+          transformedData = await parsedTransformData(data, result.data);
           console.log("TransformedData", transformedData);
 
           setParsedSkills(transformedData.skills);
-
-          setFormData((prevData: any) => ({
-            ...prevData,
-            experience:
-              fetchedExperiences?.data?.length > 0
-                ? fetchedExperiences.data
-                : transformedData.experience,
-            education:
-              fetchedEducation?.data?.length > 0
-                ? fetchedEducation.data
-                : transformedData.education,
-            certifications:
-              fetchedCertification?.data?.length > 0
-                ? fetchedCertification.data
-                : transformedData.certifications,
-          }));
         } catch (error) {
           console.error("Error transforming data:", error);
         }
       }
+
+      setFormData((prevData: any) => ({
+        ...prevData,
+        skills:
+          transformedData.skills.length > 0
+            ? transformedData.skills
+            : [
+                {
+                  skill_Id: "",
+                  name: "",
+                  rating: 0,
+                  level: "1",
+                  visibility: "All users",
+                },
+              ],
+        experience:
+          fetchedExperiences?.data?.length > 0
+            ? fetchedExperiences.data
+            : transformedData.experience.length > 0
+            ? transformedData.experience
+            : [
+                {
+                  title: "",
+                  employment_type: "",
+                  company: "",
+                  location: "",
+                  start_date: "",
+                  end_date: "",
+                  currently_working: false,
+                  description: "",
+                  current_ctc: "",
+                  expected_ctc: "",
+                  companyLogo: "",
+                  isVerified: undefined,
+                },
+              ],
+        education:
+          fetchedEducation?.data?.length > 0
+            ? fetchedEducation.data
+            : transformedData.education.length > 0
+            ? transformedData.education
+            : [
+                {
+                  education_level: "",
+                  degree: "",
+                  institute: "",
+                  board_or_certification: "",
+                  from_date: "",
+                  till_date: "",
+                  cgpa_or_marks: "",
+                },
+              ],
+        certifications:
+          fetchedCertification?.data?.length > 0
+            ? fetchedCertification.data
+            : transformedData.certifications.length > 0
+            ? transformedData.certifications
+            : [
+                {
+                  title: "",
+                  issued_by: "",
+                  issue_date: "",
+                  expiration_date: "",
+                  certificate_s3_url: "",
+                },
+              ],
+      }));
     };
 
     initializeData();
   }, [
-    data,
     fetchedExperiences,
     fetchedEducation,
     fetchedCertification,
@@ -245,6 +321,7 @@ export default function CompleteProfileModal({
     }
 
     setErrors(sectionErrors);
+    setTimeout(() => setErrors({}), 2000);
     return Object.keys(sectionErrors).length === 0;
   };
 
@@ -344,10 +421,9 @@ export default function CompleteProfileModal({
               transformedData.experience &&
               transformedData.experience.length > 0
             ) {
+              const newExperienceIds: any[] = [];
               await Promise.all(
                 transformedData.experience.map(async (exp: any) => {
-                  console.log("Working experience");
-
                   const experienceData = {
                     user_id: userId,
                     title: exp.title,
@@ -367,10 +443,20 @@ export default function CompleteProfileModal({
                       updatedExperience: experienceData,
                     }).unwrap();
                   } else {
-                    await addExperience(experienceData).unwrap();
+                    const response = await addExperience(
+                      experienceData
+                    ).unwrap();
+                    newExperienceIds.push(response.data._id);
                   }
                 })
               );
+              if (newExperienceIds.length > 0) {
+                dispatch(
+                  updateUserProfile({
+                    experience: [...user.experience, ...newExperienceIds],
+                  })
+                );
+              }
             }
           }
           break;
@@ -379,6 +465,7 @@ export default function CompleteProfileModal({
             transformedData.education &&
             transformedData.education.length > 0
           ) {
+            const newEducationIds: any[] = [];
             await Promise.all(
               transformedData.education.map(async (edu: any) => {
                 const educationData = {
@@ -396,10 +483,18 @@ export default function CompleteProfileModal({
                     updatedEducation: educationData,
                   }).unwrap();
                 } else {
-                  await addEducation(educationData).unwrap();
+                  const response = await addEducation(educationData).unwrap();
+                  newEducationIds.push(response.data._id);
                 }
               })
             );
+            if (newEducationIds.length > 0) {
+              dispatch(
+                updateUserProfile({
+                  education: [...user.education, ...newEducationIds],
+                })
+              );
+            }
           }
           break;
         case "certification":
@@ -442,6 +537,7 @@ export default function CompleteProfileModal({
               transformedData.certificates &&
               transformedData.certificates.length > 0
             ) {
+              const newCertificateIds: any[] = [];
               await Promise.all(
                 transformedData.certificates.map(async (cert: any) => {
                   const certificationData = {
@@ -458,10 +554,20 @@ export default function CompleteProfileModal({
                       updatedCertification: certificationData,
                     }).unwrap();
                   } else {
-                    await addCertification(certificationData).unwrap();
+                    const response = await addCertification(
+                      certificationData
+                    ).unwrap();
+                    newCertificateIds.push(response.data._id);
                   }
                 })
               );
+              if (newCertificateIds.length > 0) {
+                dispatch(
+                  updateUserProfile({
+                    certificates: [...user.certificates, ...newCertificateIds],
+                  })
+                );
+              }
             }
           }
           break;
@@ -511,7 +617,7 @@ export default function CompleteProfileModal({
 
     try {
       if (section === "skills") {
-        if (!deletedItem.skill_Id) {
+        if (deletedItem.transformedSkill) {
           await updateUserParsedResume(section, updatedData);
         }
       } else if (!deletedItem._id) {
