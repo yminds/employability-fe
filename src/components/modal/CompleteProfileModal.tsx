@@ -56,18 +56,14 @@ interface CompleteProfileModalProps {
   parsedData?: any;
   isParsed: boolean;
   goalId: string;
-  refetchUserDetails:()=> Promise<void>
+  refetchUserDetails: () => Promise<void>;
 }
 
 export default function CompleteProfileModal({
   onClose,
-  onSave,
-  type,
   userId,
-  parsedData,
-  isParsed,
   goalId,
-  refetchUserDetails
+  refetchUserDetails,
 }: CompleteProfileModalProps) {
   const user = useSelector((state: any) => state.auth.user);
   // const resume = useSelector((state: any) => state.resume.parsedData);
@@ -462,7 +458,12 @@ export default function CompleteProfileModal({
               }
             }
           }
-          await refetchUserDetails()
+          if (
+            !user.experience ||
+            (user.experience.length === 0 && user.is_experienced === true)
+          ) {
+            await refetchUserDetails?.();
+          }
           break;
         case "education":
           if (
@@ -500,7 +501,9 @@ export default function CompleteProfileModal({
               );
             }
           }
-          await refetchUserDetails()
+          if (!user.education || user.education.length === 0) {
+            await refetchUserDetails?.();
+          }
           break;
         case "certification":
           if (hasCertifications) {
@@ -575,7 +578,12 @@ export default function CompleteProfileModal({
               }
             }
           }
-          await refetchUserDetails()
+          if (
+            !user.certificates ||
+            (user.certificates.length === 0 && user.has_certificates === true)
+          ) {
+            await refetchUserDetails?.();
+          }
           break;
         default:
           throw new Error("Invalid section");
@@ -672,7 +680,7 @@ export default function CompleteProfileModal({
         }
       }}
     >
-      <DialogContent className="bg-white rounded-lg max-w-4xl p-[42px] flex flex-col justify-center">
+      <DialogContent className="bg-white rounded-lg max-w-6xl p-[42px] flex flex-col h-[98vh]">
         <DialogHeader className="w-full flex justify-between items-start">
           <div className="flex flex-col items-start">
             <DialogTitle className="text-black text-[20px] font-medium leading-[26px] tracking-[-0.2px] font-ubuntu">
@@ -690,238 +698,254 @@ export default function CompleteProfileModal({
           </div>
         </DialogHeader>
 
-        {/* Tabs */}
-        <div className="flex mt-6 justify-between bg-gray-100 text-center rounded-lg overflow-hidden">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`pb-2 pt-2 px-4 relative flex-1 ${
-                activeTab === tab.id
-                  ? "text-[#00183D] font-semibold bg-white"
-                  : "text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              {tab.label}
-              {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#00183D] rounded-t" />
-              )}
-            </button>
-          ))}
-        </div>
+        {/* Main Content Area with Tabs and Form */}
+        <div className="flex mt-6 h-full">
+          {/* Vertical Tabs */}
+          <div className="w-44 border-r">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full text-left px-4 py-3 relative ${
+                  activeTab === tab.id
+                    ? "text-[#00183D] font-semibold bg-white border-r-2 border-[#00183D]"
+                    : "text-[#68696B] hover:text-[#00183D] hover:bg-gray-50"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-        {/* Content Area */}
-        <div className="flex-1 max-h-[calc(98vh-300px)] overflow-y-auto pr-6 minimal-scrollbar scroll-smooth snap-y snap-mandatory">
-          {activeTab === "basic" && (
-            <div className="py-6">
-              <BasicInfoForm
-                onChange={(basicInfo, socialProfiles) => {
-                  updateFormData("basicInfo", basicInfo);
-                  updateFormData("socialProfiles", socialProfiles);
-                }}
-                errors={errors}
-                initialData={{
-                  basicInfo: parsedBasicData.basicInfo,
-                  socialProfiles: parsedBasicData.socialProfiles,
-                }}
-              />
-            </div>
-          )}
+          {/* Right Side Content Area */}
+          <div className="flex flex-col flex-1">
+            {/* Form Content */}
+            <div className="flex-1 pl-6">
+              <div className="h-[calc(98vh-240px)] overflow-y-auto pr-6 minimal-scrollbar scroll-smooth snap-y snap-mandatory">
+                {/* Your existing tab content sections */}
+                {activeTab === "basic" && (
+                  <div className="py-6">
+                    <BasicInfoForm
+                      onChange={(basicInfo, socialProfiles) => {
+                        updateFormData("basicInfo", basicInfo);
+                        updateFormData("socialProfiles", socialProfiles);
+                      }}
+                      errors={errors}
+                      initialData={{
+                        basicInfo: parsedBasicData.basicInfo,
+                        socialProfiles: parsedBasicData.socialProfiles,
+                      }}
+                    />
+                  </div>
+                )}
+                {activeTab === "skills" && (
+                  <div>
+                    <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
+                      Skills
+                    </h2>
+                    <SkillsForm
+                      skills={formData?.skills}
+                      onChange={(skills) => updateFormData("skills", skills)}
+                      errors={errors}
+                      goalId={goalId}
+                      userId={userId}
+                      onDeleteSkill={(index) => handleDelete("skills", index)}
+                    />
+                  </div>
+                )}
 
-          {activeTab === "skills" && (
-            <div>
-              <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
-                Skills
-              </h2>
-              <SkillsForm
-                skills={formData?.skills}
-                onChange={(skills) => updateFormData("skills", skills)}
-                errors={errors}
-                goalId={goalId}
-                userId={userId}
-                onDeleteSkill={(index) => handleDelete("skills", index)}
-              />
-            </div>
-          )}
+                {activeTab === "experience" && (
+                  <div>
+                    <div className="flex justify-between items-center py-6">
+                      <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px]">
+                        Experience
+                      </h2>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="checkbox"
+                          id="isFresher"
+                          checked={isFresher}
+                          disabled={fetchedExperiences?.data?.length > 0}
+                          onChange={(e) => {
+                            setIsFresher(e.target.checked);
+                            if (e.target.checked) {
+                              updateFormData("experience", []);
+                            } else {
+                              updateFormData(
+                                "experience",
+                                formData?.experience || []
+                              );
+                            }
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <Label
+                          htmlFor="isFresher"
+                          className={`text-[#68696B] font-sf-pro text-sm font-normal leading-6 tracking-[0.21px] ${
+                            fetchedExperiences?.data?.length > 0
+                              ? "opacity-50"
+                              : ""
+                          }`}
+                        >
+                          I am a Fresher
+                        </Label>
+                      </div>
+                    </div>
+                    {!isFresher && (
+                      <ExperienceForm
+                        experience={formData?.experience || []}
+                        onChange={(updatedExperience) =>
+                          updateFormData("experience", updatedExperience)
+                        }
+                        errors={errors}
+                        onAddExperience={() => {
+                          const newExperience = {
+                            id: "",
+                            title: "",
+                            employment_type: "",
+                            location: "",
+                            start_date: "",
+                            end_date: "",
+                            currently_working: false,
+                            description: "",
+                            company: "",
+                            isVerified: false,
+                            companyLogo: "",
+                            current_ctc: 0,
+                            expected_ctc: 0,
+                          };
+                          updateFormData("experience", [
+                            ...(formData?.experience || []),
+                            newExperience,
+                          ]);
+                        }}
+                        onDeleteExperience={(index) =>
+                          handleDelete("experience", index)
+                        }
+                        mode="add"
+                      />
+                    )}
+                  </div>
+                )}
 
-          {activeTab === "experience" && (
-            <div>
-              <div className="flex justify-between items-center py-6">
-                <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px]">
-                  Experience
-                </h2>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    type="checkbox"
-                    id="isFresher"
-                    checked={isFresher}
-                    disabled={fetchedExperiences?.data?.length > 0}
-                    onChange={(e) => {
-                      setIsFresher(e.target.checked);
-                      if (e.target.checked) {
-                        updateFormData("experience", []);
-                      } else {
-                        updateFormData(
-                          "experience",
-                          formData?.experience || []
-                        );
+                {activeTab === "education" && (
+                  <div>
+                    <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
+                      Education
+                    </h2>
+                    <EducationForm
+                      education={formData?.education || []}
+                      onChange={(updatedEducation) =>
+                        updateFormData("education", updatedEducation)
                       }
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <Label
-                    htmlFor="isFresher"
-                    className={`text-[#68696B] font-sf-pro text-sm font-normal leading-6 tracking-[0.21px] ${
-                      fetchedExperiences?.data?.length > 0 ? "opacity-50" : ""
-                    }`}
-                  >
-                    I am a Fresher
-                  </Label>
-                </div>
-              </div>
-              {!isFresher && (
-                <ExperienceForm
-                  experience={formData?.experience || []}
-                  onChange={(updatedExperience) =>
-                    updateFormData("experience", updatedExperience)
-                  }
-                  errors={errors}
-                  onAddExperience={() => {
-                    const newExperience = {
-                      id: "",
-                      title: "",
-                      employment_type: "",
-                      location: "",
-                      start_date: "",
-                      end_date: "",
-                      currently_working: false,
-                      description: "",
-                      company: "",
-                      isVerified: false,
-                      companyLogo: "",
-                      current_ctc: 0,
-                      expected_ctc: 0,
-                    };
-                    updateFormData("experience", [
-                      ...(formData?.experience || []),
-                      newExperience,
-                    ]);
-                  }}
-                  onDeleteExperience={(index) =>
-                    handleDelete("experience", index)
-                  }
-                  mode="add"
-                />
-              )}
-            </div>
-          )}
-
-          {activeTab === "education" && (
-            <div>
-              <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] py-6">
-                Education
-              </h2>
-              <EducationForm
-                education={formData?.education || []}
-                onChange={(updatedEducation) =>
-                  updateFormData("education", updatedEducation)
-                }
-                errors={errors}
-                onAddEducation={() => {
-                  const newEducation = {
-                    id: "",
-                    education_level: "",
-                    degree: "",
-                    institute: "",
-                    board_or_certification: "",
-                    from_date: "",
-                    till_date: "",
-                    cgpa_or_marks: "",
-                  };
-                  updateFormData("education", [
-                    ...(formData?.education || []),
-                    newEducation,
-                  ]);
-                }}
-                onDeleteEducation={(index) => handleDelete("education", index)}
-                mode="add"
-              />
-            </div>
-          )}
-
-          {activeTab === "certification" && (
-            <div>
-              <div className="flex justify-between items-center py-6">
-                <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px]">
-                  Certification
-                </h2>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    type="checkbox"
-                    id="hasCertifications"
-                    checked={hasCertifications}
-                    disabled={fetchedCertification?.data.length > 0}
-                    onChange={(e) => {
-                      setHasCertifications(e.target.checked);
-                      if (e.target.checked) {
-                        updateFormData("certifications", []);
-                      } else {
-                        updateFormData(
-                          "certifications",
-                          formData?.certifications || []
-                        );
+                      errors={errors}
+                      onAddEducation={() => {
+                        const newEducation = {
+                          id: "",
+                          education_level: "",
+                          degree: "",
+                          institute: "",
+                          board_or_certification: "",
+                          from_date: "",
+                          till_date: "",
+                          cgpa_or_marks: "",
+                        };
+                        updateFormData("education", [
+                          ...(formData?.education || []),
+                          newEducation,
+                        ]);
+                      }}
+                      onDeleteEducation={(index) =>
+                        handleDelete("education", index)
                       }
-                    }}
-                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <Label
-                    htmlFor="hasCertifications"
-                    className={`text-[#68696B] font-sf-pro text-sm font-normal leading-6 tracking-[0.21px] ${
-                      fetchedCertification?.data?.length > 0 ? "opacity-50" : ""
-                    }`}
-                  >
-                    I have no certifications
-                  </Label>
-                </div>
-              </div>
-              {!hasCertifications && (
-                <CertificationsForm
-                  certifications={formData?.certifications || []}
-                  onChange={(updatedCertifications) =>
-                    updateFormData("certifications", updatedCertifications)
-                  }
-                  errors={errors}
-                  onAddCertification={() => {
-                    const newCertification = {
-                      id: "",
-                      title: "",
-                      issued_by: "",
-                      issue_date: "",
-                      expiration_date: "",
-                      certificate_s3_url: "",
-                    };
-                    updateFormData("certifications", [
-                      ...(formData?.certifications || []),
-                      newCertification,
-                    ]);
-                  }}
-                  onDeleteCertification={(index) =>
-                    handleDelete("certifications", index)
-                  }
-                  mode="add"
-                />
-              )}
-            </div>
-          )}
-        </div>
+                      mode="add"
+                    />
+                  </div>
+                )}
 
-        {/* Save Button */}
-        <Button
-          onClick={() => handleSaveSection(activeTab)}
-          className="w-full mt-6 bg-[#00183D] hover:bg-[#062549] text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
-        >
-          Save {tabs.find((tab) => tab.id === activeTab)?.label}
-        </Button>
+                {activeTab === "certification" && (
+                  <div>
+                    <div className="flex justify-between items-center py-6">
+                      <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px]">
+                        Certification
+                      </h2>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="checkbox"
+                          id="hasCertifications"
+                          checked={hasCertifications}
+                          disabled={fetchedCertification?.data.length > 0}
+                          onChange={(e) => {
+                            setHasCertifications(e.target.checked);
+                            if (e.target.checked) {
+                              updateFormData("certifications", []);
+                            } else {
+                              updateFormData(
+                                "certifications",
+                                formData?.certifications || []
+                              );
+                            }
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <Label
+                          htmlFor="hasCertifications"
+                          className={`text-[#68696B] font-sf-pro text-sm font-normal leading-6 tracking-[0.21px] ${
+                            fetchedCertification?.data?.length > 0
+                              ? "opacity-50"
+                              : ""
+                          }`}
+                        >
+                          I have no certifications
+                        </Label>
+                      </div>
+                    </div>
+                    {!hasCertifications && (
+                      <CertificationsForm
+                        certifications={formData?.certifications || []}
+                        onChange={(updatedCertifications) =>
+                          updateFormData(
+                            "certifications",
+                            updatedCertifications
+                          )
+                        }
+                        errors={errors}
+                        onAddCertification={() => {
+                          const newCertification = {
+                            id: "",
+                            title: "",
+                            issued_by: "",
+                            issue_date: "",
+                            expiration_date: "",
+                            certificate_s3_url: "",
+                          };
+                          updateFormData("certifications", [
+                            ...(formData?.certifications || []),
+                            newCertification,
+                          ]);
+                        }}
+                        onDeleteCertification={(index) =>
+                          handleDelete("certifications", index)
+                        }
+                        mode="add"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Save Button - Now aligned to the right */}
+            <div className="pl-6 flex justify-end">
+              <Button
+                onClick={() => handleSaveSection(activeTab)}
+                className="w-48 bg-[#00183D] hover:bg-[#062549] text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+              >
+                Save {tabs.find((tab) => tab.id === activeTab)?.label}
+              </Button>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
