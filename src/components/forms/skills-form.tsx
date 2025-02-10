@@ -384,7 +384,6 @@ export default function SkillsForm({
         variant="ghost"
         className="text-[#03963F] hover:text-[#03963F]/90 hover:bg-transparent p-0 font-sf-pro text-base font-medium leading-6 tracking-[0.24px]"
         type="button"
-        disabled={isLoading}
       >
         <img
           src={plusIcon || "/placeholder.svg"}

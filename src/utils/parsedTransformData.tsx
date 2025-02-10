@@ -51,6 +51,7 @@ export const parsedTransformData = async (
         rating: 0,
         level: "1",
         visibility: "All users",
+        transformedSkill: true,
       })) || [],
     experience:
       data.experience?.map((exp: any) => {
