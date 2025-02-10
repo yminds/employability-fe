@@ -56,6 +56,7 @@ interface CompleteProfileModalProps {
   parsedData?: any;
   isParsed: boolean;
   goalId: string;
+  refetchUserDetails:()=> Promise<void>
 }
 
 export default function CompleteProfileModal({
@@ -66,6 +67,7 @@ export default function CompleteProfileModal({
   parsedData,
   isParsed,
   goalId,
+  refetchUserDetails
 }: CompleteProfileModalProps) {
   const user = useSelector((state: any) => state.auth.user);
   // const resume = useSelector((state: any) => state.resume.parsedData);
@@ -362,6 +364,7 @@ export default function CompleteProfileModal({
                 profile_image: transformedData.profile_image ?? "",
               })
             );
+            await refetchUserDetails();
           } catch (error) {
             console.error(
               "Error saving basic info and social profiles:",
@@ -459,6 +462,7 @@ export default function CompleteProfileModal({
               }
             }
           }
+          await refetchUserDetails()
           break;
         case "education":
           if (
@@ -496,6 +500,7 @@ export default function CompleteProfileModal({
               );
             }
           }
+          await refetchUserDetails()
           break;
         case "certification":
           if (hasCertifications) {
@@ -570,6 +575,7 @@ export default function CompleteProfileModal({
               }
             }
           }
+          await refetchUserDetails()
           break;
         default:
           throw new Error("Invalid section");

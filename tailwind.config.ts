@@ -185,6 +185,32 @@ module.exports = {
   },
   plugins: [
     require("tailwindcss-animate"),
+    plugin(function({ addComponents }) {
+      //Defines the font-family at the component level
+      addComponents({
+        '.text-title': {
+          fontFamily: 'Ubuntu, sans-serif',
+        },
+        '.text-h1': {
+          fontFamily: 'Ubuntu, sans-serif',
+        },
+        '.text-h2': {
+          fontFamily: 'Ubuntu, sans-serif',
+        },
+        '.text-sub-header': {
+          fontFamily: 'Ubuntu, sans-serif',
+        },
+        '.text-body1': {
+          fontFamily: 'DM Sans, sans-serif',
+        },
+        '.text-body2': {
+          fontFamily: 'DM Sans, sans-serif',
+        },
+        '.text-button': {
+          fontFamily: 'DM Sans, sans-serif',
+        },
+      });
+    }),
     plugin(function ({ addUtilities }) {
       addUtilities({
         ".scrollbar-hide": {

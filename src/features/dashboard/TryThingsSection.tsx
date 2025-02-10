@@ -71,7 +71,7 @@ const TryThingsSection: React.FC = () => {
   const {data:userDetails,refetch:refetchUserDetails} = useGetUserDetailsQuery(userId || "",{
     refetchOnMountOrArgChange:true
   })
-  console.log("data:", userDetails.data);
+  console.log("data:", userDetails?.data);
   const [updateUser] = useUpdateUserMutation()
 
   const goalId = goalsData?.data?.[0]?._id || ""
@@ -242,6 +242,7 @@ const TryThingsSection: React.FC = () => {
             has_resume: false,
           },
         })
+        await refetchUserDetails()
       } catch (error) {
         console.error("Error updating user:", error);
       }
@@ -477,7 +478,7 @@ const TryThingsSection: React.FC = () => {
           userId={userId || ""}
           isParsed={hasParsedResumeData(currentProfileSection)}
           goalId={goalId}
-          // refetchUserDetails={refetchUserDetails}
+          refetchUserDetails={refetchUserDetails}
         />
       )}
 
