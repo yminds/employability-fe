@@ -346,7 +346,17 @@ export default function CompleteProfileModal({
                 profile_image: transformedData.profile_image ?? "",
               })
             );
-            await refetchUserDetails();
+            if (
+              !user?.name &&
+              !user?.email &&
+              !user?.phone_number &&
+              !user?.gender &&
+              !user?.address?.country &&
+              !user?.address?.state &&
+              !user?.address?.city
+            ) {
+              await refetchUserDetails?.();
+            }
           } catch (error) {
             console.error(
               "Error saving basic info and social profiles:",
