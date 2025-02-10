@@ -134,7 +134,7 @@ export default function SkillsForm({
   }
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="w-full">
       {skills.map((skill: Skill, index: number) => (
         <div
           key={skill.skill_Id || index}
