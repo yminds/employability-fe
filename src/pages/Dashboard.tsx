@@ -63,10 +63,12 @@ const Dashboard: React.FC<Props> = () => {
     if (userDetails) {
       let completedCount = 0
 
-      if (isBasicInfoComplete(user)) completedCount++
-      if (isExperienceComplete(user)) completedCount++
-      if (isEducationComplete(user)) completedCount++
-      if (isCertificationComplete(user)) completedCount++
+      if (isBasicInfoComplete(user)){
+        completedCount += 25
+      }
+      if (isExperienceComplete(user)) completedCount += 25
+      if (isEducationComplete(user)) completedCount+= 25
+      if (isCertificationComplete(user)) completedCount+= 25
 
       setCompletedProfileSections(completedCount)
     }
@@ -110,11 +112,6 @@ const Dashboard: React.FC<Props> = () => {
     },
     [getUserSkills],
   )
-
-  console.log("isBasicInfo",Boolean(isBasicInfoComplete))
-  console.log("isExperience",Boolean(isExperienceComplete))
-  console.log("isEducation",Boolean(isEducationComplete))
-
 
   useEffect(() => {
     if (user_id && goalId) {
@@ -189,7 +186,7 @@ const Dashboard: React.FC<Props> = () => {
 
                   {/* Skill Cards */}
                   <div className="flex justify-between space-x-4">
-                    <SkillCard type="profile" total={4} completedProfileSections={completedProfileSections} />
+                    <SkillCard type="profile" total={null} completedProfileSections={completedProfileSections} />
                     <SkillCard
                       type="skills"
                       total={50}
@@ -268,7 +265,7 @@ const Dashboard: React.FC<Props> = () => {
                         </p>
                         <Button
                           onClick={() => setJourneyDialog(true)}
-                          className="bg-[#001630] text-white py-[10px] px-6 rounded hover:bg-[#062549] text-[14px] leading-[24px] tracking-[0.015em] font-medium font-['SF Pro Display']"
+                          className="bg-[#001630] text-button text-white py-[10px] px-6 rounded hover:bg-[#062549]"
                         >
                           Start Your Journey
                         </Button>

@@ -213,6 +213,15 @@ const TryThingsSection: React.FC = () => {
     }
   }, [userDetails])
 
+  const handleModalClose = async()=>{
+    setShowUploadModal(false);
+    try {
+      await refetchUserDetails()
+    } catch (error) {
+      console.error('Error refetching user details:', error)
+    }
+  }
+
   const handleLinkClick = (route: string) => {
     if (route === "/upload-resume") {
       setShowUploadModal(true);
@@ -263,9 +272,15 @@ const TryThingsSection: React.FC = () => {
     }
   };
 
+  const handleRefetchUserDetails = async () => {
+    await refetchUserDetails().unwrap();
+  };
+
   const getCards = (): CardType[] => {
-    const defaultCards = []
-    const user = userDetails.data
+    const defaultCards:CardType[] = [];
+    const user = userDetails?.data
+
+    if(!user) return defaultCards;
     // Only add Basic Info card if user doesn't have basic info
     if (
       !user?.name ||
@@ -478,7 +493,7 @@ const TryThingsSection: React.FC = () => {
           userId={userId || ""}
           isParsed={hasParsedResumeData(currentProfileSection)}
           goalId={goalId}
-          refetchUserDetails={refetchUserDetails}
+          refetchUserDetails={handleRefetchUserDetails}
         />
       )}
 
@@ -487,7 +502,7 @@ const TryThingsSection: React.FC = () => {
       {showUploadModal && (
         <UnifiedUploadModal
         isOpen={showUploadModal}
-        onClose={() => setShowUploadModal(false)}
+        onClose={handleModalClose}
         userId={userId || ""}
         goalId={goalId}
       />

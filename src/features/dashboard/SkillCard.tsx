@@ -61,7 +61,7 @@ export function SkillCard({
       return verifiedProjects === totalProjects && totalProjects > 0;
     }
     if (type === "profile") {
-      return completedProfileSections === 4;
+      return completedProfileSections === 100;
     }
     if (type === "interview") {
       return total === 10;
@@ -73,7 +73,7 @@ export function SkillCard({
     if (type === "skills" && verifiedSkills !== undefined && totalMandatorySkills !== undefined) {
       return (
         <div className="flex items-baseline space-x-1">
-          <span className="text-[#202326] text-xl font-bold">{verifiedSkills}</span>
+          <span className="text-[#202326] text-l font-bold">{verifiedSkills}</span>
           <span className="text-[#68696B] text-sm">/ {totalMandatorySkills}</span>
         </div>
       );
@@ -81,7 +81,7 @@ export function SkillCard({
     if (type === "projects") {
       return (
         <div className="flex items-baseline space-x-1">
-          <span className="text-[#202326] text-xl font-bold">{verifiedProjects}</span>
+          <span className="text-[#202326] text-l font-bold">{verifiedProjects}</span>
           <span className="text-[#68696B] text-sm">/ {totalProjects}</span>
         </div>
       );
@@ -89,14 +89,14 @@ export function SkillCard({
     if (type === "profile") {
       return (
         <div className="flex items-baseline space-x-1">
-          <span className="text-[#202326] text-xl font-bold">{completedProfileSections}</span>
-          <span className="text-[#68696B] text-sm">/ 4</span>
+          <span className="text-[#202326] text-l font-bold">{completedProfileSections}</span>
+          <span className="text-[#68696B] text-sm">%</span>
         </div>
       );
     }
     return (
       <div className="flex items-baseline">
-        <span className="text-[#202326] text-xl font-bold">{total}</span>
+        <span className="text-[#202326] text-l font-bold">{total}</span>
       </div>
     );
   };
