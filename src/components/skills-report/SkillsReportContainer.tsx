@@ -76,7 +76,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
       }
     }
   `;
-  
+
   const getTargetElement = () => document.getElementById('mainContent');
   // State to manage the share popup.
   const [showSharePopup, setShowSharePopup] = useState(false);
@@ -89,7 +89,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
   const shareUrl =
     typeof window !== "undefined" ? window.location.href : "";
 
- 
+
   return (
     // Note: The use of Tailwind’s print variants (e.g. print:h-auto, print:overflow-visible)
     // ensures that on print the container does not limit the height or clip the content.
@@ -156,12 +156,13 @@ const ReportContent: React.FC<ReportContentProps> = ({
         >
           <section className="w-full flex-[7]">
 
-            
-          <div className="flex justify-center  ">
+            {reportData.s3_recording_url &&
+              <section className="flex justify-center  ">
                 <div className="continer-player w-full h-[28rem] relative">
                   <InterviewPlayer urls={reportData.s3_recording_url} />
                 </div>
-              </div>
+              </section>}
+
             {/* Summary Section */}
             <section className="bg-white rounded-md shadow-sm p-6 mb-6">
               <h2 className="text-h2 font-medium text-grey-7 mb-6">Summary</h2>

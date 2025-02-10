@@ -7,6 +7,7 @@ interface InterviewPlayerProps {
 }
 
 const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
+  if (urls === undefined || urls.length === 0) { return <div>No Recordings Available</div>; }
   const playerRef = useRef<ReactPlayer>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentChunk, setCurrentChunk] = useState(0);
