@@ -430,10 +430,11 @@ const TryThingsSection: React.FC = () => {
 
   return (
     <section className="flex flex-col items-start gap-2 self-stretch">
+       {profileProgress < 100 && (
+        <>
       <h5 className="text-black text-h2">
         Complete your Basic Details
       </h5>
-      {profileProgress < 100 && (
         <div className="flex flex-col gap-1  w-full">
           <div className="flex items-center gap-3 self-stretch">
             <div className="relative w-full bg-[#FAFAFA] rounded-full h-[6px]">
@@ -477,6 +478,7 @@ const TryThingsSection: React.FC = () => {
             </div>
           </div>
         </div>
+      </>
       )}
       <div className="relative w-full">
         <div className="grid grid-cols-3 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6 w-full">
