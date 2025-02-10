@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import type { ProfileFormData } from "../../features/profile/types";
 import BasicInfoForm from "../forms/basic-info-form";
@@ -8,21 +6,18 @@ import ExperienceForm from "@/features/profile/forms/experience-form";
 import EducationForm from "../forms/education-form";
 import CertificationsForm from "../forms/certification-form";
 import { useSelector, useDispatch } from "react-redux";
-import { useUpdateUserMutation } from "@/api/userApiSlice";
+import { useGetUserByIdQuery, useUpdateUserMutation } from "@/api/userApiSlice";
 import {
   useAddExperienceMutation,
   useUpdateExperienceMutation,
-  useGetExperiencesByUserIdQuery,
 } from "@/api/experienceApiSlice";
 import {
   useAddEducationMutation,
   useUpdateEducationMutation,
-  useGetEducationByIdQuery,
 } from "@/api/educationSlice";
 import {
   useAddCertificationMutation,
   useUpdateCertificationMutation,
-  useGetCertificationsByUserIdQuery,
 } from "@/api/certificatesApiSlice";
 import {
   Dialog,
@@ -66,7 +61,6 @@ export default function CompleteProfileModal({
   refetchUserDetails,
 }: CompleteProfileModalProps) {
   const user = useSelector((state: any) => state.auth.user);
-  // const resume = useSelector((state: any) => state.resume.parsedData);
   const dispatch = useDispatch();
 
   const data = user.parsedResume;
@@ -80,10 +74,7 @@ export default function CompleteProfileModal({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [parsedSkills, setParsedSkills] = useState<any[]>([]);
 
-  const { data: fetchedExperiences } = useGetExperiencesByUserIdQuery(userId);
-  const { data: fetchedEducation } = useGetEducationByIdQuery(userId);
-  const { data: fetchedCertification } =
-    useGetCertificationsByUserIdQuery(userId);
+  const { data: userDetails } = useGetUserByIdQuery(userId);
 
   const [getUserSkills] = useGetUserSkillsMutation();
   const [getVerifySkills] = useVerifyMultipleSkillsMutation();
@@ -196,8 +187,8 @@ export default function CompleteProfileModal({
                 },
               ],
         experience:
-          fetchedExperiences?.data?.length > 0
-            ? fetchedExperiences.data
+          userDetails?.experience?.length > 0
+            ? userDetails.experience
             : transformedData.experience.length > 0
             ? transformedData.experience
             : [
@@ -217,8 +208,8 @@ export default function CompleteProfileModal({
                 },
               ],
         education:
-          fetchedEducation?.data?.length > 0
-            ? fetchedEducation.data
+          userDetails?.education?.length > 0
+            ? userDetails.education
             : transformedData.education.length > 0
             ? transformedData.education
             : [
@@ -233,8 +224,8 @@ export default function CompleteProfileModal({
                 },
               ],
         certifications:
-          fetchedCertification?.data?.length > 0
-            ? fetchedCertification.data
+          userDetails?.certificates?.length > 0
+            ? userDetails.certificates
             : transformedData.certifications.length > 0
             ? transformedData.certifications
             : [
@@ -250,12 +241,7 @@ export default function CompleteProfileModal({
     };
 
     initializeData();
-  }, [
-    fetchedExperiences,
-    fetchedEducation,
-    fetchedCertification,
-    getVerifySkills,
-  ]);
+  }, [userDetails, getVerifySkills]);
 
   useEffect(() => {
     const fetchSkills = async () => {
@@ -765,7 +751,7 @@ export default function CompleteProfileModal({
                           type="checkbox"
                           id="isFresher"
                           checked={isFresher}
-                          disabled={fetchedExperiences?.data?.length > 0}
+                          disabled={userDetails?.experience?.length > 0}
                           onChange={(e) => {
                             setIsFresher(e.target.checked);
                             if (e.target.checked) {
@@ -782,7 +768,7 @@ export default function CompleteProfileModal({
                         <Label
                           htmlFor="isFresher"
                           className={`text-[#68696B] font-sf-pro text-sm font-normal leading-6 tracking-[0.21px] ${
-                            fetchedExperiences?.data?.length > 0
+                            userDetails?.experience?.length > 0
                               ? "opacity-50"
                               : ""
                           }`}
@@ -874,7 +860,7 @@ export default function CompleteProfileModal({
                           type="checkbox"
                           id="hasCertifications"
                           checked={hasCertifications}
-                          disabled={fetchedCertification?.data.length > 0}
+                          disabled={userDetails?.certificates?.length > 0}
                           onChange={(e) => {
                             setHasCertifications(e.target.checked);
                             if (e.target.checked) {
@@ -891,7 +877,7 @@ export default function CompleteProfileModal({
                         <Label
                           htmlFor="hasCertifications"
                           className={`text-[#68696B] font-sf-pro text-sm font-normal leading-6 tracking-[0.21px] ${
-                            fetchedCertification?.data?.length > 0
+                            userDetails?.certificates?.length > 0
                               ? "opacity-50"
                               : ""
                           }`}

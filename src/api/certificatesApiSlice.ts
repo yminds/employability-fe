@@ -1,11 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiSlice } from "./apiSlice";
 
-const baseUrl = process.env.VITE_API_BASE_URL as string;
-
-export const certificationsApiSlice = createApi({
-  reducerPath: "certificationsApiSlice",
-  baseQuery: fetchBaseQuery({ baseUrl }),
-  tagTypes: ["Certification"],
+export const certificationsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Fetch certifications by user ID
     getCertificationsByUserId: builder.query<any, string>({

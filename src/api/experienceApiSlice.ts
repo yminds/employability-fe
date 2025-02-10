@@ -1,11 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiSlice } from "./apiSlice";
 
-const baseUrl = process.env.VITE_API_BASE_URL as string;
-
-export const experienceApiSlice = createApi({
-  reducerPath: "experienceApiSlice",
-  baseQuery: fetchBaseQuery({ baseUrl }),
-  tagTypes: ["Experience"],
+export const experienceApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Fetch experiences by user ID
     getExperiencesByUserId: builder.query<any, string>({
