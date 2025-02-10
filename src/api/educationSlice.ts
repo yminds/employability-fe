@@ -1,11 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiSlice } from "./apiSlice";
 
-const baseUrl = process.env.VITE_API_BASE_URL as string;
-
-export const educationApiSlice = createApi({
-  reducerPath: "educationApiSlice",
-  baseQuery: fetchBaseQuery({ baseUrl }),
-  tagTypes: ["Education"],
+export const educationApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Fetch a single education record by ID
     getEducationById: builder.query<any, string>({

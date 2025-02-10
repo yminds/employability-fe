@@ -1,4 +1,4 @@
-import { apiSlice } from './apiSlice';
+import { apiSlice } from "./apiSlice"
 
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -8,6 +8,7 @@ export const userApi = apiSlice.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["User"],
     }),
     getUserDetails: builder.query({
       query: (userId) => ({
@@ -18,11 +19,19 @@ export const userApi = apiSlice.injectEndpoints({
         },
       }),
     }),
+    getUserById: builder.query({
+      query: (userId) => ({
+        url: `/api/v1/user/getUserById/${userId}`,
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+      providesTags: ["User", "Experience", "Education", "Certification"],
+    }),
   }),
   overrideExisting: false,
-});
+})
 
-export const { 
-  useUpdateUserMutation,
-  useGetUserDetailsQuery
-} = userApi;
+export const { useUpdateUserMutation, useGetUserDetailsQuery, useGetUserByIdQuery } = userApi
+
