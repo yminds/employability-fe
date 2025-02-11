@@ -103,8 +103,8 @@ const InterviewSetupNew: React.FC = () => {
                 />
               </svg>
             </button>
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Permissions Required</h2>
-            <div className="text-base text-gray-700 space-y-3">
+            <h2 className="text-2xl font-bold mb-6 text-h2">Permissions Required</h2>
+            <div className=" text-body space-y-3">
               <p>
                 <strong>Step 1:</strong> Locate the padlock icon in your browser's address bar.
               </p>
