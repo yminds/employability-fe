@@ -141,14 +141,14 @@ const SkillCard: React.FC<SkillCardProps> = ({
       return;
     }
 
-    // const interviewId = await createInterview({
-    //   title: `${skill} Interview`,
-    //   type: "Skill",
-    //   user_skill_id: skillId,
-    //   skill_id: skillPoolId,
-    // });
+    const interviewId = await createInterview({
+      title: `${skill} Interview`,
+      type: "Skill",
+      user_skill_id: skillId,
+      skill_id: skillPoolId,
+    });
 
-    navigate(`/interview/${1234}`, {
+    navigate(`/interview/${interviewId}`, {
       state: { title: skill, skillPoolId, level },
     });
   };
