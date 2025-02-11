@@ -1,13 +1,11 @@
 import type React from "react";
 import { useState } from "react";
 import LinkedInImportModal from "@/components/modal/LinkedInImportModal";
-import ResumeUploadModal from "@/components/modal/ResumeUploadModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import type { ProfileFormData } from "@/features/profile/types";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { Card, CardContent } from "@/components/ui/card";
-import CompleteProfile from "@/pages/CompleteProfile";
 import UnifiedUploadModal from "@/components/modal/UnifiedUploadModal";
 
 interface CompleteProfileSectionProps {
@@ -26,8 +24,6 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
   const user_name = useSelector((state: RootState) => state.auth.user?.name);
   const user = useSelector((state: RootState) => state.auth.user);
   const hasResume = user?.resume_s3_url !== "";
-
-  console.log("isresume", hasResume);
 
   console.log("user", user);
 
