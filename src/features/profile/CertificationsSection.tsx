@@ -21,15 +21,13 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
   isPublic,
 }) => {
   const user = useSelector((state: any) => state.auth.user);
-  const { data, error } = useGetCertificationsByUserIdQuery(user._id, {
+  const { data, error } = useGetCertificationsByUserIdQuery(user?._id, {
     skip: isPublic,
   });
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
-
-  // const certifications = error && "status" in error && error.status === 404 ? [] : data?.data || initialCertifications
 
   const certifications = error ? [] : data?.data || initialCertifications;
 

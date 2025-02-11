@@ -62,7 +62,7 @@ const EmailVerification = () => {
     try {
       // First update the email
       const updateResponse = await fetch(
-        `https://employability.ai/api/v1/user/update-email/${user?._id}`,
+        `${process.env.VITE_API_BASE_URL}/api/v1/user/update-email/${user?._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -80,7 +80,7 @@ const EmailVerification = () => {
 
       // Then send verification OTP to the new email
       const otpResponse = await fetch(
-        "https://employability.ai/api/v1/email/send-verification-otp",
+        `${process.env.VITE_API_BASE_URL}/api/v1/email/send-verification-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -109,7 +109,7 @@ const EmailVerification = () => {
   const handleSendOtp = async () => {
     try {
       const response = await fetch(
-        "https://employability.ai/api/v1/email/send-verification-otp",
+        `${process.env.VITE_API_BASE_URL}/api/v1/email/send-verification-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -136,7 +136,7 @@ const EmailVerification = () => {
   const handleVerifyOtp = async () => {
     try {
       const response = await fetch(
-        "https://employability.ai/api/v1/email/verify-otp",
+        `${process.env.VITE_API_BASE_URL}/api/v1/email/verify-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

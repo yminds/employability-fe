@@ -121,10 +121,10 @@ const TryThingsSection: React.FC = () => {
           parsedResume.name ||
           parsedResume.contact?.email ||
           parsedResume.contact?.phone ||
-          parsedResume.address.country ||
-          parsedResume.address.city ||
-          parsedResume.address.state ||
-          parsedResume.gender
+          parsedResume.address?.country ||
+          parsedResume.address?.city ||
+          parsedResume.address?.state ||
+          parsedResume?.gender
         );
       case "experience":
         return (
@@ -495,7 +495,6 @@ const TryThingsSection: React.FC = () => {
           userId={userId || ""}
           isParsed={hasParsedResumeData(currentProfileSection)}
           goalId={goalId}
-          refetchUserDetails={handleRefetchUserDetails}
         />
       )}
 
