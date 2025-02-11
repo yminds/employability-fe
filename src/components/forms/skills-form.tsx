@@ -1,10 +1,9 @@
 import { X, Check, ChevronDown, ChevronUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import plusIcon from "@/assets/profile/plusicon.svg";
 import type { Skill } from "@/features/profile/types";
-import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import {
   Command,
@@ -23,22 +22,19 @@ import { cn } from "@/lib/utils";
 
 interface SkillsFormProps {
   skills: Skill[];
+  allSkills: any;
   onChange: (skills: Skill[]) => void;
   errors: { [key: string]: string };
-  goalId: string | null;
-  userId: string | undefined;
   onDeleteSkill: (index: number) => void;
 }
 
 export default function SkillsForm({
   skills = [],
+  allSkills,
   onChange,
   errors = {},
-  goalId,
-  userId,
   onDeleteSkill
 }: SkillsFormProps) {
-  const [isLoading, setIsLoading] = useState(true);
   const [searchValue, setSearchValue] = useState<string>("");
   const [openSkillPopovers, setOpenSkillPopovers] = useState<boolean[]>(
     skills.map(() => false)
@@ -48,28 +44,11 @@ export default function SkillsForm({
   );
   const [openLevelPopovers, setOpenLevelPopovers] = useState<boolean[]>(
     skills.map(() => false)
-  );
+  ); 
 
-  const [getUserSkills, { data: userSkillsData }] = useGetUserSkillsMutation();
-
-  const { data: skillsData, isLoading: skillsLoading } =
+  const { data: skillsData } =
     useGetMultipleSkillsQuery(searchValue);
 
-  useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        if (userId && goalId) {
-          await getUserSkills({ userId, goalId }).unwrap();
-        }
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching skills:", error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchSkills();
-  }, [userId, goalId, getUserSkills]);
 
   const handleSkillChange = (
     index: number,
@@ -191,7 +170,7 @@ export default function SkillsForm({
                       <CommandGroup>
                         {skillsData?.data?.map((item: any) => {
                           const isSkillAlreadyAdded =
-                            userSkillsData?.data?.all.some(
+                            allSkills.some(
                               (userSkill: any) =>
                                 userSkill.skill_pool_id._id === item._id
                             );
@@ -384,7 +363,6 @@ export default function SkillsForm({
         variant="ghost"
         className="text-[#03963F] hover:text-[#03963F]/90 hover:bg-transparent p-0 font-sf-pro text-base font-medium leading-6 tracking-[0.24px]"
         type="button"
-        disabled={isLoading}
       >
         <img
           src={plusIcon || "/placeholder.svg"}

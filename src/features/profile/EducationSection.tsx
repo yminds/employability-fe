@@ -21,7 +21,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
   isPublic,
 }) => {
   const user = useSelector((state: any) => state.auth.user);
-  const { data, error } = useGetEducationByIdQuery(user._id, {
+  const { data, error } = useGetEducationByIdQuery(user?._id, {
     skip: isPublic,
   });
 

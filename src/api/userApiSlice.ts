@@ -18,6 +18,7 @@ export const userApi = apiSlice.injectEndpoints({
           "Content-Type": "application/json",
         },
       }),
+      providesTags: ["User", "Experience", "Education", "Certification"],
     }),
     getUserById: builder.query({
       query: (userId) => ({

@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import CircularProgress from '@/components/ui/circular-progress-bar'; 
-import logo from '@/assets/skills/e-Logo.svg';
-import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 
