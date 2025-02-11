@@ -22,7 +22,7 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const user_name = useSelector((state: RootState) => state.auth.user?.name);
-  const user = useSelector((state: RootState) => state.auth.user);
+  const user = useSelector((state: any) => state.auth.user);
   const hasResume = user?.resume_s3_url !== "";
 
   console.log("user", user);
@@ -201,12 +201,12 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
           {/* Complete Upload Modal */}
           {isProfileModalOpen && (
             <CompleteProfileModal
-              type="resume"
+              type="basic"
               onClose={() => setIsProfileModalOpen(false)}
               onSave={(data: ProfileFormData): void => {
                 throw new Error("Function not implemented.");
               }}
-              userId={userId}
+              user={user}
               isParsed={false}
               goalId={goalId}
             />
