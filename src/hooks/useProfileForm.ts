@@ -29,14 +29,15 @@ import { ProfileFormData } from "@/features/profile/types";
 import { updateUserProfile } from "@/features/authentication/authSlice";
 
 export const useProfileForm = (
-  userId: string,
+  type: string,
+  user: any,
   goalId: string,
-  onClose: () => void,
+  onClose: () => void
 ) => {
-  const user = useSelector((state: any) => state.auth.user);
+    
   const dispatch = useDispatch();
 
-  const [activeTab, setActiveTab] = useState("basic");
+  const [activeTab, setActiveTab] = useState(type);
   const [formData, setFormData] = useState<any>({});
   const [isFresher, setIsFresher] = useState(!user.is_experienced);
   const [hasCertifications, setHasCertifications] = useState(
@@ -45,7 +46,7 @@ export const useProfileForm = (
   const [errors, setErrors] = useState({});
   const [parsedSkills, setParsedSkills] = useState([]);
 
-  const { data: userDetails } = useGetUserByIdQuery(userId, {
+  const { data: userDetails } = useGetUserByIdQuery(user._id, {
     refetchOnMountOrArgChange: false,
     refetchOnFocus: false,
   });
@@ -209,13 +210,13 @@ export const useProfileForm = (
     };
 
     initializeData();
-  }, [userDetails, getVerifySkills]);
+  }, [userDetails]);
 
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        if (userId && goalId) {
-          const response = await getUserSkills({ userId, goalId }).unwrap();
+        if (user._id && goalId) {
+          const response = await getUserSkills({ userId: user._id, goalId }).unwrap();
           if (response?.data.optional && response.data.optional.length > 0) {
             setFormData((prevData: any) => ({
               ...prevData,
@@ -253,7 +254,7 @@ export const useProfileForm = (
     };
 
     fetchSkills();
-  }, [userId, goalId, getUserSkills, parsedSkills]);
+  }, []);
 
   const updateFormData = useCallback(
     (section: keyof ProfileFormData, data: any) => {
@@ -323,7 +324,7 @@ export const useProfileForm = (
   const updateUserParsedResume = useCallback(
     async (section: string, updatedData: any[]) => {
       const response = await updateUser({
-        userId,
+        userId: user._id,
         data: {
           parsedResume: {
             ...user.parsedResume,
@@ -346,7 +347,7 @@ export const useProfileForm = (
         })
       );
     },
-    [userId, user, dispatch, updateUser]
+    [user._id, user, dispatch, updateUser]
   );
 
   const handleSaveSection = useCallback(
@@ -373,7 +374,7 @@ export const useProfileForm = (
 
             try {
               const response = await updateUser({
-                userId,
+                userId: user._id,
                 data: updatedUserData,
               }).unwrap();
 
@@ -398,7 +399,7 @@ export const useProfileForm = (
           case "skills":
             if (transformedData.skills && transformedData.skills.length > 0) {
               const skillsPayload = {
-                user_id: userId,
+                user_id: user._id,
                 skills: transformedData.skills,
                 goal_id: goalId,
               };
@@ -419,7 +420,7 @@ export const useProfileForm = (
                 })
               );
               await updateUser({
-                userId,
+                userId: user._id,
                 data: {
                   is_experienced: false,
                   parsedResume: {
@@ -436,7 +437,7 @@ export const useProfileForm = (
                 })
               );
               await updateUser({
-                userId,
+                userId: user._id,
                 data: {
                   is_experienced: true,
                 },
@@ -450,7 +451,7 @@ export const useProfileForm = (
                 await Promise.all(
                   transformedData.experience.map(async (exp: any) => {
                     const experienceData = {
-                      user_id: userId,
+                      user_id: user._id,
                       title: exp.title,
                       employment_type: exp.employment_type,
                       company: exp.company,
@@ -494,7 +495,7 @@ export const useProfileForm = (
               await Promise.all(
                 transformedData.education.map(async (edu: any) => {
                   const educationData = {
-                    user_id: userId,
+                    user_id: user._id,
                     education_level: edu.education_level,
                     degree: edu.degree,
                     institute: edu.institute,
@@ -536,7 +537,7 @@ export const useProfileForm = (
                 })
               );
               await updateUser({
-                userId,
+                userId: user._id,
                 data: {
                   has_certificates: false,
                   parsedResume: {
@@ -553,7 +554,7 @@ export const useProfileForm = (
                 })
               );
               await updateUser({
-                userId,
+                userId: user._id,
                 data: {
                   has_certificates: true,
                 },
@@ -566,7 +567,7 @@ export const useProfileForm = (
                 await Promise.all(
                   transformedData.certificates.map(async (cert: any) => {
                     const certificationData = {
-                      user_id: userId,
+                      user_id: user._id,
                       title: cert.title,
                       issued_by: cert.issued_by,
                       issue_date: cert.issue_date,
@@ -635,7 +636,7 @@ export const useProfileForm = (
       isFresher,
       activeTab,
       onClose,
-      userId,
+      user._id,
       user,
       dispatch,
       updateUser,

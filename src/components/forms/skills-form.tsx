@@ -30,7 +30,7 @@ interface SkillsFormProps {
 
 export default function SkillsForm({
   skills = [],
-  allSkills,
+  allSkills = [],
   onChange,
   errors = {},
   onDeleteSkill

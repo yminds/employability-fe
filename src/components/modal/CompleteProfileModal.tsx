@@ -20,15 +20,16 @@ interface CompleteProfileModalProps {
   onClose: () => void;
   onSave: (data: ProfileFormData) => void;
   type: string;
-  userId: string;
+  user: any;
   parsedData?: any;
   isParsed: boolean;
   goalId: string;
 }
 
 const CompleteProfileModal = ({
+  type,
   onClose,
-  userId,
+  user,
   goalId,
 }: CompleteProfileModalProps) => {
   const {
@@ -45,7 +46,7 @@ const CompleteProfileModal = ({
     updateFormData,
     handleDelete,
     handleSaveSection,
-  } = useProfileForm(userId, goalId, onClose);
+  } = useProfileForm(type, user, goalId, onClose);
 
   const tabs = useMemo(
     () => [
@@ -87,7 +88,7 @@ const CompleteProfileModal = ({
             </h2>
             <SkillsForm
               skills={formData?.skills}
-              allSkills={userDetails.skills}
+              allSkills={userDetails?.skills}
               onChange={(skills) => updateFormData("skills", skills)}
               errors={errors}
               onDeleteSkill={(index) => handleDelete("skills", index)}
