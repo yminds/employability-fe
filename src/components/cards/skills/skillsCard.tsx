@@ -24,8 +24,8 @@ interface SkillCardProps {
   onEdit?: (skillId: string, updatedSelfRating: number) => void;
   userId?: string | undefined;
   isDashboard: boolean;
-  bestInterview:string|undefined;
-  goalName:string
+  bestInterview: string | undefined;
+  goalName: string
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
@@ -101,15 +101,15 @@ const SkillCard: React.FC<SkillCardProps> = ({
       return value === "Basic"
         ? "bg-[#E5F6FF] text-[#1C3FAA] w-fit"
         : value === "Intermediate"
-        ? "bg-[#E5F0FF] text-[#1C2CD8]"
-        : "bg-[#E5E7FF] text-[#1C2CD8]";
+          ? "bg-[#E5F0FF] text-[#1C2CD8]"
+          : "bg-[#E5E7FF] text-[#1C2CD8]";
     }
     if (type === "importance") {
       return value === "Low"
         ? "bg-[#DBFFEA] text-[#10B754]"
         : value === "Medium"
-        ? "bg-[#FFF9DB] text-[#D4B30C]"
-        : "bg-[#FFF2DB] text-[#D48A0C]";
+          ? "bg-[#FFF9DB] text-[#D4B30C]"
+          : "bg-[#FFF2DB] text-[#D48A0C]";
     }
   };
 
@@ -117,7 +117,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleViewReport = () => {
     navigate(`/skill/report/${skillId}`, {
-      state: { best_interview: bestInterview, goal_name:goalName, skillIcon:skillImg },
+      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg },
     });
   };
 
@@ -278,9 +278,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
             <div className="flex items-center space-x-2">
               <img src={imgSrc} alt={status} className="w-4 h-4" />
               <span
-                className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
-                  status === "Verified" ? "text-green-600" : "text-yellow-600"
-                }`}
+                className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-green-600" : "text-yellow-600"
+                  }`}
               >
                 {status}
               </span>
@@ -407,9 +406,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   <div className="flex items-center space-x-2">
                     <img src={smImgSrc} alt={status} className="w-4 h-4" />
                     <span
-                      className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
-                        status === "Verified" ? "text-white" : "text-white"
-                      }`}
+                      className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-white" : "text-white"
+                        }`}
                     >
                       {status}
                     </span>
