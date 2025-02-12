@@ -15,7 +15,6 @@ import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 import { useTTS } from "@/hooks/useTTS";
 import { useSTT } from "@/hooks/useSTT";
 import CodeSnippetQuestion from "./CodeSnippetQuestion";
-import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 
 // Constants and Types
 const SOCKET_URL = "http://localhost:3000";

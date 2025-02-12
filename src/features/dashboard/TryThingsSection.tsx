@@ -67,6 +67,7 @@ const TryThingsSection: React.FC = () => {
 
   // Get user ID and data
   const userId = useSelector((state: RootState) => state.auth?.user?._id)
+  const user = useSelector((state: any) => state.auth.user)
   const { data: goalsData } = useGetUserGoalQuery(userId || "")
   const {data:userDetails,refetch:refetchUserDetails} = useGetUserDetailsQuery(userId || "",{
     refetchOnMountOrArgChange:true
@@ -490,7 +491,7 @@ const TryThingsSection: React.FC = () => {
           onClose={() => setShowProfileModal(false)}
           onSave={handleProfileSave}
           type={currentProfileSection}
-          userId={userId || ""}
+          user={user}
           isParsed={hasParsedResumeData(currentProfileSection)}
           goalId={goalId}
         />
