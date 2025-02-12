@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import BasicInfoForm from "../forms/basic-info-form";
 import SkillsForm from "../forms/skills-form";
-import ExperienceForm from "@/features/profile/forms/experience-form";
+import ExperienceForm from "@/components/forms/experience-form";
 import EducationForm from "../forms/education-form";
 import CertificationsForm from "../forms/certification-form";
 import { useProfileForm } from "@/hooks/useProfileForm";

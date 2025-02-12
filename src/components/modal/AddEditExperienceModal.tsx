@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import ExperienceForm from "@/features/profile/forms/experience-form";
+import ExperienceForm from "@/components/forms/experience-form";
 import type { ExperienceItem } from "@/features/profile/types";
 import { toast } from "sonner";
 import { validateExperience } from "@/features/profile/validation/validateExperience";

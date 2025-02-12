@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProjectCard, { ProjectCardSkeleton } from "./ProjectCard";
-import noExperience from "@/assets/profile/noeducation.svg";
+import noProjects from "@/assets/profile/noProjects.svg";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 interface Project {
@@ -123,7 +123,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
           ) : (
             <div className="flex flex-col items-center justify-center py-12 px-4">
               <img
-                src={noExperience || "/placeholder.svg"}
+                src={noProjects || "/placeholder.svg"}
                 alt="No project entries"
                 className="w-20 h-20 mb-6"
               />

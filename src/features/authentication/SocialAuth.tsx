@@ -76,7 +76,6 @@ const SocialLogin: React.FC<SocialLoginProps> = ({ onSocialLogin }) => {
     setIsLoading("github");
     const clientID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
     const redirectURI = `${window.location.origin}/auth/github/callback`;
-    console.log("Redirect URI", redirectURI);
     const state =
       location.pathname === "/signup" ? "github_signup" : "github_login";
 

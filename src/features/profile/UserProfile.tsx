@@ -71,58 +71,6 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
-  // const handleOpenModal = () => {
-  //   setIsModalOpen(true);
-  // };
-
-  // const handleCloseModal = () => {
-  //   setIsModalOpen(false);
-  // };
-
-  // const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  // const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
-  // const [uploadProgress, setUploadProgress] = useState(0);
-  // const [fileDetails, setFileDetails] = useState<{
-  //   name: string;
-  //   size: string;
-  // }>({ name: "", size: "" });
-
-  // const handleUpload = (file: File) => {
-  //   setFileDetails({
-  //     name: file.name,
-  //     size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-  //   });
-  //   setIsUploadModalOpen(false);
-  //   setIsProgressModalOpen(true);
-
-  //   // Simulate upload progress
-  //   let progress = 0;
-  //   const interval = setInterval(() => {
-  //     progress += 10;
-  //     setUploadProgress((prevProgress) => {
-  //       if (prevProgress >= 100) {
-  //         clearInterval(interval);
-  //         return 100;
-  //       }
-  //       return progress;
-  //     });
-  //   }, 300);
-  // };
-
-  // const handleProgressContinue = () => {
-  //   if (uploadProgress === 100) {
-  //     setIsProgressModalOpen(false);
-  //     setIsProfileModalOpen(true); // Open the CompleteProfileModal
-  //   }
-  // };
-
-  // const handleSaveProfile = (data: ProfileFormData) => {
-  //   console.log("profile Data Saved: ", data);
-  // };
-
   return (
     <div className="w-full max-w-screen-xl mx-auto p-0">
       <div className="flex justify-between items-center mb-4 sm:mt-3">
@@ -210,11 +158,11 @@ const UserProfile: React.FC = () => {
             email={user.email}
           />
           {/* Complete your profile */}
-          <CompleteProfileSection
+          {/* <CompleteProfileSection
             userId={user._id}
             isDashboard={false}
             goalId={goalId}
-          />
+          /> */}
         </div>
       </div>
     </div>

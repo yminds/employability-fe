@@ -90,7 +90,9 @@ const EducationForm: React.FC<EducationFormProps> = ({
                   <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
                   <SelectItem value="masters">Master's Degree</SelectItem>
                   <SelectItem value="phd">Ph.D.</SelectItem>
-                  <SelectItem value="associate degree">Associate Degree</SelectItem>
+                  <SelectItem value="associate degree">
+                    Associate Degree
+                  </SelectItem>
                   <SelectItem value="diploma">Diploma</SelectItem>
                   <SelectItem value="certificate">Certificate</SelectItem>
                 </SelectContent>
@@ -204,7 +206,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
               CGPA/Marks <span className="text-red-500">*</span>
             </Label>
             <Input
-              type="text"
+              type="number"
               value={edu.cgpa_or_marks}
               onChange={(e) =>
                 updateEducation(index, "cgpa_or_marks", e.target.value)
