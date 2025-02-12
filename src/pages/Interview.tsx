@@ -4,7 +4,8 @@ import useInterviewSetup from "@/hooks/useInterviewSetup";
 import Interview from "@/components/interview/Interview";
 import CheckSetup from "../components/setup/CheckSetup";
 import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
- 
+import toggleBrowserFullscreen from "@/components/skills/fullscreen";
+
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -140,7 +141,10 @@ const InterviewSetupNew: React.FC = () => {
               </div>
               <button
                 className={`bg-[#10B754] ${isProceedButtonEnabled ? "hover:bg-green-600" : "cursor-not-allowed opacity-50"} text-white rounded-[4px] font-semibold text-[16px] w-72 py-2`}
-                onClick={() => setIsInterviewStarted(true)}
+                onClick={() => {
+                  setIsInterviewStarted(true);
+                  toggleBrowserFullscreen();
+                }}
                 disabled={!isProceedButtonEnabled}
               >
                 Proceed to Interview

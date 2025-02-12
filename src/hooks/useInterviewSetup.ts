@@ -49,6 +49,7 @@ const uploadFileToS3 = async (
     // Step 2: Upload the file to S3 using the pre-signed URL
     const uploadResponse = await fetch(presignedUrl, {
       method: "PUT",
+      mode: 'cors',
       headers: {
         "Content-Type": file.type, // Ensure correct MIME type
       },

@@ -25,6 +25,8 @@ import "react-loading-skeleton/dist/skeleton.css";
 import icon from "@/assets/skills/icon.svg";
 import addicon from "@/assets/skills/add_circle.svg";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice"
+import plusicon from '@/assets/skills/add_icon.png';
 
 interface Skill {
   skill_Id: string;
@@ -96,6 +98,41 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   const [getUserSkills, { data: userSkillsData }] =
     useGetUserSkillsMutation();
 
+  const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
+  const [isSuggestedLoading, setIsLoading] = useState(false);
+  const [suggestedSkillsData, setSuggestedSkillsData] = useState<any[]>([]);
+  const getSkillNames = (skills: any[]) => {
+    const skillNames = skills.map((skill) => {
+      // Check if skill has `skill_pool_id` with a name
+      if (skill.skill_pool_id && skill.skill_pool_id.name) {
+        return skill.skill_pool_id.name;
+      }
+      // Check if skill has a direct `name` property
+      if (skill.name) {
+        return skill.name;
+      }
+      return null; // Handle cases where neither is present
+    });
+
+    // Filter out any null values and return as CSV string
+    return skillNames.filter((name) => name !== null).join(",");
+  };
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Separate fetch calls
+      const userSkills = await getUserSkills({ userId, goalId }).unwrap();
+      const allSkillNames = getSkillNames(userSkills.data.all);
+      const suggestedSkills = await getSuggestedSkills({ query: allSkillNames }).unwrap();
+      setSuggestedSkillsData(suggestedSkills);
+    } catch (err) {
+      console.error('Error fetching skills:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const fetchSkills = async (userId: string, goalId: string) => {
     try {
       await getUserSkills({ userId, goalId }).unwrap();
@@ -103,6 +140,29 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
       console.error("Error fetching skills:", err);
     }
   };
+
+  const fetchSuggestedSkills = async () => {
+    if (userId && selectedGoalId) {
+      setIsLoading(true);
+      try {
+        // Fetch current user skills to get the skill names
+        const userSkills = await getUserSkills({ userId, goalId }).unwrap();
+        const allSkills = [
+          ...userSkills.data.all,
+          ...skills.filter((skill) => skill.skill_Id !== ""),
+        ];
+        const allSkillNames = getSkillNames(allSkills);
+        // Fetch suggested skills based on the current skills
+        const suggestedSkills = await getSuggestedSkills({ query: allSkillNames }).unwrap();
+        setSuggestedSkillsData(suggestedSkills);
+      } catch (err) {
+        console.error("Error fetching suggested skills:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
 
   useEffect(() => {
     if (goalId !== selectedGoalId) {
@@ -113,8 +173,15 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   useEffect(() => {
     if (userId && selectedGoalId) {
       fetchSkills(userId, selectedGoalId);
+      fetchData()
     }
   }, [userId, selectedGoalId]);
+
+  useEffect(() => {
+    if (userId && selectedGoalId) {
+      fetchSuggestedSkills()
+    }
+  }, [skills]);
 
   const ratings = Array.from({ length: 10 }, (_, i) => `${i + 1}/10`);
   const [open, setOpen] = useState<boolean[]>([]);
@@ -222,7 +289,19 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   }, [skills]);
 
   const experienceLevelObj = { 1: "Entry-level", 2: "Mid-level", 3: "Senior-level" };
-  
+
+  const SkeletonChip = () => (
+    <div className="rounded-full">
+      <Skeleton
+        width={190}
+        height={40}
+        baseColor="#F0F2F5"
+        highlightColor="#FAFBFE"
+        borderRadius="20px"
+      />
+    </div>
+  )
+
   return (
     <Dialog
       defaultOpen
@@ -563,6 +642,49 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
             Add Skill
           </Button>
         </div>
+        <div className="mt-2">
+          <h3 className="text-body font-semibold mb-2">Suggested</h3>
+          <div className="flex flex-wrap gap-2">
+            {isSuggestedLoading
+              ? // Show skeleton chips while loading
+                Array.from({ length: 6 }).map((_, index) => <SkeletonChip key={index} />)
+              : // Render actual data when available
+                suggestedSkillsData?.map((suggestedSkill) => (
+                  <Button
+                    key={suggestedSkill.id}
+                    variant="outline"
+                    className="text-[16px] text-[#414447] font-normal leading-[22px] rounded-full bg-[#FAFBFE]"
+                    onClick={() => {
+                      if (skills.length === 1 && skills[0].name === "") {
+                        // Replace the 0th skill with the suggested skill
+                        setSkills([
+                          {
+                            skill_Id: suggestedSkill.id,
+                            name: suggestedSkill.name,
+                            rating: "10",
+                            level: "1",
+                            visibility: "All users",
+                          },
+                        ]);
+                      } else {
+                        // Add the suggested skill as a new entry
+                        const newSkill = {
+                          skill_Id: suggestedSkill.id,
+                          name: suggestedSkill.name,
+                          rating: "0",
+                          level: "1",
+                          visibility: "All users",
+                        };
+                        setSkills((prev) => [...prev, newSkill]);
+                        setOpen([...open, false]);
+                      }
+                    }}
+                  >
+                    {suggestedSkill.name} <img src={plusicon} alt="Add" />
+                  </Button>
+                ))}
+          </div>
+        </div>   
 
         {/* Save Button */}
         <Button

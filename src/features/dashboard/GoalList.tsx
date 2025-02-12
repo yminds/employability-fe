@@ -29,8 +29,8 @@ interface Props {
     isLoading: boolean;
     error: boolean;
     data?: GoalsData; // The data could be undefined if the API request hasn't completed yet
-    setJourneyDialog: boolean;
-    searchGoals: any[] | undefined;
+    setJourneyDialog: React.Dispatch<React.SetStateAction<boolean>>;
+    searchGoals: GoalsData | undefined;
     displayTitle: boolean;
     filters: any;
 }
@@ -145,14 +145,14 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                 {data?.map((goal, index) => (
                     <div
                         key={goal._id}
-                        className="relative cursor-pointer"
+                        className="relative cursor-pointer "
                         onMouseEnter={() => setHoveredCard(goal._id)} // Set hovered card ID
                         onMouseLeave={() => setHoveredCard(null)} // Reset hover state
                         onClick={() => handleGoalClick(goal)} // Handle card click
                     >
                         {/* Default Block */}
                         <div
-                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
+                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity h-full duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
                         >
                             {/* Add an Image or Placeholder */}
 
