@@ -19,7 +19,7 @@ import FundamentalBar from "../mentor/FundamentalsList";
 import { set } from "zod";
 
 // Constants and Types
-const SOCKET_URL =
+const SOCKET_URL = 
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
     : "wss://employability.ai";
