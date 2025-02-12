@@ -22,7 +22,7 @@ import { set } from "zod";
 const SOCKET_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://employability.ai";
+    : "wss://employability.ai";
 
 interface CodeSnippetType {
   code: string;
@@ -88,10 +88,10 @@ const Interview: React.FC<{
   useEffect(() => {
     if (!isInterviewLoaded || !interviewDetails?.data?._id) return;
 
-    const newSocket = io(SOCKET_URL,{
-      transports: ["websocket"],
+    const newSocket = io(SOCKET_URL, {
+      transports: ["websocket", "polling"], 
+     
     });
-
     const handleConnect = () => {
       console.log("entred handleConnect from handleConnect");
       if (!isInitialized) {
