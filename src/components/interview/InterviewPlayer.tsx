@@ -130,8 +130,8 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
         <ReactPlayer
           ref={playerRef}
           url={urls[currentChunk]}
-          width="90%"
-          height="90%"
+          width="100%"
+          height="100%"
           playing={isPlaying}
           volume={volume}
           muted={isMuted}

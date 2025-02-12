@@ -10,6 +10,10 @@ import verifiedWhite from "@/assets/skills/verified_whiteBG.svg";
 import backGround from "@/assets/skills/verifiedBg.png";
 import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 
+interface LatestInterviewStatus {
+  interview_id: string;
+  isCompleted: boolean;
+}
 interface SkillCardProps {
   skillId: string;
   skill: string;
@@ -24,8 +28,9 @@ interface SkillCardProps {
   onEdit?: (skillId: string, updatedSelfRating: number) => void;
   userId?: string | undefined;
   isDashboard: boolean;
-  bestInterview:string|undefined;
-  goalName:string
+  bestInterview: string | undefined;
+  goalName: string;
+  latest_interview_status?: LatestInterviewStatus;
 }
 
 const SkillCard: React.FC<SkillCardProps> = ({
@@ -42,7 +47,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
   onEdit,
   isDashboard,
   bestInterview,
-  goalName
+  goalName,
+  latest_interview_status,
 }) => {
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
@@ -115,7 +121,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleViewReport = () => {
     navigate(`/skill/report/${skillId}`, {
-      state: { best_interview: bestInterview, goal_name:goalName, skillIcon:skillImg },
+      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg } ,
     });
   };
 
@@ -131,18 +137,24 @@ const SkillCard: React.FC<SkillCardProps> = ({
     });
   };
 
-  const handleVerifySkill = async () => {
+  const handleVerifySkill = async (latestInteviewId?: string) => {
     const interviewId = await createInterview({
       title: `${skill} Interview`,
       type: "Skill",
       user_skill_id: skillId,
       skill_id: skillPoolId,
     });
-    navigate(`/interview/${"1234"}`, {
+    navigate(`/interview/${interviewId}`, {
       state: { title: skill, skillPoolId, level },
     });
   };
 
+  const handleResumeInterView = () => {
+    navigate(`/interview/${latest_interview_status?.interview_id}`, {
+      state: { title: skill, skillPoolId, level },
+    });
+
+  }
   return (
     <>
       <div className="group relative bg-white p-4 rounded-md transition sm:hidden">
@@ -173,9 +185,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                 {isEditing ? (
                   <div className="flex flex-col">
                     <div className="flex items-center space-x-2">
-                      <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
-                        Self rating:
-                      </p>
+                      <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">Self rating:</p>
                       <input
                         ref={inputRef}
                         type="number"
@@ -193,9 +203,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                       />
                       <span>/10</span>
                     </div>
-                    {ratingError && (
-                      <p className="text-red-500 text-xs mt-1">{ratingError}</p>
-                    )}
+                    {ratingError && <p className="text-red-500 text-xs mt-1">{ratingError}</p>}
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
@@ -223,9 +231,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   level || "1"
                 )}`}
               >
-                {skillsLevelObj[
-                  level as unknown as keyof typeof skillsLevelObj
-                ] ?? "Basic"}
+                {skillsLevelObj[level as unknown as keyof typeof skillsLevelObj] ?? "Basic"}
               </span>
             </div>
           )}
@@ -260,11 +266,38 @@ const SkillCard: React.FC<SkillCardProps> = ({
                 >
                   View report
                 </button>
+                {/* here we have to check one more check if thery any latest interviwe staus in pending */}
+                {latest_interview_status?.isCompleted === false ? (
+                  <button
+                    onClick={handleResumeInterView}
+                    className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
+                  >
+                    Resume
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleVerifySkill()}
+                    className="py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
+                  >
+                    Improve score
+                  </button>
+                )}
+         
+              </>
+            ) : // checking the latest interview isCompleted false
+            latest_interview_status?.isCompleted === false ? (
+              <>
                 <button
-                  onClick={handleVerifySkill}
-                  className="py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
+                  onClick={handleLearn}
+                  className="px-4 py-2 text-sm font-medium rounded-md text-[#001630] underline"
                 >
-                  Improve score
+                  Learn
+                </button>
+                <button
+                  onClick={handleResumeInterView}
+                  className="px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md"
+                >
+                  Resume
                 </button>
               </>
             ) : (
@@ -276,7 +309,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   Learn
                 </button>
                 <button
-                  onClick={handleVerifySkill}
+                  onClick={() => handleVerifySkill()}
                   className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
                 >
                   Verify skill
@@ -312,16 +345,12 @@ const SkillCard: React.FC<SkillCardProps> = ({
                 </span>
               </div>
               <div>
-                <h3 className="text-[16px] font-medium sm:text-sm sm: w-1/2 truncate">
-                  {skill}
-                </h3>
+                <h3 className="text-[16px] font-medium sm:text-sm sm: w-1/2 truncate">{skill}</h3>
                 <div className="flex items-center space-x-2">
                   {isEditing ? (
                     <div className="flex flex-col">
                       <div className="flex items-center space-x-2">
-                        <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
-                          Self rating:
-                        </p>
+                        <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">Self rating:</p>
                         <input
                           ref={inputRef}
                           type="number"
@@ -338,11 +367,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                         />
                         <span>/10</span>
                       </div>
-                      {ratingError && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {ratingError}
-                        </p>
-                      )}
+                      {ratingError && <p className="text-red-500 text-xs mt-1">{ratingError}</p>}
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
@@ -395,9 +420,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   level || "1"
                 )}`}
               >
-                {skillsLevelObj[
-                  level as unknown as keyof typeof skillsLevelObj
-                ] ?? "Basic"}
+                {skillsLevelObj[level as unknown as keyof typeof skillsLevelObj] ?? "Basic"}
               </span>
             </div>
             {/* Right Section: Action Buttons */}
@@ -426,7 +449,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                     Learn
                   </button>
                   <button
-                    onClick={handleVerifySkill}
+                    onClick={() => handleVerifySkill()}
                     className="px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md"
                   >
                     Verify skill

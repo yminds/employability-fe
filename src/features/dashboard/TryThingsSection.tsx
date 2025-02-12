@@ -70,7 +70,6 @@ const TryThingsSection: React.FC = () => {
     isFetching 
   } = useGetUserDetailsQuery(userId || "", {
     refetchOnMountOrArgChange: true,
-    pollingInterval: 3000, // Poll every 3 seconds
     skip: !userId,
   })
 

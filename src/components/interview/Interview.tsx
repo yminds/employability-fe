@@ -16,9 +16,14 @@ import { useTTS } from "@/hooks/useTTS";
 import { useSTT } from "@/hooks/useSTT";
 import CodeSnippetQuestion from "./CodeSnippetQuestion";
 import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
+import FundamentalBar from "../mentor/FundamentalsList";
+import { set } from "zod";
 
 // Constants and Types
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://employability.ai";
 
 interface CodeSnippetType {
   code: string;
@@ -44,10 +49,10 @@ const Interview: React.FC<{
   interviewTopic: string;
   concepts: any[];
   stopScreenSharing: () => void;
-}> = ({ interviewTopic, concepts ,stopScreenSharing}) => {
+}> = ({ interviewTopic, concepts, stopScreenSharing }) => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
-
+  const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
   // Queries and Speech Hooks
   const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
   const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(interviewId as string, {
@@ -132,6 +137,27 @@ const Interview: React.FC<{
       stopScreenSharing();
     };
 
+    const handleConceptValidation = (concepts: any) => {
+      //{'inroductionr to react'}
+      console.log("========================");
+      console.log(concepts);
+      console.log("========================");
+
+      setAllConcepts((prev) => {
+        const updatedConcepts = prev.map((concept) => {
+          if (concepts?.ratedConcepts?.includes(concept?.name)) {
+            console.log("Concept entred", { ...concept, status: "completed" });
+            
+            return { ...concept, status: "completed" };
+          }
+          console.log("concept", concept);
+          
+          return concept;
+        });
+        return updatedConcepts;
+      });
+    };
+
     // Socket event listeners
     newSocket.on("connect", handleConnect);
     newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
@@ -139,6 +165,7 @@ const Interview: React.FC<{
     newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
     newSocket.on(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
     newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
+    newSocket.on(`conceptValidation${interviewDetails.data._id}`, handleConceptValidation);
 
     return () => {
       isComponentMounted.current = false;
@@ -147,6 +174,7 @@ const Interview: React.FC<{
       newSocket.off(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
       newSocket.off(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
       newSocket.off(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
+
       newSocket.disconnect();
     };
   }, [isInterviewLoaded, interviewDetails]);
@@ -221,7 +249,7 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts.slice(0,2),
+      concepts: concepts.slice(0, 2),
       interview_id: interviewDetails.data._id,
     });
   };
@@ -229,7 +257,7 @@ const Interview: React.FC<{
   return (
     <div className="w-full h-screen pt-12">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-        <Header SkillName={interviewTopic}/>
+        <Header SkillName={interviewTopic} />
         {isInterviewEnded ? (
           <div className="text-center text-gray-500">
             <p>Thank you for your time. We will get back to you soon.</p>
@@ -242,8 +270,9 @@ const Interview: React.FC<{
             frequencyData={frequencyData}
             messages={messages}
             layoutType={2}
+            concepts={allConcepts}
           />
-        )}~
+        )}
       </div>
     </div>
   );
@@ -256,6 +285,7 @@ interface LayoutBuilderProps {
   frequencyData: any;
   messages: IMessage[];
   layoutType: 1 | 2;
+  concepts: any[];
 }
 
 const LayoutBuilder = ({
@@ -265,12 +295,14 @@ const LayoutBuilder = ({
   frequencyData,
   messages,
   layoutType,
+  concepts,
 }: LayoutBuilderProps) => {
+  const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
+
+  // console.log("concepts", concepts);
+
   return layoutType === 1 ? (
-    <div className="w-full flex gap-8 max-h-screen">
-
-  
-
+    <div className="w-full flex gap-8 max-h-screen bg-red-500">
       <div className="w-[60%] flex flex-col gap-8">
         <WebCam />
         {isUserAnswering ? (
@@ -285,7 +317,16 @@ const LayoutBuilder = ({
       </div>
     </div>
   ) : (
-    <div className="w-full flex gap-8 max-h-screen">     
+    <div className="w-full flex gap-8 max-h-screen ">
+      <div className="fundemntal-container flex">
+        <FundamentalBar
+          isSidebarOpen={isSidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          skill={"html"}
+          fundamentals={concepts}
+        />
+      </div>
+
       <div className="w-[45%] flex flex-col gap-8">
         <AIProfile height={"20vh"} frequency={frequencyData} />
         {question.isCodeSnippetMode && question.codeSnippet ? (
