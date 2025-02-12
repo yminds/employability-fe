@@ -17,10 +17,7 @@ const PublicProfile: React.FC = () => {
   const {
     data: profile,
     isLoading,
-    error,
   } = useGetPublicProfileQuery({ username });
-
-  console.log("Data", profile);
 
   const bio =
     profile?.bio ||
@@ -29,9 +26,12 @@ const PublicProfile: React.FC = () => {
     console.log("Something");
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading profile</div>;
-  if (!profile) return <div>Profile not found</div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
 
   return (
     <div className="w-full max-w-screen-xl mx-auto p-4">
