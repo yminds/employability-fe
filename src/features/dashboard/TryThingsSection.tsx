@@ -272,9 +272,7 @@ const TryThingsSection: React.FC = () => {
     }
   };
 
-  const handleRefetchUserDetails = async () => {
-    await refetchUserDetails().unwrap();
-  };
+
 
   const getCards = (): CardType[] => {
     const defaultCards:CardType[] = [];
@@ -429,13 +427,13 @@ const TryThingsSection: React.FC = () => {
   );
 
   return (
-    <section className="flex flex-col items-start gap-2 self-stretch">
+    <section className="flex flex-col items-start gap-2 ">
        {profileProgress < 100 && (
         <>
       <h5 className="text-black text-h2">
         Complete your Basic Details
       </h5>
-        <div className="flex flex-col gap-1  w-full">
+        <div className="flex flex-col gap-1  w-full ">
           <div className="flex items-center gap-3 self-stretch">
             <div className="relative w-full bg-[#FAFAFA] rounded-full h-[6px]">
               <div

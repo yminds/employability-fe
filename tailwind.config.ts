@@ -139,7 +139,7 @@ module.exports = {
           fontWeight: '400',
           fontFamily: 'DM Sans, sans-serif'
         }],
-        'body2': ['14px', {
+        'body2': ['16px', {
           lineHeight: '24px',
           letterSpacing: '0.015em',
           fontWeight: '400',
