@@ -42,13 +42,21 @@ export default function ResumeUploadProgressModal({
     setIsLoading(true);
     try {
       await onContinue();
+      onClose();
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="bg-white rounded-lg max-w-2xl p-[42px] flex flex-col justify-center">
         <DialogHeader className="w-full flex justify-between items-start">
           <DialogTitle className="text-black text-[20px] font-medium leading-[26px] tracking-[-0.2px] font-ubuntu mb-6">

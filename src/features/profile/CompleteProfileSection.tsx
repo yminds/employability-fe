@@ -1,13 +1,12 @@
 import type React from "react";
 import { useState } from "react";
 import LinkedInImportModal from "@/components/modal/LinkedInImportModal";
-import ResumeUploadModal from "@/components/modal/ResumeUploadModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import type { ProfileFormData } from "@/features/profile/types";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { Card, CardContent } from "@/components/ui/card";
-import CompleteProfile from "@/pages/CompleteProfile";
+import UnifiedUploadModal from "@/components/modal/UnifiedUploadModal";
 
 interface CompleteProfileSectionProps {
   userId: string;
@@ -23,10 +22,8 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const user_name = useSelector((state: RootState) => state.auth.user?.name);
-  const user = useSelector((state: RootState) => state.auth.user);
-  const hasResume = user?.parsedResume !== null;
-
-  console.log("isresume", hasResume);
+  const user = useSelector((state: any) => state.auth.user);
+  const hasResume = user?.resume_s3_url !== "";
 
   console.log("user", user);
 
@@ -82,7 +79,7 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
         <div className="space-y-4">
           {!hasResume && (
             <>
-              <button
+              {/* <button
                 onClick={handleOpenModal}
                 className="flex items-center space-x-3 w-full text-gray-600 hover:text-gray-800"
               >
@@ -103,7 +100,7 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
                   </svg>
                 </div>
                 <span>Import from LinkedIn</span>
-              </button>
+              </button> */}
 
               <button
                 onClick={() => setIsUploadModalOpen(true)}
@@ -184,12 +181,18 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
 
           {/* Resume Upload Modal */}
           {isUploadModalOpen && (
-            <ResumeUploadModal
-              isOpen={isUploadModalOpen}
+            // <ResumeUploadModal
+            //   isOpen={isUploadModalOpen}
+            //   onClose={() => setIsUploadModalOpen(false)}
+            //   onUpload={() => {
+            //     console.log();
+            //   }}
+            //   userId={userId}
+            //   goalId={goalId}
+            // />
+            <UnifiedUploadModal
+               isOpen={isUploadModalOpen}
               onClose={() => setIsUploadModalOpen(false)}
-              onUpload={() => {
-                console.log();
-              }}
               userId={userId}
               goalId={goalId}
             />
@@ -198,12 +201,12 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
           {/* Complete Upload Modal */}
           {isProfileModalOpen && (
             <CompleteProfileModal
-              type="resume"
+              type="basic"
               onClose={() => setIsProfileModalOpen(false)}
               onSave={(data: ProfileFormData): void => {
                 throw new Error("Function not implemented.");
               }}
-              userId={userId}
+              user={user}
               isParsed={false}
               goalId={goalId}
             />

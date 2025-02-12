@@ -303,8 +303,9 @@ export default function BasicInfoForm({
                 type="tel"
                 name="mobile"
                 value={formData.mobile}
+                readOnly
                 onChange={handleBasicInfoChange}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] bg-gray-100${
                   getError("mobile") ? "border-red-500" : ""
                 }`}
                 placeholder="+91 1234567891"
@@ -402,9 +403,9 @@ export default function BasicInfoForm({
           </div>
         </div>
       </div>
-      <h3 className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
+      {/* <h3 className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
         Basic Info
-      </h3>
+      </h3> */}
       <div className="bg-white rounded-lg p-8 space-y-6 relative border border-[#E5E7EB]">
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-2">

@@ -4,6 +4,11 @@ module.exports = {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
+    fontFamily: {
+      sans: ['DM Sans', 'sans-serif'],
+      ubuntu: ['Ubuntu', 'sans-serif'],
+      'dm-sans': ['DM Sans', 'sans-serif'],
+    },
     extend: {
       colors: {
         // Brand Primary Colors
@@ -108,50 +113,44 @@ module.exports = {
           lineHeight: '42px',
           letterSpacing: '-0.015em',
           fontWeight: '700',
-          fontFamily: 'Ubuntu',
+          fontFamily: 'Ubuntu, sans-serif',
         }],
         'h1': ['20px', {
           lineHeight: '32px',
           letterSpacing: '-1px',
           fontWeight: '500',
-          fontFamily: 'Ubuntu',
+          fontFamily: 'Ubuntu, sans-serif',
         }],
         'h2': ['18px', {
           lineHeight: '26px',
           letterSpacing: '-0.01em',
           fontWeight: '500',
-          fontFamily: 'Ubuntu',
+          fontFamily: 'Ubuntu, sans-serif',
         }],
         'sub-header': ['16px', {
           lineHeight: '22px',
           letterSpacing: '0',
           fontWeight: '500',
-          fontFamily: 'Ubuntu',
+          fontFamily: 'Ubuntu, sans-serif',
         }],
         'body1': ['16px', {
           lineHeight: '26px',
           letterSpacing: '0.015em',
           fontWeight: '400',
-          fontFamily: 'SF Pro Display',
+          fontFamily: 'DM Sans, sans-serif'
         }],
-        'body2': ['14px', {
+        'body2': ['16px', {
           lineHeight: '24px',
           letterSpacing: '0.015em',
           fontWeight: '400',
-          fontFamily: 'SF Pro Display',
+          fontFamily: 'DM Sans, sans-serif'
         }],
         'button': ['14px', {
           lineHeight: '20px',
           letterSpacing: '0.015em',
           fontWeight: '500',
-          fontFamily: 'SF Pro Display',
+          fontFamily: 'DM Sans, sans-serif'
         }],
-      },
-
-      // Font Families
-      fontFamily: {
-        ubuntu: ["Ubuntu", "sans-serif"],
-        'sf-pro': ['SF Pro Display', 'sans-serif'],
       },
       
       borderRadius: {
@@ -186,6 +185,32 @@ module.exports = {
   },
   plugins: [
     require("tailwindcss-animate"),
+    plugin(function({ addComponents }) {
+      //Defines the font-family at the component level
+      addComponents({
+        '.text-title': {
+          fontFamily: 'Ubuntu, sans-serif',
+        },
+        '.text-h1': {
+          fontFamily: 'Ubuntu, sans-serif',
+        },
+        '.text-h2': {
+          fontFamily: 'Ubuntu, sans-serif',
+        },
+        '.text-sub-header': {
+          fontFamily: 'Ubuntu, sans-serif',
+        },
+        '.text-body1': {
+          fontFamily: 'DM Sans, sans-serif',
+        },
+        '.text-body2': {
+          fontFamily: 'DM Sans, sans-serif',
+        },
+        '.text-button': {
+          fontFamily: 'DM Sans, sans-serif',
+        },
+      });
+    }),
     plugin(function ({ addUtilities }) {
       addUtilities({
         ".scrollbar-hide": {

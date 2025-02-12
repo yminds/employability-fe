@@ -1,14 +1,13 @@
-// ReportContent.tsx
-
 import React, { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Share2 } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import excellentIcon from "@/assets/skills/excellent.svg";
 import manageSearch from "@/assets/skills/manage_search.svg";
 import arrow from "@/assets/skills/arrow.svg";
 import PerformanceHighlights from "./PerformanceHighlights";
 import ReportScore from "./ReportScorecard";
-import generatePDF from 'react-to-pdf';
 import InterviewPlayer from "../interview/InterviewPlayer";
 
 interface Performance {
@@ -47,7 +46,6 @@ interface ReportContentProps {
   skill_icon: string;
 }
 
-
 const ReportContent: React.FC<ReportContentProps> = ({
   reportData,
   userName,
@@ -55,49 +53,166 @@ const ReportContent: React.FC<ReportContentProps> = ({
   goal_name,
   skill_icon,
 }) => {
-  // Create a ref for the printable part of the page.
   const componentRef = useRef<HTMLDivElement>(null);
-
-  // Define page styles that override on-screen restrictions when printing.
-  const pageStyle = `
-    @page {
-      size: auto;
-      margin: 0mm;
-    }
-    @media print {
-      html, body {
-        width: auto;
-        height: auto;
-      }
-      /* Remove fixed height and overflow restrictions */
-      .printable-container {
-        height: auto !important;
-        overflow: visible !important;
-      }
-    }
-  `;
-  
-  const getTargetElement = () => document.getElementById('mainContent');
-  // State to manage the share popup.
   const [showSharePopup, setShowSharePopup] = useState(false);
+  const [copyText, setCopyText] = useState("Copy");
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
   const handleShareClick = () => {
     setShowSharePopup((prev) => !prev);
   };
-  const [copyText, setCopyText] = useState('Copy');
 
-  // The current URL to share.
-  const shareUrl =
-    typeof window !== "undefined" ? window.location.href : "";
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
- 
+  const generatePDF = async () => {
+    if (!componentRef.current || isGeneratingPDF) return;
+
+    try {
+      setIsGeneratingPDF(true);
+
+      const element = document.getElementById("mainContent");
+      if (!element) return;
+
+      // Save original inline styles of mainContent
+      const originalStyle = element.style.cssText;
+
+      // Temporarily adjust styles to ensure all content is captured properly
+      element.style.position = "relative";
+      element.style.height = "auto";
+      element.style.overflow = "visible";
+      element.style.maxHeight = "none";
+
+      // Also adjust all parent elements (if necessary)
+      let parent = element.parentElement;
+      const originalStyles: { element: HTMLElement; style: string }[] = [];
+      while (parent && parent !== document.body) {
+        originalStyles.push({
+          element: parent,
+          style: parent.style.cssText,
+        });
+        parent.style.position = "relative";
+        parent.style.height = "auto";
+        parent.style.overflow = "visible";
+        parent.style.maxHeight = "none";
+        parent = parent.parentElement;
+      }
+
+      // Add a PDF-specific class to the container
+      element.classList.add("pdf-export");
+
+      // Inject PDF-specific CSS to improve margins/paddings and to hide unwanted sections
+      const pdfStyle = document.createElement("style");
+      pdfStyle.textContent = `
+        .pdf-export {
+          background: #f5f5f5 !important;
+          padding: 30px !important;
+          margin: 0 auto !important;
+          width: 100% !important;
+        }
+        .pdf-export header {
+          padding: 10px 0 !important;
+          margin-bottom: 20px !important;
+        }
+        .pdf-export main {
+          padding: 20px !important;
+        }
+        .pdf-export section {
+          margin-bottom: 20px !important;
+          padding: 15px !important;
+        }
+        .pdf-export .pdf-hide {
+          display: none !important;
+        }
+        .pdf-export * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .pdf-export .bg-none {
+        background: none !important;
+        }
+      `;
+      document.head.appendChild(pdfStyle);
+
+      // Capture the element using html2canvas
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
+        backgroundColor: "#f5f5f5",
+        height: element.scrollHeight,
+        windowHeight: element.scrollHeight,
+        onclone: (clonedDoc, clonedElement) => {
+          // Copy over styles from the original document
+          const styles = Array.from(document.styleSheets);
+          styles.forEach((styleSheet) => {
+            try {
+              const cssRules = Array.from(styleSheet.cssRules);
+              const style = document.createElement("style");
+              cssRules.forEach((rule) => {
+                style.appendChild(clonedDoc.createTextNode(rule.cssText));
+              });
+              clonedElement.appendChild(style);
+            } catch (e) {
+              console.warn("Could not copy styles", e);
+            }
+          });
+        },
+      });
+
+      // Create a new PDF document (A4)
+      const pdf = new jsPDF({
+        format: "a4",
+        unit: "pt",
+      });
+      
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const contentRatio = canvas.height / canvas.width;
+      const finalWidth = pageWidth;
+      const finalHeight = pageWidth * contentRatio;
+      const pageCount = Math.ceil(finalHeight / pageHeight);
+
+      // Add the image to each page of the PDF
+      for (let i = 0; i < pageCount; i++) {
+        if (i > 0) {
+          pdf.addPage();
+        }
+        pdf.addImage(
+          canvas.toDataURL("image/jpeg", 1.0),
+          "JPEG",
+          0,
+          0 - i * pageHeight, // Shift the image upward for each page
+          finalWidth,
+          finalHeight,
+          undefined,
+          "FAST"
+        );
+      }
+
+      // Restore original inline styles and remove PDF-specific styles
+      element.style.cssText = originalStyle;
+      originalStyles.forEach(({ element, style }) => {
+        element.style.cssText = style;
+      });
+      element.classList.remove("pdf-export");
+      pdfStyle.remove();
+
+      // Finally, download the generated PDF
+      pdf.save(`${userName}-${reportData.interview_id?.title}-Report.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   return (
-    // Note: The use of Tailwind’s print variants (e.g. print:h-auto, print:overflow-visible)
-    // ensures that on print the container does not limit the height or clip the content.
     <div className="flex w-full h-screen print:h-auto justify-center overflow-y-auto print:overflow-visible font-ubuntu p-6">
       <div className="w-full max-w-[1800px]">
         {/* Header */}
         <header className="py-6 flex justify-between">
-          <div className="max-w-[7/10] px-4 flex flex-col gap-2">
+          <div className="max-w-[70%] px-4 flex flex-col gap-2">
             <h1 className="text-title text-grey-7 font-bold flex gap-4 items-center">
               <button
                 onClick={handleBackToSkillsPage}
@@ -136,8 +251,8 @@ const ReportContent: React.FC<ReportContentProps> = ({
                     className="text-sm px-2 py-1 bg-primary-green text-white rounded hover:opacity-90"
                     onClick={() => {
                       navigator.clipboard.writeText(shareUrl);
-                      setCopyText('Copied');
-                      setTimeout(() => setCopyText('Copy'), 2000); // Reset back to "Copy" after 2 seconds
+                      setCopyText("Copied");
+                      setTimeout(() => setCopyText("Copy"), 2000);
                     }}
                   >
                     {copyText}
@@ -148,23 +263,28 @@ const ReportContent: React.FC<ReportContentProps> = ({
           </div>
         </header>
 
-        {/* Main Content to be printed/downloaded */}
+        {/* Main Content */}
         <main
           ref={componentRef}
-          className="max-w-[1800px] h-full print:h-auto flex mx-auto px-4 gap-6 printable-container"
           id="mainContent"
+          className="max-w-[1800px] h-full print:h-auto flex mx-auto px-4 gap-6 printable-container"
         >
+          {/* Left Section */}
           <section className="w-full flex-[7]">
-
-            
-          <div className="flex justify-center  ">
+            {/* Video Container – hidden in PDF via the "pdf-hide" class */}
+            {reportData.s3_recording_url && (
+              <section className="flex justify-center pdf-hide">
                 <div className="continer-player w-full h-[28rem] relative">
                   <InterviewPlayer urls={reportData.s3_recording_url} />
                 </div>
-              </div>
+              </section>
+            )}
+
             {/* Summary Section */}
             <section className="bg-white rounded-md shadow-sm p-6 mb-6">
-              <h2 className="text-h2 font-medium text-grey-7 mb-6">Summary</h2>
+              <h2 className="text-h2 font-medium text-grey-7 mb-6">
+                Summary
+              </h2>
               <div className="mb-8">
                 <p className="text-body2 text-grey-6 leading-relaxed">
                   {reportData.summary?.text || "No summary available"}
@@ -235,7 +355,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
               </div>
             </section>
 
-            <section className="mb-6">
+            <section className="bg-white rounded-md shadow-sm p-6 mb-6">
               <PerformanceHighlights
                 highlights={reportData.summary?.performance_highlights}
               />
@@ -292,7 +412,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                           {rating.concept}
                         </h3>
                       </div>
-                      <div className="min-w-full bg-background-grey min-h-2 relative rounded-full overflow-hidden">
+                      <div className="min-w-full bg-background-grey min-h-2 relative rounded-full overflow-hidden mt-4">
                         <div
                           className="min-h-2 bg-primary-green absolute left-0 top-0 transition-all duration-300 rounded-full"
                           style={{
@@ -310,16 +430,18 @@ const ReportContent: React.FC<ReportContentProps> = ({
               </div>
             </section>
 
-            <section className="bg-white rounded-md p-8">
+            {/* PDF Download Section – hidden in PDF */}
+            <section className="bg-white rounded-md p-8 pdf-hide">
               <div className="text-body2 mb-6">
-                Get a pdf version of this skill report to be shared with employers
+                Get a PDF version of this skill report to be shared with employers
               </div>
               <div>
                 <button
-                  className="flex gap-2 items-center px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md"
-                  onClick={() => generatePDF(getTargetElement)}
+                  className="flex gap-2 items-center px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={generatePDF}
+                  disabled={isGeneratingPDF}
                 >
-                  Download PDF
+                  {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
                 </button>
               </div>
             </section>

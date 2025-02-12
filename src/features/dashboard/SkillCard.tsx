@@ -1,11 +1,28 @@
-import React from 'react';
-import { PuzzleIcon, FileText, Users, MessageSquare } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import verified from "@/assets/skills/verified.svg";
-import verifiedGrey from "@/assets/skills/verified-grey.svg";
+import CompleteProfile from '../../assets/dashboard/Complete-profile.svg';
+import InCompleteProfile from '../../assets/dashboard/Incomplete-profile.svg'
+import InterviewsUnverified from '../../assets/dashboard/Interview-unverified.svg';
+import InterviewsVerified from '../../assets/dashboard/Interview-verified.svg';
+import ProjectsUnverified from '../../assets/dashboard/Projects-unverified.svg';
+import ProjectsVerified from '../../assets/dashboard/Projects-verified.svg';
+import SkillsUnverified from '../../assets/dashboard/Skills-unverified.svg';
+import SkillsVerified from '../../assets/dashboard/Skills-verified.svg';
+
+type CardType = "profile" | "skills" | "projects" | "interview";
+
+interface BaseCardConfig {
+  title: string;
+}
+
+interface OtherCardConfig extends BaseCardConfig {
+  type: 'skills' | 'projects' | 'interview' | 'profile';
+  verifiedIcon: string;
+  unverifiedIcon: string;
+}
+
+type CardConfig = OtherCardConfig;
 
 interface SkillCardProps {
-  type: "profile"|"skills" | "projects" | "interview";
+  type: CardType;
   total: number | null;
   verifiedSkills?: number;
   totalMandatorySkills?: number;
@@ -14,30 +31,30 @@ interface SkillCardProps {
   completedProfileSections?: number;
 }
 
-const cardConfig = {
-  profile:{
-    title: "Profile",
-    icon: Users,
-    iconColor: "text-[#4361ee]",
-    bgColor: "bg-[#eef1ff]",
+const cardConfig: Record<CardType, CardConfig> = {
+  profile: {
+    type: 'profile',
+    title: "Basic details",
+    verifiedIcon: CompleteProfile,
+    unverifiedIcon: InCompleteProfile,
   },
   skills: {
-    title: "Skills",
-    icon: PuzzleIcon,
-    iconColor: "text-[#1fd167]",
-    bgColor: "bg-[#dbffea]",
+    type: 'skills',
+    title: "Skills verified",
+    verifiedIcon: SkillsVerified,
+    unverifiedIcon: SkillsUnverified,
   },
   projects: {
-    title: "Projects",
-    icon: FileText,
-    iconColor: "text-[#ff8c3f]",
-    bgColor: "bg-[#fff2ea]",
+    type: 'projects',
+    title: "Projects verified",
+    verifiedIcon: ProjectsVerified,
+    unverifiedIcon: ProjectsUnverified,
   },
   interview: {
-    title: "Interview",
-    icon: MessageSquare,
-    iconColor: "text-[#a855f7]",
-    bgColor: "bg-[#f3e8ff]",
+    type: 'interview',
+    title: "Interviews",
+    verifiedIcon: InterviewsVerified,
+    unverifiedIcon: InterviewsUnverified,
   },
 };
 
@@ -51,7 +68,6 @@ export function SkillCard({
   completedProfileSections = 0,
 }: SkillCardProps) {
   const config = cardConfig[type];
-  const Icon = config.icon;
 
   const isCompleted = () => {
     if (type === "skills" && verifiedSkills !== undefined && totalMandatorySkills !== undefined) {
@@ -61,7 +77,7 @@ export function SkillCard({
       return verifiedProjects === totalProjects && totalProjects > 0;
     }
     if (type === "profile") {
-      return completedProfileSections === 4;
+      return completedProfileSections === 100;
     }
     if (type === "interview") {
       return total === 10;
@@ -72,58 +88,56 @@ export function SkillCard({
   const renderContent = () => {
     if (type === "skills" && verifiedSkills !== undefined && totalMandatorySkills !== undefined) {
       return (
-        <div className="flex items-baseline space-x-1">
-          <span className="text-[#202326] text-xl font-bold">{verifiedSkills}</span>
-          <span className="text-[#68696B] text-sm">/ {totalMandatorySkills}</span>
+        <div className="whitespace-nowrap">
+          <span className="text-black text-sub-header">{verifiedSkills}</span>
+          <span className="text-black/60 text-sub-header">/{totalMandatorySkills}</span>
         </div>
       );
     }
     if (type === "projects") {
       return (
-        <div className="flex items-baseline space-x-1">
-          <span className="text-[#202326] text-xl font-bold">{verifiedProjects}</span>
-          <span className="text-[#68696B] text-sm">/ {totalProjects}</span>
+        <div className="whitespace-nowrap">
+          <span className="text-black text-sub-header">{verifiedProjects}</span>
+          <span className="text-black/60 text-sub-header">/{totalProjects}</span>
         </div>
       );
     }
     if (type === "profile") {
       return (
-        <div className="flex items-baseline space-x-1">
-          <span className="text-[#202326] text-xl font-bold">{completedProfileSections}</span>
-          <span className="text-[#68696B] text-sm">/ 4</span>
+        <div className="text-black text-sub-header">
+          {completedProfileSections}%
         </div>
       );
     }
     return (
-      <div className="flex items-baseline">
-        <span className="text-[#202326] text-xl font-bold">{total}</span>
+      <div className="text-black text-sub-header">
+        {total}
       </div>
     );
   };
 
+  const getIconSrc = () => {
+    return isCompleted() ? config.verifiedIcon : config.unverifiedIcon;
+  };
+
   return (
-    <Card className="flex-1 min-w-0 bg-white rounded-xl shadow-sm border border-[#eee] hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-1">
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <div className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center flex-shrink-0`}>
-              <Icon className={`w-5 h-5 ${config.iconColor}`} />
-            </div>
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <span className="text-[#414447] text-sub-header">{config.title}</span>
-              <img 
-                src={isCompleted() ? verified : verifiedGrey} 
-                alt={isCompleted() ? "verified" : "not verified"} 
-                className="w-4 h-4 flex-shrink-0 transition-all duration-300"
-              />
-            </div>
-          </div>
-          <div className="flex-shrink-0">
-            {renderContent()}
+    <div className="w-full h-20 p-3 bg-white rounded-lg border border-black/5 flex items-center">
+      <div className="flex items-center gap-3 min-w-[182px]">
+        <div className="flex-shrink-0 w-12 h-12">
+          <img 
+            src={getIconSrc()}
+            alt={`${config.title} ${isCompleted() ? 'verified' : 'unverified'}`}
+            className="w-full h-full"
+          />
+        </div>
+        <div className="flex flex-col justify-start">
+          {renderContent()}
+          <div className="text-[#414347] text-body2 whitespace-nowrap">
+            {config.title}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

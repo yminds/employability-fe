@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { io } from "socket.io-client";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // Components
 import Header from "@/components/interview/Header";
@@ -15,7 +15,6 @@ import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 import { useTTS } from "@/hooks/useTTS";
 import { useSTT } from "@/hooks/useSTT";
 import CodeSnippetQuestion from "./CodeSnippetQuestion";
-import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 import FundamentalBar from "../mentor/FundamentalsList";
 import { set } from "zod";
 
@@ -96,7 +95,6 @@ const Interview: React.FC<{
         setIsInitialized(true);
         const initialGreeting = "Hello";
         addMessage(initialGreeting);
-        handleMessage(initialGreeting, "USER");
       }
     };
 
@@ -253,6 +251,11 @@ const Interview: React.FC<{
       interview_id: interviewDetails.data._id,
     });
   };
+  
+  const navigate = useNavigate();
+  const handleBackToSkills = () => {
+    navigate("/skills");
+  }
 
   return (
     <div className="w-full h-screen pt-12">
@@ -261,6 +264,7 @@ const Interview: React.FC<{
         {isInterviewEnded ? (
           <div className="text-center text-gray-500">
             <p>Thank you for your time. We will get back to you soon.</p>
+            <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackToSkills}>Back to Skills page</button>
           </div>
         ) : (
           <LayoutBuilder

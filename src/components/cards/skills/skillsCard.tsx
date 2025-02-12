@@ -8,7 +8,7 @@ import unverifiedImg from "@/assets/skills/unverifies.svg";
 import DefaultImg from "@/assets/skills/DefaultSkillImg.svg";
 import verifiedWhite from "@/assets/skills/verified_whiteBG.svg";
 import backGround from "@/assets/skills/verifiedBg.png";
-import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
+import SkillVerificationTutorial from "@/components/skills/SkillVerificationTutorial";
 
 interface LatestInterviewStatus {
   interview_id: string;
@@ -56,6 +56,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const [editedSelfRating, setEditedSelfRating] = useState(selfRating);
   const inputRef = useRef<HTMLInputElement>(null);
   const [ratingError, setRatingError] = useState("");
+  const [showTutorial, setShowTutorial] = useState<boolean>(false);
+  const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -125,11 +127,11 @@ const SkillCard: React.FC<SkillCardProps> = ({
     });
   };
 
-  const handleImproveScore = () => {
-    navigate(`/interview/${skillId}`, {
-      state: { skill, verified_rating, selfRating: editedSelfRating },
-    });
-  };
+  // const handleImproveScore = () => {
+  //   navigate(`/interview/${skillId}`, {
+  //     state: { skill, verified_rating, selfRating: editedSelfRating },
+  //   });
+  // };
 
   const handleLearn = () => {
     navigate(`/mentor/learn/${skillId}`, {
@@ -138,6 +140,13 @@ const SkillCard: React.FC<SkillCardProps> = ({
   };
 
   const handleVerifySkill = async (latestInteviewId?: string) => {
+    const hasSeenTutorial = localStorage.getItem("hasSeenVerifySkillTutorial");
+
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+      return;
+    }
+
     const interviewId = await createInterview({
       title: `${skill} Interview`,
       type: "Skill",
@@ -149,6 +158,29 @@ const SkillCard: React.FC<SkillCardProps> = ({
     });
   };
 
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem("hasSeenVerifySkillTutorial");
+    if (hasSeenTutorial) {
+      setShowTutorial(false);
+    }
+  }, []);
+
+  const handleCloseTutorial = () => {
+    if (dontShowAgain) {
+      localStorage.setItem("hasSeenVerifySkillTutorial", "true");
+    }
+    setShowTutorial(false);
+  };
+
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem("hasSeenVerifySkillTutorial");
+    if (hasSeenTutorial) {
+      setShowTutorial(false);
+    }
+  }, []);
+
+
+
   const handleResumeInterView = () => {
     navigate(`/interview/${latest_interview_status?.interview_id}`, {
       state: { title: skill, skillPoolId, level },
@@ -157,6 +189,19 @@ const SkillCard: React.FC<SkillCardProps> = ({
   }
   return (
     <>
+      {/* Skill Verification Tutorial Popup */}
+      {showTutorial && (
+        <SkillVerificationTutorial
+          onClose={handleCloseTutorial}
+          onConfirm={() => {
+            handleCloseTutorial();
+            handleVerifySkill();
+          }}
+          dontShowAgain={dontShowAgain}
+          setDontShowAgain={setDontShowAgain}
+        />
+      )}
+
       <div className="group relative bg-white p-4 rounded-md transition sm:hidden">
         {/* Delete Button */}
         {!isMandatory && onDelete && (
@@ -434,7 +479,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                     View report
                   </button>
                   <button
-                    onClick={handleImproveScore}
+                    onClick={handleVerifySkill}
                     className="py-2 text-sm font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
                   >
                     Improve score
@@ -462,6 +507,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       </div>
     </>
   );
+
 };
 
 export default SkillCard;

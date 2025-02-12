@@ -108,10 +108,13 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
         return acc
       }, {})
 
-      const totalProjectCount = projectDetails.data.length
-      setTotalProjects(totalProjectCount)
+      const verifiedProjects = projectDetails.data.filter((project)=>project.status === "Verified")
+      setTotalProjects(verifiedProjects.length)
 
-      projectDetails.data.forEach((project) => {
+      // const totalProjectCount = projectDetails.data.length
+      // setTotalProjects(totalProjectCount)
+
+      verifiedProjects.forEach((project) => {
         project.tech.forEach((tech) => {
           if (mandatorySkills.includes(tech.name)) {
             skillCounts[tech.name]++
@@ -124,13 +127,15 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
       const processedSkills = mandatorySkills.map((skill) => ({
         name: skill,
         usageCount: skillCounts[skill],
-        maxUsage: maxUsage,
-        progress: (skillCounts[skill] / maxUsage) * 100,
+        maxUsage: maxUsage || 1,
+        progress: maxUsage ? (skillCounts[skill] / maxUsage) * 100 : 0,
       }))
 
       setSkillUsage(processedSkills)
     }
   }, [skillsData, projectDetails])
+
+  const shouldShowScrollbar = skillUsage.length > 8;
 
   if (!goalData) {
     return <SkeletonLoader />
@@ -170,7 +175,7 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
           <img className="w-6 h-6" src={vector || "/placeholder.svg"} alt="short logo" />
           Practical Skill Coverage
         </h3>
-        <div className="space-y-4 overflow-y-auto flex-1 minimal-scrollbar">
+        <div className={`space-y-4 flex-1 ${shouldShowScrollbar ? 'minimal-scrollbar' : ''}`}>
           {projectsLoading ? (
             <SkillsSkeleton />
           ) : (
