@@ -98,11 +98,9 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                 setIsSaved(false);
                 setIsOpen(false);
                 setJourneyDialog(false);
-                window.location.reload();
             }, 2000);
         } catch (err) {
             console.error("Failed to save goal:", err);
-            setIsSaving(false)
         }
     };
 

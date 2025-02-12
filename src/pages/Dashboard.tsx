@@ -184,7 +184,6 @@ const Dashboard: React.FC<Props> = () => {
       setCompletedProfileSections(completedCount);
     }
   }, [userDetails]);
-  
 
   const isBasicInfoComplete = (user: any) => {
     return !!(
