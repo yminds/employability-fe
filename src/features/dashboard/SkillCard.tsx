@@ -1,5 +1,5 @@
-
 import CompleteProfile from '../../assets/dashboard/Complete-profile.svg';
+import InCompleteProfile from '../../assets/dashboard/Incomplete-profile.svg'
 import InterviewsUnverified from '../../assets/dashboard/Interview-unverified.svg';
 import InterviewsVerified from '../../assets/dashboard/Interview-verified.svg';
 import ProjectsUnverified from '../../assets/dashboard/Projects-unverified.svg';
@@ -13,18 +13,13 @@ interface BaseCardConfig {
   title: string;
 }
 
-interface ProfileCardConfig extends BaseCardConfig {
-  type: 'profile';
-  icon: string;
-}
-
 interface OtherCardConfig extends BaseCardConfig {
-  type: 'skills' | 'projects' | 'interview';
+  type: 'skills' | 'projects' | 'interview' | 'profile';
   verifiedIcon: string;
   unverifiedIcon: string;
 }
 
-type CardConfig = ProfileCardConfig | OtherCardConfig;
+type CardConfig = OtherCardConfig;
 
 interface SkillCardProps {
   type: CardType;
@@ -40,7 +35,8 @@ const cardConfig: Record<CardType, CardConfig> = {
   profile: {
     type: 'profile',
     title: "Basic details",
-    icon: CompleteProfile,
+    verifiedIcon: CompleteProfile,
+    unverifiedIcon: InCompleteProfile,
   },
   skills: {
     type: 'skills',
@@ -92,7 +88,7 @@ export function SkillCard({
   const renderContent = () => {
     if (type === "skills" && verifiedSkills !== undefined && totalMandatorySkills !== undefined) {
       return (
-        <div>
+        <div className="whitespace-nowrap">
           <span className="text-black text-sub-header">{verifiedSkills}</span>
           <span className="text-black/60 text-sub-header">/{totalMandatorySkills}</span>
         </div>
@@ -100,10 +96,10 @@ export function SkillCard({
     }
     if (type === "projects") {
       return (
-        <div>
-        <span className="text-black text-sub-header">{verifiedProjects}</span>
-        <span className="text-black/60 text-sub-header">/{totalProjects}</span>
-      </div>
+        <div className="whitespace-nowrap">
+          <span className="text-black text-sub-header">{verifiedProjects}</span>
+          <span className="text-black/60 text-sub-header">/{totalProjects}</span>
+        </div>
       );
     }
     if (type === "profile") {
@@ -121,25 +117,22 @@ export function SkillCard({
   };
 
   const getIconSrc = () => {
-    if (config.type === 'profile') {
-      return config.icon;
-    }
     return isCompleted() ? config.verifiedIcon : config.unverifiedIcon;
   };
 
   return (
-    <div className="h-20 p-3.5 bg-white rounded-lg border border-black/5 justify-start items-center gap-6 inline-flex overflow-hidden">
-      <div className="w-[182px] h-12 justify-start items-center gap-3 flex">
-        <div className="relative w-12 h-12">
+    <div className="w-full h-20 p-3 bg-white rounded-lg border border-black/5 flex items-center">
+      <div className="flex items-center gap-3 min-w-[182px]">
+        <div className="flex-shrink-0 w-12 h-12">
           <img 
             src={getIconSrc()}
             alt={`${config.title} ${isCompleted() ? 'verified' : 'unverified'}`}
-            className="w-12 h-12"
+            className="w-full h-full"
           />
         </div>
-        <div className="flex-col justify-start items-start inline-flex">
+        <div className="flex flex-col justify-start">
           {renderContent()}
-          <div className="text-[#414347] text-body2">
+          <div className="text-[#414347] text-body2 whitespace-nowrap">
             {config.title}
           </div>
         </div>
