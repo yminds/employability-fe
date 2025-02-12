@@ -435,7 +435,7 @@ const TryThingsSection: React.FC = () => {
         Complete your Basic Details
       </h5>
         <div className="flex flex-col gap-1  w-full ">
-          <div className="flex items-center gap-3 self-stretch">
+          <div className="flex items-center gap-12 self-stretch">
             <div className="relative w-full bg-[#FAFAFA] rounded-full h-[6px]">
               <div
                 className="bg-[#1FD167] h-[6px] rounded-full transition-all duration-300"
@@ -445,14 +445,7 @@ const TryThingsSection: React.FC = () => {
             <span className="text-[#1FD167] font-medium">
               {profileProgress}%
             </span>
-          </div>
-
-          <div className="flex justify-between items-center w-full">
-            <p className="text-black text-body2">
-              Employers are <span className="text-[#03963F]">3 times</span> more likely to hire a candidate with a complete
-              basic details.
-            </p>
-
+            
             <div className="flex gap-2">
               <button
                 onClick={handlePrevClick}
@@ -475,6 +468,13 @@ const TryThingsSection: React.FC = () => {
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
+          </div>
+
+          <div className="flex justify-end items-center w-full">
+            {/* <p className="text-black text-body2">
+              Employers are <span className="text-[#03963F]">3 times</span> more likely to hire a candidate with a complete
+              basic details.
+            </p> */}
           </div>
         </div>
       </>

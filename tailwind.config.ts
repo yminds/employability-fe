@@ -135,13 +135,13 @@ module.exports = {
         }],
         'body1': ['16px', {
           lineHeight: '26px',
-          letterSpacing: '0.015em',
+          letterSpacing: '0.03em',
           fontWeight: '400',
           fontFamily: 'DM Sans, sans-serif'
         }],
         'body2': ['16px', {
           lineHeight: '24px',
-          letterSpacing: '0.015em',
+          letterSpacing: '0.03em',
           fontWeight: '400',
           fontFamily: 'DM Sans, sans-serif'
         }],
