@@ -311,7 +311,7 @@ const LayoutBuilder = ({
   frequencyData,
   messages,
   layoutType,
-  interviewState
+  interviewState,
   concepts,
 }: LayoutBuilderProps) => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
