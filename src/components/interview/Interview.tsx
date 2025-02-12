@@ -88,10 +88,15 @@ const Interview: React.FC<{
   useEffect(() => {
     if (!isInterviewLoaded || !interviewDetails?.data?._id) return;
 
-    const newSocket = io(SOCKET_URL);
+    const newSocket = io(SOCKET_URL,{
+      transports: ["websocket"],
+    });
 
     const handleConnect = () => {
+      console.log("entred handleConnect from handleConnect");
       if (!isInitialized) {
+        console.log("Connected handleConnect isInitialized");
+        
         setIsInitialized(true);
         const initialGreeting = "Hello";
         addMessage(initialGreeting);
@@ -222,8 +227,10 @@ const Interview: React.FC<{
   };
 
   const addMessage = (prompt: string) => {
+    console.log("🔥 addMessage called with prompt:", prompt);
+
     if (!interviewDetails?.data?._id) {
-      console.error("Interview details not available");
+      console.error("⚠️ Interview details not available, skipping API call.");
       return;
     }
 
