@@ -36,7 +36,7 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
   return (
     <>
       <div
-        className={`fixed top-0 right-0 h-full transition-all duration-300 ease-in-out ${
+        className={`absolute top-0 right-0 h-full transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "w-80" : "w-0"
         } bg-white border-l border-gray-200 shadow-2xl z-50`}
       >
