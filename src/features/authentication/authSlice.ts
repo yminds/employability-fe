@@ -60,6 +60,14 @@ const authSlice = createSlice({
         };
       }
     },
+    updateUserEmail:(state,action:{payload:string}) =>{
+      if(state.user){
+        state.user = {
+          ...state.user,
+          email:action.payload
+        }
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -89,6 +97,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logOut, updateUserProfile } = authSlice.actions;
+export const { setCredentials, logOut, updateUserProfile, updateUserEmail } = authSlice.actions;
 
 export default authSlice.reducer;

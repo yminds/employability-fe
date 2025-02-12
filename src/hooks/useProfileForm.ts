@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useGetUserByIdQuery, useUpdateUserMutation } from "@/api/userApiSlice";
 import {
   useAddExperienceMutation,
@@ -34,7 +34,6 @@ export const useProfileForm = (
   goalId: string,
   onClose: () => void
 ) => {
-    
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState(type);
@@ -43,6 +42,7 @@ export const useProfileForm = (
   const [hasCertifications, setHasCertifications] = useState(
     !user.has_certificates
   );
+  const [transformData, setTransformData] = useState<any>({});
   const [errors, setErrors] = useState({});
   const [parsedSkills, setParsedSkills] = useState([]);
 
@@ -148,6 +148,7 @@ export const useProfileForm = (
             result.data
           );
           setParsedSkills(transformedData.skills);
+          setTransformData(transformedData);
         } catch (error) {
           console.error("Error transforming data:", error);
         }
@@ -216,7 +217,10 @@ export const useProfileForm = (
     const fetchSkills = async () => {
       try {
         if (user._id && goalId) {
-          const response = await getUserSkills({ userId: user._id, goalId }).unwrap();
+          const response = await getUserSkills({
+            userId: user._id,
+            goalId,
+          }).unwrap();
           if (response?.data.optional && response.data.optional.length > 0) {
             setFormData((prevData: any) => ({
               ...prevData,
@@ -229,9 +233,16 @@ export const useProfileForm = (
               })),
             }));
           } else if (parsedSkills.length > 0) {
+            let updatedSkills = parsedSkills.filter(
+              (parsedSkill: any) =>
+                !response.data.all.some(
+                  (skill: any) =>
+                    skill.skill_pool_id._id === parsedSkill.skill_Id
+                )
+            );
             setFormData((prevData: any) => ({
               ...prevData,
-              skills: parsedSkills,
+              skills: updatedSkills,
             }));
           } else {
             setFormData((prevData: any) => ({
@@ -254,7 +265,7 @@ export const useProfileForm = (
     };
 
     fetchSkills();
-  }, []);
+  }, [parsedSkills]);
 
   const updateFormData = useCallback(
     (section: keyof ProfileFormData, data: any) => {
@@ -302,17 +313,19 @@ export const useProfileForm = (
       const updatedData = formData[section].filter(
         (_: any, i: number) => i !== index
       );
-
+      const updatedResume = user.parsedResume[section].filter(
+        (_: any, i: number) => i !== index
+      );
       const deletedItem = formData[section][index];
       updateFormData(section, updatedData);
 
       try {
         if (section === "skills") {
           if (deletedItem.transformedSkill) {
-            await updateUserParsedResume(section, updatedData);
+            await updateUserParsedResume(section, updatedResume);
           }
         } else if (!deletedItem._id) {
-          await updateUserParsedResume(section, updatedData);
+          await updateUserParsedResume(section, updatedResume);
         }
       } catch (error) {
         console.error(`Error deleting ${section}:`, error);
@@ -404,6 +417,12 @@ export const useProfileForm = (
                 goal_id: goalId,
               };
               await createUserSkills(skillsPayload).unwrap();
+              if (user.parsedResume !== null) {
+                await updateUser({
+                  userId: user._id,
+                  data: { parsedResume: { ...user.parsedResume, skills: [] } },
+                });
+              }
             }
             break;
           case "experience":
@@ -483,6 +502,14 @@ export const useProfileForm = (
                     })
                   );
                 }
+                if (user.parsedResume !== null) {
+                  await updateUser({
+                    userId: user._id,
+                    data: {
+                      parsedResume: { ...user.parsedResume, experience: [] },
+                    },
+                  });
+                }
               }
             }
             break;
@@ -520,6 +547,14 @@ export const useProfileForm = (
                     education: [...user.education, ...newEducationIds],
                   })
                 );
+              }
+              if (user.parsedResume !== null) {
+                await updateUser({
+                  userId: user._id,
+                  data: {
+                    parsedResume: { ...user.parsedResume, education: [] },
+                  },
+                });
               }
             }
             break;
@@ -596,6 +631,17 @@ export const useProfileForm = (
                       ],
                     })
                   );
+                }
+                if (user.parsedResume !== null) {
+                  await updateUser({
+                    userId: user._id,
+                    data: {
+                      parsedResume: {
+                        ...user.parsedResume,
+                        certifications: [],
+                      },
+                    },
+                  });
                 }
               }
             }

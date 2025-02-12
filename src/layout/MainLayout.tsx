@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
+import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -28,9 +29,20 @@ const noSidebarRoutes = [
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
-  const isEmailVerified = useSelector((state: RootState) => 
-    state.auth.user?.is_email_verified
-  );
+  const user_id = user?._id
+
+  const { 
+      data: userDetails,
+      isLoading
+    } = useGetUserDetailsQuery(user_id || "",{
+      skip: !user_id
+    })
+
+    console.log("userDetails",userDetails?.data)
+
+    const isEmailVerified = userDetails?.data.is_email_verified
+
+    console.log("isemailVerification",isEmailVerified)
 
   const shouldDisplaySidebar = (): boolean => {
     const currentPath = location.pathname;
@@ -56,12 +68,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   const shouldShowBanner = (): boolean | null => {
+
+    if(isLoading || !userDetails){
+      return false
+    }
     // Show banner if user is logged in, email is not verified, and we're on a route that shows the sidebar
     return shouldDisplaySidebar() && user && !isEmailVerified;
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen ">
       {/* Email Verification Banner */}
       {shouldShowBanner() && (
         <div className="sticky top-0 z-50">
@@ -70,7 +86,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       )}
       
       {/* Main Content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 ">
         {/* Sidebar */}
         {shouldDisplaySidebar() && (
           <div className="flex-shrink-0">
