@@ -1,22 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import SkillCard from '@/components/cards/skills/skillsCard';
+import React, { useEffect, useState } from "react";
+import SkillCard from "@/components/cards/skills/skillsCard";
 import {
   useGetUserSkillsMutation,
   useRemoveGoalFromSkillMutation,
   useUpdateSelfRatingMutation,
-} from '@/api/skillsApiSlice';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { useNavigate } from 'react-router-dom';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import search from '@/assets/skills/search.svg';
-import AddSkillsModal from './addskills';
+} from "@/api/skillsApiSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { useNavigate } from "react-router-dom";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import search from "@/assets/skills/search.svg";
+import AddSkillsModal from "./addskills";
 
 export interface SkillPoolId {
   _id: string;
   name: string;
   icon?: string;
+}
+
+interface LatestInterviewStatus {
+  interview_id: string;
+  isCompleted: boolean;
 }
 
 export interface Skill {
@@ -25,28 +30,30 @@ export interface Skill {
   verified_rating: number;
   self_rating: number | null;
   level?: string;
-  best_interview?:string;
+  best_interview?: string;
+  latest_interview_status?: LatestInterviewStatus;
 }
-
 interface SkillListProps {
   isDashboard: boolean;
   goalId: string | null;
   onSkillsUpdate: (isUpdated: boolean) => void;
   isSkillsUpdated?: boolean;
-  goals: {
-    message: string;
-    data: [
-      {
-        experience: string | undefined;
-        _id: string;
-        name: string;
+  goals:
+    | {
+        message: string;
+        data: [
+          {
+            experience: string | undefined;
+            _id: string;
+            name: string;
+          }
+        ];
       }
-    ];
-  } | undefined;
-  selectedGoalName:string
+    | undefined;
+  selectedGoalName: string;
 }
 
-type SkillCategory = 'mandatory' | 'optional' | 'all';
+type SkillCategory = "mandatory" | "optional" | "all";
 
 const SkillList: React.FC<SkillListProps> = ({
   isDashboard,
@@ -54,14 +61,14 @@ const SkillList: React.FC<SkillListProps> = ({
   onSkillsUpdate,
   isSkillsUpdated,
   goals,
-  selectedGoalName
+  selectedGoalName,
 }) => {
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
   const [getUserSkills, { data: skillsData, isLoading }] = useGetUserSkillsMutation();
-  const [selectedCategory, setSelectedCategory] = useState<SkillCategory>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<SkillCategory>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredSkills, setFilteredSkills] = useState<Skill[]>([]);
   const [isSelfRatingEdited, setSelfRatingChange] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,7 +93,7 @@ const SkillList: React.FC<SkillListProps> = ({
     try {
       await getUserSkills({ userId, goalId }).unwrap();
     } catch (err) {
-      console.error('Error fetching skills:', err);
+      console.error("Error fetching skills:", err);
     }
   };
 
@@ -102,12 +109,12 @@ const SkillList: React.FC<SkillListProps> = ({
   }, [searchQuery, skillsData, selectedCategory]);
 
   const handleDeleteSkill = async (skillId: string) => {
-    if (window.confirm('Are you sure you want to delete this skill?')) {
+    if (window.confirm("Are you sure you want to delete this skill?")) {
       try {
         await removeGoalFromSkill({ userId, goalId, skillId }).unwrap();
         onSkillsUpdate(true);
       } catch (error) {
-        console.error('Error deleting skill:', error);
+        console.error("Error deleting skill:", error);
       }
     }
   };
@@ -128,11 +135,11 @@ const SkillList: React.FC<SkillListProps> = ({
     if (!skillsData?.data) return [];
 
     switch (selectedCategory) {
-      case 'mandatory':
+      case "mandatory":
         return skillsData.data?.mandatory || [];
-      case 'optional':
+      case "optional":
         return skillsData.data?.optional || [];
-      case 'all':
+      case "all":
       default:
         return skillsData.data?.all || [];
     }
@@ -147,7 +154,7 @@ const SkillList: React.FC<SkillListProps> = ({
       }).unwrap();
       setSelfRatingChange(true);
     } catch (err) {
-      console.error('Error updating self-rating:', err);
+      console.error("Error updating self-rating:", err);
     }
   };
 
@@ -160,9 +167,9 @@ const SkillList: React.FC<SkillListProps> = ({
     if (isDashboard) return null;
 
     const categories = [
-      { id: 'all', label: 'All' },
-      { id: 'mandatory', label: 'Mandatory' },
-      { id: 'optional', label: 'Added by you' },
+      { id: "all", label: "All" },
+      { id: "mandatory", label: "Mandatory" },
+      { id: "optional", label: "Added by you" },
     ];
 
     return (
@@ -173,9 +180,7 @@ const SkillList: React.FC<SkillListProps> = ({
               key={category.id}
               onClick={() => handleCategorySelect(category.id as SkillCategory)}
               className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all sm:px-2 sm:py-2 ${
-                selectedCategory === category.id
-                  ? 'bg-[#001630] text-white hover:bg-[#062549]'
-                  : 'text-gray-600'
+                selectedCategory === category.id ? "bg-[#001630] text-white hover:bg-[#062549]" : "text-gray-600"
               }`}
             >
               {category.label}
@@ -248,9 +253,7 @@ const SkillList: React.FC<SkillListProps> = ({
       <div className="scroll-smooth pr-2 snap-y snap-proximity minimal-scrollbar sm:min-w-[290px]">
         {displaySkills.map((skill: Skill, index: number) => {
           const isMandatorySkill =
-            selectedCategory === 'all'
-              ? mandatorySkillIds.includes(skill._id)
-              : selectedCategory === 'mandatory';
+            selectedCategory === "all" ? mandatorySkillIds.includes(skill._id) : selectedCategory === "mandatory";
 
           return (
             <React.Fragment key={skill._id}>
@@ -261,7 +264,7 @@ const SkillList: React.FC<SkillListProps> = ({
                 skillImg={skill.skill_pool_id.icon}
                 verified_rating={skill.verified_rating}
                 selfRating={skill.self_rating ?? 0}
-                initialStatus={skill.verified_rating > 0 ? "Verified" : "Unverified"}
+                initialStatus={skill.verified_rating > 3 ? "Verified" : "Unverified"}
                 level={skill.level}
                 onDelete={handleDeleteSkill}
                 onEdit={handleEditSkill}
@@ -269,23 +272,16 @@ const SkillList: React.FC<SkillListProps> = ({
                 isDashboard={isDashboard}
                 bestInterview={skill.best_interview}
                 goalName={selectedGoalName}
+                latest_interview_status={skill?.latest_interview_status}
               />
-              {index < displaySkills.length - 1 && (
-                <div className="w-full h-[1px] my-4 bg-[#E0E0E0]" />
-              )}
+              {index < displaySkills.length - 1 && <div className="w-full h-[1px] my-4 bg-[#E0E0E0]" />}
               {isDashboard && index === 2 && totalSkills > 3 && (
                 <button
                   onClick={() => navigate("/skills")}
                   className="flex items-center gap-1 text-[#001630] text-sm font-medium hover:underline py-2 mx-auto mt-2"
                 >
                   View all
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                       d="M8 3.33334L8 12.6667"
                       stroke="#001630"
@@ -325,7 +321,7 @@ const SkillList: React.FC<SkillListProps> = ({
 
         {isLoading ? Array.from({ length: 3 }).map((_) => renderLoadingSkeleton()) : renderSkills(filteredSkills)}
       </div>
-      
+
       {isModalOpen && goalId && (
         <AddSkillsModal
           goalId={goalId}

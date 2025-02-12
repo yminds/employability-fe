@@ -23,7 +23,7 @@ const slides = [
     image: `${enableAudioImg}`, // Replace with actual path
     title: "Step 2: Enable the Audio",
     description:
-      "while sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
+      "While sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
   },
   {
     image: `${checkedStateCheckSetup}`, // Replace with actual path
@@ -78,7 +78,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
                 <img 
                   src={slides[currentSlide].image} 
                   alt={`Tutorial Step ${currentSlide + 1}`}
-                  className="absolute inset-0 w-full h-full object-cover rounded-lg "
+                  className="absolute inset-0 w-full h-full object-cover rounded-lg border-2"
                 />
               </div>
             </div>
@@ -86,8 +86,8 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
             {/* Text Section - 30% */}
             <div className="w-[30%] flex flex-col justify-center">
               <div className="space-y-4">
-                <h2 className="text-xl font-bold leading-tight">{slides[currentSlide].title}</h2>
-                <p className="text-gray-600 text-sm leading-relaxed">{slides[currentSlide].description}</p>
+                <h2 className="text-h1 font-bold leading-tight">{slides[currentSlide].title}</h2>
+                <p className="text-gray-600 text-body leading-relaxed">{slides[currentSlide].description}</p>
               </div>
             </div>
           </div>

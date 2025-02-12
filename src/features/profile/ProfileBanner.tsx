@@ -3,9 +3,17 @@ import { Button } from "@/components/ui/button";
 import threeDots from "@/assets/profile/threedots.svg";
 import { Pencil } from "lucide-react";
 import EditBioModal from "@/components/modal/EditBioModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Country, State } from "country-state-city";
 import backgroundImage from "@/assets/images/Frame 1410078135.jpg";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ProfileFormData } from "./types";
+import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
+import { useGetUserSkillsSummaryMutation } from "@/api/skillsApiSlice";
 
 interface ProfileBannerProps {
   user: any;
@@ -30,7 +38,37 @@ const ProfileBanner = ({
       ? State.getStateByCodeAndCountry(user.address.state, user.address.country)
       : null;
 
+  const [getUserSkillsSummary, { data: skillsSummaryData }] =
+    useGetUserSkillsSummaryMutation();
+
+  const totalSkills = skillsSummaryData?.data?.totalSkills || "0";
+  const totalVerifiedSkills =
+    skillsSummaryData?.data?.totalVerifiedSkills || "0";
+
   const [isEditBioOpen, setIsEditBioOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const goalName = goalData?.data?.[0]?.name || "";
+  const goalId = goalData?.data?.[0]?._id || "";
+
+  useEffect(() => {
+    if (user._id && goalId) {
+      getUserSkillsSummary({ userId: user._id, goalId });
+    }
+  }, [user._id, goalId, getUserSkillsSummary]);
+
+  const totalSkillsNum = Number(totalSkills) || 0;
+  const totalVerifiedSkillsNum = Number(totalVerifiedSkills) || 0;
+  const averageVerifiedPercentage =
+    totalSkillsNum > 0
+      ? Number.parseFloat(
+          ((totalVerifiedSkillsNum / totalSkillsNum) * 100).toFixed(2)
+        )
+      : 0;
+  const employabilityScore =
+    totalSkillsNum > 0
+      ? Number.parseFloat((averageVerifiedPercentage / 10).toFixed(1))
+      : 0;
 
   const handleBioSave = (newBio: string) => {
     onBioUpdate(newBio);
@@ -41,16 +79,14 @@ const ProfileBanner = ({
     window.open(publicProfileUrl, "_blank", "noopener,noreferrer");
   };
 
-  const goalName = goalData?.data?.[0]?.name || "";
-
   return (
     <div
       className=" rounded-lg sm:bg-cover md:bg-contain lg:bg-auto "
       style={{
         backgroundImage: `url(${backgroundImage})`,
-        backgroundRepeat: "no-repeat", // Prevents the background from repeating
-        backgroundSize: "cover", // Ensures the image covers the div
-        backgroundPosition: "center", // Centers the background image
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
       <div className="max-w-5xl mx-auto p-8">
@@ -110,7 +146,9 @@ const ProfileBanner = ({
               </h2>
               <div className="flex items-center gap-2  rounded-lg">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-semibold">8.8</span>
+                  <span className="text-2xl font-semibold">
+                    {employabilityScore}
+                  </span>
                   <span className="text-sm text-gray-600">/10</span>
                 </div>
                 <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
@@ -164,9 +202,29 @@ const ProfileBanner = ({
                 Share Profile
               </Button>
 
-              <div className="w-6 h-6 flex items-center justify-center">
-                <img src={threeDots || "/placeholder.svg"} alt="Three Dots" />
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" className="w-10 h-10 p-0">
+                    <div className="w-6 h-6 flex items-center justify-center">
+                      <img
+                        src={threeDots || "/placeholder.svg"}
+                        alt="Three Dots"
+                      />
+                    </div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-44">
+                  <div className="grid gap-4">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-sm font-normal leading-6 tracking-[0.24px] text-black font-['SF Pro Display', sans-serif]"
+                      onClick={() => setIsProfileModalOpen(true)}
+                    >
+                      Edit Profile
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           )}
         </div>
@@ -177,6 +235,20 @@ const ProfileBanner = ({
           onClose={() => setIsEditBioOpen(false)}
           onSave={handleBioSave}
           currentBio={bio}
+        />
+      )}
+      {isProfileModalOpen && !isPublic && (
+        <CompleteProfileModal
+          type="basic"
+          onClose={() => setIsProfileModalOpen(false)}
+          onSave={(data: ProfileFormData) => {
+            // Implement the save functionality here
+            console.log("Profile data to save:", data);
+            setIsProfileModalOpen(false);
+          }}
+          user={user}
+          isParsed={false}
+          goalId={goalData?.data?.[0]?._id}
         />
       )}
     </div>
