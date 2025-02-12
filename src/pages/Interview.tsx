@@ -9,14 +9,14 @@ import toggleBrowserFullscreen from "@/components/skills/fullscreen";
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
   const location = useLocation();
-
+ 
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
   // New state to track if the user has the required camera and mic permissions
   const [hasPermissions, setHasPermissions] = useState(false);
-
+ 
   const { title, skillPoolId, level } = location.state || {};
   const {
     isInterviewStarted,
@@ -32,7 +32,7 @@ const InterviewSetupNew: React.FC = () => {
     cameraScale,
     isProceedButtonEnabled,
   } = useInterviewSetup();
-
+ 
   // Check camera and microphone permissions by verifying if device labels are available.
   // Device labels are only populated when permission has been granted.
   useEffect(() => {
@@ -58,7 +58,7 @@ const InterviewSetupNew: React.FC = () => {
         setShowPermissionNote(true);
       });
   }, []);
-
+ 
   // Fetch the fundamentals for the interview
   useEffect(() => {
     const sync = async () => {
@@ -74,11 +74,11 @@ const InterviewSetupNew: React.FC = () => {
     };
     sync();
   }, [fetchFundamental, skillPoolId, level]);
-
+ 
   // Only show the Interview component if the user has required permissions,
   // the fundamentals have loaded, and the interview is started.
   const canShowInterview = isInterviewStarted && fundamentals.length > 0 && hasPermissions;
-
+ 
   return (
     <>
       {/* Permission Note Modal */}
@@ -125,7 +125,7 @@ const InterviewSetupNew: React.FC = () => {
           </div>
         </div>
       )}
-
+ 
       {/* Main Content */}
       {!canShowInterview ? (
         <div className="flex items-center h-screen w-[70%] mx-auto sm:w-[95%]">
@@ -174,5 +174,5 @@ const InterviewSetupNew: React.FC = () => {
     </>
   );
 };
-
+ 
 export default InterviewSetupNew;

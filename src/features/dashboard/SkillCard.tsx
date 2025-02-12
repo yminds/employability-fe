@@ -122,7 +122,7 @@ export function SkillCard({
 
   return (
     <div className="w-full h-20 p-3 bg-white rounded-lg border border-black/5 flex items-center">
-      <div className="flex items-center gap-3 min-w-[182px]">
+      <div className="flex items-center gap-4 ">
         <div className="flex-shrink-0 w-12 h-12">
           <img 
             src={getIconSrc()}

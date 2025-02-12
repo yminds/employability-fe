@@ -29,10 +29,10 @@ export const validateExperience = (
     if (!exp.description.trim()) {
       errors[`experience.${index}.description`] = "Description is required";
     }
-    if (exp.current_ctc === 0) {
+    if (exp.current_ctc === 0 || !exp.current_ctc) {
       errors[`experience.${index}.current_ctc`] = "Current CTC is required";
     }
-    if (exp.expected_ctc === 0) {
+    if (exp.expected_ctc === 0 || !exp.expected_ctc) {
       errors[`experience.${index}.expected_ctc`] = "Expected CTC is required";
     }
   });
