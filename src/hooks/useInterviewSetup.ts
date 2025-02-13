@@ -156,7 +156,6 @@ const useInterviewSetup = () => {
 
       setScreenStream(combinedStream);
       setIsScreenSharing(true);
-      localStorage.setItem("isScreenSharing", "true");
 
       const startRecording = () => {
         const recorder = new MediaRecorder(combinedStream, {
@@ -216,7 +215,6 @@ const useInterviewSetup = () => {
       screenStream.getTracks().forEach((track) => track.stop());
       setScreenStream(null);
       setIsScreenSharing(false);
-      localStorage.setItem("isScreenSharing", "false");
     }
 
     if (intervalRef.current) {
@@ -250,7 +248,6 @@ const useInterviewSetup = () => {
       setScreenStream(stream);
       setIsScreenSharing(true);
       setMicTested(false);
-      localStorage.setItem("isScreenSharing", "true");
     } catch (error) {
       console.error("Error capturing screen:", error);
     }
