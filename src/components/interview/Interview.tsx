@@ -103,7 +103,7 @@ const Interview: React.FC<{
         console.log("Connected handleConnect isInitialized");
         
         setIsInitialized(true);
-        const initialGreeting = "Hello";
+        const initialGreeting = "Hello, before starting the interview can you please introduce yourself and describe the names of concepts that are being covered in this interview?";
         addMessage(initialGreeting);
       }
     };
@@ -257,7 +257,7 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts.slice(0, 2),
+      concepts: concepts,
       interview_id: interviewDetails.data._id,
     });
   };  
