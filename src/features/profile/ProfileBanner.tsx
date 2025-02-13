@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { ProfileFormData } from "./types";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
-import { useGetUserSkillsSummaryMutation } from "@/api/skillsApiSlice";
+import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
 
 interface ProfileBannerProps {
   user: any;
@@ -39,7 +39,7 @@ const ProfileBanner = ({
       : null;
 
   const [getUserSkillsSummary, { data: skillsSummaryData }] =
-    useGetUserSkillsSummaryMutation();
+    useGetPublicUserSkillSummaryMutation();
 
   const totalSkills = skillsSummaryData?.data?.totalSkills || "0";
   const totalVerifiedSkills =
@@ -49,13 +49,12 @@ const ProfileBanner = ({
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const goalName = goalData?.data?.[0]?.name || "";
-  const goalId = goalData?.data?.[0]?._id || "";
 
   useEffect(() => {
-    if (user._id && goalId) {
-      getUserSkillsSummary({ userId: user._id, goalId });
+    if (user) {
+      getUserSkillsSummary({ username: user.username });
     }
-  }, [user._id, goalId, getUserSkillsSummary]);
+  }, [user, getUserSkillsSummary]);
 
   const totalSkillsNum = Number(totalSkills) || 0;
   const totalVerifiedSkillsNum = Number(totalVerifiedSkills) || 0;

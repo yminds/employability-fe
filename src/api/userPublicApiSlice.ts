@@ -8,7 +8,14 @@ export const userPublicApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    getPublicUserSkillSummary: builder.mutation({
+      query: ({ username }) => ({
+        url: `/api/v1/user-profile/skill-summary`,
+        method: "POST",
+        body: { username },
+      }),
+    }),
   }),
 });
 
-export const { useGetPublicProfileQuery } = userPublicApiSlice;
+export const { useGetPublicProfileQuery, useGetPublicUserSkillSummaryMutation } = userPublicApiSlice;
