@@ -108,7 +108,7 @@ const Login: React.FC = () => {
                 Login to Your Account
               </h1>
               <p className="text-sm text-gray-500">
-                New to Employability.AI?{" "}
+                New to EmployAbility.AI?{" "}
                 <button
                   type="button"
                   onClick={() => navigate("/signup")}

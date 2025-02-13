@@ -42,7 +42,6 @@ export const useProfileForm = (
   const [hasCertifications, setHasCertifications] = useState(
     !user.has_certificates
   );
-  const [transformData, setTransformData] = useState<any>({});
   const [errors, setErrors] = useState({});
   const [parsedSkills, setParsedSkills] = useState([]);
 
@@ -148,7 +147,6 @@ export const useProfileForm = (
             result.data
           );
           setParsedSkills(transformedData.skills);
-          setTransformData(transformedData);
         } catch (error) {
           console.error("Error transforming data:", error);
         }

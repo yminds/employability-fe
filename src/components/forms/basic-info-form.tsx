@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { s3Upload, s3Delete } from "@/utils/s3Service";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -23,7 +24,6 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 import VectorFile from "@/assets/profile/completeprofile/file.svg";
 import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
 import { updateUserProfile } from "@/features/authentication/authSlice";
-import axios from "axios";
 import UploadProgressBar from "@/features/profile/UploadProgressBar";
 import type { BasicInfo } from "@/features/profile/types";
 
@@ -62,8 +62,6 @@ export default function BasicInfoForm({
     linkedIn: initialData?.socialProfiles?.linkedIn || user?.linkedIn || "",
     portfolio: initialData?.socialProfiles?.portfolio || user?.portfolio || "",
   });
-
-  // const [socialProfiles, setSocialProfiles] = useState(initialData?.socialProfiles)
 
   const [countries, setCountries] = useState<any[]>([]);
   const [states, setStates] = useState<any[]>([]);
@@ -176,23 +174,11 @@ export default function BasicInfoForm({
       formData.append("folder", "profile-image");
       formData.append("name", file.name);
 
-      const response = await axios.post(
-        `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
-        formData,
-        {
-          onUploadProgress: (progressEvent) => {
-            const progress = progressEvent.total
-              ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              : 0;
-            setUploadProgress(progress);
-          },
-        }
-      );
-      const result = response.data;
+      const response = await s3Upload(formData, setUploadProgress);
 
       setFormData((prev) => ({
         ...prev,
-        profile_image: result.data[0].fileUrl,
+        profile_image: response.data[0].fileUrl,
       }));
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -212,24 +198,8 @@ export default function BasicInfoForm({
           "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
         const key = formData.profile_image.replace(bucketBaseUrl, "");
         console.log("Deleting image with key:", key, "for user:", user._id);
-        const response = await fetch(
-          `${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              key,
-              userId: user._id,
-              folder: "profile-image.",
-            }),
-          }
-        );
 
-        if (!response.ok) {
-          throw new Error("Failed to delete file from S3");
-        }
+        await s3Delete(key, user._id, "profile-image");
       }
 
       setImagePreview(null);
