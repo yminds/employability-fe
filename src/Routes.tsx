@@ -45,6 +45,7 @@ interface RouteConfig {
   childrens?: RouteConfig[];
 }
 
+
 export const routes: RouteConfig[] = [
   {
     route: "/login",
@@ -149,7 +150,11 @@ export const routes: RouteConfig[] = [
   },
   {
     route:"/skill/report/:id",
-    component: <ReportPage/>
+    component: <ReportPage isSharedReport= {false}/>
+  },
+  {
+    route:"share/skills-report/:id",
+    component: <ReportPage isSharedReport= {true}/>
   }
 ];
 

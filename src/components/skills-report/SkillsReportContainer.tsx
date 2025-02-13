@@ -44,10 +44,11 @@ interface ReportContentProps {
   handleBackToSkillsPage: () => void;
   goal_name: string;
   skill_icon: string;
+  userImg:string;
   sharedReport?: boolean;
 }
 
-const getShareUrl = () => {
+const getShareUrl = (params = {}) => {
   if (typeof window === 'undefined') return '';
   
   // Get the current URL and split it to get the ID
@@ -56,9 +57,18 @@ const getShareUrl = () => {
   
   // Get the base URL (e.g., http://localhost:5173)
   const baseUrl = window.location.origin;
+
+  // Create URL with path
+  const url = new URL(`${baseUrl}/share/skills-report/${interviewId}`);
   
-  // Return the formatted share URL
-  return `${baseUrl}/share/skills-report/${interviewId}`;
+  // Add non-empty parameters to URL
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) {
+      url.searchParams.append(key, value as string);
+    }
+  });
+  
+  return url.toString();
 };
 
 const ReportContent: React.FC<ReportContentProps> = ({
@@ -67,6 +77,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
   handleBackToSkillsPage,
   goal_name,
   skill_icon,
+  userImg,
   sharedReport
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
@@ -78,7 +89,12 @@ const ReportContent: React.FC<ReportContentProps> = ({
     setShowSharePopup((prev) => !prev);
   };
 
-  const shareUrl = getShareUrl();
+  const shareUrl = getShareUrl({
+    userName: userName,
+    goal_name: goal_name,
+    skill_icon: skill_icon,
+    userImg: userImg
+  });
 
   const generatePDF = async () => {
     if (!componentRef.current || isGeneratingPDF) return;
@@ -419,6 +435,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
               goalName={goal_name}
               ReportScore={reportData.final_rating}
               skill_icon={skill_icon}
+              isSharedReport={sharedReport}
             />
 
             {/* Progress Bars for Concept Ratings */}
