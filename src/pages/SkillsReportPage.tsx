@@ -138,6 +138,7 @@ const ReportPage = () => {
       handleBackToSkillsPage={handleBackToSkillsPage}
       goal_name={goal_name}
       skill_icon={skill_icon}
+      sharedReport= {false}
     />
   );
 };
