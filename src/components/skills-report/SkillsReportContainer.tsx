@@ -44,7 +44,22 @@ interface ReportContentProps {
   handleBackToSkillsPage: () => void;
   goal_name: string;
   skill_icon: string;
+  sharedReport?: boolean;
 }
+
+const getShareUrl = () => {
+  if (typeof window === 'undefined') return '';
+  
+  // Get the current URL and split it to get the ID
+  const currentPath = window.location.pathname;
+  const interviewId = currentPath.split('/').pop();
+  
+  // Get the base URL (e.g., http://localhost:5173)
+  const baseUrl = window.location.origin;
+  
+  // Return the formatted share URL
+  return `${baseUrl}/share/skills-report/${interviewId}`;
+};
 
 const ReportContent: React.FC<ReportContentProps> = ({
   reportData,
@@ -52,6 +67,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
   handleBackToSkillsPage,
   goal_name,
   skill_icon,
+  sharedReport
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
   const [showSharePopup, setShowSharePopup] = useState(false);
@@ -62,7 +78,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
     setShowSharePopup((prev) => !prev);
   };
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const shareUrl = getShareUrl();
 
   const generatePDF = async () => {
     if (!componentRef.current || isGeneratingPDF) return;
@@ -165,7 +181,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
         format: "a4",
         unit: "pt",
       });
-      
+
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const contentRatio = canvas.height / canvas.width;
@@ -208,18 +224,20 @@ const ReportContent: React.FC<ReportContentProps> = ({
   };
 
   return (
-    <div className="flex w-full h-screen print:h-auto justify-center overflow-y-auto print:overflow-visible font-ubuntu p-6">
-      <div className="w-full max-w-[1800px]">
+    <div className="flex w-full h-screen print:h-auto justify-center overflow-y-auto print:overflow-visible font-ubuntu p-6 ">
+      <div className="w-[90%] max-w-[1800px]">
         {/* Header */}
         <header className="py-6 flex justify-between">
           <div className="max-w-[70%] px-4 flex flex-col gap-2">
             <h1 className="text-title text-grey-7 font-bold flex gap-4 items-center">
-              <button
-                onClick={handleBackToSkillsPage}
-                className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
-              >
-                <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
-              </button>
+              {!sharedReport && (
+                <button
+                  onClick={handleBackToSkillsPage}
+                  className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
+                >
+                  <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
+                </button>
+              )}
               <span className="text-h1">
                 {userName}&apos;s {reportData.interview_id?.title} Report
               </span>
@@ -227,40 +245,42 @@ const ReportContent: React.FC<ReportContentProps> = ({
           </div>
 
           {/* Share Button and Popup */}
-          <div className="flex gap-4 relative">
-            <button
-              className="flex gap-2 items-center px-4 py-2 rounded-md text-grey-7 hover:bg-gray-100 relative"
-              onClick={handleShareClick}
-            >
-              <Share2 />
-              Share Report
-            </button>
-            {showSharePopup && (
-              <div className="absolute right-0 top-[40px] bg-white border border-gray-300 rounded p-4 shadow-md min-w-[250px]">
-                <p className="text-sm text-grey-7 font-medium mb-2">
-                  Share this link:
-                </p>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={shareUrl}
-                    className="flex-1 text-sm py-1 px-2 border border-gray-300 rounded focus:outline-none"
-                  />
-                  <button
-                    className="text-sm px-2 py-1 bg-primary-green text-white rounded hover:opacity-90"
-                    onClick={() => {
-                      navigator.clipboard.writeText(shareUrl);
-                      setCopyText("Copied");
-                      setTimeout(() => setCopyText("Copy"), 2000);
-                    }}
-                  >
-                    {copyText}
-                  </button>
+          {!sharedReport && (
+            <div className="flex gap-4 relative">
+              <button
+                className="flex gap-2 items-center px-4 py-2 rounded-md text-grey-7 hover:bg-gray-100 relative"
+                onClick={handleShareClick}
+              >
+                <Share2 />
+                Share Report
+              </button>
+              {showSharePopup && (
+                <div className="absolute right-0 top-[40px] bg-white border border-gray-300 rounded p-4 shadow-md min-w-[250px]">
+                  <p className="text-sm text-grey-7 font-medium mb-2">
+                    Share this link:
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={shareUrl}
+                      className="flex-1 text-sm py-1 px-2 border border-gray-300 rounded focus:outline-none"
+                    />
+                    <button
+                      className="text-sm px-2 py-1 bg-primary-green text-white rounded hover:opacity-90"
+                      onClick={() => {
+                        navigator.clipboard.writeText(shareUrl);
+                        setCopyText("Copied");
+                        setTimeout(() => setCopyText("Copy"), 2000);
+                      }}
+                    >
+                      {copyText}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </header>
 
         {/* Main Content */}
@@ -270,7 +290,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
           className="max-w-[1800px] h-full print:h-auto flex mx-auto px-4 gap-6 printable-container"
         >
           {/* Left Section */}
-          <section className="w-full flex-[7]">
+          <section className="w-full flex-[7.5]">
             {/* Video Container – hidden in PDF via the "pdf-hide" class */}
             {reportData.s3_recording_url && (
               <section className="flex justify-center pdf-hide">
@@ -394,7 +414,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
           </section>
 
           {/* Right Section */}
-          <section className="w-full flex-[3] gap-5">
+          <section className="w-full flex-[2.5] gap-5">
             <ReportScore
               goalName={goal_name}
               ReportScore={reportData.final_rating}
@@ -431,11 +451,11 @@ const ReportContent: React.FC<ReportContentProps> = ({
             </section>
 
             {/* PDF Download Section – hidden in PDF */}
-            <section className="bg-white rounded-md p-8 pdf-hide">
-              <div className="text-body2 mb-6">
-                Get a PDF version of this skill report to be shared with employers
-              </div>
-              <div>
+            {!sharedReport && (
+              <section className="bg-white rounded-md p-8 pdf-hide">
+                <div className="text-body2 mb-6">
+                  Get a PDF version of this skill report to be shared with employers
+                </div>
                 <button
                   className="flex gap-2 items-center px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={generatePDF}
@@ -443,8 +463,8 @@ const ReportContent: React.FC<ReportContentProps> = ({
                 >
                   {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
                 </button>
-              </div>
-            </section>
+              </section>
+            )}
           </section>
         </main>
       </div>

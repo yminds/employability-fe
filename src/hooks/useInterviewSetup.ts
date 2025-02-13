@@ -46,6 +46,8 @@ const uploadFileToS3 = async (
       throw new Error("Failed to get pre-signed URL.");
     }
 
+
+
     // Step 2: Upload the file to S3 using the pre-signed URL
     const uploadResponse = await fetch(presignedUrl, {
       method: "PUT",
@@ -95,6 +97,7 @@ const useInterviewSetup = () => {
   const lastChunkRef = useRef<Promise<void> | null>(null);
   const [allBlobFiles, setAllBlobFiles] = useState<Blob[]>([]);
   const [chunkNumber, setChunkNumber] = useState(1);
+  const recordedChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (videoRef.current && screenStream) {
@@ -117,6 +120,8 @@ const useInterviewSetup = () => {
     setIsCameraSelected(isCameraSelected);
   };
 
+  const isStoppingRef = useRef(false);
+
   const handleShareScreen = async () => {
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
@@ -124,7 +129,6 @@ const useInterviewSetup = () => {
         audio: true, 
       });
   
-     
       const micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -133,101 +137,95 @@ const useInterviewSetup = () => {
         },
       });
   
-      
       const audioContext = new AudioContext();
       const destination = audioContext.createMediaStreamDestination();
   
-     
       const micSource = audioContext.createMediaStreamSource(micStream);
       micSource.connect(destination);
   
-    
       const systemAudioSource = audioContext.createMediaStreamSource(
         new MediaStream(screenStream.getAudioTracks())
       );
       systemAudioSource.connect(destination);
   
-     
       const combinedStream = new MediaStream([
         ...screenStream.getVideoTracks(), 
         ...destination.stream.getAudioTracks(), 
       ]);
-  
 
       setScreenStream(combinedStream);
       setIsScreenSharing(true);
-      localStorage.setItem("isScreenSharing", "true");
 
       const startRecording = () => {
         const recorder = new MediaRecorder(combinedStream, {
           mimeType: "video/webm; codecs=vp8,opus",
         });
 
-        recorder.ondataavailable = (event) => {
+        recorder.ondataavailable = async (event) => {
           if (event.data.size > 0) {
-            uploadFileToS3(updateReportRecording, event.data, interviewId, chunkNumber);
-            setChunkNumber(chunkNumber + 1);
+            recordedChunksRef.current.push(event.data);
+            
+            // If we're stopping or this is a regular chunk, upload it
+            if (isStoppingRef.current || recordedChunksRef.current.length >= 1) {
+              const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+              await uploadFileToS3(updateReportRecording, blob, interviewId, chunkNumber);
+              setChunkNumber(prev => prev + 1);
+              recordedChunksRef.current = [];
+            }
           }
         };
 
         recorder.onstop = () => {
-          // restart recoding after 1 second
-          setTimeout(startRecording, 1000);
+          if (!isStoppingRef.current) {
+            setTimeout(startRecording, 1000);
+          }
         };
 
         recorder.start();
-
         recorderRef.current = recorder;
+
         // Stop recording after 3 minutes (180000ms)
         setTimeout(() => {
           if (recorder && recorder.state !== "inactive") {
             recorder.stop();
           }
-        }, 30000);
+        }, 180000); // Changed to 3 minutes
       };
 
-      // Start the first recording
       startRecording();
     } catch (error) {
       console.error("Error capturing screen and microphone:", error);
     }
   };
 
-  const stopScreenSharing = async () => {
-    // we should upload the last chunk to S3 here
-    if (recorderRef.current) {
-      recorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          lastChunkRef.current = uploadFileToS3(updateReportRecording, event.data, interviewId, chunkNumber);
-          setChunkNumber(chunkNumber + 1);
-        }
-      };
-    }
-    if (recorderRef.current) {
-      recorderRef.current.stop();
-      recorderRef.current = null;
-    }
-    if (lastChunkRef.current) {
-      console.log("Waiting for the last chunk to finish uploading...");
-      await lastChunkRef.current;
+const stopScreenSharing = async () => {
+  try {
+    isStoppingRef.current = true;
+
+    // Stop the recorder if it's running
+    if (recorderRef.current && recorderRef.current.state !== "inactive") {
+      recorderRef.current.stop(); // This will trigger ondataavailable automatically
     }
 
+    // Wait for ondataavailable to process the last chunk
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    // Clear recorded chunks (prevents double upload)
+    recordedChunksRef.current = []; // Reset after final chunk is uploaded
+
+    // Stop screen stream
     if (screenStream) {
       screenStream.getTracks().forEach((track) => track.stop());
       setScreenStream(null);
-      setIsScreenSharing(false);
-      localStorage.setItem("isScreenSharing", "false");
     }
 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
+    setIsScreenSharing(false);
+    isStoppingRef.current = false;
+  } catch (error) {
+    console.error("Error stopping screen sharing:", error);
+  }
+};
 
-    // Clear all recorded chunks
-    recordedChunks.current = [];
-    setAllBlobFiles([]);
-  };
 
   const handleScaleChange = (scale: number) => {
     setCameraScale(scale);
@@ -250,7 +248,6 @@ const useInterviewSetup = () => {
       setScreenStream(stream);
       setIsScreenSharing(true);
       setMicTested(false);
-      localStorage.setItem("isScreenSharing", "true");
     } catch (error) {
       console.error("Error capturing screen:", error);
     }
