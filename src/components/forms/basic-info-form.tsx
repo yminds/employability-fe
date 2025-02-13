@@ -188,21 +188,12 @@ export default function BasicInfoForm({
           },
         }
       );
-
-      // if (!response.ok) {
-      //   throw new Error("Failed to upload image");
-      // }
-
-      // const result = await response.json();
-
       const result = response.data;
 
-      // Update form data with the returned S3 URL
       setFormData((prev) => ({
         ...prev,
         profile_image: result.data[0].fileUrl,
       }));
-      dispatch(updateUserProfile({ profile_image: result.data[0].fileUrl }));
     } catch (error) {
       console.error("Error uploading image:", error);
       setImageError("Failed to upload image. Please try again.");
@@ -244,7 +235,6 @@ export default function BasicInfoForm({
       setImagePreview(null);
       setImageError("");
       setFormData((prev) => ({ ...prev, profile_image: "" }));
-      dispatch(updateUserProfile({ profile_image: "" }));
     } catch (error) {
       console.error("Error removing image:", error);
       setImageError("Failed to remove image. Please try again.");
