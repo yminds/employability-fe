@@ -32,7 +32,12 @@ interface BasicInfoFormProps {
     basicInfo: BasicInfo;
     socialProfiles: any;
   };
-  onChange: (basicInfo: BasicInfo, socialProfiles: any) => void;
+  onChange: (
+    basicInfo: BasicInfo,
+    socialProfiles: any,
+    isImageDeleted: boolean,
+    newlyUploadedImage: string | null
+  ) => void;
   errors: { [key: string]: string };
 }
 
@@ -70,6 +75,10 @@ export default function BasicInfoForm({
     formData.profile_image || null
   );
   const [imageError, setImageError] = useState<string>("");
+  const [isImageDeleted, setIsImageDeleted] = useState(false); // Added state variable
+  const [newlyUploadedImage, setNewlyUploadedImage] = useState<string | null>(
+    null
+  );
 
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -98,7 +107,7 @@ export default function BasicInfoForm({
       setStates([]);
       setCities([]);
     }
-  }, [formData.country, formData.state]); // Added formData.state to dependencies
+  }, [formData.country, formData.state]);
 
   // Update cities when state changes
   useEffect(() => {
@@ -118,23 +127,22 @@ export default function BasicInfoForm({
     } else {
       setCities([]);
     }
-  }, [formData.country, formData.state]);
+  }, [formData.country, formData.state, formData.city]); // Added formData.city to dependencies
 
   // Call onChange whenever formData or socialProfiles change
   useEffect(() => {
     const timer = setTimeout(() => {
-      onChange(formData, socialProfiles);
+      onChange(formData, socialProfiles, isImageDeleted, newlyUploadedImage); // Updated onChange call
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [formData, socialProfiles]);
+  }, [formData, socialProfiles, isImageDeleted, newlyUploadedImage, onChange]); // Added isImageDeleted to dependencies
 
   const handleBasicInfoChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // dispatch(updateUserProfile({ [name]: value }))
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,6 +184,8 @@ export default function BasicInfoForm({
 
       const response = await s3Upload(formData, setUploadProgress);
 
+      setNewlyUploadedImage(response.data[0].fileUrl);
+      setImagePreview(response.data[0].fileUrl);
       setFormData((prev) => ({
         ...prev,
         profile_image: response.data[0].fileUrl,
@@ -191,20 +201,18 @@ export default function BasicInfoForm({
 
   const removeImage = async () => {
     try {
-      console.log("Remove image");
-
-      if (formData.profile_image && user?._id) {
+      if (newlyUploadedImage) {
         const bucketBaseUrl =
           "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
-        const key = formData.profile_image.replace(bucketBaseUrl, "");
-        console.log("Deleting image with key:", key, "for user:", user._id);
-
-        await s3Delete(key, user._id, "profile-image");
+        const key = newlyUploadedImage.replace(bucketBaseUrl, "");
+        await s3Delete(key, user?._id, "profile-image");
+        setNewlyUploadedImage(null);
       }
 
       setImagePreview(null);
       setImageError("");
       setFormData((prev) => ({ ...prev, profile_image: "" }));
+      setIsImageDeleted(true);
     } catch (error) {
       console.error("Error removing image:", error);
       setImageError("Failed to remove image. Please try again.");
@@ -363,9 +371,6 @@ export default function BasicInfoForm({
           </div>
         </div>
       </div>
-      {/* <h3 className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-        Basic Info
-      </h3> */}
       <div className="bg-white rounded-lg p-8 space-y-6 relative border border-[#E5E7EB]">
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -531,7 +536,7 @@ export default function BasicInfoForm({
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-              gitHub
+              GitHub
             </Label>
             <Input
               type="url"
@@ -539,7 +544,7 @@ export default function BasicInfoForm({
               value={socialProfiles.gitHub}
               onChange={handleSocialProfileChange}
               className="w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]"
-              placeholder="https://gitHub.com/username"
+              placeholder="https://github.com/username"
             />
           </div>
 
@@ -553,7 +558,7 @@ export default function BasicInfoForm({
               value={socialProfiles.linkedIn}
               onChange={handleSocialProfileChange}
               className="w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]"
-              placeholder="https://linkedIn.com/in/username"
+              placeholder="https://linkedin.com/in/username"
             />
           </div>
 

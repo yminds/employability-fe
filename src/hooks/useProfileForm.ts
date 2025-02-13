@@ -25,8 +25,9 @@ import { validateCertifications } from "@/features/profile/validation/validateCe
 import { parsedTransformData } from "@/utils/parsedTransformData";
 import { parseAddress } from "@/utils/addressParser";
 import { transformFormDataForDB } from "@/utils/transformData";
-import { ProfileFormData } from "@/features/profile/types";
+import type { ProfileFormData } from "@/features/profile/types";
 import { updateUserProfile } from "@/features/authentication/authSlice";
+import { s3Delete } from "@/utils/s3Service";
 
 export const useProfileForm = (
   type: string,
@@ -44,6 +45,10 @@ export const useProfileForm = (
   );
   const [errors, setErrors] = useState({});
   const [parsedSkills, setParsedSkills] = useState([]);
+  const [isImageDeleted, setIsImageDeleted] = useState(false);
+  const [newlyUploadedImage, setNewlyUploadedImage] = useState<string | null>(
+    null
+  );
 
   const { data: userDetails } = useGetUserByIdQuery(user._id, {
     refetchOnMountOrArgChange: false,
@@ -231,7 +236,7 @@ export const useProfileForm = (
               })),
             }));
           } else if (parsedSkills.length > 0) {
-            let updatedSkills = parsedSkills.filter(
+            const updatedSkills = parsedSkills.filter(
               (parsedSkill: any) =>
                 !response.data.all.some(
                   (skill: any) =>
@@ -266,11 +271,24 @@ export const useProfileForm = (
   }, [parsedSkills]);
 
   const updateFormData = useCallback(
-    (section: keyof ProfileFormData, data: any) => {
+    (
+      section: keyof ProfileFormData,
+      data: any,
+      isImageDeleted?: boolean,
+      newlyUploadedImage?: string | null
+    ) => {
       setFormData((prev: any) => ({
         ...prev,
         [section]: data,
       }));
+      if (section === "basicInfo") {
+        if (isImageDeleted !== undefined) {
+          setIsImageDeleted(isImageDeleted);
+        }
+        if (newlyUploadedImage !== undefined) {
+          setNewlyUploadedImage(newlyUploadedImage);
+        }
+      }
     },
     []
   );
@@ -366,9 +384,6 @@ export const useProfileForm = (
       if (!validateSection(section)) {
         return;
       }
-
-      console.log("Clicked");
-
       try {
         const transformedData = transformFormDataForDB(formData);
         transformedData.is_experienced = !isFresher;
@@ -383,6 +398,23 @@ export const useProfileForm = (
               ...updatedUserData
             } = transformedData;
 
+            if (isImageDeleted && user.profile_image) {
+              try {
+                const bucketBaseUrl =
+                  "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
+                const key = user.profile_image.replace(bucketBaseUrl, "");
+                await s3Delete(key, user._id, "profile-image");
+              } catch (error) {
+                console.error("Error deleting image from S3:", error);
+              }
+            }
+
+            if (newlyUploadedImage) {
+              updatedUserData.profile_image = newlyUploadedImage;
+            } else if (isImageDeleted) {
+              updatedUserData.profile_image = "";
+            }
+
             try {
               const response = await updateUser({
                 userId: user._id,
@@ -396,9 +428,11 @@ export const useProfileForm = (
               dispatch(
                 updateUserProfile({
                   ...updatedUserData,
-                  profile_image: transformedData.profile_image ?? "",
+                  profile_image: updatedUserData.profile_image ?? "",
                 })
               );
+              setIsImageDeleted(false);
+              setNewlyUploadedImage(null);
             } catch (error) {
               console.error(
                 "Error saving basic info and social profiles:",
@@ -650,7 +684,6 @@ export const useProfileForm = (
 
         console.log(`${section} section saved successfully`);
 
-        // Move to the next tab after saving
         const currentIndex = [
           "basic",
           "skills",
@@ -693,6 +726,8 @@ export const useProfileForm = (
       updateCertification,
       goalId,
       hasCertifications,
+      isImageDeleted,
+      newlyUploadedImage,
     ]
   );
 
@@ -712,5 +747,9 @@ export const useProfileForm = (
     validateSection,
     handleDelete,
     handleSaveSection,
+    isImageDeleted,
+    setIsImageDeleted,
+    newlyUploadedImage,
+    setNewlyUploadedImage,
   };
 };
