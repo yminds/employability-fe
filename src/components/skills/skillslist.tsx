@@ -124,8 +124,8 @@ const SkillList: React.FC<SkillListProps> = ({
   };
 
   const moveUnverifiedToIndexZero = (skills: Skill[]): Skill[] => {
-    const unverifiedSkills = skills.filter((skill) => skill.verified_rating === 0);
-    const verifiedSkills = skills.filter((skill) => skill.verified_rating > 0);
+    const unverifiedSkills = skills.filter((skill) => skill.verified_rating <= 3);
+    const verifiedSkills = skills.filter((skill) => skill.verified_rating > 3);
     return unverifiedSkills.length > 0
       ? [unverifiedSkills[0], ...verifiedSkills, ...unverifiedSkills.slice(1)]
       : skills;

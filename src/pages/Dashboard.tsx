@@ -265,7 +265,7 @@ const Dashboard: React.FC<Props> = () => {
         <div className="mx-auto p-[55px] pt-[55px] pb-[42px] h-full">
           {hasGoals ? (
             <main className="h-full">
-               <div className="grid grid-cols-4 gap-4 h-[calc(100%-30px)]">
+               <div className="grid grid-cols-4 gap-4 h-[calc(100%-1px)]">
                 {/* Main scrollable content */}
                 <div className="col-span-3 overflow-y-auto pr-4 scrollbar-hide">
                   <div className="flex flex-col gap-6">
@@ -481,6 +481,7 @@ const Dashboard: React.FC<Props> = () => {
                 </div>
 
                 {/* Set Goal Dialog */}
+
                 <Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
                   <DialogContent className="max-w-[1400px] rounded-[12px]">
                     <DialogTitle className="hidden">Set Your Goal</DialogTitle>
