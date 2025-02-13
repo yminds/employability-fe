@@ -122,7 +122,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const skillsLevelObj = { 1: "Basic", 2: "Intermediate", 3: "Advanced" };
 
   const handleViewReport = () => {
-    navigate(`/skill/report/${skillId}`, {
+    navigate(`/skill/report/${bestInterview}`, {
       state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg },
     });
   };
@@ -477,7 +477,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                     View report
                   </button>
                   <button
-                    onClick={handleVerifySkill}
+                    onClick={() => handleVerifySkill()}
                     className="py-2 text-sm font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
                   >
                     Improve score
