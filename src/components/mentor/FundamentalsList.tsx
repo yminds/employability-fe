@@ -42,18 +42,18 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
       >
         {isSidebarOpen && (
           <div className="h-full flex flex-col">
-            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 p-6">
+            <div className="bg-gradient-to-r from-green-600 to-green-700 p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-white">Fundamentals of {skill}</h2>
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="text-white hover:bg-indigo-500 p-2 rounded-full transition-colors"
+                  className="text-white hover:bg-green-500 p-2 rounded-full transition-colors"
                 >
                   <X size={20} />
                 </button>
               </div>
-              <div className="bg-indigo-500/20 rounded-lg p-3">
-                <p className="text-indigo-100 text-sm">
+              <div className="bg-green-500/20 rounded-lg p-3">
+                <p className="text-green-100 text-sm">
                   Track your progress through essential concepts and fundamentals
                 </p>
               </div>
@@ -109,7 +109,7 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
       {!isSidebarOpen && (
         <button
           onClick={() => setSidebarOpen(true)}
-          className="fixed right-6 top-6 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-105 z-50"
+          className="fixed right-6 top-6 bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-105 z-50"
         >
           <List size={20} />
         </button>

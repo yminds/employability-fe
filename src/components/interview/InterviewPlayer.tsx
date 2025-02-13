@@ -70,7 +70,10 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
       setCurrentChunk(chunkIndex);
     } else {
       playerRef.current?.seekTo(progressWithinChunk, "seconds");
+
     }
+    // also play the video
+    setIsPlaying(true);
   };
 
   // Handle seeking after chunk change
@@ -149,6 +152,20 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
           }}
           controls={false}
           playsInline
+          onPlay={()=>{
+            console.log("its playing");
+            
+          }}
+          onBuffer={()=>{
+            setIsLoading(true);
+            console.log("buffering😊");
+            
+          }}
+          onBufferEnd={()=>{
+            setIsLoading(false);
+            console.log("buffering end😊");
+            
+          }}
         />
         
         {/* Loading Overlay */}

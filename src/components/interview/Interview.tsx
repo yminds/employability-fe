@@ -234,7 +234,7 @@ const Interview: React.FC<{
     });
   };
 
-  const addMessage = (prompt: string) => {
+  const addMessage =async (prompt: string) => {
     console.log("🔥 addMessage called with prompt:", prompt);
 
     if (!interviewDetails?.data?._id) {
@@ -245,7 +245,7 @@ const Interview: React.FC<{
     // Move to "WAITING" state when sending a new question
     setInterviewState("WAITING");
   
-    interviewStream({
+    const response =await interviewStream({
       prompt,
       model: "gpt-4o",
       provider: "openai",
@@ -259,7 +259,24 @@ const Interview: React.FC<{
       skill_name: interviewTopic,
       concepts: concepts,
       interview_id: interviewDetails.data._id,
+    }).unwrap()
+
+     console.log("response", response);
+     
+    setAllConcepts((prev) => {
+      const updatedConcepts = prev.map((concept) => {
+        if (response?.event?.ratedConcepts?.includes(concept?.name)) {
+          console.log("Concept entred", { ...concept, status: "completed" });
+          
+          return { ...concept, status: "completed" };
+        }
+        console.log("concept", concept);
+        
+        return concept;
+      });
+      return updatedConcepts;
     });
+    
   };  
   
   const navigate = useNavigate();
