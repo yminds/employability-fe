@@ -43,7 +43,7 @@ const ExperienceLevel: React.FC = () => {
         </section>
         <section className="h-full w-full flex items-center justify-center">
           <div className="flex flex-col items-center justify-center max-w-[846px]">
-            <div className="bg-white rounded-lg w-full max-w-[500px]">
+            <div className="rounded-lg w-full max-w-[500px]">
               <div className="mb-[40px]">
                 <h2 className="font-ubuntu text-3xl font-bold text-[#1a1a1a] mb-2">
                   Hey <span className="text-[#08a358]">{user.name}</span>!

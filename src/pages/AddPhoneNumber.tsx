@@ -166,7 +166,7 @@ const AddPhone: React.FC = () => {
         {/* Right Section - Phone Number Form */}
         <section className="h-full w-full flex items-center justify-center">
           <div className="flex flex-col items-center justify-center max-w-[846px] w-full">
-            <div className="bg-white rounded-lg w-full max-w-[500px] p-8 relative">
+            <div className="rounded-lg w-full max-w-[500px] p-8 relative">
               {/* Back Button */}
               <button
                 onClick={() => navigate(-1)}
