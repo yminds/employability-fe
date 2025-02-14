@@ -72,20 +72,25 @@ const Login: React.FC = () => {
 
   return (
     <div className="flex h-screen w-screen bg-white dark:bg-gray-800">
-      {/* Logo */}
-      <div className="absolute top-5 left-10 w-1/4 h-1/4 z-10">
-        <img src={logo} alt="Logo" />
-      </div>
-
-      {/* Hero Image Section */}
-      <div className="flex w-1/2 justify-center items-center md:block md:p-0 relative">
-        <img
-          src={grid}
-          alt="Hero"
-          className="w-full max-h-screen md:h-screen object-cover md:block"
-        />
-        <img src={man} alt="Hero" className="w-[100%] bottom-0 absolute" />
-      </div>
+       {/* Left Section */}
+       <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
+          <img
+            src={grid || "/placeholder.svg"}
+            alt="Grid Background"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <img
+            src={man || "/placeholder.svg"}
+            alt="Hero"
+            className="absolute bottom-0 left-0 right-0 w-full object-contain"
+          />
+          <div className="absolute top-8 left-8 z-20">
+            <img
+              src={logo || "/placeholder.svg"}
+              alt="Logo"
+            />
+          </div>
+        </div>
 
       {/* Form Section */}
       <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">

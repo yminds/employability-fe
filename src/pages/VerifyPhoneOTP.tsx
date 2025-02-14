@@ -382,12 +382,8 @@ const VerifyPhoneOTP = () => {
             alt="Hero"
             className="absolute bottom-0 left-0 right-0 w-full object-contain"
           />
-          <div className="absolute top-5 left-10 z-20">
-            <img
-              src={logo || "/placeholder.svg"}
-              alt="Logo"
-              className="h-10 w-auto"
-            />
+          <div className="absolute top-8 left-8 z-20">
+            <img src={logo || "/placeholder.svg"} alt="Logo" />
           </div>
         </div>
         {/* Right Section */}

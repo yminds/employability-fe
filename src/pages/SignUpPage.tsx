@@ -120,17 +120,21 @@ const SignupForm = () => {
 
   return (
     <section className="flex h-screen w-screen bg-white relative dark:bg-gray-800">
-      <div className=" absolute top-5 left-10 w-1/4  h-1/4  z-10">
-        <img src={logo} alt="" />
-      </div>
-      {/* Left Image Section */}
-      <div className="flex w-1/2 justify-center items-center md:block md:p-0 relative">
+      {/* Left Section */}
+      <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
         <img
-          src={grid}
-          alt="Hero"
-          className="w-full max-h-screen md:h-screen object-cover md:block"
+          src={grid || "/placeholder.svg"}
+          alt="Grid Background"
+          className="absolute inset-0 h-full w-full object-cover"
         />
-        <img src={man} alt="Hero" className="w-[100%] bottom-0 absolute" />
+        <img
+          src={man || "/placeholder.svg"}
+          alt="Hero"
+          className="absolute bottom-0 left-0 right-0 w-full object-contain"
+        />
+        <div className="absolute top-8 left-8 z-20">
+          <img src={logo || "/placeholder.svg"} alt="Logo" />
+        </div>
       </div>
 
       {/* Right Form Section */}
