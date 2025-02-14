@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useVerifyOTPMutation, useUpdateFirstTimeUserMutation, useVerifyPhoneMutation, useResendOTPMutation } from "@/api/authApiSlice";
+import {
+  useVerifyOTPMutation,
+  useUpdateFirstTimeUserMutation,
+  useVerifyPhoneMutation,
+  useResendOTPMutation,
+} from "@/api/authApiSlice";
 import { setCredentials } from "@/features/authentication/authSlice";
 import { PhoneInput } from "@/components/cards/phoneInput/PhoneInput";
 import bg from "@/assets/set-goal/backGround.png";
@@ -15,27 +20,30 @@ import ProtectedOnboardingRoute from "@/features/authentication/ProtectedOnboard
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RootState } from "@/store/store";
 import { toast } from "sonner";
+import verify from "@/assets/sign-up/verify.svg";
+import Phone from "@/assets/sign-up/Phone.svg";
+import { Value as PhoneNumberValue } from "react-phone-number-input";
 
 const RESEND_COOLDOWN = 60; // 60 seconds cooldown for resend
 
 const VerifyPhoneOTP = () => {
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", ""]);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [shake, setShake] = useState(false);
-  const [currentView, setCurrentView] = useState<'otp' | 'edit'>('otp');
+  const [currentView, setCurrentView] = useState<"otp" | "edit">("otp");
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState("IN");
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  
+
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
-  
+
   const [verifyOTP] = useVerifyOTPMutation();
   const [updateFirstTimeUser] = useUpdateFirstTimeUserMutation();
   const [verifyPhone] = useVerifyPhoneMutation();
@@ -48,7 +56,7 @@ const VerifyPhoneOTP = () => {
   useEffect(() => {
     if (resendTimer > 0) {
       const interval = setInterval(() => {
-        setResendTimer(prev => prev - 1);
+        setResendTimer((prev) => prev - 1);
       }, 1000);
       return () => clearInterval(interval);
     }
@@ -61,27 +69,32 @@ const VerifyPhoneOTP = () => {
     newOtp[index] = element.value;
     setOtp(newOtp);
 
-    if (element.value !== '' && index < 3) {
-      const nextInput = element.parentElement.nextElementSibling?.querySelector('input');
+    if (element.value !== "" && index < 3) {
+      const nextInput =
+        element.parentElement.nextElementSibling?.querySelector("input");
       if (nextInput) nextInput.focus();
     }
   };
 
   const handleKeyDown = (e: any, index: any) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      const prevInput = e.target.parentElement.previousElementSibling?.querySelector('input');
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      const prevInput =
+        e.target.parentElement.previousElementSibling?.querySelector("input");
       if (prevInput) {
         prevInput.focus();
         const newOtp = [...otp];
-        newOtp[index - 1] = '';
+        newOtp[index - 1] = "";
         setOtp(newOtp);
       }
     }
   };
 
-  const handlePhoneInputChange = (value: string, country: any) => {
+  const handlePhoneInputChange = (
+    value: PhoneNumberValue,
+    country?: { countryCode: string }
+  ) => {
     setNewPhoneNumber(value || "");
-    if (country?.countryCode) {
+    if (country) {
       setCountryCode(country.countryCode);
     }
   };
@@ -89,18 +102,18 @@ const VerifyPhoneOTP = () => {
   const handleUpdatePhone = async () => {
     try {
       const verifyResponse = await verifyPhone({
-        userId: user?._id,
+        userId: user?._id || "",
         phoneNumber: newPhoneNumber,
-        countryCode
+        countryCode,
       }).unwrap();
 
       if (!verifyResponse.success) {
-        throw new Error(verifyResponse.message || 'Phone verification failed');
+        throw new Error(verifyResponse.message || "Phone verification failed");
       }
 
       toast.success("OTP sent successfully to your new number");
-      setCurrentView('otp');
-      setOtp(['', '', '', '']);
+      setCurrentView("otp");
+      setOtp(["", "", "", ""]);
       setResendTimer(RESEND_COOLDOWN);
     } catch (err: any) {
       toast.error(err.data?.message || "Failed to update phone number");
@@ -110,18 +123,18 @@ const VerifyPhoneOTP = () => {
 
   const handleResendOtp = async () => {
     if (resendTimer > 0) return;
-    
+
     setIsResending(true);
     try {
       const response = await resendOTP({
-        userId: user?._id,
+        userId: user?._id || "",
         phoneNumber: location.state?.phoneNumber,
-        countryCode: location.state?.countryCode
+        countryCode: location.state?.countryCode,
       }).unwrap();
 
       if (response.success) {
         toast.success("New OTP sent successfully!");
-        setOtp(['', '', '', '']);
+        setOtp(["", "", "", ""]);
         setErrorMessage(null);
         setResendTimer(RESEND_COOLDOWN);
       }
@@ -141,17 +154,17 @@ const VerifyPhoneOTP = () => {
     try {
       const response = await verifyOTP({
         userId: user?._id || "",
-        otp: otp.join('')
+        otp: otp.join(""),
       }).unwrap();
 
       if (!response.success) {
-        throw new Error(response.message || 'Verification failed');
+        throw new Error(response.message || "Verification failed");
       }
 
       const result = await updateFirstTimeUser({
         user_id: user?._id || "",
         experience_level: location.state?.experienceLevel,
-        phone_number: location.state?.phoneNumber
+        phone_number: location.state?.phoneNumber,
       }).unwrap();
 
       dispatch(
@@ -164,7 +177,7 @@ const VerifyPhoneOTP = () => {
       toast.success("Phone number verified successfully");
 
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 1000);
     } catch (err: any) {
       toast.error(err.message || "Invalid OTP. Please try again.");
@@ -178,24 +191,27 @@ const VerifyPhoneOTP = () => {
 
   const renderEditView = () => (
     <>
-      <Button 
-        variant="ghost" 
-        onClick={() => setCurrentView('otp')}
-        className="absolute top-4 left-4 text-gray-600 hover:text-gray-900 flex items-center"
-      >
-        <img
-          src={arrow || "/placeholder.svg"}
-          alt="Back"
-          className="w-4 h-4 mr-2"
-        />
-        <span className="text-sm font-medium">Back</span>
-      </Button>
+      <div className="space-y-11">
+        <button
+          onClick={() => setCurrentView("otp")}
+          className="absolute top-4 left-8 text-[#666] hover:text-gray-900 flex items-center mb-6"
+        >
+          <img
+            src={arrow || "/placeholder.svg"}
+            alt="Back"
+            className="w-4 h-4 mr-2"
+          />
+          <span className="text-sm font-medium">Back</span>
+        </button>
 
-      <div className="mb-[40px] mt-8">
-        <h1 className="font-ubuntu text-2xl font-bold leading-[42px] tracking-[-0.5px]">
-          Edit Phone Number
-        </h1>
-        <p className="text-black text-opacity-60 font-sf-pro-display text-base font-normal leading-6 tracking-wide">
+        <div className="w-[58px] h-[58px] flex justify-center items-center p-4 rounded-full border border-[rgba(0,0,0,0.10)]">
+          <img src={Phone} alt="Phone" className="w-6 h-6 text-gray-600" />
+        </div>
+      </div>
+
+      <div className="mb-[32px] mt-[40px] space-y-4">
+        <h1 className="text-[#1A1A1A] text-title">Edit Phone Number</h1>
+        <p className="text-[rgba(0,0,0,0.60)] text-body2">
           Enter your new phone number below
         </p>
       </div>
@@ -211,7 +227,7 @@ const VerifyPhoneOTP = () => {
         </Alert>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         <PhoneInput
           placeholder="Phone Number"
           required
@@ -233,33 +249,48 @@ const VerifyPhoneOTP = () => {
 
   const renderOtpView = () => (
     <>
-      <button
-        onClick={() => navigate(-1)}
-        className="absolute top-4 left-4 text-gray-600 hover:text-gray-900 flex items-center"
-      >
+      <div className="space-y-11">
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-8 text-gray-600 hover:text-gray-900 flex items-center"
+        >
+          <img
+            src={arrow || "/placeholder.svg"}
+            alt="Back"
+            className="w-4 h-4 mr-2"
+          />
+          <span className="text-sm font-medium">Back</span>
+        </button>
         <img
-          src={arrow || "/placeholder.svg"}
-          alt="Back"
-          className="w-4 h-4 mr-2"
+          src={verify}
+          alt="verify"
+          className="w-[58px] h-[58px] object-cover"
         />
-        <span className="text-sm font-medium">Back</span>
-      </button>
+      </div>
 
       <div className="mb-[40px] mt-8">
-        <h1 className="font-ubuntu text-2xl font-bold leading-[42px] tracking-[-0.5px]">
-          Enter verification code
-        </h1>
-        <div className="flex items-center justify-center gap-2 text-black text-opacity-60 font-sf-pro-display text-base font-normal">
+        <h1 className="text-title text-[#1A1A1A]">Verify Your Phone Number</h1>
+        <div className="flex justify-start gap-2 text-body2 text-[rgba(0,0,0,0.60)] mt-[16px]">
           <span>We've sent an OTP to</span>
           <div className="flex items-center gap-1">
-            <span className="text-[#09d372]">{location.state?.phoneNumber}</span>
+            <span
+              className="text-[#0AD472] underline decoration-solid decoration-from-font"
+              style={{
+                textDecorationSkipInk: "none",
+                textDecorationThickness: "auto",
+                textUnderlineOffset: "auto",
+                textUnderlinePosition: "from-font",
+              }}
+            >
+              {location.state?.phoneNumber}
+            </span>
             <Button
-              onClick={() => setCurrentView('edit')}
+              onClick={() => setCurrentView("edit")}
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0"
             >
-              <Edit2 className="h-3 w-3" />
+              <Edit2 className="h-3 w-3 text-[#0AD472]" />
             </Button>
           </div>
         </div>
@@ -276,8 +307,10 @@ const VerifyPhoneOTP = () => {
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className={cn("flex justify-center gap-4", shake && "animate-shake")}>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div
+          className={cn("flex justify-center gap-4", shake && "animate-shake")}
+        >
           {otp.map((digit, index) => (
             <div key={index} className="w-12 h-12">
               <input
@@ -287,7 +320,7 @@ const VerifyPhoneOTP = () => {
                   "w-full h-full text-center text-2xl font-bold border rounded-md",
                   "focus:border-[#062549] focus:ring-1 focus:ring-[#062549] outline-none",
                   shake ? "border-red-500" : "border-gray-300",
-                  digit && "border-[#09d372]"
+                  digit && "border-[#0AD472] text-[#0AD472]"
                 )}
                 value={digit}
                 onChange={(e) => handleChange(e.target, index)}
@@ -299,14 +332,14 @@ const VerifyPhoneOTP = () => {
 
         <Button
           type="submit"
-          disabled={isLoading || otp.some(digit => !digit)}
+          disabled={isLoading || otp.some((digit) => !digit)}
           className="w-full h-[44px] bg-[#062549] text-white hover:bg-[#083264] disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
-          {isLoading ? "Verifying..." : "Verify OTP"}
+          {isLoading ? "Verifying..." : "Verify"}
         </Button>
 
         <div className="flex items-center justify-center gap-2">
-          <span className="text-[#656565] text-sm">
+          <span className="text-[#666] text-body2">
             Didn't receive the OTP?
           </span>
           {resendTimer > 0 ? (
@@ -318,7 +351,13 @@ const VerifyPhoneOTP = () => {
               type="button"
               onClick={handleResendOtp}
               disabled={isResending || resendTimer > 0}
-              className="text-[#09d372] underline disabled:opacity-50"
+              className="text-[#0AD472] underline decoration-solid decoration-from-font"
+              style={{
+                textDecorationSkipInk: "none",
+                textDecorationThickness: "auto",
+                textUnderlineOffset: "auto",
+                textUnderlinePosition: "from-font",
+              }}
             >
               Resend
             </button>
@@ -330,7 +369,7 @@ const VerifyPhoneOTP = () => {
 
   return (
     <ProtectedOnboardingRoute>
-      <main className="h-screen w-screen flex p-6">
+      <main className="h-screen w-screen flex p-6 bg-white">
         <section className="h-full w-full relative">
           <img
             className="w-full h-full rounded-lg"
@@ -338,7 +377,7 @@ const VerifyPhoneOTP = () => {
             alt=""
           />
           <img
-            className="absolute top-0 2xl:top-10 left-10"
+            className="absolute top-10 2xl:top-10 left-10"
             src={logo || "/placeholder.svg"}
             alt=""
           />
@@ -351,8 +390,8 @@ const VerifyPhoneOTP = () => {
 
         <section className="h-full w-full flex items-center justify-center">
           <div className="flex flex-col items-center justify-center max-w-[846px] w-full">
-            <div className="bg-white rounded-lg w-full max-w-[500px] p-8 relative">
-              {currentView === 'edit' ? renderEditView() : renderOtpView()}
+            <div className=" rounded-lg w-full max-w-[500px] p-8 relative">
+              {currentView === "edit" ? renderEditView() : renderOtpView()}
             </div>
           </div>
         </section>

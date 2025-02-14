@@ -1,29 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useUpdateFirstTimeUserMutation, useVerifyPhoneMutation } from "@/api/authApiSlice";
+import { useVerifyPhoneMutation } from "@/api/authApiSlice";
 import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
 import { PhoneInput } from "@/components/cards/phoneInput/PhoneInput";
 import bg from "@/assets/set-goal/backGround.png";
 import logo from "@/assets/branding/logo.svg";
 import ESymbol from "@/assets/branding/e.png";
 import arrow from "@/assets/skills/arrow.svg";
 import ProtectedOnboardingRoute from "@/features/authentication/ProtectedOnboardingRoute";
-import { setCredentials } from "@/features/authentication/authSlice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import validationRules from "@/utils/validation/validationRules";
-import {toast} from 'sonner';
+import { toast } from "sonner";
+import Phone from "@/assets/sign-up/Phone.svg";
+import { Value as PhoneNumberValue } from "react-phone-number-input";
 
 const AddPhone: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
-  const token = useSelector((state: any) => state.auth.token);
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [countryCode, setCountryCode] = useState<string>("IN");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [updateFirstTimeUser, { isLoading }] = useUpdateFirstTimeUserMutation();
-  const [verifyPhone] =  useVerifyPhoneMutation();
+  const [verifyPhone, { isLoading }] = useVerifyPhoneMutation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const location = useLocation();
 
   useEffect(() => {
@@ -40,28 +37,38 @@ const AddPhone: React.FC = () => {
     // Remove non-digit characters
     const cleanPhone = phone.replace(/\D/g, "");
     console.log("cleanPhone:", cleanPhone);
-  
-    // Get validation rules for the given country
+
     const rules: any = validationRules[country];
     console.log("rules:", rules);
-  
+
     if (!rules) {
-      return true; // If no rules exist, assume it's valid
+      return true; 
     }
-  
+
     // Determine the country code length
     const countryCodeLengths: { [key: string]: number } = {
-      US: 1, CA: 1, IN: 2, CN: 2, // Example country code lengths
-      BR: 2, AU: 2, RU: 1, DE: 2, FR: 2, GB: 2, IT: 2, MX: 2, NG: 3,
+      US: 1,
+      CA: 1,
+      IN: 2,
+      CN: 2, 
+      BR: 2,
+      AU: 2,
+      RU: 1,
+      DE: 2,
+      FR: 2,
+      GB: 2,
+      IT: 2,
+      MX: 2,
+      NG: 3,
     };
-  
+
     const countryCodeLength = countryCodeLengths[country] || 0; // Default to 0 if not found
     console.log("countryCodeLength:", countryCodeLength);
-  
+
     // Slice off the country code part
     const localNumber = cleanPhone.slice(countryCodeLength);
     console.log("localNumber:", localNumber);
-  
+
     // Validate the remaining number length
     return localNumber.length === rules.length;
   };
@@ -71,7 +78,7 @@ const AddPhone: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null); // Reset error message
-    if (!validatePhoneNumber(phoneNumber,countryCode)) {
+    if (!validatePhoneNumber(phoneNumber, countryCode)) {
       setErrorMessage(`Please enter a valid ${countryCode} phone number`);
       return;
     }
@@ -90,35 +97,21 @@ const AddPhone: React.FC = () => {
       const verifyResponse = await verifyPhone({
         userId: user._id,
         phoneNumber,
-        countryCode
+        countryCode,
       }).unwrap();
 
       if (!verifyResponse.success) {
-        throw new Error(verifyResponse.message || 'Phone verification failed');
+        throw new Error(verifyResponse.message || "Phone verification failed");
       }
-
-
-      // const result = await updateFirstTimeUser({`
-      //   user_id: user._id,
-      //   experience_level: experienceLevel,
-      //   phone_number: phoneNumber,
-      // }).unwrap();
-
-      // dispatch(
-      //   setCredentials({
-      //     user: result.user_info,
-      //     accessToken: token,
-      //   })
-      // );
 
       toast.success("OTP sent successfully to your WhatsApp number");
 
-      navigate("/verify-otp",{
+      navigate("/verify-otp", {
         state: {
           phoneNumber,
           countryCode,
-          experienceLevel
-        }
+          experienceLevel,
+        },
       });
     } catch (err: any) {
       console.error("Failed to update user profile:", err);
@@ -133,17 +126,20 @@ const AddPhone: React.FC = () => {
     }
   };
 
-  const handlePhoneInputChange = (value:string,country:any) =>{
+  const handlePhoneInputChange = (
+    value: PhoneNumberValue,
+    country?: { countryCode: string }
+  ) => {
     setPhoneNumber(value || "");
 
-    if(country?.countryCode){
+    if (country) {
       setCountryCode(country.countryCode);
     }
-  }
+  };
 
   return (
     <ProtectedOnboardingRoute>
-      <main className="h-screen w-screen flex p-6">
+      <main className="h-screen w-screen bg-white flex p-6">
         {/* Left Section - Background Image */}
         <section className="h-full w-full relative">
           <img
@@ -152,7 +148,7 @@ const AddPhone: React.FC = () => {
             alt=""
           />
           <img
-            className="absolute top-0 2xl:top-10 left-10"
+            className="absolute top-10 2xl:top-10 left-10"
             src={logo || "/placeholder.svg"}
             alt=""
           />
@@ -168,23 +164,29 @@ const AddPhone: React.FC = () => {
           <div className="flex flex-col items-center justify-center max-w-[846px] w-full">
             <div className="rounded-lg w-full max-w-[500px] p-8 relative">
               {/* Back Button */}
-              <button
-                onClick={() => navigate(-1)}
-                className="absolute top-4 left-4 text-gray-600 hover:text-gray-900 flex items-center"
-              >
-                <img
-                  src={arrow || "/placeholder.svg"}
-                  alt="Back"
-                  className="w-4 h-4 mr-2"
-                />
-                <span className="text-sm font-medium">Back</span>
-              </button>
+              <div className="space-y-11">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="absolute top-4 left-8 text-[#666] hover:text-gray-900 flex items-center mb-6"
+                >
+                  <img
+                    src={arrow || "/placeholder.svg"}
+                    alt="Back"
+                    className="w-4 h-4 mr-2"
+                  />
+                  <span className="text-sm font-medium">Back</span>
+                </button>
 
-              <div className="mb-[40px] mt-8">
-                <h1 className="font-ubuntu text-2xl font-bold leading-[42px] tracking-[-0.5px]">
+                <div className="w-[58px] h-[58px] flex justify-center items-center p-4 rounded-full border border-[rgba(0,0,0,0.10)]">
+                  <img src={Phone} alt="Phone" className="w-6 h-6 text-gray-600" />
+                </div>
+              </div>
+
+              <div className="mb-[32px] mt-[40px] space-y-4">
+                <h1 className="text-[#1A1A1A] text-title">
                   Let's add phone number
                 </h1>
-                <p className="text-black text-opacity-60 font-sf-pro-display text-base font-normal leading-6 tracking-wide">
+                <p className="text-[rgba(0,0,0,0.60)] text-body2">
                   We need your phone number for verification and to keep your
                   account secure.
                 </p>
@@ -201,7 +203,7 @@ const AddPhone: React.FC = () => {
                 </Alert>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-10">
                 <div className="space-y-2">
                   <PhoneInput
                     placeholder="Phone Number"

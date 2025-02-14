@@ -27,11 +27,11 @@ const ExperienceLevel: React.FC = () => {
 
   return (
     <ProtectedOnboardingRoute>
-      <main className="h-screen w-screen flex p-6">
+      <main className="h-screen w-screen bg-white flex p-6">
         <section className="h-full w-full relative">
           <img className="w-full h-full rounded-lg" src={bg} alt="" />
           <img
-            className=" absolute top-0 2xl:top-10 left-10"
+            className=" absolute top-10 2xl:top-10 left-10"
             src={logo}
             alt=""
           />
@@ -48,10 +48,10 @@ const ExperienceLevel: React.FC = () => {
                 <h2 className="font-ubuntu text-3xl font-bold text-[#1a1a1a] mb-2">
                   Hey <span className="text-[#08a358]">{user.name}</span>!
                 </h2>
-                <h1 className="font-ubuntu text-2xl font-bold leading-[42px] tracking-[-0.5px] text-[#1a1a1a]">
+                <h1 className="text-title text-[#1a1a1a]">
                   What's your experience level?
                 </h1>
-                <p className="text-black text-opacity-60 font-sf-pro-display text-base font-normal leading-6 tracking-wide">
+                <p className="text-body2 text-[rgba(0,0,0,0.60)]">
                   Choose your experience level, or skip this step.
                 </p>
               </div>

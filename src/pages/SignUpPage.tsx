@@ -119,7 +119,7 @@ const SignupForm = () => {
   }, [error]);
 
   return (
-    <section className="flex h-screen w-screen relative dark:bg-gray-800">
+    <section className="flex h-screen w-screen bg-white relative dark:bg-gray-800">
       <div className=" absolute top-5 left-10 w-1/4  h-1/4  z-10">
         <img src={logo} alt="" />
       </div>
@@ -128,7 +128,7 @@ const SignupForm = () => {
         <img
           src={grid}
           alt="Hero"
-          className="w-full max-h-screen md:h-screen object-cover hidden md:block"
+          className="w-full max-h-screen md:h-screen object-cover md:block"
         />
         <img src={man} alt="Hero" className="w-[100%] bottom-0 absolute" />
       </div>

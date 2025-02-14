@@ -137,6 +137,7 @@ const Dashboard: React.FC<Props> = () => {
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
   const profile_image = user ? user.profile_image : "";
+  const experience_level = user ? user.experience_level : "";
 
   const { data: userDetails, isLoading: isUserDetailsLoading } =
     useGetUserDetailsQuery(user_id);
@@ -144,7 +145,7 @@ const Dashboard: React.FC<Props> = () => {
   const {
     data: goalsData,
     isLoading: isGoalsLoading,
-    isFetching: isGoalsFetching
+    isFetching: isGoalsFetching,
   } = useGetUserGoalQuery(user_id, {
     refetchOnMountOrArgChange: true,
   });
@@ -265,24 +266,23 @@ const Dashboard: React.FC<Props> = () => {
         <div className="mx-auto p-[55px] pt-[55px] pb-[42px] h-full">
           {hasGoals ? (
             <main className="h-full">
-               <div className="grid grid-cols-4 gap-4 h-[calc(100%-1px)]">
+              <div className="grid grid-cols-4 gap-4 h-[calc(100%-1px)]">
                 {/* Main scrollable content */}
                 <div className="col-span-3 overflow-y-auto pr-4 scrollbar-hide">
                   <div className="flex flex-col gap-6">
-              <header>
-                <h1 className="text-gray-600 text-h1 flex items-center gap-3">
-                  Welcome Back, {user_name}
-                  <span className="wave">
-                    <img
-                      src={emojiWavingImg || "/placeholder.svg"}
-                      alt="Emoji"
-                      className="w-5"
-                    />
-                  </span>
-                </h1>
-              </header>
+                    <header>
+                      <h1 className="text-gray-600 text-h1 flex items-center gap-3">
+                        Welcome Back, {user_name}
+                        <span className="wave">
+                          <img
+                            src={emojiWavingImg || "/placeholder.svg"}
+                            alt="Emoji"
+                            className="w-5"
+                          />
+                        </span>
+                      </h1>
+                    </header>
 
-             
                     {/* Skill Cards */}
                     <div className="flex justify-between space-x-4">
                       {isContentLoading ? (
@@ -496,7 +496,15 @@ const Dashboard: React.FC<Props> = () => {
                     <hr className="pt-3" />
                     <SetGoalCard
                       setJourneyDialog={setJourneyDialog}
-                      selectedLevel="all"
+                      selectedLevel={
+                        experience_level === "entry"
+                          ? "1"
+                          : experience_level === "mid"
+                          ? "2"
+                          : experience_level === "senior"
+                          ? "3"
+                          : "all"
+                      }
                     />
                   </DialogContent>
                 </Dialog>

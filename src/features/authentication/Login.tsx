@@ -71,7 +71,7 @@ const Login: React.FC = () => {
   }, [isSuccess, token, user, navigate]);
 
   return (
-    <div className="flex h-screen w-screen dark:bg-gray-800">
+    <div className="flex h-screen w-screen bg-white dark:bg-gray-800">
       {/* Logo */}
       <div className="absolute top-5 left-10 w-1/4 h-1/4 z-10">
         <img src={logo} alt="Logo" />
@@ -82,7 +82,7 @@ const Login: React.FC = () => {
         <img
           src={grid}
           alt="Hero"
-          className="w-full max-h-screen md:h-screen object-cover hidden md:block"
+          className="w-full max-h-screen md:h-screen object-cover md:block"
         />
         <img src={man} alt="Hero" className="w-[100%] bottom-0 absolute" />
       </div>
@@ -91,7 +91,7 @@ const Login: React.FC = () => {
       <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
         <div className="w-full max-w-md bg-white rounded-lg p-8">
           {/* Back Button */}
-          <div className="flex items-center gap-2 mb-6 hidden">
+          <div className="items-center gap-2 mb-6 hidden">
             <img className="w-4 h-4" src={arrow} alt="Back Arrow" />
             <button
               onClick={() => navigate("/")}
