@@ -9,9 +9,7 @@ import {
 } from "@/api/authApiSlice";
 import { setCredentials } from "@/features/authentication/authSlice";
 import { PhoneInput } from "@/components/cards/phoneInput/PhoneInput";
-import bg from "@/assets/set-goal/backGround.png";
 import logo from "@/assets/branding/logo.svg";
-import ESymbol from "@/assets/branding/e.png";
 import arrow from "@/assets/skills/arrow.svg";
 import { Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +21,8 @@ import { toast } from "sonner";
 import verify from "@/assets/sign-up/verify.svg";
 import Phone from "@/assets/sign-up/Phone.svg";
 import { Value as PhoneNumberValue } from "react-phone-number-input";
+import man from "@/assets/sign-up/man.png";
+import grid from "@/assets/sign-up/grid.svg";
 
 const RESEND_COOLDOWN = 60; // 60 seconds cooldown for resend
 
@@ -227,7 +227,7 @@ const VerifyPhoneOTP = () => {
         </Alert>
       )}
 
-      <div className="space-y-8">
+      <div className="space-y-10">
         <PhoneInput
           placeholder="Phone Number"
           required
@@ -238,10 +238,10 @@ const VerifyPhoneOTP = () => {
 
         <Button
           onClick={handleUpdatePhone}
-          className="w-full h-[44px] bg-[#062549] text-white hover:bg-[#083264]"
+          className="w-full h-[44px] px-8 py-4 justify-center items-center gap-2 flex-shrink-0 rounded bg-[#001630] text-white hover:bg-[#062549] hover:shadow-[0_10px_16px_-2px_rgba(6,90,216,0.15)] active:border active:border-white/20 disabled:bg-black/20 disabled:text-white/60 disabled:cursor-not-allowed"
           disabled={!newPhoneNumber}
         >
-          Update & Send New OTP
+          Verify New Phone Number
         </Button>
       </div>
     </>
@@ -307,7 +307,7 @@ const VerifyPhoneOTP = () => {
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-10">
         <div
           className={cn("flex justify-center gap-4", shake && "animate-shake")}
         >
@@ -333,7 +333,7 @@ const VerifyPhoneOTP = () => {
         <Button
           type="submit"
           disabled={isLoading || otp.some((digit) => !digit)}
-          className="w-full h-[44px] bg-[#062549] text-white hover:bg-[#083264] disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="w-full h-[44px] px-8 py-4 justify-center items-center gap-2 flex-shrink-0 rounded bg-[#001630] text-white hover:bg-[#062549] hover:shadow-[0_10px_16px_-2px_rgba(6,90,216,0.15)] active:border active:border-white/20 disabled:bg-black/20 disabled:text-white/60 disabled:cursor-not-allowed"
         >
           {isLoading ? "Verifying..." : "Verify"}
         </Button>
@@ -369,32 +369,33 @@ const VerifyPhoneOTP = () => {
 
   return (
     <ProtectedOnboardingRoute>
-      <main className="h-screen w-screen flex p-6 bg-white">
-        <section className="h-full w-full relative">
+      <main className="h-screen w-screen flex bg-white">
+        {/* Left Section */}
+        <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
           <img
-            className="w-full h-full rounded-lg"
-            src={bg || "/placeholder.svg"}
-            alt=""
+            src={grid || "/placeholder.svg"}
+            alt="Grid Background"
+            className="absolute inset-0 h-full w-full object-cover"
           />
           <img
-            className="absolute top-10 2xl:top-10 left-10"
-            src={logo || "/placeholder.svg"}
-            alt=""
+            src={man || "/placeholder.svg"}
+            alt="Hero"
+            className="absolute bottom-0 left-0 right-0 w-full object-contain"
           />
-          <img
-            className="absolute bottom-0 left-1/2 transform -translate-x-1/2 xl:w-[600px] 2xl:w-[1000px]"
-            src={ESymbol || "/placeholder.svg"}
-            alt=""
-          />
-        </section>
-
-        <section className="h-full w-full flex items-center justify-center">
-          <div className="flex flex-col items-center justify-center max-w-[846px] w-full">
-            <div className=" rounded-lg w-full max-w-[500px] p-8 relative">
-              {currentView === "edit" ? renderEditView() : renderOtpView()}
-            </div>
+          <div className="absolute top-5 left-10 z-20">
+            <img
+              src={logo || "/placeholder.svg"}
+              alt="Logo"
+              className="h-10 w-auto"
+            />
           </div>
-        </section>
+        </div>
+        {/* Right Section */}
+        <div className="flex flex-col items-center flex-1 justify-center max-w-[846px] w-full">
+          <div className=" rounded-lg w-full max-w-[500px] p-8 relative">
+            {currentView === "edit" ? renderEditView() : renderOtpView()}
+          </div>
+        </div>
       </main>
     </ProtectedOnboardingRoute>
   );

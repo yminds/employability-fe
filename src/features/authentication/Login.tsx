@@ -19,7 +19,7 @@ import { Loader2 } from "lucide-react";
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [login, { isSuccess, isError }] = useLoginMutation();
+  const [login, { isSuccess }] = useLoginMutation();
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
