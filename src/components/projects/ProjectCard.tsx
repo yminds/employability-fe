@@ -150,8 +150,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
   return (
     <Card
-      className={`flex flex-col items-start gap-7 p-5 pr-8 pb-7 bg-white rounded-lg ${
-        !isDashboard ? "border border-black/10" : ""
+      className={`flex flex-col items-start p-0 bg-white rounded-lg ${
+        !isDashboard ? "border border-black/10 p-6" : ""
       } self-stretch mb-4 sm:p-4`}
     >
       <div className="flex items-start gap-5 w-full md:flex-col sm:flex-col">
@@ -166,51 +166,53 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
 
         <div className="flex items-start justify-between flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full">
-          <div className="flex flex-col gap-4">
-            <h2 className="text-[#1f2226] text-base font-medium font-['Ubuntu'] leading-snug">
+          <div className="flex flex-col">
+            <h2 className="text-[#1f2226] text-sub-header">
               {project.name}
             </h2>
-            <div className="flex flex-col gap-2 w-full">
-              <div className="flex gap-2 flex-wrap">
-                {project.tech.slice(0, 5).map((tech) => (
-                  <Badge
-                    key={tech._id}
-                    variant="secondary"
-                    className="min-h-6 px-3 py-1 bg-[#ebebeb] rounded-[33px] flex items-center justify-center"
-                  >
-                    <span className="text-[#000000] text-body2 truncate max-w-xs">
-                      {tech.name}
-                    </span>
-                  </Badge>
-                ))}
-                {project.tech.length > 5 && (
-                  <Badge
-                    variant="secondary"
-                    className="min-h-6 px-3 py-1 bg-[#ebebeb] rounded-[33px] flex items-center justify-center"
-                  >
-                    <span className="text-black/70 text-sm font-normal">
-                      +{project.tech.length - 5}
-                    </span>
-                  </Badge>
-                )}
+            {project.tech?.length > 0 && (
+              <div className="flex flex-col gap-2 w-full mt-4">
+                <div className="flex gap-2 flex-wrap">
+                  {project.tech.slice(0, 4).map((tech) => (
+                    <Badge
+                      key={tech._id}
+                      variant="secondary"
+                      className="min-h-6 px-3 py-1 bg-[#ebebeb] rounded-full flex items-center justify-center"
+                    >
+                      <span className="text-black text-sm font-medium font-dm-sans">
+                        {tech.name}
+                      </span>
+                    </Badge>
+                  ))}
+                  {project.tech.length > 5 && (
+                    <Badge
+                      variant="secondary"
+                      className="min-h-6 px-3 py-1 bg-[#ebebeb] rounded-full flex items-center justify-center"
+                    >
+                      <span className="text-black/70 text-sm font-medium font-dm-sans">
+                        +{project.tech.length - 4}
+                      </span>
+                    </Badge>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-10 mt-5 md:flex-col  sm:flex-col md:items-start sm:items-start md:w-full sm:w-full md:gap-4 sm:gap-4">
+          <div className={`flex items-center gap-10 ${project.tech?.length > 0 ? 'mt-5' : 'mt-0'} md:flex-col sm:flex-col md:items-start sm:items-start md:w-full sm:w-full md:gap-4 sm:gap-4`}>
             <div className="flex w-[30%] flex-col items-center md:w-full sm:w-full">
               {project.status === "Verified" && (
-                <div className="flex items-baseline ">
-                <span className="text-lg font-medium">
-                  {project?.score}
-                </span>
-                <span className="text-[#909091]">/10</span>
-              </div>
+                <div className="flex items-baseline">
+                  <span className="text-xl font-medium font-ubuntu">
+                    {project?.score}
+                  </span>
+                  <span className="text-[#909091] text-xl font-medium font-ubuntu">/10</span>
+                </div>
               )}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full">
+              <div className="flex items-center gap-2 px-3 rounded-full">
                 <img src={config.icon} alt={project.status} className="w-4 h-4" />
                 <span
-                  className={`text-ellipsis text-base font-normal leading-5 ${config.color}`}
+                  className={`text-sm leading-[22px] tracking-[0] font-medium font-ubuntu ${config.color}`}
                 >
                   {project.status}
                 </span>
@@ -238,8 +240,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         </div>
       </div>
 
-      <CardContent className="flex flex-col px-0 w-full">
-        <p className="text-[#67696b] text-base font-normal font-['SF Pro Display'] leading-7 tracking-tight">
+      <CardContent className="flex flex-col px-0 w-full p-0 mt-3">
+        <p className="text-[#67696b] text-sm font-dm-sans">
           {project.description}
         </p>
         {(project.githubLink.length > 0 || project.liveLink) && (

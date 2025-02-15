@@ -6,7 +6,6 @@ import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
-import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -29,20 +28,9 @@ const noSidebarRoutes = [
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
-  const user_id = user?._id
+  const isEmailVerified = useSelector((state:any)=> state.auth.user?.is_email_verified)
 
-  const { 
-      data: userDetails,
-      isLoading
-    } = useGetUserDetailsQuery(user_id || "",{
-      skip: !user_id
-    })
-
-    console.log("userDetails",userDetails?.data)
-
-    const isEmailVerified = userDetails?.data.is_email_verified
-
-    console.log("isemailVerification",isEmailVerified)
+  console.log("isEmailVerification",isEmailVerified)
 
   const shouldDisplaySidebar = (): boolean => {
     const currentPath = location.pathname;
@@ -68,12 +56,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   const shouldShowBanner = (): boolean | null => {
-
-    if(isLoading || !userDetails){
-      return false
-    }
     // Show banner if user is logged in, email is not verified, and we're on a route that shows the sidebar
-    return shouldDisplaySidebar() && user && !isEmailVerified;
+    return shouldDisplaySidebar() && Boolean(user) && isEmailVerified===false;
   };
 
   return (

@@ -17,7 +17,7 @@ import GoalCyborgImg from "@/assets/dashboard/set_goal_cyborg.svg";
 import ProfessionalGoalsImg from "@/assets/dashboard/professional_goals.svg";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import EmployabilityBannerSection from "@/features/dashboard/EmployabilityBanner";
-import { SkillCard } from "@/features/dashboard/SkillCard";
+import SkillProgress, { SkillCard } from "@/features/dashboard/SkillCard";
 import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
 import ProjectList from "@/components/projects/ProjectList";
@@ -117,15 +117,6 @@ const TryThingsSectionSkeleton = () => (
   </div>
 );
 
-// const FullPageLoader = () => (
-//   <div className="h-full w-full flex items-center justify-center">
-//     <div className="flex flex-col items-center gap-4">
-//       <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-//       <p className="text-gray-500 text-lg">Loading your dashboard...</p>
-//     </div>
-//   </div>
-// )
-
 interface Props {
   isDashboard: boolean;
   displayScore: boolean;
@@ -144,7 +135,7 @@ const Dashboard: React.FC<Props> = () => {
   const {
     data: goalsData,
     isLoading: isGoalsLoading,
-    isFetching: isGoalsFetching
+    isFetching: isGoalsFetching,
   } = useGetUserGoalQuery(user_id, {
     refetchOnMountOrArgChange: true,
   });
@@ -164,6 +155,7 @@ const Dashboard: React.FC<Props> = () => {
   const [totalProjects, setTotalProjects] = useState(0);
   const [verifiedProjects, setVerifiedProjects] = useState(0);
   const [completedProfileSections, setCompletedProfileSections] = useState(0);
+  const [skillUsage, setSkillUsage] = useState<{ name: string; usageCount: number; maxUsage: number; progress: number }[]>([]);
 
   const is_Email_Verified = userDetails?.data?.is_email_verified;
   const hasGoals = goalsData?.data && goalsData.data.length > 0;
@@ -228,6 +220,53 @@ const Dashboard: React.FC<Props> = () => {
     }
   }, [user_id, goalId, fetchSkills]);
 
+  const calculateProjectPercentage = useCallback(() => {
+    if (skillsData?.data?.mandatory && userProjects?.data) {
+      const mandatorySkills = skillsData.data.mandatory.map(
+        (skill) => skill.skill_pool_id.name
+      );
+      const verifiedProjects = userProjects.data.filter(
+        (project) => project.status === "Verified"
+      );
+
+      if (verifiedProjects.length === 0) return 0;
+
+      // Calculate percentage for each verified project based on mandatory skills usage
+      const projectPercentages = verifiedProjects.map((project) => {
+        const usedMandatorySkills = project.tech.filter((tech) =>
+          mandatorySkills.includes(tech.name)
+        ).length;
+        return (usedMandatorySkills / mandatorySkills.length) * 100;
+      });
+
+      // Calculate average percentage across all verified projects
+      const totalPercentage = projectPercentages.reduce(
+        (acc, curr) => acc + curr,
+        0
+      );
+      return Math.round(totalPercentage / verifiedProjects.length);
+    }
+    return 0;
+  }, [skillsData, userProjects]);
+  
+
+  useEffect(() => {
+    if (skillsData?.data?.mandatory && userProjects?.data) {
+      // Project percentage calculation
+      const projectPercentage = calculateProjectPercentage();
+      setVerifiedProjects(projectPercentage);
+      setTotalProjects(100); // Since we're working with percentage for projects
+
+      // Actual count for skills verification
+      const mandatorySkills = skillsData.data.mandatory;
+      setTotalMandatorySkillsCount(mandatorySkills.length);
+      const verifiedCount = mandatorySkills.filter(
+        (skill) => skill.verified_rating >= 4
+      ).length;
+      setVerifiedSkillsCount(verifiedCount);
+    }
+  }, [skillsData, userProjects, calculateProjectPercentage]);
+
   useEffect(() => {
     if (userProjects?.data) {
       const projects = userProjects.data;
@@ -249,27 +288,16 @@ const Dashboard: React.FC<Props> = () => {
     }
   }, [skillsData]);
 
-  // if (isInitialLoading) {
-  //   return (
-  //     <main className="h-screen w-full overflow-hidden font-ubuntu">
-  //       <div className="bg-[#F5F5F5] h-full">
-  //         <FullPageLoader />
-  //       </div>
-  //     </main>
-  //   )
-  // }
-
   return (
     <main className="h-screen w-full overflow-hidden font-ubuntu">
-      <div className="bg-[#F5F5F5] h-full">
-        <div className="mx-auto p-[55px] pt-[55px] pb-[42px] h-full">
+      <div className="h-full flex flex-col bg-[#F5F5F5]">
+        <div className="flex-1 p-[55px] min-h-0">
+          {" "}
+          {/* min-h-0 enables nested flex scrolling */}
           {hasGoals ? (
-            <main className="h-full">
-               <div className="grid grid-cols-4 gap-4 h-[calc(100%-1px)]">
-                {/* Main scrollable content */}
-                <div className="col-span-3 overflow-y-auto pr-4 scrollbar-hide">
-                  <div className="flex flex-col gap-6">
-              <header>
+            <div className="h-full flex flex-col">
+              {/* Fixed Header */}
+              <header className="flex-none mb-6">
                 <h1 className="text-gray-600 text-h1 flex items-center gap-3">
                   Welcome Back, {user_name}
                   <span className="wave">
@@ -282,110 +310,134 @@ const Dashboard: React.FC<Props> = () => {
                 </h1>
               </header>
 
-             
-                    {/* Skill Cards */}
-                    <div className="flex justify-between space-x-4">
+              {/* Main Content Area with Grid */}
+              <div className="flex-1 h-[98%]">
+                {" "}
+                {/* Enable scrolling in nested flex container */}
+                <div className="grid grid-cols-4 gap-4 h-full">
+                  {/* Left Column - Scrollable Content */}
+                  <div className="col-span-3 min-h-0 flex flex-col">
+                    <div className="overflow-y-auto pr-4 scrollbar-hide">
+                      <div className="flex flex-col gap-6">
+                        {/* Skill Cards Section */}
+                        <div>
+                          {isContentLoading ? (
+                            <>
+                              <SkillCardSkeleton />
+                              <SkillCardSkeleton />
+                              <SkillCardSkeleton />
+                              <SkillCardSkeleton />
+                            </>
+                          ) : (
+                            <>
+                              <div>
+                                <SkillProgress
+                                userId={user_id}
+                                goals={goalsData}
+                                selectedGoalName={goalName}
+                                onSkillsStatusChange={(isUpdated) => {
+                                  if (isUpdated && user_id && goalId) {
+                                    fetchSkills(user_id, goalId);
+                                  }
+                                }}
+                                onGoalChange={(newGoalId) => {
+                                  if (user_id) {
+                                    fetchSkills(user_id, newGoalId);
+                                  }
+                                }}
+                                selectedGoalExperienceLevel={goalsData?.data?.[0]?.experience || "1"}
+
+                                  completedProfileSections={
+                                    completedProfileSections
+                                  }
+                                  verifiedSkillsCount={verifiedSkillsCount}
+                                  totalMandatorySkillsCount={
+                                    totalMandatorySkillsCount
+                                  }
+                                  verifiedProjects={verifiedProjects}
+                                  totalProjects={totalProjects}
+                                />
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Try Things Section */}
+                        {isContentLoading ? (
+                          <TryThingsSectionSkeleton />
+                        ) : (
+                          <TryThingsSection />
+                        )}
+
+                        {/* Skills Section */}
+                        <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                          {isContentLoading ? (
+                            <SkillListSkeleton />
+                          ) : (
+                            <SkillList
+                              isDashboard={true}
+                              goalId={goalId}
+                              onSkillsUpdate={() => {}}
+                              isSkillsUpdated={false}
+                              goals={goalsData}
+                            />
+                          )}
+                        </section>
+
+                        {/* Projects Section */}
+                        <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                          {isContentLoading ? (
+                            <ProjectListSkeleton />
+                          ) : (
+                            <ProjectList
+                              projects={userProjects?.data}
+                              isLoading={false}
+                              isDashboard={true}
+                              onOpenUploadModal={() => {}}
+                              onOpenDeleteModal={() => {}}
+                            />
+                          )}
+                        </section>
+
+                        {/* Interview Section */}
+                        <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                          {isContentLoading ? (
+                            <InterviewListSkeleton />
+                          ) : (
+                            <InterviewList isDashboard={true} />
+                          )}
+                        </section>
+
+                        {/* Employability Banner */}
+                        <EmployabilityBannerSection
+                          imageSrc={ProfessionalGoalsImg}
+                          altText="Professional Goals Image"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column - Fixed Sidebar */}
+                  <div className="col-span-1">
+                    <div className="sticky top-0">
                       {isContentLoading ? (
-                        <>
-                          <SkillCardSkeleton />
-                          <SkillCardSkeleton />
-                          <SkillCardSkeleton />
-                          <SkillCardSkeleton />
-                        </>
+                        <MyActivityCardSkeleton />
                       ) : (
-                        <>
-                          <SkillCard
-                            type="profile"
-                            total={null}
-                            completedProfileSections={completedProfileSections}
-                          />
-                          <SkillCard
-                            type="skills"
-                            total={50}
-                            verifiedSkills={verifiedSkillsCount}
-                            totalMandatorySkills={totalMandatorySkillsCount}
-                          />
-                          <SkillCard
-                            type="projects"
-                            total={totalProjects}
-                            verifiedProjects={verifiedProjects}
-                            totalProjects={totalProjects}
-                          />
-                          <SkillCard type="interview" total={10} />
-                        </>
+                        <MyActivityCard
+                          displayScore={true}
+                          goalId={goalId}
+                          goalName={goalName}
+                        />
                       )}
                     </div>
-
-                    {isContentLoading ? (
-                      <TryThingsSectionSkeleton />
-                    ) : (
-                      <TryThingsSection />
-                    )}
-
-                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      {isContentLoading ? (
-                        <SkillListSkeleton />
-                      ) : (
-                        <SkillList
-                          isDashboard={true}
-                          goalId={goalId}
-                          onSkillsUpdate={() => {}}
-                          isSkillsUpdated={false}
-                          goals={goalsData}
-                        />
-                      )}
-                    </section>
-
-                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      {isContentLoading ? (
-                        <ProjectListSkeleton />
-                      ) : (
-                        <ProjectList
-                          projects={userProjects?.data}
-                          isLoading={false}
-                          isDashboard={true}
-                          onOpenUploadModal={() => {}}
-                          onOpenDeleteModal={() => {}}
-                        />
-                      )}
-                    </section>
-
-                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      {isContentLoading ? (
-                        <InterviewListSkeleton />
-                      ) : (
-                        <InterviewList isDashboard={true} />
-                      )}
-                    </section>
-
-                    <EmployabilityBannerSection
-                      imageSrc={ProfessionalGoalsImg}
-                      altText="Professional Goals Image"
-                    />
-                  </div>
-                </div>
-
-                {/* Fixed sidebar */}
-                <div className="h-full overflow-hidden">
-                  <div className="sticky top-0">
-                    {isContentLoading ? (
-                      <MyActivityCardSkeleton />
-                    ) : (
-                      <MyActivityCard
-                        displayScore={true}
-                        goalId={goalId}
-                        goalName={goalName}
-                      />
-                    )}
                   </div>
                 </div>
               </div>
-            </main>
+            </div>
           ) : (
             !isInitialLoading &&
             !hasGoals && (
-              <main>
-                {/* Content for users without goals */}
+              <div>
                 <header className="mb-7">
                   <h1 className="text-gray-600 text-h1 flex items-center gap-3">
                     Hi, {user_name}
@@ -481,7 +533,6 @@ const Dashboard: React.FC<Props> = () => {
                 </div>
 
                 {/* Set Goal Dialog */}
-
                 <Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
                   <DialogContent className="max-w-[1400px] rounded-[12px]">
                     <DialogTitle className="hidden">Set Your Goal</DialogTitle>
@@ -500,7 +551,7 @@ const Dashboard: React.FC<Props> = () => {
                     />
                   </DialogContent>
                 </Dialog>
-              </main>
+              </div>
             )
           )}
         </div>

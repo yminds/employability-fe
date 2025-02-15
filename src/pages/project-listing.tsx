@@ -37,39 +37,41 @@ interface Project {
 export const ProjectListingSkeleton: React.FC = () => {
   return (
     <div className="w-full h-screen overflow-hidden bg-[#F5F5F5]">
-      <div className="h-full flex justify-center">
-        <div className="w-full max-w-[1800px] flex gap-6 p-6 md:flex-col-reverse sm:flex-col-reverse">
-          <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
-            <div className="flex justify-between items-center mb-4 sm:mt-3">
-              <div className="flex items-center space-x-2 gap-3">
-                <Skeleton circle width={30} height={30} />
-                <Skeleton width={100} height={26} />
+      <div className="flex justify-between items-center mb-4 mx-14">
+        <div className="flex items-center space-x-2 gap-3">
+          <Skeleton circle width={30} height={30} />
+          <Skeleton width={100} height={26} />
+        </div>
+      </div>
+      
+      <section className="w-full h-[90vh] flex bg-[#F5F5F5]">
+        <div className="h-full flex justify-center ml-8">
+          <div className="w-full max-w-[1800px] flex gap-6 p-6 md:flex-col-reverse sm:flex-col-reverse">
+            <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
+              <div className="sticky top-0 bg-[#F5F5F5] z-10 sm:relative">
+                <Skeleton height={50} />
+              </div>
+
+              <div className="mt-[70px] sm:min-w-[100%] sm:mt-4 overflow-y-auto scrollbar-hide">
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <ProjectCardSkeleton key={index} />
+                  ))}
+                </div>
               </div>
             </div>
-            
-            <div className="sticky top-0 bg-[#F5F5F5] z-10 sm:relative">
-              <Skeleton height={50} />
-            </div>
 
-            <div className="mt-[70px] sm:min-w-[100%] sm:mt-4 overflow-y-auto scrollbar-hide">
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <ProjectCardSkeleton key={index} />
-                ))}
+            <div className="flex-[3] w-full space-y-4">
+              <div className="flex flex-col gap-6 sticky top-[70px] md:relative md:top-0 sm:relative sm:top-0">
+                <Skeleton height={400} />
               </div>
-            </div>
-          </div>
-
-          <div className="flex-[3] w-full space-y-4">
-            <div className="flex flex-col gap-6 sticky top-[70px] md:relative md:top-0 sm:relative sm:top-0">
-              <Skeleton height={400} />
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
-  );
-};
+  )
+}
 
 const ProjectListing: React.FC = () => {
   const navigate = useNavigate()
@@ -167,72 +169,74 @@ const ProjectListing: React.FC = () => {
         />
       )}
 
-      <div className="h-full flex justify-center">
-        <div className="w-full max-w-[1800px] flex gap-6 p-6 md:flex-col-reverse sm:flex-col-reverse md:overflow-y-auto md:space-y-6 md:gap-0 sm:overflow-y-auto sm:space-y-6 sm:gap-0">
-          <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
-            <div className="flex justify-between items-center mb-4 sm:mt-3">
-              <div className="flex items-center space-x-2 gap-3">
-                <button
-                  onClick={handleBackToDashboard}
-                  className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
-                >
-                  <img className="w-[10px] h-[10px]" src={arrow || "/placeholder.svg"} alt="Back" />
-                </button>
-                <h1 className="text-black font-ubuntu text-[20px] font-bold leading-[26px] tracking-[-0.025rem]">
-                  Projects
-                </h1>
-              </div>
-            </div>
+      <div className="flex justify-between items-center mt-5 ml-12">
+        <div className="flex items-center  gap-3">
+          <button
+            onClick={handleBackToDashboard}
+            className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
+          >
+            <img className="w-[10px] h-[10px]" src={arrow || "/placeholder.svg"} alt="Back" />
+          </button>
+          <h1 className="text-black font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.025rem]">
+            Projects
+          </h1>
+        </div>
+      </div>
 
-            <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:relative">
-              {goalData ? (
-                <SkillsHeader
-                  userId={userId}
-                  goals={goalData}
-                  selectedGoalName={selectedGoalName}
-                  onSkillsStatusChange={handleSkillsStatusChange}
-                  onGoalChange={handleGoalChange}
-                  selectedGoalExperienceLevel={selectedGoalExperience}
-                  hideAddSkillsButton={true}
-                  onAddCreate={() => handleOpenUploadModal()}
-                />
-              ) : (
-                <Skeleton height={50} />
-              )}
-            </div>
-
-            <div className="mt-[70px] sm:mt-4 overflow-y-auto scrollbar-hide">
-              <div className="space-y-4">
-                {projectsError ? (
-                  <div className="text-center text-red-500 py-4">Error loading projects</div>
-                ) : projectsData?.data.length === 0 ? (
-                  <div className="text-center text-gray-500 py-4">
-                    No projects found.
-                    <button onClick={() => handleOpenUploadModal()} className="ml-2 text-blue-600 hover:underline">
-                      Create your first project
-                    </button>
-                  </div>
+      <section className="w-full h-[calc(100vh-2rem)]  bg-[#F5F5F5] ">
+        <div className="h-full flex justify-center mx-6">
+          <div className="w-full max-w-[1800px] flex gap-6 p-6 md:flex-col-reverse sm:flex-col-reverse md:overflow-y-auto md:space-y-6 md:gap-0 sm:overflow-y-auto sm:space-y-6 sm:gap-0">
+            <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
+              <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:relative">
+                {goalData ? (
+                  <SkillsHeader
+                    userId={userId}
+                    goals={goalData}
+                    selectedGoalName={selectedGoalName}
+                    onSkillsStatusChange={handleSkillsStatusChange}
+                    onGoalChange={handleGoalChange}
+                    selectedGoalExperienceLevel={selectedGoalExperience}
+                    hideAddSkillsButton={true}
+                    onAddCreate={() => handleOpenUploadModal()}
+                  />
                 ) : (
-                  projectsData?.data.map((project) => (
-                    <ProjectCard
-                      key={project._id}
-                      project={project}
-                      onOpenUploadModal={() => handleOpenUploadModal(project)}
-                      onOpenDeleteModal={handleOpenDeleteModal}
-                    />
-                  ))
+                  <Skeleton height={50} />
                 )}
               </div>
-            </div>
-          </div>
 
-          <div className="flex-[3] w-full space-y-4 md:mt-0 sm:mt-0">
-            <div className="flex flex-col gap-6 sticky top-[70px] md:relative md:top-0 sm:relative sm:top-0">
-              <ProjectInsights goalId={selectedGoalId || ""} userId={userId || ""} goalDetails={goalDetails} />
+              <div className="mt-[70px] sm:mt-4 overflow-y-auto scrollbar-hide">
+                <div className="space-y-4">
+                  {projectsError ? (
+                    <div className="text-center text-red-500 py-4">Error loading projects</div>
+                  ) : projectsData?.data.length === 0 ? (
+                    <div className="text-center text-gray-500 py-4">
+                      No projects found.
+                      <button onClick={() => handleOpenUploadModal()} className="ml-2 text-blue-600 hover:underline">
+                        Create your first project
+                      </button>
+                    </div>
+                  ) : (
+                    projectsData?.data.map((project) => (
+                      <ProjectCard
+                        key={project._id}
+                        project={project}
+                        onOpenUploadModal={() => handleOpenUploadModal(project)}
+                        onOpenDeleteModal={handleOpenDeleteModal}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-[2] w-[350px] space-y-4 md:mt-0 sm:mt-0">
+              <div className="flex sticky top-[70px] md:relative md:top-0 sm:relative sm:top-0">
+                <ProjectInsights goalId={selectedGoalId || ""} userId={userId || ""} goalDetails={goalDetails} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }

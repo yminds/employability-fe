@@ -34,7 +34,7 @@ const Sidebar: React.FC = () => {
         <div className="relative group">
             <aside className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden scrollbar-default transition-all ${isCollapsed ? 'w-20' : 'w-64'} sm:hidden`}>
                 <Link to="/" className={`flex items-center gap-2 self-stretch ${isCollapsed ? 'justify-center' : ''}`}>
-                    <img src={LogoIcon} alt='' />
+                    <img src={LogoIcon} alt='' className='h-6'/>
                     {!isCollapsed && (
                         <div className="text-[#001630] text-[20px] font-bold leading-normal">
                             <span>Employ</span>

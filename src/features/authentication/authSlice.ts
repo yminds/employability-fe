@@ -67,7 +67,15 @@ const authSlice = createSlice({
           email:action.payload
         }
       }
-    }
+    },
+    updateEmailVerification:(state) => {
+      if(state.user){
+        state.user = {
+          ...state.user,
+          is_email_verified: true
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -97,6 +105,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logOut, updateUserProfile, updateUserEmail } = authSlice.actions;
+export const { setCredentials, logOut, updateUserProfile, updateUserEmail,updateEmailVerification } = authSlice.actions;
 
 export default authSlice.reducer;

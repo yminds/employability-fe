@@ -432,7 +432,7 @@ const TryThingsSection: React.FC = () => {
        {profileProgress < 100 && (
         <>
       <h5 className="text-black text-h2">
-        Complete your Basic Details
+        Update your Basic Details
       </h5>
         <div className="flex flex-col gap-1  w-full ">
           <div className="flex items-center gap-12 self-stretch">
@@ -470,12 +470,7 @@ const TryThingsSection: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end items-center w-full">
-            {/* <p className="text-black text-body2">
-              Employers are <span className="text-[#03963F]">3 times</span> more likely to hire a candidate with a complete
-              basic details.
-            </p> */}
-          </div>
+    
         </div>
       </>
       )}

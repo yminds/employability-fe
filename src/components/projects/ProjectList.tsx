@@ -1,4 +1,3 @@
-"use client";
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -65,7 +64,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   };
 
   return (
-    <div className="p-[42px]">
+    <div className="p-[32px]">
       <div className="flex flex-col gap-8">
         <div className="flex items-center">
           <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
@@ -97,7 +96,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 </React.Fragment>
               ))}
               {isDashboard && projects && projects.length > 3 && (
-                <div className="w-full flex justify-center py-4">
+                <div className="w-full flex justify-center ">
                   <button
                     onClick={handleViewAll}
                     className="flex items-center gap-1 text-[#001630] text-sm font-medium hover:underline"
@@ -121,7 +120,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
               )}
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 px-4">
+            <div className="flex flex-col items-center justify-center py-12 px-4 ">
               <img
                 src={noProjects || "/placeholder.svg"}
                 alt="No project entries"
