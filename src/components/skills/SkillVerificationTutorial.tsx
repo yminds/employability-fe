@@ -35,7 +35,7 @@ const slides = [
     image: `${interveiwScreenImg}`, // Replace with actual path
     title: "Step 4: Interview Process",
     description:
-      "Once the interview starts, you'll be asked a series of questions by the AI Agent. Answer them to the best of your ability.",
+      "Once the interview starts, you'll be asked a series of questions by the AI Agent. Answer them to the best of your ability. After answering the question press the 'Done Answering' button to proceed to the next question.",
   },
   {
     image: `${skillCard}`, // Replace with actual path
@@ -99,7 +99,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                  currentSlide === index ? "bg-blue-600" : "bg-gray-300 hover:bg-gray-400"
+                  currentSlide === index ? "bg-button" : "bg-gray-300 hover:bg-gray-400"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -145,7 +145,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
                     disabled={!dontShowAgain} // Disable if checkbox is not checked
                     className={`px-6 py-2 text-sm rounded-md transition-colors ${
                       dontShowAgain
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        ? "bg-button text-white hover:bg-[#062549]"
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }`}
                   >
@@ -155,7 +155,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
               ) : (
                 <button
                   onClick={handleNext}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-button text-white rounded-md hover:bg-[#062549] transition-colors"
                 >
                   <span>Next</span>
                   <span>→</span>
