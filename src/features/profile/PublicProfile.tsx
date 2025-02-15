@@ -49,7 +49,7 @@ const PublicProfile: React.FC = () => {
             <SkillsSection skills={profile.skills} isPublic={true} />
           </div>
 
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
             <ProjectList
               projects={profile.projects}
               isLoading={false}
@@ -60,19 +60,19 @@ const PublicProfile: React.FC = () => {
             />
           </div>
 
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
             <ExperienceSection
               intialExperiences={profile.experience}
               isPublic={true}
             />
           </div>
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
             <EducationSection
               initialEducation={profile.education}
               isPublic={true}
             />
           </div>
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
             <CertificationsSection
               certifications={profile.certificates}
               isPublic={true}

@@ -97,11 +97,17 @@ const UserProfile: React.FC = () => {
             goalData={goalsData}
           />
 
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <SkillList isDashboard={true} goalId={goalId} />
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
+            <SkillList
+              isDashboard={true}
+              goalId={goalId}
+              onSkillsUpdate={() => {}}
+              isSkillsUpdated={false}
+              goals={goalsData}
+            />
           </div>
 
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
             <ProjectList
               projects={userProjects?.data}
               isLoading={false}
@@ -112,21 +118,21 @@ const UserProfile: React.FC = () => {
             />
           </div>
 
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
             <ExperienceSection
               intialExperiences={experiences}
               isPublic={false}
             />
           </div>
 
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
             <EducationSection
               initialEducation={educationEntries}
               isPublic={false}
             />
           </div>
 
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
+          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
             <CertificationsSection
               certifications={certifications}
               isPublic={false}

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProjectCard, { ProjectCardSkeleton } from "./ProjectCard";
@@ -95,53 +94,63 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   )}
                 </React.Fragment>
               ))}
-              {isDashboard && projects && projects.length > 3 && (
-                <div className="w-full flex justify-center ">
+              {!isExpanded && projects && projects.length > 3 && (
+                <>
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-[211px]"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, rgba(255, 255, 255, 0) 20%, #FFF 100%)",
+                    }}
+                  />
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
+                    <button
+                      onClick={handleViewAll}
+                      className="flex items-center gap-1 text-[#001630] text-sm font-medium"
+                    >
+                      View all
+                      <ChevronDown className="h-4 w-4 ml-1" />
+                    </button>
+                  </div>
+                </>
+              )}
+              {isExpanded && isDashboard && isPublic && (
+                <div className="w-full flex justify-center mt-4">
                   <button
                     onClick={handleViewAll}
-                    className="flex items-center gap-1 text-[#001630] text-sm font-medium hover:underline"
+                    className="flex items-center gap-1 text-[#001630] text-sm font-medium"
                   >
-                    {isPublic
-                      ? isExpanded
-                        ? "Show less"
-                        : "View all"
-                      : "View all"}
-                    {isPublic ? (
-                      isExpanded ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
+                    Show less
+                    <ChevronUp className="h-4 w-4" />
                   </button>
                 </div>
               )}
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 px-4 ">
-              <img
-                src={noProjects || "/placeholder.svg"}
-                alt="No project entries"
-                className="w-20 h-20 mb-6"
-              />
-              <h3 className="text-base text-[#414447] font-normal mb-2 text-center font-sans leading-6 tracking-[0.24px]">
-                {isPublic
-                  ? "No Projects added yet."
-                  : "You haven't added any project yet."}
-              </h3>
-              {!isPublic && (
-                <p className="text-[#414447] text-center font-sans text-base font-normal leading-6 tracking-[0.24px]">
-                  <button
-                    onClick={() => navigate("/projects")}
-                    className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
-                  >
-                    Add project
-                  </button>{" "}
-                  to show up here
-                </p>
-              )}
+            <div className="flex flex-col items-center justify-center">
+              <div className="py-[50px] items-center justify-center flex flex-col">
+                <img
+                  src={noProjects || "/placeholder.svg"}
+                  alt="No project entries"
+                  className="w-20 h-20 mb-6"
+                />
+                <h3 className="text-[#414447] text-body2 mb-2 text-center">
+                  {isPublic
+                    ? "No Projects added yet."
+                    : "You haven't added any project yet."}
+                </h3>
+                {!isPublic && (
+                  <p className="text-[#414447] text-body2 text-center">
+                    <button
+                      onClick={() => navigate("/projects")}
+                      className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
+                    >
+                      Add project
+                    </button>{" "}
+                    to show up here
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>

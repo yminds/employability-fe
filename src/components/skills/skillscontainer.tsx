@@ -83,7 +83,7 @@ const SkillsContainer: React.FC = () => {
                   selectedGoalExperienceLevel={selectedGoalExperienceLevel} // Pass experience level
                 />
               </div>
-              <div className="mt-[70px] sm:min-w-[100%]  overflow-y-auto sm:mt-4">
+              <div className="mt-[70px] sm:min-w-[100%] space-y-4 overflow-y-auto sm:mt-4">
                 <SkillList isDashboard={false} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated}  goals={goalData} selectedGoalName={selectedGoal?.name || ""}/>
                 <SuggestedSkills userId={userId} goalId={selectedGoalId} onSkillsUpdate={setIsUpdated} isSkillsUpdated={isUpdated} />
               </div>
