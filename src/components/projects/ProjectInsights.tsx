@@ -201,7 +201,7 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
         </h3>
         <div
           ref={skillsContainerRef}
-          className={`space-y-4 overflow-y-auto ${showScrollbar ? 'minimal-scrollbar p-2' : ""}`}
+          className={`space-y-4 overflow-y-auto ${showScrollbar ? 'minimal-scrollbar' : "minimal-scrollbar"}`}
           style={{ height: skillsContainerHeight }}
         >
           {projectsLoading ? (
