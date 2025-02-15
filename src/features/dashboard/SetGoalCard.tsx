@@ -17,8 +17,8 @@ interface Goal {
   predefined_goal_id: string;
 }
 
-const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string}> = ({
-  setJourneyDialog, selectedLevel
+const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string, onGoalUpdate: (isUpdated: boolean) => void;}> = ({
+  setJourneyDialog, selectedLevel, onGoalUpdate
 }) => {
   console.log(selectedLevel);
   
@@ -67,6 +67,10 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string}> =
     }
   }, [selectedLevel]);
 
+  const handleGoalAdded = () => {
+    onGoalUpdate(true); // Notify parent component that a goal has been added
+    setIsDialogOpen(false); 
+  };
 
   return (
     <>
@@ -107,6 +111,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string}> =
                 setIsOpen={setIsDialogOpen}
                 selectedGoal={selectedGoal}
                 setJourneyDialog={setJourneyDialog}
+                onGoalUpdate={handleGoalAdded}
               />
             )}
           </div>
@@ -125,6 +130,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string}> =
               searchGoals={searchGoals}
               displayTitle={true}
               filters={filters} // Pass the updated filters to GoalList
+              onGoalUpdate={handleGoalAdded}
             />
           </section>
         </div>

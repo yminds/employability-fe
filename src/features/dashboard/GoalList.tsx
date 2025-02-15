@@ -33,6 +33,7 @@ interface Props {
     searchGoals: GoalsData | undefined;
     displayTitle: boolean;
     filters: any;
+    onGoalUpdate: (isUpdated: boolean) => void;
 }
 
 const jobsMarketDemandObj = { 1: "High", 2: "Mid", 3: "Low" };
@@ -43,7 +44,7 @@ const colorPalette = [
     '#D89AFC', '#AA9AFC',  '#7BB0FF', '#FC9A9C', '#7DFDB1', '#FECF7D', '#B4B4B5', '#FF878F', '#DFF794', '#9AFCD5', '#9AEDFC', '#FC9AD3',
 ];
 
-const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters }) => {
+const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters, onGoalUpdate }) => {
     const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery() as { data: GoalsData | undefined, error: any, isLoading: boolean };
     const [fetchFilteredGoals] = useFilterGoalsMutation();
 
@@ -127,6 +128,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                     setJourneyDialog={setJourneyDialog}
                     isSetGoalsPage={isSetGoalsPage} // Pass the flag to control the appearance
                     bannerColor={bannerColors[data.findIndex(goal => goal._id === selectedGoal._id)] || colorPalette[0]} // Ensure a default color
+                    onGoalUpdate={onGoalUpdate}
                 />
             )}
 

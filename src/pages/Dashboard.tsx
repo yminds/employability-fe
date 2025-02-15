@@ -138,6 +138,7 @@ const Dashboard: React.FC<Props> = () => {
   const user_name = user ? user.name : "";
   const profile_image = user ? user.profile_image : "";
   const experience_level = user ? user.experience_level : "";
+  const [isUpdated, setIsUpdated] = useState<boolean>(false);
 
   const { data: userDetails, isLoading: isUserDetailsLoading } =
     useGetUserDetailsQuery(user_id);
@@ -146,6 +147,7 @@ const Dashboard: React.FC<Props> = () => {
     data: goalsData,
     isLoading: isGoalsLoading,
     isFetching: isGoalsFetching,
+    refetch: refetchGoals,
   } = useGetUserGoalQuery(user_id, {
     refetchOnMountOrArgChange: true,
   });
@@ -249,6 +251,14 @@ const Dashboard: React.FC<Props> = () => {
       );
     }
   }, [skillsData]);
+
+    useEffect(() => {
+      if (isUpdated) {
+        refetchGoals();
+        console.log("Goals refetched");
+        setIsUpdated(false);
+      }
+    }, [isUpdated, goalId]);
 
   // if (isInitialLoading) {
   //   return (
@@ -496,6 +506,9 @@ const Dashboard: React.FC<Props> = () => {
                     <hr className="pt-3" />
                     <SetGoalCard
                       setJourneyDialog={setJourneyDialog}
+                      onGoalUpdate={() => {
+                        setIsUpdated(true);
+                      }}
                       selectedLevel={
                         experience_level === "entry"
                           ? "1"
