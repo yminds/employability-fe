@@ -239,7 +239,9 @@ const TryThingsSection: React.FC = () => {
     const section = routeToSection[route];
     if (section) {
       setCurrentProfileSection(section);
-      setShowProfileModal(true);
+      setTimeout(() => {
+        setShowProfileModal(true);
+      }, 300);
     }
   };
  

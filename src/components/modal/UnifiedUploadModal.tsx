@@ -1,8 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { resetResumeState } from "@/store/slices/resumeSlice";
 import ResumeUploadProgressModal from "./ResumeUploadProgressModal";
-import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { Upload } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useUploadResumeMutation } from "@/api/resumeUploadApiSlice";
@@ -26,7 +24,6 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
   isOpen,
   onClose,
   userId,
-  goalId,
 }) => {
   const dispatch = useDispatch();
   const [uploadResume] = useUploadResumeMutation();
@@ -40,8 +37,6 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
   const [resume, setResume] = useState({
     resumeUrl: "",
   });
-  // const [showCompleteProfile, setShowCompleteProfile] = useState(false);
-  const [parsedData, setParsedData] = useState(null);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -126,7 +121,6 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
           fileUrl: resume.resumeUrl,
         });
         const parsedData = response.data;
-        setParsedData(parsedData.data.parsedData);
         dispatch(
           updateUserProfile({
             parsedResume: parsedData.data.parsedData,
@@ -173,7 +167,6 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
       console.error("Error removing file:", error);
     }
   };
-
 
   if (uploadState.file) {
     return (
@@ -286,29 +279,29 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogContent className="bg-white rounded-[20px] max-w-4xl p-0 flex overflow-hidden">
+      <DialogContent className="bg-white rounded-[10px] max-w-4xl p-0 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 bg-gray-50 p-4 border-r border-gray-200 rounded-l-[20px]">
+        <div className="w-48 p-4 border-r border-gray-200 rounded-l-[20px]">
           <h2 className="text-lg font-medium text-gray-900 mb-4 px-2">
             Upload Options
           </h2>
           <div className="space-y-2">
             <button
               onClick={() => setActiveTab("resume")}
-              className={`w-full text-left px-4 py-2 rounded-lg transition-colors duration-200 ${
+              className={`w-full text-left px-4 py-2 transition-colors duration-200 ${
                 activeTab === "resume"
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "text-[#00183D] font-semibold bg-white border-r-2 border-[#00183D]"
+                  : "text-[#68696B] hover:text-[#00183D] hover:bg-gray-50"
               }`}
             >
               Resume Upload
             </button>
             <button
               onClick={() => setActiveTab("linkedin")}
-              className={`w-full text-left px-4 py-2 rounded-lg transition-colors duration-200 ${
+              className={`w-full text-left px-4 py-2 transition-colors duration-200 ${
                 activeTab === "linkedin"
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "text-[#00183D] font-semibold bg-white border-r-2 border-[#00183D]"
+                  : "text-[#68696B] hover:text-[#00183D] hover:bg-gray-50"
               }`}
             >
               LinkedIn Import
