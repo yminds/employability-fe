@@ -18,7 +18,7 @@ const getPresignedUrl = async (interviewId: string, chunkNumber: number, folder 
         folder,
       }),
     });
-
+  
     const data = await response.json();
     console.log("data", data);
 
