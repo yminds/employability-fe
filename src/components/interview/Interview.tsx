@@ -42,6 +42,8 @@ interface QuestionState {
   concept: string;
 }
 
+type InterviewState = "WAITING" | "LISTENING" | "SPEAKING";
+
 const Interview: React.FC<{
   id: string;
   cameraScale: number;
@@ -51,7 +53,8 @@ const Interview: React.FC<{
 }> = ({ interviewTopic, concepts, stopScreenSharing }) => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
-  const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
+  const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
+    const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
   // Queries and Speech Hooks
   const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
   const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(interviewId as string, {
@@ -77,12 +80,14 @@ const Interview: React.FC<{
   // TTS Setup
   const { frequencyData, handleIncomingData } = useTTS({
     onPlaybackComplete: () => {
+      setInterviewState("LISTENING"); // Move to LISTENING state when TTS finishes
       setTimeout(() => {
         setIsUserAnswering(true);
         startRecording();
       }, 50);
     },
   });
+  
 
   // Socket Connection
   useEffect(() => {
@@ -98,15 +103,17 @@ const Interview: React.FC<{
         console.log("Connected handleConnect isInitialized");
         
         setIsInitialized(true);
-        const initialGreeting = "Hello";
+        const initialGreeting = "Hello, before starting the interview can you please introduce yourself and describe the names of concepts that are being covered in this interview?";
         addMessage(initialGreeting);
       }
     };
 
     const handleAIResponse = (data: string) => {
+      setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
+    
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
-
+    
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
       setQuestion((prev) => ({
@@ -199,9 +206,10 @@ const Interview: React.FC<{
     if (isUserAnswering) {
       stopRecording();
       setIsUserAnswering(false);
+      setInterviewState("WAITING"); // Back to WAITING before AI processes the response
     }
   };
-
+  
   const handleMessage = (message: string, role: "USER" | "AI") => {
     setMessages((prevMessages) => {
       if (role === "AI") {
@@ -226,26 +234,21 @@ const Interview: React.FC<{
     });
   };
 
-  const addMessage = (prompt: string) => {
+  const addMessage =async (prompt: string) => {
     console.log("🔥 addMessage called with prompt:", prompt);
 
     if (!interviewDetails?.data?._id) {
       console.error("⚠️ Interview details not available, skipping API call.");
       return;
     }
-
-    interviewStream({
+  
+    // Move to "WAITING" state when sending a new question
+    setInterviewState("WAITING");
+  
+    const response =await interviewStream({
       prompt,
       model: "gpt-4o",
       provider: "openai",
-      // model: "claude-3-5-sonnet-latest",
-      // provider: "anthropic",
-      // model: "gemini-2.0-flash-exp",
-      // model: "gemini-1.5-flash-latest",
-      // provider: "google",
-      // model: "deepseek-chat",
-      // provider: "deepseek",
-
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
       user_id: interviewDetails.data.user_id,
@@ -254,10 +257,27 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts.slice(0, 2),
+      concepts: concepts,
       interview_id: interviewDetails.data._id,
+    }).unwrap()
+
+     console.log("response", response);
+     
+    setAllConcepts((prev) => {
+      const updatedConcepts = prev.map((concept) => {
+        if (response?.event?.ratedConcepts?.includes(concept?.name)) {
+          console.log("Concept entred", { ...concept, status: "completed" });
+          
+          return { ...concept, status: "completed" };
+        }
+        console.log("concept", concept);
+        
+        return concept;
+      });
+      return updatedConcepts;
     });
-  };
+    
+  };  
   
   const navigate = useNavigate();
   const handleBackToSkills = () => {
@@ -281,6 +301,7 @@ const Interview: React.FC<{
             frequencyData={frequencyData}
             messages={messages}
             layoutType={2}
+            interviewState={interviewState}
             concepts={allConcepts}
           />
         )}
@@ -296,6 +317,7 @@ interface LayoutBuilderProps {
   frequencyData: any;
   messages: IMessage[];
   layoutType: 1 | 2;
+  interviewState: InterviewState;
   concepts: any[];
 }
 
@@ -306,6 +328,7 @@ const LayoutBuilder = ({
   frequencyData,
   messages,
   layoutType,
+  interviewState,
   concepts,
 }: LayoutBuilderProps) => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
@@ -323,7 +346,7 @@ const LayoutBuilder = ({
         )}
       </div>
       <div className="w-[40%] flex flex-col gap-8">
-        <AIProfile frequency={frequencyData} />
+        <AIProfile frequency={frequencyData} interviewState={interviewState} />
         <Conversation layoutType={1} messages={messages} />
       </div>
     </div>
@@ -339,7 +362,7 @@ const LayoutBuilder = ({
       </div>
 
       <div className="w-[45%] flex flex-col gap-8">
-        <AIProfile height={"20vh"} frequency={frequencyData} />
+        <AIProfile frequency={frequencyData} interviewState={interviewState} /> {/* Pass state here */}
         {question.isCodeSnippetMode && question.codeSnippet ? (
           <CodeSnippetQuestion question={question.codeSnippet.question} codeSnippet={question.codeSnippet.code} />
         ) : (

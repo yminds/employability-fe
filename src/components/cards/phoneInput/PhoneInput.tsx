@@ -58,7 +58,7 @@ const InputComponent = React.forwardRef<
       "w-full py-[12px] px-[16px] bg-[#FAFBFE] rounded-[6px]", // Padding, background, and border radius
       "border border-[rgba(0,0,0,0.10)]", // Light border style
       "focus:outline-none focus:ring-2 focus:ring-[#0AD472]", // Green focus ring
-      "placeholder:text-gray-500 placeholder-shown:align-middle ps-16", // Fix placeholder alignment
+      "placeholder:text-[#808080] text-body2 placeholder-shown:align-middle ps-16", // Fix placeholder alignment
       className
     )}
     {...props}

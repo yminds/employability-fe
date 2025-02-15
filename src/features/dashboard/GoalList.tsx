@@ -29,10 +29,11 @@ interface Props {
     isLoading: boolean;
     error: boolean;
     data?: GoalsData; // The data could be undefined if the API request hasn't completed yet
-    setJourneyDialog: boolean;
-    searchGoals: any[] | undefined;
+    setJourneyDialog: React.Dispatch<React.SetStateAction<boolean>>;
+    searchGoals: GoalsData | undefined;
     displayTitle: boolean;
     filters: any;
+    onGoalUpdate: (isUpdated: boolean) => void;
 }
 
 const jobsMarketDemandObj = { 1: "High", 2: "Mid", 3: "Low" };
@@ -43,7 +44,7 @@ const colorPalette = [
     '#D89AFC', '#AA9AFC',  '#7BB0FF', '#FC9A9C', '#7DFDB1', '#FECF7D', '#B4B4B5', '#FF878F', '#DFF794', '#9AFCD5', '#9AEDFC', '#FC9AD3',
 ];
 
-const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters }) => {
+const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle, filters, onGoalUpdate }) => {
     const { data: allGoals, error: fetchError, isLoading: isFetching } = useGetAllPreDefinedGoalsQuery() as { data: GoalsData | undefined, error: any, isLoading: boolean };
     const [fetchFilteredGoals] = useFilterGoalsMutation();
 
@@ -110,7 +111,24 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
         setIsDialogOpen(true); // Open the dialog
     };
 
-    const [hoveredCard, setHoveredCard] = useState(null); // Track the hovered card by ID
+    const [hoveredGoalID, setHoveredGoalID] = useState<string | null>(null);
+    const [delayedHoverGoalID, setDelayedHoverGoalID] = useState<string | null>(null);
+    const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (hoveredGoalID) {
+            const timeout = setTimeout(() => {
+                setDelayedHoverGoalID(hoveredGoalID);
+            }, 1000); // ⏳ 1-second delay before showing hover block
+            setHoverTimeout(timeout);
+        } else {
+            setDelayedHoverGoalID(null);
+        }
+
+        return () => {
+            if (hoverTimeout) clearTimeout(hoverTimeout);
+        };
+    }, [hoveredGoalID]);
 
     const location = useLocation(); // Get current location
 
@@ -127,6 +145,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                     setJourneyDialog={setJourneyDialog}
                     isSetGoalsPage={isSetGoalsPage} // Pass the flag to control the appearance
                     bannerColor={bannerColors[data.findIndex(goal => goal._id === selectedGoal._id)] || colorPalette[0]} // Ensure a default color
+                    onGoalUpdate={onGoalUpdate}
                 />
             )}
 
@@ -145,14 +164,14 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                 {data?.map((goal, index) => (
                     <div
                         key={goal._id}
-                        className="relative cursor-pointer"
-                        onMouseEnter={() => setHoveredCard(goal._id)} // Set hovered card ID
-                        onMouseLeave={() => setHoveredCard(null)} // Reset hover state
+                        className="relative cursor-pointer "
+                        onMouseEnter={() => setHoveredGoalID(goal._id)}
+                        onMouseLeave={() => setHoveredGoalID(null)}
                         onClick={() => handleGoalClick(goal)} // Handle card click
                     >
                         {/* Default Block */}
                         <div
-                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity duration-300 shadow-sm ${hoveredCard === goal._id ? "opacity-0" : "opacity-100"}`}
+                            className={`inset-0 rounded-[9px] border border-black/10 bg-white transition-opacity h-full duration-300 shadow-sm ${delayedHoverGoalID  === goal._id ? "opacity-0" : "opacity-100"}`}
                         >
                             {/* Add an Image or Placeholder */}
 
@@ -184,7 +203,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
 
                         {/* Hovered Block */}
                         <div
-                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${hoveredCard === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+                            className={`absolute inset-0 bg-gray-50 rounded-[9px] transition-transform duration-300 flex flex-col p-4 pt-4 pb-4 pl-3 ${delayedHoverGoalID  === goal._id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
                         >
                             <h3 className="text-[#414447] leading-[24px] tracking-[0.3px] mb-4">{goal.title}</h3>
                             <div className="grid grid-cols-2 gap-2">

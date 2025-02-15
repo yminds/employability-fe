@@ -13,6 +13,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import search from "@/assets/skills/search.svg";
 import AddSkillsModal from "./addskills";
 
+
 export interface SkillPoolId {
   _id: string;
   name: string;
@@ -73,6 +74,10 @@ const SkillList: React.FC<SkillListProps> = ({
   const [isSelfRatingEdited, setSelfRatingChange] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+
+  
+
+
   // Mutation hooks
   const [removeGoalFromSkill] = useRemoveGoalFromSkillMutation();
   const [updateSelfRating] = useUpdateSelfRatingMutation();
@@ -124,8 +129,8 @@ const SkillList: React.FC<SkillListProps> = ({
   };
 
   const moveUnverifiedToIndexZero = (skills: Skill[]): Skill[] => {
-    const unverifiedSkills = skills.filter((skill) => skill.verified_rating === 0);
-    const verifiedSkills = skills.filter((skill) => skill.verified_rating > 0);
+    const unverifiedSkills = skills.filter((skill) => skill.verified_rating <= 3);
+    const verifiedSkills = skills.filter((skill) => skill.verified_rating > 3);
     return unverifiedSkills.length > 0
       ? [unverifiedSkills[0], ...verifiedSkills, ...unverifiedSkills.slice(1)]
       : skills;
@@ -172,6 +177,8 @@ const SkillList: React.FC<SkillListProps> = ({
       { id: "optional", label: "Added by you" },
     ];
 
+
+    
     return (
       <div className="flex gap-1 items-center mb-4 sm:max-w-[100%] sm:flex sm:flex-col-reverse sm:items-start md:items-start sm:gap-5">
         <div className="sm:flex h-[46px]">

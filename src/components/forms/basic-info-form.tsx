@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { s3Upload, s3Delete } from "@/utils/s3Service";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -23,7 +24,6 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 import VectorFile from "@/assets/profile/completeprofile/file.svg";
 import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
 import { updateUserProfile } from "@/features/authentication/authSlice";
-import axios from "axios";
 import UploadProgressBar from "@/features/profile/UploadProgressBar";
 import type { BasicInfo } from "@/features/profile/types";
 
@@ -32,7 +32,12 @@ interface BasicInfoFormProps {
     basicInfo: BasicInfo;
     socialProfiles: any;
   };
-  onChange: (basicInfo: BasicInfo, socialProfiles: any) => void;
+  onChange: (
+    basicInfo: BasicInfo,
+    socialProfiles: any,
+    isImageDeleted: boolean,
+    newlyUploadedImage: string | null
+  ) => void;
   errors: { [key: string]: string };
 }
 
@@ -63,8 +68,6 @@ export default function BasicInfoForm({
     portfolio: initialData?.socialProfiles?.portfolio || user?.portfolio || "",
   });
 
-  // const [socialProfiles, setSocialProfiles] = useState(initialData?.socialProfiles)
-
   const [countries, setCountries] = useState<any[]>([]);
   const [states, setStates] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
@@ -72,6 +75,10 @@ export default function BasicInfoForm({
     formData.profile_image || null
   );
   const [imageError, setImageError] = useState<string>("");
+  const [isImageDeleted, setIsImageDeleted] = useState(false); // Added state variable
+  const [newlyUploadedImage, setNewlyUploadedImage] = useState<string | null>(
+    null
+  );
 
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -100,7 +107,7 @@ export default function BasicInfoForm({
       setStates([]);
       setCities([]);
     }
-  }, [formData.country, formData.state]); // Added formData.state to dependencies
+  }, [formData.country, formData.state]);
 
   // Update cities when state changes
   useEffect(() => {
@@ -120,23 +127,22 @@ export default function BasicInfoForm({
     } else {
       setCities([]);
     }
-  }, [formData.country, formData.state]);
+  }, [formData.country, formData.state, formData.city]); // Added formData.city to dependencies
 
   // Call onChange whenever formData or socialProfiles change
   useEffect(() => {
     const timer = setTimeout(() => {
-      onChange(formData, socialProfiles);
+      onChange(formData, socialProfiles, isImageDeleted, newlyUploadedImage); // Updated onChange call
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [formData, socialProfiles]);
+  }, [formData, socialProfiles, isImageDeleted, newlyUploadedImage, onChange]); // Added isImageDeleted to dependencies
 
   const handleBasicInfoChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // dispatch(updateUserProfile({ [name]: value }))
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,33 +182,14 @@ export default function BasicInfoForm({
       formData.append("folder", "profile-image");
       formData.append("name", file.name);
 
-      const response = await axios.post(
-        `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
-        formData,
-        {
-          onUploadProgress: (progressEvent) => {
-            const progress = progressEvent.total
-              ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              : 0;
-            setUploadProgress(progress);
-          },
-        }
-      );
+      const response = await s3Upload(formData, setUploadProgress);
 
-      // if (!response.ok) {
-      //   throw new Error("Failed to upload image");
-      // }
-
-      // const result = await response.json();
-
-      const result = response.data;
-
-      // Update form data with the returned S3 URL
+      setNewlyUploadedImage(response.data[0].fileUrl);
+      setImagePreview(response.data[0].fileUrl);
       setFormData((prev) => ({
         ...prev,
-        profile_image: result.data[0].fileUrl,
+        profile_image: response.data[0].fileUrl,
       }));
-      dispatch(updateUserProfile({ profile_image: result.data[0].fileUrl }));
     } catch (error) {
       console.error("Error uploading image:", error);
       setImageError("Failed to upload image. Please try again.");
@@ -214,37 +201,18 @@ export default function BasicInfoForm({
 
   const removeImage = async () => {
     try {
-      console.log("Remove image");
-
-      if (formData.profile_image && user?._id) {
+      if (newlyUploadedImage) {
         const bucketBaseUrl =
           "https://employability-user-profile.s3.us-east-1.amazonaws.com/";
-        const key = formData.profile_image.replace(bucketBaseUrl, "");
-        console.log("Deleting image with key:", key, "for user:", user._id);
-        const response = await fetch(
-          `${process.env.VITE_API_BASE_URL}/api/v1/s3/delete`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              key,
-              userId: user._id,
-              folder: "profile-image.",
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to delete file from S3");
-        }
+        const key = newlyUploadedImage.replace(bucketBaseUrl, "");
+        await s3Delete(key, user?._id, "profile-image");
+        setNewlyUploadedImage(null);
       }
 
       setImagePreview(null);
       setImageError("");
       setFormData((prev) => ({ ...prev, profile_image: "" }));
-      dispatch(updateUserProfile({ profile_image: "" }));
+      setIsImageDeleted(true);
     } catch (error) {
       console.error("Error removing image:", error);
       setImageError("Failed to remove image. Please try again.");
@@ -403,9 +371,6 @@ export default function BasicInfoForm({
           </div>
         </div>
       </div>
-      {/* <h3 className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-        Basic Info
-      </h3> */}
       <div className="bg-white rounded-lg p-8 space-y-6 relative border border-[#E5E7EB]">
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -571,7 +536,7 @@ export default function BasicInfoForm({
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-              gitHub
+              GitHub
             </Label>
             <Input
               type="url"
@@ -579,7 +544,7 @@ export default function BasicInfoForm({
               value={socialProfiles.gitHub}
               onChange={handleSocialProfileChange}
               className="w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]"
-              placeholder="https://gitHub.com/username"
+              placeholder="https://github.com/username"
             />
           </div>
 
@@ -593,7 +558,7 @@ export default function BasicInfoForm({
               value={socialProfiles.linkedIn}
               onChange={handleSocialProfileChange}
               className="w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]"
-              placeholder="https://linkedIn.com/in/username"
+              placeholder="https://linkedin.com/in/username"
             />
           </div>
 

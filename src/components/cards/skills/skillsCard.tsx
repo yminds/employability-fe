@@ -9,11 +9,16 @@ import DefaultImg from "@/assets/skills/DefaultSkillImg.svg";
 import verifiedWhite from "@/assets/skills/verified_whiteBG.svg";
 import backGround from "@/assets/skills/verifiedBg.png";
 import SkillVerificationTutorial from "@/components/skills/SkillVerificationTutorial";
+import { useGetUserDetailsQuery } from "@/api/userApiSlice";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { to } from "react-spring";
+import { toast } from "sonner";
 
 interface LatestInterviewStatus {
   interview_id: string;
   isCompleted: boolean;
-}
+}   
 interface SkillCardProps {
   skillId: string;
   skill: string;
@@ -58,6 +63,11 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const [ratingError, setRatingError] = useState("");
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
+  const userId = useSelector((state: RootState) => state.auth.user?._id);
+
+  const {data:userCredntials}= useGetUserDetailsQuery(userId!);
+  console.log("userCredntials",userCredntials);
+
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -107,23 +117,23 @@ const SkillCard: React.FC<SkillCardProps> = ({
       return value === "Basic"
         ? "bg-[#E5F6FF] text-[#1C3FAA] w-fit"
         : value === "Intermediate"
-        ? "bg-[#E5F0FF] text-[#1C2CD8]"
-        : "bg-[#E5E7FF] text-[#1C2CD8]";
+          ? "bg-[#E5F0FF] text-[#1C2CD8]"
+          : "bg-[#E5E7FF] text-[#1C2CD8]";
     }
     if (type === "importance") {
       return value === "Low"
         ? "bg-[#DBFFEA] text-[#10B754]"
         : value === "Medium"
-        ? "bg-[#FFF9DB] text-[#D4B30C]"
-        : "bg-[#FFF2DB] text-[#D48A0C]";
+          ? "bg-[#FFF9DB] text-[#D4B30C]"
+          : "bg-[#FFF2DB] text-[#D48A0C]";
     }
   };
 
   const skillsLevelObj = { 1: "Basic", 2: "Intermediate", 3: "Advanced" };
 
   const handleViewReport = () => {
-    navigate(`/skill/report/${skillId}`, {
-      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg } ,
+    navigate(`/skill/report/${bestInterview}`, {
+      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg },
     });
   };
 
@@ -146,6 +156,15 @@ const SkillCard: React.FC<SkillCardProps> = ({
       setShowTutorial(true);
       return;
     }
+
+
+  if(userCredntials?.data?.is_pending_interview){
+     toast.error("You have already a pending interview");
+     return;
+  }
+
+
+
 
     const interviewId = await createInterview({
       title: `${skill} Interview`,
@@ -268,7 +287,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           </div>
 
           {/* Middle Section */}
-          {!isDashboard && (
+          {/* {!isDashboard && (
             <div className="flex w-[30%] flex-col items-center">
               <span
                 className={`px-4 py-2 rounded-[40px] font-medium leading-6 tracking-[0.24px] ${getBadgeColor(
@@ -279,7 +298,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                 {skillsLevelObj[level as unknown as keyof typeof skillsLevelObj] ?? "Basic"}
               </span>
             </div>
-          )}
+          )} */}
 
           {/* Rating and Status */}
           <div className="flex w-[30%] flex-col items-center">
@@ -292,9 +311,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
             <div className="flex items-center space-x-2">
               <img src={imgSrc} alt={status} className="w-4 h-4" />
               <span
-                className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
-                  status === "Verified" ? "text-green-600" : "text-yellow-600"
-                }`}
+                className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-green-600" : "text-yellow-600"
+                  }`}
               >
                 {status}
               </span>
@@ -334,13 +352,13 @@ const SkillCard: React.FC<SkillCardProps> = ({
               <>
                 <button
                   onClick={handleLearn}
-                  className="px-4 py-2 text-sm font-medium rounded-md text-[#001630] underline"
+                  className="px-11 py-2 text-sm font-medium rounded-md text-[#001630] underline"
                 >
                   Learn
                 </button>
                 <button
                   onClick={handleResumeInterView}
-                  className="px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md"
+                  className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
                 >
                   Resume
                 </button>
@@ -440,9 +458,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   <div className="flex items-center space-x-2">
                     <img src={smImgSrc} alt={status} className="w-4 h-4" />
                     <span
-                      className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
-                        status === "Verified" ? "text-white" : "text-white"
-                      }`}
+                      className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-white" : "text-white"
+                        }`}
                     >
                       {status}
                     </span>
@@ -479,7 +496,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                     View report
                   </button>
                   <button
-                    onClick={handleVerifySkill}
+                    onClick={()=> handleVerifySkill()}
                     className="py-2 text-sm font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
                   >
                     Improve score

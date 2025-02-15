@@ -79,7 +79,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         )}
         
         {/* Main Content Area */}
-        <div className={`flex-1 ${shouldDisplaySidebar() ? "bg-gray-100" : ""}`}>
+        <div className="flex-1 bg-gray-100">
           {children}
         </div>
       </div>

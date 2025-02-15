@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
@@ -31,9 +31,10 @@ interface GoalFormDialogProps {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedGoal: Goal | null;
     setJourneyDialog: React.Dispatch<React.SetStateAction<boolean>>;
+    onGoalUpdate: (isUpdated: boolean) => void;
 }
 
-const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog }) => {
+const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, setJourneyDialog, onGoalUpdate }) => {
     const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal, setGoal] = useState(selectedGoal ? selectedGoal.title : "");
@@ -45,7 +46,7 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
     const [errors, setErrors] = useState({
         goal: "",
         techStack: "",
-        description: "",
+        description: "",  
     });
 
     const [createGoal] = useAddUserGoalMutation();
@@ -53,7 +54,6 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
     const { data: skillsName } = useGetMultipleSkillsNameQuery(goalId, {
         skip: !goalId,
     });
-
     const handleSkillSelect = (skillId: string) => {
         if (!selectedTechStack.includes(skillId)) {
             setSelectedTechStack((prev) => [...prev, skillId]);
@@ -98,7 +98,9 @@ const GoalFormDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, sele
                 setIsSaved(false);
                 setIsOpen(false);
                 setJourneyDialog(false);
+                onGoalUpdate(true); // Notify parent component that a goal has been created
             }, 2000);
+            console.log('updated the goal to true')
         } catch (err) {
             console.error("Failed to save goal:", err);
         }

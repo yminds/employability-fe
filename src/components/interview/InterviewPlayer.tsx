@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader } from "lucide-react";
 
 interface InterviewPlayerProps {
   urls: string[];
 }
 
 const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
-  if (urls === undefined || urls.length === 0) { return <div>No Recordings Available</div>; }
+  if (urls === undefined || urls.length === 0) {
+    return <div>No Recordings Available</div>;
+  }
+
   const playerRef = useRef<ReactPlayer>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentChunk, setCurrentChunk] = useState(0);
@@ -18,7 +21,11 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [seeking, setSeeking] = useState(false);
+
+  const [updatedProgresssion, setUpdatedProgression] = useState(0);
+  const CHUNK_DURATION = 180; // 3 minutes in seconds
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -26,42 +33,105 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  const handleProgress = (state: { played: number; playedSeconds: number }) => {
-    const totalDuration = urls.length * 30;
-    const currentProgress = ((currentChunk * 30 + state.playedSeconds) / totalDuration) * 100;
-    setProgress(Number(currentProgress.toFixed(2)));
-    setCurrentTime(formatTime(currentChunk * 30 + state.playedSeconds));
+  const [isSeeking, setIsSeeking] = useState(false);
 
-    if (state.played >= 0.99) {
-      if (currentChunk < urls.length - 1) {
-        setCurrentChunk((prev) => prev + 1);
-        setIsPlaying(true);
-        setTimeout(() => {
-          playerRef.current?.seekTo(0, "seconds");
-        }, 500);
-      } else {
-        setIsPlaying(false);
+  const handleProgress = (state: { played: number; playedSeconds: number }) => {
+    // Don't update progress while seeking
+    if (isSeeking) return;
+
+    const totalDuration = urls.length * CHUNK_DURATION;
+    const currentProgress = Math.floor(((currentChunk * CHUNK_DURATION + state.playedSeconds) / totalDuration) * 100);
+    setProgress(currentProgress);
+    setCurrentTime(formatTime(currentChunk * CHUNK_DURATION + Math.floor(state.playedSeconds)));
+
+    // Only handle auto-progression if not seeking
+    if (state.played >= 0.99 && currentChunk < urls.length - 1) {
+      setIsLoading(true);
+      setCurrentChunk((prev) => prev + 1);
+      setIsPlaying(true);
+    }
+  };
+
+  const handleTimelineChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsSeeking(true);
+    const value = Math.floor(parseFloat(e.target.value));
+    const totalDuration = urls.length * CHUNK_DURATION;
+    const newTime = Math.floor((value / 100) * totalDuration);
+    const chunkIndex = Math.floor(newTime / CHUNK_DURATION);
+    const progressWithinChunk = Math.floor(newTime % CHUNK_DURATION);
+
+
+    setUpdatedProgression(progressWithinChunk);
+    console.log(`cunk index is ${chunkIndex}`);
+
+    setIsLoading(true);
+    setProgress(value);
+    setCurrentTime(formatTime(newTime));
+
+    console.log("++++++++++++++++++++++++++++++++++++++++");
+    console.log(progressWithinChunk);
+    console.log("++++++++++++++++++++++++++++++++++++++++");
+
+    if (playerRef.current) {
+      const player = playerRef.current.getInternalPlayer();
+      if (player) {
+        try {
+          player.pause();
+
+          // console.log(`url before setting: ${player.src}`);
+
+          player.src = urls[chunkIndex];
+
+          // console.log(`Player src set to ${player.src}`);
+
+          await new Promise((resolve) => {
+            player.addEventListener("loadedmetadata", resolve, { once: true });
+          });
+
+          console.log(`Seeking to chunk ${chunkIndex} at ${progressWithinChunk} seconds`);
+          // player.currentTime = progressWithinChunk;
+
+          // playerRef.current.seekTo(progressWithinChunk, 'seconds');
+          console.log(`Player currentTime set to ${player.currentTime}`);
+
+          // player.currentTime = progressWithinChunk;
+          // await player.play();
+          console.log("Player playing");
+          setSeeking(true);
+          setCurrentChunk(chunkIndex);
+          // setIsPlaying(true);
+        } catch (error) {
+          console.log("Playback error:", error);
+        } finally {
+          setIsLoading(false);
+          setIsSeeking(false); // Reset seeking state
+        }
       }
     }
   };
 
-  const handleTimelineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    const totalChunks = urls.length;
-     
-
-    
-    const chunkIndex = Math.min(Math.floor((value / 100) * totalChunks), totalChunks - 1);
-    const progressWithinChunk = (value / 100) * totalChunks - chunkIndex;
-
-    setCurrentChunk(chunkIndex);
-    setProgress(value);
-
+  useEffect(() => {
+   
     if (playerRef.current) {
-      const duration = 30;
-      playerRef.current.seekTo(progressWithinChunk * duration, "seconds");
+
+      console.log('Inside the useEffect of seeking with progress:', updatedProgresssion);
+      // playerRef.current.seekTo(updatedProgresssion);
+
+      const player = playerRef.current.getInternalPlayer();
+      if (player)
+      {
+        player.currentTime = updatedProgresssion;
+        player.play();
+        console.log("Player playing");
+      }
+      setIsPlaying(true);
+
+      setSeeking(false);
     }
-  };
+    return () => {
+      setSeeking(false);
+    }
+  }, [seeking]);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
@@ -101,33 +171,13 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   }, []);
 
   useEffect(() => {
-    setProgress((currentChunk / urls.length) * 100);
-    setDuration(formatTime(urls.length * 30));
-
-    if (playerRef.current) {
-      playerRef.current.seekTo(0, "seconds");
-      setIsPlaying(true);
-    }
+    setProgress(Math.floor((currentChunk / urls.length) * 100));
+    setDuration(formatTime(urls.length * CHUNK_DURATION));
   }, [currentChunk, urls.length]);
-  
-  const handleMouseLeavePlayer = () => {
-    setTimeout(() => {
-      if (!isHovered) {
-        setIsHovered(false);
-      }
-    }, 100);
-  };
 
-  const handleMouseEnterPlayer = () => {
-    setIsHovered(true);
-  }
   return (
     <div ref={containerRef} className="relative w-full h-full">
-      <div
-        className="absolute top-0 left-0 w-full h-full"
-  
- 
-      >
+      <div className="absolute top-0 left-0 w-full h-full">
         <ReactPlayer
           ref={playerRef}
           url={urls[currentChunk]}
@@ -137,78 +187,104 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
           volume={volume}
           muted={isMuted}
           onProgress={handleProgress}
+          onReady={() => setIsLoading(false)}
           onEnded={() => {
             if (currentChunk === urls.length - 1) {
               setIsPlaying(false);
             }
           }}
-          controls={false}
           playsInline
-        //   onMouseEnter={handleMouseEnterPlayer}
-        //   onMouseLeave={handleMouseLeavePlayer}
+          onBuffer={() => {
+            console.log("Buffering start");
+            setIsLoading(true);
+          }}
+          onBufferEnd={() => {
+            console.log("Buffering end");
+            setIsLoading(false);
+          }}
+          autoPlay={false}
         />
+
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <div className="flex flex-col items-center gap-2">
+              <Loader className="w-8 h-8 text-green-500 animate-spin" />
+              <span className="text-white text-sm">Loading...</span>
+            </div>
+          </div>
+        )}
       </div>
 
-      {true && (
-        <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-4">
-          <div className="flex items-center gap-4">
+      <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-4 z-50">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="text-white hover:text-green-500 transition-colors"
+            disabled={isLoading}
+          >
+            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+          </button>
+
+          <div className="flex-1">
+            <input
+              type="range"
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+              style={{
+                accentColor: "rgb(34 197 94)",
+                background: `linear-gradient(to right, rgb(34 197 94) ${progress}%, rgb(209 213 219) ${progress}%)`,
+              }}
+              value={progress}
+              onChange={handleTimelineChange}
+              min={0}
+              max={100}
+              step={1}
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsPlaying(!isPlaying)}
+              onClick={toggleMute}
               className="text-white hover:text-green-500 transition-colors"
+              disabled={isLoading}
             >
-              {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+              {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
             </button>
 
-            <div className="flex-1">
+            <div className="w-20">
               <input
                 type="range"
-                className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer"
                 style={{
                   accentColor: "rgb(34 197 94)",
-                  background: `linear-gradient(to right, rgb(34 197 94) ${progress}%, rgb(209 213 219) ${progress}%)`,
+                  background: `linear-gradient(to right, rgb(34 197 94) ${volume * 100}%, rgb(209 213 219) ${
+                    volume * 100
+                  }%)`,
                 }}
-                value={progress}
-                onChange={handleTimelineChange}
+                value={volume}
+                onChange={handleVolumeChange}
                 min={0}
-                max={100}
+                max={1}
                 step={0.1}
+                disabled={isLoading}
               />
             </div>
-
-            <div className="flex items-center gap-2">
-              <button onClick={toggleMute} className="text-white hover:text-green-500 transition-colors">
-                {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-              </button>
-
-              <div className="w-20">
-                <input
-                  type="range"
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer"
-                  style={{
-                    accentColor: "rgb(34 197 94)",
-                    background: `linear-gradient(to right, rgb(34 197 94) ${volume * 100}%, rgb(209 213 219) ${
-                      volume * 100
-                    }%)`,
-                  }}
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  min={0}
-                  max={1}
-                  step={0.1}
-                />
-              </div>
-            </div>
-
-            <div className="text-white text-sm">
-              {currentTime} / {duration}
-            </div>
-
-            <button onClick={toggleFullscreen} className="text-white hover:text-green-500 transition-colors">
-              {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
-            </button>
           </div>
+
+          <div className="text-white text-sm">
+            {currentTime} / {duration}
+          </div>
+
+          <button
+            onClick={toggleFullscreen}
+            className="text-white hover:text-green-500 transition-colors"
+            disabled={isLoading}
+          >
+            {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

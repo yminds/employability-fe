@@ -12,7 +12,7 @@ import ExperienceForm from "@/components/forms/experience-form";
 import EducationForm from "../forms/education-form";
 import CertificationsForm from "../forms/certification-form";
 import { useProfileForm } from "@/hooks/useProfileForm";
-import { ProfileFormData } from "@/features/profile/types";
+import type { ProfileFormData } from "@/features/profile/types";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
@@ -46,6 +46,9 @@ const CompleteProfileModal = ({
     updateFormData,
     handleDelete,
     handleSaveSection,
+    setIsImageDeleted,
+    newlyUploadedImage,
+    setNewlyUploadedImage,
   } = useProfileForm(type, user, goalId, onClose);
 
   const tabs = useMemo(
@@ -68,9 +71,16 @@ const CompleteProfileModal = ({
               Basic Information
             </h2>
             <BasicInfoForm
-              onChange={(basicInfo, socialProfiles) => {
+              onChange={(
+                basicInfo,
+                socialProfiles,
+                isImageDeleted,
+                newlyUploadedImage
+              ) => {
                 updateFormData("basicInfo", basicInfo);
                 updateFormData("socialProfiles", socialProfiles);
+                setIsImageDeleted(isImageDeleted);
+                setNewlyUploadedImage(newlyUploadedImage);
               }}
               errors={errors}
               initialData={{
@@ -277,6 +287,9 @@ const CompleteProfileModal = ({
     userDetails,
     setIsFresher,
     setHasCertifications,
+    setIsImageDeleted,
+    newlyUploadedImage,
+    setNewlyUploadedImage,
   ]);
 
   return (

@@ -19,7 +19,7 @@ import { Loader2 } from "lucide-react";
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [login, { isSuccess, isError }] = useLoginMutation();
+  const [login, { isSuccess }] = useLoginMutation();
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
@@ -71,27 +71,32 @@ const Login: React.FC = () => {
   }, [isSuccess, token, user, navigate]);
 
   return (
-    <div className="flex h-screen w-screen dark:bg-gray-800">
-      {/* Logo */}
-      <div className="absolute top-5 left-10 w-1/4 h-1/4 z-10">
-        <img src={logo} alt="Logo" />
-      </div>
-
-      {/* Hero Image Section */}
-      <div className="flex w-1/2 justify-center items-center md:block md:p-0 relative">
-        <img
-          src={grid}
-          alt="Hero"
-          className="w-full max-h-screen md:h-screen object-cover hidden md:block"
-        />
-        <img src={man} alt="Hero" className="w-[100%] bottom-0 absolute" />
-      </div>
+    <div className="flex h-screen w-screen bg-white dark:bg-gray-800">
+       {/* Left Section */}
+       <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
+          <img
+            src={grid || "/placeholder.svg"}
+            alt="Grid Background"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <img
+            src={man || "/placeholder.svg"}
+            alt="Hero"
+            className="absolute bottom-0 left-0 right-0 w-full object-contain"
+          />
+          <div className="absolute top-8 left-8 z-20">
+            <img
+              src={logo || "/placeholder.svg"}
+              alt="Logo"
+            />
+          </div>
+        </div>
 
       {/* Form Section */}
       <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
         <div className="w-full max-w-md bg-white rounded-lg p-8">
           {/* Back Button */}
-          <div className="flex items-center gap-2 mb-6 hidden">
+          <div className="items-center gap-2 mb-6 hidden">
             <img className="w-4 h-4" src={arrow} alt="Back Arrow" />
             <button
               onClick={() => navigate("/")}
@@ -108,7 +113,7 @@ const Login: React.FC = () => {
                 Login to Your Account
               </h1>
               <p className="text-sm text-gray-500">
-                New to Employability.AI?{" "}
+                New to EmployAbility.AI?{" "}
                 <button
                   type="button"
                   onClick={() => navigate("/signup")}
