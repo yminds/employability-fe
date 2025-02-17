@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { OTPInput } from "input-otp";
 import { Dot, Edit2, ArrowLeft } from "lucide-react";
@@ -12,7 +11,7 @@ import { toast } from "sonner";
 import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 import logo from "@/assets/skills/e-Logo.svg";
 import { useDispatch } from "react-redux";
-import { updateUserEmail } from "@/features/authentication/authSlice";
+import { updateEmailVerification, updateUserEmail } from "@/features/authentication/authSlice";
 
 const EmailVerification = () => {
   const [remainingDays, setRemainingDays] = useState(10);
@@ -87,6 +86,7 @@ const EmailVerification = () => {
       );
 
       if (response.ok) {
+        dispatch(updateEmailVerification());
         setShowModal(false);
         toast.success("Email verified successfully!");
         await refetch();

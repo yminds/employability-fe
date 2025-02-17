@@ -42,14 +42,21 @@ interface DeleteProjectResponse {
   message: string;
 }
 
+interface ProjectQueryParams {
+  userId: string;
+  goalId?: string;
+}
+
+
 // Extend the apiSlice with project-related endpoints
 export const projectApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Get all projects for a specific user
-    getProjectsByUserId: builder.query<ProjectListResponse, string>({
-      query: (userId) => ({
+    getProjectsByUserId: builder.query<ProjectListResponse, ProjectQueryParams>({
+      query: ({userId,goalId}) => ({
         url: `/api/v1/user_projects/user/${userId}`,
         method: 'GET',
+        params: goalId ? {goalId} : undefined
       }),
     }),
 

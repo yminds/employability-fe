@@ -109,10 +109,10 @@ const ProfileBanner = ({
               </div>
 
               <div className="flex flex-col gap-2 items-start justify-end">
-                <h1 className="text-[#202326] text-3xl font-medium font-ubuntu leading-[26px] tracking-[-0.2px]">
+                <h1 className="text-[#202326] text-h2">
                   {user.name}
                 </h1>
-                <p className="text-[#414447] text-l font-normal font-ubuntu leading-[24px] tracking-[0.24px]">
+                <p className="text-[#414447] text-body2">
                   {country !== null ? `${state?.name}, ${country?.name}` : ""}
                 </p>
                 {/* <div className="flex items-center gap-2">
@@ -140,15 +140,15 @@ const ProfileBanner = ({
               </div>
             </div>
             <div className="flex flex-col items-start justify-end gap-2 ">
-              <h2 className="text-[#414447] text-2xl font-medium leading-[26px] tracking-[-0.2px] font-ubuntu">
+              <h2 className="text-[#414447] text-h2">
                 {isPublic ? user.goals?.[0]?.name : goalName}
               </h2>
               <div className="flex items-center gap-2  rounded-lg">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-semibold">
+                  <span className="text-black text-[28px] font-ubuntu font-bold leading-[42px] tracking-[-0.5px]">
                     {employabilityScore}
                   </span>
-                  <span className="text-sm text-gray-600">/10</span>
+                  <span className="text-black/40 text-[28px] font-ubuntu font-bold leading-[42px] tracking-[-0.5px]">/10</span>
                 </div>
                 <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
                   <svg
@@ -169,13 +169,13 @@ const ProfileBanner = ({
                   </svg>
                 </div>
               </div>
-              <span className="text-sm text-gray-600">Employability score</span>
+              <span className="text-body2 text-[#414447]">Employability score</span>
             </div>
           </div>
 
           {/* Bio */}
           <div className="flex items-start justify-between gap-4">
-            <p className="text-[#414447] text-base font-normal font-sf-pro leading-6 tracking-[0.24px] flex-1">
+            <p className="text-[#414447] text-body2 flex-1">
               {bio}
             </p>
             {!isPublic && (

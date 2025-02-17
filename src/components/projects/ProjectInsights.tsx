@@ -1,5 +1,7 @@
+"use client"
+
 import type React from "react"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice"
 import { useGetUserSkillsMutation } from "@/api/skillsApiSlice"
 import logo from "@/assets/skills/e-Logo.svg"
@@ -9,6 +11,7 @@ import { useSelector } from "react-redux"
 import type { RootState } from "@/store/store"
 import Skeleton from "react-loading-skeleton"
 import "react-loading-skeleton/dist/skeleton.css"
+
 
 interface Tech {
   name: string
@@ -61,6 +64,10 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
   const [skillUsage, setSkillUsage] = useState<SkillUsage[]>([])
   const [totalProjects, setTotalProjects] = useState(0)
   const [averageScore, setAverageScore] = useState(0)
+  const [skillsContainerHeight, setSkillsContainerHeight] = useState("auto")
+  const [showScrollbar, setShowScrollbar] = useState(false)
+
+  const skillsContainerRef = useRef<HTMLDivElement>(null)
 
   const user = useSelector((state: RootState) => state.auth.user)
 
@@ -68,24 +75,26 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
   const goalData = Array.isArray(goalDetails) && goalDetails.length > 0 ? goalDetails[0] : null
 
   const [getUserSkills, { data: skillsData }] = useGetUserSkillsMutation()
-  const { data: projectDetails, isLoading: projectsLoading } = useGetProjectsByUserIdQuery(userId)
+  const { data: projectDetails, isLoading: projectsLoading } = useGetProjectsByUserIdQuery({ userId: userId ?? "" }, {
+    skip: !userId
+  })
 
   const fetchSkills = useCallback(
-    async (userId: string | undefined, goalId: string | null) => {
+    async (goalId: string | null) => {
       try {
         await getUserSkills({ userId, goalId }).unwrap()
       } catch (err) {
         console.error("Error fetching skills:", err)
       }
     },
-    [getUserSkills],
+    [getUserSkills, userId, goalId],
   )
 
   useEffect(() => {
     if (userId && goalId) {
-      fetchSkills(userId, goalId)
+      fetchSkills(goalId)
     }
-  }, [userId, goalId])
+  }, [userId, goalId, fetchSkills])
 
   // Calculate average score from verified projects
   useEffect(() => {
@@ -108,11 +117,8 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
         return acc
       }, {})
 
-      const verifiedProjects = projectDetails.data.filter((project)=>project.status === "Verified")
+      const verifiedProjects = projectDetails.data.filter((project) => project.status === "Verified")
       setTotalProjects(verifiedProjects.length)
-
-      // const totalProjectCount = projectDetails.data.length
-      // setTotalProjects(totalProjectCount)
 
       verifiedProjects.forEach((project) => {
         project.tech.forEach((tech) => {
@@ -135,14 +141,36 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
     }
   }, [skillsData, projectDetails])
 
-  const shouldShowScrollbar = skillUsage.length > 8;
+  useEffect(() => {
+    const updateSkillsContainerHeight = () => {
+      if (skillsContainerRef.current) {
+        const containerTop = skillsContainerRef.current.getBoundingClientRect().top
+        const windowHeight = window.innerHeight
+        const maxHeight = windowHeight - containerTop - 40
+        setSkillsContainerHeight(`${maxHeight}px`)
+      }
+    }
+
+    updateSkillsContainerHeight()
+    window.addEventListener("resize", updateSkillsContainerHeight)
+
+    return () => {
+      window.removeEventListener("resize", updateSkillsContainerHeight)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (skillsContainerRef.current) {
+      setShowScrollbar(skillsContainerRef.current.scrollHeight > skillsContainerRef.current.clientHeight)
+    }
+  }, [skillsContainerRef])
 
   if (!goalData) {
     return <SkeletonLoader />
   }
 
   return (
-    <div className={`bg-white flex flex-col w-[100%] h-[100%] rounded-lg p-[30px] gap-6 md:mt-0 sm:mt-0 ${className}`}>
+    <div className={`bg-white flex flex-col w-[320px] h-[100%] rounded-lg p-[30px] gap-6 ${className}`}>
       <div className="flex items-center gap-2">
         <div>
           <img className="w-[50px] h-[50px] rounded-full" src={user?.profile_image || "/placeholder.svg"} alt="user" />
@@ -162,20 +190,22 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
           <img className="absolute w-8 h-8" src={logo || "/placeholder.svg"} alt="short logo" />
         </div>
         <div>
-          <p className="text-gray-900 font-sf-pro-display text-lg font-medium leading-6 tracking-[0.27px]">
-            Projects Score
-          </p>
           <p className="text-2xl font-bold text-gray-900">{averageScore}</p>
+          <p className="text-gray-900 text-sub-header">Projects Score</p>
         </div>
       </div>
 
       {/* Skills Section */}
       <div className="self-stretch flex-1 overflow-hidden flex flex-col">
-        <h3 className="flex items-center gap-2 text-gray-800 font-medium mb-4">
+        <h3 className="flex items-center gap-2 text-gray-800 font-medium mb-6">
           <img className="w-6 h-6" src={vector || "/placeholder.svg"} alt="short logo" />
           Practical Skill Coverage
         </h3>
-        <div className={`space-y-4 flex-1 ${shouldShowScrollbar ? 'minimal-scrollbar' : ''}`}>
+        <div
+          ref={skillsContainerRef}
+          className={`space-y-4 overflow-y-auto ${showScrollbar ? 'minimal-scrollbar' : "minimal-scrollbar"}`}
+          style={{ height: skillsContainerHeight }}
+        >
           {projectsLoading ? (
             <SkillsSkeleton />
           ) : (

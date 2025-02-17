@@ -1,148 +1,124 @@
-import type React from "react";
-import { useState, useCallback, useEffect } from "react";
-import SetGoalCard from "@/features/dashboard/SetGoalCard";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import React, { useState, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import SkillList from "@/components/skills/skillslist";
 import TryThingsSection from "@/features/dashboard/TryThingsSection";
 import MyActivityCard from "@/features/dashboard/MyActivity";
-import CircularProgress from "@/components/ui/circular-progress-bar";
-import EmailVerification from "@/components/signup/EmailVerification";
-import logo from "@/assets/skills/e-Logo.svg";
-import emojiWavingImg from "@/assets/dashboard/emoji_waving.svg";
-import GoalCyborgImg from "@/assets/dashboard/set_goal_cyborg.svg";
-import ProfessionalGoalsImg from "@/assets/dashboard/professional_goals.svg";
-import { DialogDescription } from "@radix-ui/react-dialog";
-import EmployabilityBannerSection from "@/features/dashboard/EmployabilityBanner";
-import { SkillCard } from "@/features/dashboard/SkillCard";
-import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
-import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
 import ProjectList from "@/components/projects/ProjectList";
 import InterviewList from "@/features/dashboard/InterviewList";
 import { useGetUserDetailsQuery } from "@/api/userApiSlice";
+import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
+import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
+import EmployabilityBannerSection from "@/features/dashboard/EmployabilityBanner";
+import SkillProgress from "@/features/dashboard/SkillCard";
+import SetGoalCard from "@/features/dashboard/SetGoalCard";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { DialogDescription } from "@radix-ui/react-dialog";
+import emojiWavingImg from "@/assets/dashboard/emoji_waving.svg";
+import GoalCyborgImg from "@/assets/dashboard/set_goal_cyborg.svg";
+import ProfessionalGoalsImg from "@/assets/dashboard/professional_goals.svg";
+import logo from "@/assets/skills/e-Logo.svg";
+import CircularProgress from "@/components/ui/circular-progress-bar";
+
 
 // Skeleton Components
 const SkillCardSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 animate-pulse w-full">
-    <div className="h-6 w-24 bg-gray-200 rounded mb-4"></div>
-    <div className="space-y-3">
-      <div className="h-8 w-16 bg-gray-200 rounded"></div>
-      <div className="h-4 w-32 bg-gray-200 rounded"></div>
+  <div className="w-full">
+    {/* Header section skeleton */}
+    <div className="flex justify-between items-center mb-4">
+      <div className="h-6 w-80 bg-gray-200 rounded animate-pulse"></div>
+      <div className="flex items-center h-[46px] rounded-lg bg-white pl-4">
+        <div className="h-6 w-24 bg-gray-200 rounded animate-pulse mr-2"></div>
+        <div className="h-6 w-48 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+    </div>
+
+    {/* Main content skeleton */}
+    <div className="bg-white rounded-lg p-8 pl-10">
+      <div className="flex">
+        {/* Iterate 4 times for each progress section */}
+        {[1, 2, 3, 4].map((index) => (
+          <div key={index} className="flex-1">
+            <div className="px-4">
+              {/* Title skeleton */}
+              <div className="h-7 w-24 bg-gray-200 rounded mb-4 animate-pulse"></div>
+
+              {/* Progress indicator and line */}
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                {index < 4 && (
+                  <div className="h-0.5 bg-gray-200 flex-1 ml-5 animate-pulse"></div>
+                )}
+              </div>
+
+              {/* Progress value and status */}
+              <div className="mt-4">
+                <div className="h-6 w-16 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 w-20 bg-gray-200 rounded mt-1 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 );
 
 const SkillListSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 animate-pulse">
-    <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+    <div className="h-8 w-48 bg-gray-200 rounded mb-6 animate-pulse"></div>
     <div className="space-y-4">
       {[1, 2, 3].map((i) => (
         <div key={i} className="flex items-center space-x-4">
-          <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
+          <div className="h-12 w-12 bg-gray-200 rounded-full animate-pulse"></div>
           <div className="flex-1">
-            <div className="h-4 w-48 bg-gray-200 rounded mb-2"></div>
-            <div className="h-3 w-32 bg-gray-200 rounded"></div>
+            <div className="h-4 w-48 bg-gray-200 rounded mb-2 animate-pulse"></div>
+            <div className="h-3 w-32 bg-gray-200 rounded animate-pulse"></div>
           </div>
-          <div className="h-8 w-24 bg-gray-200 rounded"></div>
+          <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
         </div>
       ))}
     </div>
   </div>
 );
 
-const ProjectListSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 animate-pulse">
-    <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
-    <div className="space-y-4">
-      {[1, 2].map((i) => (
-        <div key={i} className="flex items-center space-x-4">
-          <div className="h-16 w-16 bg-gray-200 rounded"></div>
-          <div className="flex-1">
-            <div className="h-5 w-64 bg-gray-200 rounded mb-2"></div>
-            <div className="h-4 w-48 bg-gray-200 rounded"></div>
-          </div>
-          <div className="h-8 w-24 bg-gray-200 rounded"></div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const InterviewListSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 animate-pulse">
-    <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
-    <div className="space-y-4">
-      {[1, 2].map((i) => (
-        <div key={i} className="flex items-center space-x-4">
-          <div className="h-12 w-12 bg-gray-200 rounded"></div>
-          <div className="flex-1">
-            <div className="h-4 w-48 bg-gray-200 rounded mb-2"></div>
-            <div className="h-3 w-32 bg-gray-200 rounded"></div>
-          </div>
-          <div className="h-8 w-24 bg-gray-200 rounded"></div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const MyActivityCardSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 animate-pulse">
-    <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
-    <div className="flex items-center space-x-4 mb-6">
-      <div className="h-16 w-16 bg-gray-200 rounded-full"></div>
-      <div className="flex-1">
-        <div className="h-5 w-32 bg-gray-200 rounded mb-2"></div>
-        <div className="h-4 w-24 bg-gray-200 rounded"></div>
-      </div>
-    </div>
-    <div className="space-y-4">
-      <div className="h-24 w-full bg-gray-200 rounded"></div>
-      <div className="h-24 w-full bg-gray-200 rounded"></div>
-    </div>
-  </div>
-);
-
-const TryThingsSectionSkeleton = () => (
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 animate-pulse">
-    <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
-    <div className="grid grid-cols-3 gap-4">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="h-32 bg-gray-200 rounded"></div>
-      ))}
-    </div>
-  </div>
-);
-
-// const FullPageLoader = () => (
-//   <div className="h-full w-full flex items-center justify-center">
-//     <div className="flex flex-col items-center gap-4">
-//       <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-//       <p className="text-gray-500 text-lg">Loading your dashboard...</p>
-//     </div>
-//   </div>
-// )
 
 interface Props {
   isDashboard: boolean;
   displayScore: boolean;
 }
 
+interface Goal {
+  id: string;
+  name: string;
+  experience: string;
+}
+
+interface GoalsData {
+  data: Goal[];
+}
+
 const Dashboard: React.FC<Props> = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
+  const [currentGoal, setCurrentGoal] = useState<{_id: string; name: string; experience: string} | null>(null);
+  const [isUpdated, setIsUpdated] = useState<boolean>(false);
+  const [verifiedSkillsCount, setVerifiedSkillsCount] = useState(0);
+  const [totalMandatorySkillsCount, setTotalMandatorySkillsCount] = useState(0);
+  const [totalProjects, setTotalProjects] = useState(0);
+  const [verifiedProjects, setVerifiedProjects] = useState(0);
+  const [completedProfileSections, setCompletedProfileSections] = useState(0);
+  
   const user = useSelector((state: RootState) => state.auth.user);
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
   const profile_image = user ? user.profile_image : "";
   const experience_level = user ? user.experience_level : "";
-  const [isUpdated, setIsUpdated] = useState<boolean>(false);
 
-  const { data: userDetails, isLoading: isUserDetailsLoading } =
-    useGetUserDetailsQuery(user_id);
-
+  // Queries and Mutations
+  const { data: userDetails, isLoading: isUserDetailsLoading } = useGetUserDetailsQuery(user_id);
+  
   const {
     data: goalsData,
     isLoading: isGoalsLoading,
@@ -152,31 +128,120 @@ const Dashboard: React.FC<Props> = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  const { data: userProjects, isLoading: isProjectsLoading } =
-    useGetProjectsByUserIdQuery(user_id);
+  const { data: userProjects, isLoading: isProjectsLoading, refetch: refetchProjects } = 
+    useGetProjectsByUserIdQuery({ 
+      userId: user_id,
+      goalId: currentGoal?._id 
+    });
 
-  const [getUserSkills, { data: skillsData, isLoading: isSkillsLoading }] =
-    useGetUserSkillsMutation();
+  const [getUserSkills, { data: skillsData, isLoading: isSkillsLoading }] = useGetUserSkillsMutation();
 
   const isInitialLoading = isGoalsLoading || isUserDetailsLoading;
-  const isContentLoading =
-    isGoalsFetching || isProjectsLoading || isSkillsLoading;
+  const isContentLoading = isGoalsFetching || isProjectsLoading || isSkillsLoading;
 
-  const [verifiedSkillsCount, setVerifiedSkillsCount] = useState(0);
-  const [totalMandatorySkillsCount, setTotalMandatorySkillsCount] = useState(0);
-  const [totalProjects, setTotalProjects] = useState(0);
-  const [verifiedProjects, setVerifiedProjects] = useState(0);
-  const [completedProfileSections, setCompletedProfileSections] = useState(0);
-
-  const is_Email_Verified = userDetails?.data?.is_email_verified;
   const hasGoals = goalsData?.data && goalsData.data.length > 0;
-  const goalName = goalsData?.data?.[0]?.name || "";
-  const goalId = goalsData?.data?.[0]?._id || "";
+  const is_Email_Verified = userDetails?.data?.is_email_verified;
 
-  const completionPercentage = 50;
-  const averageVerifiedPercentage = 5;
-  const averageVerifiedScore = 0;
+  // Calculate project percentage based on mandatory skills usage
+  const calculateProjectPercentage = useCallback(() => {
+    if (skillsData?.data?.mandatory && userProjects?.data) {
+      const mandatorySkills = skillsData.data.mandatory.map(
+        (skill) => skill.skill_pool_id.name
+      );
+      const verifiedProjects = userProjects.data.filter(
+        (project) => project.status === "Verified"
+      );
 
+      if (verifiedProjects.length === 0) return 0;
+
+      // Calculate percentage for each verified project based on mandatory skills usage
+      const projectPercentages = verifiedProjects.map((project) => {
+        const usedMandatorySkills = project.tech.filter((tech) =>
+          mandatorySkills.includes(tech.name)
+        ).length;
+        return (usedMandatorySkills / mandatorySkills.length) * 100;
+      });
+
+      // Calculate average percentage across all verified projects
+      const totalPercentage = projectPercentages.reduce(
+        (acc, curr) => acc + curr,
+        0
+      );
+      return Math.round(totalPercentage / verifiedProjects.length);
+    }
+    return 0;
+  }, [skillsData, userProjects]);
+
+  // Update project and skill stats when data changes
+  useEffect(() => {
+    if (skillsData?.data?.mandatory && userProjects?.data) {
+      // Project percentage calculation
+      const projectPercentage = calculateProjectPercentage();
+      setVerifiedProjects(projectPercentage);
+      setTotalProjects(100); // Since we're working with percentage for projects
+
+      // Actual count for skills verification
+      const mandatorySkills = skillsData.data.mandatory;
+      setTotalMandatorySkillsCount(mandatorySkills.length);
+      const verifiedCount = mandatorySkills.filter(
+        (skill) => skill.verified_rating >= 4
+      ).length;
+      setVerifiedSkillsCount(verifiedCount);
+    }
+  }, [skillsData, userProjects, calculateProjectPercentage]);
+
+  // Fetch skills when goal changes
+  const fetchSkills = useCallback(async () => {
+    if (user_id && currentGoal?._id) {
+      try {
+        await getUserSkills({ 
+          userId: user_id, 
+          goalId: currentGoal._id 
+        }).unwrap();
+      } catch (err) {
+        console.error("Error fetching skills:", err);
+      }
+    }
+  }, [user_id, currentGoal, getUserSkills]);
+
+  useEffect(() => {
+    if (currentGoal) {
+      fetchSkills();
+    }
+  }, [currentGoal, fetchSkills]);
+
+  // Handle goal change
+  const handleGoalChange = async (goalId: string) => {
+    const newGoal = goalsData?.data?.find(g => g._id === goalId);
+    if (newGoal) {
+      setCurrentGoal({
+        _id: newGoal._id,
+        name: newGoal.name,
+        experience: newGoal.experience || ""
+      });
+      await Promise.all([
+        refetchProjects(),
+        fetchSkills()
+      ]);
+    }
+  };
+
+  // Initialize current goal
+  useEffect(() => {
+    if ( goalsData?.data && goalsData?.data?.length > 0 && !currentGoal) {
+      const firstGoal = goalsData.data[0];
+      // Add a type guard to ensure experience exists
+      if (firstGoal.experience) {
+        setCurrentGoal({
+          _id: firstGoal._id,
+          name: firstGoal.name,
+          experience: firstGoal.experience // Now TypeScript knows this is string
+        });
+      }
+    }
+  }, [goalsData, currentGoal]);
+
+  // Calculate profile completion
   useEffect(() => {
     if (userDetails?.data) {
       let completedCount = 0;
@@ -188,6 +253,15 @@ const Dashboard: React.FC<Props> = () => {
     }
   }, [userDetails]);
 
+  // Refetch data when updates occur
+  useEffect(() => {
+    if (isUpdated) {
+      refetchGoals();
+      setIsUpdated(false);
+    }
+  }, [isUpdated, refetchGoals]);
+
+  // Helper functions for profile completion
   const isBasicInfoComplete = (user: any) => {
     return !!(
       user?.name &&
@@ -214,188 +288,126 @@ const Dashboard: React.FC<Props> = () => {
     return Array.isArray(user?.certificates) && user.certificates.length > 0;
   };
 
-  const fetchSkills = useCallback(
-    async (userId: string | undefined, goalId: string | null) => {
-      try {
-        await getUserSkills({ userId, goalId }).unwrap();
-      } catch (err) {
-        console.error("Error fetching skills:", err);
-      }
-    },
-    [getUserSkills]
-  );
-
-  useEffect(() => {
-    if (user_id && goalId) {
-      fetchSkills(user_id, goalId);
-    }
-  }, [user_id, goalId, fetchSkills]);
-
-  useEffect(() => {
-    if (userProjects?.data) {
-      const projects = userProjects.data;
-      setTotalProjects(projects.length);
-      const verifiedCount = projects.filter(
-        (project) => project.status === "Verified"
-      ).length;
-      setVerifiedProjects(verifiedCount);
-    }
-  }, [userProjects]);
-
-  useEffect(() => {
-    if (skillsData?.data?.mandatory) {
-      const mandatorySkills = skillsData.data.mandatory;
-      setTotalMandatorySkillsCount(mandatorySkills.length);
-      setVerifiedSkillsCount(
-        mandatorySkills.filter((skill) => skill.verified_rating >= 4).length
-      );
-    }
-  }, [skillsData]);
-
-    useEffect(() => {
-      if (isUpdated) {
-        refetchGoals();
-        console.log("Goals refetched");
-        setIsUpdated(false);
-      }
-    }, [isUpdated, goalId]);
-
-  // if (isInitialLoading) {
-  //   return (
-  //     <main className="h-screen w-full overflow-hidden font-ubuntu">
-  //       <div className="bg-[#F5F5F5] h-full">
-  //         <FullPageLoader />
-  //       </div>
-  //     </main>
-  //   )
-  // }
-
   return (
     <main className="h-screen w-full overflow-hidden font-ubuntu">
-      <div className="bg-[#F5F5F5] h-full">
-        <div className="mx-auto p-[55px] pt-[55px] pb-[42px] h-full">
+      <div className="h-full flex flex-col bg-[#F5F5F5]">
+        <div className="flex-1 p-[55px] min-h-0">
           {hasGoals ? (
-            <main className="h-full">
-              <div className="grid grid-cols-4 gap-4 h-[calc(100%-1px)]">
-                {/* Main scrollable content */}
-                <div className="col-span-3 overflow-y-auto pr-4 scrollbar-hide">
-                  <div className="flex flex-col gap-6">
-                    <header>
-                      <h1 className="text-gray-600 text-h1 flex items-center gap-3">
-                        Welcome Back, {user_name}
-                        <span className="wave">
-                          <img
-                            src={emojiWavingImg || "/placeholder.svg"}
-                            alt="Emoji"
-                            className="w-5"
-                          />
-                        </span>
-                      </h1>
-                    </header>
+            <div className="h-full flex flex-col">
+              {/* Header */}
+              <header className="flex-none mb-6">
+                <h1 className="text-gray-600 text-h1 flex items-center gap-3">
+                  Welcome Back, {user_name}
+                  <span className="wave">
+                    <img src={emojiWavingImg || "/placeholder.svg"} alt="Emoji" className="w-5" />
+                  </span>
+                </h1>
+              </header>
 
-                    {/* Skill Cards */}
-                    <div className="flex justify-between space-x-4">
-                      {isContentLoading ? (
-                        <>
+              {/* Main Content */}
+              <div className="flex-1 h-[98%]">
+                <div className="grid grid-cols-4 gap-4 h-full">
+                  {/* Left Column */}
+                  <div className="col-span-3 min-h-0 flex flex-col">
+                    <div className="overflow-y-auto pr-4 scrollbar-hide">
+                      <div className="flex flex-col gap-6">
+                        {/* Skill Progress */}
+                        <div>
+                          {isContentLoading ? (
+                            <SkillCardSkeleton />
+                          ) : (
+                            <SkillProgress
+                              userId={user_id}
+                              goals={goalsData}
+                              selectedGoalName={currentGoal?.name}
+                              onSkillsStatusChange={(isUpdated) => {
+                                if (isUpdated && user_id && currentGoal?._id) {
+                                  fetchSkills();
+                                }
+                              }}
+                              onGoalChange={handleGoalChange}
+                              selectedGoalExperienceLevel={currentGoal?.experience}
+                              completedProfileSections={completedProfileSections}
+                              verifiedSkillsCount={verifiedSkillsCount}
+                              totalMandatorySkillsCount={totalMandatorySkillsCount}
+                              verifiedProjects={verifiedProjects}
+                              totalProjects={totalProjects}
+                            />
+                          )}
+                        </div>
+
+                        {/* Try Things Section */}
+                        {isContentLoading ? (
                           <SkillCardSkeleton />
-                          <SkillCardSkeleton />
-                          <SkillCardSkeleton />
-                          <SkillCardSkeleton />
-                        </>
-                      ) : (
-                        <>
-                          <SkillCard
-                            type="profile"
-                            total={null}
-                            completedProfileSections={completedProfileSections}
-                          />
-                          <SkillCard
-                            type="skills"
-                            total={50}
-                            verifiedSkills={verifiedSkillsCount}
-                            totalMandatorySkills={totalMandatorySkillsCount}
-                          />
-                          <SkillCard
-                            type="projects"
-                            total={totalProjects}
-                            verifiedProjects={verifiedProjects}
-                            totalProjects={totalProjects}
-                          />
-                          <SkillCard type="interview" total={10} />
-                        </>
-                      )}
+                        ) : (
+                          <TryThingsSection />
+                        )}
+
+                        {/* Skills List */}
+                        <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                          {isContentLoading ? (
+                            <SkillListSkeleton />
+                          ) : (
+                            <SkillList
+                              isDashboard={true}
+                              goalId={currentGoal?._id || null}
+                              onSkillsUpdate={() => fetchSkills()}
+                              isSkillsUpdated={false}
+                              goals={goalsData}
+                              selectedGoalName={currentGoal?.name || ""}
+                            />
+                          )}
+                        </section>
+
+                        {/* Projects List */}
+                        <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                          {isContentLoading ? (
+                            <SkillListSkeleton />
+                          ) : (
+                            <ProjectList
+                              projects={userProjects?.data}
+                              isLoading={false}
+                              isDashboard={true}
+                              onOpenUploadModal={() => {}}
+                              onOpenDeleteModal={() => {}}
+                            />
+                          )}
+                        </section>
+
+                        {/* Interview List */}
+                        <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                          {isContentLoading ? (
+                            <SkillListSkeleton />
+                          ) : (
+                            <InterviewList isDashboard={true} />
+                          )}
+                        </section>
+
+                        {/* Employability Banner */}
+                        <EmployabilityBannerSection
+                          imageSrc={ProfessionalGoalsImg}
+                          altText="Professional Goals Image"
+                        />
+                      </div>
                     </div>
-
-                    {isContentLoading ? (
-                      <TryThingsSectionSkeleton />
-                    ) : (
-                      <TryThingsSection />
-                    )}
-
-                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      {isContentLoading ? (
-                        <SkillListSkeleton />
-                      ) : (
-                        <SkillList
-                          isDashboard={true}
-                          goalId={goalId}
-                          onSkillsUpdate={() => {}}
-                          isSkillsUpdated={false}
-                          goals={goalsData}
-                        />
-                      )}
-                    </section>
-
-                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      {isContentLoading ? (
-                        <ProjectListSkeleton />
-                      ) : (
-                        <ProjectList
-                          projects={userProjects?.data}
-                          isLoading={false}
-                          isDashboard={true}
-                          onOpenUploadModal={() => {}}
-                          onOpenDeleteModal={() => {}}
-                        />
-                      )}
-                    </section>
-
-                    <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                      {isContentLoading ? (
-                        <InterviewListSkeleton />
-                      ) : (
-                        <InterviewList isDashboard={true} />
-                      )}
-                    </section>
-
-                    <EmployabilityBannerSection
-                      imageSrc={ProfessionalGoalsImg}
-                      altText="Professional Goals Image"
-                    />
                   </div>
-                </div>
 
-                {/* Fixed sidebar */}
-                <div className="h-full overflow-hidden">
-                  <div className="sticky top-0">
-                    {isContentLoading ? (
-                      <MyActivityCardSkeleton />
-                    ) : (
+                  {/* Right Column */}
+                  <div className="col-span-1">
+                    <div className="sticky top-0">
                       <MyActivityCard
                         displayScore={true}
-                        goalId={goalId}
-                        goalName={goalName}
+                        goalId={currentGoal?._id || ""}
+                        goalName={currentGoal?.name || ""}
                       />
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </main>
+            </div>
           ) : (
-            !isInitialLoading &&
-            !hasGoals && (
-              <main>
-                {/* Content for users without goals */}
+            !isInitialLoading && (
+              <div>
                 <header className="mb-7">
                   <h1 className="text-gray-600 text-h1 flex items-center gap-3">
                     Hi, {user_name}
@@ -464,9 +476,7 @@ const Dashboard: React.FC<Props> = () => {
                       <div className="p-4 w-full h-[92px] bg-green-50 rounded-lg flex items-center space-x-4">
                         <div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
                           <CircularProgress
-                            progress={Number.parseFloat(
-                              averageVerifiedPercentage.toFixed(2)
-                            )}
+                            progress={0}
                             size={60}
                             strokeWidth={6}
                             showText={false}
@@ -479,7 +489,7 @@ const Dashboard: React.FC<Props> = () => {
                         </div>
                         <div>
                           <p className="text-[32px] font-bold leading-[42px] tracking-[-0.015em] text-gray-900 font-ubuntu">
-                            {averageVerifiedScore}
+                            0
                           </p>
                           <p className="text-[16px] leading-[26px] tracking-[0.015em] text-[#414447] font-['SF Pro Display']">
                             Employability Score
@@ -491,7 +501,6 @@ const Dashboard: React.FC<Props> = () => {
                 </div>
 
                 {/* Set Goal Dialog */}
-
                 <Dialog open={journeyDialog} onOpenChange={setJourneyDialog}>
                   <DialogContent className="max-w-[1400px] rounded-[12px]">
                     <DialogTitle className="hidden">Set Your Goal</DialogTitle>
@@ -521,7 +530,7 @@ const Dashboard: React.FC<Props> = () => {
                     />
                   </DialogContent>
                 </Dialog>
-              </main>
+              </div>
             )
           )}
         </div>
