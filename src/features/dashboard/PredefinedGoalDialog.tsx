@@ -33,6 +33,7 @@ interface GoalFormDialogProps {
     setJourneyDialog: React.Dispatch<React.SetStateAction<boolean>>;
     isSetGoalsPage: boolean; 
     bannerColor:string
+    onGoalUpdate: (isUpdated: boolean) => void;
 }
 
 const jobsMarketDemandObj = {1: "High", 2: "Mid", 3: "Low"};
@@ -42,7 +43,7 @@ const learningTimeObj = {1: "1-3 Months", 2: "3-6 Months", 3: "6-12 Months", 4: 
 
 const tabs = ["Overview", "Skills", "Market Trend", "Active Jobs"];
 
-const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, isSetGoalsPage, bannerColor, setJourneyDialog}) => { 
+const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen, selectedGoal, isSetGoalsPage, bannerColor, setJourneyDialog, onGoalUpdate}) => { 
     const user_id = useSelector((state: RootState) => state.auth.user?._id || "");
     const [goalId] = useState(selectedGoal ? selectedGoal._id : "");
     const [goal] = useState(selectedGoal ? selectedGoal.title : "");
@@ -78,6 +79,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
             setIsSaved(false);
             setIsOpen(false);
             setJourneyDialog(false);
+            onGoalUpdate(true);
             navigate("/");
             
         } catch (err) {

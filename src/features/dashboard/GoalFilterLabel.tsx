@@ -1,5 +1,5 @@
 import React from 'react';
-import close from '@/assets/dashboard/close.png';
+import close from '@/assets/dashboard/close.svg';
 
 interface Filter {
   [key: string]: string | number | (string | number)[] | null | undefined; // Allow null or undefined for removed filters
@@ -111,9 +111,9 @@ const FilterLabels: React.FC<{
           return (
             <div
               key={`${key}-${index}`}
-              className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium font-ubuntu leading-[22px]"
+              className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[#F4F7F9] text-grey-4 text-[16px] font-medium font-ubuntu leading-[22px]"
             >
-              {label}: {displayItem}
+              {label}: <span className=' text-grey-6'> {displayItem} </span> 
               {/* Remove button (X) */}
               <button
                 onClick={() => removeFilter(key)}
@@ -129,9 +129,9 @@ const FilterLabels: React.FC<{
       return (
         <div
           key={key}
-          className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[rgba(31,209,103,0.10)] text-[var(--Greens-G7,#10B754)] text-[16px] font-medium leading-[22px]"
+          className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[#F4F7F9] text-grey-4 text-[16px] font-medium font-ubuntu leading-[22px]"
         >
-          {label}: {displayValue}
+          {label}: <span className=' text-grey-6 font-medium'> {displayValue} </span>
           {/* Remove button (X) */}
           <button
             onClick={() => removeFilter(key)}

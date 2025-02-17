@@ -1,11 +1,13 @@
 // ReportPage.tsx
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useGetReportByInterviewIdQuery } from "@/api/reportApiSlice";
 import { RootState } from "@/store/store";
 import ReportContent from "@/components/skills-report/SkillsReportContainer";
 import Skeleton from "react-loading-skeleton";
+import { useGetPublicProfileQuery } from "@/api/userPublicApiSlice";
+import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 
 interface Performance {
   criteria: string;
@@ -99,74 +101,128 @@ const LoadingState = () => (
 
 interface ReportPageProps {
   isSharedReport: boolean;
-  userName?: string | undefined;
+  userName?: string;
 }
 
 const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
-  // For shared reports, get the interview ID from the URL
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
+  // For shared reports, extract the interview ID from the URL.
   const getInterviewIdFromUrl = () => {
-    const pathParts = location.pathname.split('/');
+    const pathParts = location.pathname.split("/");
     return pathParts[pathParts.length - 1];
   };
 
-  // Use appropriate method to get interview ID based on route type
-  const resolvedInterviewId = isSharedReport 
+  // Get username from Redux store.
+  const username = useSelector((state: any) => state.auth.user?.username);
+
+  // Fetch public profile only when username exists.
+  const { data: profile, isLoading: profileLoading } = useGetPublicProfileQuery(
+    { username },
+    { skip: !username }
+  );
+
+  // Determine interview ID based on report type.
+  const resolvedInterviewId = isSharedReport
     ? getInterviewIdFromUrl()
     : location.state?.best_interview;
 
-  // Use interviewId from URL if shared, else from location state
-  const best_interview = resolvedInterviewId;
+  // For non-shared reports, goal name and skill icon are passed via state.
+  const goal_name =
+    isSharedReport && profile?.goals?.length
+      ? profile.goals[0].name
+      : location.state?.goal_name || "";
+  const skill_icon =
+    isSharedReport
+      ? searchParams.get("skill_icon") || ""
+      : location.state?.skillIcon || "";
 
-  const goal_name = isSharedReport 
-    ? searchParams.get('goal_name') || ''
-    : location.state?.goal_name || '';
+  const userSkillId = location.state?.skillId || "";
 
-  const skill_icon = isSharedReport 
-    ? searchParams.get('skill_icon') || ''
-    : location.state?.skillIcon || '';
+  // Get user profile image from Redux.
+  const userImg = useSelector((state: RootState) => state.auth.user?.profile_image);
 
-  const userName = isSharedReport 
-    ? searchParams.get('userName') || ''
-    : useSelector((state: RootState) => state.auth.user?.name) || '';
-  const navigate = useNavigate();
+  // State to store report data.
+  const [reportData, setReportData] = useState<Report | null>(null);
 
+  // Fetch interview data.
+  const {
+    data: fetchInterviewData,
+    isLoading: interviewLoading,
+    error: interviewError,
+  } = useGetInterviewbyIdQuery(resolvedInterviewId);
 
-  const userImg = useSelector((state: any) => state.auth.user?.profile_image);
-  
-  const [reportData, setReport] = useState<Report | null>(null);
-
+  // Fetch report data.
   const {
     data: fetchReportData,
     isLoading: reportLoading,
     error: reportError,
-  } = useGetReportByInterviewIdQuery(best_interview);
+  } = useGetReportByInterviewIdQuery(resolvedInterviewId);
 
+  // Once both interview data and report data are available, set the report state.
   useEffect(() => {
-    if (fetchReportData?.data) {
-      setReport(fetchReportData.data as Report);
+    if (fetchReportData?.data && fetchInterviewData?.data) {
+      setReportData(fetchReportData.data as Report);
     }
-  }, [fetchReportData]);
+  }, [fetchReportData, fetchInterviewData]);
+
+  // Get the skill id from interview data and then safely extract the skill icon from profile.
+  
+  const skillId = fetchInterviewData?.data?.skill_id;
+
+  const profileSkillIcon =
+    profile?.skills?.find(
+      (skill: any) => skill.skill_pool_id._id === skillId
+    )?.skill_pool_id.icon || skill_icon;
+
+  const skill = 
+  profile?.skills?.find(
+    (skill: any) => skill.skill_pool_id._id === skillId
+  )?.skill_pool_id.name;
+
+  const level =  
+  profile?.skills?.find(
+    (skill: any) => skill.skill_pool_id._id === skillId
+  )?.level || skill_icon;
 
   const handleBackToSkillsPage = () => {
     navigate("/skills");
   };
 
-  if (reportLoading) return <LoadingState />;
-  if (reportError) return <div className="text-red-500 text-center mt-10">Error fetching report data</div>;
-  if (!reportData) return null;
+  // If any required data is still loading, show the loading state.
+  if (profileLoading || interviewLoading || reportLoading) {
+    return <LoadingState />;
+  }
+
+  // Handle error states.
+  if (reportError || interviewError) {
+    return (
+      <div className="text-red-500 text-center mt-10">
+        Error fetching report data.
+      </div>
+    );
+  }
+
+  // Ensure all necessary data is available before rendering the report.
+  if (!profile || !fetchInterviewData || !reportData) {
+    return <LoadingState />;
+  }
 
   return (
     <ReportContent
       reportData={reportData}
-      userName={userName || ""}
+      userName={profile.name || ""}
       handleBackToSkillsPage={handleBackToSkillsPage}
       goal_name={goal_name}
-      skill_icon={skill_icon}
+      skill_icon={profileSkillIcon}
       userImg={userImg}
       sharedReport={isSharedReport}
+      skillId={skillId}
+      userSkillId={userSkillId}
+      level={level}
+      skill={skill}
     />
   );
 };

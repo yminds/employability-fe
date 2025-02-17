@@ -15,8 +15,8 @@ export default function StatsSection({
   certifications,
 }: StatsSectionProps) {
   return (
-    <Card className="w-full bg-white p-6 rounded-lg">
-      <CardContent className="p-6">
+    <Card className="w-full bg-white p-0 rounded-lg">
+      <CardContent className="p-8">
         <div className="space-y-6 divide-y divide-[#E5E7EB]">
           <div className="flex items-start gap-3">
             <div className="flex w-12 h-12 justify-center items-center bg-[#ffffff] rounded-lg border border-black/5">
@@ -30,7 +30,7 @@ export default function StatsSection({
               <span className="text-[18px] text-[#000000] font-ubuntu font-medium leading-[22px]">
                 {skills}
               </span>
-              <span className="text-[#414447] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]">
+              <span className="text-[#414447] text-body2">
                 Verified skills
               </span>
             </div>
@@ -48,7 +48,7 @@ export default function StatsSection({
               <span className="text-[18px] text-[#000000] font-ubuntu font-medium leading-[22px]">
                 {projects}
               </span>
-              <span className="text-[#414447] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]">
+              <span className="text-[#414447] text-body2">
                 Verified Projects
               </span>
             </div>
@@ -66,7 +66,7 @@ export default function StatsSection({
               <span className="text-[18px] text-[#000000] font-ubuntu font-medium leading-[22px]">
                 {certifications}
               </span>
-              <span className="text-[#414447] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]">
+              <span className="text-[#414447] text-body2">
                 Certifications
               </span>
             </div>

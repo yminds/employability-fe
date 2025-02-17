@@ -1,30 +1,20 @@
 import React from 'react';
 import CircularProgress from '@/components/ui/circular-progress-bar'; 
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { useSearchParams } from 'react-router-dom';
 
 interface ReportScoreProps {
+  userName: string;
+  userImg:string | undefined;
   goalName: string;
   ReportScore:number; 
   skill_icon:string
-  isSharedReport:boolean|undefined
 }
 
-const ReportScore: React.FC<ReportScoreProps> = ({ goalName , ReportScore, skill_icon, isSharedReport }) => {
-  const [searchParams] = useSearchParams();
-  const userName = isSharedReport 
-  ? searchParams.get('userName') || ''
-  : useSelector((state: RootState) => state.auth.user?.name) || '';
+const ReportScore: React.FC<ReportScoreProps> = ({ userName, userImg, goalName , ReportScore, skill_icon }) => {
 
-  const userImg = isSharedReport 
-  ? searchParams.get('userImg') || ''
-  : useSelector((state: RootState) => state.auth.user?.profile_image) || '';
   const verifiedrating = ReportScore;
-    
 
   return (
-    <div className="bg-white flex flex-col w-[100%] rounded-lg  p-[30px] gap-6 md:mt-0 sm:mt-0">
+    <div className="bg-white flex flex-col w-[100%] rounded-lg  p-8 gap-6 md:mt-0 sm:mt-0">
       <div className="flex items-center gap-2">
         <div>
           <img className="w-[50px] h-[50px] rounded-full" src={userImg} alt="user" />

@@ -1,5 +1,5 @@
 import { apiSlice } from "./apiSlice";
-import { Thread } from "./models/thread";
+import { Thread } from "./models/Thread";
 
 export const threadApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -10,7 +10,14 @@ export const threadApiSlice = apiSlice.injectEndpoints({
         body: { ...data },
       }),
     }),
+
+    getThreadByUserAndTitle: builder.query<any, { id: string|undefined; title: string }>({
+      query: ({ id, title }) => ({
+        url: `/api/v1/threads/getAllbyUserIdAndTitle/${id}?title=${encodeURIComponent(title)}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateThreadMutation } = threadApiSlice;
+export const { useCreateThreadMutation, useGetThreadByUserAndTitleQuery } = threadApiSlice;

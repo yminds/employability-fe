@@ -73,6 +73,7 @@ export const userGoalApiSlice = apiSlice.injectEndpoints({
         url: `/api/v1/goals/userGoals/${searchTerm}`, // Use searchTerm as the dynamic part of the URL
         method: 'GET',
       }),
+      keepUnusedDataFor: 0, 
     }),
   }),
 });

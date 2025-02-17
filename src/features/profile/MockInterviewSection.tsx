@@ -19,15 +19,11 @@ export default function MockInterviewSection({
   thumbnailUrl,
 }: MockInterviewProps) {
   return (
-    <Card className="w-full bg-white p-6 rounded-lg">
+    <Card className="w-full bg-white p-0 rounded-lg">
       <CardContent className="p-8 space-y-8">
         <div className="space-y-2">
-          <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">
-            Mock interview
-          </h2>
-          <h3 className="text-[#000000] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]">
-            {role}
-          </h3>
+          <h2 className="text-[#000000] text-sub-header">Mock interview</h2>
+          <h3 className="text-[#000000] text-body2">{role}</h3>
         </div>
 
         <div className="space-y-4">
@@ -43,27 +39,23 @@ export default function MockInterviewSection({
           </div>
 
           <div className="flex items-center justify-between text-[#000000] gap-1">
-            <span className="text-[#000000] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]">
-              {duration}
-            </span>
+            <span className="text-[#000000] text-body2">{duration}</span>
             <div className="flex items-center gap-1">
               <img src={Duration} alt="Duration" />
-              <span className="text-[#414447] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]">
-                {timeAgo}
-              </span>
+              <span className="text-[#414447] text-body2">{timeAgo}</span>
             </div>
           </div>
         </div>
 
         <div className="space-y-6">
-          <button className="font-sf-pro text-[#414447] text-base font-normal flex leading-6 tracking-[0.24px] items-center gap-2">
+          <button className="text-[#414447] text-body2 flex items-center gap-2">
             View my interviews
             <ArrowRight className="w-5 h-5" />
           </button>
 
           <div className="h-[1px] bg-[#E5E7EB]" />
 
-          <p className="text-[#000000] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]">
+          <p className="text-[#000000] text-body2">
             You have performed{" "}
             <span className="font-semibold">better than {percentile}%</span> of
             candidates on Employability for the role of{" "}

@@ -45,13 +45,12 @@ interface AddSkillsModalProps {
   goals:
   | {
     message: string;
-    data: [
-      {
+    data: 
+      Array<{
         experience: string | undefined;
         _id: string;
         name: string;
-      }
-    ];
+      }>
   }
   | undefined;
   prefillSkills: Skill[]; // Prefilled skills data

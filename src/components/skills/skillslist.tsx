@@ -12,7 +12,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import search from "@/assets/skills/search.svg";
 import AddSkillsModal from "./addskills";
-
+import { ChevronDown } from "lucide-react";
 
 export interface SkillPoolId {
   _id: string;
@@ -42,13 +42,11 @@ interface SkillListProps {
   goals:
     | {
         message: string;
-        data: [
-          {
-            experience: string | undefined;
-            _id: string;
-            name: string;
-          }
-        ];
+        data:Array<{  
+          experience: string | undefined;
+          _id: string;
+          name: string;
+        }>;
       }
     | undefined;
   selectedGoalName: string;
@@ -67,16 +65,14 @@ const SkillList: React.FC<SkillListProps> = ({
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
-  const [getUserSkills, { data: skillsData, isLoading }] = useGetUserSkillsMutation();
-  const [selectedCategory, setSelectedCategory] = useState<SkillCategory>("all");
+  const [getUserSkills, { data: skillsData, isLoading }] =
+    useGetUserSkillsMutation();
+  const [selectedCategory, setSelectedCategory] =
+    useState<SkillCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredSkills, setFilteredSkills] = useState<Skill[]>([]);
   const [isSelfRatingEdited, setSelfRatingChange] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-
-  
-
 
   // Mutation hooks
   const [removeGoalFromSkill] = useRemoveGoalFromSkillMutation();
@@ -87,6 +83,7 @@ const SkillList: React.FC<SkillListProps> = ({
       fetchSkills(userId, goalId);
     }
   }, [userId, goalId]);
+  console.log("goalId", goalId);
 
   useEffect(() => {
     if (isSkillsUpdated && userId && goalId) {
@@ -94,7 +91,10 @@ const SkillList: React.FC<SkillListProps> = ({
     }
   }, [isSkillsUpdated]);
 
-  const fetchSkills = async (userId: string | undefined, goalId: string | null) => {
+  const fetchSkills = async (
+    userId: string | undefined,
+    goalId: string | null
+  ) => {
     try {
       await getUserSkills({ userId, goalId }).unwrap();
     } catch (err) {
@@ -106,7 +106,9 @@ const SkillList: React.FC<SkillListProps> = ({
     if (skillsData?.data) {
       const selectedSkills = getSelectedSkills();
       const filtered = selectedSkills.filter((skill) =>
-        skill.skill_pool_id.name.toLowerCase().includes(searchQuery.toLowerCase())
+        skill.skill_pool_id.name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
       );
       const reorderedSkills = moveUnverifiedToIndexZero(filtered);
       setFilteredSkills(reorderedSkills);
@@ -129,7 +131,9 @@ const SkillList: React.FC<SkillListProps> = ({
   };
 
   const moveUnverifiedToIndexZero = (skills: Skill[]): Skill[] => {
-    const unverifiedSkills = skills.filter((skill) => skill.verified_rating <= 3);
+    const unverifiedSkills = skills.filter(
+      (skill) => skill.verified_rating <= 3
+    );
     const verifiedSkills = skills.filter((skill) => skill.verified_rating > 3);
     return unverifiedSkills.length > 0
       ? [unverifiedSkills[0], ...verifiedSkills, ...unverifiedSkills.slice(1)]
@@ -177,17 +181,17 @@ const SkillList: React.FC<SkillListProps> = ({
       { id: "optional", label: "Added by you" },
     ];
 
-
-    
     return (
-      <div className="flex gap-1 items-center mb-4 sm:max-w-[100%] sm:flex sm:flex-col-reverse sm:items-start md:items-start sm:gap-5">
+      <div className="flex gap-1 items-center mb-10 sm:max-w-[100%] sm:flex sm:flex-col-reverse sm:items-start md:items-start sm:gap-5">
         <div className="sm:flex h-[46px]">
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => handleCategorySelect(category.id as SkillCategory)}
-              className={`px-4 py-2 rounded-[3px] text-sm font-normal transition-all sm:px-2 sm:py-2 ${
-                selectedCategory === category.id ? "bg-[#001630] text-white hover:bg-[#062549]" : "text-gray-600"
+              className={`px-4 py-2 rounded-[3px] text-body2 transition-all sm:px-2 sm:py-2 ${
+                selectedCategory === category.id
+                  ? "bg-[#001630] text-white hover:bg-[#062549]"
+                  : "text-[#68696B]"
               }`}
             >
               {category.label}
@@ -195,17 +199,21 @@ const SkillList: React.FC<SkillListProps> = ({
           ))}
         </div>
 
-        <div className="flex items-center justify-between ml-auto sm:ml-0 sm:w-[100%] gap-2">
+        <div className="flex items-center justify-between ml-auto sm:ml-0 sm:w-[100%]">
           <div className="relative w-64 sm:max-w-[100%]">
             <input
               type="text"
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border border-[#D6D7D9] rounded-[6px] px-4 py-2 pl-10 text-sm w-full focus:outline-none"
+              className="border border-[#D6D7D9] rounded-[6px] text-body2 px-4 py-2 pl-10 text-sm w-full focus:outline-none"
             />
             <div className="absolute inset-y-0 left-3 flex items-center">
-              <img src={search} alt="Search Icon" className="w-4 h-4 text-gray-400" />
+              <img
+                src={search}
+                alt="Search Icon"
+                className="w-4 h-4 text-gray-400"
+              />
             </div>
           </div>
           <div>
@@ -248,19 +256,23 @@ const SkillList: React.FC<SkillListProps> = ({
   );
 
   const renderSkills = (skills: Skill[]) => {
-    const displaySkills = isDashboard ? skills.slice(0, 3) : skills;
+    const displaySkills = isDashboard ? skills.slice(0, 5) : skills;
     const mandatorySkillIds = getMandatorySkillIds();
     const totalSkills = skills.length;
 
     if (displaySkills.length === 0) {
-      return <div className="text-gray-500 text-center py-4">No skills found</div>;
+      return (
+        <div className="text-gray-500 text-body2 text-center py-4">No skills found</div>
+      );
     }
 
     return (
-      <div className="scroll-smooth pr-2 snap-y snap-proximity minimal-scrollbar sm:min-w-[290px]">
+      <div className="scroll-smooth snap-y snap-proximity minimal-scrollbar sm:min-w-[290px]">
         {displaySkills.map((skill: Skill, index: number) => {
           const isMandatorySkill =
-            selectedCategory === "all" ? mandatorySkillIds.includes(skill._id) : selectedCategory === "mandatory";
+            selectedCategory === "all"
+              ? mandatorySkillIds.includes(skill._id)
+              : selectedCategory === "mandatory";
 
           return (
             <React.Fragment key={skill._id}>
@@ -271,7 +283,9 @@ const SkillList: React.FC<SkillListProps> = ({
                 skillImg={skill.skill_pool_id.icon}
                 verified_rating={skill.verified_rating}
                 selfRating={skill.self_rating ?? 0}
-                initialStatus={skill.verified_rating > 3 ? "Verified" : "Unverified"}
+                initialStatus={
+                  skill.verified_rating > 3 ? "Verified" : "Unverified"
+                }
                 level={skill.level}
                 onDelete={handleDeleteSkill}
                 onEdit={handleEditSkill}
@@ -281,30 +295,28 @@ const SkillList: React.FC<SkillListProps> = ({
                 goalName={selectedGoalName}
                 latest_interview_status={skill?.latest_interview_status}
               />
-              {index < displaySkills.length - 1 && <div className="w-full h-[1px] my-4 bg-[#E0E0E0]" />}
-              {isDashboard && index === 2 && totalSkills > 3 && (
-                <button
-                  onClick={() => navigate("/skills")}
-                  className="flex items-center gap-1 text-[#001630] text-sm font-medium hover:underline py-2 mx-auto mt-2"
-                >
-                  View all
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M8 3.33334L8 12.6667"
-                      stroke="#001630"
-                      strokeWidth="1.33333"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12.6667 8L8.00004 12.6667L3.33337 8"
-                      stroke="#001630"
-                      strokeWidth="1.33333"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+              {index < displaySkills.length - 1 && (
+                <div className="w-full h-[1px] my-4 bg-[#E0E0E0]" />
+              )}
+              {isDashboard && index === 4 && totalSkills > 5 && (
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-[180px]"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(255, 255, 255, 0) 20%, #FFF 100%)",
+                  }}
+                />
+              )}
+              {isDashboard && index === 4 && totalSkills > 5 && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
+                  <button
+                    onClick={() => navigate("/skills")}
+                    className="flex items-center gap-1 text-[#001630] text-sm font-medium"
+                  >
+                    View all
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </button>
+                </div>
               )}
             </React.Fragment>
           );
@@ -314,11 +326,11 @@ const SkillList: React.FC<SkillListProps> = ({
   };
 
   return (
-    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[42px] sm:p-6 mb-4 overflow-x-auto scrollbar-hide">
+    <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[32px] sm:p-6 overflow-x-auto scrollbar-hide">
       <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
         {isDashboard && (
           <div className="flex justify-between items-center mb-5">
-            <h2 className="text-gray-900 text-base font-medium leading-5">
+            <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
               Skills ({skillsData?.data?.all.length || 0})
             </h2>
           </div>
@@ -326,7 +338,9 @@ const SkillList: React.FC<SkillListProps> = ({
 
         {renderSkillChips()}
 
-        {isLoading ? Array.from({ length: 3 }).map((_) => renderLoadingSkeleton()) : renderSkills(filteredSkills)}
+        {isLoading
+          ? Array.from({ length: 3 }).map((_) => renderLoadingSkeleton())
+          : renderSkills(filteredSkills)}
       </div>
 
       {isModalOpen && goalId && (
