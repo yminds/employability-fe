@@ -37,25 +37,51 @@ interface Project {
   lastCompletedStep?: number;
 }
 
-export const ProjectListingSkeleton: React.FC = () => {
+// Skeleton component for the project listings content
+export const ProjectContentSkeleton = () => {
+  return (
+    <div className="w-full space-y-4">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <ProjectCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+};
+
+// Skeleton component for the project insights panel
+export const ProjectInsightsSkeleton = () => {
+  return (
+    <div className="w-full bg-white rounded-lg p-4">
+      <Skeleton height={40} className="mb-4" />
+      <Skeleton count={3} height={60} className="mb-2" />
+      <Skeleton width={150} height={30} />
+    </div>
+  );
+};
+
+// Full page skeleton for initial loading
+export const ProjectListingSkeleton = () => {
   return (
     <div className="w-full h-screen overflow-hidden bg-[#F5F5F5]">
-      <div className="flex justify-between items-center mb-4 mx-14">
-        <div className="flex items-center space-x-2 gap-3">
+      <div className="flex justify-between items-center mt-5 ml-12">
+        <div className="flex items-center gap-3">
           <Skeleton circle width={30} height={30} />
-          <Skeleton width={100} height={26} />
+          <Skeleton width={80} height={26} />
         </div>
       </div>
 
-      <section className="w-full h-[90vh] flex bg-[#F5F5F5]">
-        <div className="h-full flex justify-center ml-8">
+      <section className="w-full h-[calc(100vh-2rem)] bg-[#F5F5F5]">
+        <div className="h-full flex justify-center mx-6">
           <div className="w-full max-w-[1800px] flex gap-6 p-6 md:flex-col-reverse sm:flex-col-reverse">
             <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
-              <div className="sticky top-0 bg-[#F5F5F5] z-10 sm:relative">
-                <Skeleton height={50} />
+              <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:relative">
+                <div className="flex items-center justify-between">
+                  <Skeleton width={200} height={40} />
+                  <Skeleton width={120} height={40} />
+                </div>
               </div>
 
-              <div className="mt-[70px] sm:min-w-[100%] sm:mt-4 overflow-y-auto scrollbar-hide">
+              <div className="mt-[70px] sm:mt-4 overflow-y-auto scrollbar-hide">
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, index) => (
                     <ProjectCardSkeleton key={index} />
@@ -64,9 +90,13 @@ export const ProjectListingSkeleton: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex-[3] w-full space-y-4">
-              <div className="flex flex-col gap-6 sticky top-[70px] md:relative md:top-0 sm:relative sm:top-0">
-                <Skeleton height={400} />
+            <div className="flex-[2] w-[350px] space-y-4">
+              <div className="flex sticky top-[70px] md:relative md:top-0 sm:relative sm:top-0">
+                <div className="w-full bg-white rounded-lg p-4">
+                  <Skeleton height={40} className="mb-4" />
+                  <Skeleton count={3} height={60} className="mb-2" />
+                  <Skeleton width={150} height={30} />
+                </div>
               </div>
             </div>
           </div>
@@ -76,12 +106,13 @@ export const ProjectListingSkeleton: React.FC = () => {
   );
 };
 
+// Empty state component
 const EmptyState: React.FC<{
   selectedGoalName: string;
   onUploadClick: () => void;
 }> = ({ selectedGoalName, onUploadClick }) => (
   <div className="relative flex flex-col items-center justify-center min-h-[80vh] p-8">
-    <div className="absolute inset-0 z-0 ">
+    <div className="absolute inset-0 z-0">
       <img
         src={backgroundImageSVG}
         alt=""
@@ -123,6 +154,7 @@ const EmptyState: React.FC<{
   </div>
 );
 
+// Main ProjectListing component
 const ProjectListing = () => {
   const navigate = useNavigate();
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
@@ -131,6 +163,7 @@ const ProjectListing = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [skillsUpdated, setSkillsUpdated] = useState(false);
+  const [isChangingGoal, setIsChangingGoal] = useState(false);
 
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
@@ -153,6 +186,16 @@ const ProjectListing = () => {
       setSelectedGoalId(goalData.data[0]._id);
     }
   }, [goalData, selectedGoalId]);
+
+  useEffect(() => {
+    if (selectedGoalId) {
+      setIsChangingGoal(true);
+      const timer = setTimeout(() => {
+        setIsChangingGoal(false);
+      }, 1000); // Minimum skeleton display time
+      return () => clearTimeout(timer);
+    }
+  }, [selectedGoalId]);
 
   const handleOpenUploadModal = (project?: Project) => {
     setSelectedProject(project || null);
@@ -177,14 +220,18 @@ const ProjectListing = () => {
   };
 
   const handleGoalChange = (goalId: string) => {
-    setSelectedGoalId(goalId);
+    if (goalId !== selectedGoalId) {
+      setIsChangingGoal(true);
+      setSelectedGoalId(goalId);
+    }
   };
 
   const handleBackToDashboard = () => {
-    navigate("/");
+    navigate(-1);
   };
 
-  if (goalsLoading || projectsLoading) {
+  // Only show full page skeleton during initial goals loading
+  if (goalsLoading) {
     return <ProjectListingSkeleton />;
   }
 
@@ -259,6 +306,8 @@ const ProjectListing = () => {
                   <div className="text-center text-red-500 py-4">
                     Error loading projects
                   </div>
+                ) : projectsLoading || isChangingGoal ? (
+                  <ProjectContentSkeleton />
                 ) : !projectsData?.data.length ? (
                   <EmptyState
                     selectedGoalName={selectedGoalName}
@@ -281,11 +330,15 @@ const ProjectListing = () => {
 
             <div className="flex-[2] w-[350px] space-y-4">
               <div className="flex sticky top-[70px] md:relative md:top-0 sm:relative sm:top-0">
-                <ProjectInsights
-                  goalId={selectedGoalId || ""}
-                  userId={userId || ""}
-                  goalDetails={goalDetails}
-                />
+                {projectsLoading || isChangingGoal ? (
+                  <ProjectInsightsSkeleton />
+                ) : (
+                  <ProjectInsights
+                    goalId={selectedGoalId || ""}
+                    userId={userId || ""}
+                    goalDetails={goalDetails}
+                  />
+                )}
               </div>
             </div>
           </div>
