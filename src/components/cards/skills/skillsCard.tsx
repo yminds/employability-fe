@@ -235,7 +235,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           </button>
         )}
 
-        <div className="flex items-center justify-between h-[82px]">
+        <div className="flex items-center justify-between h-[82px] font-ubuntu">
           {/* Left Section */}
           <div className="flex w-[30%] items-center space-x-4">
             <span className="flex w-[52px] h-[52px] p-[9.75px] px-[10.833px] justify-center items-center rounded-full border border-black/5 bg-[rgba(250,250,250,0.98)]">
@@ -273,7 +273,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                     {ratingError && <p className="text-red-500 text-xs mt-1">{ratingError}</p>}
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 font-ubuntu">
                     <p className="text-[#414447] text-body2">
                       Self rating: {editedSelfRating}/10
                     </p>
@@ -304,7 +304,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           )} */}
 
           {/* Rating and Status */}
-          <div className="flex w-[30%] flex-col items-center">
+          <div className="flex w-[30%] flex-col items-center font-ubuntu">
             {status === "Verified" && (
               <p className="font-ubuntu text-xl font-medium leading-[22px]">
                 {verified_rating}
@@ -323,7 +323,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex w-[40%] lg:w-[50%] justify-end items-center space-x-2">
+          <div className="flex w-[40%] lg:w-[50%] justify-end items-center space-x-2 font-ubuntu">
             {status === "Verified" ? (
               <>
                 <button
@@ -376,7 +376,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                 </button>
                 <button
                   onClick={() => handleVerifySkill()}
-                  className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
+                  className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md font-ubuntu"
                 >
                   Verify skill
                 </button>
@@ -386,7 +386,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
         </div>
       </div>
 
-      <div className="group relative sm:flex flex-wrap bg-white rounded-md transition hidden">
+      <div className="group relative sm:flex flex-wrap bg-white rounded-md transition hidden font-ubuntu">
         {/* Delete Button */}
         {!isMandatory && onDelete && (
           <button
@@ -515,7 +515,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   </button>
                   <button
                     onClick={() => handleVerifySkill()}
-                    className="px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md"
+                    className="px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md font-ubuntu"
                   >
                     Verify skill
                   </button>

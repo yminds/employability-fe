@@ -55,7 +55,7 @@ const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights, isGenera
                 <div className="p-4 text-gray-600 font-medium">Criteria</div>
                 <div className="p-4 text-gray-600 font-medium">Performance Rating</div>
             </div>
-            {highlights.map((item, index) => (
+            {highlights?.map((item, index) => (
                 <div
                 key={index}
                 className="grid grid-cols-2  last:border-b-0 items-center"

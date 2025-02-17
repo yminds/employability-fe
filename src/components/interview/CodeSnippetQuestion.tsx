@@ -6,7 +6,7 @@ const CodeSnippetQuestion: React.FC<{
   codeSnippet: string;
 }> = ({ question, codeSnippet }) => {
   return (
-    <div className="flex flex-col gap-4 relative w-full rounded-xl min-h-[56vh]">
+    <div className="flex flex-col gap-4 relative w-full rounded-xl h-[50vh]">
       <div className="font-medium text-lg">{question}</div>
       <div className="rounded-lg overflow-hidden bg-[#1e1e1e] h-full px-3">
         <MonacoEditor
