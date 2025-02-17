@@ -162,13 +162,11 @@ interface SkillProgressProps {
   userId?: string;
   goals?: {
     message: string;
-    data: [
-      {
-        experience: string | undefined;
-        _id: string;
-        name: string;
-      }
-    ];
+    data: Array<{
+      experience: string | undefined;
+      _id: string;
+      name: string;
+    }>;
   };
   selectedGoalName?: string;
   onSkillsStatusChange?: (isUpdated: boolean) => void;
