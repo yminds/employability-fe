@@ -39,35 +39,39 @@ const EmptyProjectState: React.FC<{
 
         <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
           <div className="mb-8 text-center">
-            <h1 className="mb-2 text-3xl font-bold text-gray-900">
+            <h1 className="mb-2 text-3xl font-ubuntu font-bold text-gray-900">
               No Projects for {selectedGoalName}
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-body2">
               Start building your portfolio by adding your first project.
             </p>
           </div>
 
           <div className="w-full max-w-md space-y-4">
-            <button
+            <div
+              className="flex justify-center cursor-pointer hover:opacity-90 transition-opacity"
               onClick={onUploadClick}
-              className="w-full p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center justify-center gap-3"
             >
-              <img src={UploadProjectSVG} alt="Upload" className="w-6 h-6" />
-              <span>Upload Your Project</span>
-            </button>
+              <img
+                src={UploadProjectSVG || "/placeholder.svg"}
+                alt="Upload Project"
+                className="w-auto h-auto"
+              />
+            </div>
 
-            <button
-              className="w-full p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center justify-center gap-3"
-            >
-              <img src={GetProjectFromMentorSVG} alt="Mentor" className="w-6 h-6" />
-              <span>Get Project from Mentor</span>
-            </button>
+            <div className="flex justify-center cursor-pointer hover:opacity-90 transition-opacity">
+              <img
+                src={GetProjectFromMentorSVG || "/placeholder.svg"}
+                alt="Get Project from Mentor"
+                className="w-auto h-auto"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {goalId && goalDetails && (
-        <div className="flex-[3] p-6">
+      
+        {/* <div className="flex-[3] p-6">
           <div className="sticky top-[70px]">
             <ProjectInsights
               goalId={goalId}
@@ -75,8 +79,8 @@ const EmptyProjectState: React.FC<{
               goalDetails={goalDetails}
             />
           </div>
-        </div>
-      )}
+        </div> */}
+
     </div>
   </div>
 );

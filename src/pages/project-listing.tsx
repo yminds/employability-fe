@@ -5,7 +5,9 @@ import type { RootState } from "@/store/store";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
 import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
 import SkillsHeader from "@/components/skills/skillsheader";
-import ProjectCard, { ProjectCardSkeleton } from "@/components/projects/ProjectCard";
+import ProjectCard, {
+  ProjectCardSkeleton,
+} from "@/components/projects/ProjectCard";
 import ProjectInsights from "@/components/projects/ProjectInsights";
 import { ProjectUploadModal } from "@/components/projects/modal/ProjectUploadModal";
 import ProjectDeleteModal from "@/components/projects/modal/ProjectDeleteModal";
@@ -15,25 +17,24 @@ import UploadProjectSVG from "@/assets/projects/upload-local.svg";
 import GetProjectFromMentorSVG from "@/assets/projects/get-project-from-mentor.svg";
 import Skeleton from "react-loading-skeleton";
 
-
 interface Project {
-  _id: string
-  name: string
-  description: string
+  _id: string;
+  name: string;
+  description: string;
   tech: {
-    _id: string
-    name: string
-    icon: string
-  }[]
-  githubLink: string[]
-  liveLink: string
-  thumbnail?: string
-  images?: string
-  synopsisDoc?: string
-  synopsis?: string
-  status: string
-  score?: number
-  lastCompletedStep?: number
+    _id: string;
+    name: string;
+    icon: string;
+  }[];
+  githubLink: string[];
+  liveLink: string;
+  thumbnail?: string;
+  images?: string;
+  synopsisDoc?: string;
+  synopsis?: string;
+  status: string;
+  score?: number;
+  lastCompletedStep?: number;
 }
 
 export const ProjectListingSkeleton: React.FC = () => {
@@ -45,7 +46,7 @@ export const ProjectListingSkeleton: React.FC = () => {
           <Skeleton width={100} height={26} />
         </div>
       </div>
-      
+
       <section className="w-full h-[90vh] flex bg-[#F5F5F5]">
         <div className="h-full flex justify-center ml-8">
           <div className="w-full max-w-[1800px] flex gap-6 p-6 md:flex-col-reverse sm:flex-col-reverse">
@@ -72,8 +73,55 @@ export const ProjectListingSkeleton: React.FC = () => {
         </div>
       </section>
     </div>
-  )
-}
+  );
+};
+
+const EmptyState: React.FC<{
+  selectedGoalName: string;
+  onUploadClick: () => void;
+}> = ({ selectedGoalName, onUploadClick }) => (
+  <div className="relative flex flex-col items-center justify-center min-h-[80vh] p-8">
+    <div className="absolute inset-0 z-0 ">
+      <img
+        src={backgroundImageSVG}
+        alt=""
+        className="w-full h-full object-cover opacity-50"
+      />
+    </div>
+
+    <div className="relative z-10 text-center space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold font-ubuntu text-gray-900 mb-2">
+          No Projects Yet for {selectedGoalName}
+        </h1>
+        <p className="text-gray-600">
+          Start showcasing your skills by adding your first project.
+        </p>
+      </div>
+
+      <div className="w-full max-w-md space-y-4">
+        <div
+          className="flex justify-center cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={onUploadClick}
+        >
+          <img
+            src={UploadProjectSVG || "/placeholder.svg"}
+            alt="Upload Project"
+            className="w-auto h-auto"
+          />
+        </div>
+
+        <div className="flex justify-center cursor-pointer hover:opacity-90 transition-opacity">
+          <img
+            src={GetProjectFromMentorSVG || "/placeholder.svg"}
+            alt="Get Project from Mentor"
+            className="w-auto h-auto"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const ProjectListing = () => {
   const navigate = useNavigate();
@@ -86,7 +134,8 @@ const ProjectListing = () => {
 
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
-  const { data: goalData, isLoading: goalsLoading } = useGetGoalsbyuserQuery(userId);
+  const { data: goalData, isLoading: goalsLoading } =
+    useGetGoalsbyuserQuery(userId);
   const goalDetails = goalData?.data;
 
   const {
@@ -139,50 +188,11 @@ const ProjectListing = () => {
     return <ProjectListingSkeleton />;
   }
 
-  const selectedGoal = goalData?.data.find((goal) => goal._id === selectedGoalId);
+  const selectedGoal = goalData?.data.find(
+    (goal) => goal._id === selectedGoalId
+  );
   const selectedGoalName = selectedGoal?.name || "";
   const selectedGoalExperience = selectedGoal?.experience || null;
-
-  const EmptyState = () => (
-    <div className="relative flex flex-col items-center justify-center min-h-[60vh] p-8">
-      <div className="absolute inset-0 z-0">
-        <img
-          src={backgroundImageSVG}
-          alt=""
-          className="w-full h-full object-cover opacity-50"
-        />
-      </div>
-      
-      <div className="relative z-10 text-center space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            No Projects Yet for {selectedGoalName}
-          </h1>
-          <p className="text-gray-600">
-            Start showcasing your skills by adding your first project.
-          </p>
-        </div>
-
-        <div className="flex flex-col items-center gap-4">
-          <button
-            onClick={() => handleOpenUploadModal()}
-            className="flex items-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-          >
-            <img src={UploadProjectSVG} alt="Upload Project" className="w-6 h-6" />
-            <span>Upload Your Project</span>
-          </button>
-
-          <button
-            onClick={() => {/* Handle mentor project flow */}}
-            className="flex items-center space-x-2 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-          >
-            <img src={GetProjectFromMentorSVG} alt="Get Project from Mentor" className="w-6 h-6" />
-            <span>Get Project from Mentor</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="w-full h-screen overflow-hidden bg-[#F5F5F5]">
@@ -246,9 +256,14 @@ const ProjectListing = () => {
 
               <div className="mt-[70px] sm:mt-4 overflow-y-auto scrollbar-hide">
                 {projectsError ? (
-                  <div className="text-center text-red-500 py-4">Error loading projects</div>
+                  <div className="text-center text-red-500 py-4">
+                    Error loading projects
+                  </div>
                 ) : !projectsData?.data.length ? (
-                  <EmptyState />
+                  <EmptyState
+                    selectedGoalName={selectedGoalName}
+                    onUploadClick={() => handleOpenUploadModal()}
+                  />
                 ) : (
                   <div className="space-y-4">
                     {projectsData.data.map((project) => (
