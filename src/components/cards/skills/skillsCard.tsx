@@ -151,8 +151,15 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleVerifySkill = async () => {
     if (dontShowAgain) {
+      const interviewId = await createInterview({
+        title: `${skill} Interview`,
+        type: "Skill",
+        user_skill_id: skillId,
+        skill_id: skillPoolId,
+      });
+
       // Start the interview directly if tutorial is disabled
-      navigate(`/interview/${skillId}`, {
+      navigate(`/interview/${interviewId}`, {
         state: { skill, skillId, skillPoolId, level },
       });
     } else {
@@ -180,15 +187,22 @@ const SkillCard: React.FC<SkillCardProps> = ({
     }
   }, []);
 
-  const handleConfirmTutorial = () => {
+  const handleConfirmTutorial = async () => {
     if (dontShowAgain) {
       localStorage.setItem("hasSeenVerifySkillTutorial", "true");
     }
 
     setShowTutorial(false);
-
+    const interviewId = await createInterview({
+      title: `${skill} Interview`,
+      type: "Skill",
+      user_skill_id: skillId,
+      skill_id: skillPoolId,
+    });
+    console.log("interviewId", interviewId);
+    
     // Start the interview after closing the tutorial
-    navigate(`/interview/${skillId}`, {
+    navigate(`/interview/${interviewId}`, {
       state: { skill, skillId, skillPoolId, level },
     });
   };
@@ -215,9 +229,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
         {!isMandatory && onDelete && (
           <button
             onClick={handleDeleteClick}
-            className="absolute right-[-3%] top-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3 py-1 text-xs font-medium text-white bg-[#00183D] rounded hover:bg-black z-10"
+            className="absolute right-[-4%] top-[40%] opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-3  text-xs font-medium text-black rounded  z-10"
           >
-            <Trash2 size={16} />
+            <Trash2 size={20} />
           </button>
         )}
 

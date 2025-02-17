@@ -140,7 +140,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
       : location.state?.skillIcon || "";
 
   const userSkillId = location.state?.skillId || "";
-  console.log("userSkillId", userSkillId);
+
   // Get user profile image from Redux.
   const userImg = useSelector((state: RootState) => state.auth.user?.profile_image);
 
@@ -171,7 +171,6 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   // Get the skill id from interview data and then safely extract the skill icon from profile.
   
   const skillId = fetchInterviewData?.data?.skill_id;
-  console.log("skillId", skillId);
 
   const profileSkillIcon =
     profile?.skills?.find(
@@ -182,13 +181,11 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   profile?.skills?.find(
     (skill: any) => skill.skill_pool_id._id === skillId
   )?.skill_pool_id.name;
-  console.log("skill", skill);
 
   const level =  
   profile?.skills?.find(
     (skill: any) => skill.skill_pool_id._id === skillId
   )?.level || skill_icon;
-  console.log("level", level);
 
   const handleBackToSkillsPage = () => {
     navigate("/skills");

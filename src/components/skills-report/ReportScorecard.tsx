@@ -10,7 +10,7 @@ interface ReportScoreProps {
 }
 
 const ReportScore: React.FC<ReportScoreProps> = ({ userName, userImg, goalName , ReportScore, skill_icon }) => {
-  console.log('In reportScore skill_icon',skill_icon)
+
   const verifiedrating = ReportScore;
 
   return (

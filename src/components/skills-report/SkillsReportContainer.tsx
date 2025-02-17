@@ -11,6 +11,7 @@ import PerformanceHighlights from "./PerformanceHighlights";
 import ReportScore from "./ReportScorecard";
 import InterviewPlayer from "../interview/InterviewPlayer";
 import { useNavigate } from "react-router-dom";
+import { useCreateInterview } from "@/hooks/useCreateInterview";
 
 interface Performance {
   criteria: string;
@@ -98,6 +99,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
         // Optional debug:
         console.log("Attempting to load image:", img.src);
         if (img.complete) {
+          console.log("Image already loaded:", img.src);
           return Promise.resolve();
         }
         return new Promise<void>((resolve, reject) => {
@@ -132,7 +134,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
       const opt = {
         margin: [32, 32, 32, 32],
         filename: `${userName}-${reportData.interview_id?.title}-Report.pdf`,
-        image: { type: "jpeg", quality: 1.0 },
+        image: { type: "jpeg", quality: 2.0 },
         html2canvas: {
           scale: 2,
           useCORS: true,         // must be true for crossOrigin images
@@ -143,7 +145,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
           format: "a4",
           orientation: "portrait",
         },
-        pagebreak: { mode: ["avoid-all", "legacy"] },
+        pagebreak: { mode: ["avoid-all"] },
       };
 
       // Generate and save PDF
@@ -154,14 +156,22 @@ const ReportContent: React.FC<ReportContentProps> = ({
       setIsGeneratingPDF(false);
     }
   };
+  
+  const { createInterview } = useCreateInterview();
 
   const navigate = useNavigate();
-  const handleImproveScore = () => {
-    // Start the interview after closing the tutorial
-    navigate(`/interview/${skillId}`, {
-      state: { skill, skillId:userSkillId, skillPoolId:skillId, level },
+  const handleImproveScore = async () => {
+    const interviewId = await createInterview({
+      title: `${skill} Interview`,
+      type: "Skill",
+      user_skill_id: userSkillId,
+      skill_id: skillId,
     });
     
+    // Start the interview after closing the tutorial
+    navigate(`/interview/${interviewId}`, {
+      state: { skill, skillId:userSkillId, skillPoolId:skillId, level },
+    });
   }
 
   return (
@@ -186,7 +196,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                 </button>
               )}
               <span className="text-h1">
-                {userName}&apos;s {reportData.interview_id?.title} Report
+                 {reportData.interview_id?.title} Report
               </span>
             </h1>
           </div>
@@ -202,7 +212,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                 Share Report
               </button>
               {showSharePopup && (
-                <div className="absolute right-0 top-[40px] bg-white border border-gray-300 rounded p-4 shadow-md min-w-[250px]">
+                <div className="absolute right-0 top-[40px] bg-white border border-gray-300 rounded p-4 shadow-md min-w-[250px] z-10">
                   <p className="text-sm text-grey-7 font-medium mb-2">
                     Share this link:
                   </p>
@@ -346,6 +356,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
               >
                 <PerformanceHighlights
                   highlights={reportData.summary?.performance_highlights}
+                  isGeneratingPDF={isGeneratingPDF}
                 />
               </section>
 
@@ -354,7 +365,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                 <h2 className="text-h2 font-medium text-grey-7 mb-4">
                   Concept Breakdown
                 </h2>
-                <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   {reportData.concept_ratings?.length ? (
                     reportData.concept_ratings.map((rating, index) => (
                       <Card

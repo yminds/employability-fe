@@ -7,8 +7,9 @@ interface PerformanceRating {
   
   interface HighlightsProps {
     highlights: PerformanceRating[];
+    isGeneratingPDF?: boolean;
   }
-const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights }) => {
+const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights, isGeneratingPDF }) => {
   const getRatingLabel = (rating: number): string => {
     switch (rating) {
       case 5:
@@ -61,7 +62,7 @@ const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights }) => {
                 >
                 <div className="p-4 text-gray-700">{item.criteria}</div>
                 <div className="p-0 ">
-                    <span className={`p-3 rounded-full text-sm font-medium bg-none ${getRatingStyles(item.rating)}`}>
+                    <span className={`p-3 rounded-full text-sm font-medium bg-none ${!isGeneratingPDF ? getRatingStyles(item.rating): "text-gray-600"} `}>
                     {getRatingLabel(item.rating)}
                     </span>
                 </div>
