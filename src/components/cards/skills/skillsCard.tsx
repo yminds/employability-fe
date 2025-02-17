@@ -133,7 +133,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleViewReport = () => {
     navigate(`/skill/report/${bestInterview}`, {
-      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg },
+      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg, skillId : skillId },
     });
   };
 
@@ -149,32 +149,16 @@ const SkillCard: React.FC<SkillCardProps> = ({
     });
   };
 
-  const handleVerifySkill = async (latestInteviewId?: string) => {
-    const hasSeenTutorial = localStorage.getItem("hasSeenVerifySkillTutorial");
-
-    if (!hasSeenTutorial) {
+  const handleVerifySkill = async () => {
+    if (dontShowAgain) {
+      // Start the interview directly if tutorial is disabled
+      navigate(`/interview/${skillId}`, {
+        state: { skill, skillId, skillPoolId, level },
+      });
+    } else {
+      // Show the tutorial, interview will start after confirmation
       setShowTutorial(true);
-      return;
     }
-
-
-  if(userCredntials?.data?.is_pending_interview){
-     toast.error("You have already a pending interview");
-     return;
-  }
-
-
-
-
-    const interviewId = await createInterview({
-      title: `${skill} Interview`,
-      type: "Skill",
-      user_skill_id: skillId,
-      skill_id: skillPoolId,
-    });
-    navigate(`/interview/${interviewId}`, {
-      state: { title: skill, skillPoolId, level },
-    });
   };
 
   useEffect(() => {
@@ -185,26 +169,34 @@ const SkillCard: React.FC<SkillCardProps> = ({
   }, []);
 
   const handleCloseTutorial = () => {
-    if (dontShowAgain) {
-      localStorage.setItem("hasSeenVerifySkillTutorial", "true");
-    }
     setShowTutorial(false);
   };
 
-  useEffect(() => {
+ useEffect(() => {
+    // Check if the user has disabled the tutorial
     const hasSeenTutorial = localStorage.getItem("hasSeenVerifySkillTutorial");
     if (hasSeenTutorial) {
-      setShowTutorial(false);
+      setDontShowAgain(true);
     }
   }, []);
 
+  const handleConfirmTutorial = () => {
+    if (dontShowAgain) {
+      localStorage.setItem("hasSeenVerifySkillTutorial", "true");
+    }
 
+    setShowTutorial(false);
+
+    // Start the interview after closing the tutorial
+    navigate(`/interview/${skillId}`, {
+      state: { skill, skillId, skillPoolId, level },
+    });
+  };
 
   const handleResumeInterView = () => {
     navigate(`/interview/${latest_interview_status?.interview_id}`, {
       state: { title: skill, skillPoolId, level },
     });
-
   }
   return (
     <>
@@ -212,10 +204,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       {showTutorial && (
         <SkillVerificationTutorial
           onClose={handleCloseTutorial}
-          onConfirm={() => {
-            handleCloseTutorial();
-            handleVerifySkill();
-          }}
+          onConfirm={handleConfirmTutorial}
           dontShowAgain={dontShowAgain}
           setDontShowAgain={setDontShowAgain}
         />

@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 interface PerformanceRating {
     criteria: string;
@@ -44,7 +44,7 @@ const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights }) => {
   };
 
   return (
-    <Card className="w-full py-[42px] bg-white rounded-xl">
+    <Card className="w-full bg-white rounded-xl">
       <div>
         <h2 className="text-body1 font-medium p-0 mb-6">Performance Highlights</h2>
       </div>
@@ -60,8 +60,8 @@ const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights }) => {
                 className="grid grid-cols-2  last:border-b-0 items-center"
                 >
                 <div className="p-4 text-gray-700">{item.criteria}</div>
-                <div className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium bg-none ${getRatingStyles(item.rating)}`}>
+                <div className="p-0 ">
+                    <span className={`p-3 rounded-full text-sm font-medium bg-none ${getRatingStyles(item.rating)}`}>
                     {getRatingLabel(item.rating)}
                     </span>
                 </div>

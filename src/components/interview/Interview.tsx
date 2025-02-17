@@ -103,7 +103,7 @@ const Interview: React.FC<{
         console.log("Connected handleConnect isInitialized");
         
         setIsInitialized(true);
-        const initialGreeting = "Hello, before starting the interview can you please introduce yourself and describe the names of concepts that are being covered in this interview?";
+        const initialGreeting = "Hello, before starting the interview, introduce yourself?";
         addMessage(initialGreeting);
       }
     };

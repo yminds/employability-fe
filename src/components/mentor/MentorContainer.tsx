@@ -17,6 +17,7 @@ import {
 } from "@/api/mentorUtils";
 import React from "react";
 import logo from "@/assets/skills/e-Logo.svg";
+import { useGetThreadByUserAndTitleQuery } from "@/api/threadApiSlice";
 
 interface ThreadData {
   _id: string;
@@ -102,25 +103,28 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<any>(null);
-
+  const title = `${skill}'s Mentor Thread`;
   const userId = useSelector((state: RootState) => state.auth.user?._id);
   const [fetchFundamentals] = useGetUserFundamentalsByIdMutation();
   const { startMentorChat } = useMentorChat();
   const [sendMentorMessage] = useSendMentorMessageMutation();
 
-  const { data: threadsData, isLoading: threadsDataLoading } =
-    useGetThreadsByUserIdQuery({ userId });
-
+  const {
+    data: thread,
+    isLoading: threadsDataLoading,
+    isError,
+    error
+  } = useGetThreadByUserAndTitleQuery(
+    { id: userId, title },
+  );
   // Filter existing threads for this particular skill’s Mentor
   const filteredThreads = useMemo(() => {
-    if (!threadsData?.data) return [];
-    return threadsData.data.filter(
-      (thread: ThreadData) => thread.title === `${skill}'s Mentor Thread`
-    );
-  }, [threadsData, skill]);
+    if (!thread?.data) return [];
+    return thread.data;
+  }, [thread, skill]);
 
   const { data: threadMessagesData } = useGetMessagesQuery(
-    { threadId: chatId || "", userId: userId || "" },
+    { threadId: "679ca0ac7cc99185afb17a46" , userId: "6766d992c76f0cdfe33a0d9e" },
     {
       skip: !chatId, // do not fetch messages if we don't have a valid chatId
     }
@@ -160,20 +164,20 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
           currentChatId = filteredThreads[0]._id;
           setChatId(currentChatId);
         } else {
-          const { chatId: newChatId } = await startMentorChat({
-            title: `${skill}'s Mentor Thread`,
-            skill_id: skillId,
-            skill_pool_id: skillPoolId,
-          });
-          currentChatId = newChatId;
-          setChatId(newChatId);
+          // const { chatId: newChatId } = await startMentorChat({
+          //   title: `${skill}'s Mentor Thread`,
+          //   skill_id: skillId,
+          //   skill_pool_id: skillPoolId,
+          // });
+          // currentChatId = newChatId;
+          // setChatId(newChatId);
 
-          // Show an initial "Thinking..." message for new threads
-          setMessages([{ id: 0, message: "Thinking...", role: "AI" }]);
-          if (newChatId) {
-            // 3. Send a default "Hello" to start the conversation
-            await sendInitialMessage(newChatId);
-          }
+          // // Show an initial "Thinking..." message for new threads
+          // setMessages([{ id: 0, message: "Thinking...", role: "AI" }]);
+          // if (newChatId) {
+          //   // 3. Send a default "Hello" to start the conversation
+          //   await sendInitialMessage(newChatId);
+          // }
         }
 
         setIsInitialized(true);
