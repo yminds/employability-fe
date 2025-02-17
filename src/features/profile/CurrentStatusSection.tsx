@@ -22,14 +22,12 @@ export default function CurrentStatusSection({
   };
 
   return (
-    <Card className="w-full bg-white p-6 rounded-lg">
-      <CardContent className="p-6">
-        <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px] mb-4">
-          Current Status
-        </h2>
+    <Card className="w-full bg-white p-0 rounded-lg">
+      <CardContent className="p-8">
+        <h2 className="text-[#000000] text-sub-header mb-4">Current Status</h2>
         <div className="relative">
           <select
-            className="block w-full border font-sf-pro border-gray-300 rounded-md py-2 px-4 text-[#000000] text-base font-normal leading-6 tracking-[0.24px] appearance-none pr-10"
+            className="block w-full border border-gray-300 rounded-md py-2 px-4 text-[#000000] text-body2 appearance-none pr-10"
             value={currentStatus}
             onChange={handleStatusChange}
           >

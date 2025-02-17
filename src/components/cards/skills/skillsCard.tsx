@@ -221,7 +221,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
         />
       )}
 
-      <div className="group relative bg-white p-4 rounded-md transition sm:hidden">
+      <div className="group relative bg-white rounded-md transition sm:hidden">
         {/* Delete Button */}
         {!isMandatory && onDelete && (
           <button
@@ -244,12 +244,12 @@ const SkillCard: React.FC<SkillCardProps> = ({
               />
             </span>
             <div>
-              <h3 className="text-[16px] font-medium">{skill}</h3>
+              <h3 className="text-[#0C0F12] text-sub-header">{skill}</h3>
               <div className="flex items-center space-x-2">
                 {isEditing ? (
                   <div className="flex flex-col">
                     <div className="flex items-center space-x-2">
-                      <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">Self rating:</p>
+                      <p className="text-[#414447] text-body2">Self rating:</p>
                       <input
                         ref={inputRef}
                         type="number"
@@ -259,7 +259,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                         onChange={handleRatingChange}
                         onKeyDown={handleRatingKeyDown}
                         onBlur={handleRatingUpdate}
-                        className="w-12 p-1 border-none focus:outline-none appearance-none bg-transparent text-base"
+                        className="w-12 p-1 border-none focus:outline-none appearance-none bg-transparent text-body2"
                         style={{
                           MozAppearance: "textfield",
                           WebkitAppearance: "none",
@@ -271,7 +271,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
-                    <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
+                    <p className="text-[#414447] text-body2">
                       Self rating: {editedSelfRating}/10
                     </p>
                     <button
@@ -303,7 +303,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           {/* Rating and Status */}
           <div className="flex w-[30%] flex-col items-center">
             {status === "Verified" && (
-              <p className="text-lg font-medium">
+              <p className="font-ubuntu text-xl font-medium leading-[22px]">
                 {verified_rating}
                 <span className="text-[#909091]">/10</span>
               </p>
@@ -311,7 +311,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
             <div className="flex items-center space-x-2">
               <img src={imgSrc} alt={status} className="w-4 h-4" />
               <span
-                className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-green-600" : "text-yellow-600"
+                className={`overflow-hidden text-ellipsis text-sub-header ${status === "Verified" ? "text-green-600" : "text-yellow-600"
                   }`}
               >
                 {status}
@@ -325,7 +325,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
               <>
                 <button
                   onClick={handleViewReport}
-                  className="px-4 py-2 text-sm w-[138px] h-[44px] font-medium rounded-md text-[#001630] underline hover:text-[#001630CC]"
+                  className="px-4 py-2 w-[138px] h-[44px] text-button rounded-md text-[#001630] underline hover:text-[#001630CC]"
                 >
                   View report
                 </button>
@@ -333,14 +333,14 @@ const SkillCard: React.FC<SkillCardProps> = ({
                 {latest_interview_status?.isCompleted === false ? (
                   <button
                     onClick={handleResumeInterView}
-                    className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
+                    className="px-4 py-2 w-[138px] h-[44px] text-button bg-[#001630] text-white hover:bg-[#062549] rounded-md"
                   >
                     Resume
                   </button>
                 ) : (
                   <button
                     onClick={() => handleVerifySkill()}
-                    className="py-2 text-sm w-[138px] h-[44px] font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
+                    className="py-2 text-sm w-[138px] h-[44px] text-button text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
                   >
                     Improve score
                   </button>
@@ -352,13 +352,13 @@ const SkillCard: React.FC<SkillCardProps> = ({
               <>
                 <button
                   onClick={handleLearn}
-                  className="px-11 py-2 text-sm font-medium rounded-md text-[#001630] underline"
+                  className="px-11 py-2 text-button rounded-md text-[#001630] underline"
                 >
                   Learn
                 </button>
                 <button
                   onClick={handleResumeInterView}
-                  className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
+                  className="px-4 py-2 w-[138px] text-button h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md"
                 >
                   Resume
                 </button>

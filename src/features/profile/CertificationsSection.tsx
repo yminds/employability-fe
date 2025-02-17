@@ -60,14 +60,14 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between py-2">
+      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 pb-0">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
             Certifications
           </h2>
         </div>
         {certifications.length > 0 && !isPublic && (
-          <div className="sticky top-0 bg-white px-6 py-4">
+          <div className="sticky top-0 bg-white">
             <div className="flex space-x-2">
               <button
                 onClick={() => handleOpenModal("add")}
@@ -134,37 +134,45 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
 
       <CardContent className="p-0">
         {certifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-4">
-            <img
-              src={noCertifications || "/placeholder.svg"}
-              alt="No certification entries"
-              className="w-20 h-20 mb-6"
-            />
-            <h3 className="text-base text-[#414447] font-normal mb-2 text-center font-sans leading-6 tracking-[0.24px]">
-              {isPublic
-                ? "No Certicates added yet."
-                : "You haven't added any certifications yet."}
-            </h3>
-            {!isPublic && (
-              <p className="text-[#414447] text-center font-sans text-base font-normal leading-6 tracking-[0.24px]">
-                <button
-                  onClick={() => handleOpenModal("add")}
-                  className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
-                >
-                  Add certification
-                </button>{" "}
-                to show up here
-              </p>
-            )}
+          <div className="flex flex-col items-center justify-center pb-10 pt-6 px-8">
+            <div className="py-[50px] items-center justify-center flex flex-col">
+              <img
+                src={noCertifications || "/placeholder.svg"}
+                alt="No certification entries"
+                className="w-20 h-20 mb-6"
+              />
+              <h3 className="text-[#414447] text-body2 mb-2 text-center">
+                {isPublic
+                  ? "No Certicates added yet."
+                  : "You haven't added any certifications yet."}
+              </h3>
+              {!isPublic && (
+                <p className="text-[#414447] text-body2 text-center">
+                  <button
+                    onClick={() => handleOpenModal("add")}
+                    className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
+                  >
+                    Add certification
+                  </button>{" "}
+                  to show up here
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <>
-            <div className="divide-y divide-[#E5E7EB] px-6">
+            <div className="divide-y divide-[#E5E7EB] p-8 relative">
               {displayedCertifications.map(
                 (cert: Certification, index: number) => (
                   <div
                     key={cert._id || index}
-                    className="flex items-start gap-6 p-6"
+                    className={`flex items-start gap-6 ${
+                      index === 0
+                        ? "pt-0 pb-6"
+                        : index === displayedCertifications.length - 1
+                        ? "pt-6 pb-0"
+                        : "py-6"
+                    }`}
                   >
                     <div className="flex-shrink-0 mt-1">
                       <img
@@ -173,15 +181,15 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">
+                      <h3 className="text-[#000000] text-sub-header">
                         {cert.title}
                       </h3>
-                      <p className="text-[#414447] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] mt-1">
+                      <p className="text-[#414447] text-body2 mt-1">
                         {cert.issued_by}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[#040609] font-ubuntu text-base font-medium leading-[22px]">
+                      <p className="text-[#040609] text-sub-header">
                         {cert.certificate_s3_url ? (
                           <a
                             href={cert.certificate_s3_url}
@@ -203,19 +211,37 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
                   </div>
                 )
               )}
+              {!isExpanded && certifications?.length > 3 && (
+                <>
+                  <div className="absolute bottom-0 left-0 right-0 ">
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-[211px]"
+                      style={{
+                        background:
+                          "linear-gradient(180deg, rgba(255, 255, 255, 0) 20%, #FFF 100%)",
+                      }}
+                    />
+                    <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
+                      <button
+                        className="flex items-center text-sm text-[#000] hover:text-gray-900"
+                        onClick={toggleExpand}
+                      >
+                        View all
+                        <ChevronDown className="h-4 w-4 ml-1" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-            {certifications.length > 3 && (
-              <div className="flex justify-center py-4">
+            {isExpanded && certifications?.length > 3 && (
+              <div className="flex justify-center pb-4">
                 <button
-                  className="flex items-center text-sm text-gray-600 hover:text-gray-900"
+                  className="flex items-center text-sm text-[#000] hover:text-gray-900"
                   onClick={toggleExpand}
                 >
-                  {isExpanded ? "Show less" : "View all"}
-                  {isExpanded ? (
-                    <ChevronUp className="h-4 w-4 ml-1" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 ml-1" />
-                  )}
+                  Show less
+                  <ChevronUp className="h-4 w-4 ml-1" />
                 </button>
               </div>
             )}

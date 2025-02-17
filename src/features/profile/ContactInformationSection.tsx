@@ -15,7 +15,7 @@ export default function ContactInformationSection({
   email,
 }: ContactInformationProps) {
   return (
-    <Card className="w-full bg-white p-6 rounded-lg">
+    <Card className="w-full bg-white p-0 rounded-lg">
       <CardContent className="p-8 space-y-8">
         <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">
           Contact Information
