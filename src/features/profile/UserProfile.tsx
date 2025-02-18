@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { ProfileFormData } from "./types";
 import EducationSection from "./EducationSection";
 import {
   Education,
@@ -20,11 +19,9 @@ import ContactInformationSection from "./ContactInformationSection";
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import { useUpdateUserMutation } from "@/api/userApiSlice";
 import { updateUserProfile } from "../authentication/authSlice";
-import CompleteProfileSection from "./CompleteProfileSection";
 import arrow from "@/assets/skills/arrow.svg";
 import ProjectList from "@/components/projects/ProjectList";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
-
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
   console.log("user in complete modal", user);

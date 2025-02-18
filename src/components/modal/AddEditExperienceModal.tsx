@@ -99,6 +99,10 @@ const AddEditExperienceModal: React.FC<AddEditExperienceModalProps> = ({
       try {
         await deleteExperience(experienceToDelete._id).unwrap();
         toast.success("Experience entry delete successfully");
+        const updatedExperience = user.experience.filter(
+          (id: string) => id !== experienceToDelete._id
+        );
+        dispatch(updateUserProfile({ experience: updatedExperience }));
       } catch (error) {
         console.error("Failed to delete experience:", error);
         setErrors({ ...errors, delete: "Failed to delete experience" });

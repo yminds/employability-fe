@@ -29,6 +29,7 @@ export type User = {
   certificates: string[]; // Array of certificate IDs
   date_of_birth: string;
   is_email_verified: boolean;
+  is_basic_info: boolean;
   email_verification_token?: string;
   email_verification_token_expiry?: Date;
   account_status?: "active" | "disabled";

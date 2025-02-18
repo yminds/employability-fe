@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import PublicSkillCard from "@/components/cards/skills/publicSkillsCard";
-import noExperience from "@/assets/profile/noeducation.svg";
+import noExperience from "@/assets/profile/noskills.svg";
 
 export interface Skill {
   _id: string;

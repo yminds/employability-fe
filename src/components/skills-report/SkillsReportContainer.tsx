@@ -6,6 +6,7 @@ import html2pdf from "html2pdf.js";
 import excellentIcon from "@/assets/skills/excellent.svg";
 import manageSearch from "@/assets/skills/manage_search.svg";
 import arrow from "@/assets/skills/arrow.svg";
+import download from "@/assets/skills/download.svg";
 
 import PerformanceHighlights from "./PerformanceHighlights";
 import ReportScore from "./ReportScorecard";
@@ -134,7 +135,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
       const opt = {
         margin: [32, 32, 32, 32],
         filename: `${userName}-${reportData.interview_id?.title}-Report.pdf`,
-        image: { type: "jpeg", quality: 2.0 },
+        image: { type: "jpeg", quality: 0.20 },
         html2canvas: {
           scale: 2,
           useCORS: true,         // must be true for crossOrigin images
@@ -462,10 +463,14 @@ const ReportContent: React.FC<ReportContentProps> = ({
                       Get a PDF version of this skill report to share with employers
                     </div>
                     <button
-                      className="flex gap-2 items-center px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex gap-2 items-center w-full justify-center px-4 py-2 bg-white border border-[#001630] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={generatePDF}
                       disabled={isGeneratingPDF}
                     >
+                      <img
+                        className="w-4 h-4"
+                        src={download}
+                        alt="Download PDF"/>
                       {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
                     </button>
                   </section></div>

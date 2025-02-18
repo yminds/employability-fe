@@ -26,8 +26,13 @@ import { parsedTransformData } from "@/utils/parsedTransformData";
 import { parseAddress } from "@/utils/addressParser";
 import { transformFormDataForDB } from "@/utils/transformData";
 import type { ProfileFormData } from "@/features/profile/types";
-import { updateUserProfile } from "@/features/authentication/authSlice";
+import {
+  updateSkillsStatus,
+  updateUserProfile,
+} from "@/features/authentication/authSlice";
 import { s3Delete } from "@/utils/s3Service";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export const useProfileForm = (
   type: string,
@@ -54,6 +59,10 @@ export const useProfileForm = (
     refetchOnMountOrArgChange: false,
     refetchOnFocus: false,
   });
+
+  const profileStatus = useSelector(
+    (state: RootState) => state.auth.profileCompletionStatus
+  );
 
   const [updateUser] = useUpdateUserMutation();
   const [addExperience] = useAddExperienceMutation();
@@ -449,6 +458,7 @@ export const useProfileForm = (
                 goal_id: goalId,
               };
               await createUserSkills(skillsPayload).unwrap();
+              dispatch(updateSkillsStatus("updated"));
               if (user.parsedResume !== null) {
                 await updateUser({
                   userId: user._id,
@@ -751,5 +761,6 @@ export const useProfileForm = (
     setIsImageDeleted,
     newlyUploadedImage,
     setNewlyUploadedImage,
+    profileStatus,
   };
 };

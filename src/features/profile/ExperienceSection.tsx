@@ -7,7 +7,7 @@ import { useGetExperiencesByUserIdQuery } from "@/api/experienceApiSlice";
 import { useSelector } from "react-redux";
 
 // Images
-import noExperience from "@/assets/profile/noeducation.svg";
+import noExperience from "@/assets/profile/noskills.svg";
 import ExperienceIcon from "@/assets/profile/experienceIcon.svg";
 
 interface ExperienceSectionProps {
