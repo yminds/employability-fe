@@ -91,6 +91,10 @@ const AddEditEducationModal: React.FC<AddEducationModalProps> = ({
       try {
         await deleteEducation(educationToDelete._id).unwrap();
         toast.success("Education entry deleted successfully");
+        const updatedEducation = user.education.filter(
+          (id: string) => id !== educationToDelete._id
+        );
+        dispatch(updateUserProfile({ education: updatedEducation }));
       } catch (error) {
         console.error("Failed to delete education:", error);
         setErrors({ ...errors, delete: "Failed to delete education" });

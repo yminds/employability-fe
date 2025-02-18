@@ -15,6 +15,8 @@ import { useProfileForm } from "@/hooks/useProfileForm";
 import type { ProfileFormData } from "@/features/profile/types";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import Checkmark from "@/assets/profile/completeprofile/checkmark.svg";
+import { CheckCircle } from "lucide-react";
 
 interface CompleteProfileModalProps {
   onClose: () => void;
@@ -49,6 +51,7 @@ const CompleteProfileModal = ({
     setIsImageDeleted,
     newlyUploadedImage,
     setNewlyUploadedImage,
+    profileStatus,
   } = useProfileForm(type, user, goalId, onClose);
 
   const tabs = useMemo(
@@ -318,7 +321,13 @@ const CompleteProfileModal = ({
                     : "text-[#68696B] hover:text-[#00183D] hover:bg-gray-50"
                 }`}
               >
-                {tab.label}
+                <span className="flex items-center justify-between">
+                  {tab.label}
+                  {profileStatus[tab.id as keyof typeof profileStatus] ===
+                    "updated" && (
+                    <CheckCircle className="w-4 h-4 text-[#00183D]" />
+                  )}
+                </span>
               </button>
             ))}
           </div>

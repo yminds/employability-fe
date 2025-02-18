@@ -83,6 +83,10 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
       try {
         await deleteCertification(certificationToDelete._id).unwrap();
         toast.success("Certification entry deleted successfully");
+        const updatedCertification = user.certificates.filter(
+          (id: string) => id !== certificationToDelete._id
+        );
+        dispatch(updateUserProfile({ certificates: updatedCertification }));
       } catch (error) {
         console.error("Failed to delete certification:", error);
         setErrors({ ...errors, delete: "Failed to delete certification" });

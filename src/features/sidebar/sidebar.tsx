@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Menu } from "lucide-react"; // Import Menu icon from lucide-react
+import { BadgeCheck, Menu, MoreVertical, Power } from "lucide-react"; // Import Menu icon from lucide-react
 import LogoIcon from "../../assets/sidebar/logo.svg";
 import DashboardIcon from "../../assets/sidebar/dashboard.svg";
 import MentorIcon from "../../assets/sidebar/mentor.svg";
@@ -13,15 +14,46 @@ import JobsIcon from "../../assets/sidebar/jobs.svg";
 import CloseIcon from "../../assets/sidebar/left_panel_close.svg";
 import OpenIcon from "../../assets/sidebar/left_panel_open.svg";
 import { RootState } from "@/store/store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import LogoutConfirmationModal from "@/components/modal/LogoutConfirmationModal";
+
 
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State to control menu visibility on small screens
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
 
   const getActiveClass = (path: string) => {
     return window.location.pathname === path
-      ? "bg-[#DBFFEA] text-[#10B754]"
-      : "";
+      ? "text-[#10B754]"
+      : "text-[#68696B]";
+  };
+
+  const renderIcon = (Icon: string, path: string) => {
+    return window.location.pathname === path ? (
+      <img
+        src={Icon || "/placeholder.svg"}
+        alt=""
+        style={{
+          filter:
+            "invert(38%) sepia(93%) saturate(515%) hue-rotate(98deg) brightness(95%) contrast(92%)",
+        }}
+      />
+    ) : (
+      <img
+        src={Icon || "/placeholder.svg"}
+        alt=""
+        style={{
+          filter: "invert(42%) sepia(5%) saturate(20%) hue-rotate(180deg)",
+        }}
+      />
+    );
   };
 
   const user_name = useSelector((state: RootState) => state.auth.user?.name);
@@ -31,9 +63,13 @@ const Sidebar: React.FC = () => {
   );
 
   const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/login";
-  };
+    setIsLogoutDialogOpen(true)
+  }
+
+  const confirmLogout = () => {
+    localStorage.clear()
+    window.location.href = "/login"
+  }
 
   return (
     <div className="relative group">
@@ -48,9 +84,13 @@ const Sidebar: React.FC = () => {
             isCollapsed ? "justify-center" : ""
           }`}
         >
-          <img src={LogoIcon} alt="" />
+          <img
+            src={LogoIcon || "/placeholder.svg"}
+            alt=""
+            className="w-[29px] h-[26px]"
+          />
           {!isCollapsed && (
-            <div className="text-[#001630] text-[20px] font-bold leading-normal">
+            <div className="text-[#001630] font-ubuntu text-base font-bold">
               <span>Employ</span>
               <span className="text-[#0AD472]">Ability.AI</span>
             </div>
@@ -61,46 +101,34 @@ const Sidebar: React.FC = () => {
             <li>
               <Link
                 to="/"
-                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                   "/"
                 )}`}
               >
-                <img src={DashboardIcon} alt="Dashboard" />
-                {!isCollapsed && (
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Dashboard
-                  </span>
-                )}
+                {renderIcon(DashboardIcon, "/")}
+                {!isCollapsed && <span className="text-body2">Dashboard</span>}
               </Link>
             </li>
             <li>
               <Link
                 to="/mentor"
-                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                   "/mentor"
                 )}`}
               >
-                <img src={MentorIcon} alt="Mentor" />
-                {!isCollapsed && (
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Mentor
-                  </span>
-                )}
+                {renderIcon(MentorIcon, "/mentor")}
+                {!isCollapsed && <span className="text-body2">Mentor</span>}
               </Link>
             </li>
             <li>
               <Link
                 to="/user-profile"
-                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                   "/user-profile"
                 )}`}
               >
-                <img src={ProfileIcon} alt="Profile" />
-                {!isCollapsed && (
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Profile
-                  </span>
-                )}
+                {renderIcon(ProfileIcon, "/user-profile")}
+                {!isCollapsed && <span className="text-body2">Profile</span>}
               </Link>
             </li>
 
@@ -110,110 +138,113 @@ const Sidebar: React.FC = () => {
               }`}
             ></div>
 
-            {!isCollapsed && (
+            {/* {!isCollapsed && (
               <label className="flex p-2 pt-4 px-4 text-gray-400 text-sm font-medium normal-case">
                 Career
               </label>
-            )}
+            )} */}
             <li>
               <Link
                 to="/skills"
-                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                   "/skills"
                 )}`}
               >
-                <img src={SkillsIcon} alt="Skills" />
-                {!isCollapsed && (
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Skills
-                  </span>
-                )}
+                {renderIcon(SkillsIcon, "/skills")}
+                {!isCollapsed && <span className="text-body2">Skills</span>}
               </Link>
             </li>
             <li>
               <Link
                 to="/projects"
-                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                   "/projects"
                 )}`}
               >
-                <img src={ProjectsIcon} alt="Projects" />
-                {!isCollapsed && (
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Projects
-                  </span>
-                )}
+                {renderIcon(ProjectsIcon, "/projects")}
+                {!isCollapsed && <span className="text-body2">Projects</span>}
               </Link>
             </li>
             <li>
               <Link
                 to="/interviews"
-                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                   "/interviews"
                 )}`}
               >
-                <img src={InterviewsIcon} alt="Interviews" />
-                {!isCollapsed && (
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Interviews
-                  </span>
-                )}
+                {renderIcon(InterviewsIcon, "/interviews")}
+                {!isCollapsed && <span className="text-body2">Interviews</span>}
               </Link>
             </li>
             <li>
               <Link
                 to="/jobs"
-                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                   "/jobs"
                 )}`}
               >
-                <img src={JobsIcon} alt="Jobs" />
-                {!isCollapsed && (
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Jobs
-                  </span>
-                )}
+                {renderIcon(JobsIcon, "/jobs")}
+                {!isCollapsed && <span className="text-body2">Jobs</span>}
               </Link>
             </li>
           </ul>
         </nav>
 
         <div className="mt-6 w-full">
-          <button
-            onClick={handleLogout}
-            className={`p-2 bg-gray-100 border mb-4 w-full ${
-              isCollapsed ? "hidden" : ""
-            }`}
-          >
-            Logout
-          </button>
           <div
-            className={`flex items-center ${
+            className={`relative ${
               isCollapsed
-                ? "justify-center"
-                : "p-4 rounded-[6px] border border-[#F5F5F5] bg-white"
+                ? "flex justify-center"
+                : "p-4 rounded-[12px] border border-[#f5f5f5] bg-white"
             }`}
           >
-            {user_profile_image ? (
-              <img
-                src={user_profile_image || "/placeholder.svg"}
-                alt="Profile"
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">
-                {user_name ? user_name.charAt(0).toUpperCase() : "U"}
+            <div className="flex flex-col items-start">
+              <div className="relative">
+                {user_profile_image ? (
+                  <img
+                    src={user_profile_image || "/placeholder.svg"}
+                    alt="Profile"
+                    className="w-11 h-11 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-11 h-11 rounded-full bg-[#0ad472] flex items-center justify-center text-white text-lg font-semibold">
+                    {user_name ? user_name.charAt(0).toUpperCase() : "U"}
+                  </div>
+                )}
+                <div className="absolute -bottom-1 -right-1 rounded-full bg-white p-[2px]">
+                  <BadgeCheck className="w-4 h-4 text-[#0ad472]" />
+                </div>
               </div>
-            )}{" "}
+
+              {!isCollapsed && (
+                <div className="mt-3">
+                  <p className="text-[#333333] text-sub-header">{user_name}</p>
+                  <p className="text-[#909091] text-body2">{user_email}</p>
+                </div>
+              )}
+            </div>
+
             {!isCollapsed && (
-              <div className="ml-3">
-                <p className="text-gray-800 text-base font-medium">
-                  {user_name}
-                </p>
-                <p className="text-gray-400 text-xs font-medium">
-                  {user_email}
-                </p>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 hover:bg-transparent"
+                  >
+                    <MoreVertical className="h-5 w-5 text-[#b3b3b3]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[100px]">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-[#68696B] text-body2 focus:text-[#10B754] focus:bg-[#DBFFEA]"
+                  >
+                    <Power className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
@@ -223,15 +254,19 @@ const Sidebar: React.FC = () => {
         className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:hidden"
       >
         {isCollapsed ? (
-          <img src={OpenIcon} alt="Expand" />
+          <img src={OpenIcon || "/placeholder.svg"} alt="Expand" />
         ) : (
-          <img src={CloseIcon} alt="Collapse" />
+          <img src={CloseIcon || "/placeholder.svg"} alt="Collapse" />
         )}
       </button>
       <div className="sm:flex sm:items-center sm:justify-between sm:bg-white sm:shadow-md sm:p-4 sm:px-6 hidden">
         <Link to="/" className="flex items-center gap-2">
-          <img src={LogoIcon} alt="" />
-          <div className="text-[#001630] text-[20px] font-bold leading-normal">
+          <img
+            src={LogoIcon || "/placeholder.svg"}
+            alt=""
+            className="w-[29px] h-[26px]"
+          />
+          <div className="text-[#001630] font-ubuntu text-base font-bold">
             <span>Employ</span>
             <span className="text-[#0AD472]">Ability.AI</span>
           </div>
@@ -252,42 +287,36 @@ const Sidebar: React.FC = () => {
                 <Link
                   to="/"
                   onClick={() => setIsMenuOpen(false)} // Close menu on navigation
-                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                     "/"
                   )}`}
                 >
-                  <img src={DashboardIcon} alt="Dashboard" />
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Dashboard
-                  </span>
+                  {renderIcon(DashboardIcon, "/")}
+                  <span className="text-body2">Dashboard</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/mentor"
                   onClick={() => setIsMenuOpen(false)} // Close menu on navigation
-                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                     "/mentor"
                   )}`}
                 >
-                  <img src={MentorIcon} alt="Mentor" />
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Mentor
-                  </span>
+                  {renderIcon(MentorIcon, "/mentor")}
+                  <span className="text-body2">Mentor</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/user-profile"
                   onClick={() => setIsMenuOpen(false)} // Close menu on navigation
-                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                     "/user-profile"
                   )}`}
                 >
-                  <img src={ProfileIcon} alt="Profile" />
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Profile
-                  </span>
+                  {renderIcon(ProfileIcon, "/user-profile")}
+                  <span className="text-body2">Profile</span>
                 </Link>
               </li>
 
@@ -302,62 +331,59 @@ const Sidebar: React.FC = () => {
                 <Link
                   to="/skills"
                   onClick={() => setIsMenuOpen(false)} // Close menu on navigation
-                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                     "/skills"
                   )}`}
                 >
-                  <img src={SkillsIcon} alt="Skills" />
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Skills
-                  </span>
+                  {renderIcon(SkillsIcon, "/skills")}
+                  <span className="text-body2">Skills</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/projects"
                   onClick={() => setIsMenuOpen(false)} // Close menu on navigation
-                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                     "/projects"
                   )}`}
                 >
-                  <img src={ProjectsIcon} alt="Projects" />
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Projects
-                  </span>
+                  {renderIcon(ProjectsIcon, "/projects")}
+                  <span className="text-body2">Projects</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/interviews"
                   onClick={() => setIsMenuOpen(false)} // Close menu on navigation
-                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                     "/interviews"
                   )}`}
                 >
-                  <img src={InterviewsIcon} alt="Interviews" />
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Interviews
-                  </span>
+                  {renderIcon(InterviewsIcon, "/interviews")}
+                  <span className="text-body2">Interviews</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/jobs"
                   onClick={() => setIsMenuOpen(false)} // Close menu on navigation
-                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] ${getActiveClass(
+                  className={`flex p-2 px-4 items-center gap-3 self-stretch rounded-[6px] hover:bg-[#DBFFEA] hover:text-[#10B754] ${getActiveClass(
                     "/jobs"
                   )}`}
                 >
-                  <img src={JobsIcon} alt="Jobs" />
-                  <span className="text-gray-500 text-base font-medium leading-normal">
-                    Jobs
-                  </span>
+                  {renderIcon(JobsIcon, "/jobs")}
+                  <span className="text-body2">Jobs</span>
                 </Link>
               </li>
             </ul>
           </nav>
         </div>
       )}
+       <LogoutConfirmationModal
+        isOpen={isLogoutDialogOpen}
+        onClose={() => setIsLogoutDialogOpen(false)}
+        onConfirm={confirmLogout}
+      />
     </div>
   );
 };
