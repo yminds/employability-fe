@@ -8,7 +8,7 @@ import { useGetCertificationsByUserIdQuery } from "@/api/certificatesApiSlice";
 import { useSelector } from "react-redux";
 
 //Images
-import noCertifications from "@/assets/profile/noeducation.svg";
+import noCertifications from "@/assets/profile/nocertification.svg";
 import CertificaitonIcon from "@/assets/profile/certificationIcon.svg";
 
 interface CertificationsSectionProps {
