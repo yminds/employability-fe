@@ -32,6 +32,27 @@ const InterviewSetupNew: React.FC = () => {
     cameraScale,
     isProceedButtonEnabled,
   } = useInterviewSetup();
+
+    // Function to request camera and microphone permissions.
+    const requestPermissions = async () => {
+      try {
+        // Request both video and audio permissions.
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        console.log("Media stream:", stream);
+        setHasPermissions(true);
+        setShowPermissionNote(false);
+
+        // Reload the page automatically after permissions are granted.
+        window.location.reload();
+      } catch (error) {
+        console.error("Error requesting media devices:", error);
+        setHasPermissions(false);
+        setShowPermissionNote(true);
+      }
+    };
  
   // Check camera and microphone permissions by verifying if device labels are available.
   // Device labels are only populated when permission has been granted.
@@ -79,7 +100,8 @@ const InterviewSetupNew: React.FC = () => {
   // the fundamentals have loaded, and the interview is started.
   const canShowInterview = isInterviewStarted && fundamentals.length > 0 && hasPermissions;
  
-  return (
+
+ return (
     <>
       {/* Permission Note Modal */}
       {showPermissionNote && (
@@ -105,23 +127,20 @@ const InterviewSetupNew: React.FC = () => {
               </svg>
             </button>
             <h2 className="text-2xl font-bold mb-6 text-h2">Permissions Required</h2>
-            <div className=" text-body space-y-3">
+            <div className="text-body space-y-3 mb-4">
               <p>
-                <strong>Step 1:</strong> Locate the padlock icon in your browser's address bar.
+                This interview requires access to your camera and microphone.
               </p>
               <p>
-                <strong>Step 2:</strong> Click the padlock icon and select <em>"Site settings"</em> from the dropdown.
-              </p>
-              <p>
-                <strong>Step 3:</strong> In the Site Settings, scroll down to find the <strong>Camera</strong> and <strong>Microphone</strong> permissions.
-              </p>
-              <p>
-                <strong>Step 4:</strong> Change both the Camera and Microphone settings to <em>"Allow"</em>.
-              </p>
-              <p>
-                <strong>Step 5:</strong> Refresh the page to apply the changes.
+                Please click the button below to grant access. If you've previously denied permissions, you may need to adjust your browser settings.
               </p>
             </div>
+            <button
+              className="text-button bg-button text-white px-4 py-2 rounded"
+              onClick={requestPermissions}
+            >
+              Request Permissions
+            </button>
           </div>
         </div>
       )}

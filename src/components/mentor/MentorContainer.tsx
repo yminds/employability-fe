@@ -104,6 +104,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const socketRef = useRef<any>(null);
   const title = `${skill}'s Mentor Thread`;
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const userImg = useSelector((state: RootState) => state.auth.user?.profile_image);
 
   const [fetchFundamentals] = useGetUserFundamentalsByIdMutation();
   const { startMentorChat } = useMentorChat();
@@ -459,8 +460,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
           <img src={logo} alt="" />
         </div>
       ) : (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 text-white flex items-center justify-center">
-          <User size={20} />
+        <div className="flex-shrink-0 w-14 h-14 rounded-full text-white flex items-center justify-center">
+          <img src={userImg} alt="" className="rounded-full w-11 h-11 object-cover" />
         </div>
       );
 
