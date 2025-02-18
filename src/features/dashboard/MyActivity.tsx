@@ -73,8 +73,8 @@ const CompleteActivityCard: React.FC<CompleteActivityProps> = ({ displayScore = 
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="flex items-baseline">
-              <span className="text-h1 text-[#000000]">{employabilityScore}</span>
-              <span className="text-h1 text-[#000000]/40">/10</span>
+              <span className="text-2xl font-bold text-gray-900">{employabilityScore}</span>
+              <span className="text-2xl font-medium text-[#00000099]">/10</span>
             </div>
             <img src={VerfiedIcon} className="w-28px h-28px" alt="Verified" />
           </div>

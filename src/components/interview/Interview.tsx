@@ -17,12 +17,12 @@ import { useSTT } from "@/hooks/useSTT";
 import CodeSnippetQuestion from "./CodeSnippetQuestion";
 import FundamentalBar from "../mentor/FundamentalsList";
 import { set } from "zod";
+import { Timer } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 // Constants and Types
-const SOCKET_URL = 
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "wss://employability.ai";
+const SOCKET_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "wss://employability.ai";
 
 interface CodeSnippetType {
   code: string;
@@ -54,12 +54,14 @@ const Interview: React.FC<{
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
-    const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
+  const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
   // Queries and Speech Hooks
   const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
   const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(interviewId as string, {
     skip: !interviewId,
   });
+
+  const user = useSelector((state: RootState) => state.auth.user);
 
   // State
   const [isUserAnswering, setIsUserAnswering] = useState(false);
@@ -87,33 +89,31 @@ const Interview: React.FC<{
       }, 50);
     },
   });
-  
 
   // Socket Connection
   useEffect(() => {
     if (!isInterviewLoaded || !interviewDetails?.data?._id) return;
 
     const newSocket = io(SOCKET_URL, {
-      transports: ["websocket", "polling"], 
-     
+      transports: ["websocket", "polling"],
     });
     const handleConnect = () => {
       console.log("entred handleConnect from handleConnect");
       if (!isInitialized) {
         console.log("Connected handleConnect isInitialized");
-        
+
         setIsInitialized(true);
-        const initialGreeting = "Hello, before starting the interview can you please introduce yourself and describe the names of concepts that are being covered in this interview?";
+        const initialGreeting = "Hello, before starting the interview, introduce yourself?";
         addMessage(initialGreeting);
       }
     };
 
     const handleAIResponse = (data: string) => {
       setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
-    
+
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
-    
+
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
       setQuestion((prev) => ({
@@ -157,11 +157,11 @@ const Interview: React.FC<{
         const updatedConcepts = prev.map((concept) => {
           if (concepts?.ratedConcepts?.includes(concept?.name)) {
             console.log("Concept entred", { ...concept, status: "completed" });
-            
+
             return { ...concept, status: "completed" };
           }
           console.log("concept", concept);
-          
+
           return concept;
         });
         return updatedConcepts;
@@ -209,7 +209,7 @@ const Interview: React.FC<{
       setInterviewState("WAITING"); // Back to WAITING before AI processes the response
     }
   };
-  
+
   const handleMessage = (message: string, role: "USER" | "AI") => {
     setMessages((prevMessages) => {
       if (role === "AI") {
@@ -234,18 +234,18 @@ const Interview: React.FC<{
     });
   };
 
-  const addMessage =async (prompt: string) => {
+  const addMessage = async (prompt: string) => {
     console.log("🔥 addMessage called with prompt:", prompt);
 
     if (!interviewDetails?.data?._id) {
       console.error("⚠️ Interview details not available, skipping API call.");
       return;
     }
-  
+
     // Move to "WAITING" state when sending a new question
     setInterviewState("WAITING");
-  
-    const response =await interviewStream({
+
+    const response = await interviewStream({
       prompt,
       model: "gpt-4o",
       provider: "openai",
@@ -259,39 +259,41 @@ const Interview: React.FC<{
       skill_name: interviewTopic,
       concepts: concepts,
       interview_id: interviewDetails.data._id,
-    }).unwrap()
+      level: user?.experience_level || "entry"
+    }).unwrap();
 
-     console.log("response", response);
-     
+    console.log("response", response);
+
     setAllConcepts((prev) => {
       const updatedConcepts = prev.map((concept) => {
         if (response?.event?.ratedConcepts?.includes(concept?.name)) {
           console.log("Concept entred", { ...concept, status: "completed" });
-          
+
           return { ...concept, status: "completed" };
         }
         console.log("concept", concept);
-        
+
         return concept;
       });
       return updatedConcepts;
     });
-    
-  };  
-  
+  };
+
   const navigate = useNavigate();
   const handleBackToSkills = () => {
     navigate("/skills");
-  }
+  };
 
   return (
-    <div className="w-full h-screen pt-12">
+    <div className="w-full h-screen pt-12 ">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
         <Header SkillName={interviewTopic} />
         {isInterviewEnded ? (
           <div className="text-center text-gray-500">
             <p>Thank you for your time. We will get back to you soon.</p>
-            <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackToSkills}>Back to Skills page</button>
+            <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackToSkills}>
+              Back to Skills page
+            </button>
           </div>
         ) : (
           <LayoutBuilder
@@ -334,9 +336,26 @@ const LayoutBuilder = ({
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   // console.log("concepts", concepts);
+  const coveredConceptsLength = concepts.filter((concept) => concept.status === "completed").length;
+  const calculateProgress = (concepts: any[]) => {
+    if (!concepts.length) return 0;
+    
+    const completedCount = concepts.filter(
+      (concept) => concept.status === "completed"
+    ).length;
+    
+    // Round to 1 decimal place for cleaner display
+    return Math.round((completedCount / concepts.length) * 1000) / 10;
+  };
+  
+  // In the component:
+  const progression = calculateProgress(concepts);
+  
+  console.log("progression", progression);
 
   return layoutType === 1 ? (
-    <div className="w-full flex gap-8 max-h-screen bg-red-500">
+    <div className="w-full flex gap-8 max-h-screen">
+
       <div className="w-[60%] flex flex-col gap-8">
         <WebCam />
         {isUserAnswering ? (
@@ -351,31 +370,35 @@ const LayoutBuilder = ({
       </div>
     </div>
   ) : (
-    <div className="w-full flex gap-8 max-h-screen ">
-      <div className="fundemntal-container flex">
-        <FundamentalBar
-          isSidebarOpen={isSidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          skill={"html"}
-          fundamentals={concepts}
-        />
+    <div className="w-full flex flex-col gap-8 max-h-[calc(100vh-100px)]  ">
+      <div className="info-container   flex gap-2 items-center justify-center w-full  ">
+        <div className="progression-wrapper h-2 w-full bg-white rounded-md">
+          <div
+            className="progressbar h-full bg-green-500 rounded-md transition-all duration-300 ease-in-out"
+            style={{ width: `${progression}%` }}
+          ></div>
+        </div>
+        <Timer className="text-green-500" />
       </div>
 
-      <div className="w-[45%] flex flex-col gap-8">
-        <AIProfile frequency={frequencyData} interviewState={interviewState} /> {/* Pass state here */}
-        {question.isCodeSnippetMode && question.codeSnippet ? (
-          <CodeSnippetQuestion question={question.codeSnippet.question} codeSnippet={question.codeSnippet.code} />
-        ) : (
-          <Conversation layoutType={2} messages={messages} />
-        )}
-      </div>
-      <div className="w-[55%] flex flex-col gap-8">
-        <WebCam />
-        {isUserAnswering ? (
-          <Controls doneAnswering={handleDoneAnswering} />
-        ) : (
-          <div className="text-center text-gray-500" />
-        )}
+      <div className="main-container w-full flex gap-8">
+        <div className="w-[45%] flex flex-col gap-5  ">
+          <AIProfile frequency={frequencyData} interviewState={interviewState} /> {/* Pass state here */}
+          {question.isCodeSnippetMode && question.codeSnippet ? (
+            <CodeSnippetQuestion question={question.codeSnippet.question} codeSnippet={question.codeSnippet.code} />
+          ) : (
+            <Conversation layoutType={2} messages={messages} />
+            
+          )}
+        </div>
+        <div className="w-[55%] flex flex-col gap-1 ">
+          <WebCam />
+          {isUserAnswering ? (
+            <Controls doneAnswering={handleDoneAnswering} />
+          ) : (
+            <div className="text-center text-gray-500" />
+          )}
+        </div>
       </div>
     </div>
   );

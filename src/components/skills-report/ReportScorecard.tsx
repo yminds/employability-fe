@@ -1,33 +1,23 @@
 import React from 'react';
 import CircularProgress from '@/components/ui/circular-progress-bar'; 
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { useSearchParams } from 'react-router-dom';
 
 interface ReportScoreProps {
+  userName: string;
+  userImg:string | undefined;
   goalName: string;
   ReportScore:number; 
   skill_icon:string
-  isSharedReport:boolean|undefined
 }
 
-const ReportScore: React.FC<ReportScoreProps> = ({ goalName , ReportScore, skill_icon, isSharedReport }) => {
-  const [searchParams] = useSearchParams();
-  const userName = isSharedReport 
-  ? searchParams.get('userName') || ''
-  : useSelector((state: RootState) => state.auth.user?.name) || '';
+const ReportScore: React.FC<ReportScoreProps> = ({ userName, userImg, goalName , ReportScore, skill_icon }) => {
 
-  const userImg = isSharedReport 
-  ? searchParams.get('userImg') || ''
-  : useSelector((state: RootState) => state.auth.user?.profile_image) || '';
   const verifiedrating = ReportScore;
-    
 
   return (
-    <div className="bg-white flex flex-col w-[100%] rounded-lg  p-[30px] gap-6 md:mt-0 sm:mt-0">
+    <div className="bg-white flex flex-col w-[100%] rounded-lg  p-8 gap-6 md:mt-0 sm:mt-0">
       <div className="flex items-center gap-2">
         <div>
-          <img className="w-[50px] h-[50px] rounded-full" src={userImg} alt="user" />
+          <img className="w-[50px] h-[50px] rounded-full" src="https://employability-user-profile.s3.us-east-1.amazonaws.com/profile-image/6766d992c76f0cdfe33a0d9e-1739181966788-jpg-igris-solo-leveling-3840x2160-14646-jpg" alt="user" />
         </div>
         <div className='flex flex-col items-start'>
           <p className='text-[#414447] font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.2px]'>{userName}</p>

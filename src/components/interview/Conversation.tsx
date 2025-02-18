@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { IMessage } from "./Interview";
 
 const Conversation: React.FC<{
@@ -6,12 +6,34 @@ const Conversation: React.FC<{
   layoutType: 1 | 2;
 }> = ({ messages, layoutType }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // to enable auto scrolling 
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const isUserNearBottom = () => {
+      const threshold = 150; // px from bottom
+      const position = container.scrollHeight - container.scrollTop - container.clientHeight;
+      return position <= threshold;
+    };
+
+    
+    if (isUserNearBottom()) {
+     
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      });
+    }
+  }, [messages]);
 
   return (
     <div
       ref={containerRef}
       className={`relative w-full rounded-xl ${
-        layoutType === 1 ? "h-[40vh]" : "h-[56vh]"
+        layoutType === 1 ? "h-[40vh]" : "h-[50vh]"
       }`}
       style={{
         scrollBehavior: "smooth",
@@ -50,6 +72,7 @@ const Conversation: React.FC<{
             <Message key={message.id} message={{ ...message }} />
           )
         )}
+         <div ref={scrollRef} />
       </div>
 
       {/* Bottom Gradient Overlay */}

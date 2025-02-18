@@ -75,14 +75,14 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
             {/* Image Section - 70% */}
             <div className="w-[70%]">
               <div className="relative pt-[56.25%]"> {/* 16:9 aspect ratio */}
-                <img 
-                  src={slides[currentSlide].image} 
+                <img
+                  src={slides[currentSlide].image}
                   alt={`Tutorial Step ${currentSlide + 1}`}
                   className="absolute inset-0 w-full h-full object-cover rounded-lg border-2"
                 />
               </div>
             </div>
-  
+
             {/* Text Section - 30% */}
             <div className="w-[30%] flex flex-col justify-center">
               <div className="space-y-4">
@@ -91,21 +91,20 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
               </div>
             </div>
           </div>
-  
+
           {/* Navigation Dots */}
           <div className="flex justify-center space-x-2">
             {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                  currentSlide === index ? "bg-button" : "bg-gray-300 hover:bg-gray-400"
-                }`}
+                className={`w-2 h-2 rounded-full transition-colors duration-200 ${currentSlide === index ? "bg-button" : "bg-gray-300 hover:bg-gray-400"
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
-  
+
           {/* Bottom Controls */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-200">
             {/* Left side: Back button or empty space */}
@@ -120,7 +119,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
                 </button>
               )}
             </div>
-  
+
             {/* Right side: Next/Finish controls */}
             <div className="flex items-center space-x-4">
               {currentSlide === slides.length - 1 ? (
@@ -134,7 +133,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
                     />
                     <span>Don't show again</span>
                   </label>
-                  <button 
+                  <button
                     onClick={onClose}
                     className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
                   >
@@ -142,24 +141,36 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
                   </button>
                   <button
                     onClick={onConfirm}
-                    disabled={!dontShowAgain} // Disable if checkbox is not checked
-                    className={`px-6 py-2 text-sm rounded-md transition-colors ${
-                      dontShowAgain
-                        ? "bg-button text-white hover:bg-[#062549]"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    }`}
+                    className={`px-6 py-2 text-sm rounded-md transition-colors bg-button text-white hover:bg-[#062549]`}
                   >
                     Start Interview
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={handleNext}
-                  className="flex items-center space-x-2 px-4 py-2 bg-button text-white rounded-md hover:bg-[#062549] transition-colors"
-                >
-                  <span>Next</span>
-                  <span>→</span>
-                </button>
+                <>
+                  <label className="flex items-center space-x-2 text-sm text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={dontShowAgain}
+                      onChange={(e) => setDontShowAgain(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Don't show again</span>
+                  </label>
+                  <button
+                    onClick={onClose}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    className="flex items-center space-x-2 px-4 py-2 bg-button text-white rounded-md hover:bg-[#062549] transition-colors"
+                  >
+                    <span>Next</span>
+                    <span>→</span>
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -167,7 +178,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
       </div>
     </div>
   );
-  
+
 };
 
 export default SkillVerificationTutorial;

@@ -75,7 +75,9 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({ userId, goalId, goalD
   const goalData = Array.isArray(goalDetails) && goalDetails.length > 0 ? goalDetails[0] : null
 
   const [getUserSkills, { data: skillsData }] = useGetUserSkillsMutation()
-  const { data: projectDetails, isLoading: projectsLoading } = useGetProjectsByUserIdQuery(userId)
+  const { data: projectDetails, isLoading: projectsLoading } = useGetProjectsByUserIdQuery({ userId: userId ?? "" }, {
+    skip: !userId
+  })
 
   const fetchSkills = useCallback(
     async (goalId: string | null) => {

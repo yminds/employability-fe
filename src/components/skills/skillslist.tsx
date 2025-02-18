@@ -42,13 +42,11 @@ interface SkillListProps {
   goals:
     | {
         message: string;
-        data: [
-          {
-            experience: string | undefined;
-            _id: string;
-            name: string;
-          }
-        ];
+        data:Array<{  
+          experience: string | undefined;
+          _id: string;
+          name: string;
+        }>;
       }
     | undefined;
   selectedGoalName: string;
@@ -85,6 +83,7 @@ const SkillList: React.FC<SkillListProps> = ({
       fetchSkills(userId, goalId);
     }
   }, [userId, goalId]);
+  console.log("goalId", goalId);
 
   useEffect(() => {
     if (isSkillsUpdated && userId && goalId) {
