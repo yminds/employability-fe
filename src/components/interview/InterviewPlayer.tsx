@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import ReactPlayer from "react-player";
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader } from "lucide-react";
 
@@ -27,6 +27,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   const [nextChunkPreloaded, setNextChunkPreloaded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [tempProgress, setTempProgress] = useState(0);
+  const [isPending, startTransition] = useTransition();
 
   const [updatedProgresssion, setUpdatedProgression] = useState(0);
   const CHUNK_DURATION = 30;
@@ -56,7 +57,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     setCurrentTime(formatTime(currentChunk * CHUNK_DURATION + Math.floor(state.playedSeconds)));
 
     // Start preloading when we're 5 seconds away from the end
-    if (state.playedSeconds >= CHUNK_DURATION - 5 && !nextChunkPreloaded) {
+    if (state.playedSeconds >= CHUNK_DURATION - 20 && !nextChunkPreloaded) {
       preloadNextChunk();
     }
 
@@ -82,9 +83,12 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   };
 
   const handleTimelineDrag = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isDragging) {
-      setTempProgress(parseInt(e.target.value));
-    }
+  if (isDragging) {
+    const value = parseInt(e.target.value);
+    requestAnimationFrame(() => {
+      setTempProgress(value);
+    });
+  }
   };
 
   const handleTimelineMouseUp = async () => {
@@ -143,7 +147,6 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     };
   }, [seeking]);
 
-  // Initialize preloading when component mounts
   useEffect(() => {
     if (isPlaying && !nextChunkPreloaded && currentChunk < urls.length - 1) {
       preloadNextChunk();
@@ -161,7 +164,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     };
   }, [currentChunk]);
 
-  // Add global mouseup handler for cases where mouse is released outside the timeline
+  
   useEffect(() => {
     const handleGlobalMouseUp = () => {
       if (isDragging) {

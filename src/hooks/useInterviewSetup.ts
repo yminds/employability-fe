@@ -97,6 +97,7 @@ const useInterviewSetup = () => {
   const lastChunkRef = useRef<Promise<void> | null>(null);
   const [allBlobFiles, setAllBlobFiles] = useState<Blob[]>([]);
   const recordedChunksRef = useRef<Blob[]>([]);
+  const chunkNumberRef = useRef<number>(1);
 
   useEffect(() => {
     if (videoRef.current && screenStream) {
@@ -109,6 +110,7 @@ const useInterviewSetup = () => {
       }
     };
   }, [screenStream]);
+
 
   const handleMicQualityChange = (isSelected: boolean, isMicTested: boolean) => {
     setIsMicSelected(isSelected);
@@ -163,13 +165,13 @@ const useInterviewSetup = () => {
         recorder.ondataavailable = async (event) => {
           if (event.data.size > 0) {
             recordedChunksRef.current.push(event.data);
-            let chunkNumber = 1;
+            
             // If we're stopping or this is a regular chunk, upload it
             if (isStoppingRef.current || recordedChunksRef.current.length >= 1) {
               const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-              await uploadFileToS3(updateReportRecording, blob, interviewId, chunkNumber);
+              await uploadFileToS3(updateReportRecording, blob, interviewId, chunkNumberRef.current);
     
-              chunkNumber ++
+              chunkNumberRef.current++;
               recordedChunksRef.current = [];
             }
           }

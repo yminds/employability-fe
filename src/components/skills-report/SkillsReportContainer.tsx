@@ -264,7 +264,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                   className={`flex justify-center pdf-hide ${!isGeneratingPDF ? "flex" : "hidden"
                     }`}
                 >
-                  <div className="continer-player w-full h-[38rem] relative">
+                  <div className="continer-player w-full h-[28rem] relative">
                     <InterviewPlayer urls={reportData.s3_recording_url} />
                   </div>
                 </section>
