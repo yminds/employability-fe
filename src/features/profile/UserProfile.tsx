@@ -30,14 +30,15 @@ const UserProfile: React.FC = () => {
   const dispatch = useDispatch();
   const { data: goalsData } = useGetUserGoalQuery(user._id) || "";
   const [updateUser] = useUpdateUserMutation();
-  const { data: userProjects } = useGetProjectsByUserIdQuery(user._id);
+  const goalId = goalsData?.data?.[0]?._id || "";
+  const { data: userProjects } = useGetProjectsByUserIdQuery({
+    userId: user._id,
+    goalId: goalId,
+  });
 
   const educationEntries: Education[] = [];
   const experiences: ExperienceItem[] = [];
   const certifications: Certification[] = [];
-
-  const goalId = goalsData?.data?.[0]?._id || "";
-  console.log("goalId ", goalId);
 
   const [bio, setBio] = useState<string>(
     user.bio ||
