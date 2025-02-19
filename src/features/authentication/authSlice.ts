@@ -1,5 +1,13 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { User } from "@/models/User";
+
+interface ProfileCompletionStatus {
+  basic: "pending" | "updated";
+  skills: "pending" | "updated";
+  education: "pending" | "updated";
+  experience: "pending" | "updated";
+  certification: "pending" | "updated";
+}
 
 interface AuthState {
   user: User | null;
@@ -8,6 +16,7 @@ interface AuthState {
   role: {
     name: string;
   };
+  profileCompletionStatus: ProfileCompletionStatus;
 }
 
 const initialState: AuthState = {
@@ -16,6 +25,13 @@ const initialState: AuthState = {
   refreshToken: null,
   role: {
     name: "",
+  },
+  profileCompletionStatus: {
+    basic: "pending",
+    skills: "pending",
+    education: "pending",
+    experience: "pending",
+    certification: "pending",
   },
 };
 
@@ -28,6 +44,19 @@ const authSlice = createSlice({
       state.user = user;
       state.token = accessToken;
       state.refreshToken = refreshToken;
+      // Initialize profile completion status
+      state.profileCompletionStatus = {
+        basic: user.is_basic_info ? "updated" : "pending",
+        skills: "pending",
+        education:
+          user.education && user.education.length > 0 ? "updated" : "pending",
+        experience:
+          user.experience && user.experience.length > 0 ? "updated" : "pending",
+        certification:
+          user.certificates && user.certificates.length > 0
+            ? "updated"
+            : "pending",
+      };
     },
     logOut: (state) => {
       state.user = null;
@@ -58,44 +87,112 @@ const authSlice = createSlice({
             ? { ...state.user.address, ...action.payload.address }
             : state.user.address,
         };
-      }
-    },
-    updateUserEmail:(state,action:{payload:string}) =>{
-      if(state.user){
-        state.user = {
-          ...state.user,
-          email:action.payload
+
+        // Update profile completion status
+        if (action.payload.education) {
+          state.profileCompletionStatus.education =
+            action.payload.education.length > 0 ? "updated" : "pending";
+        }
+        if (action.payload.experience) {
+          state.profileCompletionStatus.experience =
+            action.payload.experience.length > 0 ? "updated" : "pending";
+        }
+        if (action.payload.certificates) {
+          state.profileCompletionStatus.certification =
+            action.payload.certificates.length > 0 ? "updated" : "pending";
         }
       }
     },
-    updateEmailVerification:(state) => {
-      if(state.user){
+    updateUserEmail: (state, action: { payload: string }) => {
+      if (state.user) {
         state.user = {
           ...state.user,
-          is_email_verified: true
-        }
+          email: action.payload,
+        };
       }
+    },
+    updateEmailVerification: (state) => {
+      if (state.user) {
+        state.user = {
+          ...state.user,
+          is_email_verified: true,
+        };
+      }
+    },
+    updateSkillsStatus: (
+      state,
+      action: PayloadAction<"pending" | "updated">
+    ) => {
+      state.profileCompletionStatus.skills = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
       .addMatcher(
         (action) => action.type.endsWith("api/executeMutation/fulfilled"),
-        (state, action) => {
+        (
+          state,
+          action: { payload: any; meta: { arg: { endpointName: string } } }
+        ) => {
           const endpointName = action.meta.arg.endpointName;
           if (endpointName === "login") {
             state.user = action.payload.user_info;
             state.token = action.payload.token;
+            if (state.user) {
+              state.profileCompletionStatus = {
+                basic: state.user.is_basic_info ? "updated" : "pending",
+                skills: "pending",
+                education:
+                  state.user.education && state.user.education.length > 0
+                    ? "updated"
+                    : "pending",
+                experience:
+                  state.user.experience && state.user.experience.length > 0
+                    ? "updated"
+                    : "pending",
+                certification:
+                  state.user.certificates && state.user.certificates.length > 0
+                    ? "updated"
+                    : "pending",
+              };
+            }
           } else if (endpointName === "updateUser") {
             if (action.payload.data) {
               state.user = action.payload.data;
+              if (state.user) {
+                state.profileCompletionStatus = {
+                  ...state.profileCompletionStatus,
+                  basic: state.user.is_basic_info ? "updated" : "pending",
+                  education:
+                    state.user.education && state.user.education.length > 0
+                      ? "updated"
+                      : "pending",
+                  experience:
+                    state.user.experience && state.user.experience.length > 0
+                      ? "updated"
+                      : "pending",
+                  certification:
+                    state.user.certificates &&
+                    state.user.certificates.length > 0
+                      ? "updated"
+                      : "pending",
+                };
+              }
             }
+          } else if (endpointName === "getUserSkills") {
+            const hasSkills = action.payload.data.optional.length > 0;
+            state.profileCompletionStatus.skills = hasSkills
+              ? "updated"
+              : "pending";
           }
         }
       )
       .addMatcher(
         (action) => action.type.endsWith("api/executeQuery/fulfilled"),
-        (state, action) => {
+        (
+          state,
+          action: { payload: any; meta: { arg: { endpointName: string } } }
+        ) => {
           const endpointName = action.meta.arg.endpointName;
           if (endpointName === "profile") {
             state.user = action.payload.data;
@@ -105,6 +202,13 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logOut, updateUserProfile, updateUserEmail,updateEmailVerification } = authSlice.actions;
+export const {
+  setCredentials,
+  logOut,
+  updateUserProfile,
+  updateUserEmail,
+  updateEmailVerification,
+  updateSkillsStatus,
+} = authSlice.actions;
 
 export default authSlice.reducer;

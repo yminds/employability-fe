@@ -21,7 +21,7 @@ const SetExperienceLevel: React.FC<SetExperienceLevelProps> = ({ onLevelSelect }
   };
 
   return (
-    <main className="h-screen w-screen flex p-6">
+    <main className="h-screen w-screen bg-white flex p-6">
       <section className="h-full w-full relative">
         <img className="w-full h-full rounded-lg" src={bg} alt="" />
         <img className=" absolute top-0 2xl:top-10 left-10" src={logo} alt="" />

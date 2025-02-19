@@ -83,6 +83,7 @@ const SkillList: React.FC<SkillListProps> = ({
       fetchSkills(userId, goalId);
     }
   }, [userId, goalId]);
+  console.log("goalId", goalId);
 
   useEffect(() => {
     if (isSkillsUpdated && userId && goalId) {
@@ -283,7 +284,7 @@ const SkillList: React.FC<SkillListProps> = ({
                 verified_rating={skill.verified_rating}
                 selfRating={skill.self_rating ?? 0}
                 initialStatus={
-                  skill.verified_rating > 3 ? "Verified" : "Unverified"
+                  skill.verified_rating >= 4 ? "Verified" : "Unverified"
                 }
                 level={skill.level}
                 onDelete={handleDeleteSkill}

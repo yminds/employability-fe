@@ -68,7 +68,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({ goalId, goalNam
     <div className="bg-white flex flex-col w-[100%] rounded-lg  p-[30px] gap-6 md:mt-0 sm:mt-0">
       <div className="flex items-center gap-2">
         <div>
-          <img className="w-[50px] h-[50px] rounded-full" src={user?.profile_image} alt="user" />
+          <img className="w-[50px] h-[50px] rounded-full object-cover" src={user?.profile_image} alt="user" />
         </div>
         <div className='flex flex-col items-start'>
           <p className='text-[#414447] font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.2px]'>{userName}</p>

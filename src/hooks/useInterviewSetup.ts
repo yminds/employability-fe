@@ -22,7 +22,7 @@ const getPresignedUrl = async (interviewId: string, chunkNumber: number, folder 
     const data = await response.json();
     console.log("data", data);
 
-    return data.data.url; // Assuming backend returns { url: "presigned-url" }
+    return data.data.url; 
   } catch (error) {
     console.error("Error getting presigned URL:", error);
     return null;
@@ -37,7 +37,7 @@ const uploadFileToS3 = async (
   folder = "interviews"
 ) => {
   try {
-    // Step 1: Get the pre-signed URL
+
     const presignedUrl = await getPresignedUrl(interviewId, chunkNumber, folder);
 
     console.log("presignedUrl", presignedUrl);
@@ -48,14 +48,14 @@ const uploadFileToS3 = async (
 
 
 
-    // Step 2: Upload the file to S3 using the pre-signed URL
+   // Upload the file to S3 using the pre-signed URL
     const uploadResponse = await fetch(presignedUrl, {
       method: "PUT",
       mode: 'cors',
       headers: {
-        "Content-Type": file.type, // Ensure correct MIME type
+        "Content-Type": file.type, 
       },
-      body: file, // Actual file data
+      body: file,
     });
 
     if (!uploadResponse.ok) {
@@ -96,8 +96,8 @@ const useInterviewSetup = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const lastChunkRef = useRef<Promise<void> | null>(null);
   const [allBlobFiles, setAllBlobFiles] = useState<Blob[]>([]);
-  const [chunkNumber, setChunkNumber] = useState(1);
   const recordedChunksRef = useRef<Blob[]>([]);
+  const chunkNumberRef = useRef<number>(1);
 
   useEffect(() => {
     if (videoRef.current && screenStream) {
@@ -110,6 +110,7 @@ const useInterviewSetup = () => {
       }
     };
   }, [screenStream]);
+
 
   const handleMicQualityChange = (isSelected: boolean, isMicTested: boolean) => {
     setIsMicSelected(isSelected);
@@ -168,8 +169,9 @@ const useInterviewSetup = () => {
             // If we're stopping or this is a regular chunk, upload it
             if (isStoppingRef.current || recordedChunksRef.current.length >= 1) {
               const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
-              await uploadFileToS3(updateReportRecording, blob, interviewId, chunkNumber);
-              setChunkNumber(prev => prev + 1);
+              await uploadFileToS3(updateReportRecording, blob, interviewId, chunkNumberRef.current);
+    
+              chunkNumberRef.current++;
               recordedChunksRef.current = [];
             }
           }
@@ -177,19 +179,19 @@ const useInterviewSetup = () => {
 
         recorder.onstop = () => {
           if (!isStoppingRef.current) {
-            setTimeout(startRecording, 1000);
+            setTimeout(startRecording, 500);
           }
         };
 
         recorder.start();
         recorderRef.current = recorder;
 
-        // Stop recording after 3 minutes (180000ms)
+        // Stop recording after 3 minutes
         setTimeout(() => {
           if (recorder && recorder.state !== "inactive") {
             recorder.stop();
           }
-        }, 180000); // Changed to 3 minutes
+        }, 30000);
       };
 
       startRecording();
@@ -202,18 +204,17 @@ const stopScreenSharing = async () => {
   try {
     isStoppingRef.current = true;
 
-    // Stop the recorder if it's running
     if (recorderRef.current && recorderRef.current.state !== "inactive") {
-      recorderRef.current.stop(); // This will trigger ondataavailable automatically
+      recorderRef.current.stop(); 
     }
 
-    // Wait for ondataavailable to process the last chunk
+    
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Clear recorded chunks (prevents double upload)
-    recordedChunksRef.current = []; // Reset after final chunk is uploaded
+    
+    recordedChunksRef.current = [];
 
-    // Stop screen stream
+  
     if (screenStream) {
       screenStream.getTracks().forEach((track) => track.stop());
       setScreenStream(null);

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { ProfileFormData } from "./types";
 import EducationSection from "./EducationSection";
 import {
   Education,
@@ -20,11 +19,9 @@ import ContactInformationSection from "./ContactInformationSection";
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import { useUpdateUserMutation } from "@/api/userApiSlice";
 import { updateUserProfile } from "../authentication/authSlice";
-import CompleteProfileSection from "./CompleteProfileSection";
 import arrow from "@/assets/skills/arrow.svg";
 import ProjectList from "@/components/projects/ProjectList";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
-
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
   console.log("user in complete modal", user);
@@ -33,14 +30,15 @@ const UserProfile: React.FC = () => {
   const dispatch = useDispatch();
   const { data: goalsData } = useGetUserGoalQuery(user._id) || "";
   const [updateUser] = useUpdateUserMutation();
-  const { data: userProjects } = useGetProjectsByUserIdQuery(user._id);
+  const goalId = goalsData?.data?.[0]?._id || "";
+  const { data: userProjects } = useGetProjectsByUserIdQuery({
+    userId: user._id,
+    goalId: goalId,
+  });
 
   const educationEntries: Education[] = [];
   const experiences: ExperienceItem[] = [];
   const certifications: Certification[] = [];
-
-  const goalId = goalsData?.data?.[0]?._id || "";
-  console.log("goalId ", goalId);
 
   const [bio, setBio] = useState<string>(
     user.bio ||

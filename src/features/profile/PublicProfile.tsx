@@ -14,10 +14,11 @@ import ProjectList from "@/components/projects/ProjectList";
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
 
-  const {
-    data: profile,
-    isLoading,
-  } = useGetPublicProfileQuery({ username });
+  const { data: profile, isLoading } = useGetPublicProfileQuery({ username });
+  const completedProjects =
+    profile?.projects.filter(
+      (project: any) => project.status !== "Incomplete"
+    ) || [];
 
   const bio =
     profile?.bio ||
@@ -51,7 +52,7 @@ const PublicProfile: React.FC = () => {
 
           <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
             <ProjectList
-              projects={profile.projects}
+              projects={completedProjects}
               isLoading={false}
               isDashboard={true}
               isPublic={true}

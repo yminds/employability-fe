@@ -1,7 +1,6 @@
 import { currentStatusSVG } from "./svg/currentStatusSVG";
 import { Button } from "@/components/ui/button";
 import threeDots from "@/assets/profile/threedots.svg";
-import { Pencil } from "lucide-react";
 import EditBioModal from "@/components/modal/EditBioModal";
 import { useEffect, useState } from "react";
 import { Country, State } from "country-state-city";
@@ -14,6 +13,7 @@ import {
 import { ProfileFormData } from "./types";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
+import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 
 interface ProfileBannerProps {
   user: any;
@@ -95,11 +95,19 @@ const ProfileBanner = ({
             <div className="relative flex gap-6 items-center">
               <div className="relative w-[130px] h-[130px]">
                 {/* Profile Image */}
-                <img
-                  src={user?.profile_image}
-                  alt="Profile"
-                  className="w-full h-full rounded-full object-cover"
-                />
+                {user?.profile_image ? (
+                  <img
+                    src={user?.profile_image || "/placeholder.svg"}
+                    alt="Profile"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={ProfileAvatar || "/placeholder.svg"}
+                    alt="Profile"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                )}
                 {/* SVG Semi-Circle */}
                 {user.current_status === "Actively seeking job" &&
                   currentStatusSVG}
@@ -109,34 +117,10 @@ const ProfileBanner = ({
               </div>
 
               <div className="flex flex-col gap-2 items-start justify-end">
-                <h1 className="text-[#202326] text-h2">
-                  {user.name}
-                </h1>
+                <h1 className="text-[#202326] text-h2">{user.name}</h1>
                 <p className="text-[#414447] text-body2">
                   {country !== null ? `${state?.name}, ${country?.name}` : ""}
                 </p>
-                {/* <div className="flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="17"
-                    height="18"
-                    viewBox="0 0 17 18"
-                    fill="none"
-                  >
-                    <circle cx="8.5" cy="9" r="8.5" fill="#0AD472" />
-                    <circle
-                      cx="8.5"
-                      cy="9"
-                      r="7.5"
-                      stroke="white"
-                      strokeOpacity="0.5"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                  <span className="text-[#000] text-base font-normal font-sf-pro leading-6 tracking-[0.24px]">
-                    {currentStatus}
-                  </span>
-                </div> */}
               </div>
             </div>
             <div className="flex flex-col items-start justify-end gap-2 ">
@@ -148,7 +132,9 @@ const ProfileBanner = ({
                   <span className="text-black text-[28px] font-ubuntu font-bold leading-[42px] tracking-[-0.5px]">
                     {employabilityScore}
                   </span>
-                  <span className="text-black/40 text-[28px] font-ubuntu font-bold leading-[42px] tracking-[-0.5px]">/10</span>
+                  <span className="text-black/40 text-[28px] font-ubuntu font-bold leading-[42px] tracking-[-0.5px]">
+                    /10
+                  </span>
                 </div>
                 <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
                   <svg
@@ -169,25 +155,15 @@ const ProfileBanner = ({
                   </svg>
                 </div>
               </div>
-              <span className="text-body2 text-[#414447]">Employability score</span>
+              <span className="text-body2 text-[#414447]">
+                Employability score
+              </span>
             </div>
           </div>
 
           {/* Bio */}
           <div className="flex items-start justify-between gap-4">
-            <p className="text-[#414447] text-body2 flex-1">
-              {bio}
-            </p>
-            {!isPublic && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="mt-1"
-                onClick={() => setIsEditBioOpen(true)}
-              >
-                <Pencil className="h-4 w-4 text-[#414447]" />
-              </Button>
-            )}
+            <p className="text-[#414447] text-body2 flex-1">{bio}</p>
           </div>
 
           {/* Action Buttons */}
@@ -213,13 +189,20 @@ const ProfileBanner = ({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-44">
-                  <div className="grid gap-4">
+                  <div className="grid ">
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-sm font-normal leading-6 tracking-[0.24px] text-black font-['SF Pro Display', sans-serif]"
+                      className="w-full justify-start text-button"
                       onClick={() => setIsProfileModalOpen(true)}
                     >
                       Edit Profile
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-button"
+                      onClick={() => setIsEditBioOpen(true)}
+                    >
+                      Edit Bio
                     </Button>
                   </div>
                 </PopoverContent>
@@ -240,13 +223,7 @@ const ProfileBanner = ({
         <CompleteProfileModal
           type="basic"
           onClose={() => setIsProfileModalOpen(false)}
-          onSave={(data: ProfileFormData) => {
-            // Implement the save functionality here
-            console.log("Profile data to save:", data);
-            setIsProfileModalOpen(false);
-          }}
           user={user}
-          isParsed={false}
           goalId={goalData?.data?.[0]?._id}
         />
       )}

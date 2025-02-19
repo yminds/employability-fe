@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import ReactPlayer from "react-player";
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader } from "lucide-react";
 
@@ -13,6 +13,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
 
   const playerRef = useRef<ReactPlayer>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const preloadAudioRef = useRef<{ current: HTMLAudioElement | null }>({ current: null });
   const [currentChunk, setCurrentChunk] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -23,9 +24,51 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [seeking, setSeeking] = useState(false);
+  const [nextChunkPreloaded, setNextChunkPreloaded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [tempProgress, setTempProgress] = useState(0);
+  const [isPending, startTransition] = useTransition();
 
   const [updatedProgresssion, setUpdatedProgression] = useState(0);
-  const CHUNK_DURATION = 180; // 3 minutes in seconds
+  const CHUNK_DURATION = 30;
+
+  // Preload next chunk
+  const preloadNextChunk = useCallback(() => {
+    if (currentChunk < urls.length - 1 && !nextChunkPreloaded) {
+      const audio = new Audio();
+      audio.src = urls[currentChunk + 1];
+      audio.preload = "auto";
+      
+      audio.addEventListener('canplaythrough', () => {
+        setNextChunkPreloaded(true);
+        console.log("Next chunk preloaded:", currentChunk + 1);
+      });
+
+      preloadAudioRef.current.current = audio;
+    }
+  }, [currentChunk, urls, nextChunkPreloaded]);
+
+  const handleProgress = (state: { played: number; playedSeconds: number }) => {
+    if (seeking) return;
+
+    const totalDuration = urls.length * CHUNK_DURATION;
+    const currentProgress = Math.floor(((currentChunk * CHUNK_DURATION + state.playedSeconds) / totalDuration) * 100);
+    setProgress(currentProgress);
+    setCurrentTime(formatTime(currentChunk * CHUNK_DURATION + Math.floor(state.playedSeconds)));
+
+    // Start preloading when we're 5 seconds away from the end
+    if (state.playedSeconds >= CHUNK_DURATION - 20 && !nextChunkPreloaded) {
+      preloadNextChunk();
+    }
+
+    // Handle chunk transition
+    if (state.played >= 0.99 && currentChunk < urls.length - 1) {
+      setIsLoading(true);
+      setCurrentChunk((prev) => prev + 1);
+      setNextChunkPreloaded(false);
+      setIsPlaying(true);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -33,105 +76,105 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  const [isSeeking, setIsSeeking] = useState(false);
-
-  const handleProgress = (state: { played: number; playedSeconds: number }) => {
-    // Don't update progress while seeking
-    if (isSeeking) return;
-
-    const totalDuration = urls.length * CHUNK_DURATION;
-    const currentProgress = Math.floor(((currentChunk * CHUNK_DURATION + state.playedSeconds) / totalDuration) * 100);
-    setProgress(currentProgress);
-    setCurrentTime(formatTime(currentChunk * CHUNK_DURATION + Math.floor(state.playedSeconds)));
-
-    // Only handle auto-progression if not seeking
-    if (state.played >= 0.99 && currentChunk < urls.length - 1) {
-      setIsLoading(true);
-      setCurrentChunk((prev) => prev + 1);
-      setIsPlaying(true);
-    }
+  const handleTimelineMouseDown = (e: React.MouseEvent<HTMLInputElement>) => {
+    setIsDragging(true);
+    const value = parseInt((e.target as HTMLInputElement).value);
+    setTempProgress(value);
   };
 
-  const handleTimelineChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsSeeking(true);
-    const value = Math.floor(parseFloat(e.target.value));
+  const handleTimelineDrag = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (isDragging) {
+    const value = parseInt(e.target.value);
+    requestAnimationFrame(() => {
+      setTempProgress(value);
+    });
+  }
+  };
+
+  const handleTimelineMouseUp = async () => {
+    if (!isDragging) return;
+    
+    setIsDragging(false);
     const totalDuration = urls.length * CHUNK_DURATION;
-    const newTime = Math.floor((value / 100) * totalDuration);
+    const newTime = Math.floor((tempProgress / 100) * totalDuration);
     const chunkIndex = Math.floor(newTime / CHUNK_DURATION);
     const progressWithinChunk = Math.floor(newTime % CHUNK_DURATION);
 
-
-    setUpdatedProgression(progressWithinChunk);
-    console.log(`cunk index is ${chunkIndex}`);
-
     setIsLoading(true);
-    setProgress(value);
+    setProgress(tempProgress);
     setCurrentTime(formatTime(newTime));
-
-    console.log("++++++++++++++++++++++++++++++++++++++++");
-    console.log(progressWithinChunk);
-    console.log("++++++++++++++++++++++++++++++++++++++++");
 
     if (playerRef.current) {
       const player = playerRef.current.getInternalPlayer();
       if (player) {
         try {
           player.pause();
-
-          // console.log(`url before setting: ${player.src}`);
-
           player.src = urls[chunkIndex];
-
-          // console.log(`Player src set to ${player.src}`);
 
           await new Promise((resolve) => {
             player.addEventListener("loadedmetadata", resolve, { once: true });
           });
 
-          console.log(`Seeking to chunk ${chunkIndex} at ${progressWithinChunk} seconds`);
-          // player.currentTime = progressWithinChunk;
-
-          // playerRef.current.seekTo(progressWithinChunk, 'seconds');
-          console.log(`Player currentTime set to ${player.currentTime}`);
-
-          // player.currentTime = progressWithinChunk;
-          // await player.play();
-          console.log("Player playing");
           setSeeking(true);
           setCurrentChunk(chunkIndex);
-          // setIsPlaying(true);
+          setNextChunkPreloaded(false);
+          setUpdatedProgression(progressWithinChunk);
+          
+          if (chunkIndex < urls.length - 1) {
+            preloadNextChunk();
+          }
         } catch (error) {
           console.log("Playback error:", error);
         } finally {
           setIsLoading(false);
-          setIsSeeking(false); // Reset seeking state
         }
       }
     }
   };
 
   useEffect(() => {
-   
     if (playerRef.current) {
-
-      console.log('Inside the useEffect of seeking with progress:', updatedProgresssion);
-      // playerRef.current.seekTo(updatedProgresssion);
-
       const player = playerRef.current.getInternalPlayer();
-      if (player)
-      {
+      if (player) {
         player.currentTime = updatedProgresssion;
         player.play();
-        console.log("Player playing");
       }
       setIsPlaying(true);
-
       setSeeking(false);
     }
     return () => {
       setSeeking(false);
-    }
+    };
   }, [seeking]);
+
+  useEffect(() => {
+    if (isPlaying && !nextChunkPreloaded && currentChunk < urls.length - 1) {
+      preloadNextChunk();
+    }
+  }, [isPlaying, currentChunk, nextChunkPreloaded, preloadNextChunk]);
+
+  // Cleanup preloaded audio when unmounting or changing chunks
+  useEffect(() => {
+    return () => {
+      if (preloadAudioRef.current) {
+        if (preloadAudioRef.current.current) {
+          preloadAudioRef.current.current.src = '';
+        }
+      }
+    };
+  }, [currentChunk]);
+
+  
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        handleTimelineMouseUp();
+      }
+    };
+
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+  }, [isDragging, tempProgress]);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
@@ -187,7 +230,15 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
           volume={volume}
           muted={isMuted}
           onProgress={handleProgress}
-          onReady={() => setIsLoading(false)}
+          onReady={() => {
+            console.log("player is now ready to receive commands");
+            setIsLoading(false);
+            
+            // Start preloading next chunk when current chunk is ready
+            if (!nextChunkPreloaded && currentChunk < urls.length - 1) {
+              preloadNextChunk();
+            }
+          }}
           onEnded={() => {
             if (currentChunk === urls.length - 1) {
               setIsPlaying(false);
@@ -205,7 +256,6 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
           autoPlay={false}
         />
 
-        {/* Loading Overlay */}
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <div className="flex flex-col items-center gap-2">
@@ -232,10 +282,12 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
               className="w-full h-2 rounded-lg appearance-none cursor-pointer"
               style={{
                 accentColor: "rgb(34 197 94)",
-                background: `linear-gradient(to right, rgb(34 197 94) ${progress}%, rgb(209 213 219) ${progress}%)`,
+                background: `linear-gradient(to right, rgb(34 197 94) ${isDragging ? tempProgress : progress}%, rgb(209 213 219) ${isDragging ? tempProgress : progress}%)`,
               }}
-              value={progress}
-              onChange={handleTimelineChange}
+              value={isDragging ? tempProgress : progress}
+              onMouseDown={handleTimelineMouseDown}
+              onChange={handleTimelineDrag}
+              onMouseUp={handleTimelineMouseUp}
               min={0}
               max={100}
               step={1}

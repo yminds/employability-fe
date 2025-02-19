@@ -6,7 +6,7 @@ import { RootState } from "@/store/store";
 const WebCam: React.FC = () => {
   const userName = useSelector((state: RootState) => state.auth.user?.name);
   return (
-    <div className="relative w-full max-w-full">
+    <div className="relative w-full max-w-full h-[45vh]">
       <Webcam
         audio={false}
         height={900}

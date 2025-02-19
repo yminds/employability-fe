@@ -26,13 +26,13 @@ export default Controls;
 
 const Recording: React.FC = () => {
   return (
-    <div className="flex gap-4 flex-row items-center py-1.5 px-4 w-[90%]">
+    <div className="flex gap-4 flex-row items-center py-1.5 px-4 w-[100%] ">
       <img src={micUrl} className="w-12 h-12" />
-      <div className="flex flex-col gap-2">
-        <p className="text-center font-ubuntu font-medium text-base text-slate-900">
-          Listening...
+      {/* <div className="flex  gap-2 w-full"> */}
+        <p className="text-center font-ubuntu   font-medium text-base text-slate-900">
+         Speak Now..
         </p>
-      </div>
+      {/* </div> */}
     </div>
   );
 };

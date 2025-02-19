@@ -1,18 +1,18 @@
 import type React from "react";
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { ChevronLeft, ChevronRight } from "lucide-react";
- 
+
 // Components
 import UnifiedUploadModal from "@/components/modal/UnifiedUploadModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
- 
+
 // Assets
 import AddPictureimg from "@/assets/dashboard/add_picture.svg";
 import Addbioimg from "@/assets/dashboard/add_bio.svg";
 import AddEducationImg from "@/assets/dashboard/add_education.svg";
- 
+import AddExperience from "@/assets/dashboard/add_experience.svg";
+
 // Types and API
 import type { RootState } from "@/store/store";
 import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
@@ -20,20 +20,19 @@ import {
   useGetUserDetailsQuery,
   useUpdateUserMutation,
 } from "@/api/userApiSlice";
-import type { ProfileFormData } from "@/features/profile/types";
- 
+
 interface SectionState {
   completed: boolean;
   skipped?: boolean;
 }
- 
+
 interface Sections {
   basicInfo: SectionState;
   experience: SectionState;
   education: SectionState;
   certification: SectionState;
 }
- 
+
 interface CardType {
   image: string;
   alt: string;
@@ -48,35 +47,35 @@ interface CardType {
   isOptional?: boolean;
   progressSection?: keyof Sections;
 }
- 
+
 const TryThingsSection: React.FC = () => {
-  const navigate = useNavigate();
   const [startIndex, setStartIndex] = useState(0);
   const [profileProgress, setProfileProgress] = useState(0);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [currentProfileSection, setCurrentProfileSection] =
     useState<string>("");
- 
+
   const [sections, setSections] = useState<Sections>({
     basicInfo: { completed: false },
     experience: { completed: false, skipped: false },
     education: { completed: false },
     certification: { completed: false, skipped: false },
   });
- 
+
   // Get user ID and data
-  const userId = useSelector((state: RootState) => state.auth?.user?._id)
-  const user = useSelector((state: any) => state.auth.user)
-  const { data: goalsData } = useGetUserGoalQuery(userId || "")
-  const {data:userDetails,refetch:refetchUserDetails} = useGetUserDetailsQuery(userId || "",{
-    refetchOnMountOrArgChange:true
-  })
+  const userId = useSelector((state: RootState) => state.auth?.user?._id);
+  const user = useSelector((state: any) => state.auth.user);
+  const { data: goalsData } = useGetUserGoalQuery(userId || "");
+  const { data: userDetails, refetch: refetchUserDetails } =
+    useGetUserDetailsQuery(userId || "", {
+      refetchOnMountOrArgChange: true,
+    });
   console.log("data:", userDetails?.data);
-  const [updateUser] = useUpdateUserMutation()
- 
-  const goalId = goalsData?.data?.[0]?._id || ""
- 
+  const [updateUser] = useUpdateUserMutation();
+
+  const goalId = goalsData?.data?.[0]?._id || "";
+
   // Check if basic info is complete
   const isBasicInfoComplete = (user: any) => {
     return !!(
@@ -89,33 +88,33 @@ const TryThingsSection: React.FC = () => {
       user?.address?.city
     );
   };
- 
+
   // Check if experience section is complete
   const isExperienceComplete = (user: any) => {
     if (user?.is_experienced === false) {
-      return true // Fresher case
+      return true; // Fresher case
     }
-    return Array.isArray(user?.experience) && user.experience.length > 0
-  }
- 
+    return Array.isArray(user?.experience) && user.experience.length > 0;
+  };
+
   // Check if education section is complete
   const isEducationComplete = (user: any) => {
-    return Array.isArray(user?.education) && user.education.length > 0
-  }
- 
+    return Array.isArray(user?.education) && user.education.length > 0;
+  };
+
   // Check if certification section is complete
   const isCertificationComplete = (user: any) => {
     if (user?.has_certificates === false) {
-      return true // No certificates case
+      return true; // No certificates case
     }
-    return Array.isArray(user?.certificates) && user.certificates.length > 0
-  }
- 
+    return Array.isArray(user?.certificates) && user.certificates.length > 0;
+  };
+
   // Check if parsed resume has data for a section
   const hasParsedResumeData = (section: string) => {
-    const parsedResume = userDetails?.data?.parsedResume
-    if (!parsedResume) return false
- 
+    const parsedResume = userDetails?.data?.parsedResume;
+    if (!parsedResume) return false;
+
     switch (section) {
       case "basicInfo":
         return !!(
@@ -146,7 +145,7 @@ const TryThingsSection: React.FC = () => {
         return false;
     }
   };
- 
+
   // Get button text based on section status
   const getButtonText = (section: string, defaultText: string) => {
     if (!isComplete(section) && hasParsedResumeData(section)) {
@@ -154,10 +153,10 @@ const TryThingsSection: React.FC = () => {
     }
     return defaultText;
   };
- 
+
   // Helper function to check if a section is complete
   const isComplete = (section: string) => {
-    const user = userDetails.data
+    const user = userDetails.data;
     switch (section) {
       case "basicInfo":
         return isBasicInfoComplete(user);
@@ -171,80 +170,78 @@ const TryThingsSection: React.FC = () => {
         return false;
     }
   };
- 
+
   // Calculate profile completion progress
   useEffect(() => {
     if (userDetails) {
-      const user = userDetails.data
-      let progress = 0
- 
+      const user = userDetails.data;
+      let progress = 0;
+
       if (isBasicInfoComplete(user)) {
-        progress += 25
+        progress += 25;
         setSections((prev) => ({
           ...prev,
           basicInfo: { completed: true },
-        }))
+        }));
       }
- 
+
       if (isExperienceComplete(user)) {
-        progress += 25
+        progress += 25;
         setSections((prev) => ({
           ...prev,
           experience: { completed: true },
-        }))
+        }));
       }
- 
+
       if (isEducationComplete(user)) {
-        progress += 25
+        progress += 25;
         setSections((prev) => ({
           ...prev,
           education: { completed: true },
-        }))
+        }));
       }
- 
+
       if (isCertificationComplete(user)) {
-        progress += 25
+        progress += 25;
         setSections((prev) => ({
           ...prev,
           certification: { completed: true },
-        }))
+        }));
       }
- 
-      setProfileProgress(progress)
+
+      setProfileProgress(progress);
     }
-  }, [userDetails])
- 
-  const handleModalClose = async()=>{
+  }, [userDetails]);
+
+  const handleModalClose = async () => {
     setShowUploadModal(false);
     try {
-      await refetchUserDetails()
+      await refetchUserDetails();
     } catch (error) {
-      console.error('Error refetching user details:', error)
+      console.error("Error refetching user details:", error);
     }
-  }
- 
+  };
+
   const handleLinkClick = (route: string) => {
     if (route === "/upload-resume") {
       setShowUploadModal(true);
       return;
     }
- 
+
     const routeToSection: { [key: string]: string } = {
       "/basic-info": "basic",
       "/add-experience": "experience",
       "/add-education": "education",
       "/add-certification": "certification",
     };
- 
+
     const section = routeToSection[route];
     if (section) {
       setCurrentProfileSection(section);
-      setTimeout(() => {
-        setShowProfileModal(true);
-      }, 300);
+      setShowProfileModal(true);
     }
   };
- 
+
   const handleFresherClick = async () => {
     if (userId) {
       try {
@@ -253,19 +250,14 @@ const TryThingsSection: React.FC = () => {
           data: {
             has_resume: false,
           },
-        })
-        await refetchUserDetails()
+        });
+        await refetchUserDetails();
       } catch (error) {
         console.error("Error updating user:", error);
       }
     }
   };
- 
-  const handleProfileSave = (data: ProfileFormData) => {
-    console.log("Saving profile data:", data)
-    setShowProfileModal(false)
-  }
- 
+
   const handleCardAction = (progressSection: keyof Sections | undefined) => {
     if (progressSection) {
       setSections((prev) => ({
@@ -274,14 +266,12 @@ const TryThingsSection: React.FC = () => {
       }));
     }
   };
- 
- 
- 
+
   const getCards = (): CardType[] => {
-    const defaultCards:CardType[] = [];
-    const user = userDetails?.data
- 
-    if(!user) return defaultCards;
+    const defaultCards: CardType[] = [];
+    const user = userDetails?.data;
+
+    if (!user) return defaultCards;
     // Only add Basic Info card if user doesn't have basic info
     if (
       !user?.name ||
@@ -295,53 +285,57 @@ const TryThingsSection: React.FC = () => {
       defaultCards.push({
         image: Addbioimg,
         alt: "Basic Info",
-        description:
-          "Add your personal and contact details to complete your profile basics.",
+        description: "Provide Your Basic Information to Complete Your Profile.",
         buttonText: getButtonText("basicInfo", "Add Basic Info"),
         route: "/basic-info",
         progressSection: "basicInfo",
       });
     }
- 
+
     // Only add Experience card if user doesn't have experience and hasn't indicated they're a fresher
-    if (user?.is_experienced !== false && (!user?.experience || user.experience.length === 0)) {
+    if (
+      user?.is_experienced !== false &&
+      (!user?.experience || user.experience.length === 0)
+    ) {
       defaultCards.push({
-        image: AddEducationImg,
+        image: AddExperience,
         alt: "Experience",
-        description:
-          "Share your work experience or indicate if you're just starting your career.",
+        description: "Let your experiences speak volumes.",
         buttonText: getButtonText("experience", "Add Experience"),
         route: "/add-experience",
         isOptional: true,
         progressSection: "experience",
       });
     }
- 
+
     // Only add Education card if user doesn't have education entries
     if (!user?.education || user.education.length === 0) {
       defaultCards.push({
         image: AddEducationImg,
         alt: "Education",
-        description: "Add your educational qualifications (required).",
+        description: "Showcase your academic journey.",
         buttonText: getButtonText("education", "Add Education"),
         route: "/add-education",
         progressSection: "education",
       });
     }
- 
+
     // Only add Certification card if user hasn't indicated no certificates and doesn't have any certificates
-    if (user?.has_certificates !== false && (!user?.certificates || user.certificates.length === 0)) {
+    if (
+      user?.has_certificates !== false &&
+      (!user?.certificates || user.certificates.length === 0)
+    ) {
       defaultCards.push({
         image: AddPictureimg,
         alt: "Certification",
-        description: "Add any relevant certifications to enhance your profile.",
+        description: "Spotlight your professional acheivements.",
         buttonText: getButtonText("certification", "Add Certification"),
         route: "/add-certification",
         isOptional: true,
         progressSection: "certification",
       });
     }
- 
+
     // Only add resume card if user hasn't uploaded a resume and hasn't indicated they don't have one
     if (
       user.has_resume !== false &&
@@ -350,8 +344,7 @@ const TryThingsSection: React.FC = () => {
       defaultCards.unshift({
         image: AddPictureimg,
         alt: "Resume",
-        description:
-          "Upload your resume or create a new one to showcase your professional background.",
+        description: "Showcase Your Expertise with a Professional Resume.",
         buttonText: "Upload Resume",
         route: "/upload-resume",
         secondaryAction: {
@@ -361,31 +354,31 @@ const TryThingsSection: React.FC = () => {
         isOptional: true,
       });
     }
- 
+
     return defaultCards;
   };
- 
-  const cards = getCards()
-  const visibleCards = cards.slice(startIndex, startIndex + 3)
-  const canScrollLeft = startIndex > 0
-  const canScrollRight = startIndex + 3 < cards.length
- 
+
+  const cards = getCards();
+  const visibleCards = cards.slice(startIndex, startIndex + 3);
+  const canScrollLeft = startIndex > 0;
+  const canScrollRight = startIndex + 3 < cards.length;
+
   const handlePrevClick = () => {
     if (canScrollLeft) {
-      setStartIndex((prev) => prev - 1)
+      setStartIndex((prev) => prev - 1);
     }
   };
- 
+
   const handleNextClick = () => {
     if (canScrollRight) {
-      setStartIndex((prev) => prev + 1)
+      setStartIndex((prev) => prev + 1);
     }
   };
- 
+
   const renderCard = (card: CardType, index: number) => (
     <div
       key={index}
-      className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col justify-between h-full relative"
+      className="rounded-lg border border-gray-200 bg-white p-6 flex flex-col justify-between h-[320px] relative"
     >
       <div className="flex flex-col gap-8">
         <div className="h-[100px]">
@@ -395,14 +388,14 @@ const TryThingsSection: React.FC = () => {
             className="absolute top-0 end-0 rounded-e-[9px] rounded-s-[9px] rounded-b-none"
           />
         </div>
- 
+
         <div className="flex flex-col items-start gap-2">
           <p className="text-gray-500 text-body2">{card.description}</p>
         </div>
       </div>
- 
+
       <div className="flex flex-col w-full gap-2 mt-4">
-      {card.alt === "Resume" && card.secondaryAction && (
+        {card.alt === "Resume" && card.secondaryAction && (
           <button
             className="text-gray-500 text-button hover:text-gray-700"
             onClick={() => {
@@ -417,9 +410,9 @@ const TryThingsSection: React.FC = () => {
         <button
           className="flex w-full p-2 px-4 justify-center items-center gap-2 rounded-[4px] bg-white border border-solid border-[#00183D] text-[#00183D] text-button hover:bg-gray-50"
           onClick={() => {
-            handleLinkClick(card.route)
+            handleLinkClick(card.route);
             if (card.progressSection) {
-              handleCardAction(card.progressSection)
+              handleCardAction(card.progressSection);
             }
           }}
         >
@@ -428,88 +421,82 @@ const TryThingsSection: React.FC = () => {
       </div>
     </div>
   );
- 
+
   return (
     <section className="flex flex-col items-start gap-2 ">
-       {profileProgress < 100 && (
+      {profileProgress < 100 && (
         <>
-      <h5 className="text-black text-h2">
-        Update your Basic Details
-      </h5>
-        <div className="flex flex-col gap-1  w-full ">
-          <div className="flex items-center gap-12 self-stretch">
-            <div className="relative w-full bg-[#FAFAFA] rounded-full h-[6px]">
-              <div
-                className="bg-[#1FD167] h-[6px] rounded-full transition-all duration-300"
-                style={{ width: `${profileProgress}%` }}
-              />
-            </div>
-            <span className="text-[#1FD167] font-medium">
-              {profileProgress}%
-            </span>
-            
-            <div className="flex gap-2">
-              <button
-                onClick={handlePrevClick}
-                disabled={!canScrollLeft}
-                className={`p-2 rounded-full  ${
-                  canScrollLeft ? "text-gray-700 hover:bg-gray-50" : "text-gray-300"
-                }`}
-                aria-label="Previous cards"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleNextClick}
-                disabled={!canScrollRight}
-                className={`p-2 rounded-full  ${
-                  canScrollRight ? "text-gray-700 hover:bg-gray-50" : "text-gray-300"
-                }`}
-                aria-label="Next cards"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+          <h5 className="text-black text-h2">Update your Basic Details</h5>
+          <div className="flex flex-col gap-1  w-full ">
+            <div className="flex items-center gap-12 self-stretch">
+              <div className="relative w-full bg-[#FAFAFA] rounded-full h-[6px]">
+                <div
+                  className="bg-[#1FD167] h-[6px] rounded-full transition-all duration-300"
+                  style={{ width: `${profileProgress}%` }}
+                />
+              </div>
+              <span className="text-[#1FD167] font-medium">
+                {profileProgress}%
+              </span>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handlePrevClick}
+                  disabled={!canScrollLeft}
+                  className={`p-2 rounded-full  ${
+                    canScrollLeft
+                      ? "text-gray-700 hover:bg-gray-50"
+                      : "text-gray-300"
+                  }`}
+                  aria-label="Previous cards"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleNextClick}
+                  disabled={!canScrollRight}
+                  className={`p-2 rounded-full  ${
+                    canScrollRight
+                      ? "text-gray-700 hover:bg-gray-50"
+                      : "text-gray-300"
+                  }`}
+                  aria-label="Next cards"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
-
-    
-        </div>
-      </>
+        </>
       )}
       <div className="relative w-full">
         <div className="grid grid-cols-3 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6 w-full">
           {visibleCards.map((card, index) => renderCard(card, index))}
         </div>
       </div>
- 
+
       {/* Profile Modal */}
       {showProfileModal && (
         <CompleteProfileModal
           onClose={() => setShowProfileModal(false)}
-          onSave={handleProfileSave}
           type={currentProfileSection}
           user={user}
-          isParsed={hasParsedResumeData(currentProfileSection)}
           goalId={goalId}
         />
       )}
- 
+
       {/* Upload Modal */}
- 
+
       {showUploadModal && (
         <UnifiedUploadModal
-        isOpen={showUploadModal}
-        onClose={handleModalClose}
-        userId={userId || ""}
-        goalId={goalId}
-      />
+          isOpen={showUploadModal}
+          onClose={handleModalClose}
+          userId={userId || ""}
+          goalId={goalId}
+        />
       )}
     </section>
   );
 };
- 
-export default TryThingsSection;
- 
- 
 
- 
+export default TryThingsSection;
