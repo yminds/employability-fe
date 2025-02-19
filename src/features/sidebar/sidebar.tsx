@@ -23,11 +23,10 @@ import {
 import { Button } from "@/components/ui/button";
 import LogoutConfirmationModal from "@/components/modal/LogoutConfirmationModal";
 
-
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State to control menu visibility on small screens
-  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   const getActiveClass = (path: string) => {
     return window.location.pathname === path
@@ -63,13 +62,13 @@ const Sidebar: React.FC = () => {
   );
 
   const handleLogout = () => {
-    setIsLogoutDialogOpen(true)
-  }
+    setIsLogoutDialogOpen(true);
+  };
 
   const confirmLogout = () => {
-    localStorage.clear()
-    window.location.href = "/login"
-  }
+    localStorage.clear();
+    window.location.href = "/login";
+  };
 
   return (
     <div className="relative group">
@@ -219,7 +218,9 @@ const Sidebar: React.FC = () => {
               {!isCollapsed && (
                 <div className="mt-3">
                   <p className="text-[#333333] text-sub-header">{user_name}</p>
-                  <p className="text-[#909091] text-body2">{user_email}</p>
+                  <p className="text-[#909091] text-body2 truncate max-w-[180px]">
+                    {user_email}
+                  </p>
                 </div>
               )}
             </div>
@@ -238,7 +239,7 @@ const Sidebar: React.FC = () => {
                 <DropdownMenuContent align="end" className="w-[100px]">
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="text-[#68696B] text-body2 focus:text-[#10B754] focus:bg-[#DBFFEA]"
+                    className="text-[#68696B] text-body2 focus:cursor-pointer focus:bg-white"
                   >
                     <Power className="mr-2 h-4 w-4" />
                     <span>Logout</span>
@@ -379,7 +380,7 @@ const Sidebar: React.FC = () => {
           </nav>
         </div>
       )}
-       <LogoutConfirmationModal
+      <LogoutConfirmationModal
         isOpen={isLogoutDialogOpen}
         onClose={() => setIsLogoutDialogOpen(false)}
         onConfirm={confirmLogout}

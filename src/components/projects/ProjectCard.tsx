@@ -126,9 +126,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const config = getStatusConfig(project.status);
 
   return (
-    <Card className={`flex flex-col items-start p-0 bg-white rounded-lg ${
-      !isDashboard ? "border border-black/10 p-6" : ""
-    } self-stretch mb-4 sm:p-4`}>
+    <Card
+      className={`flex flex-col items-start p-0 bg-white rounded-lg ${
+        !isDashboard ? "border border-black/10 p-6" : ""
+      } self-stretch mb-4 sm:p-4`}
+    >
       <div className="flex items-start gap-5 w-full md:flex-col sm:flex-col">
         {project.thumbnail && (
           <div className="relative w-[150px] h-[100px] bg-[#fcfcfc] rounded overflow-hidden md:w-full sm:w-full md:h-[200px] sm:h-[200px]">
@@ -154,7 +156,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                       variant="secondary"
                       className="min-h-6 px-3 py-1 bg-[#ebebeb] rounded-full flex items-center justify-center"
                     >
-                      <span className="text-black text-sm font-medium">
+                      <span className="text-black text-sm font-medium tracking-[0.21px]">
                         {tech.name}
                       </span>
                     </Badge>
@@ -174,19 +176,29 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             )}
           </div>
 
-          <div className={`flex items-center gap-10 ${project.tech?.length > 0 ? 'mt-5' : 'mt-0'} md:flex-col sm:flex-col md:items-start sm:items-start md:w-full sm:w-full md:gap-4 sm:gap-4`}>
+          <div
+            className={`flex items-center gap-10 ${
+              project.tech?.length > 0 ? "mt-5" : "mt-0"
+            } md:flex-col sm:flex-col md:items-start sm:items-start md:w-full sm:w-full md:gap-4 sm:gap-4`}
+          >
             <div className="flex w-[30%] flex-col items-center md:w-full sm:w-full">
               {project.status === "Verified" && (
                 <div className="flex items-baseline">
-                  <span className="text-xl font-medium">
-                    {project?.score}
+                  <span className="text-xl font-medium">{project?.score}</span>
+                  <span className="text-[#909091] text-xl font-medium">
+                    /10
                   </span>
-                  <span className="text-[#909091] text-xl font-medium">/10</span>
                 </div>
               )}
               <div className="flex items-center gap-2 px-3 rounded-full">
-                <img src={config.icon} alt={project.status} className="w-4 h-4" />
-                <span className={`text-sm leading-[22px] font-medium ${config.color}`}>
+                <img
+                  src={config.icon}
+                  alt={project.status}
+                  className="w-4 h-4"
+                />
+                <span
+                  className={`text-sm leading-[22px] font-medium ${config.color}`}
+                >
                   {config.text}
                 </span>
               </div>
@@ -197,7 +209,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 <Button
                   variant="link"
                   className="text-[#001630] underline w-28 justify-center md:w-full sm:w-full"
-                  onClick={project.status === "Incomplete" ? handleIncompleteClick : undefined}
+                  onClick={
+                    project.status === "Incomplete"
+                      ? handleIncompleteClick
+                      : undefined
+                  }
                 >
                   {getActionConfig(project.status)}
                 </Button>
@@ -214,9 +230,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       </div>
 
       <CardContent className="flex flex-col px-0 w-full p-0 mt-3">
-        <p className="text-[#67696b] text-sm">
-          {project.description}
-        </p>
+        <p className="text-[#67696b] text-sm">{project.description}</p>
         {(project.githubLink?.length > 0 || project.liveLink) && (
           <div className="flex gap-6 mt-3 md:flex-col sm:flex-col md:gap-2 sm:gap-2">
             {project.githubLink?.length > 0 && (
@@ -230,7 +244,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  View GitHub repo
+                  View GitHub report
                 </a>
               </Button>
             )}
@@ -261,6 +275,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       />
     </Card>
   );
-}
+};
 
-export default ProjectCard
+export default ProjectCard;
