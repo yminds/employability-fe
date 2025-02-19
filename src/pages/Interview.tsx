@@ -9,14 +9,14 @@ import toggleBrowserFullscreen from "@/components/skills/fullscreen";
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
   const location = useLocation();
- 
+
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
   // New state to track if the user has the required camera and mic permissions
   const [hasPermissions, setHasPermissions] = useState(false);
- 
+
   const { title, skillPoolId, level } = location.state || {};
   const {
     isInterviewStarted,
@@ -32,7 +32,46 @@ const InterviewSetupNew: React.FC = () => {
     cameraScale,
     isProceedButtonEnabled,
   } = useInterviewSetup();
- 
+
+  // Function to request camera and microphone permissions.
+  const requestPermissions = async () => {
+    try {
+      // Check if the browser supports mediaDevices.getUserMedia
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Request both video and audio permissions.
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        console.log("Media stream:", stream);
+        setHasPermissions(true);
+        setShowPermissionNote(false);
+
+        // Reload the page automatically after permissions are granted.
+        // Some browsers support window.location.reload(true) (force reload)
+        // but since true is deprecated, we use a fallback to ensure compatibility.
+        if (typeof window.location.reload === "function") {
+          // Try to force a reload from the server, if supported.
+          try {
+            window.location.reload(); // Most modern browsers
+          } catch (e) {
+            // Fallback if an error occurs (shouldn't normally happen)
+            window.location.href = window.location.href;
+          }
+        } else {
+          // Fallback for very old browsers
+          window.location.href = window.location.href;
+        }
+      } else {
+        throw new Error("getUserMedia not supported in this browser.");
+      }
+    } catch (error) {
+      console.error("Error requesting media devices:", error);
+      setHasPermissions(false);
+      setShowPermissionNote(true);
+    }
+  };
+
   // Check camera and microphone permissions by verifying if device labels are available.
   // Device labels are only populated when permission has been granted.
   useEffect(() => {
@@ -58,7 +97,7 @@ const InterviewSetupNew: React.FC = () => {
         setShowPermissionNote(true);
       });
   }, []);
- 
+
   // Fetch the fundamentals for the interview
   useEffect(() => {
     const sync = async () => {
@@ -74,11 +113,12 @@ const InterviewSetupNew: React.FC = () => {
     };
     sync();
   }, [fetchFundamental, skillPoolId, level]);
- 
+
   // Only show the Interview component if the user has required permissions,
   // the fundamentals have loaded, and the interview is started.
   const canShowInterview = isInterviewStarted && fundamentals.length > 0 && hasPermissions;
- 
+
+
   return (
     <>
       {/* Permission Note Modal */}
@@ -105,27 +145,27 @@ const InterviewSetupNew: React.FC = () => {
               </svg>
             </button>
             <h2 className="text-2xl font-bold mb-6 text-h2">Permissions Required</h2>
-            <div className=" text-body space-y-3">
+            <div className="text-body space-y-3 mb-4">
               <p>
-                <strong>Step 1:</strong> Locate the padlock icon in your browser's address bar.
+                This interview requires access to your camera and microphone.
               </p>
               <p>
-                <strong>Step 2:</strong> Click the padlock icon and select <em>"Site settings"</em> from the dropdown.
+                Please click the button below to grant access. If you've previously denied permissions, you may need to adjust your browser settings.
               </p>
               <p>
-                <strong>Step 3:</strong> In the Site Settings, scroll down to find the <strong>Camera</strong> and <strong>Microphone</strong> permissions.
-              </p>
-              <p>
-                <strong>Step 4:</strong> Change both the Camera and Microphone settings to <em>"Allow"</em>.
-              </p>
-              <p>
-                <strong>Step 5:</strong> Refresh the page to apply the changes.
+                After providing the permissions, Reload the window to apply changed.
               </p>
             </div>
+            <button
+              className="text-button bg-button text-white px-4 py-2 rounded"
+              onClick={requestPermissions}
+            >
+              Request Permissions
+            </button>
           </div>
         </div>
       )}
- 
+
       {/* Main Content */}
       {!canShowInterview ? (
         <div className="flex items-center h-screen w-[70%] mx-auto sm:w-[95%]">
@@ -174,5 +214,5 @@ const InterviewSetupNew: React.FC = () => {
     </>
   );
 };
- 
+
 export default InterviewSetupNew;

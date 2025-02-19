@@ -20,6 +20,7 @@ import { set } from "zod";
 import { Timer } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import toggleBrowserFullscreen from "../skills/fullscreen";
 
 // Constants and Types
 const SOCKET_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "wss://employability.ai";
@@ -281,6 +282,7 @@ const Interview: React.FC<{
 
   const navigate = useNavigate();
   const handleBackToSkills = () => {
+    toggleBrowserFullscreen();
     navigate("/skills");
   };
 

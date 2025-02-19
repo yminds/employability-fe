@@ -265,7 +265,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                   className={`flex justify-center pdf-hide ${!isGeneratingPDF ? "flex" : "hidden"
                     }`}
                 >
-                  <div className="continer-player w-full h-[38rem] relative">
+                  <div className="continer-player w-full h-[28rem] relative">
                     <InterviewPlayer urls={reportData.s3_recording_url} />
                   </div>
                 </section>
@@ -414,13 +414,13 @@ const ReportContent: React.FC<ReportContentProps> = ({
                 <div className="flex-cols gap-6">
                   {reportData.concept_ratings?.length ? (
                     reportData.concept_ratings.map((rating, index) => (
-                      <div key={index}>
+                      <div key={index} className=" py-2">
                         <div className="flex items-center justify-between mb-1">
                           <h3 className="text-sub-header font-medium text-grey-7">
                             {rating.concept}
                           </h3>
                         </div>
-                        <div className="min-w-full bg-background-grey min-h-2 relative rounded-full overflow-hidden mt-4">
+                        <div className="min-w-full bg-background-grey min-h-2 relative rounded-full overflow-hidden mt-2">
                           <div
                             className="min-h-2 bg-primary-green absolute left-0 top-0 transition-all duration-300 rounded-full"
                             style={{

@@ -12,7 +12,6 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import {
-  useGetThreadsByUserIdQuery,
   useGetMessagesQuery,
 } from "@/api/mentorUtils";
 import React from "react";
@@ -29,7 +28,7 @@ interface ThreadData {
   __v: number;
 }
 
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "wss://employability.ai";
 
 interface MentorContainerProps {
   skill: string;
@@ -105,38 +104,31 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const socketRef = useRef<any>(null);
   const title = `${skill}'s Mentor Thread`;
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const userImg = useSelector((state: RootState) => state.auth.user?.profile_image);
+
   const [fetchFundamentals] = useGetUserFundamentalsByIdMutation();
   const { startMentorChat } = useMentorChat();
   const [sendMentorMessage] = useSendMentorMessageMutation();
 
-  const {
-    data: thread,
-    isLoading: threadsDataLoading,
-    isError,
-    error
-  } = useGetThreadByUserAndTitleQuery(
-    { id: userId, title },
-  );
-  // Filter existing threads for this particular skill’s Mentor
-  const filteredThreads = useMemo(() => {
-    if (!thread?.data) return [];
-    return thread.data;
-  }, [thread, skill]);
+  // Get existing thread by user & title
+  const { data: thread, isLoading: isThreadLoading } = useGetThreadByUserAndTitleQuery({
+    id: userId,
+    title,
+  });
+  console.log("thread",thread);
 
-  const { data: threadMessagesData } = useGetMessagesQuery(
-    { threadId: "679ca0ac7cc99185afb17a46" , userId: "6766d992c76f0cdfe33a0d9e" },
-    {
-      skip: !chatId, // do not fetch messages if we don't have a valid chatId
-    }
-  );
+  const { data: threadMessagesData, isLoading: isMessagesLoading, refetch: refetchMessages } = useGetMessagesQuery({
+    threadId: chatId || "",
+    userId: userId,
+  }, { skip: !chatId });
 
   useEffect(() => {
     if (threadMessagesData?.data) {
       const serverMessages = threadMessagesData.data;
       const loadedMessages: Message[] = serverMessages.map((msg: any, index: number) => ({
         id: index,
-        message: msg.content,
-        role: msg.sender === userId ? "USER" : "AI",
+        message: msg.message,
+        role: msg.role === "USER" ? "USER" : "AI",
       }));
       setMessages(loadedMessages);
       setIsLoading(false);
@@ -146,8 +138,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   // Initialize chat and fundamentals once
   useEffect(() => {
     const initializeChat = async () => {
-      if (!userId || !skillId || !skillPoolId || isInitialized || !threadsDataLoading )
-        return;
+      if (!userId || !skillId || !skillPoolId || isInitialized) return;
       try {
         setIsLoading(true);
 
@@ -160,24 +151,25 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
 
         // 2. If a thread for this skill already exists, set chatId. Otherwise, create a new thread.
         let currentChatId;
-        if (filteredThreads.length > 0) {
-          currentChatId = filteredThreads[0]._id;
+        if (thread?.data) {
+          currentChatId = thread.data._id;
+          console.log("currentChatId",currentChatId);
           setChatId(currentChatId);
         } else {
-          // const { chatId: newChatId } = await startMentorChat({
-          //   title: `${skill}'s Mentor Thread`,
-          //   skill_id: skillId,
-          //   skill_pool_id: skillPoolId,
-          // });
-          // currentChatId = newChatId;
-          // setChatId(newChatId);
+          const { chatId: newChatId } = await startMentorChat({
+            title: `${skill}'s Mentor Thread`,
+            skill_id: skillId,
+            skill_pool_id: skillPoolId,
+          });
+          currentChatId = newChatId;
+          setChatId(newChatId);
 
-          // // Show an initial "Thinking..." message for new threads
-          // setMessages([{ id: 0, message: "Thinking...", role: "AI" }]);
-          // if (newChatId) {
-          //   // 3. Send a default "Hello" to start the conversation
-          //   await sendInitialMessage(newChatId);
-          // }
+          // Show an initial "Thinking..." message for new threads
+          setMessages([{ id: 0, message: "Thinking...", role: "AI" }]);
+          if (newChatId) {
+            // 3. Send a default "Hello" to start the conversation
+            await sendInitialMessage(newChatId);
+          }
         }
 
         setIsInitialized(true);
@@ -187,23 +179,36 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
       }
     };
 
-    initializeChat();
+    if (!isThreadLoading && !isInitialized) {
+      initializeChat();
+    }
   }, [
     userId,
     skillId,
     skillPoolId,
-    filteredThreads,
+    thread?.data,
+    isInitialized,
     fetchFundamentals,
     startMentorChat,
-    isInitialized,
-    threadsDataLoading,
+    isThreadLoading,
   ]);
+
+  useEffect(() => {
+    if (chatId) {
+      refetchMessages();
+    }
+  }, [chatId, refetchMessages]);
 
   const sendInitialMessage = async (currentChatId: string) => {
     try {
       setIsStreaming(true);
+      const initialMessage = "Hello";
+      setMessages((prev) => [
+        ...prev,
+        { id: prev.length + 1, message: initialMessage, role: "USER" },
+      ]);
       await sendMentorMessage({
-        prompt: "Hello",
+        prompt: initialMessage,
         chatId: currentChatId,
         userId,
         fundamentals,
@@ -384,9 +389,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
             href={href}
             target={isExternal ? "_blank" : "_self"}
             rel={isExternal ? "noopener noreferrer" : undefined}
-            className={`text-blue-600 hover:text-blue-800 underline ${
-              isExternal ? "font-semibold" : ""
-            }`}
+            className={`text-blue-600 hover:text-blue-800 underline ${isExternal ? "font-semibold" : ""
+              }`}
             {...props}
           >
             {children}
@@ -456,28 +460,26 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
           <img src={logo} alt="" />
         </div>
       ) : (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 text-white flex items-center justify-center">
-          <User size={20} />
+        <div className="flex-shrink-0 w-14 h-14 rounded-full text-white flex items-center justify-center">
+          <img src={userImg} alt="" className="rounded-full w-11 h-11 object-cover" />
         </div>
       );
 
     return (
       <div
         key={message.id}
-        className={`flex items-start gap-3 ${
-          message.role === "USER" ? "flex-row-reverse" : "flex-row"
-        }`}
+        className={`flex items-start gap-3 ${message.role === "USER" ? "flex-row-reverse" : "flex-row"
+          }`}
       >
         {MessageAvatar}
         <div
-          className={`flex-1 max-w-[70%] p-4 rounded-2xl shadow-md ${
-            message.role === "USER"
+          className={`flex-1 max-w-[70%] p-4 rounded-2xl shadow-md ${message.role === "USER"
               ? "bg-white ml-auto "
               : "bg-white border border-gray-100"
-          }`}
+            }`}
         >
           {message.role === "USER" ? (
-            <p className="text-sm whitespace-pre-wrap leading-relaxed text-[16px] font-ubuntu">{message.message}</p>
+            <p className=" whitespace-pre-wrap leading-relaxed text-[16px] font-ubuntu">{message.message}</p>
           ) : (
             <ReactMarkdown
               className="text-sm prose prose-sm max-w-none prose-headings:mt-4 prose-headings:mb-2"
@@ -506,9 +508,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     <div className="flex h-full w-full max-w-[1800px]">
       {/* MAIN CHAT COLUMN */}
       <div
-        className={`flex flex-col flex-1 transition-all duration-300 ${
-          isSidebarOpen ? "w-[70%]" : "w-full"
-        }`}
+        className={`flex flex-col flex-1 transition-all duration-300 ${isSidebarOpen ? "w-[70%]" : "w-full"
+          }`}
       >
         {/* Messages Container */}
         <div
@@ -560,8 +561,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
                 isLoading
                   ? "Loading..."
                   : isStreaming
-                  ? "Waiting for response..."
-                  : "Ask your mentor..."
+                    ? "Waiting for response..."
+                    : "Ask your mentor..."
               }
               className="flex-1 p-3 border-none rounded-lg focus:outline-none text-sm bg-white"
               disabled={isLoading || isStreaming}
@@ -569,11 +570,10 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
             <button
               onClick={handleSendMessage}
               disabled={isLoading || isStreaming || !inputMessage.trim()}
-              className={`p-3 rounded-xl shadow-md transition-all text-white ${
-                isLoading || isStreaming || !inputMessage.trim()
+              className={`p-3 rounded-xl shadow-md transition-all text-white ${isLoading || isStreaming || !inputMessage.trim()
                   ? "bg-[#062549] cursor-not-allowed"
                   : "bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.5"
-              }`}
+                }`}
             >
               <Send size={20} />
             </button>
