@@ -22,7 +22,9 @@ const noSidebarRoutes = [
   "/verify-otp",
   "/auth/github/callback",
   "/auth/linkedin/callback",
-  "/profile"
+  "/profile",
+  "/employer/signup",
+  "/employer/login",
 ];
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

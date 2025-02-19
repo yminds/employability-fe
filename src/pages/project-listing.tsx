@@ -192,7 +192,7 @@ const ProjectListing = () => {
       setIsChangingGoal(true);
       const timer = setTimeout(() => {
         setIsChangingGoal(false);
-      }, 1000); // Minimum skeleton display time
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [selectedGoalId]);
