@@ -150,7 +150,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             {project.tech?.length > 0 && (
               <div className="flex flex-col gap-2 w-full mt-4">
                 <div className="flex gap-2 flex-wrap">
-                  {project.tech.slice(0, 4).map((tech) => (
+                  {project.tech.slice(0, 3).map((tech) => (
                     <Badge
                       key={tech._id}
                       variant="secondary"
@@ -161,13 +161,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                       </span>
                     </Badge>
                   ))}
-                  {project.tech.length > 4 && (
+                  {project.tech.length > 3 && (
                     <Badge
                       variant="secondary"
                       className="min-h-6 px-3 py-1 bg-[#ebebeb] rounded-full flex items-center justify-center"
                     >
                       <span className="text-black/70 text-sm font-medium">
-                        +{project.tech.length - 4}
+                        +{project.tech.length - 3}
                       </span>
                     </Badge>
                   )}
