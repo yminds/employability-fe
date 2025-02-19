@@ -73,9 +73,9 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
               setDots(Array(16).fill(false).map((_, i) => volume > i * 10));
             }
 
-            const lowFreq = dataArray.slice(0, 50);
-            const midFreq = dataArray.slice(50, 150);
-            const highFreq = dataArray.slice(150, 255);
+            const lowFreq = dataArray.slice(0, 20);
+            const midFreq = dataArray.slice(20, 50);
+            const highFreq = dataArray.slice(50, 150);
 
             const avgLow = lowFreq.reduce((a, b) => a + b, 0) / lowFreq.length;
             const avgMid = midFreq.reduce((a, b) => a + b, 0) / midFreq.length;

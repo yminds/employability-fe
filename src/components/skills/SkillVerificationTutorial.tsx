@@ -10,48 +10,56 @@ interface SkillVerificationTutorialProps {
   onConfirm: () => void;
   dontShowAgain: boolean;
   setDontShowAgain: (value: boolean) => void;
+  component:"SkillsCard" | "ScreenSharing";
 }
-
-const slides = [
-  {
-    image: `${checkSetupImg}`, // Replace with actual path
-    title: "Step 1: Check Your Setup",
-    description:
-      "Before you dive in, make sure your microphone and camera are working properly, and screen is shared correctly.",
-  },
-  {
-    image: `${enableAudioImg}`, // Replace with actual path
-    title: "Step 2: Enable the Audio",
-    description:
-      "While sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
-  },
-  {
-    image: `${checkedStateCheckSetup}`, // Replace with actual path
-    title: "Step 3: Proceed to Interview",
-    description:
-      "Once you've checked your setup, click on 'Proceed to Interview' to begin the skill interview.",
-  },
-  {
-    image: `${interveiwScreenImg}`, // Replace with actual path
-    title: "Step 4: Interview Process",
-    description:
-      "Once the interview starts, you'll be asked a series of questions by the AI Agent. Answer them to the best of your ability. After answering the question press the 'Done Answering' button to proceed to the next question.",
-  },
-  {
-    image: `${skillCard}`, // Replace with actual path
-    title: "Step 5: Verified Rating & Report",
-    description:
-      "Once the interview is complete, you'll receive a verified rating and report based on your performance.",
-  },
-];
 
 const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
   onClose,
   onConfirm,
   dontShowAgain,
   setDontShowAgain,
+  component,
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const slides =  component === "SkillsCard" ? [
+    {
+      image: `${checkSetupImg}`, // Replace with actual path
+      title: "Step 1: Check Your Setup",
+      description:
+        "Before you dive in, make sure your microphone and camera are working properly, and screen is shared correctly.",
+    },
+    {
+      image: `${enableAudioImg}`, // Replace with actual path
+      title: "Step 2: Enable the Audio",
+      description:
+        "While sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
+    },
+    {
+      image: `${checkedStateCheckSetup}`, // Replace with actual path
+      title: "Step 3: Proceed to Interview",
+      description:
+        "Once you've checked your setup, click on 'Proceed to Interview' to begin the skill interview.",
+    },
+    {
+      image: `${interveiwScreenImg}`, // Replace with actual path
+      title: "Step 4: Interview Process",
+      description:
+        "Once the interview starts, you'll be asked a series of questions by the AI Agent. Answer them to the best of your ability. After answering the question press the 'Done Answering' button to proceed to the next question.",
+    },
+    {
+      image: `${skillCard}`, // Replace with actual path
+      title: "Step 5: Verified Rating & Report",
+      description:
+        "Once the interview is complete, you'll receive a verified rating and report based on your performance.",
+    },
+  ] : [
+    {
+      image: `${enableAudioImg}`, // Replace with actual path
+      title: "Enable the Audio",
+      description:
+        "Enable the screen using the 'Entire Screen' only. Make sure to enable audio sharing as well.",
+    },
+  ];
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {

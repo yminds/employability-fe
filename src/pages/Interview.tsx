@@ -118,7 +118,6 @@ const InterviewSetupNew: React.FC = () => {
   // the fundamentals have loaded, and the interview is started.
   const canShowInterview = isInterviewStarted && fundamentals.length > 0 && hasPermissions;
 
-
   return (
     <>
       {/* Permission Note Modal */}
@@ -209,6 +208,7 @@ const InterviewSetupNew: React.FC = () => {
           interviewTopic={title}
           concepts={fundamentals}
           stopScreenSharing={stopScreenSharing}
+          skillLevel={level}
         />
       )}
     </>
