@@ -2,7 +2,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { Country, State, City } from "country-state-city";
 import "react-phone-input-2/lib/style.css";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,6 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 //Images
 import VectorFile from "@/assets/profile/completeprofile/file.svg";
 import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
-import { updateUserProfile } from "@/features/authentication/authSlice";
 import UploadProgressBar from "@/features/profile/UploadProgressBar";
 import type { BasicInfo } from "@/features/profile/types";
 
@@ -83,7 +82,6 @@ export default function BasicInfoForm({
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const dispatch = useDispatch();
 
   // Load countries
   useEffect(() => {
@@ -136,7 +134,7 @@ export default function BasicInfoForm({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [formData, socialProfiles, isImageDeleted, newlyUploadedImage, onChange]); // Added isImageDeleted to dependencies
+  }, [formData, socialProfiles, isImageDeleted, newlyUploadedImage]); // Added isImageDeleted to dependencies
 
   const handleBasicInfoChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -224,7 +222,6 @@ export default function BasicInfoForm({
   ) => {
     const { name, value } = e.target;
     setSocialProfiles((prev) => ({ ...prev, [name]: value }));
-    dispatch(updateUserProfile({ ...formData, [name]: value }));
   };
 
   const getError = (field: string) => {
