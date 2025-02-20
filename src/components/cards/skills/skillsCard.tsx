@@ -12,8 +12,6 @@ import SkillVerificationTutorial from "@/components/skills/SkillVerificationTuto
 import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { to } from "react-spring";
-import { toast } from "sonner";
 
 interface LatestInterviewStatus {
   interview_id: string;
@@ -203,12 +201,12 @@ const SkillCard: React.FC<SkillCardProps> = ({
     
     // Start the interview after closing the tutorial
     navigate(`/interview/${interviewId}`, {
-      state: { skill, skillId, skillPoolId, level },
+      state: { title:skill, skillId, skillPoolId, level },
     });
   };
 
   const handleResumeInterView = () => {
-    navigate(`/interview/${latest_interview_status?.interview_id}`, {
+      navigate(`/interview/${latest_interview_status?.interview_id}`, {
       state: { title: skill, skillPoolId, level },
     });
   }
@@ -221,6 +219,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           onConfirm={handleConfirmTutorial}
           dontShowAgain={dontShowAgain}
           setDontShowAgain={setDontShowAgain}
+          component={"SkillsCard"}
         />
       )}
 

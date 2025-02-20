@@ -35,6 +35,9 @@ import UserPublicProfilePage from "./pages/UserPublicProfilePage.tsx";
 
 import ReportPage from "./pages/SkillsReportPage.tsx";
 import VerifyPhoneOTP from "./pages/VerifyPhoneOTP.tsx";
+import ResumeUploader from "./components/employer/ResumeUpload.tsx";
+import { EmployerSignup } from "./pages/EmployerSignUp.tsx";
+import { EmployerLogin } from "./pages/EmployerLogin.tsx";
 
 
 interface RouteConfig {
@@ -82,6 +85,18 @@ export const routes: RouteConfig[] = [
   {
     route:"/verify-otp",
     component:<VerifyPhoneOTP/>,
+  },
+  {
+    route:"/employer/uploadResume",
+    component:<ResumeUploader/>
+  },
+  {
+    route:"/employer/signup",
+    component:<EmployerSignup/>
+  },
+  {
+    route:"/employer/login",
+    component:<EmployerLogin/>
   },
   // {
   //   route:"/verify-email/:token",

@@ -240,12 +240,10 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({
       {/* Skills Section */}
       <div className="self-stretch flex-1 overflow-hidden flex flex-col">
         <h3 className="flex items-center gap-2 text-gray-800 font-medium mb-6">
-          <img
-            className="w-6 h-6"
-            src={vector || "/placeholder.svg"}
-            alt="short logo"
-          />
+          <img className="w-6 h-6" src={vector || "/placeholder.svg"} alt="short logo" />
+          <div className="pt-1.5">
           Practical Skill Coverage
+          </div>
         </h3>
         <div
           ref={skillsContainerRef}
