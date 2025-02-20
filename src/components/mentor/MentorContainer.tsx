@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Send, User, Copy } from "lucide-react";
+import { Send, Copy } from "lucide-react";
 import FundamentalBar from "@/components/mentor/FundamentalsList";
 import { useGetUserFundamentalsByIdMutation } from "@/api/userFundamentalsAppiSlice";
 import { useMentorChat } from "@/hooks/useChatMentor";
@@ -17,6 +17,8 @@ import {
 import React from "react";
 import logo from "@/assets/skills/e-Logo.svg";
 import { useGetThreadByUserAndTitleQuery } from "@/api/threadApiSlice";
+import { flushSync } from "react-dom";
+import { set } from "zod";
 
 interface ThreadData {
   _id: string;
@@ -104,6 +106,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const socketRef = useRef<any>(null);
   const title = `${skill}'s Mentor Thread`;
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const userImg = useSelector((state: RootState) => state.auth.user?.profile_image);
 
   const [fetchFundamentals] = useGetUserFundamentalsByIdMutation();
   const { startMentorChat } = useMentorChat();
@@ -114,7 +117,6 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     id: userId,
     title,
   });
-  console.log("thread",thread);
 
   const { data: threadMessagesData, isLoading: isMessagesLoading, refetch: refetchMessages } = useGetMessagesQuery({
     threadId: chatId || "",
@@ -148,26 +150,27 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
         }).unwrap();
         setFundamentals(fundamentalsResponse?.data?.fundamentals || []);
 
-        // 2. If a thread for this skill already exists, set chatId. Otherwise, create a new thread.
-        let currentChatId;
+        // 2. If a thread for this skill already exists, set chatId to the thread's _id.
         if (thread?.data) {
-          currentChatId = thread.data._id;
-          console.log("currentChatId",currentChatId);
-          setChatId(currentChatId);
+          setChatId(thread.data._id);
         } else {
-          const { chatId: newChatId } = await startMentorChat({
+          // New chat: call startMentorChat (which returns a chatId that is temporary)
+          const {threadId: tempChatId} = await startMentorChat({
             title: `${skill}'s Mentor Thread`,
             skill_id: skillId,
             skill_pool_id: skillPoolId,
           });
-          currentChatId = newChatId;
-          setChatId(newChatId);
+          // Set chatId to the returned id for now.
+          flushSync(() => {
+            setChatId(tempChatId);
+          });
+          console.log("New chat started:", tempChatId);
 
           // Show an initial "Thinking..." message for new threads
           setMessages([{ id: 0, message: "Thinking...", role: "AI" }]);
-          if (newChatId) {
-            // 3. Send a default "Hello" to start the conversation
-            await sendInitialMessage(newChatId);
+          if (tempChatId) {
+            // Send an initial "Hello" message.
+            await sendInitialMessage(tempChatId);
           }
         }
 
@@ -308,6 +311,12 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
       setTimeout(() => toast.remove(), 500);
     }, 2000);
   };
+
+  useEffect(() => {
+    if (thread?.data && chatId !== thread.data._id) {
+      setChatId(thread.data._id);
+    }
+  }, [thread, chatId]);
 
   // ---------- MARKDOWN COMPONENTS ----------
   const MarkdownComponents = useMemo(() => {
@@ -459,8 +468,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
           <img src={logo} alt="" />
         </div>
       ) : (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 text-white flex items-center justify-center">
-          <User size={20} />
+        <div className="flex-shrink-0 w-14 h-14 rounded-full text-white flex items-center justify-center">
+          <img src={userImg} alt="" className="rounded-full w-11 h-11 object-cover" />
         </div>
       );
 

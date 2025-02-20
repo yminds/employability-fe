@@ -54,6 +54,7 @@ export const useProfileForm = (
   const [newlyUploadedImage, setNewlyUploadedImage] = useState<string | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
 
   const { data: userDetails } = useGetUserByIdQuery(user._id, {
     refetchOnMountOrArgChange: false,
@@ -393,6 +394,7 @@ export const useProfileForm = (
       if (!validateSection(section)) {
         return;
       }
+      setIsLoading(true);
       try {
         const transformedData = transformFormDataForDB(formData);
         transformedData.is_experienced = !isFresher;
@@ -715,6 +717,8 @@ export const useProfileForm = (
         if (err instanceof Error) {
           setErrors({ [section]: err.message });
         }
+      } finally {
+        setIsLoading(false);
       }
     },
     [
@@ -762,5 +766,6 @@ export const useProfileForm = (
     newlyUploadedImage,
     setNewlyUploadedImage,
     profileStatus,
+    isLoading,
   };
 };

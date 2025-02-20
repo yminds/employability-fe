@@ -241,7 +241,7 @@ const SkillProgress: React.FC<SkillProgressProps> = ({
     },
     { 
       type: 'interview',
-      title: "Mock Interviews",
+      title: "Interviews",
       value: mockInterviews,
       total: 8,
       step: 4,
@@ -373,7 +373,7 @@ const SkillProgress: React.FC<SkillProgressProps> = ({
                     )}
                   </div>
 
-                  <div className="mt-4">
+                  <div className="mt-4 m">
                     {renderValue(step)}
                     <div className={`text-xs mt-1 font-medium font-['DM Sans'] ${getStatusColor(status)}`}>
                       {getStatusText(status)}

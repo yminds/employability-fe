@@ -48,7 +48,7 @@ const Conversation: React.FC<{
 
       {/* Scrollable Messages */}
       <div
-        className={`overflow-y-scroll h-full minimal-scrollbar ${
+        className={`overflow-y-scroll max-h-full minimal-scrollbar flex flex-col-reverse ${
           layoutType === 1 ? "p-0" : "p-4"
         }`}
       >
@@ -60,13 +60,13 @@ const Conversation: React.FC<{
               key={message.id}
               message={{
                 ...message,
-                className: layoutType === 1 ? "mt-12" : "mt-4",
+                className: layoutType === 1 ? "mb-12" : "mb-4",
               }}
             />
           ) : index === messages.length - 1 ? (
             <Message
               key={message.id}
-              message={{ ...message, className: "mb-12" }}
+              message={{ ...message, className: "mb-5" }}
             />
           ) : (
             <Message key={message.id} message={{ ...message }} />

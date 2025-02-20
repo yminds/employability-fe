@@ -223,13 +223,7 @@ const ProfileBanner = ({
         <CompleteProfileModal
           type="basic"
           onClose={() => setIsProfileModalOpen(false)}
-          onSave={(data: ProfileFormData) => {
-            // Implement the save functionality here
-            console.log("Profile data to save:", data);
-            setIsProfileModalOpen(false);
-          }}
           user={user}
-          isParsed={false}
           goalId={goalData?.data?.[0]?._id}
         />
       )}

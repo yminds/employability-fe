@@ -20,6 +20,7 @@ import { set } from "zod";
 import { Timer } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import toggleBrowserFullscreen from "../skills/fullscreen";
 
 // Constants and Types
 const SOCKET_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "wss://employability.ai";
@@ -50,7 +51,8 @@ const Interview: React.FC<{
   interviewTopic: string;
   concepts: any[];
   stopScreenSharing: () => void;
-}> = ({ interviewTopic, concepts, stopScreenSharing }) => {
+  skillLevel:"1" | "2" | "3"
+}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel }) => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
@@ -257,7 +259,7 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts,
+      concepts: concepts.slice(0,4),
       interview_id: interviewDetails.data._id,
       level: user?.experience_level || "entry"
     }).unwrap();
@@ -281,13 +283,14 @@ const Interview: React.FC<{
 
   const navigate = useNavigate();
   const handleBackToSkills = () => {
+    toggleBrowserFullscreen();
     navigate("/skills");
   };
 
   return (
     <div className="w-full h-screen pt-12 ">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-        <Header SkillName={interviewTopic} />
+        <Header SkillName={interviewTopic} type={"Skills Interview"} skillLevel={skillLevel}/>
         {isInterviewEnded ? (
           <div className="text-center text-gray-500">
             <p>Thank you for your time. We will get back to you soon.</p>
