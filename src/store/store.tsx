@@ -27,12 +27,13 @@ import { certificationsApiSlice } from "@/api/certificatesApiSlice";
 import { projectApiSlice } from "@/api/projectApiSlice";
 import {resumeUploadApiSlice } from '@/api/resumeUploadApiSlice';
 import {fundamentalsApiSlice}   from '@/api/fundementalSlice';
+import employerAuthReducer from '../features/authentication/employerAuthSlice'
 // Redux persist config
 const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  whitelist: ["auth", "onboarding", "clinicOnboarding"],
+  whitelist: ["auth", "onboarding", "clinicOnboarding","employerAuth"],
 };
 
 // Combined root reducer
@@ -47,6 +48,7 @@ const rootReducer = combineReducers({
   [resumeUploadApiSlice.reducerPath]:resumeUploadApiSlice.reducer,
 
   auth: authReducer,
+  employerAuth:employerAuthReducer,
   goals: goalReducer,
   error: errorReducer,
   success: successReducer,

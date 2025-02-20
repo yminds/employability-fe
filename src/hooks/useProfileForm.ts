@@ -76,7 +76,7 @@ export const useProfileForm = (
   const [getUserSkills] = useGetUserSkillsMutation();
   const [getVerifySkills] = useVerifyMultipleSkillsMutation();
 
-  const parsedBasicData = useMemo(() => {
+  const [parsedBasicData, setParsedBasicData] = useState(() => {
     if (!user.is_basic_info) {
       const data = user.parsedResume;
       if (!data) {
@@ -141,7 +141,7 @@ export const useProfileForm = (
         portfolio: user.portfolio || "",
       },
     };
-  }, [user]);
+  });
 
   useEffect(() => {
     const initializeData = async () => {
@@ -291,7 +291,14 @@ export const useProfileForm = (
         ...prev,
         [section]: data,
       }));
-      if (section === "basicInfo") {
+      if (section === "basicInfo" || section === "socialProfiles") {
+        setParsedBasicData((prev: any) => ({
+          ...prev,
+          [section]: {
+            ...prev[section],
+            ...data,
+          },
+        }));
         if (isImageDeleted !== undefined) {
           setIsImageDeleted(isImageDeleted);
         }
@@ -339,11 +346,11 @@ export const useProfileForm = (
       const updatedData = formData[section].filter(
         (_: any, i: number) => i !== index
       );
+      updateFormData(section, updatedData);
       const updatedResume = user.parsedResume[section].filter(
         (_: any, i: number) => i !== index
       );
       const deletedItem = formData[section][index];
-      updateFormData(section, updatedData);
 
       try {
         if (section === "skills") {
