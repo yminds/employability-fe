@@ -74,7 +74,7 @@ const Sidebar: React.FC = () => {
     <div className="relative group">
       <aside
         className={`bg-white shadow-md h-screen p-8 px-4 justify-between flex-shrink-0 flex flex-col items-start gap-[40px] self-stretch overflow-y-auto overflow-x-hidden scrollbar-default transition-all ${
-          isCollapsed ? "w-20" : "w-64"
+          isCollapsed ? "w-20" : "w-52"
         } sm:hidden`}
       >
         <Link
@@ -218,7 +218,7 @@ const Sidebar: React.FC = () => {
               {!isCollapsed && (
                 <div className="mt-3">
                   <p className="text-[#333333] text-sub-header">{user_name}</p>
-                  <p className="text-[#909091] text-body2 truncate max-w-[180px]">
+                  <p className="text-[#909091] text-[14px] leading-5 tracking-[0.03em] font-dm-sans truncate max-w-[150px]">
                     {user_email}
                   </p>
                 </div>

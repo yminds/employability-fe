@@ -54,7 +54,7 @@ const CompleteProfileModal = ({
   const tabs = useMemo(
     () => [
       { id: "basic", label: "Basic Info" },
-      { id: "skills", label: "Skills" },
+      ...(goalId ? [{ id: "skills", label: "Skills" }] : []),
       { id: "experience", label: "Experience" },
       { id: "education", label: "Education" },
       { id: "certification", label: "Certifications" },
