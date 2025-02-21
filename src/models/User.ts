@@ -18,8 +18,6 @@ export type User = {
   email: string;
   role: Role;
   name: string;
-  isProfileCompleted: boolean;
-  isPhoneVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
   skills: string[]; // Array of skill IDs
@@ -29,6 +27,7 @@ export type User = {
   certificates: string[]; // Array of certificate IDs
   date_of_birth: string;
   is_email_verified: boolean;
+  is_phone_verified: boolean;
   is_basic_info: boolean;
   email_verification_token?: string;
   email_verification_token_expiry?: Date;

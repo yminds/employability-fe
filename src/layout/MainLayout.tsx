@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { routes } from "@/Routes";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "@/features/sidebar/sidebar";
 import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
@@ -29,10 +29,16 @@ const noSidebarRoutes = [
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
-  const isEmailVerified = useSelector((state:any)=> state.auth.user?.is_email_verified)
+  const isEmailVerified = user?.is_email_verified;
+  const isPhoneVerified = user?.is_phone_verified;
 
-  console.log("isEmailVerification",isEmailVerified)
+  useEffect(() => {
+    if (user && !isPhoneVerified) {
+      navigate("/setexperience");
+    }
+  }, [user, isPhoneVerified]);
 
   const shouldDisplaySidebar = (): boolean => {
     const currentPath = location.pathname;
@@ -59,7 +65,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const shouldShowBanner = (): boolean | null => {
     // Show banner if user is logged in, email is not verified, and we're on a route that shows the sidebar
-    return shouldDisplaySidebar() && Boolean(user) && isEmailVerified===false;
+    return shouldDisplaySidebar() && Boolean(user) && isEmailVerified === false;
   };
 
   return (
@@ -70,7 +76,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <EmailVerification />
         </div>
       )}
-      
+
       {/* Main Content */}
       <div className="flex flex-1 ">
         {/* Sidebar */}
@@ -79,13 +85,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <Sidebar />
           </div>
         )}
-        
+
         {/* Main Content Area */}
-        <div className="flex-1 bg-gray-100">
-          {children}
-        </div>
+        <div className="flex-1 bg-gray-100">{children}</div>
       </div>
-      
+
       {/* Toast Notifications */}
       <Toaster />
     </div>
