@@ -54,14 +54,15 @@ interface ReportContentProps {
   userSkillId: string;
   level: string;
   skill:string;
+  publicProfileName:string
 }
 
-const getShareUrl = () => {
+const getShareUrl = (publicProfileName : string) => {
   if (typeof window === "undefined") return "";
   const currentPath = window.location.pathname;
   const interviewId = currentPath.split("/").pop();
   const baseUrl = window.location.origin;
-  const url = new URL(`${baseUrl}/share/skills-report/${interviewId}`);
+  const url = new URL(`${baseUrl}/skills-report/${publicProfileName}/${interviewId}`);
   return url.toString();
 };
 
@@ -76,7 +77,8 @@ const ReportContent: React.FC<ReportContentProps> = ({
   skillId,
   userSkillId,
   level,
-  skill
+  skill,
+  publicProfileName
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +90,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
     setShowSharePopup((prev) => !prev);
   };
 
-  const shareUrl = getShareUrl();
+  const shareUrl = getShareUrl(publicProfileName);
 
   /**
    * Wait for all images in the given element to be loaded.
