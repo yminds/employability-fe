@@ -110,6 +110,8 @@ const Interview: React.FC<{
       }
     };
 
+    
+
     const handleAIResponse = (data: string) => {
       setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
 
