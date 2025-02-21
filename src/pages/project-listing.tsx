@@ -242,7 +242,8 @@ const ProjectListing = () => {
   const selectedGoalExperience = selectedGoal?.experience || null;
 
   return (
-    <div className="w-full h-screen overflow-hidden bg-[#F5F5F5]">
+    <div className="w-[95%] h-screen overflow-hidden max-w-[1800px] p-5 bg-[#F5F5F5] mx-auto">
+      <div className="w-full max-w-screen-xl flex flex-col gap-6">
       <ProjectUploadModal
         open={isModalOpen}
         onOpenChange={handleCloseModal}
@@ -268,25 +269,23 @@ const ProjectListing = () => {
         />
       )}
 
-      <div className="flex justify-between items-center mt-5 ml-12">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleBackToDashboard}
-            className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
-          >
-            <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
-          </button>
-          <h1 className="text-black font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.025rem]">
-            Projects
-          </h1>
-        </div>
-      </div>
+      <section className="flex items-center space-x-2 gap-3">
+        <button
+          onClick={handleBackToDashboard}
+          className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
+        >
+          <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
+        </button>
+        <h1 className="text-black font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.025rem]">
+          Projects
+        </h1>
+      </section>
 
-      <section className="w-full h-[calc(100vh-2rem)] bg-[#F5F5F5]">
-        <div className="h-full flex justify-center mx-6">
-          <div className="w-full max-w-[1800px] flex gap-6 p-6 md:flex-col-reverse sm:flex-col-reverse">
+      <section className="w-full h-[calc(100vh-2rem)]">
+        <div className="h-full flex justify-center">
+          <div className="w-full flex gap-6 md:flex-col-reverse sm:flex-col-reverse">
             <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
-              <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:relative">
+              <div className="sticky top-0 left-0 z-10 sm:relative">
                 {goalData && (
                   <SkillsHeader
                     userId={userId}
@@ -301,7 +300,7 @@ const ProjectListing = () => {
                 )}
               </div>
 
-              <div className="mt-[70px] sm:mt-4 overflow-y-auto scrollbar-hide">
+              <div className="mt-[70px] mb-[50px] sm:mt-4 overflow-y-auto scrollbar-hide">
                 {projectsError ? (
                   <div className="text-center text-red-500 py-4">
                     Error loading projects
@@ -328,8 +327,8 @@ const ProjectListing = () => {
               </div>
             </div>
 
-            <div className="flex-[2] w-[350px] space-y-4">
-              <div className="flex sticky top-[70px] md:relative md:top-0 sm:relative sm:top-0">
+            <div className="flex-[2] w-[30%] space-y-4">
+              <div className="flex sticky md:relative md:top-0 sm:relative sm:top-0">
                 {projectsLoading || isChangingGoal ? (
                   <ProjectInsightsSkeleton />
                 ) : (
@@ -344,6 +343,7 @@ const ProjectListing = () => {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 };
