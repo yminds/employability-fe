@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { routes } from "@/Routes";
 import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "@/features/sidebar/sidebar";
@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
+import DisabledAccountModal from "@/components/modal/DisabledAccountModal";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -33,12 +34,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const isEmailVerified = user?.is_email_verified;
   const isPhoneVerified = user?.is_phone_verified;
+  const account_status = user?.account_status;
+
+  const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 
   useEffect(() => {
     if (user && !isPhoneVerified) {
       navigate("/setexperience");
     }
   }, [user, isPhoneVerified]);
+
+  useEffect(() => {
+    setIsDisabledModalOpen(account_status === "disabled");
+  }, [account_status]);
 
   const shouldDisplaySidebar = (): boolean => {
     const currentPath = location.pathname;
@@ -87,7 +95,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         )}
 
         {/* Main Content Area */}
-        <div className="flex-1 bg-gray-100">{children}</div>
+        <div className="flex-1 bg-gray-100">
+          {isDisabledModalOpen ? (
+            <DisabledAccountModal isOpen={isDisabledModalOpen} />
+          ) : (
+            children
+          )}
+        </div>
       </div>
 
       {/* Toast Notifications */}
