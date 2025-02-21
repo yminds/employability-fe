@@ -143,7 +143,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
                     setIsOpen={setIsDialogOpen}
                     selectedGoal={selectedGoal}
                     setJourneyDialog={setJourneyDialog}
-                    isSetGoalsPage={isSetGoalsPage} // Pass the flag to control the appearance
+                    isSetGoalsPage={true} // Pass the flag to control the appearance
                     bannerColor={bannerColors[data.findIndex(goal => goal._id === selectedGoal._id)] || colorPalette[0]} // Ensure a default color
                     onGoalUpdate={onGoalUpdate}
                 />

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useLayoutEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -15,8 +15,6 @@ import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 import { useTTS } from "@/hooks/useTTS";
 import { useSTT } from "@/hooks/useSTT";
 import CodeSnippetQuestion from "./CodeSnippetQuestion";
-import FundamentalBar from "../mentor/FundamentalsList";
-import { set } from "zod";
 import { Timer } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -336,9 +334,6 @@ const LayoutBuilder = ({
   interviewState,
   concepts,
 }: LayoutBuilderProps) => {
-  const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
-
-  // console.log("concepts", concepts);
   const coveredConceptsLength = concepts.filter((concept) => concept.status === "completed").length;
   const calculateProgress = (concepts: any[]) => {
     if (!concepts.length) return 0;

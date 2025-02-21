@@ -41,7 +41,7 @@ const SkillsContainer: React.FC = () => {
 
   const handleGoalModal = () => {
     setIsModalOpen(false);
-    navigate("/skills"); 
+    navigate("/"); 
   };
   const navigate = useNavigate();
 

@@ -127,7 +127,7 @@ const ProjectsPage = () => {
 
   const handleGoalModal = () => {
     setIsGoalModalOpen(false);
-    navigate("/projects");
+    navigate("/");
   };
 
   if (isGoalLoading || isProjectLoading) {
