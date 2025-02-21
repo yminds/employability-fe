@@ -66,50 +66,42 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
         </h1>
       </section>
 
-      <section
-        id="search and filters "
-        className="flex flex-row gap-3.5 justify-between items-center "
-      >
-        <div
-          id="job categories"
-          className="bg-white   p-[5px] rounded-md justify-start text-center gap-2.5 inline-flex"
-        >
+      <section className="flex flex-row gap-3.5 justify-between items-center">
+        <div className="bg-white p-[5px] rounded-md justify-start text-center gap-2.5 inline-flex">
           <button
             onClick={() => setJobsTab("All")}
-            className={`py-1.5 px-2 rounded-[3px]  text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight ${
-              JobsTab == "All" ? "bg-[#DBFFEA] text-[#10B754]" : ""
+            className={`py-1.5 px-2 rounded-[3px] text-body2 ${
+              JobsTab == "All"
+                ? "bg-[#DBFFEA] text-[#10B754]"
+                : "text-[#68696B]"
             } `}
           >
             All
           </button>
           <button
             onClick={() => setJobsTab("Suggested")}
-            className={`py-1.5 px-2 rounded-[3px] text-base font-normal font-['SF Pro Display']  leading-normal tracking-tight ${
-              JobsTab == "Suggested" ? "bg-[#DBFFEA] text-[#10B754]" : ""
+            className={`py-1.5 px-2 rounded-[3px] text-body2 ${
+              JobsTab == "Suggested"
+                ? "bg-[#DBFFEA] text-[#10B754]"
+                : "text-[#68696B]"
             }`}
           >
             Suggested
           </button>
           <button
             onClick={() => setJobsTab("Active application")}
-            className={`py-1.5 px-2 rounded-[3px] text-base font-normal font-['SF Pro Display'] leading-normal text-nowrap tracking-tight ${
+            className={`py-1.5 px-2 rounded-[3px] text-body2 ${
               JobsTab == "Active application"
                 ? "bg-[#DBFFEA] text-[#10B754]"
-                : ""
+                : "text-[#68696B]"
             }`}
           >
             Active applications
           </button>
         </div>
 
-        <div
-          id="search bar and filters "
-          className="flex flex-row gap-3.5  item-center"
-        >
-          <div
-            id="searchbar"
-            className="flex flex-row p-[5px]  rounded-[6px] items-center bg-white"
-          >
+        <div className="flex flex-row gap-3.5 item-center">
+          <div className="flex flex-row p-[5px]  rounded-[6px] items-center bg-white">
             <div className="py-1.5 px-3 flex items-center justify-center">
               <img src={searchIcon} className="w-4 h-4 "></img>
             </div>
@@ -118,18 +110,17 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
                 onKeyDown={handleSearchChange}
                 type="text"
                 placeholder="Search"
-                className=" text-[#67696b] text-base font-normal font-['SF Pro Display'] w-20 leading-normal tracking-tight focus:outline-none focus:w-28 "
+                className=" text-[#67696b] text-body2 w-20 focus:outline-none focus:w-28 "
               />
             </div>
           </div>
 
           <div
-            id="filters"
-            className="flex flex-row p-2.5 rounded-[6px] items-center text-center bg-white "
+            className="flex flex-row p-2.5 rounded-[6px] items-center text-center bg-white cursor-pointer"
             onClick={() => openFiltersModal()}
           >
             <img src={filterIcon} className="w-4 h-4 my-1.5 mx-3 "></img>
-            <p className=" my-1.6 mr-12 text-[#67696b] text-nowrap text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight">
+            <p className=" my-1.6 mr-12 text-[#67696b] text-nowrap text-body2">
               {" "}
               Filters {appliedFiltersCount ? `(${appliedFiltersCount})` : ""}
             </p>
@@ -142,12 +133,12 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
           id="applied filters"
           className="flex  flex-row justify-start gap-3.5 items-center w-full  rounded-lg  overflow-hidden overflow-ellipsis   "
         >
-          <p className="  text-nowrap ">Applied filters </p>
+          <p className="text-nowrap text-sub-header">Applied filters </p>
 
           <div className="inline-flex gap-2 ">
             {/* location filters */}
             {filters.locations.length > 0 && (
-              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-start py-2.5 bg-white text-nowrap text-ellipsis overflow-hidden min-w-min w-max-[380px]">
+              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-start py-2.5 bg-white text-nowrap text-ellipsis text-body2 overflow-hidden min-w-min w-max-[380px]">
                 <img src={locationIcon} className="w-4 h-4  "></img>
                 <p className=" inline-block ">
                   {filters.locations.slice(0, 4).join(",")}
@@ -157,7 +148,7 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
             )}
 
             {filters.workTypes.length > 0 && (
-              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-start py-2.5 bg-white text-nowrap text-ellipsis overflow-hidden min-w-min w-max-[320px]">
+              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-start py-2.5 bg-white text-nowrap text-ellipsis text-body2  overflow-hidden min-w-min w-max-[320px]">
                 <img src={locationIcon} className="w-4 h-4  "></img>
                 <p className=" inline-block w-full ">
                   {filters.workTypes.join(",")}
@@ -167,7 +158,7 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
 
             {/* salary filters */}
             {filters.minimumSalary > 0 && (
-              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-center py-2.5 bg-white  ">
+              <div className=" flex flex-row  gap-1.5 px-3 items-center text-body2 rounded-lg justify-center py-2.5 bg-white  ">
                 <img src={compensationsvg} className="w-4 h-4  "></img>
                 <p className=" inline-block ">
                   {" "}
@@ -179,7 +170,7 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
 
             {/* jobtypes filters */}
             {filters.jobTypes.length > 0 && (
-              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-center py-2.5 bg-white text-ellipsis text-nowrap ">
+              <div className=" flex flex-row  gap-1.5 px-3 items-center text-body2 rounded-lg justify-center py-2.5 bg-white text-ellipsis text-nowrap ">
                 <img src={employeesvg} className="w-4 h-4  "></img>
                 <p className=" inline-block ">
                   {filters.jobTypes
@@ -194,7 +185,7 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
             )}
 
             {filters.jobRoles.length > 0 && (
-              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-center py-2.5 bg-white   text-ellipsis whitespace-nowrap ">
+              <div className=" flex flex-row  gap-1.5 px-3 items-center text-body2 rounded-lg justify-center py-2.5 bg-white   text-ellipsis whitespace-nowrap ">
                 <img src={employeesvg} className="w-4 h-4  "></img>
                 <p className=" inline-block ">
                   {filters.jobRoles.slice(0, 2).join(", ")}
@@ -204,7 +195,7 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
             )}
 
             {filters.companySize != "" && (
-              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-center py-2.5 bg-white   text-ellipsis text-nowrap overflow-hidden ">
+              <div className=" flex flex-row  gap-1.5 px-3 items-center text-body2 rounded-lg justify-center py-2.5 bg-white   text-ellipsis text-nowrap overflow-hidden ">
                 <img src={employeesvg} className="w-4 h-4  "></img>
                 <p className=" inline-block ">
                   {filters.companySize} employees
@@ -213,7 +204,7 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
             )}
 
             {filters.minimumExperience && (
-              <div className=" flex flex-row  gap-1.5 px-3 items-center rounded-lg justify-center py-2.5 bg-white   text-ellipsis text-nowrap overflow-hidden ">
+              <div className=" flex flex-row  gap-1.5 px-3 items-center text-body2 rounded-lg justify-center py-2.5 bg-white   text-ellipsis text-nowrap overflow-hidden ">
                 <img src={employeesvg} className="w-4 h-4  "></img>
                 <p className=" inline-block ">
                   {filters.minimumExperience} Years

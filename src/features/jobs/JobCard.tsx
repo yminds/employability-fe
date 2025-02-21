@@ -51,7 +51,7 @@ const JobCard: React.FC<JobCardProps> = ({
   return (
     <div className="bg-white py-[36px] px-[42px] flex flex-col gap-4 content-center w-full  rounded-[8px] items-stretch">
       <div className="flex flex-row  justify-between ">
-        <div className=" flex flex-row gap-[14px] text-left">
+        <div className="flex flex-row gap-[14px] text-left">
           <img
             className="w-[48px] h-[48px] px-[9px] py-[10px] rounded-full bg-gray-100 center "
             src={logo}
@@ -59,14 +59,14 @@ const JobCard: React.FC<JobCardProps> = ({
           ></img>
 
           <div className="flex flex-col gap-[4px]">
-            <p className="text-[16px] leading-[20px] font-medium">{title}</p>
+            <p className="text-black text-sub-header">{title}</p>
 
             <div className="">
-              <p className="text-base font-normal tracking-tight leading-normal text-[#414347]">
+              <p className="text-body2 text-[#414447]">
                 {company} {type && `• ${type}`}{" "}
                 {salaryRange && `• ${salaryRange}`}
               </p>
-              <p className="text-sm font-normal tracking-tight leading-normal text-[#67696b]">
+              <p className="text-[14px] font-normal tracking-[0.21px] leading-[24px] text-[#68696B]">
                 {locations
                   .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
                   .join(",")}
@@ -79,18 +79,18 @@ const JobCard: React.FC<JobCardProps> = ({
           {skills.length > 0 && (
             <div className="text-right  items-center">
               <p
-                className={` text-xl font-bold  leading-[18px] ${
-                  matchPercentage >= 60 ? "text-[#10b753]" : "text-[#aa040f]"
+                className={`text-xl font-ubuntu font-bold leading-[18px] ${
+                  matchPercentage >= 60 ? "text-[#10B754]" : "text-[#AA040F]"
                 } `}
               >
                 {matchPercentage}%
               </p>
-              <p className="text-sm text-gray-600">match</p>
+              <p className="text-sm text-[#0C0F12]">match</p>
             </div>
           )}
           <div className="flex flex-col gap-4 items-stretch">
             <button
-              className="px-[20px] py-[8px] w-[141px] ring-1- h-10 border rounded text-base text-black leading-[0.24px] border-black/20  "
+              className="px-[20px] py-[8px] w-[141px] ring-1- h-10 border rounded text-black text-body2 border-black/20  "
               onClick={onApply}
             >
               Apply now
@@ -107,11 +107,11 @@ const JobCard: React.FC<JobCardProps> = ({
           <div className="inline-block ">
             {(job.skills.length > 0 || true) && (
               <>
-                <span className="text-[#67696b] text-sm font-normal font-['SF Pro Display'] leading-normal tracking-tight">
+                <span className="text-[#67696b] text-sm font-normal font-dm-sans leading-normal tracking-[0.21px]">
                   You have
                 </span>
                 <span
-                  className={`text-sm font-medium font-['SF Pro Display'] leading-normal tracking-tight ${
+                  className={`text-sm font-medium font-dm-sans leading-normal tracking-[0.21px] ${
                     matchPercentage >= minimumMatchPercentage
                       ? "text-[#03963e]"
                       : "text-[#CF0C19]"
@@ -120,7 +120,7 @@ const JobCard: React.FC<JobCardProps> = ({
                   {" "}
                   {matchedSkills}/{requiredSkills} skills
                 </span>
-                <span className="text-[#67696b] text-sm font-normal font-['SF Pro Display'] leading-normal tracking-tight">
+                <span className="text-[#67696b] text-sm font-normal font-dm-sans leading-normal tracking-[0.21px]t">
                   {" "}
                   required for this job.
                 </span>
@@ -129,24 +129,24 @@ const JobCard: React.FC<JobCardProps> = ({
 
             {(!inpreferedLocations || userExperience < minimumExperience) && (
               <>
-                <span className="text-[#67696b] text-sm font-normal font-['SF Pro Display'] leading-normal tracking-tight">
+                <span className="text-[#67696b] text-sm font-normal font-dm-sans leading-normal tracking-[0.21px]">
                   This job is{" "}
                 </span>
 
                 {!inpreferedLocations && (
-                  <span className="text-[#cf0c19] text-sm font-medium font-['SF Pro Display'] leading-normal tracking-tight">
+                  <span className="text-[#cf0c19] text-sm font-medium font-dm-sans leading-normal tracking-[0.21px]">
                     not in preferred locations{" "}
                   </span>
                 )}
 
                 {!inpreferedLocations && userExperience < minimumExperience && (
-                  <span className="text-[#cf0c19] text-sm font-medium font-['SF Pro Display'] leading-normal tracking-tight">
+                  <span className="text-[#cf0c19] text-sm font-medium font-dm-sans leading-normal tracking-[0.21px]">
                     and{" "}
                   </span>
                 )}
 
                 {userExperience < minimumExperience && (
-                  <span className="text-[#cf0c19] text-sm font-medium font-['SF Pro Display'] leading-normal tracking-tight">
+                  <span className="text-[#cf0c19] text-sm font-medium font-dm-sans leading-normal tracking-[0.21px]">
                     for someone {minimumExperience - userExperience}+ years
                     experienced than you
                   </span>

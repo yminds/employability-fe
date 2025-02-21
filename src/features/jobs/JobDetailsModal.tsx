@@ -10,6 +10,7 @@ import ChipsCardAdd from "./chipsCardAdd";
 
 import DOMPurify from "dompurify";
 import type { Job } from "@/pages/JobsPage";
+import { parseKeyResponsibilities } from "@/utils/parseJobDescription";
 
 interface JobDetailsProps {
   jobData: Job;
@@ -22,7 +23,7 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
   userSkills,
   closeModal,
 }) => {
-  const calculateMatch = () => {
+  const calculateMatch = () => { 
     const requiredSkills = jobData.skills;
     const matchedSkills = requiredSkills.filter((item) =>
       userSkills.includes(item._id)
@@ -35,6 +36,21 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
 
   const matchPercentage = calculateMatch();
   const minimumMatchPercentage = 60;
+  const [keyResponsibilities, setKeyResponsibilities] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    console.log("Raw job description:", jobData.description)
+    const sanitizedDescription = DOMPurify.sanitize(jobData.description)
+    console.log("Sanitized description:", sanitizedDescription)
+    const responsibilities = parseKeyResponsibilities(sanitizedDescription)
+    console.log("Parsed responsibilities:", responsibilities)
+
+    setKeyResponsibilities(responsibilities)
+  }, [jobData.description])
+
+  console.log("Job data:", jobData.description)
+
+  console.log("Sanitized job description:", DOMPurify.sanitize(jobData.description))
 
   return (
     <div
@@ -91,7 +107,7 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                         src={jobData.logo}
                       ></img>
                     </div>
-                    <h3 className="text-[#191919] text-base font-medium font-['Ubuntu'] leading-snug my-auto ">
+                    <h3 className="text-[#191919] text-sub-header my-auto ">
                       {jobData.company}
                     </h3>
                   </div>
@@ -99,15 +115,15 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                   {jobData.skills.length > 0 && (
                     <div>
                       <span
-                        className={`text-xl font-bold inline-block font-['Ubuntu'] leading-[18px] ${
+                        className={`text-xl font-bold inline-block font-['Ubuntu'] leading-[20px] ${
                           matchPercentage >= minimumMatchPercentage
-                            ? "text-[#10b753]"
+                            ? "text-[#10B754]"
                             : "text-[#cf0c19]"
                         }`}
                       >
                         {matchPercentage}%
                       </span>
-                      <span className="text-[#0b0e12] text-base font-['Ubuntu'] leading-[18px] ">
+                      <span className="text-[#0b0e12] text-sm font-['Ubuntu'] leading-[18px] font-normal">
                         {" "}
                         match
                       </span>
@@ -116,27 +132,27 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                  <h3 className="text-black text-sub-header">
                     About
                   </h3>
-                  <p> {jobData.aboutCompany}</p>
+                  <p className="text-[#414447] text-body2"> {jobData.aboutCompany || "We’re seeking a talented Full Stack Engineer to join our team. In this role, you will work across the entire stack, building scalable systems and crafting exceptional user experiences. "}</p>
                 </div>
                 {/* skills */}
 
                 {jobData.skills.length > 0 && (
                   <div className="flex flex-col gap-1">
-                    <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                    <h3 className="text-black text-sub-header">
                       Skills required
                     </h3>
 
-                    <ul className="flex flex-wrap w-full gap-2">
+                    <ul className="flex flex-wrap w-full gap-2 mt-3">
                       {/* skills that dont match with user */}
                       {jobData.skills
                         .filter((item) => !userSkills.includes(item._id))
                         .map((item) => (
                           <li
                             key={item._id}
-                            className="inline-flex items-center gap-1 py-1 pl-2.5 pr-4  bg-[#cf0c19]/10 rounded-[33px] text-[#cf0c19] text-base font-['SF Pro Display']  tracking-tight"
+                            className="inline-flex items-center gap-1 py-1 pl-2.5 pr-4 bg-[#CF0C19]/10 rounded-[33px] text-[#CF0C19] text-body2"
                           >
                             {" "}
                             <img
@@ -153,7 +169,7 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                         .map((item) => (
                           <li
                             key={item._id}
-                            className="  tracking-tight  py-1 px-4 bg-[#e6eeeb]  rounded-[33px] text-[#03963e]  text-base font-['SF Pro Display'] tracking-tight"
+                            className="py-1 px-4 bg-[#E7EFEB]  rounded-[33px] text-[#03963F] text-body2"
                           >
                             {" "}
                             {item.name}{" "}
@@ -170,10 +186,10 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                     <img src={employeeIcon} className="h-[22px] w-[22px] " />
                   </div>
                   <div>
-                    <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                    <h3 className="text-black text-sub-header">
                       Min Experience
                     </h3>
-                    <p className="text-[#414347] text-base  font-['SF Pro Display']  tracking-tight">
+                    <p className="text-[#414347] text-body2">
                       {" "}
                       {jobData.minimumExperience} years
                     </p>
@@ -185,10 +201,10 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                     <img src={locationIcon} className="h-[22px] w-[22px] " />
                   </div>
                   <div>
-                    <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                    <h3 className="text-black text-sub-header">
                       Location
                     </h3>
-                    <p className="text-[#414347] text-base  font-['SF Pro Display']  tracking-tight">
+                    <p className="text-[#414347] text-body2">
                       {" "}
                       {jobData.locations
                         .map(
@@ -204,10 +220,10 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                     <img src={employeeIcon} className="h-[22px] w-[22px] " />
                   </div>
                   <div>
-                    <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                    <h3 className="text-black text-sub-header">
                       Compensation
                     </h3>
-                    <p className="text-[#414347] text-base  font-['SF Pro Display']  tracking-tight">
+                    <p className="text-[#414347] text-body2">
                       {" "}
                       {jobData.salaryRange}
                     </p>
@@ -219,10 +235,10 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                     <img src={briefcaseIcon} className="h-[22px] w-[22px] " />
                   </div>
                   <div>
-                    <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                    <h3 className="text-black text-sub-header">
                       Job Type
                     </h3>
-                    <p className="text-[#414347] text-base  font-['SF Pro Display']  tracking-tight">
+                    <p className="text-[#414347] text-body2">
                       {" "}
                       {jobData.type}
                     </p>
@@ -233,14 +249,14 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
 
             {/* job description                 */}
             <section className="flex flex-col gap-4  ">
-              <h2 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+              <h2 className="text-black text-sub-header">
                 {" "}
                 Job Description
               </h2>
               {/*                             
                             <iframe className=' bg-slate-200  overflow-scroll scrollbar-hide'  srcDoc={jobData.description}  > </iframe> */}
               <div
-                className="  overflow-scroll scrollbar-hide"
+                className="text-[#414447] text-body2 overflow-scroll scrollbar-hide"
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(jobData.description),
                 }}
@@ -257,11 +273,11 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
               <div className="w-full flex flex-col justify-start gap-8 ">
                 {/* overview  */}
                 <div className="flex flex-col justify-start items-stretch gap-2.5">
-                  <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                  <h3 className="text-black text-sub-header">
                     AI Analysis
                   </h3>
 
-                  <p className="text-[#414347] text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight">
+                  <p className="text-[#414347] text-body2">
                     You’re a strong candidate for this position! Your
                     experience, skills, and projects align closely with what
                     Creative Minds Inc. is looking for. However, to maximize
@@ -274,12 +290,12 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
 
                 <div className="flex flex-row gap-8 w-full">
                   <div className="flex-1 flex-col flex gap-3">
-                    <h3 className=" text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                    <h3 className=" text-black text-sub-header">
                       {" "}
                       Skill Alignment
                     </h3>
 
-                    <ul className="list-disc ml-5">
+                    <ul className="list-disc ml-5 text-[#414347] text-body2">
                       <li>
                         Your experience with React.js, Node.js, SQL/NoSQL
                         databases, and cloud platforms (AWS) is highly relevant
@@ -292,12 +308,12 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                   </div>
 
                   <div className="flex-1 flex flex-col gap-3">
-                    <h3 className=" text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                    <h3 className=" text-black text-sub-header">
                       {" "}
                       Skill Alignment
                     </h3>
 
-                    <ul className="list-disc ml-5">
+                    <ul className="list-disc ml-5 text-[#414347] text-body2">
                       <li>
                         Your experience with React.js, Node.js, SQL/NoSQL
                         databases, and cloud platforms (AWS) is highly relevant
@@ -312,8 +328,8 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
 
                 <hr></hr>
                 <div className="flex flex-col gap-3">
-                  <h3>Recommendation</h3>
-                  <div className="flex flex-col gap-4">
+                  <h3 className="text-black text-sub-header">Recommendation</h3>
+                  <div className="flex flex-col gap-4 text-[#414347] text-body2">
                     <p>
                       Add the following skills to our profile to improve your
                       job match by upto 90%
