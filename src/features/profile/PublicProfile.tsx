@@ -36,8 +36,8 @@ const PublicProfile: React.FC = () => {
 
   return (
     <div className="w-full max-w-screen-xl mx-auto p-4">
-      <div className="grid grid-cols-10 gap-6">
-        <div className="flex flex-col col-span-7">
+      <div className="grid grid-cols-8 gap-6">
+        <div className="flex flex-col col-span-6">
           <ProfileBanner
             user={profile}
             bio={bio}
@@ -83,7 +83,7 @@ const PublicProfile: React.FC = () => {
         </div>
 
         {/* Right Section */}
-        <div className="space-y-6 flex flex-col flex-1 col-span-3">
+        <div className="space-y-6 flex flex-col flex-1 col-span-2">
           {/* MockInterview Section */}
           <MockInterviewSection
             duration="5m 32s"
