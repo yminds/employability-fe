@@ -259,7 +259,7 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts,
+      concepts: concepts.slice(0,3 ),
       interview_id: interviewDetails.data._id,
       level: user?.experience_level || "entry"
     }).unwrap();
