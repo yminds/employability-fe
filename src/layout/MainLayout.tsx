@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { routes } from "@/Routes";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "@/features/sidebar/sidebar";
 import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
+import DisabledAccountModal from "@/components/modal/DisabledAccountModal";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -29,10 +30,23 @@ const noSidebarRoutes = [
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
-  const isEmailVerified = useSelector((state:any)=> state.auth.user?.is_email_verified)
+  const isEmailVerified = user?.is_email_verified;
+  const isPhoneVerified = user?.is_phone_verified;
+  const account_status = user?.account_status;
 
-  console.log("isEmailVerification",isEmailVerified)
+  const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (user && !isPhoneVerified) {
+      navigate("/setexperience");
+    }
+  }, [user, isPhoneVerified]);
+
+  useEffect(() => {
+    setIsDisabledModalOpen(account_status === "disabled");
+  }, [account_status]);
 
   const shouldDisplaySidebar = (): boolean => {
     const currentPath = location.pathname;
@@ -59,7 +73,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const shouldShowBanner = (): boolean | null => {
     // Show banner if user is logged in, email is not verified, and we're on a route that shows the sidebar
-    return shouldDisplaySidebar() && Boolean(user) && isEmailVerified===false;
+    return shouldDisplaySidebar() && Boolean(user) && isEmailVerified === false;
   };
 
   return (
@@ -70,7 +84,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <EmailVerification />
         </div>
       )}
-      
+
       {/* Main Content */}
       <div className="flex flex-1 ">
         {/* Sidebar */}
@@ -79,13 +93,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <Sidebar />
           </div>
         )}
-        
+
         {/* Main Content Area */}
         <div className="flex-1 bg-gray-100">
-          {children}
+          {isDisabledModalOpen ? (
+            <DisabledAccountModal isOpen={isDisabledModalOpen} />
+          ) : (
+            children
+          )}
         </div>
       </div>
-      
+
       {/* Toast Notifications */}
       <Toaster />
     </div>

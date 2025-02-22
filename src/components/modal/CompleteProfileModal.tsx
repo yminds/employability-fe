@@ -20,7 +20,6 @@ interface CompleteProfileModalProps {
   onClose: () => void;
   type: string;
   user: any;
-  parsedData?: any;
   goalId: string;
 }
 

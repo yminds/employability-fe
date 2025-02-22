@@ -10,7 +10,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ProfileFormData } from "./types";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
@@ -49,6 +48,7 @@ const ProfileBanner = ({
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const goalName = goalData?.data?.[0]?.name || "";
+  const goalId = goalData?.data?.[0]?._id || "";
 
   useEffect(() => {
     if (user) {
@@ -224,7 +224,7 @@ const ProfileBanner = ({
           type="basic"
           onClose={() => setIsProfileModalOpen(false)}
           user={user}
-          goalId={goalData?.data?.[0]?._id}
+          goalId={goalId}
         />
       )}
     </div>
