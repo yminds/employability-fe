@@ -38,7 +38,7 @@ const SearchPopover: React.FC<SearchPopoverProps> = ({
         </PopoverTrigger>
         <PopoverContent className=" m-0 w-full  p-4  bg-white shadow-md rounded-lg border border-gray-200 z-[56] ">
           <input
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 text-body2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Search..."
             value={search}
             onChange={handleInputChange}
@@ -47,7 +47,7 @@ const SearchPopover: React.FC<SearchPopoverProps> = ({
             {options.map((item, index) => (
               <li
                 key={index}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
+                className="p-2 text-body2 hover:bg-gray-100 cursor-pointer"
                 onClick={() => onSelect(item)}
               >
                 {item}

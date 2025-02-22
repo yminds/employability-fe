@@ -33,7 +33,7 @@ export default function SkillsForm({
   allSkills = [],
   onChange,
   errors = {},
-  onDeleteSkill
+  onDeleteSkill,
 }: SkillsFormProps) {
   const [searchValue, setSearchValue] = useState<string>("");
   const [openSkillPopovers, setOpenSkillPopovers] = useState<boolean[]>(
@@ -44,11 +44,9 @@ export default function SkillsForm({
   );
   const [openLevelPopovers, setOpenLevelPopovers] = useState<boolean[]>(
     skills.map(() => false)
-  ); 
+  );
 
-  const { data: skillsData } =
-    useGetMultipleSkillsQuery(searchValue);
-
+  const { data: skillsData } = useGetMultipleSkillsQuery(searchValue);
 
   const handleSkillChange = (
     index: number,
@@ -169,11 +167,10 @@ export default function SkillsForm({
                       <CommandEmpty>No skill found.</CommandEmpty>
                       <CommandGroup>
                         {skillsData?.data?.map((item: any) => {
-                          const isSkillAlreadyAdded =
-                            allSkills.some(
-                              (userSkill: any) =>
-                                userSkill.skill_pool_id._id === item._id
-                            );
+                          const isSkillAlreadyAdded = allSkills.some(
+                            (userSkill: any) =>
+                              userSkill.skill_pool_id._id === item._id
+                          );
 
                           return (
                             <CommandItem

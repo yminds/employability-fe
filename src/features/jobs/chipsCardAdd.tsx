@@ -18,7 +18,7 @@ const ChipsCardAdd: React.FC<ChipsCardProps> = (props) => {
             className="h-10 px-4 py-2 bg-[#fafbfe] rounded-[35px] border border-black/10 justify-start items-center gap-2 inline-flex hover:cursor-pointer"
             onClick={() => selectItem(item)}
           >
-            <span className="text-[#414347] text-base font-normal font-['SF Pro Display'] leading-normal tracking-tigh">
+            <span className="text-[#414347] text-body2">
               {" "}
               {item}
             </span>
