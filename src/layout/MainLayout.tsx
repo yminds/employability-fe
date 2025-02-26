@@ -101,7 +101,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     if (!shouldDisplaySidebar()) {
       return (
         <div className="flex-1 bg-gray-100">
-          {children}
+          {isDisabledModalOpen ? (
+            <DisabledAccountModal isOpen={isDisabledModalOpen} />
+          ) : (
+            children
+          )}
         </div>
       );
     }
@@ -118,7 +122,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </div>
         )}
         <div className="flex-1 bg-gray-100">
-          {children}
+        {isDisabledModalOpen ? (
+            <DisabledAccountModal isOpen={isDisabledModalOpen} />
+          ) : (
+            children
+          )}
         </div>
       </div>
     );
