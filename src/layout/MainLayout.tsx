@@ -49,11 +49,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (user && !isPhoneVerified) {
-      navigate("/setexperience");
-    }
-  }, [user, isPhoneVerified]);
+  // useEffect(() => {
+  //   if (user && !isPhoneVerified) {
+  //     navigate("/setexperience");
+  //   }
+  // }, [user, isPhoneVerified]);
 
   useEffect(() => {
     setIsDisabledModalOpen(account_status === "disabled");
