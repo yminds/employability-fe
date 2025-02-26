@@ -111,7 +111,7 @@ const Interview: React.FC<{
       }
     };
 
-    
+
 
     const handleAIResponse = (data: string) => {
       setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
@@ -258,18 +258,19 @@ const Interview: React.FC<{
       // provider: "google",
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
-      user_id: interviewDetails.data.user_id,
+      user_id: interviewDetails.data.user_id, 
       user_skill_id: interviewDetails.data.user_skill_id,
       skill_id: interviewDetails.data.skill_id,
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts.slice(0,3),
+      concepts: concepts,
       interview_id: interviewDetails.data._id,
       level: user?.experience_level || "entry",
       type:type,
       jobDescription:jobDescription
     }).unwrap();
+    
 
     console.log("response", response);
 
@@ -343,6 +344,12 @@ const LayoutBuilder = ({
   interviewState,
   concepts,
 }: LayoutBuilderProps) => {
+  const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
+
+
+  console.log("all conepts", concepts);
+  
+  // console.log("concepts", concepts);
   const coveredConceptsLength = concepts.filter((concept) => concept.status === "completed").length;
   const calculateProgress = (concepts: any[]) => {
     if (!concepts.length) return 0;

@@ -15,12 +15,18 @@ import { useProfileForm } from "@/hooks/useProfileForm";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { CheckCircle } from "lucide-react";
+import {
+  ExperienceFormSkeleton,
+  EducationFormSkeleton,
+  CertificationsFormSkeleton,
+  BasicInfoFormSkeleton,
+  SkillsFormSkeleton,
+} from "../forms/form-skeletons";
 
 interface CompleteProfileModalProps {
   onClose: () => void;
   type: string;
   user: any;
-  parsedData?: any;
   goalId: string;
 }
 
@@ -49,7 +55,12 @@ const CompleteProfileModal = ({
     setNewlyUploadedImage,
     profileStatus,
     isLoading,
+    skillsLoading,
+    isBasicInfoLoading,
+    userLoading,
   } = useProfileForm(type, user, goalId, onClose);
+
+  console.log("user loading", userLoading);
 
   const tabs = useMemo(
     () => [
@@ -70,24 +81,28 @@ const CompleteProfileModal = ({
             <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] mb-4">
               Basic Information
             </h2>
-            <BasicInfoForm
-              onChange={(
-                basicInfo,
-                socialProfiles,
-                isImageDeleted,
-                newlyUploadedImage
-              ) => {
-                updateFormData("basicInfo", basicInfo);
-                updateFormData("socialProfiles", socialProfiles);
-                setIsImageDeleted(isImageDeleted);
-                setNewlyUploadedImage(newlyUploadedImage);
-              }}
-              errors={errors}
-              initialData={{
-                basicInfo: parsedBasicData.basicInfo,
-                socialProfiles: parsedBasicData.socialProfiles,
-              }}
-            />
+            {isBasicInfoLoading ? (
+              <BasicInfoFormSkeleton />
+            ) : (
+              <BasicInfoForm
+                onChange={(
+                  basicInfo,
+                  socialProfiles,
+                  isImageDeleted,
+                  newlyUploadedImage
+                ) => {
+                  updateFormData("basicInfo", basicInfo);
+                  updateFormData("socialProfiles", socialProfiles);
+                  setIsImageDeleted(isImageDeleted);
+                  setNewlyUploadedImage(newlyUploadedImage);
+                }}
+                errors={errors}
+                initialData={{
+                  basicInfo: parsedBasicData.basicInfo,
+                  socialProfiles: parsedBasicData.socialProfiles,
+                }}
+              />
+            )}
           </>
         );
       case "skills":
@@ -96,13 +111,17 @@ const CompleteProfileModal = ({
             <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] mb-4">
               Skills
             </h2>
-            <SkillsForm
-              skills={formData?.skills}
-              allSkills={userDetails?.skills}
-              onChange={(skills) => updateFormData("skills", skills)}
-              errors={errors}
-              onDeleteSkill={(index) => handleDelete("skills", index)}
-            />
+            {skillsLoading ? (
+              <SkillsFormSkeleton />
+            ) : (
+              <SkillsForm
+                skills={formData?.skills}
+                allSkills={userDetails?.skills}
+                onChange={(skills) => updateFormData("skills", skills)}
+                errors={errors}
+                onDeleteSkill={(index) => handleDelete("skills", index)}
+              />
+            )}
           </>
         );
       case "experience":
@@ -139,38 +158,44 @@ const CompleteProfileModal = ({
               </div>
             </div>
             {!isFresher && (
-              <ExperienceForm
-                experience={formData?.experience || []}
-                onChange={(updatedExperience) =>
-                  updateFormData("experience", updatedExperience)
-                }
-                errors={errors}
-                onAddExperience={() => {
-                  const newExperience = {
-                    id: "",
-                    title: "",
-                    employment_type: "",
-                    location: "",
-                    start_date: "",
-                    end_date: "",
-                    currently_working: false,
-                    description: "",
-                    company: "",
-                    isVerified: false,
-                    companyLogo: "",
-                    current_ctc: 0,
-                    expected_ctc: 0,
-                  };
-                  updateFormData("experience", [
-                    ...(formData?.experience || []),
-                    newExperience,
-                  ]);
-                }}
-                onDeleteExperience={(index) =>
-                  handleDelete("experience", index)
-                }
-                mode="add"
-              />
+              <>
+                {userLoading ? (
+                  <ExperienceFormSkeleton />
+                ) : (
+                  <ExperienceForm
+                    experience={formData?.experience || []}
+                    onChange={(updatedExperience) =>
+                      updateFormData("experience", updatedExperience)
+                    }
+                    errors={errors}
+                    onAddExperience={() => {
+                      const newExperience = {
+                        id: "",
+                        title: "",
+                        employment_type: "",
+                        location: "",
+                        start_date: "",
+                        end_date: "",
+                        currently_working: false,
+                        description: "",
+                        company: "",
+                        isVerified: false,
+                        companyLogo: "",
+                        current_ctc: 0,
+                        expected_ctc: 0,
+                      };
+                      updateFormData("experience", [
+                        ...(formData?.experience || []),
+                        newExperience,
+                      ]);
+                    }}
+                    onDeleteExperience={(index) =>
+                      handleDelete("experience", index)
+                    }
+                    mode="add"
+                  />
+                )}
+              </>
             )}
           </>
         );
@@ -180,31 +205,35 @@ const CompleteProfileModal = ({
             <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] mb-4">
               Education
             </h2>
-            <EducationForm
-              education={formData?.education || []}
-              onChange={(updatedEducation) =>
-                updateFormData("education", updatedEducation)
-              }
-              errors={errors}
-              onAddEducation={() => {
-                const newEducation = {
-                  id: "",
-                  education_level: "",
-                  degree: "",
-                  institute: "",
-                  board_or_certification: "",
-                  from_date: "",
-                  till_date: "",
-                  cgpa_or_marks: "",
-                };
-                updateFormData("education", [
-                  ...(formData?.education || []),
-                  newEducation,
-                ]);
-              }}
-              onDeleteEducation={(index) => handleDelete("education", index)}
-              mode="add"
-            />
+            {userLoading ? (
+              <EducationFormSkeleton />
+            ) : (
+              <EducationForm
+                education={formData?.education || []}
+                onChange={(updatedEducation) =>
+                  updateFormData("education", updatedEducation)
+                }
+                errors={errors}
+                onAddEducation={() => {
+                  const newEducation = {
+                    id: "",
+                    education_level: "",
+                    degree: "",
+                    institute: "",
+                    board_or_certification: "",
+                    from_date: "",
+                    till_date: "",
+                    cgpa_or_marks: "",
+                  };
+                  updateFormData("education", [
+                    ...(formData?.education || []),
+                    newEducation,
+                  ]);
+                }}
+                onDeleteEducation={(index) => handleDelete("education", index)}
+                mode="add"
+              />
+            )}
           </>
         );
       case "certification":
@@ -244,31 +273,37 @@ const CompleteProfileModal = ({
               </div>
             </div>
             {!hasCertifications && (
-              <CertificationsForm
-                certifications={formData?.certifications || []}
-                onChange={(updatedCertifications) =>
-                  updateFormData("certifications", updatedCertifications)
-                }
-                errors={errors}
-                onAddCertification={() => {
-                  const newCertification = {
-                    id: "",
-                    title: "",
-                    issued_by: "",
-                    issue_date: "",
-                    expiration_date: "",
-                    certificate_s3_url: "",
-                  };
-                  updateFormData("certifications", [
-                    ...(formData?.certifications || []),
-                    newCertification,
-                  ]);
-                }}
-                onDeleteCertification={(index) =>
-                  handleDelete("certifications", index)
-                }
-                mode="add"
-              />
+              <>
+                {userLoading ? (
+                  <CertificationsFormSkeleton />
+                ) : (
+                  <CertificationsForm
+                    certifications={formData?.certifications || []}
+                    onChange={(updatedCertifications) =>
+                      updateFormData("certifications", updatedCertifications)
+                    }
+                    errors={errors}
+                    onAddCertification={() => {
+                      const newCertification = {
+                        id: "",
+                        title: "",
+                        issued_by: "",
+                        issue_date: "",
+                        expiration_date: "",
+                        certificate_s3_url: "",
+                      };
+                      updateFormData("certifications", [
+                        ...(formData?.certifications || []),
+                        newCertification,
+                      ]);
+                    }}
+                    onDeleteCertification={(index) =>
+                      handleDelete("certifications", index)
+                    }
+                    mode="add"
+                  />
+                )}
+              </>
             )}
           </>
         );

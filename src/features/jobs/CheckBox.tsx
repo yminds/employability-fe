@@ -36,7 +36,7 @@ export default function CheckBox(props: CheckBoxProps) {
                   : item.value == selected
               }
             />
-            <label className="text-[#67696b] text-base font-normal font-['SF Pro Display'] leading-normal tracking-tight">
+            <label className="text-[#67696b] text-body2">
               {item.label}
             </label>
           </div>

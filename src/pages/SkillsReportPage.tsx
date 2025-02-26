@@ -198,13 +198,14 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   if (!profile || !reportData) {
     return <LoadingState />;
   }
-
+  console.log("interview",interviewId)
+  console.log("profile",profile.skills)
   // Attempt to pull skill info from the user's profile
   const skill = profile.skills?.find(
     (skillItem:any) => skillItem.best_interview === interviewId
   );
-
-  const { name: skillName, icon: skillIcon } = skill.skill_pool_id;
+  console.log("skill",skill)
+  const { name: skillName, icon: skillIcon } = skill?.skill_pool_id;
   console.log({ name: skillName, icon: skillIcon })
 
   console.log(skill)

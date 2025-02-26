@@ -192,7 +192,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
       >
         {/* title section */}
         <section className="flex flex-row justify-between">
-          <h2 className="text-[#191919] text-xl font-medium font-['Ubuntu'] leading-relaxed">
+          <h2 className="text-[#191919] text-h1">
             Filter Jobs by
           </h2>
           <img
@@ -213,7 +213,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
                 src={jobsvg}
                 className="w-5 h-5 relative overflow-hidden"
               ></img>
-              <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+              <h3 className="text-black text-sub-header">
                 Job title
               </h3>
             </div>
@@ -241,7 +241,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
 
               {/* suggestion tab for jobtitles */}
               <div className="flex flex-col gap-3">
-                <h2> Suggested </h2>
+                <h2 className="text-body2"> Suggested </h2>
                 <div className=" justify-start items-center flex flex-row gap-4 ">
                   <ChipsCardAdd
                     itemList={fixedJobTitles}
@@ -260,21 +260,21 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
                   src={employeesvg}
                   className="w-5 h-5 relative overflow-hidden"
                 ></img>
-                <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                <h3 className="text-black text-sub-header">
                   Experience
                 </h3>
               </div>
             </div>
 
             <div className="bg-[#f9f9f9] rounded-[7px] p-6 pt-8 border border-black/10 flex-col justify-start  gap-7 flex items-stretch  ">
-              <div className="flex justify-between w-1/2">
-                <h3>Minimum Experience </h3>
+              <div className="flex justify-between w-full">
+                <h3 className="text-body2">Minimum Experience </h3>
                 <div className="flex justify-end">
                   {mininmumExperience != null ? (
                     <>
                       <input
                         type="number"
-                        className="focus:outline-none  bg-[#f9f9f9] appearance-none w-fix text-center"
+                        className="focus:outline-none  bg-[#f9f9f9] appearance-none w-fix text-center text-body2"
                         value={mininmumExperience}
                         min={0}
                         max={31}
@@ -293,7 +293,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
               </div>
 
               {/* slider */}
-              <div className="relative flex  gap-6 w-1/2">
+              <div className="relative flex  gap-6 w-full">
                 {/* <div className="flex flex-col w-full justify-start gap-6"> */}
 
                 <div className="relative w-full ">
@@ -342,7 +342,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
                   src={locaitonsvg}
                   className="w-5 h-5 relative overflow-hidden"
                 ></img>
-                <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                <h3 className="text-black text-sub-header">
                   Location
                 </h3>
               </div>
@@ -371,7 +371,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
 
               {/* suggestion tab for locations */}
               <div className="flex flex-col gap-3 ">
-                <h2> Suggested </h2>
+                <h2 className="text-body2"> Suggested </h2>
                 <div className="justify-start items-center flex flex-row gap-4 ">
                   <ChipsCardAdd
                     itemList={fixedJobLocations}
@@ -384,7 +384,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
               <div className="flex  gap-4 items-stretch justify-start  ">
                 {/* <Button variant="default" >Work Preferences</Button> */}
                 <div className="  text-nowrap flex gap-2 items-center ">
-                  <p>Work Preference </p>
+                  <p className="text-body2">Work Preference </p>
                 </div>
 
                 <div className="flex  gap-2  w-full">
@@ -416,14 +416,14 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
                 src={compensationsvg}
                 className="w-5 h-5 relative overflow-hidden"
               ></img>
-              <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+              <h3 className="text-black text-sub-header">
                 Compensation
               </h3>
             </div>
 
             <div className="bg-[#f9f9f9] rounded-[7px] p-6 pt-8 border border-black/10 flex-col justify-start  gap-6 flex items-stretch  ">
               <div className="flex flex-col gap-3 ">
-                <label className="text-black text-base font-normal font-['SF Pro Display']  tracking-tight">
+                <label className="text-black text-body2">
                   {" "}
                   Enter minimum expected salary (yearly){" "}
                 </label>
@@ -432,7 +432,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
                   <select
                     name="currency"
                     id="currency"
-                    className="focus:outline-none text-black text-base font-normal font-['SF Pro Display']  tracking-tight appearance:textfield"
+                    className="focus:outline-none text-black text-body2 appearance:textfield"
                     onChange={(e) => {
                       setCurrency(e.target.value);
                     }}
@@ -459,7 +459,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
               </div>
 
               <div className="flex flex-col gap-3 ">
-                <label className="text-black text-base font-normal font-['SF Pro Display']  tracking-tight">
+                <label className="text-black text-body2">
                   {" "}
                   Equity{" "}
                 </label>
@@ -469,7 +469,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
                     min="0"
                     max="100"
                     type="number"
-                    className="w-full focus:outline-none"
+                    className="w-full focus:outline-none text-body2"
                   ></input>
                 </div>
               </div>
@@ -485,7 +485,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
                   src={employeesvg}
                   className="w-5 h-5 relative overflow-hidden"
                 ></img>
-                <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                <h3 className="text-black text-sub-header">
                   Job Type
                 </h3>
               </div>
@@ -506,7 +506,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
                   src={buildingIcon}
                   className="w-5 h-5 relative overflow-hidden"
                 ></img>
-                <h3 className="text-black text-base font-medium font-['Ubuntu'] leading-snug">
+                <h3 className="text-black text-sub-header">
                   Company size
                 </h3>
               </div>
@@ -528,7 +528,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
 
         <div className="flex gap-3 justify-end">
           <button
-            className="w-[161px] h-11 px-8 py-4 rounded border border-[#00183d] justify-center items-center gap-2 inline-flex text-base font-medium font-['SF Pro Display'] leading-normal"
+            className="w-[161px] h-11 px-8 py-4 rounded border border-[#00183d] justify-center items-center gap-2 inline-flex text-body2"
             onClick={() => {
               setIsFilterModalOpen(false);
             }}
@@ -536,7 +536,7 @@ const JobsFilterModal: React.FC<JobsFilterModalProps> = (props) => {
             Discard{" "}
           </button>
           <button
-            className="w-[196px] h-11 px-8 py-4 bg-[#00183d] rounded justify-center items-center gap-2 inline-flex text-base font-medium font-['SF Pro Display'] leading-normal text-white"
+            className="w-[196px] h-11 px-8 py-4 bg-[#00183d] rounded justify-center items-center gap-2 inline-flex text-body2 text-white"
             onClick={applyFilters}
           >
             Apply filter

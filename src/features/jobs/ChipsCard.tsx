@@ -37,7 +37,7 @@ const ChipsCard: React.FC<ChipsCardProps> = (props) => {
             className="h-9 px-3 py-1.5 bg-[#fafbfe] rounded-[10px] border border-[#03963e] justify-start items-center gap-2 inline-flex hover:cursor-pointer"
             onClick={() => removeitem(item)}
           >
-            <span className="text-[#03963e]"> {item}</span>
+            <span className="text-[#03963e] text-body2"> {item}</span>
             <img src={closeIcon}></img>
           </li>
         ))}
