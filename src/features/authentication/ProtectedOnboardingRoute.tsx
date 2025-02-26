@@ -12,7 +12,7 @@ const ProtectedOnboardingRoute: React.FC<ProtectedOnboardingRouteProps> = ({
 }) => {
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
-  const isPhoneVerified = user?.is_phone_verified;
+  const isPhoneVerified = user?.experience_level !== "";
 
   useEffect(() => {
     if (user && isPhoneVerified) {

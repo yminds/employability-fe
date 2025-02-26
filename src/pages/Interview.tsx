@@ -17,7 +17,7 @@ const InterviewSetupNew: React.FC = () => {
   // New state to track if the user has the required camera and mic permissions
   const [hasPermissions, setHasPermissions] = useState(false);
 
-  const { title, skillPoolId, level } = location.state || {};
+  const { title, skillPoolId, level, type, jobDescription } = location.state || {};
   const {
     isInterviewStarted,
     setIsInterviewStarted,
@@ -101,22 +101,25 @@ const InterviewSetupNew: React.FC = () => {
   // Fetch the fundamentals for the interview
   useEffect(() => {
     const sync = async () => {
-      try {
-        const fundamentalsResponse = await fetchFundamental({
-          skill_pool_id: skillPoolId,
-          level,
-        }).unwrap();
-        setFundamentals(fundamentalsResponse.data[0]?.concepts || []);
-      } catch (error) {
-        console.error("Error fetching fundamentals:", error);
+      if (type === 'Skill'){
+        try {
+          const fundamentalsResponse = await fetchFundamental({
+           
+            skill_pool_id: skillPoolId,
+            level,
+          }).unwrap();
+          setFundamentals(fundamentalsResponse.data[0]?.concepts || []);
+        } catch (error) {
+          console.error("Error fetching fundamentals:", error);
+        }
       }
     };
     sync();
-  }, [fetchFundamental, skillPoolId, level]);
+  }, [fetchFundamental, skillPoolId, level, type]);
 
   // Only show the Interview component if the user has required permissions,
   // the fundamentals have loaded, and the interview is started.
-  const canShowInterview = isInterviewStarted && fundamentals.length > 0 && hasPermissions;
+  const canShowInterview = isInterviewStarted && (fundamentals.length > 0 || type != 'Skill') && hasPermissions;
 
   return (
     <>
@@ -209,6 +212,8 @@ const InterviewSetupNew: React.FC = () => {
           concepts={fundamentals}
           stopScreenSharing={stopScreenSharing}
           skillLevel={level}
+          type={type}
+          jobDescription={jobDescription}
         />
       )}
     </>

@@ -9,21 +9,46 @@ import ProtectedOnboardingRoute from "@/features/authentication/ProtectedOnboard
 import { useSelector } from "react-redux";
 import man from "@/assets/sign-up/man.png";
 import grid from "@/assets/sign-up/grid.svg";
-
+import { useUpdateFirstTimeUserMutation } from "@/api/authApiSlice";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/features/authentication/authSlice";
+import { RootState } from "@/store/store";
+ 
 const ExperienceLevel: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
-  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const token = useSelector((state: RootState) => state.auth.token);
+ 
+  const [selectedLevel, setSelectedLevel] = useState<
+    "" | "entry" | "mid" | "senior"
+  >("");
+  const [updateFirstTimeUser] = useUpdateFirstTimeUserMutation();
+ 
   const navigate = useNavigate();
-
-  const handleSelection = async (level: string) => {
+  const dispatch = useDispatch();
+ 
+  const handleSelection = async (level: "entry" | "mid" | "senior") => {
     setSelectedLevel(level);
     try {
-      navigate("/addphone", { state: { experienceLevel: level } });
+      // navigate("/addphone", { state: { experienceLevel: level } });
+      const result = await updateFirstTimeUser({
+        user_id: user?._id || "",
+        experience_level: level || "",
+      }).unwrap();
+ 
+      dispatch(
+        setCredentials({
+          user: result.user_info,
+          accessToken: token,
+        })
+      );
+      if (result) {
+        navigate("/");
+      }
     } catch (error) {
       console.error("Failed to store experience level:", error);
     }
   };
-
+ 
   return (
     <ProtectedOnboardingRoute>
       <main className="h-screen w-screen bg-white flex">
@@ -43,7 +68,7 @@ const ExperienceLevel: React.FC = () => {
             <img src={logo || "/placeholder.svg"} alt="Logo" />
           </div>
         </div>
-
+ 
         {/* Right Section */}
         <div className="flex flex-col items-center flex-1 justify-center max-w-[846px]">
           <div className="rounded-lg w-full max-w-[500px]">
@@ -90,5 +115,5 @@ const ExperienceLevel: React.FC = () => {
     </ProtectedOnboardingRoute>
   );
 };
-
+ 
 export default ExperienceLevel;

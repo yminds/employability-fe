@@ -1,3 +1,5 @@
+"use client";
+
 import type React from "react";
 import { useEffect, useState } from "react";
 import { Country, State, City } from "country-state-city";
@@ -16,6 +18,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { s3Upload, s3Delete } from "@/utils/s3Service";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -27,10 +44,6 @@ import UploadProgressBar from "@/features/profile/UploadProgressBar";
 import type { BasicInfo } from "@/features/profile/types";
 
 interface BasicInfoFormProps {
-  initialData?: {
-    basicInfo: BasicInfo;
-    socialProfiles: any;
-  };
   onChange: (
     basicInfo: BasicInfo,
     socialProfiles: any,
@@ -38,12 +51,16 @@ interface BasicInfoFormProps {
     newlyUploadedImage: string | null
   ) => void;
   errors: { [key: string]: string };
+  initialData?: {
+    basicInfo: BasicInfo;
+    socialProfiles: any;
+  };
 }
 
 export default function BasicInfoForm({
-  initialData,
   onChange,
   errors,
+  initialData,
 }: BasicInfoFormProps) {
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -74,14 +91,13 @@ export default function BasicInfoForm({
     formData.profile_image || null
   );
   const [imageError, setImageError] = useState<string>("");
-  const [isImageDeleted, setIsImageDeleted] = useState(false); // Added state variable
+  const [isImageDeleted, setIsImageDeleted] = useState(false);
   const [newlyUploadedImage, setNewlyUploadedImage] = useState<string | null>(
     null
   );
 
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState<boolean>(false);
-
 
   // Load countries
   useEffect(() => {
@@ -125,16 +141,16 @@ export default function BasicInfoForm({
     } else {
       setCities([]);
     }
-  }, [formData.country, formData.state, formData.city]); // Added formData.city to dependencies
+  }, [formData.country, formData.state, formData.city]);
 
   // Call onChange whenever formData or socialProfiles change
   useEffect(() => {
     const timer = setTimeout(() => {
-      onChange(formData, socialProfiles, isImageDeleted, newlyUploadedImage); // Updated onChange call
+      onChange(formData, socialProfiles, isImageDeleted, newlyUploadedImage);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [formData, socialProfiles, isImageDeleted, newlyUploadedImage]); // Added isImageDeleted to dependencies
+  }, [formData, socialProfiles, isImageDeleted, newlyUploadedImage, onChange]);
 
   const handleBasicInfoChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -230,6 +246,7 @@ export default function BasicInfoForm({
 
   return (
     <div className="space-y-6 w-full">
+      {/* Personal Information Section */}
       <div className="bg-white rounded-lg p-8 space-y-6 relative border border-[#E5E7EB]">
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-2 space-y-6">
@@ -368,8 +385,11 @@ export default function BasicInfoForm({
           </div>
         </div>
       </div>
+
+      {/* Additional Information Section */}
       <div className="bg-white rounded-lg p-8 space-y-6 relative border border-[#E5E7EB]">
         <div className="grid grid-cols-2 gap-6">
+          {/* Date of Birth field */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
               Date Of Birth
@@ -391,6 +411,7 @@ export default function BasicInfoForm({
             )}
           </div>
 
+          {/* Gender field */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
               Gender
@@ -424,108 +445,188 @@ export default function BasicInfoForm({
         </div>
 
         <div className="grid grid-cols-3 gap-6">
+          {/* Country Combobox */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
               Country
             </Label>
-            <Select
-              name="country"
-              value={formData.country}
-              onValueChange={(value) =>
-                handleBasicInfoChange({
-                  target: { name: "country", value },
-                } as React.ChangeEvent<HTMLSelectElement>)
-              }
-            >
-              <SelectTrigger
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("country") ? "border-red-500" : ""
-                }`}
-              >
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[200px] overflow-y-auto">
-                {countries.map((country) => (
-                  <SelectItem key={country.isoCode} value={country.isoCode}>
-                    {country.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className={cn(
+                    "w-full justify-between h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]",
+                    !formData.country && "text-muted-foreground"
+                  )}
+                >
+                  {formData.country
+                    ? countries.find(
+                        (country) => country.isoCode === formData.country
+                      )?.name
+                    : "Select country"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search country..." />
+                  <CommandList>
+                    <CommandEmpty>No country found.</CommandEmpty>
+                    <CommandGroup className="max-h-[300px] overflow-y-auto">
+                      {countries.map((country) => (
+                        <CommandItem
+                          key={country.isoCode}
+                          onSelect={() => {
+                            handleBasicInfoChange({
+                              target: {
+                                name: "country",
+                                value: country.isoCode,
+                              },
+                            } as React.ChangeEvent<HTMLSelectElement>);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              formData.country === country.isoCode
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {country.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             {getError("country") && (
               <p className="text-red-500 text-sm">{getError("country")}</p>
             )}
           </div>
 
+          {/* State Combobox */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
               State
             </Label>
-            <Select
-              name="state"
-              value={formData.state}
-              onValueChange={(value) =>
-                handleBasicInfoChange({
-                  target: { name: "state", value },
-                } as React.ChangeEvent<HTMLSelectElement>)
-              }
-              disabled={!formData.country}
-            >
-              <SelectTrigger
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("state") ? "border-red-500" : ""
-                }`}
-              >
-                <SelectValue placeholder="Select state" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[200px] overflow-y-auto">
-                {states.map((state) => (
-                  <SelectItem key={state.isoCode} value={state.isoCode}>
-                    {state.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className={cn(
+                    "w-full justify-between h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]",
+                    !formData.state && "text-muted-foreground"
+                  )}
+                  disabled={!formData.country}
+                >
+                  {formData.state
+                    ? states.find((state) => state.isoCode === formData.state)
+                        ?.name
+                    : "Select state"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search state..." />
+                  <CommandList>
+                    <CommandEmpty>No state found.</CommandEmpty>
+                    <CommandGroup className="max-h-[300px] overflow-y-auto">
+                      {states.map((state) => (
+                        <CommandItem
+                          key={state.isoCode}
+                          onSelect={() => {
+                            handleBasicInfoChange({
+                              target: { name: "state", value: state.isoCode },
+                            } as React.ChangeEvent<HTMLSelectElement>);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              formData.state === state.isoCode
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {state.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             {getError("state") && (
               <p className="text-red-500 text-sm">{getError("state")}</p>
             )}
           </div>
 
+          {/* City Combobox */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
               City
             </Label>
-            <Select
-              name="city"
-              value={formData.city}
-              onValueChange={(value) =>
-                handleBasicInfoChange({
-                  target: { name: "city", value },
-                } as React.ChangeEvent<HTMLSelectElement>)
-              }
-              disabled={!formData.state}
-            >
-              <SelectTrigger
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                  getError("city") ? "border-red-500" : ""
-                }`}
-              >
-                <SelectValue placeholder="Select city" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[200px] overflow-y-auto">
-                {cities.map((city) => (
-                  <SelectItem key={city.name} value={city.name}>
-                    {city.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className={cn(
+                    "w-full justify-between h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]",
+                    !formData.city && "text-muted-foreground"
+                  )}
+                  disabled={!formData.state}
+                >
+                  {formData.city
+                    ? cities.find((city) => city.name === formData.city)?.name
+                    : "Select city"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search city..." />
+                  <CommandList>
+                    <CommandEmpty>No city found.</CommandEmpty>
+                    <CommandGroup className="max-h-[300px] overflow-y-auto">
+                      {cities.map((city) => (
+                        <CommandItem
+                          key={city.name}
+                          onSelect={() => {
+                            handleBasicInfoChange({
+                              target: { name: "city", value: city.name },
+                            } as React.ChangeEvent<HTMLSelectElement>);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              formData.city === city.name
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {city.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             {getError("city") && (
               <p className="text-red-500 text-sm">{getError("city")}</p>
             )}
           </div>
         </div>
       </div>
+
+      {/* Social Profiles Section */}
       <h3 className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
         Social Profiles
       </h3>

@@ -32,12 +32,16 @@ import Mentor from "./pages/Mentor.tsx";
 import Canidates from "./pages/Canidates.tsx";
 import Candidate from "./pages/Candidate.tsx";
 import UserPublicProfilePage from "./pages/UserPublicProfilePage.tsx";
+import InterviewsLisingPage from "./pages/InterviewsListingPage.tsx"
+import InterviewInvites from "./features/dashboard/InterviewsInvites.tsx";
 
 import ReportPage from "./pages/SkillsReportPage.tsx";
 import VerifyPhoneOTP from "./pages/VerifyPhoneOTP.tsx";
 import ResumeUploader from "./components/employer/ResumeUpload.tsx";
 import { EmployerSignup } from "./pages/EmployerSignUp.tsx";
 import { EmployerLogin } from "./pages/EmployerLogin.tsx";
+import EmployerDashboard from "./pages/EmployerDashboard.tsx";
+import EmployerNotFound from "./components/employer/NotFound.tsx";
 
 
 interface RouteConfig {
@@ -98,11 +102,10 @@ export const routes: RouteConfig[] = [
     route:"/employer/login",
     component:<EmployerLogin/>
   },
-  // {
-  //   route:"/verify-email/:token",
-  //   component: <EmailVerification/>,
-  //   roles: ["CANDIDATE"]
-  // },
+  {
+    route:"/employer",
+    component:<EmployerDashboard/>
+  },
   {
     route: "/setgoal",
     component: <SetGoal />,
@@ -126,6 +129,10 @@ export const routes: RouteConfig[] = [
   {
     route: "*",
     component: <NotFound />,
+  },
+  {
+    route:"/employer/*",
+    component:<EmployerNotFound/>
   },
   {
     route: "/user-profile",
@@ -168,9 +175,13 @@ export const routes: RouteConfig[] = [
     component: <ReportPage isSharedReport= {false}/>
   },
   {
-    route:"skills-report/:id/:id",
+    route:"/skills-report/:id/:id",
     component: <ReportPage isSharedReport= {true}/>
-  }
+  },
+  {
+    route:"/invites",
+    component: <InterviewsLisingPage/>
+  },
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {
