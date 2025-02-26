@@ -9,9 +9,10 @@ interface SuggestedSkillsProps {
   goalId: string | null;
   onSkillsUpdate: (isUpdated: boolean) => void;
   isSkillsUpdated: boolean
+  goals:any
 }
 
-const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSkillsUpdate, isSkillsUpdated }) => {
+const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSkillsUpdate, isSkillsUpdated, goals}) => {
   const [getUserSkills] = useGetUserSkillsMutation();
   const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
 
@@ -140,7 +141,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
           userId={userId}
           goalId={goalId}
           onClose={handleCloseModal}
-          onSkillsUpdate={onSkillsUpdate} goals={undefined}
+          onSkillsUpdate={onSkillsUpdate} goals={goals}
           prefillSkills={selectedSkills}
         />
       )}

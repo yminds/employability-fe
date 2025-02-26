@@ -32,6 +32,8 @@ import Mentor from "./pages/Mentor.tsx";
 import Canidates from "./pages/Canidates.tsx";
 import Candidate from "./pages/Candidate.tsx";
 import UserPublicProfilePage from "./pages/UserPublicProfilePage.tsx";
+import InterviewsLisingPage from "./pages/InterviewsListingPage.tsx"
+import InterviewInvites from "./features/dashboard/InterviewsInvites.tsx";
 
 import ReportPage from "./pages/SkillsReportPage.tsx";
 import VerifyPhoneOTP from "./pages/VerifyPhoneOTP.tsx";
@@ -168,9 +170,13 @@ export const routes: RouteConfig[] = [
     component: <ReportPage isSharedReport= {false}/>
   },
   {
-    route:"skills-report/:id/:id",
+    route:"/skills-report/:id/:id",
     component: <ReportPage isSharedReport= {true}/>
-  }
+  },
+  {
+    route:"/invites",
+    component: <InterviewsLisingPage/>
+  },
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {

@@ -25,6 +25,7 @@ const noSidebarRoutes = [
   "/profile",
   "/employer/signup",
   "/employer/login",
+  "/skills-report",
 ];
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

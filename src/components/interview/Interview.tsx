@@ -19,6 +19,7 @@ import { Timer } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import toggleBrowserFullscreen from "../skills/fullscreen";
+import { JobDescription } from "../interview-list/ViewJD";
 
 // Constants and Types
 const SOCKET_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "wss://employability.ai";
@@ -49,8 +50,10 @@ const Interview: React.FC<{
   interviewTopic: string;
   concepts: any[];
   stopScreenSharing: () => void;
-  skillLevel:"1" | "2" | "3"
-}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel }) => {
+  skillLevel:"1" | "2" | "3";
+  type: "Skill"|"Mock"|"Project",
+  jobDescription:JobDescription
+}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription }) => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
@@ -251,6 +254,8 @@ const Interview: React.FC<{
       prompt,
       model: "gpt-4o",
       provider: "openai",
+      // model: "gemini-2.0-flash-exp",
+      // provider: "google",
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
       user_id: interviewDetails.data.user_id,
@@ -259,9 +264,11 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts.slice(0,3 ),
+      concepts: concepts.slice(0,3),
       interview_id: interviewDetails.data._id,
-      level: user?.experience_level || "entry"
+      level: user?.experience_level || "entry",
+      type:type,
+      jobDescription:jobDescription
     }).unwrap();
 
     console.log("response", response);
@@ -290,7 +297,7 @@ const Interview: React.FC<{
   return (
     <div className="w-full h-screen pt-12 ">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-        <Header SkillName={interviewTopic} type={"Skills Interview"} skillLevel={skillLevel}/>
+        <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel}/>
         {isInterviewEnded ? (
           <div className="text-center text-gray-500">
             <p>Thank you for your time. We will get back to you soon.</p>

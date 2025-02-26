@@ -201,7 +201,7 @@ const useInterviewSetup = () => {
         }, 30000);
       };
     
-      startRecording();
+      // startRecording();
     } catch (error) {
       console.error("Error capturing screen and microphone:", error);
     }
