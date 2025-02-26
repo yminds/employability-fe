@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import { Loader2, Building2, Briefcase } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEmployerSignupMutation, useEmployerLoginMutation } from '@/api/employerApiSlice';
 import { setEmployerCredentials } from '@/features/authentication/employerAuthSlice';
 
@@ -17,19 +16,6 @@ import man from '@/assets/sign-up/man.png';
 import grid from '@/assets/sign-up/grid.svg';
 import arrow from '@/assets/skills/arrow.svg';
 
-// Industry options
-const INDUSTRY_OPTIONS = [
-  "Information Technology",
-  "Software Development",
-  "Digital Marketing",
-  "E-commerce",
-  "Consulting",
-  "Healthcare",
-  "Education",
-  "Finance",
-  "Manufacturing",
-  "Other"
-];
 
 export const EmployerSignup = () => {
   const navigate = useNavigate();
@@ -41,8 +27,7 @@ export const EmployerSignup = () => {
     password: '',
     confirmPassword: '',
     companyName: '',
-    website: '', // Added website field
-    industry: ''
+    website: '',
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -68,58 +53,81 @@ export const EmployerSignup = () => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-
+  
     // Validation checks
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
       setIsLoading(false);
       return;
     }
-
+  
     if (!validateEmailDomain()) {
       setError("Email domain must match company website domain");
       setIsLoading(false);
       return;
     }
-
+  
     try {
       const signupResponse = await signup({
-        employerName: formData.employerName,
-        email: formData.email,
+        employerName: formData.employerName.trim(),
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
-        companyName: formData.companyName,
-        website: formData.website,
-        industry: formData.industry
+        companyName: formData.companyName.trim(),
+        website: formData.website.trim(),
       }).unwrap();
-
+  
       if (signupResponse.success) {
-        // Dispatch the credentials to Redux store
-        dispatch(setEmployerCredentials(signupResponse.data));
+        const employerData: any = signupResponse.data;
         
-        // Automatic login after successful signup
-        try {
-          const loginResponse = await login({
-            email: formData.email,
-            password: formData.password
-          }).unwrap();
-
-          if (loginResponse.success) {
-            navigate("/employer/dashboard");
-          }
-        } catch (loginError: any) {
-          setError("Signup successful but login failed. Please try logging in manually.");
-        }
-      } else {
-        setError(signupResponse.message || "Signup failed. Please try again.");
+        // Structure the data to match what the Redux slice expects
+        dispatch(setEmployerCredentials({
+          employer_info: {
+            _id: employerData._id,
+            employerName: employerData.employerName,
+            email: employerData.email,
+            role: employerData.role,
+            is_email_verified: employerData.is_email_verified,
+            account_status: employerData.account_status,
+            posted_jobs: employerData.posted_jobs || [],
+            active_jobs: employerData.active_jobs || [],
+            createdAt: employerData.createdAt,
+            updatedAt: employerData.updatedAt,
+            company_id: employerData.company_id
+          },
+          token: employerData.token,
+          company: employerData.company
+        }));
+  
+        // Clear form data
+        setFormData({
+          employerName: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          companyName: '',
+          website: '',
+        });
+  
+          navigate("/employer");
       }
     } catch (err: any) {
       console.error("Signup error:", err);
-      setError(err.data?.message || "An error occurred during signup. Please try again.");
+      
+      if (err.status === 400) {
+        if (err.data?.message.includes("Email already exists")) {
+          setError("This email is already registered. Please try logging in instead.");
+        } else if (err.data?.message.includes("domain")) {
+          setError("Your email domain must match your company's website domain.");
+        } else {
+          setError(err.data?.message || "Please check your input and try again.");
+        }
+      } else {
+        setError("An error occurred during signup. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(null), 3000);
@@ -185,6 +193,33 @@ export const EmployerSignup = () => {
                 />
                 <img src={User} alt="User Icon" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" />
               </div>
+             
+              <div className="relative">
+                <input
+                  type="text"
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                  placeholder="Company Name"
+                  value={formData.companyName}
+                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                  required
+                />
+                <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+              </div>
+
+              <div className="relative">
+                <input
+                  type="url"
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                  placeholder="Company Website (e.g., https://company.com)"
+                  value={formData.website}
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  required
+                  pattern="https?://.*"
+                  title="Please include http:// or https://"
+                />
+                <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+              
+            </div>
 
               <div className="relative">
                 <input
@@ -223,50 +258,7 @@ export const EmployerSignup = () => {
               </div>
             </div>
 
-            {/* Company Info Section */}
-            <div className="space-y-4 pt-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
-                  placeholder="Company Name"
-                  value={formData.companyName}
-                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                  required
-                />
-                <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-              </div>
-
-              <div className="relative">
-                <input
-                  type="url"
-                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
-                  placeholder="Company Website (e.g., https://company.com)"
-                  value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  required
-                  pattern="https?://.*"
-                  title="Please include http:// or https://"
-                />
-                <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-              </div>
-
-              <Select
-                value={formData.industry}
-                onValueChange={(value) => setFormData({ ...formData, industry: value })}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Industry" />
-                </SelectTrigger>
-                <SelectContent>
-                  {INDUSTRY_OPTIONS.map((industry) => (
-                    <SelectItem key={industry} value={industry}>
-                      {industry}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            
 
             <Button
               type="submit"

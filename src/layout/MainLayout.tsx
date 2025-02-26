@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
+import EmployerSidebar from "@/features/sidebar/EmployerSidebar";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -27,12 +28,27 @@ const noSidebarRoutes = [
   "/employer/login",
 ];
 
+const employerRoutes = [
+  "/employer",
+  "/employer/candidates",
+  "/employer/jobs",
+  "/employer/profile",
+  "/employer/dashboard",
+  "/employer/settings",
+  "/employer/uploadResume"
+]
+
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
   const isEmailVerified = useSelector((state:any)=> state.auth.user?.is_email_verified)
 
   console.log("isEmailVerification",isEmailVerified)
+
+  const isEmployerRoute = (): boolean => {
+    const currentPath = location.pathname;
+    return employerRoutes.some(route => currentPath.startsWith(route));
+  };
 
   const shouldDisplaySidebar = (): boolean => {
     const currentPath = location.pathname;
@@ -54,16 +70,48 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       return currentPath === routePath;
     });
 
-    return isMatchedRoute;
+    // Check for employer routes
+    const isEmployerPath = employerRoutes.some(route => 
+      currentPath === route || currentPath.startsWith(route + "/")
+    );
+
+    return isMatchedRoute || isEmployerPath;
   };
 
   const shouldShowBanner = (): boolean | null => {
     // Show banner if user is logged in, email is not verified, and we're on a route that shows the sidebar
-    return shouldDisplaySidebar() && Boolean(user) && isEmailVerified===false;
+    return shouldDisplaySidebar() && Boolean(user) && isEmailVerified===false && !isEmployerRoute();
+  };
+
+  const renderAppropriateLayout = () => {
+    if (!shouldDisplaySidebar()) {
+      return (
+        <div className="flex-1 bg-gray-100">
+          {children}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-1">
+        {isEmployerRoute() ? (
+          <div className="flex-shrink-0">
+            <EmployerSidebar />
+          </div>
+        ) : (
+          <div className="flex-shrink-0">
+            <Sidebar />
+          </div>
+        )}
+        <div className="flex-1 bg-gray-100">
+          {children}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="flex flex-col min-h-screen ">
+    <div className="flex flex-col min-h-screen">
       {/* Email Verification Banner */}
       {shouldShowBanner() && (
         <div className="sticky top-0 z-50">
@@ -72,19 +120,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       )}
       
       {/* Main Content */}
-      <div className="flex flex-1 ">
-        {/* Sidebar */}
-        {shouldDisplaySidebar() && (
-          <div className="flex-shrink-0">
-            <Sidebar />
-          </div>
-        )}
-        
-        {/* Main Content Area */}
-        <div className="flex-1 bg-gray-100">
-          {children}
-        </div>
-      </div>
+      {renderAppropriateLayout()}
       
       {/* Toast Notifications */}
       <Toaster />

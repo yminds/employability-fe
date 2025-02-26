@@ -21,6 +21,7 @@ import GoalCyborgImg from "@/assets/dashboard/set_goal_cyborg.svg";
 import ProfessionalGoalsImg from "@/assets/dashboard/professional_goals.svg";
 import logo from "@/assets/skills/e-Logo.svg";
 import CircularProgress from "@/components/ui/circular-progress-bar";
+import { useNavigate } from "react-router-dom";
 
 
 // Skeleton Components
@@ -109,8 +110,10 @@ const Dashboard: React.FC<Props> = () => {
   const [totalProjects, setTotalProjects] = useState(0);
   const [verifiedProjects, setVerifiedProjects] = useState(0);
   const [completedProfileSections, setCompletedProfileSections] = useState(0);
+  const navigate = useNavigate()
   
   const user = useSelector((state: RootState) => state.auth.user);
+  // const token = useSelector((state:RootState)=>state.auth.token);
   const user_id = user ? user._id : "";
   const user_name = user ? user.name : "";
   const profile_image = user ? user.profile_image : "";
@@ -240,6 +243,8 @@ const Dashboard: React.FC<Props> = () => {
       }
     }
   }, [goalsData, currentGoal]);
+
+   
 
   // Calculate profile completion
   useEffect(() => {
