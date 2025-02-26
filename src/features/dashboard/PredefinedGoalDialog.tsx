@@ -92,8 +92,8 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
     };
 
     const [activeTab, setActiveTab] = useState("Overview");
-    const dialogClassName = `p-0 max-w-[1400px] h-[90vh] overflow-y-auto minimal-scrollbar rounded-[12px] font-ubuntu [&>button:last-child]:hidden lg:max-w-full md:max-w-lg ${
-        isSetGoalsPage ? 'fixed w-[] h-[100vh] transition-all duration-300 border-none rounded-none ' + (isOpen ? 'translate-x-0' : 'translate-x-full') : ''
+    const dialogClassName = `p-0 max-w-[1400px] h-[90vh]  overflow-y-auto minimal-scrollbar rounded-[12px] font-ubuntu [&>button:last-child]:hidden lg:max-w-full md:max-w-lg ${
+        isSetGoalsPage ? 'fixed w-[50vw] h-[100vh] transition-all duration-300 border-none rounded-none ' + (isOpen ? 'translate-x-0' : 'translate-x-full') : ''
     }`;
 
     return (

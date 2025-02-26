@@ -173,7 +173,7 @@ export const routes: RouteConfig[] = [
     component: <ReportPage isSharedReport= {false}/>
   },
   {
-    route:"share/skills-report/:id",
+    route:"skills-report/:id/:id",
     component: <ReportPage isSharedReport= {true}/>
   }
 ];

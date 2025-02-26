@@ -21,7 +21,7 @@ const ScreenSharingComponent: React.FC<ScreenSharingComponentProps> = ({
   handleShareScreen,
   videoRef,
 }) => {
-  const [screenCount, setScreenCount] = useState<number>(1);
+  const [screenCount, setScreenCount] = useState<number>(0);
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 

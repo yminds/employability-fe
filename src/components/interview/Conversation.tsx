@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { IMessage } from "./Interview";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 const Conversation: React.FC<{
   messages: IMessage[];
@@ -88,6 +90,8 @@ export default Conversation;
 const Message: React.FC<{
   message: { id: number; message: string; role: string; className?: string };
 }> = ({ message }) => {
+  
+  const userName = useSelector((state: RootState) => state.auth.user?.name);
   return (
     <div
       className={`flex gap-4 flex-row items-center py-1.5 px-1.5 w-full ${message.className}`}
@@ -98,7 +102,7 @@ const Message: React.FC<{
             message.role !== "User" ? "text-[#08A358]" : "text-[#228BBF]"
           } font-ubuntu font-medium text-sm`}
         >
-          {message.role}
+          {message.role === 'USER' ? `${userName}`: 'AI'}
         </span>
         <p className="text-left font-ubuntu text-base text-slate-900">
           {message.message}

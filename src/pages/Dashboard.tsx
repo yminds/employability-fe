@@ -311,7 +311,7 @@ const Dashboard: React.FC<Props> = () => {
 
               {/* Main Content */}
               <div className="flex-1 h-[98%]">
-                <div className="grid grid-cols-4 gap-4 h-full">
+                <div className="grid grid-cols-4 gap-2 h-full">
                   {/* Left Column */}
                   <div className="col-span-3 min-h-0 flex flex-col">
                     <div className="overflow-y-auto pr-4 scrollbar-hide">

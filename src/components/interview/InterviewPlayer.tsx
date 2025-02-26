@@ -135,10 +135,10 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   useEffect(() => {
     if (playerRef.current) {
       const player = playerRef.current.getInternalPlayer();
-      if (player) {
-        player.currentTime = updatedProgresssion;
-        player.play();
-      }
+      // if (player) {
+      //   player.currentTime = updatedProgresssion;
+      //   player.play();
+      // }
       setIsPlaying(true);
       setSeeking(false);
     }

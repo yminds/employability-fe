@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useGetUserByIdQuery, useUpdateUserMutation } from "@/api/userApiSlice";
 import {
@@ -55,6 +55,8 @@ export const useProfileForm = (
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isBasicInfoLoading, setIsBasicInfoLoading] = useState(true);
+  const [userLoading, setUserLoading] = useState(true);
 
   const { data: userDetails } = useGetUserByIdQuery(user._id, {
     refetchOnMountOrArgChange: false,
@@ -73,13 +75,16 @@ export const useProfileForm = (
   const [addCertification] = useAddCertificationMutation();
   const [updateCertification] = useUpdateCertificationMutation();
   const [createUserSkills] = useCreateUserSkillsMutation();
-  const [getUserSkills] = useGetUserSkillsMutation();
+  const [getUserSkills, { isLoading: skillsLoading }] =
+    useGetUserSkillsMutation();
   const [getVerifySkills] = useVerifyMultipleSkillsMutation();
 
-  const parsedBasicData = useMemo(() => {
+  const [parsedBasicData, setParsedBasicData] = useState(() => {
+    setIsBasicInfoLoading(true);
     if (!user.is_basic_info) {
-      const data = user.parsedResume;
+      const data = user?.parsedResume;
       if (!data) {
+        setIsBasicInfoLoading(false);
         return {
           basicInfo: {
             name: user.name || "",
@@ -103,6 +108,7 @@ export const useProfileForm = (
       const address = data?.contact?.address || "";
       const { city, stateCode, countryCode } = parseAddress(address);
 
+      setIsBasicInfoLoading(false);
       return {
         basicInfo: {
           name: data?.name || "",
@@ -123,6 +129,7 @@ export const useProfileForm = (
       };
     }
 
+    setIsBasicInfoLoading(false);
     return {
       basicInfo: {
         name: user.name || "",
@@ -141,7 +148,7 @@ export const useProfileForm = (
         portfolio: user.portfolio || "",
       },
     };
-  }, [user]);
+  });
 
   useEffect(() => {
     const initializeData = async () => {
@@ -166,7 +173,7 @@ export const useProfileForm = (
           console.error("Error transforming data:", error);
         }
       }
-
+      setUserLoading(true);
       setFormData((prevData: any) => ({
         ...prevData,
         experience:
@@ -221,6 +228,7 @@ export const useProfileForm = (
                 },
               ],
       }));
+      setUserLoading(false);
     };
 
     initializeData();
@@ -291,7 +299,14 @@ export const useProfileForm = (
         ...prev,
         [section]: data,
       }));
-      if (section === "basicInfo") {
+      if (section === "basicInfo" || section === "socialProfiles") {
+        setParsedBasicData((prev: any) => ({
+          ...prev,
+          [section]: {
+            ...prev[section],
+            ...data,
+          },
+        }));
         if (isImageDeleted !== undefined) {
           setIsImageDeleted(isImageDeleted);
         }
@@ -339,11 +354,11 @@ export const useProfileForm = (
       const updatedData = formData[section].filter(
         (_: any, i: number) => i !== index
       );
+      updateFormData(section, updatedData);
       const updatedResume = user.parsedResume[section].filter(
         (_: any, i: number) => i !== index
       );
       const deletedItem = formData[section][index];
-      updateFormData(section, updatedData);
 
       try {
         if (section === "skills") {
@@ -767,5 +782,8 @@ export const useProfileForm = (
     setNewlyUploadedImage,
     profileStatus,
     isLoading,
+    skillsLoading,
+    isBasicInfoLoading,
+    userLoading,
   };
 };

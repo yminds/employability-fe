@@ -142,21 +142,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
         )}
 
-        <div className="flex items-start justify-between flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full">
-          <div className="flex flex-col">
-            <h2 className="text-[#1f2226] text-xl font-semibold">
-              {project.name}
-            </h2>
+        <div className="flex items-center justify-between gap-3 flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-[#1f2226] text-sub-header">{project.name}</h2>
             {project.tech?.length > 0 && (
-              <div className="flex flex-col gap-2 w-full mt-4">
-                <div className="flex gap-2 flex-wrap">
+              <div className="flex">
+                <div className="flex gap-2 w-[200px] flex-wrap">
                   {project.tech.slice(0, 3).map((tech) => (
                     <Badge
                       key={tech._id}
                       variant="secondary"
-                      className="min-h-6 px-3 py-1 bg-[#ebebeb] rounded-full flex items-center justify-center"
+                      className="px-[6px] bg-[#ebebeb] rounded-full flex items-center justify-center "
                     >
-                      <span className="text-black text-sm font-medium tracking-[0.21px]">
+                      <span className="text-black text-[14px] leading-5 tracking-[0.21px] font-medium font-dm-sans">
                         {tech.name}
                       </span>
                     </Badge>
@@ -176,61 +174,59 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             )}
           </div>
 
-          <div
-            className={`flex items-center gap-10 ${
-              project.tech?.length > 0 ? "mt-5" : "mt-0"
-            } md:flex-col sm:flex-col md:items-start sm:items-start md:w-full sm:w-full md:gap-4 sm:gap-4`}
-          >
-            <div className="flex w-[30%] flex-col items-center md:w-full sm:w-full">
-              {project.status === "Verified" && (
-                <div className="flex items-baseline">
-                  <span className="text-xl font-medium">{project?.score}</span>
-                  <span className="text-[#909091] text-xl font-medium">
-                    /10
+          {!isPublic && (
+            <div
+              className={`flex items-center justify-between gap-3 ${
+                project.tech?.length > 0 ? "mt-0" : "mt-0"
+              } md:flex-col sm:flex-col md:items-start sm:items-start md:w-full sm:w-full md:gap-4 sm:gap-4`}
+            >
+              <div className="flex flex-col items-center md:w-full sm:w-full">
+                {project.status === "Verified" && (
+                  <div className="flex items-baseline">
+                    <span className="text-xl font-medium">
+                      {project?.score}
+                    </span>
+                    <span className="text-[#909091] text-xl font-medium">
+                      /10
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1 rounded-full">
+                  <img
+                    src={config.icon}
+                    alt={project.status}
+                    className="w-4 h-4"
+                  />
+                  <span className={`text-sub-header ${config.color}`}>
+                    {config.text}
                   </span>
                 </div>
-              )}
-              <div className="flex items-center gap-2 px-3 rounded-full">
-                <img
-                  src={config.icon}
-                  alt={project.status}
-                  className="w-4 h-4"
-                />
-                <span
-                  className={`text-sm leading-[22px] font-medium ${config.color}`}
-                >
-                  {config.text}
-                </span>
               </div>
-            </div>
 
-            {!isPublic && (
-              <div className="flex gap-8 md:flex-col sm:flex-col md:w-full sm:w-full md:gap-2 sm:gap-2">
-                <Button
-                  variant="link"
-                  className="text-[#001630] underline w-28 justify-center md:w-full sm:w-full"
-                  onClick={
-                    project.status === "Incomplete"
-                      ? handleIncompleteClick
-                      : undefined
-                  }
-                >
-                  {getActionConfig(project.status)}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-[#67696b] text-[#001630] w-28 justify-center md:w-full sm:w-full"
-                >
-                  View Project
-                </Button>
-              </div>
-            )}
-          </div>
+              <Button
+                variant="link"
+                className="text-[#68696B] text-body2 underline justify-center text-center md:w-full sm:w-full"
+                onClick={
+                  project.status === "Incomplete"
+                    ? handleIncompleteClick
+                    : undefined
+                }
+              >
+                {getActionConfig(project.status)}
+              </Button>
+              <Button
+                variant="outline"
+                className="border-[#68696B] text-[#68696B] text-body2 justify-center md:w-full sm:w-full"
+              >
+                View Project
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
       <CardContent className="flex flex-col px-0 w-full p-0 mt-3">
-        <p className="text-[#67696b] text-sm">{project.description}</p>
+        <p className="text-[#67696b] text-body2">{project.description}</p>
         {(project.githubLink?.length > 0 || project.liveLink) && (
           <div className="flex gap-6 mt-3 md:flex-col sm:flex-col md:gap-2 sm:gap-2">
             {project.githubLink?.length > 0 && (
@@ -244,7 +240,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  View GitHub report
+                  View GIT repo
                 </a>
               </Button>
             )}

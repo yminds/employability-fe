@@ -116,12 +116,14 @@ const UserProfile: React.FC = () => {
             />
           </div>
 
-          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <ExperienceSection
-              intialExperiences={experiences}
-              isPublic={false}
-            />
-          </div>
+          {user.is_experienced && (
+            <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
+              <ExperienceSection
+                intialExperiences={experiences}
+                isPublic={false}
+              />
+            </div>
+          )}
 
           <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
             <EducationSection
@@ -130,12 +132,15 @@ const UserProfile: React.FC = () => {
             />
           </div>
 
-          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <CertificationsSection
-              certifications={certifications}
-              isPublic={false}
-            />
-          </div>
+          {user.has_certificates && (
+            <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
+              <CertificationsSection
+                certifications={certifications}
+                isPublic={false}
+              />
+            </div>
+          )}
+
           <div className="mb-6"></div>
         </div>
 
