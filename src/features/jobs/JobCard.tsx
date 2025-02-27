@@ -1,7 +1,4 @@
 import React from "react";
-
-import brandLogo from "@/assets/branding/logo.svg";
-
 import type { Job, Skill } from "@/pages/JobsPage";
 
 interface JobCardProps {

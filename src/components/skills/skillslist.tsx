@@ -42,7 +42,7 @@ interface SkillListProps {
   goals:
     | {
         message: string;
-        data:Array<{  
+        data: Array<{
           experience: string | undefined;
           _id: string;
           name: string;
@@ -262,7 +262,9 @@ const SkillList: React.FC<SkillListProps> = ({
 
     if (displaySkills.length === 0) {
       return (
-        <div className="text-gray-500 text-body2 text-center py-4">No skills found</div>
+        <div className="text-gray-500 text-body2 text-center py-4">
+          No skills found
+        </div>
       );
     }
 

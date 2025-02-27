@@ -98,6 +98,16 @@ const JobsHeader: React.FC<JobsHeaderProps> = (props) => {
           >
             Active applications
           </button>
+          <button
+            onClick={() => setJobsTab("Saved")}
+            className={`py-1.5 px-2 rounded-[3px] text-body2 ${
+              JobsTab === "Saved"
+                ? "bg-[#DBFFEA] text-[#10B754]"
+                : "text-[#68696B]"
+            }`}
+          >
+            Saved Jobs
+          </button>
         </div>
 
         <div className="flex flex-row gap-3.5 item-center">
