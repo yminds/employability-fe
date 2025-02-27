@@ -33,37 +33,29 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get install sshpass -y
 
-      - name: Create remote directory
-        uses: appleboy/ssh-action@v0.1.4
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          host: ${{ secrets.AZURE_VM_IP }}
-          username: ${{ secrets.AZURE_VM_USERNAME }}
-          password: ${{ secrets.AZURE_VM_PASSWORD }}
-          script: |
-            powershell.exe -Command "
-            if (-not (Test-Path 'E:\Inetpub\vhosts\employability.ai\httpdocs')) {
-              New-Item -Path 'E:\Inetpub\vhosts\employability.ai\httpdocs' -ItemType Directory -Force
-            }
-            "
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Copy files to server
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with: 
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: yminds/employability-frontend:latest
+
+      - name: Deploy Backend on Ubuntu VM
         env:
-          SSHPASS: ${{ secrets.AZURE_VM_PASSWORD }}
+          SSHPASS: ${{ secrets.AZURE_VM_PASSWORD_NEW }}
         run: |
-          sshpass -e scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r dist/* "${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }}:E:/Inetpub/vhosts/employability.ai/httpdocs"
-
-      - name: Verify deployment on server
-        uses: appleboy/ssh-action@v0.1.4
-        with:
-          host: ${{ secrets.AZURE_VM_IP }}
-          username: ${{ secrets.AZURE_VM_USERNAME }}
-          password: ${{ secrets.AZURE_VM_PASSWORD }}
-          script: |
-            powershell.exe -Command "
-            if ((Get-ChildItem -Path 'E:\Inetpub\vhosts\employability.ai\httpdocs').Count -gt 0) {
-              Write-Host 'Files deployed successfully.'
-            } else {
-              Write-Error 'Deployment failed: No files found in the target directory.'
-              exit 1
-            }
-            "
+          sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USERNAME_NEW }}@${{ secrets.AZURE_VM_IP_NEW }} << EOF
+            cd ~/employability.ai
+            sudo docker login -u yminds -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+            sudo docker compose down
+            sudo docker compose up -d
+            sudo docker system prune -f
+          EOF         
+   

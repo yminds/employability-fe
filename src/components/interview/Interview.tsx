@@ -111,8 +111,6 @@ const Interview: React.FC<{
       }
     };
 
-
-
     const handleAIResponse = (data: string) => {
       setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
 
@@ -154,9 +152,9 @@ const Interview: React.FC<{
 
     const handleConceptValidation = (concepts: any) => {
       //{'inroductionr to react'}
-      console.log("========================");
+      console.log("========================+");
       console.log(concepts);
-      console.log("========================");
+      console.log("========================+");
 
       setAllConcepts((prev) => {
         const updatedConcepts = prev.map((concept) => {
@@ -258,30 +256,26 @@ const Interview: React.FC<{
       // provider: "google",
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
-      user_id: interviewDetails.data.user_id, 
+      user_id: interviewDetails.data.user_id,
       user_skill_id: interviewDetails.data.user_skill_id,
       skill_id: interviewDetails.data.skill_id,
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts,
+      concepts: concepts.slice(0,4),
       interview_id: interviewDetails.data._id,
       level: user?.experience_level || "entry",
       type:type,
       jobDescription:jobDescription
     }).unwrap();
-    
 
     console.log("response", response);
 
     setAllConcepts((prev) => {
       const updatedConcepts = prev.map((concept) => {
         if (response?.event?.ratedConcepts?.includes(concept?.name)) {
-          console.log("Concept entred", { ...concept, status: "completed" });
-
           return { ...concept, status: "completed" };
         }
-        console.log("concept", concept);
 
         return concept;
       });
@@ -346,30 +340,26 @@ const LayoutBuilder = ({
 }: LayoutBuilderProps) => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
-
   console.log("all conepts", concepts);
-  
+
   // console.log("concepts", concepts);
   const coveredConceptsLength = concepts.filter((concept) => concept.status === "completed").length;
   const calculateProgress = (concepts: any[]) => {
     if (!concepts.length) return 0;
-    
-    const completedCount = concepts.filter(
-      (concept) => concept.status === "completed"
-    ).length;
-    
+
+    const completedCount = concepts.filter((concept) => concept.status === "completed").length;
+
     // Round to 1 decimal place for cleaner display
     return Math.round((completedCount / concepts.length) * 1000) / 10;
   };
-  
+
   // In the component:
   const progression = calculateProgress(concepts);
-  
+
   console.log("progression", progression);
 
   return layoutType === 1 ? (
     <div className="w-full flex gap-8 max-h-screen">
-
       <div className="w-[60%] flex flex-col gap-8">
         <WebCam />
         {isUserAnswering ? (
@@ -402,7 +392,6 @@ const LayoutBuilder = ({
             <CodeSnippetQuestion question={question.codeSnippet.question} codeSnippet={question.codeSnippet.code} />
           ) : (
             <Conversation layoutType={2} messages={messages} />
-            
           )}
         </div>
         <div className="w-[55%] flex flex-col gap-1 ">
