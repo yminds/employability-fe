@@ -14,18 +14,37 @@ import grid from "@/assets/sign-up/grid.svg";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
 import arrow from "@/assets/skills/arrow.svg";
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
+
+// Types
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
 export const EmployerLogin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
   });
   const [error, setError] = useState<string | null>(null);
 
   const [login, { isLoading }] = useEmployerLoginMutation();
+  const employer = useSelector((state:RootState)=> state.employerAuth.employer)
+  const token = useSelector((state:RootState)=> state.employerAuth.token)
+
+  useEffect(()=>{
+      if(employer && token){
+        navigate("/employer")
+      }
+      else{
+        navigate('/employer/login')
+      }
+    },[employer,token])
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -33,21 +52,56 @@ export const EmployerLogin = () => {
 
     try {
       const response = await login({
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         password: formData.password
       }).unwrap();
 
       if (response.success) {
-        // Dispatch credentials to Redux store
-        dispatch(setEmployerCredentials(response.data));
+        const employerData:any = response.data;
+
+        console.log("EmployerDetails",employerData)
+        
+        // Structure the data to match what the Redux slice expects
+        dispatch(setEmployerCredentials({
+          employer_info: {
+            _id: employerData._id,
+            employerName: employerData.employerName,
+            email: employerData.email,
+            role: employerData.role,
+            is_email_verified: employerData.is_email_verified,
+            account_status: employerData.account_status,
+            posted_jobs: employerData.posted_jobs || [],
+            active_jobs: employerData.active_jobs || [],
+            createdAt: employerData.createdAt,
+            updatedAt: employerData.updatedAt,
+            company_id: employerData?.company?._id
+          },
+          token: employerData.token,
+          company: employerData.company
+        }));
+
         navigate('/employer');
-      } else {
-        setError(response.message || 'Login failed. Please try again.');
       }
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.data?.message || 'An error occurred. Please try again.');
+      if (err.status === 400) {
+        setError('Invalid email or password.');
+      } else if (err.status === 401) {
+        setError('Your account is not active. Please contact support.');
+      } else if (err.status === 404) {
+        setError('Account not found. Please check your email.');
+      } else {
+        setError('An error occurred. Please try again.');
+      }
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   useEffect(() => {
@@ -71,15 +125,6 @@ export const EmployerLogin = () => {
       {/* Form Section */}
       <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
         <div className="w-full max-w-md bg-white rounded-lg p-8">
-          <div className="flex items-center gap-2 mb-6">
-            <button
-              onClick={() => navigate('/')}
-              className="hover:text-green-600 text-black text-sm flex items-center"
-            >
-              <img className="w-4 h-4 mr-2" src={arrow} alt="Back Arrow" />
-              <span>Back to Home</span>
-            </button>
-          </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="h-[84px] flex flex-col justify-around mx-auto">
@@ -106,10 +151,11 @@ export const EmployerLogin = () => {
               <div className="relative">
                 <input
                   type="email"
+                  name="email"
                   className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                   placeholder="Company Email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={handleInputChange}
                   required
                 />
                 <img src={Mail} alt="Email Icon" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
@@ -118,10 +164,11 @@ export const EmployerLogin = () => {
               <div className="relative">
                 <input
                   type="password"
+                  name="password"
                   className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                   placeholder="Password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={handleInputChange}
                   required
                 />
                 <img src={Password} alt="Password Icon" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />

@@ -12,7 +12,7 @@ const Header: React.FC<HeaderProbs> = ({SkillName, type, skillLevel}) => {
         <img src={logo} />
       </div>
       <div className=" text-h1">
-        {type} : {SkillName}, {experience[skillLevel]}
+        {type} interview : {SkillName}, {experience[skillLevel]}
       </div>
     </div>
   );

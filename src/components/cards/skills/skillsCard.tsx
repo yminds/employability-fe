@@ -158,7 +158,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
       // Start the interview directly if tutorial is disabled
       navigate(`/interview/${interviewId}`, {
-        state: {title: skill, skillId, skillPoolId, level },
+        state: {title: skill, skillId, skillPoolId, level, type: "Skill" },
       });
     } else {
       // Show the tutorial, interview will start after confirmation
