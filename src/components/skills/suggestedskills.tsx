@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice"
-import { useGetUserSkillsMutation } from '@/api/skillsApiSlice';
-import AddSkillsModal from './addskills';
-import Skeleton from 'react-loading-skeleton';
+import React, { useEffect, useState } from "react";
+import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice";
+import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
+import AddSkillsModal from "./addskills";
+import Skeleton from "react-loading-skeleton";
 
 interface SuggestedSkillsProps {
-  userId: string | undefined
+  userId: string | undefined;
   goalId: string | null;
   onSkillsUpdate: (isUpdated: boolean) => void;
-  isSkillsUpdated: boolean
+  isSkillsUpdated: boolean;
+  goals: any;
 }
 
-const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSkillsUpdate, isSkillsUpdated }) => {
+const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({
+  userId,
+  goalId,
+  onSkillsUpdate,
+  isSkillsUpdated,
+  goals,
+}) => {
   const [getUserSkills] = useGetUserSkillsMutation();
   const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
 
@@ -37,24 +44,26 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
       const userSkills = await getUserSkills({ userId, goalId }).unwrap();
       const allSkillNames = getSkillNames(userSkills.data.all);
 
-      const suggestedSkills = await getSuggestedSkills({ query: allSkillNames }).unwrap();
+      const suggestedSkills = await getSuggestedSkills({
+        query: allSkillNames,
+      }).unwrap();
       setSuggestedSkillsData(suggestedSkills);
     } catch (err) {
-      console.error('Error fetching skills:', err);
+      console.error("Error fetching skills:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
-
-
   const getSkillNames = (skills: any[]) => {
-    return skills.map(skill => skill.skill_pool_id.name).join(',');
+    return skills.map((skill) => skill.skill_pool_id.name).join(",");
   };
 
   const [showAll, setShowAll] = useState(false);
 
-  const displayedSkills = showAll ? suggestedSkillsData : suggestedSkillsData.slice(0, 3);
+  const displayedSkills = showAll
+    ? suggestedSkillsData
+    : suggestedSkillsData.slice(0, 3);
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal
   const [selectedSkills, setSelectedSkills] = useState<any[]>([]);
@@ -67,10 +76,9 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
     setSelectedSkills([]);
   };
 
-
   if (isLoading) {
     return (
-      <div className='sm:max-w-[100vw] overflow-auto'>
+      <div className="sm:max-w-[100vw] overflow-auto">
         <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start sm:w-[100%] sm:p-4">
           <div className="flex justify-between items-start mb-6 w-full sm:max-w-[90vw]">
             <Skeleton width={200} height={30} />
@@ -97,7 +105,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
   }
 
   return (
-    <div className='sm:max-w-[100vw] overflow-auto'>
+    <div className="sm:max-w-[100vw] overflow-auto">
       <section className="p-6 bg-white rounded-lg sm:flex sm:flex-col sm:items-start sm:w-[100%] sm:p-4">
         <div className="flex justify-between items-start mb-6 w-full sm:max-w-[90vw]">
           <h2 className="text-[20px] font-medium leading-[26px] sm:text-sm">
@@ -107,7 +115,7 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
             className="text-[14px] text-green-600 font-medium hover:underline"
             onClick={() => setShowAll(!showAll)}
           >
-            {showAll ? 'Show Less' : 'View All →'}
+            {showAll ? "Show Less" : "View All →"}
           </button>
         </div>
         <div className="flex flex-wrap gap-4">
@@ -118,11 +126,19 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
             >
               <div className="flex items-center space-x-3">
                 <div className="w-[42px] h-[42px] rounded-full flex justify-center items-center bg-white">
-                  <img src={skill?.icon} alt={skill?.name} className="w-[22px] h-[22px]" />
+                  <img
+                    src={skill?.icon}
+                    alt={skill?.name}
+                    className="w-[22px] h-[22px]"
+                  />
                 </div>
-                <h3 className="text-[16px] font-medium text-gray-800">{skill?.name}</h3>
+                <h3 className="text-[16px] font-medium text-gray-800">
+                  {skill?.name}
+                </h3>
               </div>
-              <p className="text-[14px] text-gray-600 leading-[20px]">{skill?.description}</p>
+              <p className="text-[14px] text-gray-600 leading-[20px]">
+                {skill?.description}
+              </p>
               <button
                 className="text-[14px] text-left text-green-600 font-medium hover:text-green-700 hover:underline"
                 onClick={() => handleOpenModal(skill)}
@@ -140,7 +156,8 @@ const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({ userId, goalId, onSki
           userId={userId}
           goalId={goalId}
           onClose={handleCloseModal}
-          onSkillsUpdate={onSkillsUpdate} goals={undefined}
+          onSkillsUpdate={onSkillsUpdate}
+          goals={goals}
           prefillSkills={selectedSkills}
         />
       )}

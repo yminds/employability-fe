@@ -27,8 +27,8 @@ const MicCheck: React.FC<MicCheckProps> = ({ onMicQualityChange }) => {
     <div className={`bg-[#FAFAFA] flex flex-col gap-1 justify-around p-3 rounded-xl h-[35vh] ${isMicSelected && qualityTested ? "border-[#10B754] border-2" : "border border-[#DBDBDB]"}`}>
       <div className="flex justify-between items-center">
         <div className="text-[#333] text-xl font-medium flex items-center gap-5">
-          <span className="flex sm:w-[1vw]h-[2vh] md:w-12 h-12 p-3 justify-center items-center bg-white border border-[#ddd] rounded-full">
-            <img className="sm:w-[1vw] sm:h-[3vh] md:w-6h-5" src={mic} alt="Mic" />
+          <span className="flex sm:w-[1vw] md:w-12 w-12 h-12 p-3 justify-center items-center bg-white border border-[#ddd] rounded-full">
+            <img className="sm:w-[1vw] sm:h-[3vh] md:w-6 h-5" src={mic} alt="Mic" />
           </span>
           <span>Mic Check</span>
         </div>
@@ -53,12 +53,12 @@ const MicCheck: React.FC<MicCheckProps> = ({ onMicQualityChange }) => {
         <div className="text-[#666] text-sm">Level Input</div>
         <div className="flex w-[100%] justify-between">
           {dots.map((isActive, i) => (
-            <span key={i} className={`w-[0.7vw] h-[4vh] rounded-[.5rem] ${isSpeaking && isActive ? "bg-[#10B754]" : "bg-gray-200"}`} />
+            <span key={i} className={`w-[0.7vw] h-[4vh] rounded-[.5rem] ${isSpeaking && isActive ? "bg-button" : "bg-gray-200"}`} />
           ))}
         </div>
 
         <button
-          className={` h-[3vh] w-[10vw] rounded text-[12px]  ${qualityTested ? "bg-gray-500" : "bg-[#10B754]"} text-white`}
+          className={` h-[3vh] w-[10vw] rounded text-[12px]  ${qualityTested ? "bg-gray-800" : "bg-button"} text-white`}
           onClick={handleSpeakClick}
           disabled={!isMicSelected}
         >

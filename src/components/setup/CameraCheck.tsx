@@ -46,9 +46,9 @@ const CameraCheck: React.FC<CameraCheckProps> = ({
     >
       <div className="flex justify-between items-center">
         <div className="text-[#333] text-xl not-italic font-medium leading-[normal] flex items-center gap-5">
-          <span className="flex sm:w-[1vw]h-[2vh] md:w-12 h-12 justify-center items-center bg-white border border-[#ddd] rounded-[42px]">
+          <span className="flex sm:w-[1vw] md:w-12 w-12 h-12 justify-center items-center bg-white border border-[#ddd] rounded-[42px]">
             <img
-              className="sm:w-[1vw] sm:h-[3vh] md:w-6 w-[41px] h-6"
+              className="sm:w-[1vw] sm:h-[3vh] md:w-6 w-[30px] h-6"
               src={camera}
               alt="Camera Icon"
             />

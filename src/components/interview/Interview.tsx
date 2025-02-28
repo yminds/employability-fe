@@ -19,6 +19,7 @@ import { Timer } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import toggleBrowserFullscreen from "../skills/fullscreen";
+import { JobDescription } from "../interview-list/ViewJD";
 
 // Constants and Types
 const SOCKET_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "wss://employability.ai";
@@ -49,8 +50,10 @@ const Interview: React.FC<{
   interviewTopic: string;
   concepts: any[];
   stopScreenSharing: () => void;
-  skillLevel:"1" | "2" | "3"
-}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel }) => {
+  skillLevel:"1" | "2" | "3";
+  type: "Skill"|"Mock"|"Project",
+  jobDescription:JobDescription
+}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription }) => {
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
@@ -108,8 +111,6 @@ const Interview: React.FC<{
       }
     };
 
-
-
     const handleAIResponse = (data: string) => {
       setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
 
@@ -151,9 +152,9 @@ const Interview: React.FC<{
 
     const handleConceptValidation = (concepts: any) => {
       //{'inroductionr to react'}
-      console.log("========================");
+      console.log("========================+");
       console.log(concepts);
-      console.log("========================");
+      console.log("========================+");
 
       setAllConcepts((prev) => {
         const updatedConcepts = prev.map((concept) => {
@@ -251,9 +252,11 @@ const Interview: React.FC<{
       prompt,
       model: "gpt-4o",
       provider: "openai",
+      // model: "gemini-2.0-flash-exp",
+      // provider: "google",
       _id: interviewDetails.data._id,
       thread_id: interviewDetails.data.thread_id,
-      user_id: interviewDetails.data.user_id, 
+      user_id: interviewDetails.data.user_id,
       user_skill_id: interviewDetails.data.user_skill_id,
       skill_id: interviewDetails.data.skill_id,
       code_snippet: question.codeSnippet?.code || "",
@@ -261,20 +264,18 @@ const Interview: React.FC<{
       skill_name: interviewTopic,
       concepts: concepts,
       interview_id: interviewDetails.data._id,
-      level: user?.experience_level || "entry"
+      level: user?.experience_level || "entry",
+      type:type,
+      jobDescription:jobDescription
     }).unwrap();
-    
 
     console.log("response", response);
 
     setAllConcepts((prev) => {
       const updatedConcepts = prev.map((concept) => {
         if (response?.event?.ratedConcepts?.includes(concept?.name)) {
-          console.log("Concept entred", { ...concept, status: "completed" });
-
           return { ...concept, status: "completed" };
         }
-        console.log("concept", concept);
 
         return concept;
       });
@@ -291,7 +292,7 @@ const Interview: React.FC<{
   return (
     <div className="w-full h-screen pt-12 ">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-        <Header SkillName={interviewTopic} type={"Skills Interview"} skillLevel={skillLevel}/>
+        <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel}/>
         {isInterviewEnded ? (
           <div className="text-center text-gray-500">
             <p>Thank you for your time. We will get back to you soon.</p>
@@ -339,30 +340,26 @@ const LayoutBuilder = ({
 }: LayoutBuilderProps) => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
-
   console.log("all conepts", concepts);
-  
+
   // console.log("concepts", concepts);
   const coveredConceptsLength = concepts.filter((concept) => concept.status === "completed").length;
   const calculateProgress = (concepts: any[]) => {
     if (!concepts.length) return 0;
-    
-    const completedCount = concepts.filter(
-      (concept) => concept.status === "completed"
-    ).length;
-    
+
+    const completedCount = concepts.filter((concept) => concept.status === "completed").length;
+
     // Round to 1 decimal place for cleaner display
     return Math.round((completedCount / concepts.length) * 1000) / 10;
   };
-  
+
   // In the component:
   const progression = calculateProgress(concepts);
-  
+
   console.log("progression", progression);
 
   return layoutType === 1 ? (
     <div className="w-full flex gap-8 max-h-screen">
-
       <div className="w-[60%] flex flex-col gap-8">
         <WebCam />
         {isUserAnswering ? (
@@ -395,7 +392,6 @@ const LayoutBuilder = ({
             <CodeSnippetQuestion question={question.codeSnippet.question} codeSnippet={question.codeSnippet.code} />
           ) : (
             <Conversation layoutType={2} messages={messages} />
-            
           )}
         </div>
         <div className="w-[55%] flex flex-col gap-1 ">

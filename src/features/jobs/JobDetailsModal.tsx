@@ -1,29 +1,56 @@
-import React from "react";
-
+import React, { useState } from "react";
 import closeIcon from "@/assets/jobs/close.svg";
 import errorIcon from "@/assets/jobs/error.svg";
 import locationIcon from "@/assets/jobs/location.svg";
 import employeeIcon from "@/assets/jobs/employee.svg";
 import briefcaseIcon from "@/assets/jobs/briefcase.svg";
-
-import ChipsCardAdd from "./chipsCardAdd";
-
 import DOMPurify from "dompurify";
 import type { Job } from "@/pages/JobsPage";
-import { parseKeyResponsibilities } from "@/utils/parseJobDescription";
+import { useSelector } from "react-redux";
+import { useGetJobSkillAnalysisQuery } from "@/api/jobsApiSlice";
+import AIAnalysisSkeleton from "./ai-analysis-skeleton";
+import AddSkillsModal from "@/components/skills/addskills";
+import ChipsCardAddSkill from "./chipsCardAddSkill";
+import { useSaveJobMutation } from "@/api/jobsApiSlice";
+import { toast } from "sonner";
 
 interface JobDetailsProps {
   jobData: Job;
   userSkills: string[];
   closeModal: () => void;
+  goals: any;
+  goalId: string | null;
+}
+
+interface Skill {
+  id: string;
+  name: string;
 }
 
 const JobDetailsModal: React.FC<JobDetailsProps> = ({
   jobData,
   userSkills,
   closeModal,
+  goals,
+  goalId,
 }) => {
-  const calculateMatch = () => { 
+  const user = useSelector((state: any) => state.auth.user);
+
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState<any[]>([]);
+
+  const { data: skillAnalysis, isLoading } = useGetJobSkillAnalysisQuery({
+    jobId: jobData.id.toString(),
+    userSkills,
+    userSoftSkills: user.parsedResume.softSkills || [],
+    userEducation: user.education,
+    userExperience: user.experience,
+  });
+  const [saveJob, { isLoading: isSaving }] = useSaveJobMutation();
+
+  console.log("Skill analysis", skillAnalysis);
+
+  const calculateMatch = () => {
     const requiredSkills = jobData.skills;
     const matchedSkills = requiredSkills.filter((item) =>
       userSkills.includes(item._id)
@@ -36,21 +63,24 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
 
   const matchPercentage = calculateMatch();
   const minimumMatchPercentage = 60;
-  const [keyResponsibilities, setKeyResponsibilities] = React.useState<string[]>([])
 
-  React.useEffect(() => {
-    console.log("Raw job description:", jobData.description)
-    const sanitizedDescription = DOMPurify.sanitize(jobData.description)
-    console.log("Sanitized description:", sanitizedDescription)
-    const responsibilities = parseKeyResponsibilities(sanitizedDescription)
-    console.log("Parsed responsibilities:", responsibilities)
+  const handleSaveJob = async () => {
+    try {
+      const response = await saveJob({
+        jobId: jobData.id.toString(),
+        userId: user._id,
+      }).unwrap();
+      toast.success(response.message);
+    } catch (error: any) {
+      console.error("Failed to save job:", error);
+      toast.error(error.data.message);
+    }
+  };
 
-    setKeyResponsibilities(responsibilities)
-  }, [jobData.description])
-
-  console.log("Job data:", jobData.description)
-
-  console.log("Sanitized job description:", DOMPurify.sanitize(jobData.description))
+  const handleCloseModal = () => {
+    setIsAddSkillModalOpen(false);
+    setSelectedSkill([]);
+  };
 
   return (
     <div
@@ -132,10 +162,12 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-black text-sub-header">
-                    About
-                  </h3>
-                  <p className="text-[#414447] text-body2"> {jobData.aboutCompany || "We’re seeking a talented Full Stack Engineer to join our team. In this role, you will work across the entire stack, building scalable systems and crafting exceptional user experiences. "}</p>
+                  <h3 className="text-black text-sub-header">About</h3>
+                  <p className="text-[#414447] text-body2">
+                    {" "}
+                    {jobData.aboutCompany ||
+                      "We’re seeking a talented Full Stack Engineer to join our team. In this role, you will work across the entire stack, building scalable systems and crafting exceptional user experiences. "}
+                  </p>
                 </div>
                 {/* skills */}
 
@@ -201,9 +233,7 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                     <img src={locationIcon} className="h-[22px] w-[22px] " />
                   </div>
                   <div>
-                    <h3 className="text-black text-sub-header">
-                      Location
-                    </h3>
+                    <h3 className="text-black text-sub-header">Location</h3>
                     <p className="text-[#414347] text-body2">
                       {" "}
                       {jobData.locations
@@ -220,9 +250,7 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                     <img src={employeeIcon} className="h-[22px] w-[22px] " />
                   </div>
                   <div>
-                    <h3 className="text-black text-sub-header">
-                      Compensation
-                    </h3>
+                    <h3 className="text-black text-sub-header">Compensation</h3>
                     <p className="text-[#414347] text-body2">
                       {" "}
                       {jobData.salaryRange}
@@ -235,13 +263,8 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
                     <img src={briefcaseIcon} className="h-[22px] w-[22px] " />
                   </div>
                   <div>
-                    <h3 className="text-black text-sub-header">
-                      Job Type
-                    </h3>
-                    <p className="text-[#414347] text-body2">
-                      {" "}
-                      {jobData.type}
-                    </p>
+                    <h3 className="text-black text-sub-header">Job Type</h3>
+                    <p className="text-[#414347] text-body2"> {jobData.type}</p>
                   </div>
                 </div>
               </div>
@@ -249,10 +272,7 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
 
             {/* job description                 */}
             <section className="flex flex-col gap-4  ">
-              <h2 className="text-black text-sub-header">
-                {" "}
-                Job Description
-              </h2>
+              <h2 className="text-black text-sub-header"> Job Description</h2>
               {/*                             
                             <iframe className=' bg-slate-200  overflow-scroll scrollbar-hide'  srcDoc={jobData.description}  > </iframe> */}
               <div
@@ -263,101 +283,109 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
               ></div>
             </section>
 
-            <section className=" p-6 bg-[#ddf8e8]/50 rounded-[9px] justify-start items-stretch gap-2.5 flex flex-row ">
-              {/* employablility icon */}
-              <div className=" flex flex-col   justify-start size-fit py-[3px] ">
-                <img src="/logo.svg" className="h-[14.5px] w-4 mt-[2px]" />
-              </div>
-
-              {/* Analysis content */}
-              <div className="w-full flex flex-col justify-start gap-8 ">
-                {/* overview  */}
-                <div className="flex flex-col justify-start items-stretch gap-2.5">
-                  <h3 className="text-black text-sub-header">
-                    AI Analysis
-                  </h3>
-
-                  <p className="text-[#414347] text-body2">
-                    You’re a strong candidate for this position! Your
-                    experience, skills, and projects align closely with what
-                    Creative Minds Inc. is looking for. However, to maximize
-                    your chances: Refine your portfolio with detailed case
-                    studies and measurable outcomes. Emphasize how your
-                    freelance work was equivalent to full-time professional
-                    experience.
-                  </p>
+            {isLoading ? (
+              <AIAnalysisSkeleton />
+            ) : (
+              <section className=" p-6 bg-[#ddf8e8]/50 rounded-[9px] justify-start items-stretch gap-2.5 flex flex-row ">
+                {/* employablility icon */}
+                <div className=" flex flex-col   justify-start size-fit py-[3px] ">
+                  <img src="/logo.svg" className="h-[14.5px] w-4 mt-[2px]" />
                 </div>
 
-                <div className="flex flex-row gap-8 w-full">
-                  <div className="flex-1 flex-col flex gap-3">
-                    <h3 className=" text-black text-sub-header">
-                      {" "}
-                      Skill Alignment
-                    </h3>
-
-                    <ul className="list-disc ml-5 text-[#414347] text-body2">
-                      <li>
-                        Your experience with React.js, Node.js, SQL/NoSQL
-                        databases, and cloud platforms (AWS) is highly relevant
-                        to the role.
-                      </li>
-                      <li>
-                        No mention of Ruby on Rails or GraphQL in your resume.
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="flex-1 flex flex-col gap-3">
-                    <h3 className=" text-black text-sub-header">
-                      {" "}
-                      Skill Alignment
-                    </h3>
-
-                    <ul className="list-disc ml-5 text-[#414347] text-body2">
-                      <li>
-                        Your experience with React.js, Node.js, SQL/NoSQL
-                        databases, and cloud platforms (AWS) is highly relevant
-                        to the role.
-                      </li>
-                      <li>
-                        No mention of Ruby on Rails or GraphQL in your resume.
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <hr></hr>
-                <div className="flex flex-col gap-3">
-                  <h3 className="text-black text-sub-header">Recommendation</h3>
-                  <div className="flex flex-col gap-4 text-[#414347] text-body2">
-                    <p>
-                      Add the following skills to our profile to improve your
-                      job match by upto 90%
+                {/* Analysis content */}
+                <div className="w-full flex flex-col justify-start gap-8 ">
+                  {/* overview  */}
+                  <div className="flex flex-col justify-start items-stretch gap-2.5">
+                    <h3 className="text-black text-sub-header">AI Analysis</h3>
+                    <p className="text-[#414347] text-body2">
+                      {skillAnalysis?.overallAnalysis.summary}
                     </p>
-                    <ChipsCardAdd
-                      itemList={[
-                        "React",
-                        "MongoDb",
-                        "Node.js",
-                        "GraphQL",
-                        "MySQL",
-                        "Express",
-                      ]}
-                      selectItem={(item: string) => {}}
-                    ></ChipsCardAdd>
+                  </div>
+
+                  <div className="flex flex-row gap-8 w-full">
+                    <div className="flex-1 flex-col flex gap-3">
+                      <h3 className="text-black text-sub-header">
+                        Technical Fit
+                      </h3>
+                      <ul className="list-disc ml-5 text-[#414347] text-body2">
+                        {skillAnalysis?.technicalSkillsAnalysis.skillStrengths.map(
+                          (strength, index) => (
+                            <li key={index}>{strength}</li>
+                          )
+                        )}
+                        {skillAnalysis?.experienceAnalysis.strengths.map(
+                          (strength, index) => (
+                            <li key={`exp-${index}`}>{strength}</li>
+                          )
+                        )}
+                        {skillAnalysis?.technicalSkillsAnalysis.skillGapRecommendations.map(
+                          (gap, index) => (
+                            <li key={`gap-${index}`}>{gap}</li>
+                          )
+                        )}
+                        {skillAnalysis?.experienceAnalysis.experienceGaps.map(
+                          (gap, index) => (
+                            <li key={`expgap-${index}`}>{gap}</li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+
+                    <div className="flex-1 flex flex-col gap-3">
+                      <h3 className="text-black text-sub-header">
+                        Cultural Fit
+                      </h3>
+                      <ul className="list-disc ml-5 text-[#414347] text-body2">
+                        {skillAnalysis?.culturalFit.alignmentDetails.strengths.map(
+                          (strength, index) => (
+                            <li key={index}>{strength}</li>
+                          )
+                        )}
+                        {skillAnalysis?.culturalFit.alignmentDetails.potentialChallenges.map(
+                          (challenge, index) => (
+                            <li key={`challenge-${index}`}>{challenge}</li>
+                          )
+                        )}
+                        {skillAnalysis?.culturalFit.alignmentDetails.recommendedAdaptationStrategies.map(
+                          (recommendation, index) => (
+                            <li key={`recommendation-${index}`}>
+                              {recommendation}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <hr></hr>
+                  <div className="flex flex-col gap-3">
+                    <h3 className="text-black text-sub-header">
+                      Recommendation
+                    </h3>
+                    <div className="flex flex-col gap-4 text-[#414347] text-body2">
+                      <p>Add the following skills to improve your job match:</p>
+                      <ChipsCardAddSkill
+                        itemList={skillAnalysis?.recommendedSkills || []}
+                        selectItem={(item: Skill) => {
+                          setSelectedSkill([item]);
+                          setIsAddSkillModalOpen(true);
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
           </div>
         </div>
 
         <div className="flex gap-3 justify-end p-0">
           <button
-            className="w-[161px] h-11 px-8 py-4 rounded border border-[#00183d] justify-center items-center gap-2 inline-flex text-base font-medium font-['SF Pro Display'] leading-normal"
-            onClick={() => {}}
+            className="w-[161px] h-11 px-8 py-4 rounded border border-[#00183d] justify-center items-center gap-2 inline-flex text-base font-medium font-['SF Pro Display'] leading-normal disabled:cursor-not-allowed"
+            onClick={handleSaveJob}
+            disabled={isLoading || isSaving}
           >
-            Save Job{" "}
+            {isSaving ? "Saving..." : "Save Job"}
           </button>
           <a
             className="w-[196px] h-11 px-8 py-4 bg-[#00183d] rounded justify-center items-center gap-2 inline-flex text-base font-medium font-['SF Pro Display'] leading-normal text-white"
@@ -367,6 +395,16 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
             Apply now
           </a>
         </div>
+        {isAddSkillModalOpen && (
+          <AddSkillsModal
+            userId={user._id}
+            goalId={goalId}
+            onClose={handleCloseModal}
+            onSkillsUpdate={() => {}}
+            goals={goals}
+            prefillSkills={selectedSkill}
+          />
+        )}
       </div>
     </div>
   );

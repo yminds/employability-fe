@@ -43,7 +43,7 @@ const MultiScreenDetector: React.FC<MultiScreenDetectorProps> = ({ onScreenCount
         <Alert variant="destructive">Multiple screens detected! Please disconnect other displays.</Alert>
       )}
       {!permissionRequested && (
-        <button className='text-[#10B754] text-center text-[0.86rem] not-italic font-normal font-ubuntu leading-[1.24rem] flex py-2 px-3 justify-center items-center rounded-[5px] border border-1 border-[#10B754] w-[1/2]' onClick={handleCheckScreens}>Check for Multiple Screens</button>
+        <button className='text-button text-center  not-italic font-normal font-ubuntu leading-[1.24rem] flex py-2 px-3 justify-center items-center rounded-[5px] border border-1 border-button w-[1/2]' onClick={handleCheckScreens}>Check for Multiple Screens</button>
       )}
     </div>
   );

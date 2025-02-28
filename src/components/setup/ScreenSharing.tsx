@@ -21,7 +21,7 @@ const ScreenSharingComponent: React.FC<ScreenSharingComponentProps> = ({
   handleShareScreen,
   videoRef,
 }) => {
-  const [screenCount, setScreenCount] = useState<number>(0);
+  const [screenCount, setScreenCount] = useState<number>(1);
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 
@@ -75,9 +75,9 @@ const ScreenSharingComponent: React.FC<ScreenSharingComponentProps> = ({
       >
         <div className="flex justify-between items-center">
           <div className="text-[#333] text-xl not-italic font-medium leading-[normal] flex items-center gap-5">
-            <span className="flex sm:w-[3vw]h-[6vh] md:w-12 h-12 p-3 justify-center items-center bg-white border border-[#ddd] rounded-full">
+            <span className="flex sm:w-[3vw] md:w-12 w-12 h-12 p-3 justify-center items-center bg-white border border-[#ddd] rounded-full">
               <img
-                className="sm:w-[2vw]h-[4vh] md:w-6h-6"
+                className="sm:w-[1vw] sm:h-[3vh] md:w-6 h-5 "
                 src={screenshare}
                 alt="screenShare"
               />
@@ -119,7 +119,7 @@ const ScreenSharingComponent: React.FC<ScreenSharingComponentProps> = ({
             )}
             {screenCount === 1 && (
               <button
-                className={`text-[#10B754] text-center text-[0.86rem] not-italic font-normal font-ubuntu leading-[1.24rem] flex py-2 px-3 justify-center items-center rounded-[5px] border border-1 border-[#10B754] w-[10vw] ${screenCount > 1 ? "cursor-not-allowed opacity-50" : ""}`}
+                className={`text-button text-center not-italic font-normal font-ubuntu leading-[1.24rem] flex py-2 px-3 justify-center items-center rounded-[5px] border border-1 border-button w-[10vw] ${screenCount > 1 ? "cursor-not-allowed opacity-50" : ""}`}
                 onClick={handleShareScreenClick}
                 disabled={screenCount > 1}
               >
