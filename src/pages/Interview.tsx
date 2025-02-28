@@ -184,7 +184,7 @@ const InterviewSetupNew: React.FC = () => {
                 </p>
               </div>
               <button
-                className={`bg-[#10B754] ${isProceedButtonEnabled ? "hover:bg-green-600" : "cursor-not-allowed opacity-50"} text-white rounded-[4px] font-semibold text-[16px] w-72 py-2`}
+                className={`bg-button ${isProceedButtonEnabled ? "hover:bg-[#062549]" : "cursor-not-allowed opacity-50"} text-white rounded-[4px] font-normal text-[14px] w-72 py-2 leading-5`}
                 onClick={() => {
                   setIsInterviewStarted(true);
                   toggleBrowserFullscreen();
