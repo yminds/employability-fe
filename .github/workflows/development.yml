@@ -1,9 +1,9 @@
-name: Deploy Frontend
+name: Deploy Frontend (Production)
 
 on:
   push:
     branches:
-      - dev
+      - production
 
 jobs:
   build-and-deploy:
@@ -16,8 +16,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.18.1'
-          cache: 'npm'
+          node-version: "20.18.1"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install
@@ -39,23 +39,22 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (Production)
         uses: docker/build-push-action@v4
-        with: 
+        with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: yminds/employability-frontend:latest
+          tags: yminds/employability-frontend-p:latest
 
-      - name: Deploy Backend on Ubuntu VM
-        env:
-          SSHPASS: ${{ secrets.AZURE_VM_PASSWORD_NEW }}
-        run: |
-          sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USERNAME_NEW }}@${{ secrets.AZURE_VM_IP_NEW }} << EOF
-            cd ~/employability.ai
-            sudo docker login -u yminds -p ${{ secrets.DOCKER_HUB_PASSWORD }}
-            sudo docker compose down
-            sudo docker compose up -d
-            sudo docker system prune -f
-          EOF         
-   
+      # - name: Deploy Backend on Ubuntu VM (Production)
+      #   env:
+      #     SSHPASS: ${{ secrets.AZURE_VM_PASSWORD_NEW }}
+      #   run: |
+      #     sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USERNAME_NEW }}@${{ secrets.AZURE_VM_IP_NEW }} << EOF
+      #       cd ~/prod.employability.ai
+      #       sudo docker login -u yminds -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+      #       sudo docker compose down
+      #       sudo docker compose up -d
+      #       sudo docker system prune -f
+      #     EOF
