@@ -20,9 +20,7 @@ const PublicProfile: React.FC = () => {
       (project: any) => project.status !== "Incomplete"
     ) || [];
 
-  const bio =
-    profile?.bio ||
-    "Full-stack developer with a strong foundation in React, Python, and MongoDB. A quick learner passionate about building user-friendly web applications, eager to apply skills in a professional environment.";
+  const bio = profile?.bio || "";
   const handleEdit = () => {
     console.log("Something");
   };
