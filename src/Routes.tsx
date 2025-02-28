@@ -40,6 +40,7 @@ import { EmployerSignup } from "./pages/EmployerSignUp.tsx";
 import { EmployerLogin } from "./pages/EmployerLogin.tsx";
 import EmployerDashboard from "./pages/EmployerDashboard.tsx";
 import EmployerNotFound from "./components/employer/NotFound.tsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 
 
 interface RouteConfig {
@@ -83,6 +84,10 @@ export const routes: RouteConfig[] = [
   {
     route: "/signup",
     component: <SignupForm />,
+  },
+  {
+    route:"/privacy-policy",
+    component: <PrivacyPolicy />,
   },
   {
     route:"/verify-otp",
