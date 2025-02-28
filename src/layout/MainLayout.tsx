@@ -27,8 +27,8 @@ const noSidebarRoutes = [
   "/profile",
   "/employer/signup",
   "/employer/login",
-  "/privacy-policy",
   "/skills-report",
+  "/privacy-policy"
 ];
 
 const employerRoutes = [
