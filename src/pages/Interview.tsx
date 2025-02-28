@@ -108,6 +108,8 @@ const InterviewSetupNew: React.FC = () => {
             skill_pool_id: skillPoolId,
             level,
           }).unwrap();
+          console.log("fundemental", fundamentalsResponse);
+          
           setFundamentals(fundamentalsResponse.data[0]?.concepts || []);
         } catch (error) {
           console.error("Error fetching fundamentals:", error);

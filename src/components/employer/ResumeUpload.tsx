@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// ResumeUploader.tsx
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
-import axios, { AxiosError } from 'axios';
 import { AlertCircle, CheckCircle, FileText, Loader2, X, Clock } from 'lucide-react';
 
 // Define interfaces for type safety
@@ -50,13 +50,15 @@ interface UploadProgress {
     message?: string;
 }
 
-interface UploadResponse {
-    message: string;
-    data: {
-        uploadId: string;
-        totalFiles: number;
-        totalBatches: number;
-    };
+interface UploadState {
+    isUploading: boolean;
+    startTime: number;
+    uploadId?: string;
+}
+
+interface WorkerMessage {
+    type: string;
+    data: any;
 }
 
 const ResumeUploader: React.FC = () => {
@@ -67,7 +69,103 @@ const ResumeUploader: React.FC = () => {
     const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [startTime, setStartTime] = useState<number | null>(null);
-
+    
+    // Create a ref for the web worker to persist across renders
+    const workerRef = useRef<Worker | null>(null);
+    
+    // Initialize the worker
+    useEffect(() => {
+        // Ensure only one worker is created
+        if (!workerRef.current) {
+            workerRef.current = new Worker(new URL('../../workers/resumeWorkerUpload.ts', import.meta.url), { type: 'module' });
+            
+            // Set up event listener for messages from the worker
+            workerRef.current.addEventListener('message', (event: MessageEvent<WorkerMessage>) => {
+                const { type, data } = event.data;
+                
+                switch (type) {
+                    case 'WORKER_READY':
+                        console.log('Worker is ready');
+                        break;
+                    case 'UPLOAD_COMPLETE':
+                        // Update upload state with the upload ID
+                        const currentState: UploadState = JSON.parse(sessionStorage.getItem('resumeUploadState') || '{}');
+                        const updatedState = { ...currentState, uploadId: data.uploadId };
+                        sessionStorage.setItem('resumeUploadState', JSON.stringify(updatedState));
+                        
+                        setUploadId(data.uploadId);
+                        break;
+                    case 'UPLOAD_PROGRESS':
+                        setUploadProgress(data);
+                        
+                        if (data.isParsingDone) {
+                            setUploading(false);
+                            setStartTime(null);
+                            
+                            // Clear stored upload state
+                            sessionStorage.removeItem('resumeUploadState');
+                        }
+                        break;
+                    case 'PROCESSED_RESUMES':
+                        setProcessedResumes(data);
+                        break;
+                    case 'UPLOAD_ERROR':
+                        setError(data.error);
+                        setUploading(false);
+                        setStartTime(null);
+                        
+                        // Clear stored upload state
+                        sessionStorage.removeItem('resumeUploadState');
+                        break;
+                    default:
+                        console.warn('Unknown message type from worker:', type);
+                }
+            });
+        }
+        
+        // Cleanup worker on component unmount
+        return () => {
+            // Only terminate if there's no active upload
+            const savedUploadState = sessionStorage.getItem('resumeUploadState');
+            if (!savedUploadState && workerRef.current) {
+                workerRef.current.terminate();
+                workerRef.current = null;
+            }
+        };
+    }, []);
+    
+    // Check for saved upload state on initial load
+    useEffect(() => {
+        const savedState = sessionStorage.getItem('resumeUploadState');
+        
+        if (savedState && workerRef.current) {
+            try {
+                const parsedState: UploadState = JSON.parse(savedState);
+                
+                if (parsedState.isUploading && parsedState.uploadId) {
+                    setUploading(true);
+                    setUploadId(parsedState.uploadId);
+                    setStartTime(parsedState.startTime);
+                    
+                    // Tell worker to resume progress checking
+                    workerRef.current.postMessage({
+                        type: 'FETCH_PROGRESS',
+                        data: {
+                            uploadId: parsedState.uploadId,
+                            apiBaseUrl: import.meta.env.VITE_API_BASE_URL
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to parse saved upload state');
+                sessionStorage.removeItem('resumeUploadState');
+            }
+        }
+        
+        // Fetch processed resumes in any case
+        fetchProcessedResumes();
+    }, []);
+    
     // File drop handler
     const onDrop = useCallback((acceptedFiles: File[]) => {
         setFiles(prev => [...prev, ...acceptedFiles]);
@@ -94,81 +192,52 @@ const ResumeUploader: React.FC = () => {
         return ((Date.now() - start) / 1000).toFixed(1);
     }, []);
 
-    // Fetch processed resumes
-    const fetchProcessedResumes = async () => {
-        try {
-            const response = await axios.get<{ message: string; data: ProcessedResume[] }>(
-                `${process.env.VITE_API_BASE_URL}/api/v1/resume/getAll-resumes`
-            );
-            setProcessedResumes(response.data.data || []);
-        } catch (error) {
-            setError('Failed to fetch processed resumes');
-            setProcessedResumes([]);
-        }
-    };
-
-    // Progress checking
-    const checkProgress = useCallback(async (id: string) => {
-        if (!id) return;
-
-        try {
-            const response = await axios.get<UploadProgress>(
-                `${process.env.VITE_API_BASE_URL}/api/v1/resume/upload-status/${id}`
-            );
-            const progress = response.data;
-
-            setUploadProgress(progress);
-
-            if (!progress.isParsingDone) {
-                setTimeout(() => checkProgress(id), 1000);
-            } else {
-                setUploading(false);
-                setStartTime(null);
-                fetchProcessedResumes();
-            }
-        } catch (error) {
-            setError('Failed to check progress');
-            setUploading(false);
-            setStartTime(null);
+    // Fetch processed resumes using worker
+    const fetchProcessedResumes = useCallback(() => {
+        if (workerRef.current) {
+            workerRef.current.postMessage({
+                type: 'FETCH_RESUMES',
+                data: {
+                    apiBaseUrl: import.meta.env.VITE_API_BASE_URL
+                }
+            });
         }
     }, []);
 
-    // Upload handler
-    const handleUpload = async () => {
+    // Upload handler using worker
+    const handleUpload = useCallback(() => {
         if (files.length === 0) {
             setError('Please select files to upload');
             return;
         }
 
+        const uploadStartTime = Date.now();
         setUploading(true);
         setError(null);
-        setStartTime(Date.now());
+        setStartTime(uploadStartTime);
         
-        const formData = new FormData();
-        files.forEach(file => {
-            formData.append('resumes', file);
-        });
-
-        try {
-            const response = await axios.post<UploadResponse>(
-                `${process.env.VITE_API_BASE_URL}/api/v1/resume/bulkUpload-resumes`, 
-                formData
-            );
-            const uploadId = response.data.data.uploadId;
-            setUploadId(uploadId);
-            setFiles([]); // Clear files after successful upload
-            checkProgress(uploadId);
-        } catch (error) {
-            const axiosError = error as AxiosError<{ error: string }>;
-            setError(axiosError.response?.data?.error || 'Upload failed');
-            setUploading(false);
-            setStartTime(null);
+        // Save upload state for persistence across navigation
+        const uploadState: UploadState = {
+            isUploading: true,
+            startTime: uploadStartTime
+            // uploadId will be set when we get it from the worker
+        };
+        sessionStorage.setItem('resumeUploadState', JSON.stringify(uploadState));
+        
+        // Send files to worker for uploading
+        if (workerRef.current) {
+            workerRef.current.postMessage({
+                type: 'UPLOAD_RESUMES',
+                data: {
+                    files,
+                    apiBaseUrl: import.meta.env.VITE_API_BASE_URL
+                }
+            });
         }
-    };
-
-    useEffect(() => {
-        fetchProcessedResumes();
-    }, []);
+        
+        // Clear files immediately for better UX
+        setFiles([]);
+    }, [files]);
 
     return (
         <div className="max-w-4xl mx-auto p-6">
@@ -241,7 +310,7 @@ const ResumeUploader: React.FC = () => {
                 </button>
 
                 {/* Progress Bar with Processing Time */}
-                {uploadProgress && (
+                {(uploading || uploadProgress) && (
                     <div className="mt-4">
                         <div className="flex justify-between mb-1">
                             <span className="text-sm text-gray-600">Processing Resumes</span>
@@ -252,26 +321,30 @@ const ResumeUploader: React.FC = () => {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex justify-between mb-1">
-                            <span className="text-sm text-gray-600">
-                                {uploadProgress.completed} / {uploadProgress.total} files
-                            </span>
-                            {uploadProgress.completed > 0 && startTime && (
-                                <span className="text-sm text-gray-600">
-                                    ~{(Number(getProcessingTime(startTime)) / uploadProgress.completed).toFixed(1)}s per file
-                                </span>
-                            )}
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div
-                                className="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
-                                style={{ width: `${(uploadProgress.completed / uploadProgress.total) * 100}%` }}
-                            />
-                        </div>
-                        {uploadProgress.failed > 0 && (
-                            <p className="mt-1 text-sm text-red-500">
-                                Failed to process {uploadProgress.failed} files
-                            </p>
+                        {uploadProgress && (
+                            <>
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-sm text-gray-600">
+                                        {uploadProgress.completed} / {uploadProgress.total} files
+                                    </span>
+                                    {uploadProgress.completed > 0 && startTime && (
+                                        <span className="text-sm text-gray-600">
+                                            ~{(Number(getProcessingTime(startTime)) / uploadProgress.completed).toFixed(1)}s per file
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div
+                                        className="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
+                                        style={{ width: `${(uploadProgress.completed / uploadProgress.total) * 100}%` }}
+                                    />
+                                </div>
+                                {uploadProgress.failed > 0 && (
+                                    <p className="mt-1 text-sm text-red-500">
+                                        Failed to process {uploadProgress.failed} files
+                                    </p>
+                                )}
+                            </>
                         )}
                     </div>
                 )}
