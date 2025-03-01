@@ -127,7 +127,7 @@ const ProfileBanner = ({
               <div className="flex flex-col gap-2 items-start justify-end">
                 <h1 className="text-[#202326] text-h2">{user.name}</h1>
                 <p className="text-[#414447] text-body2">
-                  {country !== null ? `${''}, ${''}` : ""}
+                  {country !== null ? `${state?.name}, ${country?.name}` : ""}
                 </p>
               </div>
             </div>
