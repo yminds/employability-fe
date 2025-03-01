@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import threeDots from "@/assets/profile/threedots.svg";
 import EditBioModal from "@/components/modal/EditBioModal";
 import { useEffect, useState } from "react";
-import { Country, State } from "country-state-city";
 import backgroundImage from "@/assets/images/Frame 1410078135.jpg";
 import {
   Popover,
@@ -13,6 +12,10 @@ import {
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
+import {
+  useGetCountriesQuery,
+  useGetStatesQuery,
+} from "@/api/locationApiSlice";
 
 interface ProfileBannerProps {
   user: any;
@@ -29,12 +32,17 @@ const ProfileBanner = ({
   isPublic,
   goalData,
 }: ProfileBannerProps) => {
+  const { data: countries = [] } = useGetCountriesQuery();
+  const { data: states = [] } = useGetStatesQuery(user.address?.country || "", {
+    skip: !user.address?.country,
+  });
+
   const country = user.address?.country
-    ? Country.getCountryByCode(user.address.country)
+    ? countries.find((c) => c.isoCode === user.address.country)
     : null;
   const state =
     user.address?.state && user.address?.country
-      ? State.getStateByCodeAndCountry(user.address.state, user.address.country)
+      ? states.find((s) => s.isoCode === user.address.state)
       : null;
 
   const [getUserSkillsSummary, { data: skillsSummaryData }] =

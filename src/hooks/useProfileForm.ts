@@ -23,7 +23,6 @@ import { validateExperience } from "@/features/profile/validation/validateExperi
 import { validateEducation } from "@/features/profile/validation/validateEducation";
 import { validateCertifications } from "@/features/profile/validation/validateCertification";
 import { parsedTransformData } from "@/utils/parsedTransformData";
-import { parseAddress } from "@/utils/addressParser";
 import { transformFormDataForDB } from "@/utils/transformData";
 import type { ProfileFormData } from "@/features/profile/types";
 import {
@@ -83,6 +82,8 @@ export const useProfileForm = (
     setIsBasicInfoLoading(true);
     if (!user.is_basic_info) {
       const data = user?.parsedResume;
+      console.log("parsedResume", data);
+      
       if (!data) {
         setIsBasicInfoLoading(false);
         return {
@@ -105,9 +106,6 @@ export const useProfileForm = (
         };
       }
 
-      const address = data?.contact?.address || "";
-      const { city, stateCode, countryCode } = parseAddress(address);
-
       setIsBasicInfoLoading(false);
       return {
         basicInfo: {
@@ -116,9 +114,9 @@ export const useProfileForm = (
           email: user.email || "",
           date_of_birth: data?.date_of_birth || "",
           gender: data?.gender || "",
-          country: countryCode,
-          state: stateCode,
-          city: city,
+          country: data?.contact?.location?.countryCode || "",
+          state: data?.contact?.location?.stateCode || "",
+          city: data?.contact?.location?.city || "",
           profile_image: data?.profile_image || "",
         },
         socialProfiles: {

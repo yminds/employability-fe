@@ -11,11 +11,11 @@ export const validateBasicInfo = (
   }
 
   // Mobile number validation
-  if (!basicInfo.mobile.trim()) {
-    errors["mobile"] = "Mobile number is required";
-  } else if (!/^\+?[1-9]\d{1,14}$/.test(basicInfo.mobile)) {
-    errors["mobile"] = "Invalid mobile number format";
-  }
+  // if (!basicInfo.mobile.trim()) {
+  //   errors["mobile"] = "Mobile number is required";
+  // } else if (!/^\+?[1-9]\d{1,14}$/.test(basicInfo.mobile)) {
+  //   errors["mobile"] = "Invalid mobile number format";
+  // }
 
   // Email validation
   if (!basicInfo.email.trim()) {
