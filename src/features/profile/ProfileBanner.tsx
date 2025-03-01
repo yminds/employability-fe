@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import threeDots from "@/assets/profile/threedots.svg";
 import EditBioModal from "@/components/modal/EditBioModal";
 import { useEffect, useState } from "react";
-import { Country, State } from "country-state-city";
+// import { Country, State } from "country-state-city";
 import backgroundImage from "@/assets/images/Frame 1410078135.jpg";
 import {
   Popover,
@@ -30,11 +30,11 @@ const ProfileBanner = ({
   goalData,
 }: ProfileBannerProps) => {
   const country = user.address?.country
-    ? Country.getCountryByCode(user.address.country)
+    ? []
     : null;
   const state =
     user.address?.state && user.address?.country
-      ? State.getStateByCodeAndCountry(user.address.state, user.address.country)
+      ? []
       : null;
 
   const [getUserSkillsSummary, { data: skillsSummaryData }] =
@@ -119,7 +119,7 @@ const ProfileBanner = ({
               <div className="flex flex-col gap-2 items-start justify-end">
                 <h1 className="text-[#202326] text-h2">{user.name}</h1>
                 <p className="text-[#414447] text-body2">
-                  {country !== null ? `${state?.name}, ${country?.name}` : ""}
+                  {country !== null ? `${''}, ${''}` : ""}
                 </p>
               </div>
             </div>

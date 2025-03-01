@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Country, State, City } from "country-state-city";
+// import { Country, State, City } from "country-state-city";
 import "react-phone-input-2/lib/style.css";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
@@ -101,19 +101,19 @@ export default function BasicInfoForm({
 
   // Load countries
   useEffect(() => {
-    const allCountries = Country.getAllCountries();
+    const allCountries:any =  [];
     setCountries(allCountries);
   }, []);
 
   // Update states when country changes
   useEffect(() => {
     if (formData.country) {
-      const countryStates = State.getStatesOfCountry(formData.country);
+      const countryStates:any = [];
       setStates(countryStates);
 
       if (
         formData.state &&
-        !countryStates.find((state) => state.isoCode === formData.state)
+        !countryStates.find((state:any) => state.isoCode === formData.state)
       ) {
         setFormData((prev) => ({ ...prev, state: "", city: "" }));
       }
@@ -126,15 +126,12 @@ export default function BasicInfoForm({
   // Update cities when state changes
   useEffect(() => {
     if (formData.country && formData.state) {
-      const stateCities = City.getCitiesOfState(
-        formData.country,
-        formData.state
-      );
+      const stateCities:any = [];
       setCities(stateCities);
 
       if (
         formData.city &&
-        !stateCities.find((city) => city.name === formData.city)
+        !stateCities.find((city:any) => city.name === formData.city)
       ) {
         setFormData((prev) => ({ ...prev, city: "" }));
       }

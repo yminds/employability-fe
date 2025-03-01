@@ -1,4 +1,4 @@
-import { Country, State, City } from "country-state-city";
+// import { Country, State, City } from "country-state-city";
 
 interface ParsedAddress {
   city: string;
@@ -18,24 +18,19 @@ export function parseAddress(address: string): ParsedAddress {
 
   // Helper function to find a country
   const findCountry = (name: string) => {
-    const allCountries = Country.getAllCountries();
-    return allCountries.find(
-      (c) =>
-        c.name.toLowerCase() === name.toLowerCase() ||
-        c.isoCode.toLowerCase() === name.toLowerCase()
-    );
+    const allCountries:any = []
   };
 
   // Helper function to find a state
   const findState = (name: string, countryCode = "") => {
-    let allStates = [];
+    let allStates:any = [];
     if (countryCode) {
-      allStates = State.getStatesOfCountry(countryCode);
+      allStates = []
     } else {
-      allStates = State.getAllStates();
+      allStates = []
     }
     return allStates.find(
-      (s) =>
+      (s:any) =>
         s.name.toLowerCase() === name.toLowerCase() ||
         s.isoCode.toLowerCase() === name.toLowerCase()
     );
@@ -47,11 +42,11 @@ export function parseAddress(address: string): ParsedAddress {
 
     if (!country) {
       const foundCountry = findCountry(part);
-      if (foundCountry) {
-        country = foundCountry.name;
-        countryCode = foundCountry.isoCode;
-        continue;
-      }
+      // if (foundCountry) {
+      //   country = foundCountry.name;
+      //   countryCode = foundCountry.isoCode;
+      //   continue;
+      // }
     }
 
     if (!state) {
@@ -60,7 +55,7 @@ export function parseAddress(address: string): ParsedAddress {
         state = foundState.name;
         stateCode = foundState.isoCode;
         countryCode = foundState.countryCode;
-        country = Country.getCountryByCode(countryCode)?.name || "";
+        country = "";
         continue;
       }
     }
@@ -78,23 +73,21 @@ export function parseAddress(address: string): ParsedAddress {
       state = foundState.name;
       stateCode = foundState.isoCode;
       countryCode = foundState.countryCode;
-      country = Country.getCountryByCode(countryCode)?.name || "";
+      country =  "";
       city = parts[1];
     }
   }
 
   // If we still don't have a state but have a city, try to infer the state
   if (!state && city) {
-    const allStates = State.getAllStates();
-    const citiesOfStates = allStates.flatMap((s) =>
-      City.getCitiesOfState(s.countryCode, s.isoCode)
-    );
+    const allStates:any = []
+    const citiesOfStates:any = []
     const foundCity = citiesOfStates.find(
-      (c) => c.name.toLowerCase() === city.toLowerCase()
+      (c:any) => c.name.toLowerCase() === city.toLowerCase()
     );
     if (foundCity) {
       const foundState = allStates.find(
-        (s) =>
+        (s:any) =>
           s.isoCode === foundCity.stateCode &&
           s.countryCode === foundCity.countryCode
       );
@@ -102,7 +95,7 @@ export function parseAddress(address: string): ParsedAddress {
         state = foundState.name;
         stateCode = foundState.isoCode;
         countryCode = foundState.countryCode;
-        country = Country.getCountryByCode(countryCode)?.name || "";
+        country =  "";
       }
     }
   }

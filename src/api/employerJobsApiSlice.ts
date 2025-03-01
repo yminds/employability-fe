@@ -98,7 +98,7 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
         // Create job posting
         createJobPosting: builder.mutation<JobResponse, CreateJobPayload>({
             query: (data) => ({
-                url: "/api/v1/employer/jobs",
+                url: "/api/v1/employerJobs/jobs",
                 method: "POST",
                 body: data
             }),
@@ -107,7 +107,7 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
         // Update job
         updateJob: builder.mutation<JobResponse, { id: string; data: UpdateJobPayload }>({
             query: ({ id, data }) => ({
-                url: `/api/v1/employer/jobs/${id}`,
+                url: `/api/v1/employerJobs/jobs/${id}`,
                 method: "PUT",
                 body: data
             }),
@@ -116,33 +116,31 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
         // Delete job
         deleteJob: builder.mutation<{ success: boolean; message: string }, string>({
             query: (id) => ({
-                url: `/api/v1/employer/jobs/${id}`,
+                url: `/api/v1/employerJobs/jobs/${id}`,
                 method: "DELETE"
             }),
         }),
 
         // Get company jobs
         getCompanyJobs: builder.query<JobsListResponse, { company_id: string; page?: number; limit?: number }>({
-            query: ({ company_id, page = 1, limit = 10 }) => ({
-                url: `/api/v1/employer/company/${company_id}/jobs`,
+            query: ({ company_id}) => ({
+                url: `/api/v1/employerJobs/company/${company_id}/jobs`,
                 method: "GET",
-                params: { page, limit }
             }),
         }),
 
         // Get manageable jobs for an employer
         getManageableJobs: builder.query<JobsListResponse, { employer_id: string; page?: number; limit?: number }>({
-            query: ({ employer_id, page = 1, limit = 10 }) => ({
-                url: `/api/v1/employer/employer/${employer_id}/manageable-jobs`,
+            query: ({ employer_id}) => ({
+                url: `/api/v1/employerJobs/employer/${employer_id}/manageable-jobs`,
                 method: "GET",
-                params: { page, limit }
             }),
         }),
 
         // Search jobs
         searchJobs: builder.query<JobsListResponse, SearchJobsParams>({
             query: (params) => ({
-                url: `/api/v1/employer/jobs/search`,
+                url: `/api/v1/employerJobs/jobs/search`,
                 method: "GET",
                 params
             })
@@ -151,11 +149,12 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
         // Get job details
         getJobDetails: builder.query<JobResponse, string>({
             query: (id) => ({
-                url: `/api/v1/employer/jobs/${id}`,
+                url: `/api/v1/employerJobs/jobs/${id}`,
                 method: "GET"
             }),
-        })
-    })
+        }),
+    }),
+    overrideExisting:false
 });
 
 // Export hooks
