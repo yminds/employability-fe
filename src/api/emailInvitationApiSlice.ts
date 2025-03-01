@@ -90,7 +90,7 @@ export const emailInvitationApiSlice = apiSlice.injectEndpoints({
     // Invite candidates
     inviteCandidates: builder.mutation<InvitationResponse, InviteCandidatesPayload>({
       query: (data) => ({
-        url: "/api/v1/invitations/invite",
+        url: "/api/v1/employerInterview/invite",
         method: "POST",
         body: data,
       }),
@@ -99,7 +99,7 @@ export const emailInvitationApiSlice = apiSlice.injectEndpoints({
     // Get invitation progress
     getInvitationProgress: builder.query<InvitationProgressResponse, string>({
       query: (batch_id) => ({
-        url: `/api/v1/invitations/progress/${batch_id}`,
+        url: `/api/v1/employerInterview/progress/${batch_id}`,
         method: "GET",
       }),
     }),
@@ -110,7 +110,7 @@ export const emailInvitationApiSlice = apiSlice.injectEndpoints({
       { job_id: string; employer_id: string }
     >({
       query: ({ job_id, employer_id }) => ({
-        url: `/api/v1/invitations/statuses`,
+        url: `/api/v1/employerInterview/statuses`,
         method: "GET",
         params: { job_id, employer_id },
       }),
@@ -122,7 +122,7 @@ export const emailInvitationApiSlice = apiSlice.injectEndpoints({
       { job_id: string; email: string; token: string }
     >({
       query: (params) => ({
-        url: `/api/v1/invitations/validate-token`,
+        url: `/api/v1/employerInterview/validate-token`,
         method: "GET",
         params,
       }),
@@ -131,7 +131,7 @@ export const emailInvitationApiSlice = apiSlice.injectEndpoints({
     // Resend invitation
     resendInvitation: builder.mutation<InvitationResponse, ResendInvitationPayload>({
       query: (data) => ({
-        url: `/api/v1/invitations/resend`,
+        url: `/api/v1/employerInterview/resend`,
         method: "POST",
         body: data,
       }),
@@ -140,11 +140,12 @@ export const emailInvitationApiSlice = apiSlice.injectEndpoints({
     // Get candidate invitations
     getCandidateInvitations: builder.query<CandidateInvitationsResponse, string>({
       query: (candidate_id) => ({
-        url: `/api/v1/invitations/candidate/${candidate_id}`,
+        url: `/api/v1/employerInterview/candidate/${candidate_id}`,
         method: "GET",
       }),
     }),
   }),
+  overrideExisting:false
 });
 
 // Export hooks
