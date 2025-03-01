@@ -40,10 +40,7 @@ const UserProfile: React.FC = () => {
   const experiences: ExperienceItem[] = [];
   const certifications: Certification[] = [];
 
-  const [bio, setBio] = useState<string>(
-    user.bio ||
-      "Full-stack developer with a strong foundation in React, Python, and MongoDB. A quick learner passionate about building user-friendly web applications, eager to apply skills in a professional environment."
-  );
+  const [bio, setBio] = useState<string>(user.bio || "");
   const handleEditBio = async (updatedBio: string) => {
     try {
       await updateUser({
