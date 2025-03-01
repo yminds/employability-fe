@@ -16,7 +16,7 @@ import { RootState } from "@/store/store";
 interface LatestInterviewStatus {
   interview_id: string;
   isCompleted: boolean;
-}   
+}
 interface SkillCardProps {
   skillId: string;
   skill: string;
@@ -63,9 +63,8 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
-  const {data:userCredntials}= useGetUserDetailsQuery(userId!);
-  console.log("userCredntials",userCredntials);
-
+  const { data: userCredntials } = useGetUserDetailsQuery(userId!);
+  console.log("userCredntials", userCredntials);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -115,15 +114,15 @@ const SkillCard: React.FC<SkillCardProps> = ({
       return value === "Basic"
         ? "bg-[#E5F6FF] text-[#1C3FAA] w-fit"
         : value === "Intermediate"
-          ? "bg-[#E5F0FF] text-[#1C2CD8]"
-          : "bg-[#E5E7FF] text-[#1C2CD8]";
+        ? "bg-[#E5F0FF] text-[#1C2CD8]"
+        : "bg-[#E5E7FF] text-[#1C2CD8]";
     }
     if (type === "importance") {
       return value === "Low"
         ? "bg-[#DBFFEA] text-[#10B754]"
         : value === "Medium"
-          ? "bg-[#FFF9DB] text-[#D4B30C]"
-          : "bg-[#FFF2DB] text-[#D48A0C]";
+        ? "bg-[#FFF9DB] text-[#D4B30C]"
+        : "bg-[#FFF2DB] text-[#D48A0C]";
     }
   };
 
@@ -131,7 +130,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleViewReport = () => {
     navigate(`/skill/report/${bestInterview}`, {
-      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg, skillId : skillId },
+      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg, skillId: skillId },
     });
   };
 
@@ -158,7 +157,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
       // Start the interview directly if tutorial is disabled
       navigate(`/interview/${interviewId}`, {
-        state: {title: skill, skillId, skillPoolId, level, type: "Skill" },
+        state: { title: skill, skillId, skillPoolId, level, type: "Skill" },
       });
     } else {
       // Show the tutorial, interview will start after confirmation
@@ -177,7 +176,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
     setShowTutorial(false);
   };
 
- useEffect(() => {
+  useEffect(() => {
     // Check if the user has disabled the tutorial
     const hasSeenTutorial = localStorage.getItem("hasSeenVerifySkillTutorial");
     if (hasSeenTutorial) {
@@ -198,7 +197,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       skill_id: skillPoolId,
     });
     console.log("interviewId", interviewId);
-    
+
     // Start the interview after closing the tutorial
     navigate(`/interview/${interviewId}`, {
       state: { title:skill, skillId, skillPoolId, level, type: "Skill" },
@@ -209,7 +208,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
       navigate(`/interview/${latest_interview_status?.interview_id}`, {
       state: { title: skill, skillPoolId, level, type:"Skill" },
     });
-  }
+  };
   return (
     <>
       {/* Skill Verification Tutorial Popup */}
@@ -273,9 +272,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2 font-ubuntu">
-                    <p className="text-[#414447] text-body2">
-                      Self rating: {editedSelfRating}/10
-                    </p>
+                    <p className="text-[#414447] text-body2">Self rating: {editedSelfRating}/10</p>
                     <button
                       onClick={() => setIsEditing(true)}
                       className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-500 hover:text-blue-600"
@@ -313,8 +310,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
             <div className="flex items-center space-x-2">
               <img src={imgSrc} alt={status} className="w-4 h-4" />
               <span
-                className={`overflow-hidden text-ellipsis text-sub-header ${status === "Verified" ? "text-green-600" : "text-yellow-600"
-                  }`}
+                className={`overflow-hidden text-ellipsis text-sub-header ${
+                  status === "Verified" ? "text-green-600" : "text-yellow-600"
+                }`}
               >
                 {status}
               </span>
@@ -347,15 +345,11 @@ const SkillCard: React.FC<SkillCardProps> = ({
                     Improve score
                   </button>
                 )}
-         
               </>
             ) : // checking the latest interview isCompleted false
             latest_interview_status?.isCompleted === false ? (
               <>
-                <button
-                  onClick={handleLearn}
-                  className="px-11 py-2 text-button rounded-md text-[#001630] underline"
-                >
+                <button onClick={handleLearn} className="px-11 py-2 text-button rounded-md text-[#001630] underline">
                   Learn
                 </button>
                 <button
@@ -460,8 +454,9 @@ const SkillCard: React.FC<SkillCardProps> = ({
                   <div className="flex items-center space-x-2">
                     <img src={smImgSrc} alt={status} className="w-4 h-4" />
                     <span
-                      className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${status === "Verified" ? "text-white" : "text-white"
-                        }`}
+                      className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
+                        status === "Verified" ? "text-white" : "text-white"
+                      }`}
                     >
                       {status}
                     </span>
@@ -498,7 +493,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
                     View report
                   </button>
                   <button
-                    onClick={()=> handleVerifySkill()}
+                    onClick={() => handleVerifySkill()}
                     className="py-2 text-sm font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
                   >
                     Improve score
@@ -526,7 +521,6 @@ const SkillCard: React.FC<SkillCardProps> = ({
       </div>
     </>
   );
-
 };
 
 export default SkillCard;
