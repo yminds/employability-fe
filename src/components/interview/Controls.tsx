@@ -11,7 +11,7 @@ const Controls: React.FC<IControls> = ({ doneAnswering }) => {
         <Recording />
         <div
           onClick={() => doneAnswering()}
-          className="w-full cursor-pointer h-12 px-3 py-3.5 bg-[#09d372]/90 rounded-xl border border-[#83edb9] justify-center items-center inline-flex"
+          className="w-full cursor-pointer h-12 px-3 py-3.5 bg-button/90 rounded-xl border border-button justify-center items-center inline-flex"
         >
           <div className="text-center text-white text-base font-medium leading-tight">
             Done Answering
@@ -30,7 +30,7 @@ const Recording: React.FC = () => {
       <img src={micUrl} className="w-12 h-12" />
       {/* <div className="flex  gap-2 w-full"> */}
         <p className="text-center font-ubuntu   font-medium text-base text-slate-900">
-         Speak Now..
+         Recording...
         </p>
       {/* </div> */}
     </div>

@@ -154,8 +154,6 @@ const JobPage: React.FC = () => {
   const [jobsList, setJobsList] = useState<Job[]>([]);
   const [pageNumber, setPageNumber] = useState(1);
 
-  console.log("jobs", jobs);
-
   useEffect(() => {
     if (jobsCategory !== "Saved") {
       getAllJobs({ page: pageNumber, filters });
