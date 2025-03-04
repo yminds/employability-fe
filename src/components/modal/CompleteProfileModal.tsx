@@ -60,8 +60,6 @@ const CompleteProfileModal = ({
     userLoading,
   } = useProfileForm(type, user, goalId, onClose);
 
-  console.log("user loading", userLoading);
-
   const tabs = useMemo(
     () => [
       { id: "basic", label: "Basic Info" },

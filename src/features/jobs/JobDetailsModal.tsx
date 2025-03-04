@@ -42,13 +42,11 @@ const JobDetailsModal: React.FC<JobDetailsProps> = ({
   const { data: skillAnalysis, isLoading } = useGetJobSkillAnalysisQuery({
     jobId: jobData.id.toString(),
     userSkills,
-    userSoftSkills: user.parsedResume.softSkills || [],
+    userSoftSkills: user?.parsedResume?.softSkills || [],
     userEducation: user.education,
     userExperience: user.experience,
   });
   const [saveJob, { isLoading: isSaving }] = useSaveJobMutation();
-
-  console.log("Skill analysis", skillAnalysis);
 
   const calculateMatch = () => {
     const requiredSkills = jobData.skills;

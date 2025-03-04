@@ -35,6 +35,7 @@ const UserProfile: React.FC = () => {
     userId: user._id,
     goalId: goalId,
   });
+  const profileUrl = `employability.ai/profile/${user?.username}`;
 
   const educationEntries: Education[] = [];
   const experiences: ExperienceItem[] = [];
@@ -159,7 +160,7 @@ const UserProfile: React.FC = () => {
           <CurrentStatusSection onStatusChange={handleEditStatus} user={user} />
 
           <ContactInformationSection
-            profileUrl="employability.ai"
+            profileUrl={profileUrl}
             phoneNumber={user.phone_number}
             email={user.email}
           />

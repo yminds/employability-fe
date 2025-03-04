@@ -81,7 +81,7 @@ export const screeningCardApiSlice = apiSlice.injectEndpoints({
     // Screen candidates for a job
     screenCandidates: builder.mutation<BatchScreeningResponse, ScreenCandidatesPayload>({
       query: (data) => ({
-        url: "/api/v1/screening/screen",
+        url: "/api/v1/employerScreeening/screen",
         method: "POST",
         body: data,
       }),
@@ -90,7 +90,7 @@ export const screeningCardApiSlice = apiSlice.injectEndpoints({
     // Get screening progress
     getScreeningProgress: builder.query<ScreeningProgressResponse, string>({
       query: (batch_id) => ({
-        url: `/api/v1/screening/progress/${batch_id}`,
+        url: `/api/v1/employerScreeening/progress/${batch_id}`,
         method: "GET",
       }),
     }),
@@ -98,7 +98,7 @@ export const screeningCardApiSlice = apiSlice.injectEndpoints({
     // Get screening results
     getScreeningResults: builder.query<ScreeningCardsListResponse, GetScreeningResultsParams>({
       query: (params) => ({
-        url: `/api/v1/screening/results`,
+        url: `/api/v1/employerScreeening/results`,
         method: "GET",
         params,
       }),
@@ -111,7 +111,7 @@ export const screeningCardApiSlice = apiSlice.injectEndpoints({
       { job_id: string; candidate_id: string }
     >({
       query: ({ job_id, candidate_id }) => ({
-        url: `/api/v1/screening/details/${job_id}/${candidate_id}`,
+        url: `/api/v1/employerScreeening/details/${job_id}/${candidate_id}`,
         method: "GET",
       }),
     }),
@@ -122,12 +122,13 @@ export const screeningCardApiSlice = apiSlice.injectEndpoints({
       { id: string; invite_status: "not_invited" | "invited" }
     >({
       query: ({ id, invite_status }) => ({
-        url: `/api/v1/screening/${id}/invite`,
+        url: `/api/v1/employerScreeening/${id}/invite`,
         method: "PATCH",
         body: { invite_status },
       }),
     }),
   }),
+  overrideExisting:false
 });
 
 // Export hooks

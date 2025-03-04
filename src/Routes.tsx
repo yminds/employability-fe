@@ -43,6 +43,7 @@ import { EmployerLogin } from "./pages/EmployerLogin.tsx";
 import EmployerDashboard from "./pages/EmployerDashboard.tsx";
 import EmployerNotFound from "./components/employer/NotFound.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import InterviewsPage from "./pages/InterviewsPage.tsx";
 
 
 interface RouteConfig {
@@ -187,6 +188,10 @@ export const routes: RouteConfig[] = [
     route:"/invites",
     component: <InterviewsLisingPage/>
   },
+  {
+    route:"/interviews",
+    component: <InterviewsPage />,
+  }
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {
