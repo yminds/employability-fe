@@ -42,6 +42,13 @@ export const mentorChatApiSlice = apiSlice.injectEndpoints({
         },
       }),
     }),
+    generateQuizQuestions: builder.mutation({
+      query: ({ topic, user_id, thread_id, model = "gpt-4o", provider = "openai" }) => ({
+        url: `/api/v1/mentor-chat/generate-quiz-questions`,
+        method: "POST",
+        body: { topic, model, provider, user_id, thread_id },
+      }),
+    }),
   }),
 });
 
@@ -50,4 +57,5 @@ export const {
   useGetMentorChatByIdQuery,
   useSendMessageMutation,
   useSendMentorMessageMutation,
+  useGenerateQuizQuestionsMutation
 } = mentorChatApiSlice;

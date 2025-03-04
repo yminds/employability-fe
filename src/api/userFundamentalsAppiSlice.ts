@@ -14,12 +14,12 @@ export const userFundamentalsApiSlice = apiSlice.injectEndpoints({
     ),
 
     // Update a fundamental's status using POST
-    updateFundamentalStatus: builder.mutation<any, { user_id: string; skill_pool_id: string; fundamental_id: string; newStatus: 'Pending' | 'Completed' }>(
+    updateFundamentalStatus: builder.mutation<any, { user_id: string; skill_pool_id: string; name: string; newStatus: 'Pending' | 'Completed' }>(
       {
-        query: ({ user_id, skill_pool_id, fundamental_id, newStatus }) => ({
-          url: '/api/userfundamentals/update-status',
+        query: ({ user_id, skill_pool_id, name, newStatus }) => ({
+          url: '/api/v1/userfundamentals/updatestatus',
           method: 'POST',
-          body: { user_id, skill_pool_id, fundamental_id, newStatus },
+          body: { user_id, skill_pool_id, name, newStatus },
         }),
       }
     ),
