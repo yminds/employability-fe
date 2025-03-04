@@ -30,7 +30,7 @@ export default function ContactInformationSection({
               <h3 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px] mb-1">
                 Profile URL
               </h3>
-              <p className="text-[#414447] text-sm font-sf-pro font-normal leading-6 tracking-[0.24px]">
+              <p className="text-[#414447] text-sm font-sf-pro font-normal leading-6 tracking-[0.24px] truncate">
                 {profileUrl}
               </p>
             </div>

@@ -2,7 +2,6 @@ import type React from "react";
 import { useState } from "react";
 import LinkedInImportModal from "@/components/modal/LinkedInImportModal";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
-import type { ProfileFormData } from "@/features/profile/types";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { Card, CardContent } from "@/components/ui/card";
@@ -203,11 +202,7 @@ const CompleteProfileSection: React.FC<CompleteProfileSectionProps> = ({
             <CompleteProfileModal
               type="basic"
               onClose={() => setIsProfileModalOpen(false)}
-              onSave={(data: ProfileFormData): void => {
-                throw new Error("Function not implemented.");
-              }}
               user={user}
-              isParsed={false}
               goalId={goalId}
             />
           )}
