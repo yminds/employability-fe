@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { flushSync } from "react-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import { skipToken } from "@reduxjs/toolkit/query/react";
 import { useGetUserFundamentalsByIdMutation } from "@/api/userFundamentalsAppiSlice";
@@ -198,7 +200,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     setFinalScore(score);
     setIsQuizOpen(false);
 
-    // ✅ Update status to "Completed" only if score > 3
+    // ✅ Update status to "Completed" only if score >= 3
     if (score >= 3 && userId && skillPoolId && currentPendingTopic) {
       try {
         await updateFundamentalStatus({
@@ -224,14 +226,57 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     setIsUpdated(true);
   };
 
+  // Show a skeleton layout while threads, fundamentals, or messages are loading
+  if (isLoading || isThreadLoading) {
+    return (
+      <div className="flex flex-col h-full w-full max-w-[1800px] border-0 relative">
+        <div className="flex min-h-[80px] items-center p-4 bg-transparent justify-between border-b-2 gap-36">
+          <section className="flex items-center justify-between min-w-[820px]">
+            <section className="flex-col p-2 min-w-[350px]">
+              <div className="text-body2 text-grey-5 text-sm">
+                <Skeleton width={200} height={20} />
+              </div>
+              <div className="text-h1">
+                <Skeleton width={250} height={40} />
+              </div>
+            </section>
+            <div>
+              <Skeleton width={100} height={40} />
+            </div>
+          </section>
+          <section>
+            <Skeleton width={150} height={30} />
+          </section>
+        </div>
+        <div className="relative w-full flex-1 min-w-[70vh] ">
+          <div className="w-full h-full flex-col min-w-[70vh] justify-around">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <React.Fragment key={index}>
+                <div className="max-w-[40%]">
+                  {/* Mimic message thread skeleton */}
+                  <Skeleton count={1} height={80} />
+                </div>
+                <div className="max-w-[50%] ml-auto">
+                  {/* Mimic message thread skeleton */}
+                  <Skeleton count={1} height={80} />
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        </div>
+    );
+  }
+
   return (
     <div>
       {pendingFundamentals.length > 0 ? (
         <div className="flex flex-col h-full w-full max-w-[1800px] border-0 relative">
-          <div className="flex min-h-[80px] items-center p-4 bg-transparent justify-between border-b-2  gap-36 ">
-            <section className=" flex items-center justify-between min-w-[820px] ">
+          <div className="flex min-h-[80px] items-center p-4 bg-transparent justify-between border-b-2 gap-36">
+            <section className="flex items-center justify-between min-w-[820px]">
               <section className="flex-col p-2 min-w-[350px]">
-                <div className="text-body2 text-grey-5 text-sm ">
+                <div className="text-body2 text-grey-5 text-sm">
                   Fundamentals of {skill}
                 </div>
                 <div className="text-h1">{currentPendingTopic}</div>
