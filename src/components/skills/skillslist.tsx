@@ -13,6 +13,8 @@ import "react-loading-skeleton/dist/skeleton.css";
 import search from "@/assets/skills/search.svg";
 import AddSkillsModal from "./addskills";
 import { ChevronDown } from "lucide-react";
+import noSkills from "@/assets/profile/noskills.svg";
+import GoalDialog from "./setGoalDialog";
 
 export interface SkillPoolId {
   _id: string;
@@ -73,6 +75,7 @@ const SkillList: React.FC<SkillListProps> = ({
   const [filteredSkills, setFilteredSkills] = useState<Skill[]>([]);
   const [isSelfRatingEdited, setSelfRatingChange] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   // Mutation hooks
   const [removeGoalFromSkill] = useRemoveGoalFromSkillMutation();
@@ -262,8 +265,27 @@ const SkillList: React.FC<SkillListProps> = ({
 
     if (displaySkills.length === 0) {
       return (
-        <div className="text-gray-500 text-body2 text-center py-4">
-          No skills found
+        <div className="flex flex-col items-center justify-center pb-10 pt-6 px-8">
+          <div className="py-[50px] items-center justify-center flex flex-col">
+            <img
+              src={noSkills || "/placeholder.svg"}
+              alt="No experience entries"
+              className="w-20 h-20 mb-6"
+            />
+            <h3 className="text-[#414447] text-body2 mb-2 text-center">
+              You haven't added any skills yet.
+            </h3>
+
+            <p className="text-[#414447] text-body2 text-center">
+              <button
+                onClick={() => setIsGoalModalOpen(true)}
+                className="text-[#414447] underline underline-offset-2 hover:text-emerald-700 focus:outline-none"
+              >
+                Add skill
+              </button>{" "}
+              to show up here
+            </p>
+          </div>
         </div>
       );
     }
@@ -353,6 +375,12 @@ const SkillList: React.FC<SkillListProps> = ({
           onSkillsUpdate={onSkillsUpdate}
           goals={goals}
           prefillSkills={[]}
+        />
+      )}
+      {isGoalModalOpen && (
+        <GoalDialog
+          isOpen={isGoalModalOpen}
+          onClose={() => setIsGoalModalOpen(false)}
         />
       )}
     </section>
