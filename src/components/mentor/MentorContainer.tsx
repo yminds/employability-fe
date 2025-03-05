@@ -41,6 +41,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const [isUpdated, setIsUpdated] = useState<boolean>(false);
 
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const userExperience = useSelector((state: RootState) => state.auth.user?.experience_level);
+  console.log(userExperience)
   const [updateFundamentalStatus] = useUpdateFundamentalStatusMutation();
   // We'll derive the thread title from skill + user
   const title = userId ? `${skill}'s Mentor Thread` : null;
@@ -90,7 +92,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
    *   - The user has not yet completed the 'init' step (isInitialized = false)
    */
   useEffect(() => {
-    if (!userId || !skillId || !skillPoolId) return;
+    if (!userId || !skillId || !skillPoolId || userExperience) return;
     if (isThreadLoading || isThreadFetching) return;
     if (isInitialized) return;
 
@@ -165,8 +167,6 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     (f) => f.status.toLowerCase() === "pending"
   );
   const firstPendingFundamental = pendingFundamentals.map((f) => f.name);
-  console.log("firstPendingFundamental", firstPendingFundamental);
-
   // Default to the first pending in the array:
   useEffect(() => {
     if (firstPendingFundamental.length > 0) {
@@ -196,7 +196,6 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   };
 
   const handleFinalScore = async (score: number) => {
-    console.log("Score:", score);
     setFinalScore(score);
     setIsQuizOpen(false);
 
@@ -209,7 +208,6 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
           name: currentPendingTopic, // Name of the fundamental
           newStatus: "Completed",
         }).unwrap();
-        console.log(`Fundamental "${currentPendingTopic}" marked as Completed.`);
 
         // Remap the fundamentals array so that the updated item is no longer pending
         setFundamentals((prevFundamentals) =>
@@ -274,7 +272,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
       {pendingFundamentals.length > 0 ? (
         <div className="flex flex-col h-full w-full max-w-[1800px] border-0 relative">
           <div className="flex min-h-[80px] items-center p-4 bg-transparent justify-between border-b-2 gap-36">
-            <section className="flex items-center justify-between min-w-[820px]">
+            {/* <section className="flex items-center justify-between min-w-[820px]"> */}
               <section className="flex-col p-2 min-w-[350px]">
                 <div className="text-body2 text-grey-5 text-sm">
                   Fundamentals of {skill}
@@ -289,7 +287,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
                 onStartQuiz={handleStartQuiz}
                 skipCurrentConcept={handleSkipCurrentConcept}
               />
-            </section>
+            {/* </section> */}
 
             <section>
               {!isSidebarOpen ? (
@@ -341,6 +339,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
               finalScore={handleFinalScore}
               user_id={userId}
               thread_id={chatId}
+              experience_level={userExperience}
             />
           )}
         </div>

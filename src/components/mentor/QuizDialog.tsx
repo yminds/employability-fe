@@ -8,9 +8,10 @@ interface QuizDialogProps {
   finalScore: (score:number) => void;
   user_id: string|undefined;
   thread_id: string;
+  experience_level : string | undefined
 }
 
-const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, finalScore,user_id, thread_id }) => {
+const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, finalScore,user_id, thread_id, experience_level }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -26,7 +27,7 @@ const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, fina
     const fetchQuizQuestions = async () => {
       if (!currentQuizTopic) return;
       try {
-        const response = await generateQuizQuestions({ topic: currentQuizTopic, user_id:user_id, thread_id:thread_id })
+        const response = await generateQuizQuestions({ topic: currentQuizTopic, user_id:user_id, thread_id:thread_id, experience_level:experience_level })
         console.log(response)
         const regex = /```json\s*([\s\S]+?)\s*```/gm;
         const match = regex.exec(response?.data.data[0].text); 

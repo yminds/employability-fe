@@ -47,8 +47,6 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
   finalQuizScore,
   currentPendingTopic,
 }) => {
-  console.log("finalQuizScore:", finalQuizScore);
-
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -60,7 +58,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
   const socketRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null); // <-- ADDED
 
-  const userImg = useSelector((state: RootState) => state.auth.user?.profile_image);
+  // const userImg = useSelector((state: RootState) => state.auth.user?.profile_image);
 
   // 2) Query for existing messages
   const { data: threadMessagesData } = useGetMessagesQuery(

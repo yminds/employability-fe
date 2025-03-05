@@ -35,7 +35,7 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
 
   return (
     <div
-      className={`absolute top-0 right-0 h-[80vh] max-h-[1150px] transition-all duration-300 ease-in-out 
+      className={`absolute top-5 right-0 h-[80vh] max-h-[1150px] transition-all duration-300 ease-in-out 
       ${isSidebarOpen ? "w-[405px]" : "w-0"} 
       bg-white shadow-2xl z-50 overflow-hidden rounded-xl`}
     >
@@ -82,7 +82,7 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
                           onClick={() => setSelectedFundamental(isOpen ? null : index)}
                           className="flex w-full items-center justify-between text-left"
                         >
-                          <h3 className={`font-semibold ${isOpen ? 'text-grey-10': 'text-grey-5'} truncate`}>{item.name}</h3>
+                          <h3 className={`font-semibold ${isOpen ? 'text-grey-10': 'text-grey-5 truncate'} `}>{item.name}</h3>
                           <span className="text-gray-700">{isOpen ? <ChevronUp /> : <ChevronDown />}</span>
                         </button>
 

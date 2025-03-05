@@ -113,7 +113,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     }
 
     return (
-      <div className="flex flex-1">
+      <div className="flex flex-1 sm:flex-col">
         {isEmployerRoute() ? (
           <div className="flex-shrink-0">
             <EmployerSidebar />

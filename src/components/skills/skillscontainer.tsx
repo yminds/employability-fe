@@ -110,6 +110,3 @@ const SkillsContainer: React.FC = () => {
 };
 
 export default SkillsContainer;
-  
-
-// Test commit 
