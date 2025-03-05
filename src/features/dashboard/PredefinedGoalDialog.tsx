@@ -121,8 +121,8 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({ isOpen, setIsOpen
                                         {experienceLevel}
                                     </span>
                                 </div>
-                                <button className="flex w-[196px] h-[44px] p-4 px-8 justify-center items-center gap-2 rounded bg-[#00183D] text-white text-[16px] font-medium leading-[150%] font-sf-pro" onClick={handleSubmit}>
-                                    Set This Goal
+                                <button className="flex w-[196px] h-[44px] p-4 px-8 justify-center items-center gap-2 rounded bg-[#00183D] text-white text-[16px] font-medium leading-[150%] font-sf-pro" onClick={handleSubmit} disabled={isSaving}>
+                                    {isSaving ? "Setting Goal..." : "Set This Goal"}
                                 </button>
                             </div>
                             <div className=" bg-green-200">

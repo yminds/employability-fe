@@ -362,8 +362,12 @@ const SkillList: React.FC<SkillListProps> = ({
 
         {renderSkillChips()}
 
-        {isLoading
-          ? Array.from({ length: 3 }).map((_) => renderLoadingSkeleton())
+        {(!skillsData || isLoading)
+          ? Array.from({ length: 3 }).map((_, index) => (
+              <React.Fragment key={index}>
+                {renderLoadingSkeleton()}
+              </React.Fragment>
+            ))
           : renderSkills(filteredSkills)}
       </div>
 
