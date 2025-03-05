@@ -27,7 +27,7 @@ interface MentorChatThreadsProps {
   skill: string;
   isLoading: boolean; // parent's initial loading
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  finalQuizScore: number;
+  finalQuizScore: { score: number, correctAnswers: any, wrongAnswers: any };
   currentPendingTopic: string;
 }
 
@@ -47,6 +47,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
   finalQuizScore,
   currentPendingTopic,
 }) => {
+  console.log(finalQuizScore)
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -87,23 +88,33 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
     }
   }, [threadMessagesData, setIsLoading]);
 
+
+
   // If final quiz score > 0, automatically send an update to the chat
   useEffect(() => {
-    if (finalQuizScore !== 0) {
+    if (finalQuizScore.score > 0) {
+      const formattedCorrectAnswers = finalQuizScore.correctAnswers
+        .map((item: { question: any; correctAnswer: any; }) => `Question: "${item.question}" – Answer: "${item.correctAnswer}"`)
+        .join("; ");
+
+      const formattedWrongAnswers = finalQuizScore.wrongAnswers
+        .map((item: { question: any; selectedOption: any; correctAnswer: any; }) => `Question: "${item.question}" – Your Answer: "${item.selectedOption}", Correct: "${item.correctAnswer}"`)
+        .join("; ");
+
       handleSendMessage(
         true,
-        `Hey I have cleared a Quiz on the concept ${currentPendingTopic} and have scored ${finalQuizScore} marks in it. Give me some suggestions or we can move on with the further concepts.`
+        `Hey I have cleared a Quiz on the concept ${currentPendingTopic} and have scored ${finalQuizScore.score} marks in it. My correct answers are ${formattedCorrectAnswers}, and my wrong answers were ${formattedWrongAnswers}. Could you analyze my performance, highlight any strengths and weaknesses, and provide suggestions for improvement? Based on my score, should I move on to further concepts or revisit this topic for more practice?`
       );
     }
   }, [finalQuizScore]);
 
   // 3) Socket.io for streaming updates
   useEffect(() => {
-    if (!chatId) return;
+    if (!userId) return;
 
     socketRef.current = io(SOCKET_URL);
 
-    socketRef.current.on(`mentorResponse${chatId}`, (textPart: string) => {
+    socketRef.current.on(`mentorResponse${userId}`, (textPart: string) => {
       setIsStreaming(false);
       setIsLoading(false);
       updateAIMessage(textPart);
@@ -112,7 +123,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
     return () => {
       socketRef.current?.disconnect();
     };
-  }, [chatId, setIsLoading]);
+  }, [userId, setIsLoading]);
 
   // If not streaming, focus on the input
   useEffect(() => {
@@ -240,24 +251,22 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
     return (
       <div
         key={msg.id}
-        className={`flex items-start gap-3 w-fit ${
-          msg.role === "USER" ? "flex-row-reverse ml-auto" : "flex-row"
-        }`}
+        className={`flex items-start gap-3 w-fit ${msg.role === "USER" ? "flex-row-reverse ml-auto" : "flex-row"
+          }`}
       >
         {/* Avatar */}
         {isAI && (
           <div className="flex-shrink-0 w-8 h-8 rounded- flex items-center justify-center">
             <img src={logo} alt="AI" />
           </div>
-        ) }
+        )}
 
         {/* Bubble */}
         <div
-          className={`flex-1 p-3 max-w-[60vw] rounded-2xl ${
-            isAI
+          className={`flex-1 p-3 max-w-[60vw] rounded-2xl ${isAI
               ? "bg-[#F5F5F5] border border-gray-100"
               : "bg-white w-fit"
-          }`}
+            }`}
         >
           {isAI ? (
             <YouTubeProvider>
@@ -342,8 +351,8 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
               isLoading
                 ? "Loading..."
                 : isStreaming
-                ? "Waiting for response..."
-                : "Chat with your mentor AI..."
+                  ? "Waiting for response..."
+                  : "Chat with your mentor AI..."
             }
             className="flex-1 border-none rounded-lg focus:outline-none text-sm bg-white"
             disabled={isLoading || isStreaming}
@@ -351,11 +360,10 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
           <button
             onClick={() => handleSendMessage(false, "")}
             disabled={isLoading || isStreaming || !inputMessage.trim()}
-            className={`rounded-xl transition-all text-white ${
-              isLoading || isStreaming || !inputMessage.trim()
+            className={`rounded-xl transition-all text-white ${isLoading || isStreaming || !inputMessage.trim()
                 ? "cursor-not-allowed"
                 : ""
-            }`}
+              }`}
           >
             <img className="bg-[#F0F5F3] py-1 px-2 rounded-lg" src={send} alt="" />
           </button>
