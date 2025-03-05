@@ -17,12 +17,13 @@ const SkillsContainer: React.FC = () => {
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const navigate = useNavigate();
   const { data: goalData, } = useGetGoalsbyuserQuery(userId);
   
   useEffect(() => {
     if(goalData?.data && goalData.data.length === 0) {
       setIsModalOpen(true);
+      console.log("Goaldata", goalData)
     }
     else if (goalData?.data?.length && selectedGoalId === null) {
       setSelectedGoalId(goalData.data[0]._id);
@@ -41,9 +42,10 @@ const SkillsContainer: React.FC = () => {
 
   const handleGoalModal = () => {
     setIsModalOpen(false);
+    setIsUpdated(true);
     navigate("/"); 
   };
-  const navigate = useNavigate();
+
 
   const handleBackToDashboard = () => {
     navigate("/"); // Navigate to the dashboard page

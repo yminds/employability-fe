@@ -23,7 +23,7 @@ const QuizQuestions: React.FC<QuizQuestionsProps> = ({
   const currentQuestion = questions[questionIndex];
 
   return (
-    <div className="p-6 w-full max-w-lg bg-white shadow-md rounded-md">
+    <div className="p-6 w-full max-w-[40rem] bg-white shadow-md rounded-md">
       {/* Question Header */}
       <h2 className="text-lg font-semibold mb-4">
         Question {questionIndex + 1}

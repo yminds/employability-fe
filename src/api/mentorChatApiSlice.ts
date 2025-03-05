@@ -32,7 +32,6 @@ export const mentorChatApiSlice = apiSlice.injectEndpoints({
           prompt,
           model: "gpt-4",
           provider: "openai",
-          _id: chatId,
           thread_id: chatId,
           user_id: userId,
           code_snippet: "",

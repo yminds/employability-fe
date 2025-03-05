@@ -5,20 +5,37 @@ import { useGenerateQuizQuestionsMutation } from "@/api/mentorChatApiSlice";
 interface QuizDialogProps {
   currentQuizTopic: string;
   onClose: () => void;
-  finalScore: (score:number) => void;
-  user_id: string|undefined;
+  finalScore: (result: { score: number, correctAnswers: AnswerRecord[], wrongAnswers: AnswerRecord[] }) => void;
+  user_id: string | undefined;
   thread_id: string;
-  experience_level : string | undefined
+  experience_level: string | undefined;
 }
 
-const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, finalScore,user_id, thread_id, experience_level }) => {
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  answer: string;
+}
+
+interface AnswerRecord {
+  question: string;
+  selectedOption: string;
+  correctAnswer: string;
+}
+
+const QuizDialog: React.FC<QuizDialogProps> = ({
+  currentQuizTopic,
+  onClose,
+  finalScore,
+  user_id,
+  thread_id,
+  experience_level,
+}) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);
-  const [quizFinished, setQuizFinished] = useState(false);
-  const [questions, setQuestions] = useState<
-    { question: string; options: string[]; answer: string }[]
-  >([]);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [userAnswers, setUserAnswers] = useState<AnswerRecord[]>([]);
 
   // Fetch quiz questions
   const [generateQuizQuestions, { isLoading, error }] = useGenerateQuizQuestionsMutation();
@@ -27,15 +44,20 @@ const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, fina
     const fetchQuizQuestions = async () => {
       if (!currentQuizTopic) return;
       try {
-        const response = await generateQuizQuestions({ topic: currentQuizTopic, user_id:user_id, thread_id:thread_id, experience_level:experience_level })
-        console.log(response)
+        const response = await generateQuizQuestions({
+          topic: currentQuizTopic,
+          user_id,
+          thread_id,
+          experience_level,
+        });
+        console.log(response);
         const regex = /```json\s*([\s\S]+?)\s*```/gm;
-        const match = regex.exec(response?.data.data[0].text); 
-        console.log(match)
+        const match = regex.exec(response?.data.data[0].text);
+        console.log(match);
         if (match) {
-        const jsonString = match[1];
-        const quizQuestions = JSON.parse(jsonString);
-        setQuestions(quizQuestions);
+          const jsonString = match[1];
+          const quizQuestions = JSON.parse(jsonString);
+          setQuestions(quizQuestions);
         }
       } catch (err) {
         console.error("Error generating quiz:", err);
@@ -43,7 +65,7 @@ const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, fina
     };
 
     fetchQuizQuestions();
-  }, [currentQuizTopic, generateQuizQuestions]);
+  }, [currentQuizTopic, generateQuizQuestions, user_id, thread_id, experience_level]);
 
   // Handle outside click to close modal
   const handleOutsideClick = useCallback(
@@ -74,23 +96,46 @@ const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, fina
 
   // Handle next question
   const handleNext = () => {
-    if (selectedOption === questions[currentQuestionIndex].answer) {
-      setScore((prev) => prev + 1);
-    }
+    if (!questions.length) return;
+    const currentQuestion = questions[currentQuestionIndex];
+    const answerRecord: AnswerRecord = {
+      question: currentQuestion.question,
+      selectedOption: selectedOption as string,
+      correctAnswer: currentQuestion.answer,
+    };
+
+    // Prepare new answers list and update score if correct
+    const newUserAnswers = [...userAnswers];
+    newUserAnswers[currentQuestionIndex] = answerRecord;
+    const isCorrect = selectedOption === currentQuestion.answer;
+    const newScore = isCorrect ? score + 1 : score;
 
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
+      setUserAnswers(newUserAnswers);
+      setScore(newScore);
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedOption(null);
     } else {
-      setQuizFinished(true);
+      // Last question: update state and compute analysis data
+      setUserAnswers(newUserAnswers);
+      setScore(newScore);
+      const correctAnswers = newUserAnswers.filter(
+        (record) => record.selectedOption === record.correctAnswer
+      );
+      const wrongAnswers = newUserAnswers.filter(
+        (record) => record.selectedOption !== record.correctAnswer
+      );
+      // Return analysis data to the parent component
+      finalScore({ score: newScore, correctAnswers, wrongAnswers });
+      onClose();
     }
   };
 
-  // Handle previous question
+  // Handle previous question (restores previously selected answer)
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
-      setSelectedOption(null);
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      setSelectedOption(userAnswers[currentQuestionIndex - 1]?.selectedOption || null);
     }
   };
 
@@ -110,7 +155,7 @@ const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, fina
           <p className="text-red-500">Failed to load questions. Please try again.</p>
         ) : !questions.length ? (
           <p className="text-gray-500">No questions available.</p>
-        ) : !quizFinished ? (
+        ) : (
           <>
             <QuizQuestions
               questionIndex={currentQuestionIndex}
@@ -126,7 +171,7 @@ const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, fina
                 className={`px-4 py-2 rounded-md ${
                   currentQuestionIndex === 0
                     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : "text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
+                    : "text-[#001630] bg-white border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
                 }`}
               >
                 Previous
@@ -135,24 +180,14 @@ const QuizDialog: React.FC<QuizDialogProps> = ({ currentQuizTopic, onClose, fina
               <button
                 onClick={handleNext}
                 disabled={!selectedOption}
-                className={`px-4 py-2 rounded-md text-white 
-                  ${selectedOption ? "bg-[#001630] hover:bg-[#062549]" : "bg-gray-400 cursor-not-allowed"}`}
+                className={`px-4 py-2 rounded-md text-white ${
+                  selectedOption ? "bg-[#001630] hover:bg-[#062549]" : "bg-gray-400 cursor-not-allowed"
+                }`}
               >
                 {currentQuestionIndex < questions.length - 1 ? "Next" : "Submit"}
               </button>
             </div>
           </>
-        ) : (
-          <div className="text-center">
-            <h3 className="text-lg font-bold">Quiz Completed!</h3>
-            <p className="text-xl mt-2">Your Score: {score} / {questions.length}</p>
-            <button
-              onClick={()=>{finalScore(score);onClose}}
-              className="px-4 py-2 w-[138px] h-[44px] bg-[#001630] text-white hover:bg-[#062549] rounded-md font-ubuntu"
-            >
-              Close Quiz
-            </button>
-          </div>
         )}
       </div>
     </div>

@@ -35,7 +35,7 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
 
   return (
     <div
-      className={`absolute top-5 right-0 h-[80vh] max-h-[1150px] transition-all duration-300 ease-in-out 
+      className={`absolute top-2 right-0 h-[80vh] max-h-[1150px] transition-all duration-300 ease-in-out 
       ${isSidebarOpen ? "w-[405px]" : "w-0"} 
       bg-white shadow-2xl z-50 overflow-hidden rounded-xl`}
     >

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { flushSync } from "react-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import Skeleton from "react-loading-skeleton";
@@ -16,6 +15,12 @@ import FundamentalsList from "@/components/mentor/FundamentalsList";
 import MentorChatThreads from "./MentorChatThreads";
 import QuizDialog from "./QuizDialog";
 import QuizActionBtns from "./QuizActionBtns";
+
+interface AnswerRecord {
+  question: string;
+  selectedOption: string;
+  correctAnswer: string;
+}
 
 interface MentorContainerProps {
   skill: string;
@@ -36,7 +41,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const [hasSentHello, setHasSentHello] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [finalScore, setFinalScore] = useState(0);
+  const [finalScore, setFinalScore] = useState<any>({});
   const [currentPendingTopic, setCurrentPendingTopic] = useState("");
   const [isUpdated, setIsUpdated] = useState<boolean>(false);
 
@@ -56,7 +61,6 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const {
     data: thread,
     isLoading: isThreadLoading,
-    isFetching: isThreadFetching,
   } = useGetThreadByUserAndTitleQuery(
     userId && title ? { id: userId, title } : skipToken
   );
@@ -92,8 +96,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
    *   - The user has not yet completed the 'init' step (isInitialized = false)
    */
   useEffect(() => {
-    if (!userId || !skillId || !skillPoolId || userExperience) return;
-    if (isThreadLoading || isThreadFetching) return;
+    if (!userId || !skillId || !skillPoolId ) return;
+    if (isThreadLoading) return;
     if (isInitialized) return;
 
     const createOrReuseThread = async () => {
@@ -109,9 +113,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
             skill_pool_id: skillPoolId,
           });
 
-          flushSync(() => {
             setChatId(newChatId);
-          });
+
 
           // Send "Hello!" message
           await sendInitialMessage(newChatId);
@@ -130,7 +133,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     skillPoolId,
     thread,
     isThreadLoading,
-    isThreadFetching,
+    // isThreadFetching,
     isInitialized,
     startMentorChat,
   ]);
@@ -141,7 +144,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
       if (hasSentHello || !currentChatId || !userId) return;
       try {
         await sendMentorMessage({
-          prompt: "Hello! Give me a small introduction about yourself",
+          prompt: "Hello! Give me a small introduction about yourself and start the journey",
           chatId: currentChatId,
           userId,
           fundamentals,
@@ -195,12 +198,13 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     });
   };
 
-  const handleFinalScore = async (score: number) => {
-    setFinalScore(score);
+  const handleFinalScore = async (result: { score: number, correctAnswers: AnswerRecord[], wrongAnswers: AnswerRecord[] }) => {
+    setFinalScore(result);
+    console.log(result)
     setIsQuizOpen(false);
 
     // ✅ Update status to "Completed" only if score >= 3
-    if (score >= 3 && userId && skillPoolId && currentPendingTopic) {
+    if (result.score >= 3 && userId && skillPoolId && currentPendingTopic) {
       try {
         await updateFundamentalStatus({
           user_id: userId,
@@ -302,9 +306,9 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
             </section>
           </div>
 
-          <div className="relative w-full flex-1">
+          <div className="relative w-full flex justify-center">
             {/* Chat + Threads component */}
-            <div className="w-full h-full">
+            <div className="w-[780px] h-full">
               <MentorChatThreads
                 chatId={chatId}
                 userId={userId}
