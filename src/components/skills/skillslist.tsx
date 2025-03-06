@@ -67,8 +67,7 @@ const SkillList: React.FC<SkillListProps> = ({
   const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
-  const [getUserSkills, { data: skillsData, isLoading }] =
-    useGetUserSkillsMutation();
+  const [getUserSkills, { data: skillsData }] = useGetUserSkillsMutation();
   const [selectedCategory, setSelectedCategory] =
     useState<SkillCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,6 +75,7 @@ const SkillList: React.FC<SkillListProps> = ({
   const [isSelfRatingEdited, setSelfRatingChange] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Mutation hooks
   const [removeGoalFromSkill] = useRemoveGoalFromSkillMutation();
@@ -100,6 +100,7 @@ const SkillList: React.FC<SkillListProps> = ({
   ) => {
     try {
       await getUserSkills({ userId, goalId }).unwrap();
+      setIsLoading(false);
     } catch (err) {
       console.error("Error fetching skills:", err);
     }
@@ -362,7 +363,7 @@ const SkillList: React.FC<SkillListProps> = ({
 
         {renderSkillChips()}
 
-        {(!skillsData || isLoading)
+        {isLoading
           ? Array.from({ length: 3 }).map((_, index) => (
               <React.Fragment key={index}>
                 {renderLoadingSkeleton()}

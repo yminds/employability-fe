@@ -14,19 +14,23 @@ export interface Skill {
   verified_rating: number;
   self_rating: number | null;
   level?: string;
+  best_interview: string;
 }
 
 interface SkillsSectionProps {
   skills: Skill[];
   isPublic?: boolean;
+  username?: string;
 }
 
-const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
+const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+
+  console.log("Skills", skills);
 
   const displaySkills = isExpanded ? skills : skills.slice(0, 3);
 
@@ -66,6 +70,8 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
                       skill.verified_rating > 0 ? "Verified" : "Unverified"
                     }
                     level={skill.level}
+                    best_interview={skill.best_interview}
+                    username={username}
                   />
                 </React.Fragment>
               ))}

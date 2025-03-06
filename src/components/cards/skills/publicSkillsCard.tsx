@@ -14,6 +14,8 @@ interface PublicSkillCardProps {
   selfRating: number;
   initialStatus: string;
   level: string | undefined;
+  best_interview: string;
+  username?: string;
 }
 
 const PublicSkillCard: React.FC<PublicSkillCardProps> = ({
@@ -23,6 +25,8 @@ const PublicSkillCard: React.FC<PublicSkillCardProps> = ({
   verified_rating,
   selfRating,
   initialStatus,
+  best_interview,
+  username,
 }) => {
   const navigate = useNavigate();
 
@@ -30,9 +34,7 @@ const PublicSkillCard: React.FC<PublicSkillCardProps> = ({
   const imgSrc = status === "Verified" ? verifiedImg : unverifiedImg;
 
   const handleViewReport = () => {
-    navigate(`/skills/${skillId}`, {
-      state: { skill, verified_rating, selfRating },
-    });
+    navigate(`/skills-report/${username}/${best_interview}`);
   };
 
   const handleRequestVerification = () => {

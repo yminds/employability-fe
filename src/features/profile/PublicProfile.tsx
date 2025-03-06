@@ -45,7 +45,11 @@ const PublicProfile: React.FC = () => {
           />
 
           <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <SkillsSection skills={profile.skills} isPublic={true} />
+            <SkillsSection
+              skills={profile.skills}
+              isPublic={true}
+              username={username}
+            />
           </div>
 
           <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
