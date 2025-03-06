@@ -205,7 +205,6 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const skill = location.state?.fromInterviewCard
   ? profile.skills?.find(() => true)
   : profile.skills?.find((skillItem: any) => skillItem.best_interview === interviewId)
-  console.log("skill",skill)
   const { name: skillName, icon: skillIcon } = skill?.skill_pool_id;
   console.log({ name: skillName, icon: skillIcon })
 

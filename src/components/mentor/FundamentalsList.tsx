@@ -95,13 +95,14 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
                             <div className="mt-3">
                               <p className="text-body1 text-gray-500 mb-1">Status: {item.status}</p>
                             </div>
-
+                            
                             <div className="flex items-center justify-end gap-4 mt-4">
                               <QuizActionBtns
                                 fundamentals={fundamentals}
                                 currentQuizTopic={item.name}
                                 onStartQuiz={onStartQuiz}
-                                skipCurrentConcept={handleSkipCurrentConcept} // Updated
+                                skipCurrentConcept={handleSkipCurrentConcept}
+                                showSkipBtn
                               />
                             </div>
                           </div>

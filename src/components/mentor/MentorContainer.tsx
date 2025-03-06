@@ -43,11 +43,12 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [finalScore, setFinalScore] = useState<any>({});
   const [currentPendingTopic, setCurrentPendingTopic] = useState("");
+  // New state for quiz topic selected from the fundamentals bar
+  const [selectedQuizTopic, setSelectedQuizTopic] = useState("");
   const [isUpdated, setIsUpdated] = useState<boolean>(false);
 
   const userId = useSelector((state: RootState) => state.auth.user?._id);
   const userExperience = useSelector((state: RootState) => state.auth.user?.experience_level);
-  console.log(userExperience)
   const [updateFundamentalStatus] = useUpdateFundamentalStatusMutation();
   // We'll derive the thread title from skill + user
   const title = userId ? `${skill}'s Mentor Thread` : null;
@@ -89,14 +90,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   }, [userId, skillPoolId, fetchFundamentals]);
 
   // -------- 2) Create or reuse the mentor thread --------------
-  /**
-   * We only want to do the create-once logic if:
-   *   - We have a userId, skillId, skillPoolId
-   *   - The thread is not loading/fetching
-   *   - The user has not yet completed the 'init' step (isInitialized = false)
-   */
   useEffect(() => {
-    if (!userId || !skillId || !skillPoolId ) return;
+    if (!userId || !skillId || !skillPoolId) return;
     if (isThreadLoading) return;
     if (isInitialized) return;
 
@@ -113,8 +108,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
             skill_pool_id: skillPoolId,
           });
 
-            setChatId(newChatId);
-
+          setChatId(newChatId);
 
           // Send "Hello!" message
           await sendInitialMessage(newChatId);
@@ -133,7 +127,6 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     skillPoolId,
     thread,
     isThreadLoading,
-    // isThreadFetching,
     isInitialized,
     startMentorChat,
   ]);
@@ -183,8 +176,10 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   }, [firstPendingFundamental, currentIndex, isUpdated]);
 
   // -------- 4) Quiz handlers --------------
+  // Updated to use separate state for quiz topic
   const handleStartQuiz = (topic: string) => {
-    setCurrentPendingTopic(topic);
+    console.log("Topic inside handleStartQuiz:", topic);
+    setSelectedQuizTopic(topic);
     setIsQuizOpen(true);
   };
 
@@ -198,10 +193,10 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     });
   };
 
-  const handleFinalScore = async (result: { score: number, correctAnswers: AnswerRecord[], wrongAnswers: AnswerRecord[] }) => {
+  const handleFinalScore = async (result: { score: number; correctAnswers: AnswerRecord[]; wrongAnswers: AnswerRecord[] }) => {
     setFinalScore(result);
-    console.log(result)
     setIsQuizOpen(false);
+    // Reset the selected quiz topic after finishing the quiz
 
     // ✅ Update status to "Completed" only if score >= 3
     if (result.score >= 3 && userId && skillPoolId && currentPendingTopic) {
@@ -266,8 +261,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
             ))}
           </div>
         </div>
-
-        </div>
+      </div>
     );
   }
 
@@ -276,22 +270,21 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
       {pendingFundamentals.length > 0 ? (
         <div className="flex flex-col h-full w-full max-w-[1800px] border-0 relative">
           <div className="flex min-h-[80px] items-center p-4 bg-transparent justify-between border-b-2 gap-36">
-            {/* <section className="flex items-center justify-between min-w-[820px]"> */}
-              <section className="flex-col p-2 min-w-[350px]">
-                <div className="text-body2 text-grey-5 text-sm">
-                  Fundamentals of {skill}
-                </div>
-                <div className="text-h1">{currentPendingTopic}</div>
-              </section>
+            <section className="flex-col p-2 min-w-[350px]">
+              <div className="text-body2 text-grey-5 text-sm">
+                Fundamentals of {skill}
+              </div>
+              <div className="text-h1">{currentPendingTopic}</div>
+            </section>
 
-              {/* Quiz Button */}
-              <QuizActionBtns
-                fundamentals={fundamentals}
-                currentQuizTopic={currentPendingTopic}
-                onStartQuiz={handleStartQuiz}
-                skipCurrentConcept={handleSkipCurrentConcept}
-              />
-            {/* </section> */}
+            {/* Quiz Button */}
+            <QuizActionBtns
+              fundamentals={fundamentals}
+              currentQuizTopic={currentPendingTopic}
+              onStartQuiz={handleStartQuiz}
+              skipCurrentConcept={handleSkipCurrentConcept}
+              showSkipBtn
+            />
 
             <section>
               {!isSidebarOpen ? (
@@ -317,7 +310,9 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
                 isLoading={isLoading || isThreadLoading}
                 setIsLoading={setIsLoading}
                 finalQuizScore={finalScore}
-                currentPendingTopic={currentPendingTopic}
+                currentPendingTopic={selectedQuizTopic || currentPendingTopic}
+                onStartQuiz={handleStartQuiz}
+                skipCurrentConcept={handleSkipCurrentConcept}
               />
             </div>
 
@@ -339,7 +334,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
           {isQuizOpen && userId && chatId && (
             <QuizDialog
               onClose={() => setIsQuizOpen(false)}
-              currentQuizTopic={currentPendingTopic}
+              // Pass the selected quiz topic if available, otherwise default to the current pending topic
+              currentQuizTopic={selectedQuizTopic || currentPendingTopic}
               finalScore={handleFinalScore}
               user_id={userId}
               thread_id={chatId}

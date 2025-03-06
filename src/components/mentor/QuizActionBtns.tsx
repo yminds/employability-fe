@@ -5,12 +5,16 @@ interface QuizActionbtnsProps {
   currentQuizTopic: string;
   onStartQuiz: (topic: string) => void;
   skipCurrentConcept: ()=> void;
+  showSkipBtn: boolean
 }
 
-const QuizActionBtns: React.FC<QuizActionbtnsProps> = ({ fundamentals, currentQuizTopic, onStartQuiz,skipCurrentConcept }) => {
+const QuizActionBtns: React.FC<QuizActionbtnsProps> = ({  currentQuizTopic, onStartQuiz,skipCurrentConcept,showSkipBtn = true }) => {
+  console.log(currentQuizTopic)
   return (
     <section className="flex gap-5">
-      <button className="text-body1" onClick={skipCurrentConcept}>Skip</button>
+      {showSkipBtn && (
+        <button className="text-body1" onClick={skipCurrentConcept}>Skip</button>
+      )}
       <button
         onClick={() => onStartQuiz(currentQuizTopic)}
         className="bg-[#00163012] p-2 rounded-full text-body1"
