@@ -34,7 +34,9 @@ const PublicSkillCard: React.FC<PublicSkillCardProps> = ({
   const imgSrc = status === "Verified" ? verifiedImg : unverifiedImg;
 
   const handleViewReport = () => {
-    navigate(`/skills-report/${username}/${best_interview}`);
+    navigate(`/skills-report/${username}/${best_interview}`, {
+      state: { isPublic: true },
+    });
   };
 
   const handleRequestVerification = () => {

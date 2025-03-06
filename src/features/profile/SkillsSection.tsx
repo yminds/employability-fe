@@ -30,8 +30,6 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
     setIsExpanded(!isExpanded);
   };
 
-  console.log("Skills", skills);
-
   const displaySkills = isExpanded ? skills : skills.slice(0, 3);
 
   return (
