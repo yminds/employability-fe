@@ -11,8 +11,8 @@ import { useSelector, useDispatch } from "react-redux";
 import SkillList from "@/components/skills/skillslist";
 import ProfileBanner from "./ProfileBanner";
 import { useNavigate } from "react-router-dom";
-import MockInterviewSection from "./MockInterviewSection";
-import MockInterivewImage from "@/assets/profile/MockInterview.svg";
+// import MockInterviewSection from "./MockInterviewSection";
+// import MockInterivewImage from "@/assets/profile/MockInterview.svg";
 import StatsSection from "./StatsSection";
 import CurrentStatusSection from "./CurrentStatusSection";
 import ContactInformationSection from "./ContactInformationSection";
@@ -93,15 +93,17 @@ const UserProfile: React.FC = () => {
             goalData={goalsData}
           />
 
-          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
-            <SkillList
-              isDashboard={true}
-              goalId={goalId}
-              onSkillsUpdate={() => {}}
-              isSkillsUpdated={false}
-              goals={goalsData}
-            />
-          </div>
+          {user?.goals && user?.goals.length > 0 && (
+            <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
+              <SkillList
+                isDashboard={true}
+                goalId={goalId}
+                onSkillsUpdate={() => {}}
+                isSkillsUpdated={false}
+                goals={goalsData}
+              />
+            </div>
+          )}
 
           <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
             <ProjectList
@@ -145,19 +147,19 @@ const UserProfile: React.FC = () => {
         {/* Right Section */}
         <div className="space-y-6 flex flex-col flex-1 col-span-3">
           {/* MockInterview Section */}
-          <MockInterviewSection
+          {/* <MockInterviewSection
             duration="5m 32s"
             timeAgo="3 weeks ago"
             role="Full stack developer"
             percentile={60}
             thumbnailUrl={MockInterivewImage || ""}
-          />
-
-          {/* Stats Section */}
-          <StatsSection skills={6} projects={4} certifications={2} />
+          /> */}
 
           {/* Current Status Section */}
           <CurrentStatusSection onStatusChange={handleEditStatus} user={user} />
+
+          {/* Stats Section */}
+          <StatsSection username={user?.username}/>
 
           <ContactInformationSection
             profileUrl={profileUrl}

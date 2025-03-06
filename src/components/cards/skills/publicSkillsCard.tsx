@@ -58,8 +58,8 @@ const PublicSkillCard: React.FC<PublicSkillCardProps> = ({
               />
             </span>
             <div>
-              <h3 className="text-[16px] font-medium">{skill}</h3>
-              <p className="text-gray-600 text-base font-normal leading-6 tracking-[0.24px]">
+              <h3 className="text-[#0C0F12] text-sub-header">{skill}</h3>
+              <p className="text-[#414447] text-body2">
                 Self rating: {selfRating}/10
               </p>
             </div>
@@ -71,7 +71,7 @@ const PublicSkillCard: React.FC<PublicSkillCardProps> = ({
           {/* Rating and Status */}
           <div className="flex w-[30%] flex-col items-center">
             {status === "Verified" && (
-              <p className="text-lg font-medium">
+              <p className="font-ubuntu text-xl font-medium leading-[22px]">
                 {verified_rating}
                 <span className="text-[#909091]">/10</span>
               </p>
@@ -83,7 +83,7 @@ const PublicSkillCard: React.FC<PublicSkillCardProps> = ({
                 className="w-4 h-4"
               />
               <span
-                className={`overflow-hidden text-ellipsis text-base font-normal leading-5 ${
+                className={`overflow-hidden text-ellipsis text-sub-header ${
                   status === "Verified" ? "text-green-600" : "text-yellow-600"
                 }`}
               >
@@ -93,11 +93,11 @@ const PublicSkillCard: React.FC<PublicSkillCardProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex w-[40%] lg:w-[50%] justify-end items-center space-x-2">
+          <div className="flex w-[40%] lg:w-[50%] justify-end items-center space-x-2 font-ubuntu">
             {status === "Verified" && (
               <button
                 onClick={handleViewReport}
-                className="px-4 py-2 text-sm font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
+                className="px-4 py-2 text-button text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
               >
                 View report
               </button>

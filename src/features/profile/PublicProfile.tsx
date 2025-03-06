@@ -6,8 +6,8 @@ import SkillsSection from "./SkillsSection";
 import ExperienceSection from "./ExperienceSection";
 import EducationSection from "./EducationSection";
 import CertificationsSection from "./CertificationsSection";
-import MockInterivewImage from "@/assets/profile/MockInterview.svg";
-import MockInterviewSection from "./MockInterviewSection";
+// import MockInterivewImage from "@/assets/profile/MockInterview.svg";
+// import MockInterviewSection from "./MockInterviewSection";
 import StatsSection from "./StatsSection";
 import ProjectList from "@/components/projects/ProjectList";
 
@@ -87,16 +87,16 @@ const PublicProfile: React.FC = () => {
         {/* Right Section */}
         <div className="space-y-6 flex flex-col flex-1 col-span-2">
           {/* MockInterview Section */}
-          <MockInterviewSection
+          {/* <MockInterviewSection
             duration="5m 32s"
             timeAgo="3 weeks ago"
             role="Full stack developer"
             percentile={60}
             thumbnailUrl={MockInterivewImage || ""}
-          />
+          /> */}
 
           {/* Stats Section */}
-          <StatsSection skills={6} projects={4} certifications={2} />
+          <StatsSection username={profile?.username} />
         </div>
       </div>
     </div>

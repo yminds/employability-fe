@@ -48,7 +48,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
               alt="No skills entries"
               className="w-20 h-20 mb-6"
             />
-            <h3 className="text-base text-[#414447] font-normal mb-2 text-center font-sans leading-6 tracking-[0.24px]">
+            <h3 className="text-body2 text-[#414447] mb-2 text-center">
               No skills added yet.
             </h3>
           </div>
