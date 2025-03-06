@@ -1,4 +1,4 @@
-import { YouTubeEmbed } from "./MarkdownAndVideo";
+import YouTubeEmbed from "./YouTubeEmbed";
 import { useYouTubeContext } from "./YouTubeContext";
 
 /** The "child" that displays all collected videos in a 3-col layout. */

@@ -14,6 +14,7 @@ import remarkGfm from "remark-gfm";
 import { MarkdownComponents } from "./MarkdownAndVideo";
 import VideosAtEnd from "./YoutubeVideosGrid";
 import { YouTubeProvider } from "./YouTubeContext";
+import QuizActionBtns from "./QuizActionBtns";
 
 const SOCKET_URL =
   window.location.hostname === "localhost"
@@ -29,6 +30,8 @@ interface MentorChatThreadsProps {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   finalQuizScore: { score: number, correctAnswers: any, wrongAnswers: any };
   currentPendingTopic: string;
+  onStartQuiz: (topic: string) => void;
+  skipCurrentConcept: ()=> void;
 }
 
 interface Message {
@@ -46,8 +49,9 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
   setIsLoading,
   finalQuizScore,
   currentPendingTopic,
+  onStartQuiz,
+  skipCurrentConcept
 }) => {
-  console.log(finalQuizScore)
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -248,11 +252,20 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
   // 9) Render each message
   const renderMessage = (msg: Message) => {
     const isAI = msg.role === "AI";
+    const lastAiMessageId = messages.filter((m) => m.role === "AI").slice(-1)[0]?.id;
+    // We only show the quiz buttons if:
+    // 1) This message is AI
+    // 2) There are at least 2 AI messages overall
+    // 3) This message is the last AI message
+    const showQuizButtons =
+      isAI && messages.length >= 2 && msg.id === lastAiMessageId;
+
     return (
       <div
         key={msg.id}
-        className={`flex items-start gap-3 w-fit ${msg.role === "USER" ? "flex-row-reverse ml-auto" : "flex-row"
-          }`}
+        className={`flex items-start gap-3 w-fit ${
+          msg.role === "USER" ? "flex-row-reverse ml-auto" : "flex-row"
+        }`}
       >
         {/* Avatar */}
         {isAI && (
@@ -263,21 +276,34 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
 
         {/* Bubble */}
         <div
-          className={`flex-1 p-3 max-w-[60vw] rounded-2xl ${isAI
+          className={`flex-1 p-3 max-w-[60vw] rounded-2xl ${
+            isAI
               ? "bg-[#F5F5F5] border border-gray-100"
               : "bg-white w-fit"
-            }`}
+          }`}
         >
           {isAI ? (
-            <YouTubeProvider>
-              <ReactMarkdown
-                children={msg.message}
-                remarkPlugins={[remarkGfm]}
-                components={MarkdownComponents}
-              />
-              {/* After the markdown is done, show all the YouTube videos in a grid */}
-              <VideosAtEnd />
-            </YouTubeProvider>
+            <>
+              <YouTubeProvider>
+                <ReactMarkdown
+                  children={msg.message}
+                  remarkPlugins={[remarkGfm]}
+                  components={MarkdownComponents}
+                />
+                {/* All videos shown at the end */}
+                <VideosAtEnd />
+                {/* Conditionally show quiz buttons */}
+                {showQuizButtons && (
+                  <QuizActionBtns
+                    fundamentals={fundamentals}
+                    currentQuizTopic={currentPendingTopic}
+                    onStartQuiz={onStartQuiz}
+                    skipCurrentConcept={skipCurrentConcept}
+                    showSkipBtn={false}
+                  />
+                )}
+              </YouTubeProvider>
+            </>
           ) : (
             <p className="whitespace-pre-wrap leading-relaxed text-[16px] font-ubuntu w-fit">
               {msg.message}
@@ -287,6 +313,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
       </div>
     );
   };
+
 
   // 10) The actual UI
   return (

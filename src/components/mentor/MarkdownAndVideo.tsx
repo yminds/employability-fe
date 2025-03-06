@@ -1,47 +1,9 @@
 // MarkdownComponents.tsx
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Check, Copy } from "lucide-react";
 import { useYouTubeContext } from "./YouTubeContext";
-
-
-/** Extract a YouTube Video ID from standard YouTube links. */
- export function getVideoId(url: string) {
-  const match = url.match(
-    /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-  );
-  return match ? match[1] : null;
-}
-
-export const YouTubeEmbed = React.memo(
-  ({
-    src,
-    width = "300px",
-    height = "400px",
-  }: {
-    src: string;
-    width?: string;
-    height?: string;
-  }) => {
-    const videoId = useMemo(() => getVideoId(src), [src]);
-    if (!videoId) return null;
-
-    return (
-      <div className="youtube-embed-container my-4 w-full aspect-video ">
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}`}
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          className="w-full h-full"
-          width={width}
-          height={height}
-        />
-      </div>
-    );
-  }
-);
 
 export const MarkdownComponents = {
   code({
@@ -169,7 +131,7 @@ const CopyButton = ({ textToCopy }: { textToCopy: string }) => {
   return (
     <button
       onClick={handleCopy}
-      className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors shadow-md"
+      className="p-2 bg-button hover:bg-indigo-700 text-white rounded-md transition-colors shadow-md"
       title="Copy to clipboard"
     >
       {copied ? <Check size={16} /> : <Copy size={16} />}
