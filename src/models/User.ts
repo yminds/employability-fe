@@ -20,6 +20,7 @@ export type User = {
   name: string;
   createdAt: Date;
   updatedAt: Date;
+  goals: string[];
   skills: string[]; // Array of skill IDs
   address: Address;
   education: string[]; // Array of education IDs

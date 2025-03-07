@@ -82,8 +82,6 @@ export const useProfileForm = (
     setIsBasicInfoLoading(true);
     if (!user.is_basic_info) {
       const data = user?.parsedResume;
-      console.log("parsedResume", data);
-      
       if (!data) {
         setIsBasicInfoLoading(false);
         return {
@@ -709,21 +707,26 @@ export const useProfileForm = (
 
         console.log(`${section} section saved successfully`);
 
-        const currentIndex = [
-          "basic",
-          "skills",
-          "experience",
-          "education",
-          "certification",
-        ].indexOf(activeTab);
-        if (currentIndex < 4) {
-          setActiveTab(
-            ["basic", "skills", "experience", "education", "certification"][
-              currentIndex + 1
-            ]
-          );
+        if (section === "basic") {
+          if (!goalId) {
+            setActiveTab("experience");
+          } else {
+            setActiveTab("skills");
+          }
         } else {
-          onClose();
+          const sections = [
+            "basic",
+            "skills",
+            "experience",
+            "education",
+            "certification",
+          ];
+          const currentIndex = sections.indexOf(activeTab);
+          if (currentIndex < 4) {
+            setActiveTab(sections[currentIndex + 1]);
+          } else {
+            onClose();
+          }
         }
       } catch (err) {
         console.error(`Error saving ${section} section:`, err);

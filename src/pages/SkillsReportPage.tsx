@@ -109,6 +109,7 @@ interface ReportPageProps {
 const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const isPublic = location.state?.isPublic || false;
 
   // Get username and interview ID from URL for shared reports
   const getInterviewIdFromUrl = () => {
@@ -229,6 +230,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
       level={level}
       skill={skill}
       publicProfileName={profile?.username || ""}
+      isPublic={isPublic}
     />
   );
 };

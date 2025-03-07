@@ -55,6 +55,7 @@ interface ReportContentProps {
   level: string;
   skill:string;
   publicProfileName:string
+  isPublic?: boolean;
 }
 
 const getShareUrl = (publicProfileName : string) => {
@@ -78,7 +79,8 @@ const ReportContent: React.FC<ReportContentProps> = ({
   userSkillId,
   level,
   skill,
-  publicProfileName
+  publicProfileName,
+  isPublic,
 }) => {
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -184,7 +186,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
         <header className="py-6 flex justify-between">
           <div className="max-w-[70%] px-4 flex flex-col gap-2">
             <h1 className="text-title text-grey-7 font-bold flex gap-4 items-center">
-              {!sharedReport && (
+              {(!sharedReport || isPublic) && (
                 <button
                   onClick={handleBackToSkillsPage}
                   className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"

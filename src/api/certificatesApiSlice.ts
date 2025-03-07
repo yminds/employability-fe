@@ -18,7 +18,7 @@ export const certificationsApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: newCertification,
       }),
-      invalidatesTags: ["Certification"],
+      invalidatesTags: ["Certification", "VerifiedContent"],
     }),
 
     // Update an existing certification record by ID
@@ -40,7 +40,7 @@ export const certificationsApiSlice = apiSlice.injectEndpoints({
         url: `/api/v1/user_certification/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Certification"],
+      invalidatesTags: ["Certification", "VerifiedContent"],
     }),
   }),
 });
