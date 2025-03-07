@@ -89,7 +89,6 @@ const ProfileBanner = ({
 
   const handleShareProfile = () => {
     const publicProfileUrl = `${window.location.origin}/profile/${user.username}`;
-    window.open(publicProfileUrl, "_blank", "noopener,noreferrer");
     navigator.clipboard
       .writeText(publicProfileUrl)
       .then(() => {
@@ -98,6 +97,9 @@ const ProfileBanner = ({
       .catch((err) => {
         console.error("Failed to copy: ", err);
       });
+    setTimeout(() => {
+      window.open(publicProfileUrl, "_blank", "noopener,noreferrer");
+    }, 1500);
   };
 
   const hasGoalData = isPublic
@@ -232,7 +234,10 @@ const ProfileBanner = ({
 
           {/* Bio */}
           <div className="flex items-start justify-between gap-4">
-            <p className="text-[#414447] text-body2 flex-1">{bio}</p>
+            <p className="text-[#414447] text-body2 flex-1">
+              {bio ||
+                "No bio available. Add a bio to tell others about yourself."}
+            </p>
           </div>
 
           {/* Action Buttons */}
