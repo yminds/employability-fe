@@ -58,13 +58,14 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const { startMentorChat } = useMentorChat();
   const [sendMentorMessage] = useSendMentorMessageMutation();
 
-  // Queries the existing thread (if any) for this user + title
   const {
     data: thread,
     isLoading: isThreadLoading,
   } = useGetThreadByUserAndTitleQuery(
-    userId && title ? { id: userId, title } : skipToken
+    userId && title ? { userId, title } : skipToken
   );
+
+  console.log("thread",thread)
 
   // -------- 1) Load fundamentals --------------
   useEffect(() => {
@@ -226,10 +227,10 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   // Show a skeleton layout while threads, fundamentals, or messages are loading
   if (isLoading || isThreadLoading) {
     return (
-      <div className="flex flex-col h-full w-full max-w-[1800px] border-0 relative">
-        <div className="flex min-h-[80px] items-center p-4 bg-transparent justify-between border-b-2 gap-36">
-          <section className="flex items-center justify-between min-w-[820px]">
-            <section className="flex-col p-2 min-w-[350px]">
+      <div className="flex flex-col h-screen w-full max-w-[1800px] border-0 relative">
+        <div className="flex h-[84px] justify-center items-center gap-4 self-stretch">
+          <section className="flex items-center justify-between w-[820px]">
+            <section className="flex-col p-2 min-w-[350px] items-center justify-center">
               <div className="text-body2 text-grey-5 text-sm">
                 <Skeleton width={200} height={20} />
               </div>
@@ -266,27 +267,29 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   }
 
   return (
-    <div>
+    <div className="h-full w-full">
       {pendingFundamentals.length > 0 ? (
-        <div className="flex flex-col h-full w-full max-w-[1800px] border-0 relative">
-          <div className="flex min-h-[80px] items-center p-4 bg-transparent justify-between border-b-2 gap-36">
-            <section className="flex-col p-2 min-w-[350px]">
-              <div className="text-body2 text-grey-5 text-sm">
-                Fundamentals of {skill}
-              </div>
-              <div className="text-h1">{currentPendingTopic}</div>
+        <div className="flex flex-col h-full w-full border-0 relative">
+          <div className="flex h-[84px] justify-around items-center gap-[75px] 2xl:gap-0 self-stretch border-b">
+            <section className=" flex min-w-[800px] ml-auto 2xl:mr-auto  items-center">
+              <section className="flex-col p-[14px] min-w-[450px]">
+                <div className="text-body2 text-grey-5 text-[14px] leading-6 tracking-[0.7px] ">
+                  Fundamentals of {skill}
+                </div>
+                <div className="text-h1">{currentPendingTopic}</div>
+              </section>
+
+              {/* Quiz Button */}
+              <QuizActionBtns
+                fundamentals={fundamentals}
+                currentQuizTopic={currentPendingTopic}
+                onStartQuiz={handleStartQuiz}
+                skipCurrentConcept={handleSkipCurrentConcept}
+                showSkipBtn
+              />
             </section>
 
-            {/* Quiz Button */}
-            <QuizActionBtns
-              fundamentals={fundamentals}
-              currentQuizTopic={currentPendingTopic}
-              onStartQuiz={handleStartQuiz}
-              skipCurrentConcept={handleSkipCurrentConcept}
-              showSkipBtn
-            />
-
-            <section>
+            <section className="mx-10">
               {!isSidebarOpen ? (
                 <button onClick={() => setSidebarOpen(true)}>
                   View curriculum
@@ -299,9 +302,9 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
             </section>
           </div>
 
-          <div className="relative w-full flex justify-center">
+          <div className="relative w-full h-full p-[55px] pb-[42px] flex items-center justify-center">
             {/* Chat + Threads component */}
-            <div className="w-[780px] h-full">
+            <div className="w-full h-full relative">
               <MentorChatThreads
                 chatId={chatId}
                 userId={userId}
@@ -325,6 +328,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
                   skill={skill}
                   fundamentals={fundamentals}
                   onStartQuiz={handleStartQuiz}
+                  onClose={()=>{setSidebarOpen(false)}}
                 />
               </div>
             )}

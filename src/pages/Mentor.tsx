@@ -8,7 +8,7 @@ const Mentor: React.FC = () => {
     const { skill,skillId, skillPoolId} = location.state;
   return (
     <div className="flex w-full h-screen justify-center sm:overflow-y-auto">
-      <main className=" flex-col bg-[#F5F5F5] w-[95%] max-w-[1800px] h-full sm:p-0 relative py-4">
+      <main className=" flex-col bg-[#F5F5F5] w-full h-screen sm:p-0 relative ">
         <MentorContainer skill={skill} skillId={skillId} skillPoolId={skillPoolId}/>
       </main>
     </div>
