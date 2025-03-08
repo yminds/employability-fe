@@ -206,7 +206,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleResumeInterView = () => {
     navigate(`/interview/${latest_interview_status?.interview_id}`, {
-      state: { title: skill, skillPoolId, level, type: "Skill" },
+      state: { title: skill, skillPoolId, level, type: "Skill",isResume:true },
     });
   };
   return (
