@@ -109,6 +109,7 @@ interface ReportPageProps {
 const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const isPublic = location.state?.isPublic || false;
 
   // Get username and interview ID from URL for shared reports
   const getInterviewIdFromUrl = () => {
@@ -201,10 +202,9 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   console.log("interview",interviewId)
   console.log("profile",profile.skills)
   // Attempt to pull skill info from the user's profile
-  const skill = profile.skills?.find(
-    (skillItem:any) => skillItem.best_interview === interviewId
-  );
-  console.log("skill",skill)
+  const skill = location.state?.fromInterviewCard
+  ? profile.skills?.find(() => true)
+  : profile.skills?.find((skillItem: any) => skillItem.best_interview === interviewId)
   const { name: skillName, icon: skillIcon } = skill?.skill_pool_id;
   console.log({ name: skillName, icon: skillIcon })
 
@@ -213,7 +213,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const level = skill?.level || "";
 
   const handleBackToSkillsPage = () => {
-    navigate("/skills");
+    navigate(-1);
   };
 
   return (
@@ -230,6 +230,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
       level={level}
       skill={skill}
       publicProfileName={profile?.username || ""}
+      isPublic={isPublic}
     />
   );
 };

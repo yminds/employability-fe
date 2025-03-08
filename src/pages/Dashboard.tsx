@@ -22,7 +22,7 @@ import ProfessionalGoalsImg from "@/assets/dashboard/professional_goals.svg";
 import logo from "@/assets/skills/e-Logo.svg";
 import CircularProgress from "@/components/ui/circular-progress-bar";
 import { useNavigate } from "react-router-dom";
-
+import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 
 // Skeleton Components
 const SkillCardSkeleton = () => (
@@ -85,7 +85,6 @@ const SkillListSkeleton = () => (
   </div>
 );
 
-
 interface Props {
   isDashboard: boolean;
   displayScore: boolean;
@@ -103,15 +102,19 @@ interface GoalsData {
 
 const Dashboard: React.FC<Props> = () => {
   const [journeyDialog, setJourneyDialog] = useState(false);
-  const [currentGoal, setCurrentGoal] = useState<{_id: string; name: string; experience: string} | null>(null);
+  const [currentGoal, setCurrentGoal] = useState<{
+    _id: string;
+    name: string;
+    experience: string;
+  } | null>(null);
   const [isUpdated, setIsUpdated] = useState<boolean>(false);
   const [verifiedSkillsCount, setVerifiedSkillsCount] = useState(0);
   const [totalMandatorySkillsCount, setTotalMandatorySkillsCount] = useState(0);
   const [totalProjects, setTotalProjects] = useState(0);
   const [verifiedProjects, setVerifiedProjects] = useState(0);
   const [completedProfileSections, setCompletedProfileSections] = useState(0);
-  const navigate = useNavigate()
-  
+  const navigate = useNavigate();
+
   const user = useSelector((state: RootState) => state.auth.user);
   // const token = useSelector((state:RootState)=>state.auth.token);
   const user_id = user ? user._id : "";
@@ -120,8 +123,9 @@ const Dashboard: React.FC<Props> = () => {
   const experience_level = user ? user.experience_level : "";
 
   // Queries and Mutations
-  const { data: userDetails, isLoading: isUserDetailsLoading } = useGetUserDetailsQuery(user_id);
-  
+  const { data: userDetails, isLoading: isUserDetailsLoading } =
+    useGetUserDetailsQuery(user_id);
+
   const {
     data: goalsData,
     isLoading: isGoalsLoading,
@@ -131,16 +135,21 @@ const Dashboard: React.FC<Props> = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  const { data: userProjects, isLoading: isProjectsLoading, refetch: refetchProjects } = 
-    useGetProjectsByUserIdQuery({ 
-      userId: user_id,
-      goalId: currentGoal?._id 
-    });
+  const {
+    data: userProjects,
+    isLoading: isProjectsLoading,
+    refetch: refetchProjects,
+  } = useGetProjectsByUserIdQuery({
+    userId: user_id,
+    goalId: currentGoal?._id,
+  });
 
-  const [getUserSkills, { data: skillsData, isLoading: isSkillsLoading }] = useGetUserSkillsMutation();
+  const [getUserSkills, { data: skillsData, isLoading: isSkillsLoading }] =
+    useGetUserSkillsMutation();
 
   const isInitialLoading = isGoalsLoading || isUserDetailsLoading;
-  const isContentLoading = isGoalsFetching || isProjectsLoading || isSkillsLoading;
+  const isContentLoading =
+    isGoalsFetching || isProjectsLoading || isSkillsLoading;
 
   const hasGoals = goalsData?.data && goalsData.data.length > 0;
   const is_Email_Verified = userDetails?.data?.is_email_verified;
@@ -197,9 +206,9 @@ const Dashboard: React.FC<Props> = () => {
   const fetchSkills = useCallback(async () => {
     if (user_id && currentGoal?._id) {
       try {
-        await getUserSkills({ 
-          userId: user_id, 
-          goalId: currentGoal._id 
+        await getUserSkills({
+          userId: user_id,
+          goalId: currentGoal._id,
         }).unwrap();
       } catch (err) {
         console.error("Error fetching skills:", err);
@@ -215,36 +224,31 @@ const Dashboard: React.FC<Props> = () => {
 
   // Handle goal change
   const handleGoalChange = async (goalId: string) => {
-    const newGoal = goalsData?.data?.find(g => g._id === goalId);
+    const newGoal = goalsData?.data?.find((g) => g._id === goalId);
     if (newGoal) {
       setCurrentGoal({
         _id: newGoal._id,
         name: newGoal.name,
-        experience: newGoal.experience || ""
+        experience: newGoal.experience || "",
       });
-      await Promise.all([
-        refetchProjects(),
-        fetchSkills()
-      ]);
+      await Promise.all([refetchProjects(), fetchSkills()]);
     }
   };
 
   // Initialize current goal
   useEffect(() => {
-    if ( goalsData?.data && goalsData?.data?.length > 0 && !currentGoal) {
+    if (goalsData?.data && goalsData?.data?.length > 0 && !currentGoal) {
       const firstGoal = goalsData.data[0];
       // Add a type guard to ensure experience exists
       if (firstGoal.experience) {
         setCurrentGoal({
           _id: firstGoal._id,
           name: firstGoal.name,
-          experience: firstGoal.experience // Now TypeScript knows this is string
+          experience: firstGoal.experience, // Now TypeScript knows this is string
         });
       }
     }
   }, [goalsData, currentGoal]);
-
-   
 
   // Calculate profile completion
   useEffect(() => {
@@ -304,7 +308,11 @@ const Dashboard: React.FC<Props> = () => {
                 <h1 className="text-gray-600 text-h1 flex items-center gap-3">
                   Welcome Back, {user_name}
                   <span className="wave">
-                    <img src={emojiWavingImg || "/placeholder.svg"} alt="Emoji" className="w-5" />
+                    <img
+                      src={emojiWavingImg || "/placeholder.svg"}
+                      alt="Emoji"
+                      className="w-5"
+                    />
                   </span>
                 </h1>
               </header>
@@ -331,10 +339,16 @@ const Dashboard: React.FC<Props> = () => {
                                 }
                               }}
                               onGoalChange={handleGoalChange}
-                              selectedGoalExperienceLevel={currentGoal?.experience}
-                              completedProfileSections={completedProfileSections}
+                              selectedGoalExperienceLevel={
+                                currentGoal?.experience
+                              }
+                              completedProfileSections={
+                                completedProfileSections
+                              }
                               verifiedSkillsCount={verifiedSkillsCount}
-                              totalMandatorySkillsCount={totalMandatorySkillsCount}
+                              totalMandatorySkillsCount={
+                                totalMandatorySkillsCount
+                              }
                               verifiedProjects={verifiedProjects}
                               totalProjects={totalProjects}
                             />
@@ -466,11 +480,19 @@ const Dashboard: React.FC<Props> = () => {
                   <div className="flex flex-col items-start gap-6 flex-1 lg:col-span-2">
                     <aside className="bg-white p-6 flex flex-col items-start self-stretch rounded-[9px] border border-[#0000000D] shadow-sm gap-3">
                       <div className="flex items-center">
-                        <img
-                          src={profile_image || "/placeholder.svg"}
-                          alt="profile"
-                          className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold mr-3"
-                        />
+                        {user?.profile_image ? (
+                          <img
+                            src={profile_image || "/placeholder.svg"}
+                            alt="profile"
+                            className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold mr-3"
+                          />
+                        ) : (
+                          <img
+                            src={ProfileAvatar || "/placeholder.svg"}
+                            alt="Profile"
+                            className="w-10 h-10 rounded-full object-cover mr-3"
+                          />
+                        )}
                         <div>
                           <h3 className="text-gray-600 text-sub-header">
                             {user_name}

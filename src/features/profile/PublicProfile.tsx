@@ -6,10 +6,9 @@ import SkillsSection from "./SkillsSection";
 import ExperienceSection from "./ExperienceSection";
 import EducationSection from "./EducationSection";
 import CertificationsSection from "./CertificationsSection";
-import MockInterivewImage from "@/assets/profile/MockInterview.svg";
-import MockInterviewSection from "./MockInterviewSection";
 import StatsSection from "./StatsSection";
 import ProjectList from "@/components/projects/ProjectList";
+import ProfileBannerMobile from "./ProfileBannerMobile";
 
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -20,9 +19,7 @@ const PublicProfile: React.FC = () => {
       (project: any) => project.status !== "Incomplete"
     ) || [];
 
-  const bio =
-    profile?.bio ||
-    "Full-stack developer with a strong foundation in React, Python, and MongoDB. A quick learner passionate about building user-friendly web applications, eager to apply skills in a professional environment.";
+  const bio = profile?.bio || "";
   const handleEdit = () => {
     console.log("Something");
   };
@@ -34,67 +31,93 @@ const PublicProfile: React.FC = () => {
       </div>
     );
 
+  // Render the right section components
+  const renderRightSectionComponents = () => (
+    <>
+      <StatsSection username={profile?.username} />{" "}
+    </>
+  );
+
+  // Render main content sections
+  const renderMainContentSections = () => (
+    <>
+      <div className="bg-white rounded-lg mt-6 p-8 overflow-y-auto overflow-x-auto max-h-3xl relative">
+        <SkillsSection
+          skills={profile.skills}
+          isPublic={true}
+          username={username}
+        />
+      </div>
+
+      <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
+        <ProjectList
+          projects={completedProjects}
+          isLoading={false}
+          isDashboard={true}
+          isPublic={true}
+          onOpenUploadModal={() => {}}
+          onOpenDeleteModal={() => {}}
+        />
+      </div>
+
+      <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
+        <ExperienceSection
+          intialExperiences={profile.experience}
+          isPublic={true}
+        />
+      </div>
+      <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
+        <EducationSection
+          initialEducation={profile.education}
+          isPublic={true}
+        />
+      </div>
+      <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
+        <CertificationsSection
+          certifications={profile.certificates}
+          isPublic={true}
+        />
+      </div>
+    </>
+  );
+
   return (
     <div className="w-full max-w-screen-xl mx-auto p-4">
-      <div className="grid grid-cols-8 gap-6">
-        <div className="flex flex-col col-span-6">
-          <ProfileBanner
+      <div className="lg:hidden xl:hidden 2xl:hidden">
+        <div className="mb-6">
+          <ProfileBannerMobile
             user={profile}
             bio={bio}
             onBioUpdate={handleEdit}
             isPublic={true}
             goalData={""}
           />
-
-          <div className="bg-white rounded-lg mt-6 p-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <SkillsSection skills={profile.skills} isPublic={true} />
-          </div>
-
-          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl relative">
-            <ProjectList
-              projects={completedProjects}
-              isLoading={false}
-              isDashboard={true}
-              isPublic={true}
-              onOpenUploadModal={() => {}}
-              onOpenDeleteModal={() => {}}
-            />
-          </div>
-
-          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <ExperienceSection
-              intialExperiences={profile.experience}
-              isPublic={true}
-            />
-          </div>
-          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <EducationSection
-              initialEducation={profile.education}
-              isPublic={true}
-            />
-          </div>
-          <div className="bg-white rounded-lg mt-6 overflow-y-auto overflow-x-auto max-h-3xl">
-            <CertificationsSection
-              certifications={profile.certificates}
-              isPublic={true}
-            />
-          </div>
-          <div className="mb-6"></div>
         </div>
+        {/* Mobile Right Section Components */}
+        <div className="space-y-6 mb-6">{renderRightSectionComponents()}</div>
 
+        {/* Main Content Sections */}
+        <div className="space-y-6">{renderMainContentSections()}</div>
+      </div>
+
+      <div className="hidden lg:grid xl:grid 2xl:grid grid-cols-10 gap-6">
+        <div className="flex flex-col col-span-7">
+          <div className="mb-6">
+            <ProfileBanner
+              user={profile}
+              bio={bio}
+              onBioUpdate={handleEdit}
+              isPublic={true}
+              goalData={""}
+            />
+          </div>
+
+          {/* Main Content Sections */}
+          <div className="space-y-6">{renderMainContentSections()}</div>
+        </div>
         {/* Right Section */}
-        <div className="space-y-6 flex flex-col flex-1 col-span-2">
-          {/* MockInterview Section */}
-          <MockInterviewSection
-            duration="5m 32s"
-            timeAgo="3 weeks ago"
-            role="Full stack developer"
-            percentile={60}
-            thumbnailUrl={MockInterivewImage || ""}
-          />
-
-          {/* Stats Section */}
-          <StatsSection skills={6} projects={4} certifications={2} />
+        <div className="flex flex-col space-y-6 flex-1 col-span-3">
+          {renderRightSectionComponents()}
         </div>
       </div>
     </div>

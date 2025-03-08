@@ -14,14 +14,16 @@ export interface Skill {
   verified_rating: number;
   self_rating: number | null;
   level?: string;
+  best_interview: string;
 }
 
 interface SkillsSectionProps {
   skills: Skill[];
   isPublic?: boolean;
+  username?: string;
 }
 
-const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
+const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
@@ -32,7 +34,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between py-2">
+      <CardHeader className="flex flex-row items-center justify-between p-0 mb-8">
         <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
           Skills ({skills.length})
         </h2>
@@ -46,13 +48,13 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
               alt="No skills entries"
               className="w-20 h-20 mb-6"
             />
-            <h3 className="text-base text-[#414447] font-normal mb-2 text-center font-sans leading-6 tracking-[0.24px]">
+            <h3 className="text-body2 text-[#414447] mb-2 text-center">
               No skills added yet.
             </h3>
           </div>
         ) : (
           <>
-            <div className="divide-y divide-[#E5E7EB] py-4 px-6">
+            <div className="lg:divide-y lg:divide-[#E5E7EB] xl:divide-y xl:divide-[#E5E7EB] md:divide-y md:divide-[#E5E7EB] 2xl:divide-y 2xl:divide-[#E5E7EB]">
               {displaySkills.map((skill: Skill) => (
                 <React.Fragment key={skill._id}>
                   <PublicSkillCard
@@ -66,22 +68,42 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
                       skill.verified_rating > 0 ? "Verified" : "Unverified"
                     }
                     level={skill.level}
+                    best_interview={skill.best_interview}
+                    username={username}
                   />
                 </React.Fragment>
               ))}
             </div>
-            {skills.length > 3 && (
-              <div className="flex justify-center py-4">
+            {!isExpanded && skills.length > 3 && (
+              <>
+                <div className="absolute bottom-0 left-0 right-0 ">
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-[211px]"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, rgba(255, 255, 255, 0) 20%, #FFF 100%)",
+                    }}
+                  />
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
+                    <button
+                      className="flex items-center text-sm text-[#000] hover:text-gray-900"
+                      onClick={toggleExpand}
+                    >
+                      View all
+                      <ChevronDown className="h-4 w-4 ml-1" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+            {isExpanded && skills.length > 3 && (
+              <div className="flex justify-center pb-4">
                 <button
-                  className="flex items-center text-sm text-gray-600 hover:text-gray-900"
+                  className="flex items-center text-sm text-[#000] hover:text-gray-900"
                   onClick={toggleExpand}
                 >
-                  {isExpanded ? "Show less" : "View all"}
-                  {isExpanded ? (
-                    <ChevronUp className="h-4 w-4 ml-1" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 ml-1" />
-                  )}
+                  Show less
+                  <ChevronUp className="h-4 w-4 ml-1" />
                 </button>
               </div>
             )}

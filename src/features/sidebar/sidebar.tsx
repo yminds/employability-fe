@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import LogoutConfirmationModal from "@/components/modal/LogoutConfirmationModal";
+import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -206,9 +207,11 @@ const Sidebar: React.FC = () => {
                     className="w-11 h-11 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-11 h-11 rounded-full bg-[#0ad472] flex items-center justify-center text-white text-lg font-semibold">
-                    {user_name ? user_name.charAt(0).toUpperCase() : "U"}
-                  </div>
+                  <img
+                    src={ProfileAvatar || "/placeholder.svg"}
+                    alt="Profile"
+                    className="w-11 h-11 rounded-full object-cover"
+                  />
                 )}
                 <div className="absolute -bottom-1 -right-1 rounded-full bg-white p-[2px]">
                   <BadgeCheck className="w-4 h-4 text-[#0ad472]" />
@@ -252,7 +255,7 @@ const Sidebar: React.FC = () => {
       </aside>
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:hidden"
+        className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:hidden z-10"
       >
         {isCollapsed ? (
           <img src={OpenIcon || "/placeholder.svg"} alt="Expand" />

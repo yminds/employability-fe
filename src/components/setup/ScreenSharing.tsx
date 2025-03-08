@@ -3,7 +3,6 @@ import React, { RefObject, useEffect, useState } from "react";
 // Images
 import check_circle from '@/assets/screen-setup/check_circle.svg'
 import screenshare from '@/assets/screen-setup/screenShare.svg'
-import MultiScreenDetector from "../interview/multiScreendetector";
 import SkillVerificationTutorial from "../skills/SkillVerificationTutorial";
 
 interface ScreenSharingComponentProps {
@@ -21,7 +20,6 @@ const ScreenSharingComponent: React.FC<ScreenSharingComponentProps> = ({
   handleShareScreen,
   videoRef,
 }) => {
-  const [screenCount, setScreenCount] = useState<number>(1);
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 
@@ -114,19 +112,12 @@ const ScreenSharingComponent: React.FC<ScreenSharingComponentProps> = ({
           </button>
         ) : (
           <div className="flex justify-between items-center">
-            {screenCount != 1 && (
-              <MultiScreenDetector onScreenCountChange={setScreenCount} />
-            )}
-            {screenCount === 1 && (
               <button
-                className={`text-button text-center not-italic font-normal font-ubuntu leading-[1.24rem] flex py-2 px-3 justify-center items-center rounded-[5px] border border-1 border-button w-[10vw] ${screenCount > 1 ? "cursor-not-allowed opacity-50" : ""}`}
+                className={`text-button text-center not-italic font-normal font-ubuntu leading-[1.24rem] flex py-2 px-3 justify-center items-center rounded-[5px] border border-1 border-button w-[10vw] }`}
                 onClick={handleShareScreenClick}
-                disabled={screenCount > 1}
               >
                 Share Screen
               </button>
-            )
-            }
           </div>
         )}
 

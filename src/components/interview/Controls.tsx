@@ -7,13 +7,14 @@ interface IControls {
 const Controls: React.FC<IControls> = ({ doneAnswering }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[200px]">
-      <div className=" max-w-[250px] flex flex-col gap-2 items-start">
-        <Recording />
+      <div className=" max-w-[350px] flex flex-col gap-2 items-center ">
+        {/* <div className="text-center text-h2 text-base font-medium leading-tight ">Speak your answer and once done answering click on the "Done Answeing" button</div> */}
+        <div><Recording /></div>
         <div
           onClick={() => doneAnswering()}
-          className="w-full cursor-pointer h-12 px-3 py-3.5 bg-[#09d372]/90 rounded-xl border border-[#83edb9] justify-center items-center inline-flex"
+          className="w-full cursor-pointer h-12 px-3 py-3.5 bg-button/90 rounded-xl border border-button justify-center items-center inline-flex max-w-[250px]"
         >
-          <div className="text-center text-white text-base font-medium leading-tight">
+          <div className="text-center text-white text-base font-medium leading-tight ">
             Done Answering
           </div>
         </div>
@@ -30,7 +31,7 @@ const Recording: React.FC = () => {
       <img src={micUrl} className="w-12 h-12" />
       {/* <div className="flex  gap-2 w-full"> */}
         <p className="text-center font-ubuntu   font-medium text-base text-slate-900">
-         Speak Now..
+         Recording...
         </p>
       {/* </div> */}
     </div>

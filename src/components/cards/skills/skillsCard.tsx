@@ -64,8 +64,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
   const { data: userCredntials } = useGetUserDetailsQuery(userId!);
-  console.log("userCredntials", userCredntials);
-
+  
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
@@ -196,11 +195,10 @@ const SkillCard: React.FC<SkillCardProps> = ({
       user_skill_id: skillId,
       skill_id: skillPoolId,
     });
-    console.log("interviewId", interviewId);
 
     // Start the interview after closing the tutorial
     navigate(`/interview/${interviewId}`, {
-      state: { title: skill, skillId, skillPoolId, level, type: "Skill" },
+      state: { title:skill, skillId, skillPoolId, level, type: "Skill" },
     });
   };
 
