@@ -54,7 +54,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
           </div>
         ) : (
           <>
-            <div className="lg:divide-y lg:divide-[#E5E7EB] xl:divide-y xl:divide-[#E5E7EB] md:divide-y md:divide-[#E5E7EB] 2xl:divide-y 2xl:divide-[#E5E7EB]">
+            <div className="">
               {displaySkills.map((skill: Skill) => (
                 <React.Fragment key={skill._id}>
                   <PublicSkillCard
