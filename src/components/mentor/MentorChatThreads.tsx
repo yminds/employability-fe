@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, ChevronDown } from "lucide-react";
 import { useSendMentorMessageMutation } from "@/api/mentorChatApiSlice";
 import { useGetMessagesQuery } from "@/api/mentorUtils";
 import { io } from "socket.io-client";
-
-import { RootState } from "@/store/store";
-import { useSelector } from "react-redux";
 import logo from "@/assets/mentor/mentor_img.png";
 import send from "@/assets/mentor/send.svg";
 
@@ -31,7 +27,7 @@ interface MentorChatThreadsProps {
   finalQuizScore: { score: number, correctAnswers: any, wrongAnswers: any };
   currentPendingTopic: string;
   onStartQuiz: (topic: string) => void;
-  skipCurrentConcept: ()=> void;
+  skipCurrentConcept: () => void;
 }
 
 interface Message {
@@ -61,7 +57,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
   // 1) Create a ref for the chat container & input:
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<any>(null);
-  const inputRef = useRef<HTMLInputElement>(null); // <-- ADDED
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // const userImg = useSelector((state: RootState) => state.auth.user?.profile_image);
 
@@ -91,8 +87,6 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
       }, 100);
     }
   }, [threadMessagesData, setIsLoading]);
-
-
 
   // If final quiz score > 0, automatically send an update to the chat
   useEffect(() => {
@@ -178,6 +172,9 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
         scrollToBottom();
       }, 100);
 
+      // Reset textarea height
+      adjustTextareaHeight();
+
       await sendMentorMessage({
         prompt: message,
         chatId,
@@ -200,7 +197,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
   };
 
   // 5) Press Enter to send
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -249,38 +246,53 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
     }
   }, []);
 
+  // Function to automatically adjust textarea height based on content
+  const adjustTextareaHeight = () => {
+    const textarea = inputRef.current;
+    if (textarea) {
+      // Reset height to auto first to correctly calculate the new height
+      textarea.style.height = 'auto';
+
+      // Calculate the new height based on the scrollHeight, clamped at 200px maximum
+      const newHeight = Math.min(textarea.scrollHeight, 200);
+
+      // Set the new height
+      textarea.style.height = `${newHeight}px`;
+    }
+  };
+
+  // Call adjustTextareaHeight whenever inputMessage changes
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [inputMessage]);
+
   // 9) Render each message
   const renderMessage = (msg: Message) => {
     const isAI = msg.role === "AI";
     const lastAiMessageId = messages.filter((m) => m.role === "AI").slice(-1)[0]?.id;
-    // We only show the quiz buttons if:
-    // 1) This message is AI
-    // 2) There are at least 2 AI messages overall
-    // 3) This message is the last AI message
+
     const showQuizButtons =
-      isAI && messages.length >= 2 && msg.id === lastAiMessageId;
+      isAI && messages.length >= 4 && msg.id === lastAiMessageId;
 
     return (
       <div
         key={msg.id}
-        className={`flex items-start gap-3 w-fit ${
-          msg.role === "USER" ? "flex-row-reverse ml-auto" : "flex-row"
-        }`}
+        className={`flex items-start gap-3 w-fit ${msg.role === "USER" ? "flex-row-reverse ml-auto" : "flex-row"
+          }`}
       >
         {/* Avatar */}
         {isAI && (
-          <div className="flex-shrink-0 w-8 h-8 rounded- flex items-center justify-center">
+          <div className="flex-shrink-0 w-8 h-8 rounded mt-4 flex items-center justify-center">
             <img src={logo} alt="AI" />
           </div>
         )}
 
         {/* Bubble */}
         <div
-          className={`flex-1 p-3 max-w-[60vw] rounded-2xl ${
-            isAI
-              ? "bg-[#F5F5F5] border border-gray-100"
-              : "bg-white w-fit"
-          }`}
+          className={`flex-1 p-3 max-w-[60vw] rounded-2xl ${isAI
+            ? "bg-[#F5F5F5] border border-gray-100"
+            : "bg-white w-fit"
+            }`}
         >
           {isAI ? (
             <>
@@ -314,14 +326,13 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
     );
   };
 
-
   // 10) The actual UI
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 h-[70vh] w-full items-center minimal-scrollbar overflow-y-auto">
       {/* Messages Container */}
       <div
         ref={chatContainerRef}
-        className="flex-grow overflow-y-auto p-6 space-y-6 bg-[#F5F5F5] minimal-scrollbar max-h-[74vh] min-h-[74vh]"
+        className="flex-grow  space-y-6 xl:max-h-[66vh] 2xl:max-h-[70vh] minimal-scrollbar w-[780px]"
       >
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full space-y-4">
@@ -355,7 +366,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
       </div>
 
       {/* Scroll to bottom button */}
-      {showScrollButton && (
+      {/* {showScrollButton && (
         <button
           onClick={scrollToBottom}
           className="absolute bottom-24 right-8 bg-button text-white p-3 rounded-full border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC] transition-all transform hover:-translate-y-1 z-10 flex items-center justify-center"
@@ -363,37 +374,41 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
         >
           <ChevronDown size={12} />
         </button>
-      )}
+      )} */}
 
       {/* Input Box */}
-      <div className="p-4 bg-[#F5F5F5]">
-        <div className="max-w-4xl mx-auto flex items-center gap-3 border-2 p-3 bg-white rounded-xl">
-          <input
-            ref={inputRef} // <-- ADDED
-            type="text"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={
-              isLoading
-                ? "Loading..."
-                : isStreaming
-                  ? "Waiting for response..."
-                  : "Chat with your mentor AI..."
-            }
-            className="flex-1 border-none rounded-lg focus:outline-none text-sm bg-white"
-            disabled={isLoading || isStreaming}
-          />
-          <button
-            onClick={() => handleSendMessage(false, "")}
-            disabled={isLoading || isStreaming || !inputMessage.trim()}
-            className={`rounded-xl transition-all text-white ${isLoading || isStreaming || !inputMessage.trim()
-                ? "cursor-not-allowed"
-                : ""
-              }`}
-          >
-            <img className="bg-[#F0F5F3] py-1 px-2 rounded-lg" src={send} alt="" />
-          </button>
+      <div className="bg-white absolute bottom-0 w-[780px] rounded-xl">
+        <div className="max-w-4xl mx-auto flex items-center justify-center gap-3 border-2 min-h-[64px] rounded-xl">
+          <div className="flex justify-between items-end w-full px-3 min-h-[64px]">
+            <textarea
+              value={inputMessage}
+              onChange={(e) => {
+                setInputMessage(e.target.value);
+                // Auto-resize logic
+                e.target.style.height = 'auto';
+                e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+              }}
+              onKeyPress={handleKeyPress}
+              placeholder={
+                isLoading
+                  ? "Loading..."
+                  : isStreaming
+                    ? "Waiting for response..."
+                    : "Chat with your mentor AI..."
+              }
+              className="flex-1 flex justify-center border-none rounded-lg focus:outline-none text-body2 max-h-[200px] min-h-[20px] max-w-[94%] resize-none overflow-y-auto whitespace-pre-wrap mt-3"
+              disabled={isLoading || isStreaming}
+              
+            />
+            <button
+              onClick={() => handleSendMessage(false, "")}
+              disabled={isLoading || isStreaming || !inputMessage.trim()}
+              className={`rounded-xl transition-all text-white ${isLoading || isStreaming || !inputMessage.trim() ? "cursor-not-allowed" : ""
+                }`}
+            >
+              <img className="bg-[#F0F5F3] py-1 px-2 rounded-lg h-[42px] w-[42px] mb-3" src={send} alt="" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import QuizActionBtns from "./QuizActionBtns";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, X } from "lucide-react";
 
 interface Fundamental {
   name: string;
   status: string;
   description: string;
-  progress?: number; // Add a progress field if you need a percentage
+  progress?: number; // Optional percentage progress field
 }
 
 interface FundamentalBarProps {
@@ -15,6 +15,7 @@ interface FundamentalBarProps {
   fundamentals: Fundamental[];
   skill: string;
   onStartQuiz: (topic: string) => void;
+  onClose: () => void;
 }
 
 const FundamentalBar: React.FC<FundamentalBarProps> = ({
@@ -22,6 +23,7 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
   fundamentals,
   skill,
   onStartQuiz,
+  onClose,
 }) => {
   const [selectedFundamental, setSelectedFundamental] = useState<number | null>(0);
 
@@ -37,19 +39,25 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
     <div
       className={`absolute top-2 right-0 h-[80vh] max-h-[1150px] transition-all duration-300 ease-in-out 
       ${isSidebarOpen ? "w-[405px]" : "w-0"} 
-      bg-white shadow-2xl z-50 overflow-hidden rounded-xl`}
+      bg-white shadow-[0px_10px_16px_-2px_rgba(149,151,153,0.16)] z-50 overflow-hidden rounded-xl`}
     >
       {isSidebarOpen && (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full p-[22px]">
           {/* Header */}
-          <div className="bg-white p-3 mb-0 border-b-2 m-3">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Fundamentals of {skill}</h2>
+          <div className="bg-white">
+            <div className="flex justify-between items-center">
+              <h2 className="overflow-hidden text-grey-10 font-dm-sans text-[20px] normal-case font-medium leading-[24px] tracking-[0.1px]">
+                Fundamentals of {skill}
+              </h2>
+              <button onClick={onClose} className="text-[#6A6A6A]">
+                <X size={20} />
+              </button>
             </div>
           </div>
+          <div className="min-h-[1px] w-full bg-grey-5 my-6"></div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-5 minimal-scrollbar">
+          <div className="flex-1 overflow-y-auto minimal-scrollbar">
             {fundamentals.length > 0 ? (
               fundamentals.map((item, index) => {
                 const isOpen = selectedFundamental === index;
@@ -59,43 +67,45 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
                     {index < fundamentals.length && (
                       <span
                         className={`absolute left-4 w-[2px] ${
-                          isOpen ? `bg-black top-10 bottom-[-20px]` : `bg-gray-200 top-10 bottom-[-20px]`
-                        } ${index === 0 ? `top-10` : `top-0`} ${
-                          index == fundamentals.length - 1 ? `top-[100vh]` : ``
+                          isOpen
+                            ? "bg-black top-10 bottom-[-13px]"
+                            : "bg-gray-200 top-12 bottom-[-13px]"
+                        } ${index === 0 ? "top-10" : "top-0"} ${
+                          index === fundamentals.length - 1 ? "top-[100vh]" : ""
                         }`}
                       />
                     )}
 
                     {/* Step circle with index */}
                     <div
-                      className={`absolute left-0 top-4 h-8 w-8 flex items-center justify-center rounded-full 
-                      ${isOpen ? "bg-black text-white" : "bg-gray-200 text-gray-700"}`}
+                      className={`absolute left-0 top-3 h-9 w-9 flex items-center justify-center rounded-full 
+                      ${isOpen ? "bg-button text-white" : "bg-[#F0F5F333] border border-grey-2 text-gray-700"}`}
                     >
-                      {index + 1}
+                      <span className={`text-button font-ubuntu ${isOpen ? "text-white" : "text-grey-4"}`}>
+                        {index + 1}
+                      </span>
                     </div>
 
                     {/* The card itself */}
                     <div className="ml-10">
-                      <div className="p-4 border border-gray-200 bg-gray-50 rounded-lg">
+                      <div className="p-4 border border-gray-200 bg-[#F0F5F333] rounded-lg min-h-[52px]">
                         {/* Clickable header row */}
                         <button
                           onClick={() => setSelectedFundamental(isOpen ? null : index)}
                           className="flex w-full items-center justify-between text-left"
                         >
-                          <h3 className={`font-semibold ${isOpen ? 'text-grey-10': 'text-grey-5 truncate'} `}>{item.name}</h3>
-                          <span className="text-gray-700">{isOpen ? <ChevronUp /> : <ChevronDown />}</span>
+                          <h3 className={`text-sub-header font-dm-sans ${isOpen ? "text-grey-10" : "text-grey-5 truncate"}`}>
+                            {item.name}
+                          </h3>
+                          <span className="text-gray-700">
+                            {isOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                          </span>
                         </button>
 
                         {/* Conditionally rendered details */}
                         {isOpen && (
                           <div className="mt-2">
-                            <p className="text-gray-600 text-sm">{item.description}</p>
-
-                            {/* Status Progress Bar */}
-                            <div className="mt-3">
-                              <p className="text-body1 text-gray-500 mb-1">Status: {item.status}</p>
-                            </div>
-                            
+                            <p className="text-gray-600 text-body2">{item.description}</p>
                             <div className="flex items-center justify-end gap-4 mt-4">
                               <QuizActionBtns
                                 fundamentals={fundamentals}

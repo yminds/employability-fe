@@ -46,8 +46,7 @@ const uploadFileToS3 = async (
       throw new Error("Failed to get pre-signed URL.");
     }
 
-
-
+  
    // Upload the file to S3 using the pre-signed URL
     const uploadResponse = await fetch(presignedUrl, {
       method: "PUT",
@@ -229,6 +228,10 @@ const stopScreenSharing = async () => {
 
     setIsScreenSharing(false);
     isStoppingRef.current = false;
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    recorderRef.current = null;
   } catch (error) {
     console.error("Error stopping screen sharing:", error);
   }

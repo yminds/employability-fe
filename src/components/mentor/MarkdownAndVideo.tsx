@@ -94,7 +94,7 @@ export const MarkdownComponents = {
 
   p({ children }: { children?: React.ReactNode }) {
     return (
-      <p className="mb-4 leading-relaxed text-[16px] font-ubuntu">
+      <p className=" text-body2">
         {children}
       </p>
     );

@@ -255,7 +255,7 @@ const Sidebar: React.FC = () => {
       </aside>
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:hidden"
+        className="absolute top-8 right-[-30px] p-1 bg-white rounded-md focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:hidden z-10"
       >
         {isCollapsed ? (
           <img src={OpenIcon || "/placeholder.svg"} alt="Expand" />
