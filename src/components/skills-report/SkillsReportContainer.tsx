@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import type React from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Share2 } from "lucide-react";
 import html2pdf from "html2pdf.js";
@@ -195,14 +196,14 @@ const ReportContent: React.FC<ReportContentProps> = ({
             {reportData.summary?.text || "No summary available"}
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Strengths */}
           <div className="bg-grey-1 rounded-lg p-4">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center justify-center rounded-full w-[32px] h-[32px] bg-[#FAFAFAFA] border">
                 <img
                   crossOrigin="anonymous"
-                  src={excellentIcon}
+                  src={excellentIcon || "/placeholder.svg"}
                   alt="Verified icon"
                   className="w-[20px] h-[20px]"
                 />
@@ -232,7 +233,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
               <div className="flex items-center justify-center rounded-full w-[32px] h-[32px] bg-[#FAFAFAFA] border">
                 <img
                   crossOrigin="anonymous"
-                  src={manageSearch}
+                  src={manageSearch || "/placeholder.svg"}
                   alt="Verified icon"
                   className="w-[24px] h-[24px]"
                 />
@@ -376,7 +377,11 @@ const ReportContent: React.FC<ReportContentProps> = ({
               onClick={generatePDF}
               disabled={isGeneratingPDF}
             >
-              <img className="w-4 h-4" src={download} alt="Download PDF" />
+              <img
+                className="w-4 h-4"
+                src={download || "/placeholder.svg"}
+                alt="Download PDF"
+              />
               {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
             </button>
           </section>
@@ -384,6 +389,15 @@ const ReportContent: React.FC<ReportContentProps> = ({
       )}
     </>
   );
+
+  const renderInterviewPlayer = () =>
+    reportData.s3_recording_url && (
+      <section className="flex justify-center pdf-hide mb-6">
+        <div className="continer-player w-full h-[28rem] relative">
+          <InterviewPlayer urls={reportData.s3_recording_url} />
+        </div>
+      </section>
+    );
 
   return (
     <div className="flex w-full h-screen print:h-auto justify-center overflow-y-auto print:overflow-visible font-ubuntu p-6">
@@ -397,11 +411,10 @@ const ReportContent: React.FC<ReportContentProps> = ({
                   onClick={handleBackToSkillsPage}
                   className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
                 >
-                  {/* Add crossOrigin="anonymous" here */}
                   <img
                     crossOrigin="anonymous"
                     className="w-[10px] h-[10px]"
-                    src={arrow}
+                    src={arrow || "/placeholder.svg"}
                     alt="Back"
                   />
                 </button>
@@ -455,41 +468,37 @@ const ReportContent: React.FC<ReportContentProps> = ({
         <main
           ref={componentRef}
           id="mainContent"
-          className="max-w-[1800px] h-full print:h-auto flex mx-auto px-4 gap-6 printable-container"
+          className="max-w-[1800px] h-full print:h-auto mx-auto px-4 printable-container"
         >
           {isGeneratingPDF && (
             <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
               <div className="text-xl font-semibold">Generating PDF...</div>
             </div>
           )}
-          <div
-            id="printable-area"
-            className={`relative flex gap-6 ${
-              !isGeneratingPDF ? "flex-row" : "flex-col-reverse"
-            }`}
-          >
-            {/* Left Section */}
-            <section className="w-full flex-[7.5]">
-              {/* Video Container – hidden in PDF via the "pdf-hide" class */}
-              {reportData.s3_recording_url && (
-                <section
-                  className={`flex justify-center pdf-hide ${
-                    !isGeneratingPDF ? "flex" : "hidden"
-                  }`}
-                >
-                  <div className="continer-player w-full h-[28rem] relative">
-                    <InterviewPlayer urls={reportData.s3_recording_url} />
-                  </div>
-                </section>
-              )}
 
-              {renderLeftSection()}
-            </section>
+          {/* Mobile Layout - Stacked view for screens below 1024px */}
+          <div className="lg:hidden xl:hidden 2xl:hidden">
+            <div id="printable-area" className="relative flex flex-col gap-6">
+              {!isGeneratingPDF && renderInterviewPlayer()}
+              <div className="space-y-6 mb-6">{renderRightSection()}</div>
+              <div className="space-y-6">{renderLeftSection()}</div>
+            </div>
+          </div>
 
-            {/* Right Section */}
-            <section className="w-full flex-[2.5] gap-5">
-              {renderRightSection()}
-            </section>
+          {/* Desktop Layout - Two-column view for screens 1024px and above */}
+          <div className="hidden lg:block xl:block 2xl:block">
+            <div
+              id="printable-area"
+              className="relative grid grid-cols-10 gap-6"
+            >
+              <div className="col-span-7 flex flex-col">
+                {!isGeneratingPDF && renderInterviewPlayer()}
+                <div className="space-y-6">{renderLeftSection()}</div>
+              </div>
+              <div className="col-span-3 flex flex-col space-y-6">
+                {renderRightSection()}
+              </div>
+            </div>
           </div>
         </main>
       </div>
