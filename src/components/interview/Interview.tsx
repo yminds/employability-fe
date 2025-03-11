@@ -127,7 +127,7 @@ const Interview: React.FC<{
       console.log("[enetred to ai response]", question);
 
       if (!data) {
-        addMessage("Sorry, I didn't get that. Can you please repeat?");
+        addMessage("Sorry, I didn't get that. Can you please repeat the question?");
         return;
       }
 
