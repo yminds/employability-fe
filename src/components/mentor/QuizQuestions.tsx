@@ -26,7 +26,7 @@ const QuizQuestions: React.FC<QuizQuestionsProps> = ({
     <div className="p-6 w-full max-w-[40rem] bg-white shadow-md rounded-md">
       {/* Question Header */}
       <h2 className="text-lg font-semibold mb-4">
-        Question {questionIndex + 1}
+        Question {questionIndex + 1} / {questions.length}
       </h2>
 
       {/* Question Text */}

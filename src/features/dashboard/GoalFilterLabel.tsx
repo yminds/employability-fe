@@ -2,13 +2,14 @@ import React from 'react';
 import close from '@/assets/dashboard/close.svg';
 
 interface Filter {
-  [key: string]: string | number | (string | number)[] | null | undefined; // Allow null or undefined for removed filters
+  [key: string]: string | number | (string | number)[] | null | undefined;
 }
 
 const experienceLevelObj = {
   1: 'Entry Level',
   2: 'Mid Level',
   3: 'Senior Level',
+  4: 'All'
 };
 
 const difficultyLevelObj = {
@@ -32,10 +33,11 @@ const learningTimeObj = {
 
 // Format salary range to Lakhs (1L, 2L, etc.)
 const formatSalaryToLakhs = (salary: number) => {
+  // For values >= 1 Lakh (100000), convert to Lakhs.
   if (salary >= 100000) {
-    return `${(salary / 100000).toFixed(0)}L`; // Format to Lakhs with one decimal
+    return `${(salary / 100000).toFixed(0)}L`;
   }
-  return `${salary}`; // Return salary as is if it's less than 1 Lakh
+  return `${salary}`; // Fallback if below 100000
 };
 
 const formatSalaryRange = (min: number, max: number) => {
@@ -46,53 +48,78 @@ const formatSalaryRange = (min: number, max: number) => {
 
 const FilterLabels: React.FC<{
   filters: Filter;
-  removeFilter: (key: string) => void; // Function to remove the filter
+  removeFilter: (key: string) => void;
 }> = ({ filters, removeFilter }) => (
   <div className="flex gap-2 flex-wrap">
-    {/* Iterate through the filters and display them */}
     {Object.keys(filters).map((key) => {
-      // Get the value(s) for the filter key
       const value = filters[key];
 
-      // Skip if the filter is null, undefined, or empty
-      if (value === null || value === undefined || (Array.isArray(value) && value.length === 0)) {
-        return null; // Don't render anything for removed filters
+      // Skip if the filter is null, undefined, or an empty array
+      if (
+        value === null ||
+        value === undefined ||
+        (Array.isArray(value) && value.length === 0)
+      ) {
+        return null;
       }
 
       let displayValue;
       let label = '';
 
-      // Determine the label and display value based on the key
       switch (key) {
-        case 'experience_level':
+        case 'experience_level': {
           label = 'Experience';
-          displayValue = experienceLevelObj[value as keyof typeof experienceLevelObj];
+          if (
+            Array.isArray(value) &&
+            value.length === Object.keys(experienceLevelObj).length
+          ) {
+            displayValue = 'All Levels';
+          } else if (Array.isArray(value)) {
+            // If it's an array of experience levels, handle each in the array case below
+            displayValue = ''; 
+          } else {
+            displayValue =
+              experienceLevelObj[value as keyof typeof experienceLevelObj];
+          }
           break;
-        case 'difficulty_level':
+        }
+        case 'difficulty_level': {
           label = 'Difficulty Level';
-          displayValue = difficultyLevelObj[value as keyof typeof difficultyLevelObj];
+          displayValue =
+            difficultyLevelObj[value as keyof typeof difficultyLevelObj];
           break;
-        case 'job_market_demand':
+        }
+        case 'job_market_demand': {
           label = 'Demand';
-          displayValue = jobsMarketDemandObj[value as keyof typeof jobsMarketDemandObj];
+          displayValue =
+            jobsMarketDemandObj[value as keyof typeof jobsMarketDemandObj];
           break;
+        }
         case 'min_salary_range':
-        case 'max_salary_range':
+        case 'max_salary_range': {
+          // If this is `max_salary_range` and we already have a `min_salary_range`, skip
+          if (key === 'max_salary_range' && filters.min_salary_range != null) {
+            return null; // We handle both ranges under `min_salary_range` below
+          }
           label = 'Salary Range';
+          // Convert both min & max for display, defaulting to 0 if undefined
           const minSalary = Number(filters.min_salary_range) || 0;
           const maxSalary = Number(filters.max_salary_range) || 0;
           displayValue = formatSalaryRange(minSalary, maxSalary);
           break;
-        case 'learning_time':
+        }
+        case 'learning_time': {
           label = 'Learning Time';
           displayValue = learningTimeObj[value as keyof typeof learningTimeObj];
           break;
-        default:
+        }
+        default: {
           displayValue = value;
-          label = key.replace('_', ' ').toUpperCase(); // Default label if not found
+          label = key.replace('_', ' ').toUpperCase();
+        }
       }
 
-      // Check if the value is an array (multiple values for the same filter)
+      // If the value is an array (e.g. multiple experience levels)
       if (Array.isArray(value)) {
         return value.map((v, index) => {
           let displayItem = v;
@@ -104,8 +131,6 @@ const FilterLabels: React.FC<{
             displayItem = jobsMarketDemandObj[v as keyof typeof jobsMarketDemandObj];
           } else if (key === 'learning_time') {
             displayItem = learningTimeObj[v as keyof typeof learningTimeObj];
-          } else {
-            displayItem = v;
           }
 
           return (
@@ -113,8 +138,7 @@ const FilterLabels: React.FC<{
               key={`${key}-${index}`}
               className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[#F4F7F9] text-grey-4 text-[16px] font-medium font-ubuntu leading-[22px]"
             >
-              {label}: <span className=' text-grey-6'> {displayItem} </span> 
-              {/* Remove button (X) */}
+              {label}: <span className="text-grey-6"> {displayItem} </span>
               <button
                 onClick={() => removeFilter(key)}
                 className="ml-2"
@@ -131,8 +155,7 @@ const FilterLabels: React.FC<{
           key={key}
           className="flex p-[5px_20px_5px_16px] justify-center items-center gap-[10px] rounded-[57px] bg-[#F4F7F9] text-grey-4 text-[16px] font-medium font-ubuntu leading-[22px]"
         >
-          {label}: <span className=' text-grey-6 font-medium'> {displayValue} </span>
-          {/* Remove button (X) */}
+          {label}: <span className="text-grey-6 font-medium"> {displayValue} </span>
           <button
             onClick={() => removeFilter(key)}
             className="ml-2"

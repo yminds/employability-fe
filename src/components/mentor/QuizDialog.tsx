@@ -3,12 +3,14 @@ import QuizQuestions from "./QuizQuestions";
 import { useGenerateQuizQuestionsMutation } from "@/api/mentorChatApiSlice";
 
 interface QuizDialogProps {
+  fundamentals: any;
   currentQuizTopic: string;
   onClose: () => void;
   finalScore: (result: { score: number, correctAnswers: AnswerRecord[], wrongAnswers: AnswerRecord[] }) => void;
   user_id: string | undefined;
   thread_id: string;
   experience_level: string | undefined;
+  canTakeFinalQuiz: boolean;
 }
 
 interface QuizQuestion {
@@ -24,6 +26,8 @@ interface AnswerRecord {
 }
 
 const QuizDialog: React.FC<QuizDialogProps> = ({
+  canTakeFinalQuiz,
+  fundamentals,
   currentQuizTopic,
   onClose,
   finalScore,
@@ -31,7 +35,7 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
   thread_id,
   experience_level,
 }) => {
-  console.log("currentQuizTopic",currentQuizTopic);
+  console.log("currentQuizTopic", currentQuizTopic);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -43,14 +47,21 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
 
   useEffect(() => {
     const fetchQuizQuestions = async () => {
-      if (!currentQuizTopic) return;
+      if (!currentQuizTopic && !canTakeFinalQuiz) return;
+      
       try {
+        // Use fundamentals as the topic parameter if canTakeFinalQuiz is true
+        const topicToUse = canTakeFinalQuiz ? fundamentals : currentQuizTopic;
+        const quizType = canTakeFinalQuiz ? "FinalQuiz" : "TopicQuiz";
+        
         const response = await generateQuizQuestions({
-          topic: currentQuizTopic,
+          topic: topicToUse,
           user_id,
           thread_id,
           experience_level,
+          quizType
         });
+        
         console.log(response);
         const regex = /```json\s*([\s\S]+?)\s*```/gm;
         const match = regex.exec(response?.data.data[0].text);
@@ -66,7 +77,7 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
     };
 
     fetchQuizQuestions();
-  }, [currentQuizTopic, generateQuizQuestions, user_id, thread_id, experience_level]);
+  }, [currentQuizTopic, generateQuizQuestions, user_id, thread_id, experience_level, canTakeFinalQuiz, fundamentals]);
 
   // Handle outside click to close modal
   const handleOutsideClick = useCallback(
@@ -140,6 +151,9 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
     }
   };
 
+  // Determine the title to display based on whether it's a final quiz or regular topic quiz
+  const quizTitle = canTakeFinalQuiz ? "Final Assessment" : `Quiz: ${currentQuizTopic}`;
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 w-screen">
       <div
@@ -147,7 +161,7 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
         className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-2xl transition-transform duration-300 transform scale-100"
       >
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Quiz: {currentQuizTopic}
+          {quizTitle}
         </h2>
 
         {isLoading ? (

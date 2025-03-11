@@ -43,6 +43,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [finalScore, setFinalScore] = useState<any>({});
   const [currentPendingTopic, setCurrentPendingTopic] = useState("");
+  const [canTakeFinalQuiz, setCanTakeFinalQuiz] = useState(false);
   // New state for quiz topic selected from the fundamentals bar
   const [selectedQuizTopic, setSelectedQuizTopic] = useState("");
   const [isUpdated, setIsUpdated] = useState<boolean>(false);
@@ -173,15 +174,21 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
       setCurrentPendingTopic(firstPendingFundamental[currentIndex]);
     } else {
       setCurrentPendingTopic("No pending fundamentals");
+      setCanTakeFinalQuiz(true);
     }
   }, [firstPendingFundamental, currentIndex, isUpdated]);
 
   // -------- 4) Quiz handlers --------------
+
   // Updated to use separate state for quiz topic
   const handleStartQuiz = (topic: string) => {
-    console.log("Topic inside handleStartQuiz:", topic);
-    setSelectedQuizTopic(topic);
-    setIsQuizOpen(true);
+    if(topic === "Final Quiz") {
+      setCanTakeFinalQuiz(true);
+    } else {
+      console.log("Topic inside handleStartQuiz:", topic);
+      setIsQuizOpen(true);
+      setSelectedQuizTopic(topic);
+    }
   };
 
   const handleSkipCurrentConcept = () => {
@@ -268,7 +275,6 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
 
   return (
     <div className="h-full w-full">
-      {pendingFundamentals.length > 0 ? (
         <div className="flex flex-col h-full w-full border-0 relative">
           <div className="flex h-[84px] justify-around items-center gap-[75px] 2xl:gap-0 self-stretch border-b">
             <section className=" flex min-w-[800px] ml-auto 2xl:mr-auto  items-center">
@@ -278,15 +284,20 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
                 </div>
                 <div className="text-h1">{currentPendingTopic}</div>
               </section>
-
-              {/* Quiz Button */}
-              <QuizActionBtns
-                fundamentals={fundamentals}
-                currentQuizTopic={currentPendingTopic}
-                onStartQuiz={handleStartQuiz}
-                skipCurrentConcept={handleSkipCurrentConcept}
-                showSkipBtn
-              />
+              {canTakeFinalQuiz && currentPendingTopic === "No pending fundamentals" ? (
+                <section>
+                  <button onClick={() => {handleStartQuiz("Final Quiz"); setIsQuizOpen(true)}}>
+                    Take final quiz
+                  </button>
+                </section> ) : (
+                <QuizActionBtns
+                  fundamentals={fundamentals}
+                  currentQuizTopic={currentPendingTopic}
+                  onStartQuiz={handleStartQuiz}
+                  skipCurrentConcept={handleSkipCurrentConcept}
+                  showSkipBtn={pendingFundamentals.length > 1}
+                />
+              )}
             </section>
 
             <section className="mx-10">
@@ -337,6 +348,8 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
           {/* Quiz Dialog */}
           {isQuizOpen && userId && chatId && (
             <QuizDialog
+              canTakeFinalQuiz={canTakeFinalQuiz}
+              fundamentals={fundamentals}
               onClose={() => setIsQuizOpen(false)}
               // Pass the selected quiz topic if available, otherwise default to the current pending topic
               currentQuizTopic={selectedQuizTopic || currentPendingTopic}
@@ -347,9 +360,6 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
             />
           )}
         </div>
-      ) : (
-        "No pending fundamentals"
-      )}
     </div>
   );
 };
