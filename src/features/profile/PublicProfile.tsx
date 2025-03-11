@@ -1,6 +1,9 @@
 import type React from "react";
 import { useParams } from "react-router-dom";
-import { useGetPublicProfileQuery } from "@/api/userPublicApiSlice";
+import {
+  useGetPublicProfileQuery,
+  useGetPublicProfileViewCountMutation,
+} from "@/api/userPublicApiSlice";
 import ProfileBanner from "./ProfileBanner";
 import SkillsSection from "./SkillsSection";
 import ExperienceSection from "./ExperienceSection";
@@ -9,6 +12,7 @@ import CertificationsSection from "./CertificationsSection";
 import StatsSection from "./StatsSection";
 import ProjectList from "@/components/projects/ProjectList";
 import ProfileBannerMobile from "./ProfileBannerMobile";
+import { useEffect } from "react";
 
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -18,6 +22,13 @@ const PublicProfile: React.FC = () => {
     profile?.projects.filter(
       (project: any) => project.status !== "Incomplete"
     ) || [];
+  const [incrementViewCount] = useGetPublicProfileViewCountMutation();
+
+  useEffect(() => {
+    if (profile && username) {
+      incrementViewCount({ username });
+    }
+  }, [profile, username, incrementViewCount]);
 
   const bio = profile?.bio || "";
   const handleEdit = () => {
@@ -94,14 +105,14 @@ const PublicProfile: React.FC = () => {
           />
         </div>
         {/* Mobile Right Section Components */}
-        <div className="space-y-6 mb-6">{renderRightSectionComponents()}</div>
+        {/* <div className="space-y-6 mb-6">{renderRightSectionComponents()}</div> */}
 
         {/* Main Content Sections */}
         <div className="space-y-6">{renderMainContentSections()}</div>
       </div>
 
       <div className="hidden lg:grid xl:grid 2xl:grid grid-cols-10 gap-6">
-        <div className="flex flex-col col-span-7">
+        <div className="flex flex-col col-span-10 max-w-4xl mx-auto">
           <div className="mb-6">
             <ProfileBanner
               user={profile}
@@ -116,9 +127,9 @@ const PublicProfile: React.FC = () => {
           <div className="space-y-6">{renderMainContentSections()}</div>
         </div>
         {/* Right Section */}
-        <div className="flex flex-col space-y-6 flex-1 col-span-3">
+        {/* <div className="flex flex-col space-y-6 flex-1 col-span-3">
           {renderRightSectionComponents()}
-        </div>
+        </div> */}
       </div>
     </div>
   );
