@@ -236,13 +236,7 @@ const renderRoutes = (routesArray: RouteConfig[]) => {
 const AppRoutes: React.FC = () => {
   useScrollToTop();
   return (
-    <Suspense
-    // fallback={
-    //   <div className="flex items-center justify-center h-screen">
-    //     Loading...
-    //   </div>
-    // }
-    >
+    <Suspense>
       <Routes>{renderRoutes(routes)}</Routes>
     </Suspense>
   );

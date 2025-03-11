@@ -14,7 +14,6 @@ import ProjectList from "@/components/projects/ProjectList";
 import ProfileBannerMobile from "./ProfileBannerMobile";
 import { useEffect } from "react";
 import ProfileSkeleton from "./publicProfileSkeleton/profile-skeleton";
-import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -27,17 +26,9 @@ const PublicProfile: React.FC = () => {
   const [incrementViewCount] = useGetPublicProfileViewCountMutation();
 
   useEffect(() => {
-    const trackProfileView = async () => {
-      if (!profile || !username) return;
-
-      const fp = await FingerprintJS.load();
-      const result = await fp.get();
-      const visitorId = result.visitorId;
-
-      incrementViewCount({ username, visitorId });
-    };
-
-    trackProfileView();
+    if (profile && username) {
+      incrementViewCount({ username });
+    }
   }, [profile, username, incrementViewCount]);
 
   const bio = profile?.bio || "";
