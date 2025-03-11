@@ -11,6 +11,7 @@ import { MarkdownComponents } from "./MarkdownAndVideo";
 import VideosAtEnd from "./YoutubeVideosGrid";
 import { YouTubeProvider } from "./YouTubeContext";
 import QuizActionBtns from "./QuizActionBtns";
+import { ArrowDown } from "lucide-react";
 
 const SOCKET_URL =
   window.location.hostname === "localhost"
@@ -81,10 +82,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
       setMessages(loadedMessages);
       setIsLoading(false);
 
-      // Ensure we scroll to bottom when messages first load
-      setTimeout(() => {
-        scrollToBottom();
-      }, 100);
+      scrollToBottom();
     }
   }, [threadMessagesData, setIsLoading]);
 
@@ -230,10 +228,8 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
 
   // 7) Auto-scroll when new messages arrive if already at bottom
   useEffect(() => {
-    if (isNearBottom) {
-      scrollToBottom();
-    }
-  }, [messages, isNearBottom]);
+    scrollToBottom();
+  }, [messages]);
 
   // 8) Set up scroll event listener
   useEffect(() => {
@@ -267,7 +263,12 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
   }, [inputMessage]);
 
   // 9) Render each message
-  const renderMessage = (msg: Message) => {
+  const renderMessage = (msg: Message, index: number) => {
+    // Skip the first message if it's from a USER and index is 0
+    if (index === 0 && msg.role === "USER") {
+      return null;
+    }
+
     const isAI = msg.role === "AI";
     const lastAiMessageId = messages.filter((m) => m.role === "AI").slice(-1)[0]?.id;
 
@@ -289,9 +290,9 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
 
         {/* Bubble */}
         <div
-          className={`flex-1 p-3 max-w-[60vw] rounded-2xl ${isAI
+          className={`flex-1 p-3  rounded-2xl ${isAI
             ? "bg-[#F5F5F5] border border-gray-100"
-            : "bg-white w-fit"
+            : "bg-white w-fit max-w-[80%]"
             }`}
         >
           {isAI ? (
@@ -328,11 +329,13 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
 
   // 10) The actual UI
   return (
-    <div className="flex flex-col flex-1 h-[70vh] w-full items-center minimal-scrollbar overflow-y-auto">
+    <div
+     ref={chatContainerRef}
+     className="flex flex-col flex-1 2xl:h-[73vh] h-[69vh] w-full items-center minimal-scrollbar overflow-y-auto">
       {/* Messages Container */}
       <div
-        ref={chatContainerRef}
-        className="flex-grow  space-y-6 xl:max-h-[66vh] 2xl:max-h-[70vh] minimal-scrollbar w-[780px]"
+        
+        className="flex-grow  space-y-6 xl:max-h-[66vh] 2xl:max-h-[74vh] w-[780px]"
       >
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full space-y-4">
@@ -341,7 +344,7 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
           </div>
         ) : (
           <>
-            {messages.map(renderMessage)}
+            {messages.map((message, index) => renderMessage(message, index))}
 
             {/* Streaming "Thinking..." Indicator */}
             {isStreaming && (
@@ -366,21 +369,22 @@ const MentorChatThreads: React.FC<MentorChatThreadsProps> = ({
       </div>
 
       {/* Scroll to bottom button */}
-      {/* {showScrollButton && (
+      {showScrollButton && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-24 right-8 bg-button text-white p-3 rounded-full border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC] transition-all transform hover:-translate-y-1 z-10 flex items-center justify-center"
+          className="absolute bottom-24 right-8 text-black p-3 rounded-full border border-solid  hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC] transition-all transform hover:-translate-y-1 z-10 flex items-center justify-center"
           aria-label="Scroll to bottom"
         >
-          <ChevronDown size={12} />
+          <ArrowDown size={16} />
         </button>
-      )} */}
+      )}
 
       {/* Input Box */}
       <div className="bg-white absolute bottom-0 w-[780px] rounded-xl">
         <div className="max-w-4xl mx-auto flex items-center justify-center gap-3 border-2 min-h-[64px] rounded-xl">
           <div className="flex justify-between items-end w-full px-3 min-h-[64px]">
             <textarea
+              ref={inputRef}
               value={inputMessage}
               onChange={(e) => {
                 setInputMessage(e.target.value);

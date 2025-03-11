@@ -13,8 +13,8 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
 
   useEffect(() => {
     setFilterParams(filters);
-    // If you have a min_salary in your filters, uncomment/adjust as needed:
-    // setTempMinSalary(filters.min_salary_range ? filters.min_salary_range / 100000 : 0);
+    // If needed, update for min salary as well:
+    setTempMinSalary(filters.min_salary_range ? filters.min_salary_range / 100000 : 0);
     setTempMaxSalary(filters.max_salary_range ? filters.max_salary_range / 100000 : 50);
   }, [filters]);
 
@@ -42,18 +42,16 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
   };
 
   const handleApply = () => {
+    // Ensure we store them with min < max, just in case.
     const minValue = Math.min(tempMinSalary, tempMaxSalary);
     const maxValue = Math.max(tempMinSalary, tempMaxSalary);
 
     updateFilters({
-      // If you also need a min_salary_range:
-      // min_salary_range: minValue * 100000,
+      // If you also need to set `min_salary_range`, do so here:
+      min_salary_range: minValue * 100000,
       max_salary_range: maxValue * 100000,
     });
   };
-
-  const lowerValue = Math.min(tempMinSalary, tempMaxSalary);
-  const upperValue = Math.max(tempMinSalary, tempMaxSalary);
 
   return (
     <>
@@ -63,11 +61,39 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
           Experience Level
         </label>
         <div className="flex flex-col items-start gap-3 self-stretch">
-          {['1', '2', '3'].map(level => (
+
+          {/* All option */}
+          <div
+            className={`flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${
+              // "All" is active if experience_level is empty or missing
+              Array.isArray(filterParams.experience_level) &&
+                filterParams.experience_level.length === 0
+                ? 'border-[#000000] bg-none'
+                : 'bg-white border-[#B4B4B5]'
+              }`}
+            onClick={() => updateFilters({ experience_level: [] })}
+          >
+            <div className="grid gap-1.5 leading-none">
+              <label
+                className={`text-sm font-medium leading-5 tracking-tight cursor-pointer ${
+                  // If array is empty, highlight text
+                  Array.isArray(filterParams.experience_level) &&
+                    filterParams.experience_level.length === 0
+                    ? 'text-black font-medium'
+                    : 'text-gray-500'
+                  }`}
+              >
+                All
+              </label>
+            </div>
+          </div>
+
+          {/* Individual levels */}
+          {['1', '2', '3'].map((level) => (
             <div
               key={level}
               onClick={() => handleSelect(level)}
-              className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${filterParams.experience_level?.includes(level)
+              className={`flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${filterParams.experience_level?.includes(level)
                   ? 'border-[#000000] bg-none'
                   : 'bg-white border-[#B4B4B5]'
                 }`}
@@ -82,7 +108,10 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
               <div className="grid gap-1.5 leading-none">
                 <label
                   htmlFor={`level-${level}`}
-                  className={` text-sm font-medium leading-5 tracking-tight cursor-pointer  ${filterParams.experience_level?.includes(level) ? " text-black font-medium ": " text-gray-500"}`}
+                  className={`text-sm font-medium leading-5 tracking-tight cursor-pointer ${filterParams.experience_level?.includes(level)
+                      ? 'text-black font-medium'
+                      : 'text-gray-500'
+                    }`}
                 >
                   {level === '1'
                     ? 'Entry Level'
@@ -95,6 +124,8 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
           ))}
         </div>
       </div>
+
+
 
       {/* Salary Range */}
       <div className="flex flex-col items-start w-[280px] gap-5 border-b border-[#E0E0E0] pb-6">
@@ -110,72 +141,104 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
           <span>{tempMinSalary} LPA</span>
           <span>{tempMaxSalary} LPA</span>
         </div>
-        <div className="relative w-full flex items-center">
+
+        {/* Double Slider */}
+        <div className="relative w-full h-6">
           {/* Background track */}
-          <div className="absolute w-full h-1 bg-gray-200 rounded-full"></div>
-
-          {/* Filled area */}
+          <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full" />
+          {/* Filled area (between min & max) */}
           <div
-            className="absolute h-1 bg-black rounded-full"
+            className="absolute top-1/2 transform -translate-y-1/2 h-1 bg-black rounded-full"
             style={{
-              left: `${(lowerValue / 50) * 100}%`,
-              right: `${100 - (upperValue / 50) * 100}%`,
+              left: `${(tempMinSalary / 50) * 100}%`,
+              width: `${((tempMaxSalary - tempMinSalary) / 50) * 100}%`,
             }}
-          ></div>
+          />
 
+          {/* Min slider */}
+          <input
+            type="range"
+            min={0}
+            max={50}
+            value={tempMinSalary}
+            onChange={(e) => {
+              const newValue = Number(e.target.value);
+              // Don’t let the min go above the current max
+              if (newValue > tempMaxSalary) {
+                setTempMinSalary(tempMaxSalary);
+              } else {
+                setTempMinSalary(newValue);
+              }
+            }}
+            className="absolute w-full pointer-events-auto bg-transparent"
+            style={{ top: 10, left: 0 }}
+          />
+
+          {/* Max slider */}
+          <input
+            type="range"
+            min={0}
+            max={50}
+            value={tempMaxSalary}
+            onChange={(e) => {
+              const newValue = Number(e.target.value);
+              // Don’t let the max go below the current min
+              if (newValue < tempMinSalary) {
+                setTempMaxSalary(tempMinSalary);
+              } else {
+                setTempMaxSalary(newValue);
+              }
+            }}
+            className="absolute w-full pointer-events-auto bg-transparent"
+            style={{ top: 10, left: 0 }}
+          />
+
+          {/* Slider thumb styling */}
           <style>
             {`
               input[type="range"] {
                 -webkit-appearance: none;
                 appearance: none;
-                width: 100%;
-                background: transparent;
-              }
-              input[type="range"]:focus {
+                height: 6px;
                 outline: none;
+                
               }
+
+              input[type="range"]::-webkit-slider-runnable-track {
+                height: 6px;
+                background: transparent;
+                border: none;
+                border-radius: 0;
+              }
+
               input[type="range"]::-webkit-slider-thumb {
                 -webkit-appearance: none;
+                appearance: none;
                 height: 16px;
                 width: 16px;
                 border-radius: 50%;
                 background: #fff;
                 border: 1px solid #001630;
                 cursor: pointer;
+                margin-top: -5px; /* centers thumb relative to track */
+                position: relative;
+                z-index: 2;
               }
+
               input[type="range"]::-moz-range-thumb {
                 height: 16px;
                 width: 16px;
                 border-radius: 50%;
                 background: #fff;
-                border: 2px solid #000;
+                border: 1px solid #001630;
                 cursor: pointer;
+                position: relative;
+                z-index: 2;
               }
             `}
           </style>
-
-          {/* Min salary slider: placed FIRST in the DOM, lower zIndex */}
-          <input
-            type="range"
-            min="0"
-            max="50"
-            value={tempMinSalary}
-            onChange={(e) => setTempMinSalary(Number(e.target.value))}
-            className="absolute w-full h-1 pointer-events-auto"
-            style={{ zIndex: 2 }}
-          />
-
-          {/* Max salary slider: placed SECOND, higher zIndex (so you can always click it) */}
-          <input
-            type="range"
-            min="0"
-            max="50"
-            value={tempMaxSalary}
-            onChange={(e) => setTempMaxSalary(Number(e.target.value))}
-            className="absolute w-full h-1 pointer-events-auto"
-            style={{ zIndex: 3 }}
-          />
         </div>
+
         <button
           className="py-2 text-sm w-[80px] font-medium text-[#001630] rounded-md border border-solid border-[#001630] float-end mt-2"
           onClick={handleApply}
@@ -194,7 +257,7 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
             <div
               key={demand}
               onClick={() => handleSelectDemand(demand)}
-              className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${filterParams.job_market_demand === demand
+              className={`flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${filterParams.job_market_demand === demand
                   ? 'border-[#000000] bg-none'
                   : 'bg-white border-[#B4B4B5]'
                 }`}
@@ -209,7 +272,10 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
               <div className="grid gap-1.5 leading-none">
                 <label
                   htmlFor={`demand-${demand}`}
-                  className={`text-sm font-medium leading-5 tracking-tight cursor-pointer ${filterParams.job_market_demand === demand ? "text-black font-medium ": "text-gray-500"}`}
+                  className={`text-sm font-medium leading-5 tracking-tight cursor-pointer ${filterParams.job_market_demand === demand
+                      ? "text-black font-medium"
+                      : "text-gray-500"
+                    }`}
                 >
                   {demand === '1'
                     ? 'High Demand'
@@ -244,7 +310,10 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
               <RadioGroupItem value={option} id={`option-${option}`} />
               <label
                 htmlFor={`option-${option}`}
-                className={`text-sm font-medium leading-5 tracking-tight cursor-pointer ${filterParams.learning_time === option ? "text-black font-medium ": "text-gray-500"}`}
+                className={`text-sm font-medium leading-5 tracking-tight cursor-pointer ${filterParams.learning_time === option
+                    ? "text-black font-medium"
+                    : "text-gray-500"
+                  }`}
               >
                 {option === '1'
                   ? '1-3 Months'
@@ -269,7 +338,7 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
             <div
               key={difficulty}
               onClick={() => handleDiffcultSelect(difficulty)}
-              className={`items-top flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${filterParams.difficulty_level === difficulty
+              className={`flex space-x-2 p-2 px-3 items-center self-stretch rounded border cursor-pointer ${filterParams.difficulty_level === difficulty
                   ? 'border-[#000000] bg-none'
                   : 'bg-white border-[#B4B4B5]'
                 }`}
@@ -284,7 +353,10 @@ const SetGoalFilter: React.FC<SetGoalFilterProps> = ({ filters, onFilterChange }
               <div className="grid gap-1.5 leading-none">
                 <label
                   htmlFor={`difficulty-${difficulty}`}
-                  className={`text-sm font-medium leading-5 tracking-tight cursor-pointer ${filterParams.difficulty_level === difficulty ? "text-black font-medium ": "text-gray-500"}`}
+                  className={`text-sm font-medium leading-5 tracking-tight cursor-pointer ${filterParams.difficulty_level === difficulty
+                      ? "text-black font-medium"
+                      : "text-gray-500"
+                    }`}
                 >
                   {difficulty === '1' ? 'Easy' : difficulty === '2' ? 'Medium' : 'Hard'}
                 </label>

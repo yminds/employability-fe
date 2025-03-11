@@ -16,7 +16,7 @@ const VideosAtEnd = () => {
 
   return (
     <div className="my-8">
-      <h3 className="text-lg font-bold mb-4">YouTube Videos</h3>
+      <h3 className="text-lg font-bold mb-4">Relevant Videos</h3>
       <div className="grid grid-cols-3 gap-4">
         {validVideos.map((href, idx) => (
           <div key={idx} className="w-full">
