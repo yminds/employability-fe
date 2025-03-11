@@ -3,7 +3,7 @@ import React from 'react';
 export type JobDescription = {
   summary: string;
   keyResponsibilities: string[];
-  requiredSkillsAndQualifications: { name: string; description: string }[];
+  requiredSkillsAndQualifications: string[];
   experience: string;
   perksAndBenefits: string;
   whyJoinUs: string[];
@@ -70,8 +70,7 @@ const ViewJD: React.FC<InterviewDetailsProps> = ({
           <h4 className="font-medium text-gray-800 mb-2">Required Skills & Qualifications</h4>
           {jobDescription.requiredSkillsAndQualifications.map((skill, idx) => (
             <div key={idx} className="mb-2">
-              <strong className="block text-sm text-gray-800">{skill.name}</strong>
-              <p className="text-sm text-gray-600 ml-4">{skill.description}</p>
+              <strong className="block text-sm text-gray-800">{skill}</strong>
             </div>
           ))}
         </div>
