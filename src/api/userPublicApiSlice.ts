@@ -15,7 +15,18 @@ export const userPublicApiSlice = apiSlice.injectEndpoints({
         body: { username },
       }),
     }),
+    getPublicProfileViewCount: builder.mutation({
+      query: ({ username }) => ({
+        url: `/api/v1/user-profile/view-count`,
+        method: "POST",
+        body: { username },
+      }),
+    }),
   }),
 });
 
-export const { useGetPublicProfileQuery, useGetPublicUserSkillSummaryMutation } = userPublicApiSlice;
+export const {
+  useGetPublicProfileQuery,
+  useGetPublicUserSkillSummaryMutation,
+  useGetPublicProfileViewCountMutation,
+} = userPublicApiSlice;

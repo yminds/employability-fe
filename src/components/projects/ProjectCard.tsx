@@ -1,3 +1,4 @@
+import type React from "react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -135,19 +136,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         {project.thumbnail && (
           <div className="relative w-[150px] h-[100px] bg-[#fcfcfc] rounded overflow-hidden md:w-full sm:w-full md:h-[200px] sm:h-[200px]">
             <img
-              src={project.thumbnail}
+              src={project.thumbnail || "/placeholder.svg"}
               alt={`${project.name} Thumbnail`}
               className="w-full h-full object-cover"
             />
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full">
-          <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-3 flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full md:items-start sm:items-start">
+          <div className="flex flex-col gap-4 md:w-full sm:w-full">
             <h2 className="text-[#1f2226] text-sub-header">{project.name}</h2>
             {project.tech?.length > 0 && (
-              <div className="flex">
-                <div className="flex gap-2 w-[200px] flex-wrap">
+              <div className="flex w-[200px] md:w-full sm:w-full">
+                <div className="flex gap-2 flex-wrap">
                   {project.tech.slice(0, 3).map((tech) => (
                     <Badge
                       key={tech._id}
@@ -193,7 +194,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 )}
                 <div className="flex items-center gap-1 rounded-full">
                   <img
-                    src={config.icon}
+                    src={config.icon || "/placeholder.svg"}
                     alt={project.status}
                     className="w-4 h-4"
                   />
@@ -228,11 +229,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       <CardContent className="flex flex-col px-0 w-full p-0 mt-3">
         <p className="text-[#67696b] text-body2">{project.description}</p>
         {(project.githubLink?.length > 0 || project.liveLink) && (
-          <div className="flex gap-6 mt-3 md:flex-col sm:flex-col md:gap-2 sm:gap-2">
+          <div className="flex gap-6 mt-3 md:flex-col sm:flex-col md:gap-2 sm:gap-2 md:items-start sm:items-start">
             {project.githubLink?.length > 0 && (
               <Button
                 variant="link"
-                className="text-[#67696b] underline p-0 h-auto"
+                className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto"
                 asChild
               >
                 <a
@@ -247,7 +248,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             {project.liveLink && (
               <Button
                 variant="link"
-                className="text-[#67696b] underline p-0 h-auto"
+                className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto"
                 asChild
               >
                 <a

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
+import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 import {
   useGetCountriesQuery,
@@ -21,6 +22,7 @@ import EditProfile from "@/assets/profile/editprofile.svg";
 import EditBio from "@/assets/profile/editbio.svg";
 import Share from "@/assets/profile/share.svg";
 import { toast } from "sonner";
+import { TrendingUp } from "lucide-react";
 
 interface ProfileBannerProps {
   user: any;
@@ -52,6 +54,9 @@ const ProfileBanner = ({
 
   const [getUserSkillsSummary, { data: skillsSummaryData }] =
     useGetPublicUserSkillSummaryMutation();
+  const { data: userDetails } = useGetUserDetailsQuery(user._id || "", {
+    skip: isPublic,
+  });
 
   const totalSkills = skillsSummaryData?.data?.totalSkills || "0";
   const totalVerifiedSkills =
@@ -236,56 +241,62 @@ const ProfileBanner = ({
 
           {/* Bio */}
           <div className="flex items-start justify-between gap-4">
-            <p className="text-[#414447] text-body2 flex-1">
-              {bio ||
-                "No bio available. Add a bio to tell others about yourself."}
-            </p>
+            <p className="text-[#414447] text-body2 flex-1">{bio || ""}</p>
           </div>
 
           {/* Action Buttons */}
           {!isPublic && hasGoalData && (
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                className="flex w-[130px] h-[40px] px-3 py-2 justify-center items-center gap-3 text-black text-body2 hover:bg-transparent hover:text-black focus:ring-0"
-                onClick={handleShareProfile}
-              >
-                <img src={Share} alt="Share" />
-                Share Profile
-              </Button>
+            <div className="flex justify-between">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  className="flex w-[130px] h-[40px] px-3 py-2 justify-center items-center gap-3 text-black text-body2 hover:bg-transparent hover:text-black focus:ring-0"
+                  onClick={handleShareProfile}
+                >
+                  <img src={Share} alt="Share" />
+                  Share Profile
+                </Button>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" className="w-10 h-10 p-0">
-                    <div className="w-6 h-6 flex items-center justify-center">
-                      <img
-                        src={threeDots || "/placeholder.svg"}
-                        alt="Three Dots"
-                      />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" className="w-10 h-10 p-0">
+                      <div className="w-6 h-6 flex items-center justify-center">
+                        <img
+                          src={threeDots || "/placeholder.svg"}
+                          alt="Three Dots"
+                        />
+                      </div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-1.5" align="start">
+                    <div className="grid gap-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-[#414447] text-body2 px-3 py-2 h-auto"
+                        onClick={() => setIsProfileModalOpen(true)}
+                      >
+                        <img src={EditProfile} alt="Edit Profile" />
+                        Edit profile
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-[#414447] text-body2 px-3 py-2 h-auto"
+                        onClick={() => setIsEditBioOpen(true)}
+                      >
+                        <img src={EditBio} alt="Edit Bio" />
+                        Edit bio
+                      </Button>
                     </div>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-1.5" align="start">
-                  <div className="grid gap-1">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-[#414447] text-body2 px-3 py-2 h-auto"
-                      onClick={() => setIsProfileModalOpen(true)}
-                    >
-                      <img src={EditProfile} alt="Edit Profile" />
-                      Edit profile
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-[#414447] text-body2 px-3 py-2 h-auto"
-                      onClick={() => setIsEditBioOpen(true)}
-                    >
-                      <img src={EditBio} alt="Edit Bio" />
-                      Edit bio
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="flex items-center gap-2 text-[#03963f]">
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-body2">
+                  {userDetails?.data?.profile_view_count} profile views
+                </span>
+              </div>
             </div>
           )}
         </div>

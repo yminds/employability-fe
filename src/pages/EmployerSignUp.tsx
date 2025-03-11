@@ -1,38 +1,40 @@
-import { useState, FormEvent, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { Loader2, Building2, Briefcase } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { useEmployerSignupMutation, useEmployerLoginMutation } from '@/api/employerApiSlice';
-import { setEmployerCredentials } from '@/features/authentication/employerAuthSlice';
+import { useState, FormEvent, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Loader2, Building2, Briefcase } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  useEmployerSignupMutation,
+  useEmployerLoginMutation,
+} from "@/api/employerApiSlice";
+import { setEmployerCredentials } from "@/features/authentication/employerAuthSlice";
 
 // Import your assets
-import User from '@/assets/sign-up/user.png';
-import Mail from '@/assets/sign-up/mail.png';
-import Password from '@/assets/sign-up/password.png';
-import logo from '@/assets/branding/logo.svg';
-import man from '@/assets/sign-up/man.png';
-import grid from '@/assets/sign-up/grid.svg';
-import arrow from '@/assets/skills/arrow.svg';
+import User from "@/assets/sign-up/user.png";
+import Mail from "@/assets/sign-up/mail.png";
+import Password from "@/assets/sign-up/password.png";
+import logo from "@/assets/branding/logo.svg";
+import man from "@/assets/sign-up/man.png";
+import grid from "@/assets/sign-up/grid.svg";
+import arrow from "@/assets/skills/arrow.svg";
 
-
-export const EmployerSignup = () => {
+const EmployerSignup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const [formData, setFormData] = useState({
-    employerName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    companyName: '',
-    website: '',
+    employerName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    companyName: "",
+    website: "",
   });
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [signup] = useEmployerSignupMutation();
   const [login] = useEmployerLoginMutation();
 
@@ -40,10 +42,10 @@ export const EmployerSignup = () => {
   const validateEmailDomain = () => {
     if (!formData.email || !formData.website) return true;
 
-    const emailDomain = formData.email.split('@')[1]?.toLowerCase();
+    const emailDomain = formData.email.split("@")[1]?.toLowerCase();
     const websiteDomain = formData.website
-      .replace(/^https?:\/\//, '')
-      .split('/')[0]
+      .replace(/^https?:\/\//, "")
+      .split("/")[0]
       .toLowerCase();
 
     return emailDomain === websiteDomain;
@@ -53,20 +55,20 @@ export const EmployerSignup = () => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-  
+
     // Validation checks
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
       setIsLoading(false);
       return;
     }
-  
+
     if (!validateEmailDomain()) {
       setError("Email domain must match company website domain");
       setIsLoading(false);
       return;
     }
-  
+
     try {
       const signupResponse = await signup({
         employerName: formData.employerName.trim(),
@@ -75,51 +77,59 @@ export const EmployerSignup = () => {
         companyName: formData.companyName.trim(),
         website: formData.website.trim(),
       }).unwrap();
-  
+
       if (signupResponse.success) {
         const employerData: any = signupResponse.data;
-        
+
         // Structure the data to match what the Redux slice expects
-        dispatch(setEmployerCredentials({
-          employer_info: {
-            _id: employerData._id,
-            employerName: employerData.employerName,
-            email: employerData.email,
-            role: employerData.role,
-            is_email_verified: employerData.is_email_verified,
-            account_status: employerData.account_status,
-            posted_jobs: employerData.posted_jobs || [],
-            active_jobs: employerData.active_jobs || [],
-            createdAt: employerData.createdAt,
-            updatedAt: employerData.updatedAt,
-            company_id: employerData.company_id
-          },
-          token: employerData.token,
-          company: employerData.company
-        }));
-  
+        dispatch(
+          setEmployerCredentials({
+            employer_info: {
+              _id: employerData._id,
+              employerName: employerData.employerName,
+              email: employerData.email,
+              role: employerData.role,
+              is_email_verified: employerData.is_email_verified,
+              account_status: employerData.account_status,
+              posted_jobs: employerData.posted_jobs || [],
+              active_jobs: employerData.active_jobs || [],
+              createdAt: employerData.createdAt,
+              updatedAt: employerData.updatedAt,
+              company_id: employerData.company_id,
+            },
+            token: employerData.token,
+            company: employerData.company,
+          })
+        );
+
         // Clear form data
         setFormData({
-          employerName: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          companyName: '',
-          website: '',
+          employerName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          companyName: "",
+          website: "",
         });
-  
-          navigate("/employer");
+
+        navigate("/employer");
       }
     } catch (err: any) {
       console.error("Signup error:", err);
-      
+
       if (err.status === 400) {
         if (err.data?.message.includes("Email already exists")) {
-          setError("This email is already registered. Please try logging in instead.");
+          setError(
+            "This email is already registered. Please try logging in instead."
+          );
         } else if (err.data?.message.includes("domain")) {
-          setError("Your email domain must match your company's website domain.");
+          setError(
+            "Your email domain must match your company's website domain."
+          );
         } else {
-          setError(err.data?.message || "Please check your input and try again.");
+          setError(
+            err.data?.message || "Please check your input and try again."
+          );
         }
       } else {
         setError("An error occurred during signup. Please try again.");
@@ -139,8 +149,16 @@ export const EmployerSignup = () => {
     <section className="flex h-screen w-screen bg-white relative dark:bg-gray-800">
       {/* Left Section */}
       <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
-        <img src={grid} alt="Grid Background" className="absolute inset-0 h-full w-full object-cover" />
-        <img src={man} alt="Hero" className="absolute bottom-0 left-0 right-0 w-full object-contain" />
+        <img
+          src={grid}
+          alt="Grid Background"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <img
+          src={man}
+          alt="Hero"
+          className="absolute bottom-0 left-0 right-0 w-full object-contain"
+        />
         <div className="absolute top-8 left-8 z-20">
           <img src={logo} alt="Logo" />
         </div>
@@ -151,7 +169,7 @@ export const EmployerSignup = () => {
         <div className="w-full max-w-md bg-white rounded-lg p-8">
           <div className="flex items-center gap-2 mb-6">
             <button
-              onClick={() => navigate('/employer/login')}
+              onClick={() => navigate("/employer/login")}
               className="hover:text-green-600 text-black text-sm flex items-center"
             >
               <img className="w-4 h-4 mr-2" src={arrow} alt="Back Arrow" />
@@ -161,12 +179,14 @@ export const EmployerSignup = () => {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="h-[84px] flex flex-col justify-around mx-auto">
-              <h1 className="text-2xl font-bold text-gray-900">Create Employer Account</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Create Employer Account
+              </h1>
               <p className="text-sm text-gray-500">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => navigate('/employer/login')}
+                  onClick={() => navigate("/employer/login")}
                   className="text-green-600 underline hover:text-green-800"
                 >
                   Log in
@@ -175,8 +195,13 @@ export const EmployerSignup = () => {
             </div>
 
             {error && (
-              <Alert variant="destructive" className="mb-8 bg-[#ff3b30]/10 border border-[#ff3b30] text-[#ff3b30]">
-                <AlertDescription className="text-[#ff3b30]">{error}</AlertDescription>
+              <Alert
+                variant="destructive"
+                className="mb-8 bg-[#ff3b30]/10 border border-[#ff3b30] text-[#ff3b30]"
+              >
+                <AlertDescription className="text-[#ff3b30]">
+                  {error}
+                </AlertDescription>
               </Alert>
             )}
 
@@ -188,19 +213,27 @@ export const EmployerSignup = () => {
                   className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                   placeholder="Full Name"
                   value={formData.employerName}
-                  onChange={(e) => setFormData({ ...formData, employerName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, employerName: e.target.value })
+                  }
                   required
                 />
-                <img src={User} alt="User Icon" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" />
+                <img
+                  src={User}
+                  alt="User Icon"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                />
               </div>
-             
+
               <div className="relative">
                 <input
                   type="text"
                   className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                   placeholder="Company Name"
                   value={formData.companyName}
-                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, companyName: e.target.value })
+                  }
                   required
                 />
                 <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -212,14 +245,15 @@ export const EmployerSignup = () => {
                   className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                   placeholder="Company Website (e.g., https://company.com)"
                   value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, website: e.target.value })
+                  }
                   required
                   pattern="https?://.*"
                   title="Please include http:// or https://"
                 />
                 <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-              
-            </div>
+              </div>
 
               <div className="relative">
                 <input
@@ -227,10 +261,16 @@ export const EmployerSignup = () => {
                   className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                   placeholder="Company Email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   required
                 />
-                <img src={Mail} alt="Email Icon" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
+                <img
+                  src={Mail}
+                  alt="Email Icon"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                />
               </div>
 
               <div className="relative">
@@ -239,10 +279,16 @@ export const EmployerSignup = () => {
                   className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                   placeholder="Password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   required
                 />
-                <img src={Password} alt="Password Icon" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
+                <img
+                  src={Password}
+                  alt="Password Icon"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                />
               </div>
 
               <div className="relative">
@@ -251,14 +297,21 @@ export const EmployerSignup = () => {
                   className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                   placeholder="Confirm Password"
                   value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
                   required
                 />
-                <img src={Password} alt="Password Icon" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
+                <img
+                  src={Password}
+                  alt="Password Icon"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                />
               </div>
             </div>
-
-            
 
             <Button
               type="submit"
@@ -285,3 +338,5 @@ export const EmployerSignup = () => {
     </section>
   );
 };
+
+export default EmployerSignup;
