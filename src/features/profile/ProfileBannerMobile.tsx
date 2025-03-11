@@ -126,11 +126,11 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
           backgroundPosition: "center",
         }}
       >
-        <div className="pt-4 pb-4">
+        <div className="pt-8 sm:pt-5 pb-4 sm:pb-1">
           {/* Profile header section */}
-          <div className="flex items-center justify-between px-4">
+          <div className="flex items-center justify-between px-8 sm:px-5">
             {/* Profile image */}
-            <div className="w-16 h-16">
+            <div className="w-[96px] h-[96px]">
               {user?.profile_image ? (
                 <img
                   src={user?.profile_image || "/placeholder.svg"}
@@ -147,7 +147,7 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
             </div>
 
             {/* Name and location */}
-            <div className="flex-1 mx-3">
+            <div className="flex-1 mx-6">
               <h2 className="text-[#202326] text-h2">{fullName}</h2>
               <p className="text-[#414447] text-body2">
                 {country !== null ? `${state?.name}, ${country?.name}` : ""}
@@ -205,14 +205,14 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
           {hasGoalData ? (
             <>
               {/* Job title */}
-              <div className="mt-4 px-8">
+              <div className="mt-6 mb-[6px] px-8 sm:px-5">
                 <h3 className="text-[#202326] text-lg font-medium font-ubuntu">
                   {isPublic ? user.goals?.[0]?.name : goalName}
                 </h3>
               </div>
 
               {/* Employability score */}
-              <div className="px-8 flex items-center">
+              <div className="px-8 sm:px-5 flex items-center">
                 <div className="flex items-baseline">
                   <span className="text-black text-[28px] font-ubuntu font-bold leading-[42px] tracking-[-0.5px]">
                     {employabilityScore}
@@ -242,7 +242,7 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
                   </div>
                 )}
               </div>
-              <div className="px-8">
+              <div className="px-8 sm:px-5">
                 <p className="text-[#414447] text-body2">Employability score</p>
               </div>
             </>
@@ -260,7 +260,7 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
           )}
 
           {/* Bio section */}
-          <div className="mt-2 px-4">
+          <div className="mt-2 px-4 sm:px-1">
             <div className="rounded-lg p-4">
               <p className="text-[#414447] text-body2">{bio || ""}</p>
             </div>

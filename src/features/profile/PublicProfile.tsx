@@ -48,7 +48,7 @@ const PublicProfile: React.FC = () => {
   // Render main content sections
   const renderMainContentSections = () => (
     <>
-      <div className="bg-white rounded-lg mt-6 p-8 overflow-y-auto overflow-x-auto max-h-3xl relative">
+      <div className="bg-white rounded-lg mt-6 p-8 sm:p-5 overflow-y-auto overflow-x-auto max-h-3xl relative">
         <SkillsSection
           skills={profile.skills}
           isPublic={true}

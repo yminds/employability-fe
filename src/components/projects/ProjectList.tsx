@@ -63,7 +63,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   };
 
   return (
-    <div className="p-[32px]">
+    <div className="p-[32px] sm:p-[20px]">
       <div className="flex flex-col gap-8">
         <div className="flex items-center">
           <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">

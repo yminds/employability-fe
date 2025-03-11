@@ -130,7 +130,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     <Card
       className={`flex flex-col items-start p-0 bg-white rounded-lg ${
         !isDashboard ? "border border-black/10 p-6" : ""
-      } self-stretch mb-4 sm:p-4`}
+      } self-stretch mb-4`}
     >
       <div className="flex items-start gap-5 w-full md:flex-col sm:flex-col">
         {project.thumbnail && (

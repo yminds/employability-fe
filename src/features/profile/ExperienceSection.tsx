@@ -140,7 +140,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 pb-0">
+      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 sm:px-5 sm:pt-5 pb-0">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
             Experience{" "}
@@ -244,7 +244,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           </div>
         ) : (
           <>
-            <div className="divide-y divide-[#E5E7EB] p-8 relative">
+            <div className="divide-y divide-[#E5E7EB] p-8 sm:p-5 relative">
               {displayedExperiences.map(
                 (item: ExperienceItem, index: number) => (
                   <div
