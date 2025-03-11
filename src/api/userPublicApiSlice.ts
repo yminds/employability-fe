@@ -16,10 +16,10 @@ export const userPublicApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     getPublicProfileViewCount: builder.mutation({
-      query: ({ username }) => ({
+      query: ({ username, visitorId }) => ({
         url: `/api/v1/user-profile/view-count`,
         method: "POST",
-        body: { username },
+        body: { username, visitorId },
       }),
     }),
   }),

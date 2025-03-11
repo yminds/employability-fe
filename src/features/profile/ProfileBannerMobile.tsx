@@ -264,12 +264,14 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
             <div className="rounded-lg p-4">
               <p className="text-[#414447] text-body2">{bio || ""}</p>
             </div>
-            <div className="flex items-center px-4 gap-2 text-[#03963f]">
-              <TrendingUp className="w-5 h-5" />
-              <span className="text-body2">
-                {userDetails?.data?.profile_view_count} profile views
-              </span>
-            </div>
+            {!isPublic && (
+              <div className="flex items-center px-4 gap-2 text-[#03963f]">
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-body2">
+                  {userDetails?.data?.profile_view_count} profile views
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

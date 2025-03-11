@@ -13,6 +13,8 @@ import StatsSection from "./StatsSection";
 import ProjectList from "@/components/projects/ProjectList";
 import ProfileBannerMobile from "./ProfileBannerMobile";
 import { useEffect } from "react";
+import ProfileSkeleton from "./publicProfileSkeleton/profile-skeleton";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -25,9 +27,17 @@ const PublicProfile: React.FC = () => {
   const [incrementViewCount] = useGetPublicProfileViewCountMutation();
 
   useEffect(() => {
-    if (profile && username) {
-      incrementViewCount({ username });
-    }
+    const trackProfileView = async () => {
+      if (!profile || !username) return;
+
+      const fp = await FingerprintJS.load();
+      const result = await fp.get();
+      const visitorId = result.visitorId;
+
+      incrementViewCount({ username, visitorId });
+    };
+
+    trackProfileView();
   }, [profile, username, incrementViewCount]);
 
   const bio = profile?.bio || "";
@@ -35,12 +45,7 @@ const PublicProfile: React.FC = () => {
     console.log("Something");
   };
 
-  if (isLoading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
+  if (isLoading) return <ProfileSkeleton />;
 
   // Render the right section components
   const renderRightSectionComponents = () => (
@@ -111,8 +116,8 @@ const PublicProfile: React.FC = () => {
         <div className="space-y-6">{renderMainContentSections()}</div>
       </div>
 
-      <div className="hidden lg:grid xl:grid 2xl:grid grid-cols-10 gap-6">
-        <div className="flex flex-col col-span-10 max-w-4xl mx-auto">
+      <div className="hidden lg:grid xl:grid 2xl:grid grid-cols-10 gap-6 max-w-4xl mx-auto">
+        <div className="flex flex-col col-span-10">
           <div className="mb-6">
             <ProfileBanner
               user={profile}
