@@ -45,7 +45,7 @@ const GoalsWindow: React.FC<GoalsWindowProps> = ({
         </select>
       </div>
       {/* current job status */}
-      <div className="flex flex-col gap-4 items-stretch ">
+      {/* <div className="flex flex-col gap-4 items-stretch ">
         <p className="text-black text-base font-medium font-['Ubuntu'] leading-snug  ">
           {" "}
           Current Status
@@ -55,7 +55,7 @@ const GoalsWindow: React.FC<GoalsWindowProps> = ({
           <option>Not unemployed for job</option>
           <option>Not looking for job</option>
         </select>
-      </div>
+      </div> */}
     </div>
   );
 };
@@ -142,7 +142,7 @@ const JobSideBar: React.FC<JobSideBarProps> = ({
         selectedGoalId={selectedGoalId}
         onGoalChange={onGoalChange}
       ></GoalsWindow>
-      <MyJobs applied={2} intervied={3} shortlisted={4}></MyJobs>
+      {/* <MyJobs applied={2} intervied={3} shortlisted={4}></MyJobs> */}
     </div>
   );
 };

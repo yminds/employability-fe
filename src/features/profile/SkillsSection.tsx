@@ -34,7 +34,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between p-0 mb-8">
+      <CardHeader className="flex flex-row items-center justify-between p-0 mb-4">
         <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
           Skills ({skills.length})
         </h2>
@@ -54,8 +54,8 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
           </div>
         ) : (
           <>
-            <div className="lg:divide-y lg:divide-[#E5E7EB] xl:divide-y xl:divide-[#E5E7EB] md:divide-y md:divide-[#E5E7EB] 2xl:divide-y 2xl:divide-[#E5E7EB]">
-              {displaySkills.map((skill: Skill) => (
+            <div>
+              {displaySkills.map((skill: Skill, index: number) => (
                 <React.Fragment key={skill._id}>
                   <PublicSkillCard
                     skillId={skill._id}
@@ -70,6 +70,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
                     level={skill.level}
                     best_interview={skill.best_interview}
                     username={username}
+                    isFirst={index === 0}
                   />
                 </React.Fragment>
               ))}

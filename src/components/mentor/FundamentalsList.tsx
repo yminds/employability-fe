@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import QuizActionBtns from "./QuizActionBtns";
-import { ChevronUp, ChevronDown, X } from "lucide-react";
+import { ChevronUp, ChevronDown, X, BadgeCheck } from "lucide-react";
 
 interface Fundamental {
   name: string;
@@ -66,24 +66,26 @@ const FundamentalBar: React.FC<FundamentalBarProps> = ({
                   <div key={index} className="relative p-1">
                     {index < fundamentals.length && (
                       <span
-                        className={`absolute left-4 w-[2px] ${
-                          isOpen
+                        className={`absolute left-4 w-[2px] ${isOpen
                             ? "bg-black top-10 bottom-[-13px]"
                             : "bg-gray-200 top-12 bottom-[-13px]"
-                        } ${index === 0 ? "top-10" : "top-0"} ${
-                          index === fundamentals.length - 1 ? "top-[100vh]" : ""
-                        }`}
+                          } ${index === 0 ? "top-10" : "top-0"} ${index === fundamentals.length - 1 ? "top-[100vh]" : ""
+                          }`}
                       />
                     )}
 
-                    {/* Step circle with index */}
+                    {/* Step circle with index or badge */}
                     <div
                       className={`absolute left-0 top-3 h-9 w-9 flex items-center justify-center rounded-full 
-                      ${isOpen ? "bg-button text-white" : "bg-[#F0F5F333] border border-grey-2 text-gray-700"}`}
+            ${isOpen ? "bg-button text-white" : "bg-[#F0F5F333] border border-grey-2 text-gray-700"}`}
                     >
-                      <span className={`text-button font-ubuntu ${isOpen ? "text-white" : "text-grey-4"}`}>
-                        {index + 1}
-                      </span>
+                      {item.status === "Completed" ? (
+                        <BadgeCheck size={20} className={isOpen ? "text-white" : "text-grey-4"} />
+                      ) : (
+                        <span className={`text-button font-ubuntu ${isOpen ? "text-white" : "text-grey-4"}`}>
+                          {index + 1}
+                        </span>
+                      )}
                     </div>
 
                     {/* The card itself */}

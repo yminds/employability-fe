@@ -24,7 +24,7 @@ const QuizActionBtns: React.FC<QuizActionbtnsProps> = ({
         >
           Skip
           {/* Tooltip */}
-          <span className="absolute bottom-[-32px] left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-[#00163012] text-xs rounded py-1 px-2 whitespace-nowrap">
+          <span className="absolute bottom-[-40px] left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-[#00163012] text-xs rounded py-1 px-2 whitespace-nowrap">
             Skip current concept
           </span>
         </button>

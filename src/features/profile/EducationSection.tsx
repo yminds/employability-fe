@@ -60,7 +60,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 pb-0">
+      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 pb-0 sm:px-5 sm:pt-5">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
             Education
@@ -161,7 +161,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
           </div>
         ) : (
           <>
-            <div className="divide-y divide-[#E5E7EB] p-8 relative">
+            <div className="divide-y divide-[#E5E7EB] p-8 sm:p-5 relative">
               {displayedEducation.map((edu: Education, index: number) => (
                 <div
                   key={edu._id || index}
