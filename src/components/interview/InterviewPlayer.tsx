@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { memo, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import ReactPlayer from "react-player";
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader } from "lucide-react";
 
@@ -31,7 +31,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
 
   const [updatedProgresssion, setUpdatedProgression] = useState(0);
   const CHUNK_DURATION = 30;
-  
+
   // References for touch events
   const timelineRef = useRef<HTMLInputElement>(null);
   const volumeSliderRef = useRef<HTMLInputElement>(null);
@@ -55,7 +55,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     }
   }, [currentChunk, urls, nextChunkPreloaded]);
 
-  const handleProgress = (state: { played: number; playedSeconds: number }) => {
+  const handleProgress = useCallback((state: { played: number; playedSeconds: number }) => {
     if (seeking) return;
 
     const totalDuration = urls.length * CHUNK_DURATION;
@@ -73,9 +73,8 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
       setIsLoading(true);
       setCurrentChunk((prev) => prev + 1);
       setNextChunkPreloaded(false);
-      setIsPlaying(true);
     }
-  };
+  }, []);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -148,14 +147,14 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
       if (player) {
         try {
           player.pause();
-          player.src = urls[chunkIndex];
+          // player.src = urls[chunkIndex];
+          setSeeking(true);
+          setCurrentChunk(chunkIndex);
 
           await new Promise((resolve) => {
             player.addEventListener("loadedmetadata", resolve, { once: true });
           });
 
-          setSeeking(true);
-          setCurrentChunk(chunkIndex);
           setNextChunkPreloaded(false);
           setUpdatedProgression(progressWithinChunk);
 
@@ -195,7 +194,6 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   useEffect(() => {
     if (playerRef.current) {
       const player = playerRef.current.getInternalPlayer();
-      setIsPlaying(true);
       setSeeking(false);
     }
     return () => {
@@ -236,7 +234,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
 
     window.addEventListener("mouseup", handleGlobalMouseUp);
     window.addEventListener("touchend", handleGlobalTouchEnd);
-    
+
     return () => {
       window.removeEventListener("mouseup", handleGlobalMouseUp);
       window.removeEventListener("touchend", handleGlobalTouchEnd);
@@ -284,6 +282,10 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     setProgress(Math.floor((currentChunk / urls.length) * 100));
     setDuration(formatTime(urls.length * CHUNK_DURATION));
   }, [currentChunk, urls.length]);
+
+  console.log("--------------------------------------------------");
+  console.log("rendered InterviewPlayer");
+  console.log("--------------------------------------------------");
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
@@ -417,4 +419,4 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   );
 };
 
-export default InterviewPlayer;
+export default memo(InterviewPlayer);

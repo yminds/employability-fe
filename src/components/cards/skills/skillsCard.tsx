@@ -125,7 +125,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
         : "bg-[#FFF2DB] text-[#D48A0C]";
     }
   };
-
+ 
   const skillsLevelObj = { 1: "Basic", 2: "Intermediate", 3: "Advanced" };
 
   const handleViewReport = () => {
