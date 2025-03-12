@@ -5,9 +5,7 @@ import type { RootState } from "@/store/store";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
 import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
 import SkillsHeader from "@/components/skills/skillsheader";
-import ProjectCard, {
-  ProjectCardSkeleton,
-} from "@/components/projects/ProjectCard";
+import ProjectCard, { ProjectCardSkeleton } from "@/components/projects/ProjectCard";
 import ProjectInsights from "@/components/projects/ProjectInsights";
 import { ProjectUploadModal } from "@/components/projects/modal/ProjectUploadModal";
 import ProjectDeleteModal from "@/components/projects/modal/ProjectDeleteModal";
@@ -113,33 +111,18 @@ const EmptyState: React.FC<{
 }> = ({ selectedGoalName, onUploadClick }) => (
   <div className="relative flex flex-col items-center justify-center min-h-[80vh] p-8">
     <div className="absolute inset-0 z-0">
-      <img
-        src={backgroundImageSVG}
-        alt=""
-        className="w-full h-full object-cover opacity-50"
-      />
+      <img src={backgroundImageSVG} alt="" className="w-full h-full object-cover opacity-50" />
     </div>
 
     <div className="relative z-10 text-center space-y-8">
       <div>
-        <h1 className="text-2xl font-bold font-ubuntu text-gray-900 mb-2">
-          No Projects Yet for {selectedGoalName}
-        </h1>
-        <p className="text-gray-600">
-          Start showcasing your skills by adding your first project.
-        </p>
+        <h1 className="text-2xl font-bold font-ubuntu text-gray-900 mb-2">No Projects Yet for {selectedGoalName}</h1>
+        <p className="text-gray-600">Start showcasing your skills by adding your first project.</p>
       </div>
 
       <div className="w-full max-w-md space-y-4">
-        <div
-          className="flex justify-center cursor-pointer hover:opacity-90 transition-opacity"
-          onClick={onUploadClick}
-        >
-          <img
-            src={UploadProjectSVG || "/placeholder.svg"}
-            alt="Upload Project"
-            className="w-auto h-auto"
-          />
+        <div className="flex justify-center cursor-pointer hover:opacity-90 transition-opacity" onClick={onUploadClick}>
+          <img src={UploadProjectSVG || "/placeholder.svg"} alt="Upload Project" className="w-auto h-auto" />
         </div>
 
         <div className="flex justify-center cursor-pointer hover:opacity-90 transition-opacity">
@@ -164,11 +147,10 @@ const ProjectListing = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [skillsUpdated, setSkillsUpdated] = useState(false);
   const [isChangingGoal, setIsChangingGoal] = useState(false);
-
+  const [shouldPoll, setShouldPoll] = useState(false);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
-  const { data: goalData, isLoading: goalsLoading } =
-    useGetGoalsbyuserQuery(userId);
+  const { data: goalData, isLoading: goalsLoading } = useGetGoalsbyuserQuery(userId);
   const goalDetails = goalData?.data;
 
   const {
@@ -180,6 +162,27 @@ const ProjectListing = () => {
     userId: userId ?? "",
     goalId: selectedGoalId ?? undefined,
   });
+
+  // setting the shoudPoll state of any project is "in-review"
+  useEffect(() => {
+    if (projectsData?.data.some((project) => project.status === "In-review")) {
+      setShouldPoll(true);
+    } else {
+      setShouldPoll(false);
+    }
+  }, [projectsData]);
+
+  // Polling the projects every 5 seconds if any project is "in-review"
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (shouldPoll) {
+      interval = setInterval(() => {
+        refetchProjects();
+      }, 5000);
+    }
+
+    return () => clearInterval(interval);
+  }, [shouldPoll, refetchProjects]);
 
   useEffect(() => {
     if (goalData?.data?.length && selectedGoalId === null) {
@@ -235,114 +238,103 @@ const ProjectListing = () => {
     return <ProjectListingSkeleton />;
   }
 
-  const selectedGoal = goalData?.data.find(
-    (goal) => goal._id === selectedGoalId
-  );
+  const selectedGoal = goalData?.data.find((goal) => goal._id === selectedGoalId);
   const selectedGoalName = selectedGoal?.name || "";
   const selectedGoalExperience = selectedGoal?.experience || null;
 
   return (
     <div className="w-[95%] h-screen overflow-hidden max-w-[1800px] p-5 bg-[#F5F5F5] mx-auto">
       <div className="w-full max-w-screen-xl flex flex-col gap-6">
-      <ProjectUploadModal
-        open={isModalOpen}
-        onOpenChange={handleCloseModal}
-        selectedGoalId={selectedGoalId || ""}
-        existingProject={selectedProject}
-        onSuccess={async () => {
-          await refetchProjects();
-          setIsModalOpen(false);
-          setSelectedProject(null);
-        }}
-      />
-
-      {projectToDelete && (
-        <ProjectDeleteModal
-          open={isDeleteModalOpen}
-          onOpenChange={handleCloseDeleteModal}
-          projectId={projectToDelete}
+        <ProjectUploadModal
+          open={isModalOpen}
+          onOpenChange={handleCloseModal}
+          selectedGoalId={selectedGoalId || ""}
+          existingProject={selectedProject}
           onSuccess={async () => {
             await refetchProjects();
-            setIsDeleteModalOpen(false);
-            setProjectToDelete(null);
+            setIsModalOpen(false);
+            setSelectedProject(null);
           }}
         />
-      )}
 
-      <section className="flex items-center space-x-2 gap-3">
-        <button
-          onClick={handleBackToDashboard}
-          className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
-        >
-          <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
-        </button>
-        <h1 className="text-black font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.025rem]">
-          Projects
-        </h1>
-      </section>
+        {projectToDelete && (
+          <ProjectDeleteModal
+            open={isDeleteModalOpen}
+            onOpenChange={handleCloseDeleteModal}
+            projectId={projectToDelete}
+            onSuccess={async () => {
+              await refetchProjects();
+              setIsDeleteModalOpen(false);
+              setProjectToDelete(null);
+            }}
+          />
+        )}
 
-      <section className="w-full h-[calc(100vh-2rem)]">
-        <div className="h-full flex justify-center">
-          <div className="w-full flex gap-6 md:flex-col-reverse sm:flex-col-reverse">
-            <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
-              <div className="sticky top-0 left-0 z-10 sm:relative">
-                {goalData && (
-                  <SkillsHeader
-                    userId={userId}
-                    goals={goalData}
-                    selectedGoalName={selectedGoalName}
-                    onSkillsStatusChange={setSkillsUpdated}
-                    onGoalChange={handleGoalChange}
-                    selectedGoalExperienceLevel={selectedGoalExperience}
-                    hideAddSkillsButton={true}
-                    onAddCreate={() => handleOpenUploadModal()}
-                  />
-                )}
+        <section className="flex items-center space-x-2 gap-3">
+          <button
+            onClick={handleBackToDashboard}
+            className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
+          >
+            <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
+          </button>
+          <h1 className="text-black font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.025rem]">
+            Projects
+          </h1>
+        </section>
+
+        <section className="w-full h-[calc(100vh-2rem)]">
+          <div className="h-full flex justify-center">
+            <div className="w-full flex gap-6 md:flex-col-reverse sm:flex-col-reverse">
+              <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
+                <div className="sticky top-0 left-0 z-10 sm:relative">
+                  {goalData && (
+                    <SkillsHeader
+                      userId={userId}
+                      goals={goalData}
+                      selectedGoalName={selectedGoalName}
+                      onSkillsStatusChange={setSkillsUpdated}
+                      onGoalChange={handleGoalChange}
+                      selectedGoalExperienceLevel={selectedGoalExperience}
+                      hideAddSkillsButton={true}
+                      onAddCreate={() => handleOpenUploadModal()}
+                    />
+                  )}
+                </div>
+
+                <div className="mt-[70px] mb-[50px] sm:mt-4 overflow-y-auto scrollbar-hide">
+                  {projectsError ? (
+                    <div className="text-center text-red-500 py-4">Error loading projects</div>
+                  ) : projectsLoading || isChangingGoal ? (
+                    <ProjectContentSkeleton />
+                  ) : !projectsData?.data.length ? (
+                    <EmptyState selectedGoalName={selectedGoalName} onUploadClick={() => handleOpenUploadModal()} />
+                  ) : (
+                    <div className="space-y-4">
+                      {projectsData.data.map((project) => (
+                        <ProjectCard
+                          key={project._id}
+                          project={project}
+                          onOpenUploadModal={() => handleOpenUploadModal(project)}
+                          onOpenDeleteModal={handleOpenDeleteModal}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="mt-[70px] mb-[50px] sm:mt-4 overflow-y-auto scrollbar-hide">
-                {projectsError ? (
-                  <div className="text-center text-red-500 py-4">
-                    Error loading projects
-                  </div>
-                ) : projectsLoading || isChangingGoal ? (
-                  <ProjectContentSkeleton />
-                ) : !projectsData?.data.length ? (
-                  <EmptyState
-                    selectedGoalName={selectedGoalName}
-                    onUploadClick={() => handleOpenUploadModal()}
-                  />
-                ) : (
-                  <div className="space-y-4">
-                    {projectsData.data.map((project) => (
-                      <ProjectCard
-                        key={project._id}
-                        project={project}
-                        onOpenUploadModal={() => handleOpenUploadModal(project)}
-                        onOpenDeleteModal={handleOpenDeleteModal}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex-[2] w-[30%] space-y-4">
-              <div className="flex sticky md:relative md:top-0 sm:relative sm:top-0">
-                {projectsLoading || isChangingGoal ? (
-                  <ProjectInsightsSkeleton />
-                ) : (
-                  <ProjectInsights
-                    goalId={selectedGoalId || ""}
-                    userId={userId || ""}
-                    goalDetails={goalDetails}
-                  />
-                )}
+              <div className="flex-[2] w-[30%] space-y-4">
+                <div className="flex sticky md:relative md:top-0 sm:relative sm:top-0">
+                  {projectsLoading || isChangingGoal ? (
+                    <ProjectInsightsSkeleton />
+                  ) : (
+                    <ProjectInsights goalId={selectedGoalId || ""} userId={userId || ""} goalDetails={goalDetails} />
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
       </div>
     </div>
   );

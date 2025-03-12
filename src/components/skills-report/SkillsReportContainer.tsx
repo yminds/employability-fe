@@ -53,12 +53,12 @@ interface ReportContentProps {
   skillId: string;
   userSkillId: string;
   level: string;
-  skill:string;
-  publicProfileName:string
+  skill: string;
+  publicProfileName: string;
   isPublic?: boolean;
 }
 
-const getShareUrl = (publicProfileName : string) => {
+const getShareUrl = (publicProfileName: string) => {
   if (typeof window === "undefined") return "";
   const currentPath = window.location.pathname;
   const interviewId = currentPath.split("/").pop();
@@ -139,10 +139,10 @@ const ReportContent: React.FC<ReportContentProps> = ({
       const opt = {
         margin: [32, 32, 32, 32],
         filename: `${userName}-${reportData.interview_id?.title}-Report.pdf`,
-        image: { type: "jpeg", quality: 0.20 },
+        image: { type: "jpeg", quality: 0.2 },
         html2canvas: {
           scale: 2,
-          useCORS: true,         // must be true for crossOrigin images
+          useCORS: true, // must be true for crossOrigin images
           allowTaint: false,
         },
         jsPDF: {
@@ -161,7 +161,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
       setIsGeneratingPDF(false);
     }
   };
-  
+
   const { createInterview } = useCreateInterview();
 
   const navigate = useNavigate();
@@ -172,12 +172,12 @@ const ReportContent: React.FC<ReportContentProps> = ({
       user_skill_id: userSkillId,
       skill_id: skillId,
     });
-    
+
     // Start the interview after closing the tutorial
     navigate(`/interview/${interviewId}`, {
-      state: { skill, skillId:userSkillId, skillPoolId:skillId, level },
+      state: { skill, skillId: userSkillId, skillPoolId: skillId, level },
     });
-  }
+  };
 
   return (
     <div className="flex w-full h-screen print:h-auto justify-center overflow-y-auto print:overflow-visible font-ubuntu p-6">
@@ -192,17 +192,10 @@ const ReportContent: React.FC<ReportContentProps> = ({
                   className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
                 >
                   {/* Add crossOrigin="anonymous" here */}
-                  <img
-                    crossOrigin="anonymous"
-                    className="w-[10px] h-[10px]"
-                    src={arrow}
-                    alt="Back"
-                  />
+                  <img crossOrigin="anonymous" className="w-[10px] h-[10px]" src={arrow} alt="Back" />
                 </button>
               )}
-              <span className="text-h1">
-                 {reportData.interview_id?.title} Report
-              </span>
+              <span className="text-h1">{reportData.interview_id?.title} Report</span>
             </h1>
           </div>
 
@@ -218,9 +211,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
               </button>
               {showSharePopup && (
                 <div className="absolute right-0 top-[40px] bg-white border border-gray-300 rounded p-4 shadow-md min-w-[250px] z-10">
-                  <p className="text-sm text-grey-7 font-medium mb-2">
-                    Share this link:
-                  </p>
+                  <p className="text-sm text-grey-7 font-medium mb-2">Share this link:</p>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
@@ -258,28 +249,22 @@ const ReportContent: React.FC<ReportContentProps> = ({
           )}
           <div
             id="printable-area"
-            className={`relative flex gap-6 ${!isGeneratingPDF ? "flex-row" : "flex-col-reverse"
-              }`}
+            className={`relative flex gap-6 ${!isGeneratingPDF ? "flex-row" : "flex-col-reverse"}`}
           >
             {/* Left Section */}
             <section className="w-full flex-[7.5]">
               {/* Video Container – hidden in PDF via the "pdf-hide" class */}
               {reportData.s3_recording_url && (
-                <section
-                  className={`flex justify-center pdf-hide ${!isGeneratingPDF ? "flex" : "hidden"
-                    }`}
-                >
+                <section className={`flex justify-center pdf-hide ${!isGeneratingPDF ? "flex" : "hidden"}`}>
                   <div className="continer-player w-full h-[28rem] relative">
+                    {/* <InterviewPlayer urls={reportData.s3_recording_url} /> */}
                     <InterviewPlayer urls={reportData.s3_recording_url} />
                   </div>
                 </section>
               )}
 
               {/* Summary Section */}
-              <section
-                className={`bg-white rounded-md shadow-sm p-8 ${isGeneratingPDF ? "mb-0" : "mb-6"
-                  }`}
-              >
+              <section className={`bg-white rounded-md shadow-sm p-8 ${isGeneratingPDF ? "mb-0" : "mb-6"}`}>
                 <h2 className="text-h2 font-medium text-grey-7 mb-6">Summary</h2>
                 <div className="mb-8">
                   <p className="text-body2 text-grey-6 leading-relaxed">
@@ -298,23 +283,17 @@ const ReportContent: React.FC<ReportContentProps> = ({
                           className="w-[20px] h-[20px]"
                         />
                       </div>
-                      <h3 className="text-sub-header font-medium text-grey-7 flex items-center gap-2">
-                        Strengths
-                      </h3>
+                      <h3 className="text-sub-header font-medium text-grey-7 flex items-center gap-2">Strengths</h3>
                     </div>
                     <ul className="space-y-2">
                       {reportData.summary?.strengths?.length ? (
                         reportData.summary.strengths.map((strength, index) => (
                           <li key={index} className="flex items-start gap-2">
-                            <span className="text-body2 text-grey-6">
-                              {strength}
-                            </span>
+                            <span className="text-body2 text-grey-6">{strength}</span>
                           </li>
                         ))
                       ) : (
-                        <li className="text-body2 text-grey-5">
-                          No strengths available
-                        </li>
+                        <li className="text-body2 text-grey-5">No strengths available</li>
                       )}
                     </ul>
                   </div>
@@ -336,29 +315,20 @@ const ReportContent: React.FC<ReportContentProps> = ({
                     </div>
                     <ul className="space-y-2">
                       {reportData.summary?.improvements?.length ? (
-                        reportData.summary.improvements.map(
-                          (improvement, index) => (
-                            <li key={index} className="flex items-start gap-2">
-                              <span className="text-body2 text-grey-6">
-                                {improvement}
-                              </span>
-                            </li>
-                          )
-                        )
+                        reportData.summary.improvements.map((improvement, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="text-body2 text-grey-6">{improvement}</span>
+                          </li>
+                        ))
                       ) : (
-                        <li className="text-body2 text-grey-5">
-                          No improvements available
-                        </li>
+                        <li className="text-body2 text-grey-5">No improvements available</li>
                       )}
                     </ul>
                   </div>
                 </div>
               </section>
 
-              <section
-                className={`bg-white rounded-md shadow-sm p-8 ${isGeneratingPDF ? "mb-0" : "mb-6"
-                  }`}
-              >
+              <section className={`bg-white rounded-md shadow-sm p-8 ${isGeneratingPDF ? "mb-0" : "mb-6"}`}>
                 <PerformanceHighlights
                   highlights={reportData.summary?.performance_highlights}
                   isGeneratingPDF={isGeneratingPDF}
@@ -367,33 +337,22 @@ const ReportContent: React.FC<ReportContentProps> = ({
 
               {/* Concept Breakdown */}
               <section className="mb-6 bg-white rounded-xl p-8">
-                <h2 className="text-h2 font-medium text-grey-7 mb-4">
-                  Concept Breakdown
-                </h2>
+                <h2 className="text-h2 font-medium text-grey-7 mb-4">Concept Breakdown</h2>
                 <div className="grid grid-cols-1 gap-6">
                   {reportData.concept_ratings?.length ? (
                     reportData.concept_ratings.map((rating, index) => (
-                      <Card
-                        key={index}
-                        className="bg-white border border-grey-2 rounded-md shadow-sm"
-                      >
+                      <Card key={index} className="bg-white border border-grey-2 rounded-md shadow-sm">
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-sub-header font-medium text-grey-7">
-                              {rating.concept}
-                            </h3>
+                            <h3 className="text-sub-header font-medium text-grey-7">{rating.concept}</h3>
                             <span>{rating.rating}/5</span>
                           </div>
-                          <p className="text-body2 text-grey-6">
-                            {rating.reason}
-                          </p>
+                          <p className="text-body2 text-grey-6">{rating.reason}</p>
                         </CardContent>
                       </Card>
                     ))
                   ) : (
-                    <p className="text-grey-5">
-                      No competency ratings available
-                    </p>
+                    <p className="text-grey-5">No competency ratings available</p>
                   )}
                 </div>
               </section>
@@ -411,18 +370,13 @@ const ReportContent: React.FC<ReportContentProps> = ({
               />
 
               {/* Progress Bars for Concept Ratings */}
-              <section
-                className={`bg-white rounded-md shadow-sm mt-6 p-8 ${isGeneratingPDF ? "mb-0" : "mb-6"
-                  }`}
-              >
+              <section className={`bg-white rounded-md shadow-sm mt-6 p-8 ${isGeneratingPDF ? "mb-0" : "mb-6"}`}>
                 <div className="flex-cols gap-6">
                   {reportData.concept_ratings?.length ? (
                     reportData.concept_ratings.map((rating, index) => (
                       <div key={index} className=" py-2">
                         <div className="flex items-center justify-between mb-1">
-                          <h3 className="text-sub-header font-medium text-grey-7">
-                            {rating.concept}
-                          </h3>
+                          <h3 className="text-sub-header font-medium text-grey-7">{rating.concept}</h3>
                         </div>
                         <div className="min-w-full bg-background-grey min-h-2 relative rounded-full overflow-hidden mt-2">
                           <div
@@ -435,9 +389,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                       </div>
                     ))
                   ) : (
-                    <p className="text-grey-5">
-                      No competency ratings available
-                    </p>
+                    <p className="text-grey-5">No competency ratings available</p>
                   )}
                 </div>
               </section>
@@ -445,24 +397,18 @@ const ReportContent: React.FC<ReportContentProps> = ({
               {/* PDF Download Section – hidden in PDF */}
               {!sharedReport && (
                 <div className="flex flex-col gap-6">
-                  <section
-                    className={`bg-white rounded-md p-8 pdf-hide ${!isGeneratingPDF ? "" : "hidden"
-                      }`}
-                  >
+                  <section className={`bg-white rounded-md p-8 pdf-hide ${!isGeneratingPDF ? "" : "hidden"}`}>
                     <div className="text-body2 mb-6">
                       Retake the interview to refine your skill verification and achieve a higher score.
                     </div>
                     <button
                       className="flex gap-2 items-center px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={handleImproveScore} 
+                      onClick={handleImproveScore}
                     >
                       Improve Score
                     </button>
                   </section>
-                  <section
-                    className={`bg-white rounded-md p-8 pdf-hide ${!isGeneratingPDF ? "" : "hidden"
-                      }`}
-                  >
+                  <section className={`bg-white rounded-md p-8 pdf-hide ${!isGeneratingPDF ? "" : "hidden"}`}>
                     <div className="text-body2 mb-6">
                       Get a PDF version of this skill report to share with employers
                     </div>
@@ -471,13 +417,11 @@ const ReportContent: React.FC<ReportContentProps> = ({
                       onClick={generatePDF}
                       disabled={isGeneratingPDF}
                     >
-                      <img
-                        className="w-4 h-4"
-                        src={download}
-                        alt="Download PDF"/>
+                      <img className="w-4 h-4" src={download} alt="Download PDF" />
                       {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
                     </button>
-                  </section></div>
+                  </section>
+                </div>
               )}
             </section>
           </div>

@@ -632,7 +632,7 @@ export function ProjectUploadModal({
       }
     } catch (error: any) {
       console.error("Error submitting project for review:", error);
-      toast.error(error.data?.message || "Failed to submit project for review");
+
     }
   };
 
