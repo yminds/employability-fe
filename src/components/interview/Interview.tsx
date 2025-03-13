@@ -65,7 +65,9 @@ const Interview: React.FC<{
   type: "Skill" | "Mock" | "Project";
   jobDescription: JobDescription;
   isResume: boolean;
-}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false }) => {
+  userExperience:string | undefined
+}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false, userExperience }) => {
+  console.log("in interviews jobDescription", jobDescription);
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
@@ -126,16 +128,16 @@ const Interview: React.FC<{
     const handleAIResponse = (data: string) => {
       console.log("[enetred to ai response]", question);
 
-      if (!data) {
-        addMessage("Sorry, I didn't get that. Can you please repeat the question?");
-        return;
-      }
+      // if (!data) {
+      //   addMessage("Sorry, I didn't get that. Can you please repeat the question?");
+      //   return;
+      // }
 
       setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
 
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
-
+  
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
       setQuestion((prev) => ({
@@ -219,7 +221,7 @@ const Interview: React.FC<{
       handleMessage(text, "USER");
       addMessage(text);
     }
-
+  
     if (sttError) {
       console.error("Speech-to-text error:", sttError);
     }
@@ -290,6 +292,7 @@ const Interview: React.FC<{
       type: type,
       jobDescription: jobDescription,
       userName: user?.name,
+      userExperience: userExperience
     }).unwrap();
 
     console.log("response", response);

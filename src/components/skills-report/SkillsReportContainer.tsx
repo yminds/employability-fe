@@ -437,9 +437,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
               </button>
               {showSharePopup && (
                 <div className="absolute right-0 top-[40px] bg-white border border-gray-300 rounded p-4 shadow-md min-w-[250px] z-10">
-                  <p className="text-sm text-grey-7 font-medium mb-2">
-                    Share this link:
-                  </p>
+                  <p className="text-sm text-grey-7 font-medium mb-2">Share this link:</p>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
