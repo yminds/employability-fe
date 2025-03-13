@@ -1,602 +1,474 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
-import { TabsContent } from "@/components/ui/tabs";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
-import { 
-  useScreenCandidatesMutation,
-  useGetScreeningResultsQuery
-} from '../../api/screenCardApislice';
-import { 
-  useInviteCandidatesMutation
-} from '../../api/emailInvitationApiSlice';
-import { IJob } from './JobCard';
-import { jobUtils } from '../../utils/jobUtils';
-import {toast} from 'sonner'
-import ResumeUploader from '@/components/employer/ResumeUpload';
+import { Loader2, Mail } from "lucide-react";
+import { toast } from "sonner";
+ 
+// Import sub-tab components
+import CandidatesTab from "./CandidatesTab";
+import ScreeningResultsTab from "./matchingResultTabs";
+import InvitedCandidatesTab from "./InviteCandidatesTab";
+ 
+// Import types
+import { IJob, ScreeningCard, ProcessedResume } from "../../types/candidate";
 import {
-  Upload,
-  CheckCircle,
-  Search,
-  AlertCircle,
-  X,
-  Loader2,
-  FileText,
-  Mail,
-  SendHorizonal
-} from 'lucide-react';
-
+  useScreenCandidatesMutation,
+  useGetScreeningResultsQuery,
+} from "../../api/matchingCardApi";
+import {
+  useInviteCandidatesMutation,
+  useResendInvitationMutation,
+  useGetInvitationStatusesQuery,
+} from "../../api/emailInvitationApiSlice";
+ 
 interface JobDetailsTabsProps {
   job: IJob;
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
-
-interface ICandidate {
-  _id: string;
-  name: string;
-  email: string;
-  skills?: string[];
-  experience?: string;
-  education?: string;
-  match_score?: number;
-  status?: string;
-}
-
-interface IScreeningResult {
-  _id: string;
-  candidate_id: ICandidate;
-  status: "passed" | "failed";
-  matching_score: number;
-  reason: string;
-  invite_status: "not_invited" | "invited";
-}
-
-const JobDetailsTabs: React.FC<JobDetailsTabsProps> = ({ job, activeTab, setActiveTab }) => {
+ 
+const JobDetailsTabs: React.FC<JobDetailsTabsProps> = ({
+  job,
+  activeTab,
+  setActiveTab,
+}) => {
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [isScreening, setIsScreening] = useState(false);
   const [isSendingInvites, setIsSendingInvites] = useState(false);
-  const [batchId, setBatchId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [screeningBatchId, setScreeningBatchId] = useState<string | null>(null);
+  const [invitationBatchId, setInvitationBatchId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [showInviteDialog, setShowInviteDialog] = useState(false);
-  const [customMessage, setCustomMessage] = useState('');
-  
+  const [customMessage, setCustomMessage] = useState("");
+  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([]);
+  const [isScreeningPolling, setIsScreeningPolling] = useState(false);
+  const [isInvitationPolling, setIsInvitationPolling] = useState(false);
+  const [screeningCompleted, setScreeningCompleted] = useState(false);
+  const [invitationCompleted, setInvitationCompleted] = useState(false);
+ 
+  // Reference to the workers
+  const matchingWorkerRef = useRef<Worker | null>(null);
+  const invitationWorkerRef = useRef<Worker | null>(null);
+ 
   const employer = useSelector((state: RootState) => state.employerAuth.employer);
-  
+ 
   // RTK Query hooks
   const [screenCandidates] = useScreenCandidatesMutation();
   const [inviteCandidates] = useInviteCandidatesMutation();
-  
-  const { data: screeningResults, isLoading: isLoadingResults } = useGetScreeningResultsQuery(
-    { job_id: job._id },
-    { skip: activeTab !== 'screening' }
+  const [resendInvitation] = useResendInvitationMutation();
+ 
+  const {
+    data: screeningResults,
+    isLoading: isLoadingResults,
+    refetch: refetchScreeningResults
+  } = useGetScreeningResultsQuery(
+    { job_id: job._id, batch_id: screeningBatchId },
+    {
+      skip: activeTab !== "screening" || !screeningBatchId,
+      pollingInterval: 0,
+    }
   );
-  
-  // Handle candidate selection
-  const handleSelectCandidate = (candidateId: string) => {
-    if (selectedCandidates.includes(candidateId)) {
-      setSelectedCandidates(selectedCandidates.filter(id => id !== candidateId));
-    } else {
-      setSelectedCandidates([...selectedCandidates, candidateId]);
+ 
+  const { 
+    data: invitationStatuses, 
+    isLoading: isLoadingInvitations,
+    refetch: refetchInvitations
+  } = useGetInvitationStatusesQuery(
+    { 
+      job_id: job._id,
+      employer_id: employer?._id || ''
+    }, 
+    { 
+      skip: activeTab !== "invited",
+      pollingInterval: 0,
     }
-  };
-  
-  // Handle "Select All" functionality
-  const handleSelectAll = (candidates: ICandidate[]) => {
-    if (selectedCandidates.length === candidates.length) {
-      setSelectedCandidates([]);
-    } else {
-      setSelectedCandidates(candidates.map(c => c._id));
+  );
+ 
+  // Handle tab changes and refetching data
+  useEffect(() => {
+    if (activeTab === "screening" && screeningBatchId) {
+      refetchScreeningResults();
+    } else if (activeTab === "invited") {
+      refetchInvitations();
     }
-  };
-  
-  // Start screening process
-const handleScreenCandidates = async () => {
+  }, [activeTab, screeningBatchId, refetchScreeningResults, refetchInvitations]);
+ 
+  // Initialize workers
+  useEffect(() => {
+    if (!matchingWorkerRef.current) {
+      matchingWorkerRef.current = new Worker(
+        new URL("../../workers/matchingWorker.ts", import.meta.url),
+        { type: "module" }
+      );
+      matchingWorkerRef.current.addEventListener("message", (event) => {
+        const { type, data } = event.data;
+        switch (type) {
+          case "SCREENING_WORKER_READY":
+            console.log("Screening worker is ready");
+            break;
+          case "SCREENING_PROGRESS":
+            console.log("Screening progress update:", data);
+            break;
+          case "SCREENING_COMPLETE":
+            setIsScreeningPolling(false);
+            setScreeningCompleted(true);
+            toast.success("Screening completed", {
+              description: "Candidates have been screened successfully.",
+            });
+            
+            refetchScreeningResults();
+            
+            if (matchingWorkerRef.current) {
+              matchingWorkerRef.current.terminate();
+              matchingWorkerRef.current = null;
+            }
+            break;
+          case "SCREENING_ERROR":
+            setIsScreeningPolling(false);
+            toast.error("Screening error", {
+              description: data.error || "There was an error during screening.",
+            });
+            if (matchingWorkerRef.current) {
+              matchingWorkerRef.current.terminate();
+              matchingWorkerRef.current = null;
+            }
+            break;
+          default:
+            console.warn("Unknown message type from screening worker:", type);
+        }
+      });
+    }
+
+    // Initialize the invitation worker
+    if (!invitationWorkerRef.current) {
+      invitationWorkerRef.current = new Worker(
+        new URL("../../workers/invitationWorker.ts", import.meta.url),
+        { type: "module" }
+      );
+      invitationWorkerRef.current.addEventListener("message", (event) => {
+        const { type, data } = event.data;
+        switch (type) {
+          case "INVITATION_WORKER_READY":
+            console.log("Invitation worker is ready");
+            break;
+          case "INVITATION_PROGRESS":
+            // Update invitation progress state
+            console.log("Invitation progress update:", data);
+            break;
+          case "INVITATION_COMPLETE":
+            setIsInvitationPolling(false);
+            setInvitationCompleted(true);
+            toast.success("Invitations sent", {
+              description: "Candidates have been invited successfully.",
+            });
+            // Refetch invitations after completion
+            refetchInvitations();
+            // Terminate the worker after completion
+            if (invitationWorkerRef.current) {
+              invitationWorkerRef.current.terminate();
+              invitationWorkerRef.current = null;
+            }
+            break;
+          case "INVITATION_ERROR":
+            setIsInvitationPolling(false);
+            toast.error("Invitation error", {
+              description: data.error || "There was an error during invitation process.",
+            });
+            if (invitationWorkerRef.current) {
+              invitationWorkerRef.current.terminate();
+              invitationWorkerRef.current = null;
+            }
+            break;
+          default:
+            console.warn("Unknown message type from invitation worker:", type);
+        }
+      });
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (matchingWorkerRef.current) {
+        matchingWorkerRef.current.terminate();
+        matchingWorkerRef.current = null;
+      }
+      if (invitationWorkerRef.current) {
+        invitationWorkerRef.current.terminate();
+        invitationWorkerRef.current = null;
+      }
+    };
+  }, [refetchScreeningResults, refetchInvitations]);
+ 
+  // Callback when resumes are processed from the ResumeUploader within CandidatesTab
+  const handleResumesProcessed = useCallback((resumes: ProcessedResume[]) => {
+    setProcessedResumes(resumes);
+  }, []);
+ 
+  // Handle candidate selection from CandidatesTab
+  const handleCandidateSelection = useCallback((candidateIds: string[]) => {
+    setSelectedCandidates(candidateIds);
+  }, []);
+ 
+  // Handle screening of candidates using the worker for progress polling
+  const handleScreenCandidates = useCallback(async () => {
     if (selectedCandidates.length === 0) {
       toast.error("No candidates selected", {
-        description: "Please select at least one candidate to screen."
+        description: "Please select at least one candidate to screen.",
       });
       return;
     }
-    
+   
     setIsScreening(true);
-    
+    setScreeningCompleted(false);
+   
     try {
       const result = await screenCandidates({
         job_id: job._id,
-        candidate_ids: selectedCandidates
+        candidate_ids: selectedCandidates,
+        employer_id: employer?._id,
+        company_id: job.company,
       }).unwrap();
-      
-      setBatchId(result.data.batch_id);
-      setActiveTab('screening');
-      
+ 
+      if (result.data?.batch_id) {
+        setScreeningBatchId(result.data.batch_id);
+        setIsScreeningPolling(true);
+        // Start the screening progress worker
+        if (matchingWorkerRef.current) {
+          matchingWorkerRef.current.postMessage({
+            type: "START_SCREENING_PROGRESS",
+            data: {
+              batchId: result.data.batch_id,
+              apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+              jobId: job._id,
+            },
+          });
+        }
+      }
+     
+      setActiveTab("screening");
       toast.success("Screening started", {
-        description: `Screening ${selectedCandidates.length} candidates. This may take a few moments.`
+        description: `Screening ${selectedCandidates.length} candidates. You'll see results shortly.`,
       });
     } catch (error) {
-      console.error('Error screening candidates:', error);
+      console.error("Error screening candidates:", error);
       toast.error("Screening failed", {
-        description: "There was an error while screening candidates. Please try again."
+        description: "There was an error while screening candidates. Please try again.",
       });
     } finally {
       setIsScreening(false);
-      setSelectedCandidates([]);
     }
-  };
-  
+  }, [selectedCandidates, job._id, employer?._id, job.company, screenCandidates, setActiveTab]);
+ 
   // Send email invitations
-  const handleSendInvites = async () => {
+  const handleSendInvites = useCallback(async () => {
     if (selectedCandidates.length === 0) {
       toast.error("No candidates selected", {
-        description: "Please select at least one candidate to invite."
+        description: "Please select at least one candidate to invite.",
       });
       return;
     }
-    
     setIsSendingInvites(true);
+    setInvitationCompleted(false);
     
     try {
       const result = await inviteCandidates({
         job_id: job._id,
         candidate_ids: selectedCandidates,
         message: customMessage,
-        email_type: 'interview_invitation',
-        employer_id: employer?._id || ""
+        email_type: "interview_invitation",
+        employer_id: employer?._id || "",
       }).unwrap();
       
       setShowInviteDialog(false);
-      setCustomMessage('');
+      setCustomMessage("");
+
+      // Start invitation progress polling if we got a batch ID
+      if (result.data?.batch_id) {
+        setInvitationBatchId(result.data.batch_id);
+        setIsInvitationPolling(true);
+        
+        // Start the invitation progress worker
+        if (invitationWorkerRef.current) {
+          invitationWorkerRef.current.postMessage({
+            type: "START_INVITATION_PROGRESS",
+            data: {
+              batchId: result.data.batch_id,
+              apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+              jobId: job._id,
+            },
+          });
+        }
+      }
       
-      toast.success("Invitations sent", {
-        description: `Successfully sent ${selectedCandidates.length} invitations.`
+      setActiveTab("invited");
+      toast.success("Sending invitations", {
+        description: `Processing ${selectedCandidates.length} invitations. You'll see results shortly.`,
       });
-      
-      // Move to the invited tab
-      setActiveTab('invited');
     } catch (error) {
-      console.error('Error sending invitations:', error);
+      console.error("Error sending invitations:", error);
       toast.error("Failed to send invitations", {
-        description: "There was an error while sending invitations. Please try again."
+        description: "There was an error while sending invitations. Please try again.",
       });
     } finally {
       setIsSendingInvites(false);
     }
-  };
-  
-  // Filter candidates based on search term
-  const filterCandidates = (candidates: ICandidate[]) => {
-    if (!searchTerm) return candidates;
-    
-    return candidates.filter(candidate => 
-      candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidate.skills?.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  };
-  
-  // Get filtered candidates for the current tab
-  const getFilteredCandidates = () => {
-    switch (activeTab) {
-      case 'uploadResume':
-        return filterCandidates(job.candidates.applied);
-      case 'screening':
-        if (!screeningResults?.data) return [];
-        return filterCandidates(screeningResults.data.map((result: any) => result.candidate_id));
-      case 'invited':
-        return filterCandidates(job.candidates.shortlisted);
-      default:
-        return [];
+  }, [
+    selectedCandidates,
+    customMessage,
+    job._id,
+    employer?._id,
+    inviteCandidates,
+    setActiveTab
+  ]);
+
+  // Handle resend invitation
+  const handleResendInvitation = useCallback(async (candidateId: string) => {
+    try {
+      if (!candidateId) {
+        console.error("Cannot resend invitation: Missing candidate ID");
+        return;
+      }
+      
+      const result = await resendInvitation({
+        job_id: job._id,
+        candidate_id: candidateId,
+        message: "",
+        employer_id: employer?._id || "",
+      }).unwrap();
+      
+      // If we get a batch ID, start polling for this specific invitation
+      if (result.data?.batch_id) {
+        setInvitationBatchId(result.data.batch_id);
+        setIsInvitationPolling(true);
+        
+        // Start the invitation progress worker
+        if (invitationWorkerRef.current) {
+          invitationWorkerRef.current.postMessage({
+            type: "START_INVITATION_PROGRESS",
+            data: {
+              batchId: result.data.batch_id,
+              apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+              jobId: job._id,
+            },
+          });
+        }
+      }
+      
+      toast.success("Resending invitation", {
+        description: "The invitation is being resent. You'll see the updated status shortly.",
+      });
+    } catch (error) {
+      console.error("Error resending invitation:", error);
+      toast.error("Failed to resend invitation", {
+        description: "There was an error while resending the invitation. Please try again.",
+      });
     }
-  };
-  
-  const filteredCandidates = getFilteredCandidates();
-  
+  }, [job._id, employer?._id, resendInvitation]);
+
+  // Handle manual refresh for invitations
+  const handleRefreshInvitations = useCallback(() => {
+    refetchInvitations();
+    toast.success("Refreshing invitation data", {
+      description: "Fetching the latest invitation statuses.",
+    });
+  }, [refetchInvitations]);
+ 
+  // Extract screening results data safely
+  const getScreeningResultsData = useCallback((): ScreeningCard[] => {
+    if (!screeningResults) return [];
+    const result = screeningResults as any;
+    if (result.data?.screeningResults && Array.isArray(result.data.screeningResults)) {
+      return result.data.screeningResults;
+    }
+    if (result.data && Array.isArray(result.data)) {
+      return result.data;
+    }
+    if (Array.isArray(result)) {
+      return result;
+    }
+    return [];
+  }, [screeningResults]);
+ 
+  // Extract candidate invitations data safely
+  const getCandidateInvitationsData = useCallback((): any[] => {
+    if (!invitationStatuses) return [];
+    
+    if (invitationStatuses.success && Array.isArray(invitationStatuses.data)) {
+      return invitationStatuses.data;
+    }
+
+    // Fallback in case the response structure is different
+    const result = invitationStatuses as any;
+    if (result.data && Array.isArray(result.data)) {
+      return result.data;
+    }
+    if (Array.isArray(result)) {
+      return result;
+    }
+    
+    return [];
+  }, [invitationStatuses]);
+ 
+  const screeningResultsData = getScreeningResultsData();
+  const invitationsData = getCandidateInvitationsData();
+  const appliedCandidates = job.candidates?.applied || [];
+ 
   return (
     <>
-      {/* Upload Resumes Tab */}
-      <TabsContent value="uploadResume">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Upload className="h-5 w-5 mr-2" />
-              Upload Resumes
-            </CardTitle>
-            <CardDescription>
-              Upload candidate resumes in PDF, DOC, or DOCX format. You can also upload a CSV file with candidate information.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResumeUploader jobId={job._id} />
-            
-            {/* Uploaded Candidates List */}
-            {job.candidates.applied.length > 0 && (
-              <div className="mt-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold">Uploaded Candidates ({job.candidates.applied.length})</h3>
-                  <div className="flex items-center space-x-4">
-                    <div className="relative w-64">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        className="pl-10"
-                        placeholder="Search candidates..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="select-all"
-                        checked={selectedCandidates.length === filteredCandidates.length && filteredCandidates.length > 0}
-                        onCheckedChange={() => handleSelectAll(filteredCandidates)}
-                      />
-                      <label htmlFor="select-all" className="text-sm">Select All</label>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md overflow-hidden">
-                  {filteredCandidates.length > 0 ? (
-                    <div className="divide-y">
-                      {filteredCandidates.map((candidate, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 hover:bg-gray-50">
-                          <div className="flex items-center">
-                            <Checkbox
-                              checked={selectedCandidates.includes(candidate._id)}
-                              onCheckedChange={() => handleSelectCandidate(candidate._id)}
-                              className="mr-4"
-                            />
-                            <div className="flex items-center">
-                              <Avatar className="h-10 w-10 mr-3">
-                                <AvatarFallback>{candidate.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <h4 className="font-medium">{candidate.name}</h4>
-                                <p className="text-sm text-gray-500">{candidate.email}</p>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center">
-                            {candidate.skills && (
-                              <div className="flex gap-2 mr-6">
-                                {candidate.skills.slice(0, 3).map((skill, idx) => (
-                                  <Badge key={idx} variant="outline" className="font-normal">
-                                    {skill}
-                                  </Badge>
-                                ))}
-                                {candidate.skills.length > 3 && (
-                                  <Badge variant="outline" className="font-normal">
-                                    +{candidate.skills.length - 3}
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                            
-                            <Button variant="ghost" size="sm" className="mr-2">
-                              <FileText className="h-4 w-4 mr-1" />
-                              View CV
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-8 text-center">
-                      <AlertCircle className="h-10 w-10 text-gray-400 mx-auto mb-4" />
-                      <h3 className="font-medium text-gray-900">No candidates found</h3>
-                      <p className="text-gray-500 mt-1">
-                        {searchTerm ? 'Try a different search term' : 'Upload resumes to see candidates here'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                
-                {filteredCandidates.length > 0 && (
-                  <div className="mt-4 flex justify-end">
-                    <Button 
-                      onClick={handleScreenCandidates}
-                      disabled={selectedCandidates.length === 0 || isScreening}
-                    >
-                      {isScreening ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Screening...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Screen Selected Candidates ({selectedCandidates.length})
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Main Candidates Tab */}
+      <TabsContent value="candidates">
+        <CandidatesTab
+          job={job}
+          employerId={employer?._id}
+          onResumesProcessed={handleResumesProcessed}
+          onSelectCandidates={handleCandidateSelection}
+          selectedCandidates={selectedCandidates}
+          isScreening={isScreening}
+          onScreenCandidates={handleScreenCandidates}
+          activeCandidatesTab={activeTab === "candidates"}
+        />
       </TabsContent>
-      
+ 
       {/* Screening Results Tab */}
       <TabsContent value="screening">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <CheckCircle className="h-5 w-5 mr-2" />
-              Screening Results
-            </CardTitle>
-            <CardDescription>
-              Review candidates who have been automatically screened based on their skills and experience match.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoadingResults ? (
-              <div className="py-20 text-center">
-                <Loader2 className="h-10 w-10 text-gray-400 mx-auto mb-4 animate-spin" />
-                <h3 className="font-medium text-gray-900">Loading screening results...</h3>
-              </div>
-            ) : (
-              <>
-                {!screeningResults?.data || screeningResults.data.length === 0 ? (
-                  <div className="py-20 text-center">
-                    <AlertCircle className="h-10 w-10 text-gray-400 mx-auto mb-4" />
-                    <h3 className="font-medium text-gray-900">No screening results available</h3>
-                    <p className="text-gray-500 mt-1">
-                      Screen candidates first to see results here
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex justify-between items-center mb-4">
-                      <div className="flex space-x-4">
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                          Passed: {screeningResults.data.filter((r: any) => r.status === 'passed').length}
-                        </Badge>
-                        <Badge className="bg-red-100 text-red-800 hover:bg-red-200">
-                          Failed: {screeningResults.data.filter((r: any) => r.status === 'failed').length}
-                        </Badge>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        <div className="relative w-64">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                          <Input
-                            className="pl-10"
-                            placeholder="Search results..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="select-all-screening"
-                            checked={
-                              selectedCandidates.length === 
-                              screeningResults.data
-                                .filter((r: any) => r.status === 'passed')
-                                .filter((r: any) => 
-                                  !searchTerm || 
-                                  r.candidate_id.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                  r.candidate_id.email.toLowerCase().includes(searchTerm.toLowerCase())
-                                )
-                                .length && 
-                              screeningResults.data
-                                .filter((r: any) => r.status === 'passed')
-                                .filter((r: any) => 
-                                  !searchTerm || 
-                                  r.candidate_id.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                  r.candidate_id.email.toLowerCase().includes(searchTerm.toLowerCase())
-                                )
-                                .length > 0
-                            }
-                            onCheckedChange={() => {
-                              const passedCandidates = screeningResults.data
-                                .filter((r: any) => r.status === 'passed')
-                                .filter((r: any) => 
-                                  !searchTerm || 
-                                  r.candidate_id.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                  r.candidate_id.email.toLowerCase().includes(searchTerm.toLowerCase())
-                                )
-                                .map((r: any) => r.candidate_id);
-                              
-                              handleSelectAll(passedCandidates);
-                            }}
-                          />
-                          <label htmlFor="select-all-screening" className="text-sm">Select All Passed</label>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="border rounded-md overflow-hidden">
-                      <div className="divide-y">
-                        {screeningResults.data
-                          .filter((result: any) => {
-                            const candidate = result.candidate_id;
-                            return !searchTerm || 
-                              candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              candidate.email.toLowerCase().includes(searchTerm.toLowerCase());
-                          })
-                          .map((result: any, index: number) => (
-                            <div key={index} className={`flex items-center justify-between p-4 ${
-                              result.status === 'passed' ? 'bg-green-50' : 'bg-red-50'
-                            }`}>
-                              <div className="flex items-center">
-                                {result.status === 'passed' && (
-                                  <Checkbox
-                                    checked={selectedCandidates.includes(result.candidate_id._id)}
-                                    onCheckedChange={() => handleSelectCandidate(result.candidate_id._id)}
-                                    className="mr-4"
-                                  />
-                                )}
-                                <div className="flex items-center">
-                                  <Avatar className="h-10 w-10 mr-3">
-                                    <AvatarFallback>{result.candidate_id.name.charAt(0)}</AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <h4 className="font-medium flex items-center">
-                                      {result.candidate_id.name}
-                                      {result.status === 'passed' && (
-                                        <CheckCircle className="h-4 w-4 text-green-600 ml-2" />
-                                      )}
-                                      {result.status === 'failed' && (
-                                        <X className="h-4 w-4 text-red-600 ml-2" />
-                                      )}
-                                    </h4>
-                                    <p className="text-sm text-gray-500">{result.candidate_id.email}</p>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center">
-                                <div className="mr-6 text-center">
-                                  <div className="text-2xl font-bold">
-                                    {result.matching_score}%
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    Match Score
-                                  </div>
-                                </div>
-                                
-                                <div className="w-48 mr-6">
-                                  <p className="text-sm line-clamp-2" title={result.reason}>
-                                    {result.reason}
-                                  </p>
-                                </div>
-                                
-                                <Badge 
-                                  className={`mr-3 ${jobUtils.getStatusColor(result.status)}`}
-                                >
-                                  {result.status}
-                                </Badge>
-                                
-                                {result.invite_status === 'invited' && (
-                                  <Badge className="bg-purple-100 text-purple-800 mr-2">
-                                    Invited
-                                  </Badge>
-                                )}
-                                
-                                <Button variant="ghost" size="sm">
-                                  <FileText className="h-4 w-4 mr-1" />
-                                  View CV
-                                </Button>
-                              </div>
-                            </div>
-                          ))
-                        }
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 flex justify-end">
-                      <Button 
-                        onClick={() => setShowInviteDialog(true)}
-                        disabled={
-                          selectedCandidates.length === 0 || 
-                          isSendingInvites || 
-                          !screeningResults.data.some((r: any) => 
-                            r.status === 'passed' && 
-                            selectedCandidates.includes(r.candidate_id._id)
-                          )
-                        }
-                      >
-                        <Mail className="h-4 w-4 mr-2" />
-                        Send Email Invites ({selectedCandidates.length})
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <ScreeningResultsTab
+          screeningResultsData={screeningResultsData}
+          isLoadingResults={isLoadingResults || isScreeningPolling}
+          isPolling={isScreeningPolling}
+          selectedCandidates={selectedCandidates}
+          setSelectedCandidates={setSelectedCandidates}
+          onOpenInviteDialog={() => setShowInviteDialog(true)}
+          isSendingInvites={isSendingInvites}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          job={job}
+          appliedCandidates={appliedCandidates}
+          screeningCompleted={screeningCompleted}
+          batchId={screeningBatchId}
+        />
       </TabsContent>
-      
+ 
       {/* Invited Candidates Tab */}
       <TabsContent value="invited">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Mail className="h-5 w-5 mr-2" />
-              Invited Candidates
-            </CardTitle>
-            <CardDescription>
-              Track candidates who have been invited to apply or interview for this position.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {job.candidates.shortlisted.length === 0 ? (
-              <div className="py-20 text-center">
-                <AlertCircle className="h-10 w-10 text-gray-400 mx-auto mb-4" />
-                <h3 className="font-medium text-gray-900">No invited candidates yet</h3>
-                <p className="text-gray-500 mt-1">
-                  Screen and invite candidates first
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold">Invited Candidates ({job.candidates.shortlisted.length})</h3>
-                  <div className="relative w-64">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      className="pl-10"
-                      placeholder="Search invited candidates..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                </div>
-                
-                <div className="border rounded-md overflow-hidden">
-                  <div className="divide-y">
-                    {filteredCandidates.map((candidate, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 hover:bg-gray-50">
-                        <div className="flex items-center">
-                          <Avatar className="h-10 w-10 mr-3">
-                            <AvatarFallback>{candidate.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-medium">{candidate.name}</h4>
-                            <p className="text-sm text-gray-500">{candidate.email}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <div className="mr-6">
-                            <Badge className="bg-purple-100 text-purple-800">
-                              Invited
-                            </Badge>
-                          </div>
-                          
-                          <Button variant="outline" size="sm" className="mr-2">
-                            <SendHorizonal className="h-4 w-4 mr-1" />
-                            Resend Invite
-                          </Button>
-                          
-                          <Button variant="ghost" size="sm">
-                            <FileText className="h-4 w-4 mr-1" />
-                            View CV
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <InvitedCandidatesTab
+          invitationsData={invitationsData}
+          isLoadingInvitations={isLoadingInvitations}
+          isPolling={isInvitationPolling}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          appliedCandidates={appliedCandidates}
+          onResendInvite={handleResendInvitation}
+          onManualRefresh={handleRefreshInvitations}
+          invitationCompleted={invitationCompleted}
+          batchId={invitationBatchId}
+          job_id={job._id}
+        />
       </TabsContent>
-      
+ 
       {/* Email Invitation Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
         <DialogContent className="max-w-md">
@@ -608,9 +480,10 @@ const handleScreenCandidates = async () => {
                 You are about to send invitations to {selectedCandidates.length} candidates.
               </p>
             </div>
-            
             <div>
-              <Label htmlFor="custom-message" className="text-sm font-medium">Custom Message (Optional)</Label>
+              <Label htmlFor="custom-message" className="text-sm font-medium">
+                Custom Message (Optional)
+              </Label>
               <Textarea
                 id="custom-message"
                 placeholder="Add a personal message to the email invitation..."
@@ -620,7 +493,6 @@ const handleScreenCandidates = async () => {
                 className="mt-1"
               />
             </div>
-            
             <div className="flex justify-end space-x-3 pt-4">
               <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
                 Cancel
@@ -645,5 +517,5 @@ const handleScreenCandidates = async () => {
     </>
   );
 };
-
+ 
 export default JobDetailsTabs;

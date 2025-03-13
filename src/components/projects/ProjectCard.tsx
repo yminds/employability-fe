@@ -262,13 +262,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
         )}
       </CardContent>
-
+{/* 
       <ReviewModal
-        open={isReviewModalOpen}
+        open={true}
         onOpenChange={setIsReviewModalOpen}
         project={project}
         username={user?.name}
-      />
+      /> */}
     </Card>
   );
 };

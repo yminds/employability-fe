@@ -28,7 +28,8 @@ const noSidebarRoutes = [
   "/employer/signup",
   "/employer/login",
   "/skills-report",
-  "/privacy-policy"
+  "/privacy-policy",
+  "/employer/company/create"
 ];
 
 const employerRoutes = [
@@ -38,7 +39,10 @@ const employerRoutes = [
   "/employer/profile",
   "/employer/dashboard",
   "/employer/settings",
-  "/employer/uploadResume"
+  "/employer/uploadResume",
+  "/employer/jobs",
+  "/employer/jobs/:jobId",
+  "/employer/company/create"
 ]
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

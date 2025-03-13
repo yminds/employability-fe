@@ -33,7 +33,6 @@ import Canidates from "./pages/Canidates.tsx";
 import Candidate from "./pages/Candidate.tsx";
 import UserPublicProfilePage from "./pages/UserPublicProfilePage.tsx";
 import InterviewsLisingPage from "./pages/InterviewsListingPage.tsx"
-import InterviewInvites from "./features/dashboard/InterviewsInvites.tsx";
 
 import ReportPage from "./pages/SkillsReportPage.tsx";
 import VerifyPhoneOTP from "./pages/VerifyPhoneOTP.tsx";
@@ -43,6 +42,12 @@ import { EmployerLogin } from "./pages/EmployerLogin.tsx";
 import EmployerDashboard from "./pages/EmployerDashboard.tsx";
 import EmployerNotFound from "./components/employer/NotFound.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import JobDetailsPage from "./components/employer/JobDetailsDialog.tsx";
+import EmployerJobsPage from "./pages/EmployerJobsPage.tsx";
+import EmployerCandidatesPage from "./pages/EmployerCandidatesPages.tsx";
+import CompanyForm from "./components/employer/CompanyForm.tsx";
+import JobPostingPage from "./components/employer/JobPostingForm.tsx";
+import CreateJobPage from "./pages/CreateJobPage.tsx";
 
 
 interface RouteConfig {
@@ -95,10 +100,10 @@ export const routes: RouteConfig[] = [
     route:"/verify-otp",
     component:<VerifyPhoneOTP/>,
   },
-  {
-    route:"/employer/uploadResume",
-    component:<ResumeUploader/>
-  },
+  // {
+  //   route:"/employer/uploadResume",
+  //   component:<ResumeUploader/>
+  // },
   {
     route:"/employer/signup",
     component:<EmployerSignup/>
@@ -111,6 +116,34 @@ export const routes: RouteConfig[] = [
     route:"/employer",
     component:<EmployerDashboard/>
   },
+  {
+    route:"/employer/jobs",
+    component:<EmployerJobsPage/>
+  },
+  {
+    route:"/employer/candidates",
+    component:<EmployerCandidatesPage/>
+  },
+  {
+    route:"/employer/jobs/:jobId",
+    component:<JobDetailsPage/>
+  },
+  {
+    route:"/employer/company/create",
+    component:<CompanyForm/>
+  },
+  {
+    route:"/employer/jobs/create",
+    component:<CreateJobPage/>
+  },
+  // {
+  //   route:"/employer/",
+  //   component:<
+  // },
+  // {
+  //   route:"/employer/candidates",
+  //   component:<CandidatesList/>
+  // },
   {
     route: "/setgoal",
     component: <SetGoal />,
