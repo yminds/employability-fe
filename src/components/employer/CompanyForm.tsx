@@ -12,7 +12,7 @@ import { useCreateCompanyMutation } from "@/api/employerApiSlice";
 // Replace these imports with your actual asset paths
 import Elogo from "@/assets/branding/logo.svg";
 import employerBackground from "@/assets/employer/createCompany.svg";
-import placeholderLogo from "@/assets/employer/placeholderLogo.svg";
+import placeholderLogo from "@/assets/employer/placeHolderLogo.svg";
 import employerUpload from "@/assets/employer/employerUpload.svg";
 
 const organizationSizes = [
