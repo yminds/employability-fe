@@ -288,7 +288,7 @@ const InterviewInvites: React.FC<InterviewListProps> = ({ isDashboard = false, i
 
     // Start the interview directly if tutorial is disabled
     navigate(`/interview/${interviewId}`, {
-      state: {title: `${interview.jobTitle}`, type : 'Mock', jobDescription: interview},
+      state: {title: `${interview.jobTitle}`, type : 'Job', jobDescription: interview},
     });
   };
 

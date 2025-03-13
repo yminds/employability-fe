@@ -42,8 +42,8 @@ const UserPublicProfilePage = lazy(
 const InterviewsLisingPage = lazy(
   () => import("./pages/InterviewsListingPage.tsx")
 );
-const InterviewInvites = lazy(
-  () => import("./features/dashboard/InterviewsInvites.tsx")
+const MockInterviewsPage = lazy(
+  () => import("./pages/MockInterviews.tsx")
 );
 const ReportPage = lazy(() => import("./pages/SkillsReportPage.tsx"));
 const VerifyPhoneOTP = lazy(() => import("./pages/VerifyPhoneOTP.tsx"));
@@ -200,6 +200,10 @@ export const routes: RouteConfig[] = [
   {
     route: "/interviews",
     component: <InterviewsPage />,
+  },
+  {
+    route: "/mock-interviews",
+    component: <MockInterviewsPage />,
   },
 ];
 
