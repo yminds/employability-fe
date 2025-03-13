@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/popover";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
 import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
-import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 import {
   useGetCountriesQuery,
@@ -22,7 +21,6 @@ import EditProfile from "@/assets/profile/editprofile.svg";
 import EditBio from "@/assets/profile/editbio.svg";
 import Share from "@/assets/profile/share.svg";
 import { toast } from "sonner";
-import { TrendingUp } from "lucide-react";
 
 interface ProfileBannerProps {
   user: any;
@@ -54,9 +52,6 @@ const ProfileBanner = ({
 
   const [getUserSkillsSummary, { data: skillsSummaryData }] =
     useGetPublicUserSkillSummaryMutation();
-  const { data: userDetails } = useGetUserDetailsQuery(user._id || "", {
-    skip: isPublic,
-  });
 
   const totalSkills = skillsSummaryData?.data?.totalSkills || "0";
   const totalVerifiedSkills =
@@ -244,6 +239,23 @@ const ProfileBanner = ({
             <p className="text-[#414447] text-body2 flex-1">{bio || ""}</p>
           </div>
 
+          {/* contact */}
+          {isPublic && (
+            <div className="flex items-start justify-between">
+              <Button
+                className="bg-[#001630] text-body2 text-white rounded-md px-6 py-2 hover:bg-[#001630]/90"
+                onClick={() =>
+                  window.open(
+                    `https://mail.google.com/mail/?view=cm&fs=1&to=${user?.email}`,
+                    "_blank"
+                  )
+                }
+              >
+                Contact
+              </Button>
+            </div>
+          )}
+
           {/* Action Buttons */}
           {!isPublic && hasGoalData && (
             <div className="flex justify-between">
@@ -289,13 +301,6 @@ const ProfileBanner = ({
                     </div>
                   </PopoverContent>
                 </Popover>
-              </div>
-
-              <div className="flex items-center gap-2 text-[#03963f]">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-body2">
-                  {userDetails?.data?.profile_view_count} profile views
-                </span>
               </div>
             </div>
           )}

@@ -222,7 +222,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
               <img
                 src={noExperience || "/placeholder.svg"}
                 alt="No experience entries"
-                className="w-20 h-20 mb-6"
+                className="w-20 h-20 mb-6 sm:mb-1"
               />
               <h3 className="text-[#414447] text-body2 mb-2 text-center">
                 {isPublic
@@ -276,7 +276,8 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                             {item.location}
                           </p>
                         </div>
-                        <div className="text-right">
+                        {/* Duration and dates for medium and larger screens */}
+                        <div className="text-right sm:hidden block ">
                           <p className="text-[#000000] text-sub-header">
                             {calculateExperienceDuration(
                               item.start_date,
@@ -313,6 +314,20 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                           </p>
                         </div>
                       )}
+
+                      {/* Duration and dates for small screens - after description */}
+                      <div className="mt-4 flex gap-2 items-center md:hidden lg:hidden xl:hidden 2xl:hidden">
+                        <p className="text-[#000000] text-sub-header">
+                          {calculateExperienceDuration(
+                            item.start_date,
+                            item.end_date
+                          )}
+                        </p>
+                        <p className="text-[#909091] mt-[2px] font-sf-pro text-sm font-normal leading-6 tracking-[0.24px]">
+                          {formatDate(item.start_date)} -{" "}
+                          {formatDate(item.end_date) || "Present"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )

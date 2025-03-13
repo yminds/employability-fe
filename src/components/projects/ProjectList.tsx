@@ -132,7 +132,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 <img
                   src={noProjects || "/placeholder.svg"}
                   alt="No project entries"
-                  className="w-20 h-20 mb-6"
+                  className="w-20 h-20 mb-6 sm:mb-1"
                 />
                 <h3 className="text-[#414447] text-body2 mb-2 text-center">
                   {isPublic

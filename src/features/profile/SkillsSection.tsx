@@ -46,7 +46,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, username }) => {
             <img
               src={noExperience || "/placeholder.svg"}
               alt="No skills entries"
-              className="w-20 h-20 mb-6"
+              className="w-20 h-20 mb-6 sm:mb-1"
             />
             <h3 className="text-body2 text-[#414447] mb-2 text-center">
               No skills added yet.
