@@ -137,7 +137,7 @@ const Interview: React.FC<{
 
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
-
+  
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
       setQuestion((prev) => ({
@@ -221,7 +221,7 @@ const Interview: React.FC<{
       handleMessage(text, "USER");
       addMessage(text);
     }
-
+  
     if (sttError) {
       console.error("Speech-to-text error:", sttError);
     }

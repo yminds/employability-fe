@@ -10,6 +10,9 @@ import verifyImg from "@/assets/skills/verified.svg";
 import unVerifyImg from "@/assets/skills/unverifies.svg";
 import clockLoader from "@/assets/skills/clock_loader.svg";
 import alertCircle from "@/assets/projects/alertCircle.svg";
+import SuccessModal from "./modal/steps/SuccessModal";
+import { useCreateInterview } from "@/hooks/useCreateInterview";
+import { useNavigate } from "react-router-dom";
 
 interface Tech {
   _id: string;
@@ -79,6 +82,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 }) => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const { createInterview } = useCreateInterview();
+
+  const navigate = useNavigate();
 
   const handleIncompleteClick = () => {
     if (project?.status === "Incomplete" && onOpenUploadModal) {
@@ -86,6 +93,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     }
   };
 
+  const handleViewStatusClick = () => {
+    setIsReviewModalOpen(true);
+    setIsSuccessModalOpen(true);
+  };
   const getStatusConfig = (status: ProjectStatus) => {
     const configs = {
       Verified: {
@@ -116,7 +127,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const getActionConfig = (status: ProjectStatus) => {
     const configs = {
       Verified: "Improve score",
-      "In-review": "Verify Project",
+      "In-review": "view status",
       Unverified: "Verify Project",
       Incomplete: "Complete Project",
     };
@@ -125,6 +136,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   const config = getStatusConfig(project.status);
+
+  const handleVerifySProject = async () => {
+    // const interviewId = await createInterview({
+    //   title: `project Interview`,
+    //   type: "Project",
+    //   project_id: project._id,
+    // });
+
+    // navigate(`/interview/${interviewId}`, {
+    //   state: { title: "Project Interview", level: user?.experience_level, type: "Project" },
+    // });
+  };
 
   return (
     <Card
@@ -165,9 +188,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                       variant="secondary"
                       className="min-h-6 px-3 py-1 bg-[#ebebeb] rounded-full flex items-center justify-center"
                     >
-                      <span className="text-black/70 text-sm font-medium">
-                        +{project.tech.length - 3}
-                      </span>
+                      <span className="text-black/70 text-sm font-medium">+{project.tech.length - 3}</span>
                     </Badge>
                   )}
                 </div>
@@ -184,23 +205,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               <div className="flex flex-col items-center md:w-full sm:w-full">
                 {project.status === "Verified" && (
                   <div className="flex items-baseline">
-                    <span className="text-xl font-medium">
-                      {project?.score}
-                    </span>
-                    <span className="text-[#909091] text-xl font-medium">
-                      /10
-                    </span>
+                    <span className="text-xl font-medium">{project?.score}</span>
+                    <span className="text-[#909091] text-xl font-medium">/10</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1 rounded-full">
-                  <img
-                    src={config.icon || "/placeholder.svg"}
-                    alt={project.status}
-                    className="w-4 h-4"
-                  />
-                  <span className={`text-sub-header ${config.color}`}>
-                    {config.text}
-                  </span>
+                  <img src={config.icon || "/placeholder.svg"} alt={project.status} className="w-4 h-4" />
+                  <span className={`text-sub-header ${config.color}`}>{config.text}</span>
                 </div>
               </div>
 
@@ -210,6 +221,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 onClick={
                   project.status === "Incomplete"
                     ? handleIncompleteClick
+                    : project.status === "In-review"
+                    ? handleViewStatusClick
                     : undefined
                 }
               >
@@ -231,31 +244,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         {(project.githubLink?.length > 0 || project.liveLink) && (
           <div className="flex gap-6 mt-3 md:flex-col sm:flex-col md:gap-2 sm:gap-2 md:items-start sm:items-start">
             {project.githubLink?.length > 0 && (
-              <Button
-                variant="link"
-                className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto"
-                asChild
-              >
-                <a
-                  href={project.githubLink[0]}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+              <Button variant="link" className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto" asChild>
+                <a href={project.githubLink[0]} target="_blank" rel="noopener noreferrer">
                   View GIT repo
                 </a>
               </Button>
             )}
             {project.liveLink && (
-              <Button
-                variant="link"
-                className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto"
-                asChild
-              >
-                <a
-                  href={project.liveLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+              <Button variant="link" className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto" asChild>
+                <a href={project.liveLink} target="_blank" rel="noopener noreferrer">
                   Live link
                 </a>
               </Button>
@@ -263,13 +260,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
         )}
       </CardContent>
-
+      {/* 
       <ReviewModal
         open={isReviewModalOpen}
         onOpenChange={setIsReviewModalOpen}
         project={project}
         username={user?.name}
-      />
+      /> */}
+
+      {isSuccessModalOpen && (
+        <SuccessModal
+          onClose={() => {
+            setIsSuccessModalOpen(false);
+          }}
+          // onRefresh={(onSuccess) => }
+        />
+      )}
     </Card>
   );
 };

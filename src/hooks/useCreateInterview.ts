@@ -44,6 +44,7 @@ const useCreateInterview = () => {
       type: string;
       user_skill_id?: string;
       skill_id?: string;
+      project_id?: string;  
     }) => {
       try {
         const thread_id = await createThread({
