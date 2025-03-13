@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { memo, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import ReactPlayer from "react-player";
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader } from "lucide-react";
 
@@ -32,14 +32,21 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   const [updatedProgresssion, setUpdatedProgression] = useState(0);
   const CHUNK_DURATION = 30;
 
+  // References for touch events
+  const timelineRef = useRef<HTMLInputElement>(null);
+  const volumeSliderRef = useRef<HTMLInputElement>(null);
+
   // Preload next chunk
   const preloadNextChunk = useCallback(() => {
     if (currentChunk < urls.length - 1 && !nextChunkPreloaded) {
       const audio = new Audio();
       audio.src = urls[currentChunk + 1];
       audio.preload = "auto";
-      
-      audio.addEventListener('canplaythrough', () => {
+      audio.autoplay = false;
+      audio.muted = true;
+      audio.pause();
+
+      audio.addEventListener("canplaythrough", () => {
         setNextChunkPreloaded(true);
         console.log("Next chunk preloaded:", currentChunk + 1);
       });
@@ -48,7 +55,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     }
   }, [currentChunk, urls, nextChunkPreloaded]);
 
-  const handleProgress = (state: { played: number; playedSeconds: number }) => {
+  const handleProgress = useCallback((state: { played: number; playedSeconds: number }) => {
     if (seeking) return;
 
     const totalDuration = urls.length * CHUNK_DURATION;
@@ -66,9 +73,8 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
       setIsLoading(true);
       setCurrentChunk((prev) => prev + 1);
       setNextChunkPreloaded(false);
-      setIsPlaying(true);
     }
-  };
+  }, []);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -76,24 +82,56 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  // Function to calculate position for both mouse and touch events
+  const calculateInputPosition = (input: HTMLInputElement, clientX: number) => {
+    const rect = input.getBoundingClientRect();
+    const offsetX = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (offsetX / rect.width) * 100));
+    return percentage;
+  };
+
+  // Timeline interaction handlers (mouse events)
   const handleTimelineMouseDown = (e: React.MouseEvent<HTMLInputElement>) => {
     setIsDragging(true);
-    const value = parseInt((e.target as HTMLInputElement).value);
-    setTempProgress(value);
+    if (timelineRef.current) {
+      const percentage = calculateInputPosition(timelineRef.current, e.clientX);
+      setTempProgress(percentage);
+    }
   };
 
   const handleTimelineDrag = (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (isDragging) {
-    const value = parseInt(e.target.value);
-    requestAnimationFrame(() => {
-      setTempProgress(value);
-    });
-  }
+    if (isDragging) {
+      const value = parseInt(e.target.value);
+      requestAnimationFrame(() => {
+        setTempProgress(value);
+      });
+    }
   };
 
-  const handleTimelineMouseUp = async () => {
+  // Timeline touch events
+  const handleTimelineTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
+    e.preventDefault(); // Prevent page scrolling
+    setIsDragging(true);
+    if (timelineRef.current && e.touches[0]) {
+      const percentage = calculateInputPosition(timelineRef.current, e.touches[0].clientX);
+      setTempProgress(percentage);
+    }
+  };
+
+  const handleTimelineTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
+    e.preventDefault(); // Prevent page scrolling
+    if (isDragging && timelineRef.current && e.touches[0]) {
+      const percentage = calculateInputPosition(timelineRef.current, e.touches[0].clientX);
+      requestAnimationFrame(() => {
+        setTempProgress(percentage);
+      });
+    }
+  };
+
+  // Common end interaction handler for both mouse and touch
+  const handleTimelineEnd = async () => {
     if (!isDragging) return;
-    
+
     setIsDragging(false);
     const totalDuration = urls.length * CHUNK_DURATION;
     const newTime = Math.floor((tempProgress / 100) * totalDuration);
@@ -109,17 +147,17 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
       if (player) {
         try {
           player.pause();
-          player.src = urls[chunkIndex];
+          // player.src = urls[chunkIndex];
+          setSeeking(true);
+          setCurrentChunk(chunkIndex);
 
           await new Promise((resolve) => {
             player.addEventListener("loadedmetadata", resolve, { once: true });
           });
 
-          setSeeking(true);
-          setCurrentChunk(chunkIndex);
           setNextChunkPreloaded(false);
           setUpdatedProgression(progressWithinChunk);
-          
+
           if (chunkIndex < urls.length - 1) {
             preloadNextChunk();
           }
@@ -132,14 +170,30 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     }
   };
 
+  // Volume control touch events
+  const handleVolumeTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
+    e.preventDefault(); // Prevent page scrolling
+    if (volumeSliderRef.current && e.touches[0]) {
+      const percentage = calculateInputPosition(volumeSliderRef.current, e.touches[0].clientX);
+      const newVolume = percentage / 100;
+      setVolume(newVolume);
+      setIsMuted(newVolume === 0);
+    }
+  };
+
+  const handleVolumeTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
+    e.preventDefault(); // Prevent page scrolling
+    if (volumeSliderRef.current && e.touches[0]) {
+      const percentage = calculateInputPosition(volumeSliderRef.current, e.touches[0].clientX);
+      const newVolume = Math.max(0, Math.min(1, percentage / 100));
+      setVolume(newVolume);
+      setIsMuted(newVolume === 0);
+    }
+  };
+
   useEffect(() => {
     if (playerRef.current) {
       const player = playerRef.current.getInternalPlayer();
-      // if (player) {
-      //   player.currentTime = updatedProgresssion;
-      //   player.play();
-      // }
-      setIsPlaying(true);
       setSeeking(false);
     }
     return () => {
@@ -158,22 +212,33 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     return () => {
       if (preloadAudioRef.current) {
         if (preloadAudioRef.current.current) {
-          preloadAudioRef.current.current.src = '';
+          preloadAudioRef.current.current.src = "";
         }
       }
     };
   }, [currentChunk]);
 
-  
   useEffect(() => {
+    // Global mouse/touch end handlers
     const handleGlobalMouseUp = () => {
       if (isDragging) {
-        handleTimelineMouseUp();
+        handleTimelineEnd();
       }
     };
 
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+    const handleGlobalTouchEnd = () => {
+      if (isDragging) {
+        handleTimelineEnd();
+      }
+    };
+
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+    window.addEventListener("touchend", handleGlobalTouchEnd);
+
+    return () => {
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
+      window.removeEventListener("touchend", handleGlobalTouchEnd);
+    };
   }, [isDragging, tempProgress]);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -218,6 +283,10 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     setDuration(formatTime(urls.length * CHUNK_DURATION));
   }, [currentChunk, urls.length]);
 
+  console.log("--------------------------------------------------");
+  console.log("rendered InterviewPlayer");
+  console.log("--------------------------------------------------");
+
   return (
     <div ref={containerRef} className="relative w-full h-full">
       <div className="absolute top-0 left-0 w-full h-full">
@@ -233,7 +302,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
           onReady={() => {
             console.log("player is now ready to receive commands");
             setIsLoading(false);
-            
+
             // Start preloading next chunk when current chunk is ready
             if (!nextChunkPreloaded && currentChunk < urls.length - 1) {
               preloadNextChunk();
@@ -278,16 +347,22 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
 
           <div className="flex-1">
             <input
+              ref={timelineRef}
               type="range"
               className="w-full h-2 rounded-lg appearance-none cursor-pointer"
               style={{
                 accentColor: "rgb(34 197 94)",
-                background: `linear-gradient(to right, rgb(34 197 94) ${isDragging ? tempProgress : progress}%, rgb(209 213 219) ${isDragging ? tempProgress : progress}%)`,
+                background: `linear-gradient(to right, rgb(34 197 94) ${
+                  isDragging ? tempProgress : progress
+                }%, rgb(209 213 219) ${isDragging ? tempProgress : progress}%)`,
               }}
               value={isDragging ? tempProgress : progress}
               onMouseDown={handleTimelineMouseDown}
               onChange={handleTimelineDrag}
-              onMouseUp={handleTimelineMouseUp}
+              onMouseUp={handleTimelineEnd}
+              onTouchStart={handleTimelineTouchStart}
+              onTouchMove={handleTimelineTouchMove}
+              onTouchEnd={handleTimelineEnd}
               min={0}
               max={100}
               step={1}
@@ -306,6 +381,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
 
             <div className="w-20">
               <input
+                ref={volumeSliderRef}
                 type="range"
                 className="w-full h-1.5 rounded-lg appearance-none cursor-pointer"
                 style={{
@@ -316,6 +392,8 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
                 }}
                 value={volume}
                 onChange={handleVolumeChange}
+                onTouchStart={handleVolumeTouchStart}
+                onTouchMove={handleVolumeTouchMove}
                 min={0}
                 max={1}
                 step={0.1}
@@ -341,4 +419,4 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
   );
 };
 
-export default InterviewPlayer;
+export default memo(InterviewPlayer);

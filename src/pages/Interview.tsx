@@ -5,19 +5,25 @@ import Interview from "@/components/interview/Interview";
 import CheckSetup from "../components/setup/CheckSetup";
 import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 import toggleBrowserFullscreen from "@/components/skills/fullscreen";
+import MultiScreenDetector from "@/components/interview/multiScreendetector";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
   const location = useLocation();
-
+  const userExperience = useSelector((state: RootState) => state.auth.user?.experience_level);
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
+  const [screenCount, setScreenCount] = useState<number>(0);
+  
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
   // New state to track if the user has the required camera and mic permissions
   const [hasPermissions, setHasPermissions] = useState(false);
 
-  const { title, skillPoolId, level, type, jobDescription } = location.state || {};
+  const { title, skillPoolId, level, type, jobDescription ,isResume} = location.state || {};
+  console.log("jobDescription", jobDescription);
   const {
     isInterviewStarted,
     setIsInterviewStarted,
@@ -183,6 +189,11 @@ const InterviewSetupNew: React.FC = () => {
                   Before you proceed to the interview, make sure your setup is working properly.
                 </p>
               </div>
+
+              {screenCount != 1 && (
+              <MultiScreenDetector onScreenCountChange={setScreenCount} />
+              )}
+              {screenCount === 1 && (
               <button
                 className={`bg-button ${isProceedButtonEnabled ? "hover:bg-[#062549]" : "cursor-not-allowed opacity-50"} text-white rounded-[4px] font-normal text-[14px] w-72 py-2 leading-5`}
                 onClick={() => {
@@ -192,7 +203,8 @@ const InterviewSetupNew: React.FC = () => {
                 disabled={!isProceedButtonEnabled}
               >
                 Proceed to Interview
-              </button>
+              </button>)
+              }
             </div>
             <CheckSetup
               isScreenSharing={isScreenSharing}
@@ -216,6 +228,8 @@ const InterviewSetupNew: React.FC = () => {
           skillLevel={level}
           type={type}
           jobDescription={jobDescription}
+          isResume={isResume}
+          userExperience={userExperience}
         />
       )}
     </>

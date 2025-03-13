@@ -1,4 +1,4 @@
-import { apiSlice } from "./apiSlice"
+import { apiSlice } from "./apiSlice";
 
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -30,9 +30,23 @@ export const userApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["User", "Experience", "Education", "Certification"],
     }),
+    getUserVerifiedContent: builder.query({
+      query: (username) => ({
+        url: `/api/v1/user/verified-content/${username}`,
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+      providesTags: ["VerifiedContent"]
+    }),
   }),
   overrideExisting: false,
-})
+});
 
-export const { useUpdateUserMutation, useGetUserDetailsQuery, useGetUserByIdQuery } = userApi
-
+export const {
+  useUpdateUserMutation,
+  useGetUserDetailsQuery,
+  useGetUserByIdQuery,
+  useGetUserVerifiedContentQuery,
+} = userApi;

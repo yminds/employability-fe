@@ -38,6 +38,12 @@ const SignupForm = () => {
     setError(null);
     setIsLoading(true);
 
+    if (!name.trim()) {
+      setError("Name is required!");
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match!");
       setIsLoading(false);
@@ -47,7 +53,7 @@ const SignupForm = () => {
     const signupData: SignupData = {
       email,
       password,
-      name,
+      name: name.trim(),
       role: urlRole,
     };
     try {
@@ -61,7 +67,15 @@ const SignupForm = () => {
           navigate("/setexperience"); // Navigate after successful login
         }
       } else {
-        setError(result.data?.message || "Signup failed. Please try again.");
+        if (
+          result.error &&
+          typeof result.error === "object" &&
+          "data" in result.error
+        ) {
+          setError((result.error as any).data.message);
+        } else {
+          setError("An error occurred. Please try again.");
+        }
       }
     } catch (err: any) {
       if (err.data?.message) {
@@ -264,9 +278,9 @@ const SignupForm = () => {
                 "Sign Up"
               )}
             </Button>
-            {/* Social Login */}
-            <SocialLogin onSocialLogin={handleSocialLogin} />
           </form>
+          {/* Social Login */}
+          <SocialLogin onSocialLogin={handleSocialLogin} />
         </div>
       </div>
     </section>

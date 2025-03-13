@@ -22,7 +22,12 @@ import toggleBrowserFullscreen from "../skills/fullscreen";
 import { JobDescription } from "../interview-list/ViewJD";
 
 // Constants and Types
-const SOCKET_URL = window.location.hostname === "localhost" ? "http://localhost:3000" : "wss://employability.ai";
+const SOCKET_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : window.location.hostname === "dev.employability.ai"
+    ? "wss://dev.employability.ai"
+    : "wss://employability.ai";
 
 interface CodeSnippetType {
   code: string;
@@ -43,6 +48,12 @@ interface QuestionState {
 }
 
 type InterviewState = "WAITING" | "LISTENING" | "SPEAKING";
+const initialState = {
+  question: "",
+  codeSnippet: null,
+  isCodeSnippetMode: false,
+  concept: "",
+};
 
 const Interview: React.FC<{
   id: string;
@@ -50,10 +61,13 @@ const Interview: React.FC<{
   interviewTopic: string;
   concepts: any[];
   stopScreenSharing: () => void;
-  skillLevel:"1" | "2" | "3";
-  type: "Skill"|"Mock"|"Project",
-  jobDescription:JobDescription
-}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription }) => {
+  skillLevel: "1" | "2" | "3";
+  type: "Skill" | "Mock" | "Project";
+  jobDescription: JobDescription;
+  isResume: boolean;
+  userExperience:string | undefined
+}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false, userExperience }) => {
+  console.log("in interviews jobDescription", jobDescription);
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
@@ -69,12 +83,7 @@ const Interview: React.FC<{
   // State
   const [isUserAnswering, setIsUserAnswering] = useState(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [question, setQuestion] = useState<QuestionState>({
-    question: "",
-    codeSnippet: null,
-    isCodeSnippetMode: false,
-    concept: "",
-  });
+  const [question, setQuestion] = useState<QuestionState>(initialState);
 
   const [isInitialized, setIsInitialized] = useState(false);
   const [layoutType, setLayoutType] = useState<1 | 2>(1);
@@ -107,16 +116,28 @@ const Interview: React.FC<{
 
         setIsInitialized(true);
         const initialGreeting = "Hello, before starting the interview, introduce yourself?";
+        const resumeMessage = "Hello, sorry for the interruption. We can continue from where we left off.";
+        if (isResume) {
+          addMessage(resumeMessage);
+          return;
+        }
         addMessage(initialGreeting);
       }
     };
 
     const handleAIResponse = (data: string) => {
+      console.log("[enetred to ai response]", question);
+
+      // if (!data) {
+      //   addMessage("Sorry, I didn't get that. Can you please repeat the question?");
+      //   return;
+      // }
+
       setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
 
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
-
+  
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
       setQuestion((prev) => ({
@@ -146,12 +167,13 @@ const Interview: React.FC<{
     };
 
     const handleEndInterview = () => {
-      setIsInterviewEnded(true);
+      setTimeout(() => {
+        setIsInterviewEnded(true);
+      }, 5000);
       stopScreenSharing();
     };
 
     const handleConceptValidation = (concepts: any) => {
-      //{'inroductionr to react'}
       console.log("========================+");
       console.log(concepts);
       console.log("========================+");
@@ -199,7 +221,7 @@ const Interview: React.FC<{
       handleMessage(text, "USER");
       addMessage(text);
     }
-
+  
     if (sttError) {
       console.error("Speech-to-text error:", sttError);
     }
@@ -250,6 +272,8 @@ const Interview: React.FC<{
 
     const response = await interviewStream({
       prompt,
+      // model: "deepseek-chat",
+      // provider: "deepseek",
       model: "gpt-4o",
       provider: "openai",
       // model: "gemini-2.0-flash-exp",
@@ -265,8 +289,10 @@ const Interview: React.FC<{
       concepts: concepts,
       interview_id: interviewDetails.data._id,
       level: user?.experience_level || "entry",
-      type:type,
-      jobDescription:jobDescription
+      type: type,
+      jobDescription: jobDescription,
+      userName: user?.name,
+      userExperience: userExperience
     }).unwrap();
 
     console.log("response", response);
@@ -292,9 +318,9 @@ const Interview: React.FC<{
   return (
     <div className="w-full h-screen pt-12 ">
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-        <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel}/>
+        <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} />
         {isInterviewEnded ? (
-          <div className="text-center text-gray-500">
+          <div className="text-center text-gray-500  font-ubuntu">
             <p>Thank you for your time. We will get back to you soon.</p>
             <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackToSkills}>
               Back to Skills page

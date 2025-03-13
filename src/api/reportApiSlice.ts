@@ -14,6 +14,7 @@ export const reportApiSlice = apiSlice.injectEndpoints({
       }),
       // no cahce for now
       keepUnusedDataFor: 0,
+      
     }),
 
     updateReportSummary: builder.mutation<any, UpdateReportSummaryPayload>({

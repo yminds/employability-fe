@@ -33,6 +33,7 @@ export const EmployerSignup = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+
   const [signup] = useEmployerSignupMutation();
 
   const handlePhoneInputChange = (value: string) => {
@@ -136,7 +137,7 @@ export const EmployerSignup = () => {
           {/* Back Button */}
           <div className="flex items-center gap-2 mb-6">
             <button
-              onClick={() => navigate('/employer/login')}
+              onClick={() => navigate("/employer/login")}
               className="hover:text-green-600 text-black text-sm flex items-center"
             >
               <img className="w-4 h-4 mr-2" src={arrow} alt="Back Arrow" />
@@ -148,12 +149,14 @@ export const EmployerSignup = () => {
           <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Header */}
             <div className="h-[84px] flex flex-col justify-around mx-auto">
-              <h1 className="text-2xl font-bold text-gray-900">Create Employer Account</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Create Employer Account
+              </h1>
               <p className="text-sm text-gray-500">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => navigate('/employer/login')}
+                  onClick={() => navigate("/employer/login")}
                   className="text-green-600 underline hover:text-green-800"
                 >
                   Log in
@@ -283,3 +286,5 @@ export const EmployerSignup = () => {
     </section>
   );
 };
+
+export default EmployerSignup;

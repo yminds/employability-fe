@@ -1,3 +1,4 @@
+import type React from "react";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -32,8 +33,6 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   );
 
   const experiences = error ? [] : data?.data || intialExperiences;
-
-  console.log(experiences);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -70,12 +69,84 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     });
   };
 
+  const calculateExperienceDuration = (
+    startDate: string,
+    endDate: string | null
+  ) => {
+    const start = new Date(startDate);
+    const end = endDate ? new Date(endDate) : new Date();
+
+    const years = end.getFullYear() - start.getFullYear();
+    const months = end.getMonth() - start.getMonth();
+
+    let totalMonths = years * 12 + months;
+    if (totalMonths < 0) totalMonths = 0;
+
+    const finalYears = Math.floor(totalMonths / 12);
+    const finalMonths = totalMonths % 12;
+
+    let result = "";
+    if (finalYears > 0) {
+      result += `${finalYears}${finalYears === 1 ? "y" : "y"}`;
+    }
+    if (finalMonths > 0) {
+      if (result) result += " ";
+      result += `${finalMonths}${finalMonths === 1 ? "m" : "m"}`;
+    }
+    if (!result) result = "Less than a month";
+
+    return result;
+  };
+
+  const calculateTotalExperience = () => {
+    if (!experiences || experiences.length === 0) return "";
+
+    const monthsWorked = new Set<string>();
+
+    experiences.forEach((exp: ExperienceItem) => {
+      const startDate = new Date(exp.start_date);
+      const endDate = exp.end_date ? new Date(exp.end_date) : new Date();
+
+      const currentDate = new Date(startDate);
+
+      while (currentDate <= endDate) {
+        const monthKey = `${currentDate.getFullYear()}-${
+          currentDate.getMonth() + 1
+        }`;
+        monthsWorked.add(monthKey);
+
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+    });
+
+    const totalMonths = monthsWorked.size;
+
+    const years = Math.floor(totalMonths / 12);
+    const months = totalMonths % 12;
+
+    let result = "(";
+    if (years > 0) {
+      result += `${years} ${years === 1 ? "year" : "years"}`;
+    }
+    if (months > 0) {
+      if (years > 0) result += " ";
+      result += `${months} ${months === 1 ? "month" : "months"}`;
+    }
+    if (totalMonths === 0) result += "Less than a month";
+    result += ")";
+
+    return result;
+  };
+
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 pb-0">
+      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 sm:px-5 sm:pt-5 pb-0">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
-            Experience
+            Experience{" "}
+            <span className="text-[#909091]">
+              {experiences?.length > 0 ? calculateTotalExperience() : ""}
+            </span>
           </h2>
         </div>
         {experiences?.length > 0 && !isPublic && (
@@ -151,7 +222,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
               <img
                 src={noExperience || "/placeholder.svg"}
                 alt="No experience entries"
-                className="w-20 h-20 mb-6"
+                className="w-20 h-20 mb-6 sm:mb-1"
               />
               <h3 className="text-[#414447] text-body2 mb-2 text-center">
                 {isPublic
@@ -173,7 +244,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           </div>
         ) : (
           <>
-            <div className="divide-y divide-[#E5E7EB] p-8 relative">
+            <div className="divide-y divide-[#E5E7EB] p-8 sm:p-5 relative">
               {displayedExperiences.map(
                 (item: ExperienceItem, index: number) => (
                   <div
@@ -193,19 +264,32 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[#000000] text-sub-header">
-                        {item.title}
-                      </h3>
-                      <p className="text-[#414447] text-body2">
-                        {item.company} • {item.employment_type}
-                      </p>
-                      <p className="text-[#68696B] text-sm font-dm-sans font-normal leading-6 tracking-[0.21px]">
-                        {item.location}
-                      </p>
-                      <p className="text-[#68696B] text-sm font-dm-sans font-normal leading-5 tracking-[0.21px]">
-                        {formatDate(item.start_date)} -{" "}
-                        {formatDate(item.end_date) || "Present"}
-                      </p>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-[#000000] text-sub-header">
+                            {item.title}
+                          </h3>
+                          <p className="text-[#414447] text-body2">
+                            {item.company} • {item.employment_type}
+                          </p>
+                          <p className="text-[#68696B] text-sm font-dm-sans font-normal leading-6 tracking-[0.21px]">
+                            {item.location}
+                          </p>
+                        </div>
+                        {/* Duration and dates for medium and larger screens */}
+                        <div className="text-right sm:hidden block ">
+                          <p className="text-[#000000] text-sub-header">
+                            {calculateExperienceDuration(
+                              item.start_date,
+                              item.end_date
+                            )}
+                          </p>
+                          <p className="text-[#68696B] text-body2">
+                            {formatDate(item.start_date)} -{" "}
+                            {formatDate(item.end_date) || "Present"}
+                          </p>
+                        </div>
+                      </div>
 
                       {item.description && (
                         <div className="mt-4">
@@ -230,6 +314,20 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                           </p>
                         </div>
                       )}
+
+                      {/* Duration and dates for small screens - after description */}
+                      <div className="mt-4 flex gap-2 items-center md:hidden lg:hidden xl:hidden 2xl:hidden">
+                        <p className="text-[#000000] text-sub-header">
+                          {calculateExperienceDuration(
+                            item.start_date,
+                            item.end_date
+                          )}
+                        </p>
+                        <p className="text-[#909091] mt-[2px] font-sf-pro text-sm font-normal leading-6 tracking-[0.24px]">
+                          {formatDate(item.start_date)} -{" "}
+                          {formatDate(item.end_date) || "Present"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )

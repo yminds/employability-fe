@@ -1,54 +1,65 @@
-import React from "react";
+import type React from "react";
+import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 
 // Hooks
 import useScrollToTop from "./hooks/useScrollTop.ts";
 
 // Models
-import { Role } from "./models/Role";
-
-// Routes Components
-import Dashboard from "./pages/Dashboard";
-import SetGoal from "./pages/SetGoal.tsx";
-import Interview from "./pages/Interview.tsx";
+import type { Role } from "./models/Role";
 
 // Components
 import NotFound from "@/components/app/NotFound";
 import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
-import Login from "./pages/LoginPage.tsx";
-import UserProfilePage from "./pages/UserProfilePage.tsx";
-import Skills from "./pages/SkillsPage.tsx";
-import SkillDetailPage from "./pages/SkillDetailPage.tsx";
-import SignupForm from "./pages/SignUpPage.tsx";
-import ProjectsPage from "./pages/ProjectsPage.tsx";
-import JobsPage from "./pages/JobsPage.tsx";
-import ProjectListing from "./pages/project-listing.tsx";
-import LinkedInCallback from "./features/authentication/LinkedinCallback.tsx";
-import GitHubCallback from "./features/authentication/GithubCallback.tsx";
-import ExperienceLevel from "./pages/SetExperience.tsx";
-import AddPhone from "./pages/AddPhoneNumber.tsx";
-import Example from "./features/cap/Example.tsx";
-import Mentor from "./pages/Mentor.tsx";
-import Canidates from "./pages/Canidates.tsx";
-import Candidate from "./pages/Candidate.tsx";
-import UserPublicProfilePage from "./pages/UserPublicProfilePage.tsx";
-import InterviewsLisingPage from "./pages/InterviewsListingPage.tsx"
-
-import ReportPage from "./pages/SkillsReportPage.tsx";
-import VerifyPhoneOTP from "./pages/VerifyPhoneOTP.tsx";
-import ResumeUploader from "./components/employer/ResumeUpload.tsx";
-import { EmployerSignup } from "./pages/EmployerSignUp.tsx";
-import { EmployerLogin } from "./pages/EmployerLogin.tsx";
-import EmployerDashboard from "./pages/EmployerDashboard.tsx";
-import EmployerNotFound from "./components/employer/NotFound.tsx";
-import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import JobDetailsPage from "./components/employer/JobDetailsDialog.tsx";
+import CompanyForm from "./components/employer/CompanyForm.tsx";
+import CreateJobPage from "./pages/CreateJobPage.tsx";
 import EmployerJobsPage from "./pages/EmployerJobsPage.tsx";
 import EmployerCandidatesPage from "./pages/EmployerCandidatesPages.tsx";
-import CompanyForm from "./components/employer/CompanyForm.tsx";
-import JobPostingPage from "./components/employer/JobPostingForm.tsx";
-import CreateJobPage from "./pages/CreateJobPage.tsx";
 
+// Lazy load route components
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const SetGoal = lazy(() => import("./pages/SetGoal.tsx"));
+const Interview = lazy(() => import("./pages/Interview.tsx"));
+const Login = lazy(() => import("./pages/LoginPage.tsx"));
+const UserProfilePage = lazy(() => import("./pages/UserProfilePage.tsx"));
+const Skills = lazy(() => import("./pages/SkillsPage.tsx"));
+const SkillDetailPage = lazy(() => import("./pages/SkillDetailPage.tsx"));
+const SignupForm = lazy(() => import("./pages/SignUpPage.tsx"));
+const ProjectsPage = lazy(() => import("./pages/ProjectsPage.tsx"));
+const JobsPage = lazy(() => import("./pages/JobsPage.tsx"));
+const ProjectListing = lazy(() => import("./pages/project-listing.tsx"));
+const LinkedInCallback = lazy(
+  () => import("./features/authentication/LinkedinCallback.tsx")
+);
+const GitHubCallback = lazy(
+  () => import("./features/authentication/GithubCallback.tsx")
+);
+const ExperienceLevel = lazy(() => import("./pages/SetExperience.tsx"));
+const AddPhone = lazy(() => import("./pages/AddPhoneNumber.tsx"));
+const Example = lazy(() => import("./features/cap/Example.tsx"));
+const Mentor = lazy(() => import("./pages/Mentor.tsx"));
+const Canidates = lazy(() => import("./pages/Canidates.tsx"));
+const Candidate = lazy(() => import("./pages/Candidate.tsx"));
+const UserPublicProfilePage = lazy(
+  () => import("./pages/UserPublicProfilePage.tsx")
+);
+const InterviewsLisingPage = lazy(
+  () => import("./pages/InterviewsListingPage.tsx")
+);
+const MockInterviewsPage = lazy(
+  () => import("./pages/MockInterviews.tsx")
+);
+const ReportPage = lazy(() => import("./pages/SkillsReportPage.tsx"));
+const VerifyPhoneOTP = lazy(() => import("./pages/VerifyPhoneOTP.tsx"));
+const EmployerSignup = lazy(() => import("./pages/EmployerSignUp.tsx"));
+const EmployerLogin = lazy(() => import("./pages/EmployerLogin.tsx"));
+const EmployerDashboard = lazy(() => import("./pages/EmployerDashboard.tsx"));
+const EmployerNotFound = lazy(
+  () => import("./components/employer/NotFound.tsx")
+);
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
+const InterviewsPage = lazy(() => import("./pages/InterviewsPage.tsx"));
 
 interface RouteConfig {
   route: string;
@@ -57,7 +68,6 @@ interface RouteConfig {
   roles?: Role[];
   childrens?: RouteConfig[];
 }
-
 
 export const routes: RouteConfig[] = [
   {
@@ -93,28 +103,28 @@ export const routes: RouteConfig[] = [
     component: <SignupForm />,
   },
   {
-    route:"/privacy-policy",
+    route: "/privacy-policy",
     component: <PrivacyPolicy />,
   },
   {
-    route:"/verify-otp",
-    component:<VerifyPhoneOTP/>,
+    route: "/verify-otp",
+    component: <VerifyPhoneOTP />,
   },
   // {
   //   route:"/employer/uploadResume",
   //   component:<ResumeUploader/>
   // },
   {
-    route:"/employer/signup",
-    component:<EmployerSignup/>
+    route: "/employer/signup",
+    component: <EmployerSignup />,
   },
   {
-    route:"/employer/login",
-    component:<EmployerLogin/>
+    route: "/employer/login",
+    component: <EmployerLogin />,
   },
   {
-    route:"/employer",
-    component:<EmployerDashboard/>
+    route: "/employer",
+    component: <EmployerDashboard />,
   },
   {
     route:"/employer/jobs",
@@ -169,8 +179,8 @@ export const routes: RouteConfig[] = [
     component: <NotFound />,
   },
   {
-    route:"/employer/*",
-    component:<EmployerNotFound/>
+    route: "/employer/*",
+    component: <EmployerNotFound />,
   },
   {
     route: "/user-profile",
@@ -178,7 +188,7 @@ export const routes: RouteConfig[] = [
   },
   {
     route: "/profile/:username",
-    component: <UserPublicProfilePage/>
+    component: <UserPublicProfilePage />,
   },
   {
     route: "/jobs",
@@ -198,7 +208,7 @@ export const routes: RouteConfig[] = [
   },
   {
     route: "/mentor/learn/:id",
-    component: <Mentor />
+    component: <Mentor />,
   },
   {
     route: "/candidates",
@@ -209,16 +219,24 @@ export const routes: RouteConfig[] = [
     component: <Candidate />,
   },
   {
-    route:"/skill/report/:id",
-    component: <ReportPage isSharedReport= {false}/>
+    route: "/skill/report/:id",
+    component: <ReportPage isSharedReport={false} />,
   },
   {
-    route:"/skills-report/:id/:id",
-    component: <ReportPage isSharedReport= {true}/>
+    route: "/skills-report/:id/:id",
+    component: <ReportPage isSharedReport={true} />,
   },
   {
-    route:"/invites",
-    component: <InterviewsLisingPage/>
+    route: "/invites",
+    component: <InterviewsLisingPage />,
+  },
+  {
+    route: "/interviews",
+    component: <InterviewsPage />,
+  },
+  {
+    route: "/mock-interviews",
+    component: <MockInterviewsPage />,
   },
 ];
 
@@ -254,7 +272,11 @@ const renderRoutes = (routesArray: RouteConfig[]) => {
 
 const AppRoutes: React.FC = () => {
   useScrollToTop();
-  return <Routes>{renderRoutes(routes)}</Routes>;
+  return (
+    <Suspense>
+      <Routes>{renderRoutes(routes)}</Routes>
+    </Suspense>
+  );
 };
 
 export default AppRoutes;

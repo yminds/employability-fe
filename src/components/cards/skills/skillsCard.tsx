@@ -12,6 +12,7 @@ import SkillVerificationTutorial from "@/components/skills/SkillVerificationTuto
 import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { useGetReportByInterviewIdQuery } from "@/api/reportApiSlice";
 
 interface LatestInterviewStatus {
   interview_id: string;
@@ -64,7 +65,6 @@ const SkillCard: React.FC<SkillCardProps> = ({
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
   const { data: userCredntials } = useGetUserDetailsQuery(userId!);
-  console.log("userCredntials", userCredntials);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -125,7 +125,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
         : "bg-[#FFF2DB] text-[#D48A0C]";
     }
   };
-
+ 
   const skillsLevelObj = { 1: "Basic", 2: "Intermediate", 3: "Advanced" };
 
   const handleViewReport = () => {
@@ -196,17 +196,16 @@ const SkillCard: React.FC<SkillCardProps> = ({
       user_skill_id: skillId,
       skill_id: skillPoolId,
     });
-    console.log("interviewId", interviewId);
 
     // Start the interview after closing the tutorial
     navigate(`/interview/${interviewId}`, {
-      state: { title:skill, skillId, skillPoolId, level, type: "Skill" },
+      state: { title: skill, skillId, skillPoolId, level, type: "Skill" },
     });
   };
 
   const handleResumeInterView = () => {
-      navigate(`/interview/${latest_interview_status?.interview_id}`, {
-      state: { title: skill, skillPoolId, level, type:"Skill" },
+    navigate(`/interview/${latest_interview_status?.interview_id}`, {
+      state: { title: skill, skillPoolId, level, type: "Skill", isResume: true },
     });
   };
   return (

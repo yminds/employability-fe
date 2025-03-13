@@ -9,472 +9,227 @@ import ViewJD from '@/components/interview-list/ViewJD';
 
 export const mockInterviews = [
   {
-    id: 1,
-    company: "Tech Corp",
-    type: "Technical",
-    jobTitle: "Frontend Developer",
-    dueDate: "2023-06-15",
-    jobDescription: {
-      summary: `We are seeking a highly skilled Frontend Developer to join our dynamic development team at Tech Corp. The ideal candidate will be responsible for designing, developing, and maintaining scalable applications using MongoDB, Express.js, React.js, Next.js, and Node.js. You will work closely with other developers and team members to deliver high-quality, efficient, and secure applications.`,
-      keyResponsibilities: [
-        "Develop, test, and maintain backend services using Node.js, Express.js, and MongoDB.",
-        "Build and maintain frontend components using React.js and Next.js.",
-        "Design and optimize RESTful APIs for seamless communication between frontend and backend applications.",
-        "Work with database technologies such as MongoDB (including schema design, indexing, aggregation, and performance optimization).",
-        "Implement authentication and authorization using JWT, OAuth, or similar authentication methods.",
-        "Integrate third-party services and APIs as required.",
-        "Write unit tests and integration tests to ensure application reliability.",
-        "Troubleshoot and debug applications for performance and scalability.",
-        "Collaborate with UI/UX designers and DevOps engineers to create robust applications.",
-        "Implement best coding practices, security standards, and code documentation.",
-      ],
-      requiredSkillsAndQualifications: [
-        {
-          name: "MERN Stack (React.js, Next.js, Node.js, Express.js, MongoDB)",
-          description: "Proficiency in building and maintaining full-stack applications using the MERN stack.",
-        },
-        {
-          name: "JavaScript",
-          description: "Strong knowledge of modern JavaScript features and asynchronous programming.",
-        },
-        {
-          name: "API Development",
-          description: "Experience designing and implementing APIs for data exchange between client and server.",
-        },
-        {
-          name: "Authentication (JWT, OAuth, Passport.js)",
-          description: "Familiarity with authentication mechanisms for secure user and service interactions.",
-        },
-        {
-          name: "MongoDB Queries & Aggregation",
-          description: "Hands-on experience with schema design, indexing, and performance optimization in MongoDB.",
-        },
-        {
-          name: "Version Control",
-          description: "Knowledge of Git-based workflows using GitHub or GitLab.",
-        },
-        {
-          name: "Testing Frameworks",
-          description: "Experience with Jest, Mocha, or Chai for writing unit and integration tests.",
-        },
-      ],
-      experience: "1-5 years in MERN full-stack development.",
-      perksAndBenefits: `At ElixirBizz, we’re all about creating impactful solutions that drive success for our clients. Here, your ideas matter, your skills grow, and your contributions shape the future of our projects. Join us if you’re ready to make a difference in a collaborative, innovation-focused environment.`,
-      whyJoinUs: [
-        "Growth Opportunities: Gain experience across a variety of tech stacks and projects.",
-        "Incentives: Monthly performance-based incentives.",
-        "Flexible Work Culture: Embrace a collaborative environment where innovation and excellence are celebrated.",
-        "Paid Time Off: Annual leave, sick leave, and selected public holidays included.",
-      ],
-      role: "Full Stack Developer",
-      industryType: "IT Services & Consulting",
-      department: "Engineering - Software & QA",
-      employmentType: "Full Time, Permanent",
-      roleCategory: "Software Development",
-      keySkills: "MernExpressNode.JsReact.Js Mern StackMongoDBNextjs",
-    },
-  },
-  {
-    id: 2,
-    company: "Innovate Inc",
-    type: "Technical",
-    jobTitle: "Full-Stack Engineer",
-    dueDate: "2023-06-18",
-    jobDescription: {
-      summary: `We are seeking a highly skilled Full-Stack Engineer to join our dynamic development team at Innovate Inc. The ideal candidate will be responsible for designing, developing, and maintaining scalable applications using MongoDB, Express.js, React.js, Next.js, and Node.js. You will work closely with other developers and team members to deliver high-quality, efficient, and secure applications.`,
-      keyResponsibilities: [
-        "Develop, test, and maintain backend services using Node.js, Express.js, and MongoDB.",
-        "Build and maintain frontend components using React.js and Next.js.",
-        "Design and optimize RESTful APIs for seamless communication between frontend and backend applications.",
-        "Work with database technologies such as MongoDB (including schema design, indexing, aggregation, and performance optimization).",
-        "Implement authentication and authorization using JWT, OAuth, or similar authentication methods.",
-        "Integrate third-party services and APIs as required.",
-        "Write unit tests and integration tests to ensure application reliability.",
-        "Troubleshoot and debug applications for performance and scalability.",
-        "Collaborate with UI/UX designers and DevOps engineers to create robust applications.",
-        "Implement best coding practices, security standards, and code documentation.",
-      ],
-      requiredSkillsAndQualifications: [
-        {
-          name: "MERN Stack (React.js, Next.js, Node.js, Express.js, MongoDB)",
-          description: "Proficiency in building and maintaining full-stack applications using the MERN stack.",
-        },
-        {
-          name: "JavaScript (ES6+)",
-          description: "Strong knowledge of modern JavaScript features and asynchronous programming.",
-        },
-        {
-          name: "API Development (RESTful Services)",
-          description: "Experience designing and implementing APIs for data exchange between client and server.",
-        },
-        {
-          name: "Authentication (JWT, OAuth, Passport.js)",
-          description: "Familiarity with authentication mechanisms for secure user and service interactions.",
-        },
-        {
-          name: "MongoDB Queries & Aggregation",
-          description: "Hands-on experience with schema design, indexing, and performance optimization in MongoDB.",
-        },
-        {
-          name: "Version Control",
-          description: "Knowledge of Git-based workflows using GitHub or GitLab.",
-        },
-        {
-          name: "Testing Frameworks",
-          description: "Experience with Jest, Mocha, or Chai for writing unit and integration tests.",
-        },
-      ],
-      experience: "1-5 years in MERN full-stack development.",
-      perksAndBenefits: `At ElixirBizz, we’re all about creating impactful solutions that drive success for our clients. Here, your ideas matter, your skills grow, and your contributions shape the future of our projects. Join us if you’re ready to make a difference in a collaborative, innovation-focused environment.`,
-      whyJoinUs: [
-        "Growth Opportunities: Gain experience across a variety of tech stacks and projects.",
-        "Incentives: Monthly performance-based incentives.",
-        "Flexible Work Culture: Embrace a collaborative environment where innovation and excellence are celebrated.",
-        "Paid Time Off: Annual leave, sick leave, and selected public holidays included.",
-      ],
-      role: "Full Stack Developer",
-      industryType: "IT Services & Consulting",
-      department: "Engineering - Software & QA",
-      employmentType: "Full Time, Permanent",
-      roleCategory: "Software Development",
-    },
-  },
-  {
-    id: 3,
-    company: "Future Systems",
-    type: "Technical Design",
-    jobTitle: "Systems Architect",
-    dueDate: "2023-06-20",
-    jobDescription: {
-      summary: `We are seeking a highly skilled Systems Architect to join our dynamic development team at Future Systems. The ideal candidate will be responsible for designing, developing, and maintaining scalable applications using MongoDB, Express.js, React.js, Next.js, and Node.js. You will work closely with other developers and team members to deliver high-quality, efficient, and secure applications.`,
-      keyResponsibilities: [
-        "Develop, test, and maintain backend services using Node.js, Express.js, and MongoDB.",
-        "Build and maintain frontend components using React.js and Next.js.",
-        "Design and optimize RESTful APIs for seamless communication between frontend and backend applications.",
-        "Work with database technologies such as MongoDB (including schema design, indexing, aggregation, and performance optimization).",
-        "Implement authentication and authorization using JWT, OAuth, or similar authentication methods.",
-        "Integrate third-party services and APIs as required.",
-        "Write unit tests and integration tests to ensure application reliability.",
-        "Troubleshoot and debug applications for performance and scalability.",
-        "Collaborate with UI/UX designers and DevOps engineers to create robust applications.",
-        "Implement best coding practices, security standards, and code documentation.",
-      ],
-      requiredSkillsAndQualifications: [
-        {
-          name: "MERN Stack (React.js, Next.js, Node.js, Express.js, MongoDB)",
-          description: "Proficiency in building and maintaining full-stack applications using the MERN stack.",
-        },
-        {
-          name: "JavaScript (ES6+)",
-          description: "Strong knowledge of modern JavaScript features and asynchronous programming.",
-        },
-        {
-          name: "API Development (RESTful Services)",
-          description: "Experience designing and implementing APIs for data exchange between client and server.",
-        },
-        {
-          name: "Authentication (JWT, OAuth, Passport.js)",
-          description: "Familiarity with authentication mechanisms for secure user and service interactions.",
-        },
-        {
-          name: "MongoDB Queries & Aggregation",
-          description: "Hands-on experience with schema design, indexing, and performance optimization in MongoDB.",
-        },
-        {
-          name: "Version Control",
-          description: "Knowledge of Git-based workflows using GitHub or GitLab.",
-        },
-        {
-          name: "Testing Frameworks",
-          description: "Experience with Jest, Mocha, or Chai for writing unit and integration tests.",
-        },
-      ],
-      experience: "1-5 years in MERN full-stack development.",
-      perksAndBenefits: `At ElixirBizz, we’re all about creating impactful solutions that drive success for our clients. Here, your ideas matter, your skills grow, and your contributions shape the future of our projects. Join us if you’re ready to make a difference in a collaborative, innovation-focused environment.`,
-      whyJoinUs: [
-        "Growth Opportunities: Gain experience across a variety of tech stacks and projects.",
-        "Incentives: Monthly performance-based incentives.",
-        "Flexible Work Culture: Embrace a collaborative environment where innovation and excellence are celebrated.",
-        "Paid Time Off: Annual leave, sick leave, and selected public holidays included.",
-      ],
-      role: "Full Stack Developer",
-      industryType: "IT Services & Consulting",
-      department: "Engineering - Software & QA",
-      employmentType: "Full Time, Permanent",
-      roleCategory: "Software Development",
-    },
-  },
-  {
-    id: 4,
-    company: "Dev Solutions",
-    type: "Technical",
-    jobTitle: "Backend Developer",
-    dueDate: "2023-06-22",
-    jobDescription: {
-      summary: `We are seeking a highly skilled Backend Developer to join our dynamic development team at Dev Solutions. The ideal candidate will be responsible for designing, developing, and maintaining scalable applications using MongoDB, Express.js, React.js, Next.js, and Node.js. You will work closely with other developers and team members to deliver high-quality, efficient, and secure applications.`,
-      keyResponsibilities: [
-        "Develop, test, and maintain backend services using Node.js, Express.js, and MongoDB.",
-        "Build and maintain frontend components using React.js and Next.js.",
-        "Design and optimize RESTful APIs for seamless communication between frontend and backend applications.",
-        "Work with database technologies such as MongoDB (including schema design, indexing, aggregation, and performance optimization).",
-        "Implement authentication and authorization using JWT, OAuth, or similar authentication methods.",
-        "Integrate third-party services and APIs as required.",
-        "Write unit tests and integration tests to ensure application reliability.",
-        "Troubleshoot and debug applications for performance and scalability.",
-        "Collaborate with UI/UX designers and DevOps engineers to create robust applications.",
-        "Implement best coding practices, security standards, and code documentation.",
-      ],
-      requiredSkillsAndQualifications: [
-        {
-          name: "MERN Stack (React.js, Next.js, Node.js, Express.js, MongoDB)",
-          description: "Proficiency in building and maintaining full-stack applications using the MERN stack.",
-        },
-        {
-          name: "JavaScript (ES6+)",
-          description: "Strong knowledge of modern JavaScript features and asynchronous programming.",
-        },
-        {
-          name: "API Development (RESTful Services)",
-          description: "Experience designing and implementing APIs for data exchange between client and server.",
-        },
-        {
-          name: "Authentication (JWT, OAuth, Passport.js)",
-          description: "Familiarity with authentication mechanisms for secure user and service interactions.",
-        },
-        {
-          name: "MongoDB Queries & Aggregation",
-          description: "Hands-on experience with schema design, indexing, and performance optimization in MongoDB.",
-        },
-        {
-          name: "Version Control",
-          description: "Knowledge of Git-based workflows using GitHub or GitLab.",
-        },
-        {
-          name: "Testing Frameworks",
-          description: "Experience with Jest, Mocha, or Chai for writing unit and integration tests.",
-        },
-      ],
-      experience: "1-5 years in MERN full-stack development.",
-      perksAndBenefits: `At ElixirBizz, we’re all about creating impactful solutions that drive success for our clients. Here, your ideas matter, your skills grow, and your contributions shape the future of our projects. Join us if you’re ready to make a difference in a collaborative, innovation-focused environment.`,
-      whyJoinUs: [
-        "Growth Opportunities: Gain experience across a variety of tech stacks and projects.",
-        "Incentives: Monthly performance-based incentives.",
-        "Flexible Work Culture: Embrace a collaborative environment where innovation and excellence are celebrated.",
-        "Paid Time Off: Annual leave, sick leave, and selected public holidays included.",
-      ],
-      role: "Full Stack Developer",
-      industryType: "IT Services & Consulting",
-      department: "Engineering - Software & QA",
-      employmentType: "Full Time, Permanent",
-      roleCategory: "Software Development",
-    },
-  },
-  {
-    id: 5,
-    company: "Code Masters",
-    type: "Behavioral",
-    jobTitle: "Software Developer",
-    dueDate: "2023-06-25",
-    jobDescription: {
-      summary: `We are seeking a highly skilled Software Developer to join our dynamic development team at Code Masters. The ideal candidate will be responsible for designing, developing, and maintaining scalable applications using MongoDB, Express.js, React.js, Next.js, and Node.js. You will work closely with other developers and team members to deliver high-quality, efficient, and secure applications.`,
-      keyResponsibilities: [
-        "Develop, test, and maintain backend services using Node.js, Express.js, and MongoDB.",
-        "Build and maintain frontend components using React.js and Next.js.",
-        "Design and optimize RESTful APIs for seamless communication between frontend and backend applications.",
-        "Work with database technologies such as MongoDB (including schema design, indexing, aggregation, and performance optimization).",
-        "Implement authentication and authorization using JWT, OAuth, or similar authentication methods.",
-        "Integrate third-party services and APIs as required.",
-        "Write unit tests and integration tests to ensure application reliability.",
-        "Troubleshoot and debug applications for performance and scalability.",
-        "Collaborate with UI/UX designers and DevOps engineers to create robust applications.",
-        "Implement best coding practices, security standards, and code documentation.",
-      ],
-      requiredSkillsAndQualifications: [
-        {
-          name: "MERN Stack (React.js, Next.js, Node.js, Express.js, MongoDB)",
-          description: "Proficiency in building and maintaining full-stack applications using the MERN stack.",
-        },
-        {
-          name: "JavaScript (ES6+)",
-          description: "Strong knowledge of modern JavaScript features and asynchronous programming.",
-        },
-        {
-          name: "API Development (RESTful Services)",
-          description: "Experience designing and implementing APIs for data exchange between client and server.",
-        },
-        {
-          name: "Authentication (JWT, OAuth, Passport.js)",
-          description: "Familiarity with authentication mechanisms for secure user and service interactions.",
-        },
-        {
-          name: "MongoDB Queries & Aggregation",
-          description: "Hands-on experience with schema design, indexing, and performance optimization in MongoDB.",
-        },
-        {
-          name: "Version Control",
-          description: "Knowledge of Git-based workflows using GitHub or GitLab.",
-        },
-        {
-          name: "Testing Frameworks",
-          description: "Experience with Jest, Mocha, or Chai for writing unit and integration tests.",
-        },
-      ],
-      experience: "1-5 years in MERN full-stack development.",
-      perksAndBenefits: `At ElixirBizz, we’re all about creating impactful solutions that drive success for our clients. Here, your ideas matter, your skills grow, and your contributions shape the future of our projects. Join us if you’re ready to make a difference in a collaborative, innovation-focused environment.`,
-      whyJoinUs: [
-        "Growth Opportunities: Gain experience across a variety of tech stacks and projects.",
-        "Incentives: Monthly performance-based incentives.",
-        "Flexible Work Culture: Embrace a collaborative environment where innovation and excellence are celebrated.",
-        "Paid Time Off: Annual leave, sick leave, and selected public holidays included.",
-      ],
-      role: "Full Stack Developer",
-      industryType: "IT Services & Consulting",
-      department: "Engineering - Software & QA",
-      employmentType: "Full Time, Permanent",
-      roleCategory: "Software Development",
-    },
-  },
-  {
-    "id": 6,
-    "company": "AI Solutions Group",
+    "id": 1,
+    "company": "Web Innovators",
     "type": "Technical",
-    "jobTitle": "AI Engineer",
-    "dueDate": "2023-07-20",
+    "jobTitle": "Frontend Web Developer",
+    "dueDate": "2023-07-01",
     "jobDescription": {
-      "summary": "AI Solutions Group is seeking a talented AI Engineer to develop and deploy cutting-edge AI models. The ideal candidate will have a strong background in machine learning, deep learning, and natural language processing. You will work on projects involving data analysis, model development, and deployment in a fast-paced, innovative environment.",
+      "summary": "Join our cutting-edge team at Web Innovators as a Frontend Web Developer. You will work on user-facing elements of our flagship products, ensuring seamless experiences across browsers and devices. Your expertise in modern JavaScript frameworks and responsive design will help drive our product strategy and user satisfaction.",
       "keyResponsibilities": [
-        "Develop and implement machine learning models using Python and relevant libraries (TensorFlow, PyTorch, scikit-learn).",
-        "Design and build deep learning architectures for image recognition, natural language processing, or other applications.",
-        "Perform data preprocessing, feature engineering, and model evaluation.",
-        "Deploy and maintain AI models in production environments.",
-        "Collaborate with data scientists and software engineers to integrate AI solutions into applications.",
-        "Research and implement state-of-the-art AI algorithms and techniques.",
-        "Optimize model performance and scalability.",
-        "Develop and maintain documentation for AI models and processes.",
-        "Troubleshoot and debug AI models and systems.",
-        "Stay up-to-date with the latest advancements in AI and machine learning."
+        "Develop and maintain efficient, reusable, and reliable code using React.js and modern JavaScript.",
+        "Implement responsive UI using HTML5, CSS3, and pre-processors like SASS or LESS.",
+        "Optimize front-end components for maximum performance across a vast array of web-capable devices and browsers.",
+        "Collaborate with product managers and UI/UX designers to shape the visual and interactive elements.",
+        "Write and execute test cases for new features and bug fixes."
       ],
       "requiredSkillsAndQualifications": [
-        {
-          "name": "Machine Learning",
-          "description": "Strong understanding of machine learning algorithms and techniques (e.g., regression, classification, clustering)."
-        },
-        {
-          "name": "Deep Learning",
-          "description": "Experience with deep learning frameworks (TensorFlow, PyTorch) and architectures (CNNs, RNNs, Transformers)."
-        },
-        {
-          "name": "Python",
-          "description": "Proficiency in Python programming and relevant libraries (NumPy, Pandas, Scikit-learn)."
-        },
-        {
-          "name": "Natural Language Processing (NLP)",
-          "description": "Experience with NLP techniques and libraries (NLTK, spaCy, Transformers)."
-        },
-        {
-          "name": "Data Analysis",
-          "description": "Ability to analyze and interpret large datasets."
-        },
-        {
-          "name": "Model Deployment",
-          "description": "Experience with deploying and maintaining AI models in production environments (e.g., Docker, Kubernetes)."
-        },
-        {
-          "name": "Version Control (Git)",
-          "description": "Proficiency in Git and version control practices."
-        },
-        {
-          "name": "Cloud Platforms (AWS, GCP, Azure)",
-          "description": "Familiarity with cloud-based AI services and platforms."
-        }
+        "HTML5/CSS3",
+        "JavaScript (ES6+)",
+        "React.js",
+        "Responsive Web Design",
+        "Version Control (Git)"
       ],
-      "experience": "2-5 years of experience in AI or machine learning development.",
-      "perksAndBenefits": "Join a team of passionate AI professionals and work on challenging projects that impact real-world problems. We offer competitive salaries, comprehensive benefits, and opportunities for professional growth.",
+      "experience": "2-4 years in frontend web development.",
+      "perksAndBenefits": "A dynamic environment where your innovative ideas are valued. We offer health insurance, flexible work hours, and opportunities for continuous learning.",
       "whyJoinUs": [
-        "Work on cutting-edge AI technologies.",
-        "Collaborate with a talented and innovative team.",
-        "Contribute to meaningful projects that make a difference.",
-        "Opportunities for continuous learning and professional development.",
-        "Flexible work environment."
+        "Innovative Culture: Work on challenging projects that push the boundaries of web technologies.",
+        "Personal Growth: Access to workshops, online courses, and mentorship programs.",
+        "Flexible Timing: Maintain a healthy work-life balance with our flexible schedule.",
+        "Team Events: Participate in hackathons, retreats, and team-building outings."
       ],
-      "role": "AI Engineer",
-      "industryType": "Artificial Intelligence",
-      "department": "AI Development",
+      "role": "Frontend Developer",
+      "industryType": "IT Services & Consulting",
+      "department": "Engineering - Web Development",
       "employmentType": "Full Time, Permanent",
-      "roleCategory": "AI and Machine Learning"
-    }
+      "roleCategory": "Software Development",
+      "keySkills": "HTML5 CSS3 JavaScript React Git"
+    },
+    "specificQuestions": [
+      "How do you optimize React applications for performance?",
+      "Which strategies do you use to ensure cross-browser compatibility?",
+      "Can you describe a scenario where you used advanced CSS features to improve the user experience?"
+    ]
   },
   {
-    id: 7, // Increment ID
-    company: "WebCraft Studios",
-    type: "Front-End Development",
-    jobTitle: "Front-End Developer (HTML/CSS)",
-    dueDate: "2023-07-15",
-    jobDescription: {
-      summary: `WebCraft Studios is looking for a talented Front-End Developer with a strong focus on HTML and CSS to join our creative team. You will be instrumental in building and maintaining visually appealing and user-friendly web interfaces, ensuring a seamless user experience across various platforms.`,
-      keyResponsibilities: [
-        "Develop and maintain clean, semantic, and well-structured HTML5 and CSS3 code.",
-        "Translate UI/UX design wireframes and mockups into responsive and functional web pages.",
-        "Ensure cross-browser compatibility and responsiveness across various devices and screen sizes.",
-        "Optimize website performance by writing efficient and optimized CSS.",
-        "Collaborate with UI/UX designers to ensure design consistency and accuracy.",
-        "Implement and maintain accessibility standards (WCAG) to ensure inclusive web experiences.",
-        "Participate in code reviews and provide constructive feedback.",
-        "Stay up-to-date with the latest front-end development trends and best practices.",
-        "Troubleshoot and debug front-end issues.",
-        "Maintain and improve existing front-end codebases."
+    "id": 2,
+    "company": "MegaByte Solutions",
+    "type": "Technical",
+    "jobTitle": "Backend Web Developer",
+    "dueDate": "2023-08-15",
+    "jobDescription": {
+      "summary": "At MegaByte Solutions, we are looking for a Backend Web Developer to create and maintain robust server-side applications. The ideal candidate will have experience with Node.js, RESTful APIs, and database schema design, ensuring our web services are performant, secure, and scalable.",
+      "keyResponsibilities": [
+        "Design and maintain RESTful APIs for internal and external services using Node.js.",
+        "Implement database schemas in MongoDB and optimize queries for performance.",
+        "Ensure security best practices for user authentication and data protection.",
+        "Work closely with frontend teams to integrate APIs efficiently.",
+        "Troubleshoot and resolve backend-related issues promptly."
       ],
-      requiredSkillsAndQualifications: [
-        {
-          name: "HTML5 & CSS3",
-          description: "Proficiency in building and maintaining front-end interfaces using HTML5 and CSS3.",
-        },
-        {
-          name: "Responsive Web Design",
-          description: "Experience in creating responsive designs using media queries and flexible layouts.",
-        },
-        {
-          name: "CSS Preprocessors (Sass/Less)",
-          description: "Familiarity with CSS preprocessors like Sass or Less for efficient CSS development.",
-        },
-        {
-          name: "CSS Frameworks (Bootstrap, Tailwind CSS)",
-          description: "Experience with CSS frameworks like Bootstrap or Tailwind CSS for rapid development.",
-        },
-        {
-          name: "Web Accessibility (WCAG)",
-          description: "Understanding and implementation of web accessibility standards (WCAG).",
-        },
-        {
-          name: "Version Control (Git)",
-          description: "Knowledge of Git-based workflows using GitHub or GitLab.",
-        },
-        {
-          name: "Basic JavaScript",
-          description: "Basic understanding of JavaScript and its interaction with HTML and CSS.",
-        },
+      "requiredSkillsAndQualifications": [
+        "Node.js",
+        "Express.js",
+        "RESTful API Development",
+        "MongoDB / SQL",
+        "Testing Frameworks (Jest or Mocha)"
       ],
-      experience: "1-3 years of experience in front-end development with a focus on HTML and CSS.",
-      perksAndBenefits: `At WebCraft Studios, we believe in fostering a creative and collaborative environment. We offer opportunities for professional growth, competitive salaries, and a range of benefits to support our team's well-being and success.`,
-      whyJoinUs: [
-        "Creative Environment: Work on visually stunning and innovative web projects.",
-        "Growth Opportunities: Enhance your skills and grow your career in a dynamic environment.",
-        "Collaborative Team: Work with a team of talented designers and developers.",
-        "Work-Life Balance: Enjoy a flexible work culture and supportive team."
+      "experience": "3-5 years in backend web development.",
+      "perksAndBenefits": "Competitive salary with bonuses, medical insurance, and a collaborative environment that fosters innovation and professional growth.",
+      "whyJoinUs": [
+        "Cutting-Edge Projects: Work on large-scale web solutions impacting millions of users.",
+        "Career Advancement: Clear pathways for progression and specialized training programs.",
+        "Inclusive Environment: We value diverse perspectives and encourage creative problem-solving.",
+        "Work-Life Balance: Ample leave policies to ensure personal well-being."
       ],
-      role: "Front-End Developer",
-      industryType: "Web Design & Development",
-      department: "Front-End Development",
-      employmentType: "Full Time, Permanent",
-      roleCategory: "Web Development",
+      "role": "Backend Developer",
+      "industryType": "Software Development",
+      "department": "Engineering - Web Services",
+      "employmentType": "Full Time, Permanent",
+      "roleCategory": "Software Development",
+      "keySkills": "Node.js Express.js API MongoDB SQL"
     },
+    "specificQuestions": [
+      "Explain how you structure a Node.js project for maintainability and scalability.",
+      "What authentication methods have you implemented, and why did you choose them?",
+      "How do you handle large datasets and optimize database queries?"
+    ]
+  },
+  {
+    "id": 3,
+    "company": "CloudScape Digital",
+    "type": "Technical",
+    "jobTitle": "Full Stack Web Developer",
+    "dueDate": "2023-09-10",
+    "jobDescription": {
+      "summary": "CloudScape Digital is seeking a Full Stack Web Developer to build and maintain end-to-end web solutions. The role involves working with both frontend (React.js or Vue.js) and backend (Node.js or Python) technologies to deliver high-performing, secure, and scalable web applications.",
+      "keyResponsibilities": [
+        "Develop and maintain client-facing interfaces using modern JavaScript frameworks.",
+        "Build and optimize server-side logic to handle data-intensive workloads.",
+        "Implement secure user authentication and authorization.",
+        "Collaborate with designers, product managers, and QA teams to ensure high-quality software.",
+        "Perform troubleshooting and debugging across the entire web stack."
+      ],
+      "requiredSkillsAndQualifications": [
+        "React.js or Vue.js",
+        "Node.js or Python",
+        "API Design and Integration",
+        "Database Management (SQL or NoSQL)",
+        "DevOps Fundamentals"
+      ],
+      "experience": "2-5 years in full-stack web development.",
+      "perksAndBenefits": "Highly competitive salary, stock options, remote work flexibility, and a culture that promotes professional growth through continuous learning.",
+      "whyJoinUs": [
+        "Tech-First Culture: Embrace the latest tools and methodologies.",
+        "Remote & Flexible Work: We trust you to get work done wherever you are.",
+        "Mentorship Programs: Grow under the guidance of seasoned developers.",
+        "Innovative Environment: Challenge yourself with cutting-edge projects."
+      ],
+      "role": "Full Stack Developer",
+      "industryType": "IT Services & Consulting",
+      "department": "Engineering - Software & QA",
+      "employmentType": "Full Time, Permanent",
+      "roleCategory": "Software Development",
+      "keySkills": "React Vue Node Python Full Stack"
+    },
+    "specificQuestions": [
+      "How do you decide when to use a SQL database over a NoSQL solution?",
+      "Describe your process for ensuring code quality across the frontend and backend.",
+      "What are some best practices for handling user authentication and session management?"
+    ]
+  },
+  {
+    "id": 4,
+    "company": "PixelCraft Labs",
+    "type": "Technical",
+    "jobTitle": "UI/UX Web Developer",
+    "dueDate": "2023-10-05",
+    "jobDescription": {
+      "summary": "PixelCraft Labs is on the lookout for a UI/UX Web Developer with a strong eye for design and a passion for creating intuitive user experiences. You’ll work closely with designers and product managers to translate wireframes and mockups into high-fidelity, interactive web pages.",
+      "keyResponsibilities": [
+        "Implement pixel-perfect, responsive web layouts using HTML, CSS, and JavaScript.",
+        "Integrate design tools (Figma, Sketch, or Adobe XD) to streamline workflow.",
+        "Optimize UI components for maximum speed and scalability.",
+        "Conduct user testing and gather feedback to refine user experiences.",
+        "Collaborate with cross-functional teams to ensure design integrity."
+      ],
+      "requiredSkillsAndQualifications": [
+        "HTML/CSS/JavaScript",
+        "Responsive & Adaptive Design",
+        "UI/UX Principles",
+        "Design Tool Proficiency (Figma/Sketch/XD)",
+        "Cross-Browser Testing"
+      ],
+      "experience": "1-3 years in UI/UX or frontend development.",
+      "perksAndBenefits": "Employee wellness programs, ongoing training opportunities, and an open office environment that encourages creativity and collaboration.",
+      "whyJoinUs": [
+        "Creative Freedom: Bring your unique design ideas to life.",
+        "Collaborative Space: Brainstorm and innovate with talented UI/UX professionals.",
+        "Growth: Expand your skill set through hands-on projects and learning resources.",
+        "Recognition: Your contributions are acknowledged and rewarded."
+      ],
+      "role": "UI/UX Developer",
+      "industryType": "Web and Design Services",
+      "department": "Product & Design",
+      "employmentType": "Full Time, Permanent",
+      "roleCategory": "Design & Development",
+      "keySkills": "HTML CSS JavaScript UI/UX Figma Sketch"
+    },
+    "specificQuestions": [
+      "What’s your process for transforming wireframes into interactive prototypes?",
+      "Describe a time you improved the accessibility of a web application.",
+      "How do you balance aesthetics with performance optimization?"
+    ]
+  },
+  {
+    "id": 5,
+    "company": "Skyline Tech",
+    "type": "Technical",
+    "jobTitle": "Web Developer",
+    "dueDate": "2023-11-20",
+    "jobDescription": {
+      "summary": "Skyline Tech is hiring a Web Developer to design, code, and modify websites, from layout to function. You will ensure that the web properties align with user expectations, providing a seamless experience that is visually appealing and intuitive to navigate.",
+      "keyResponsibilities": [
+        "Write well-designed, testable, and efficient code using best software development practices.",
+        "Create website layout/user interfaces using standard HTML/CSS practices.",
+        "Integrate data from various back-end services and databases.",
+        "Gather and refine specifications and requirements based on technical needs.",
+        "Troubleshoot and resolve website performance and usability issues."
+      ],
+      "requiredSkillsAndQualifications": [
+        "HTML/CSS/JavaScript",
+        "Backend Integration (PHP, Node.js, or similar)",
+        "Database Knowledge (MySQL or MongoDB)",
+        "Cross-Platform & Cross-Browser Optimization",
+        "CMS Experience (WordPress or Drupal)"
+      ],
+      "experience": "1-3 years in general web development.",
+      "perksAndBenefits": "Competitive salary, a friendly work atmosphere, regular team lunches, and career growth opportunities within a rapidly expanding company.",
+      "whyJoinUs": [
+        "Dynamic Team: Collaborate with passionate developers who love building web solutions.",
+        "Skill Enhancement: Access to courses, certifications, and regular training workshops.",
+        "Fast Growth: Be part of an expanding firm with clear career progression pathways.",
+        "Innovation: Opportunity to experiment with the latest web technologies."
+      ],
+      "role": "Web Developer",
+      "industryType": "IT Services & Consulting",
+      "department": "Engineering - Web Development",
+      "employmentType": "Full Time, Permanent",
+      "roleCategory": "Software Development",
+      "keySkills": "HTML CSS JavaScript PHP Node MySQL MongoDB"
+    },
+    "specificQuestions": [
+      "What strategies do you use to ensure a website is mobile-responsive?",
+      "How do you handle server-side rendering versus client-side rendering?",
+      "Can you describe a complex integration you’ve managed involving multiple APIs?"
+    ]
   }
-];
+]
+;
 
 interface JobDescription {
   summary: string;
   keyResponsibilities: string[];
-  requiredSkillsAndQualifications: { name: string; description: string }[];
+  requiredSkillsAndQualifications: string[];
   experience: string;
   perksAndBenefits: string;
   whyJoinUs: string[];
@@ -533,7 +288,7 @@ const InterviewInvites: React.FC<InterviewListProps> = ({ isDashboard = false, i
 
     // Start the interview directly if tutorial is disabled
     navigate(`/interview/${interviewId}`, {
-      state: {title: `Mock Interview for ${interview.jobTitle}`, type : 'Mock', jobDescription: interview.jobDescription},
+      state: {title: `${interview.jobTitle}`, type : 'Job', jobDescription: interview},
     });
   };
 

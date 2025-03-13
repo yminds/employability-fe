@@ -99,7 +99,7 @@ const SetGoalCard: React.FC<{ setJourneyDialog: any , selectedLevel : string, on
               className="flex h-[50px] p-2 px-12 justify-between items-center flex-[1_0_0] rounded-[6px] border border-black/10 bg-[#FAFBFE] focus:outline-none"
             />
             <button
-              className="flex p-3 px-6 py-3 gap-3 rounded bg-[#00183D] hover:bg-[#062549] text-white text-base font-medium leading-6 font-sf-pro"
+              className=" p-3 px-6 py-3 gap-3 rounded bg-[#00183D] hover:bg-[#062549] text-white text-base font-medium leading-6 font-sf-pro hidden"
               onClick={() => handleLinkClick()}
             >
               <img src={AddGoalImg} className="w-3 h-3 mt-1" />

@@ -1,8 +1,5 @@
-"use client";
-
 import type React from "react";
 import { useEffect, useState } from "react";
-// import { Country, State, City } from "country-state-city";
 import "react-phone-input-2/lib/style.css";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
@@ -33,6 +30,11 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  useGetCountriesQuery,
+  useGetStatesQuery,
+  useGetCitiesQuery,
+} from "@/api/locationApiSlice";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -84,9 +86,6 @@ export default function BasicInfoForm({
     portfolio: initialData?.socialProfiles?.portfolio || user?.portfolio || "",
   });
 
-  const [countries, setCountries] = useState<any[]>([]);
-  const [states, setStates] = useState<any[]>([]);
-  const [cities, setCities] = useState<any[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(
     formData.profile_image || null
   );
@@ -99,46 +98,38 @@ export default function BasicInfoForm({
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  // Load countries
-  useEffect(() => {
-    const allCountries:any =  [];
-    setCountries(allCountries);
-  }, []);
+  const { data: countriesData = [] } = useGetCountriesQuery();
 
-  // Update states when country changes
-  useEffect(() => {
-    if (formData.country) {
-      const countryStates:any = [];
-      setStates(countryStates);
+  const { data: statesData = [] } = useGetStatesQuery(formData.country || "", {
+    skip: !formData.country,
+  });
 
+  const { data: citiesData = [] } = useGetCitiesQuery(
+    { countryCode: formData.country || "", stateCode: formData.state || "" },
+    { skip: !formData.country || !formData.state }
+  );
+
+  useEffect(() => {
+    if (formData.country && statesData.length > 0) {
       if (
         formData.state &&
-        !countryStates.find((state:any) => state.isoCode === formData.state)
+        !statesData.find((state: any) => state.isoCode === formData.state)
       ) {
         setFormData((prev) => ({ ...prev, state: "", city: "" }));
       }
-    } else {
-      setStates([]);
-      setCities([]);
     }
-  }, [formData.country, formData.state]);
+  }, [formData.country, statesData, formData.state]);
 
-  // Update cities when state changes
   useEffect(() => {
-    if (formData.country && formData.state) {
-      const stateCities:any = [];
-      setCities(stateCities);
-
+    if (formData.country && formData.state && citiesData.length > 0) {
       if (
         formData.city &&
-        !stateCities.find((city:any) => city.name === formData.city)
+        !citiesData.find((city: any) => city.name === formData.city)
       ) {
         setFormData((prev) => ({ ...prev, city: "" }));
       }
-    } else {
-      setCities([]);
     }
-  }, [formData.country, formData.state, formData.city]);
+  }, [formData.country, formData.state, citiesData, formData.city]);
 
   // Call onChange whenever formData or socialProfiles change
   useEffect(() => {
@@ -458,7 +449,7 @@ export default function BasicInfoForm({
                   )}
                 >
                   {formData.country
-                    ? countries.find(
+                    ? countriesData.find(
                         (country) => country.isoCode === formData.country
                       )?.name
                     : "Select country"}
@@ -471,7 +462,7 @@ export default function BasicInfoForm({
                   <CommandList>
                     <CommandEmpty>No country found.</CommandEmpty>
                     <CommandGroup className="max-h-[300px] overflow-y-auto">
-                      {countries.map((country) => (
+                      {countriesData.map((country) => (
                         <CommandItem
                           key={country.isoCode}
                           onSelect={() => {
@@ -521,8 +512,9 @@ export default function BasicInfoForm({
                   disabled={!formData.country}
                 >
                   {formData.state
-                    ? states.find((state) => state.isoCode === formData.state)
-                        ?.name
+                    ? statesData.find(
+                        (state) => state.isoCode === formData.state
+                      )?.name
                     : "Select state"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -533,7 +525,7 @@ export default function BasicInfoForm({
                   <CommandList>
                     <CommandEmpty>No state found.</CommandEmpty>
                     <CommandGroup className="max-h-[300px] overflow-y-auto">
-                      {states.map((state) => (
+                      {statesData.map((state) => (
                         <CommandItem
                           key={state.isoCode}
                           onSelect={() => {
@@ -580,7 +572,8 @@ export default function BasicInfoForm({
                   disabled={!formData.state}
                 >
                   {formData.city
-                    ? cities.find((city) => city.name === formData.city)?.name
+                    ? citiesData.find((city) => city.name === formData.city)
+                        ?.name
                     : "Select city"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -591,7 +584,7 @@ export default function BasicInfoForm({
                   <CommandList>
                     <CommandEmpty>No city found.</CommandEmpty>
                     <CommandGroup className="max-h-[300px] overflow-y-auto">
-                      {cities.map((city) => (
+                      {citiesData.map((city) => (
                         <CommandItem
                           key={city.name}
                           onSelect={() => {

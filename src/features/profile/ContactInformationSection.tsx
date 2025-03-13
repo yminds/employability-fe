@@ -2,6 +2,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import ProfileURL from "@/assets/profile/profileURL.svg";
 import Phone from "@/assets/profile/phone.svg";
 import Mail from "@/assets/profile/mail.svg";
+import { toast } from "sonner";
+import { useState } from "react";
+import { CheckIcon, CopyIcon } from "lucide-react";
 
 interface ContactInformationProps {
   profileUrl: string;
@@ -14,6 +17,20 @@ export default function ContactInformationSection({
   phoneNumber,
   email,
 }: ContactInformationProps) {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      toast.success("Profile URL Copied");
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (err) {
+      toast.error("Failed to Copy URL");
+    }
+  };
   return (
     <Card className="w-full bg-white p-0 rounded-lg">
       <CardContent className="p-8 space-y-8">
@@ -26,11 +43,23 @@ export default function ContactInformationSection({
             <div className="flex-shrink-0 flex w-12 h-12 justify-center items-center rounded-md border border-black/10 bg-white">
               <img src={ProfileURL} alt="Profile Url" className="w-6 h-6" />
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px] mb-1">
-                Profile URL
-              </h3>
-              <p className="text-[#414447] text-sm font-sf-pro font-normal leading-6 tracking-[0.24px]">
+            <div
+              className="min-w-0 flex-1 group cursor-pointer"
+              onClick={() => copyToClipboard(profileUrl)}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px] mb-1">
+                  Profile URL
+                </h3>
+                <div className="text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {isCopied ? (
+                    <CheckIcon className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <CopyIcon className="w-4 h-4" />
+                  )}
+                </div>
+              </div>
+              <p className="text-[#414447] text-sm font-sf-pro font-normal leading-6 tracking-[0.24px] truncate">
                 {profileUrl}
               </p>
             </div>

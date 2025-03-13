@@ -6,6 +6,11 @@ import AddEditCertificationsModal from "@/components/modal/AddEditCertifications
 import type { Certification } from "@/features/profile/types";
 import { useGetCertificationsByUserIdQuery } from "@/api/certificatesApiSlice";
 import { useSelector } from "react-redux";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 //Images
 import noCertifications from "@/assets/profile/nocertification.svg";
@@ -60,7 +65,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 pb-0">
+      <CardHeader className="flex flex-row items-start justify-between px-8 pt-8 pb-0 sm:px-5 sm:pt-5">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
             Certifications
@@ -139,7 +144,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
               <img
                 src={noCertifications || "/placeholder.svg"}
                 alt="No certification entries"
-                className="w-20 h-20 mb-6"
+                className="w-20 h-20 mb-6 sm:mb-1"
               />
               <h3 className="text-[#414447] text-body2 mb-2 text-center">
                 {isPublic
@@ -161,7 +166,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
           </div>
         ) : (
           <>
-            <div className="divide-y divide-[#E5E7EB] p-8 relative">
+            <div className="divide-y divide-[#E5E7EB] p-8 sm:p-5 relative">
               {displayedCertifications.map(
                 (cert: Certification, index: number) => (
                   <div
@@ -181,14 +186,58 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[#000000] text-sub-header">
-                        {cert.title}
-                      </h3>
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-[#000000] text-sub-header">
+                          {cert.title}
+                        </h3>
+                        <div className="hidden sm:flex">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button className="text-[#000000] focus:outline-none">
+                                <svg
+                                  width="24"
+                                  height="24"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M12 8C13.1 8 14 7.1 14 6C14 4.9 13.1 4 12 4C10.9 4 10 4.9 10 6C10 7.1 10.9 8 12 8ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10ZM12 16C10.9 16 10 16.9 10 18C10 19.1 10.9 20 12 20C13.1 20 14 19.1 14 18C14 16.9 13.1 16 12 16Z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-48 p-0">
+                              <div className="py-1">
+                                {cert.certificate_s3_url ? (
+                                  <a
+                                    href={cert.certificate_s3_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center px-4 py-2 text-body2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                  >
+                                    View Credentials
+                                  </a>
+                                ) : (
+                                  <span className="flex items-center px-4 py-2 text-sm text-gray-500">
+                                    No credential link
+                                  </span>
+                                )}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
                       <p className="text-[#414447] text-body2 mt-1">
                         {cert.issued_by}
                       </p>
+                      <p className="hidden sm:block text-[#909091] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] mt-1">
+                        {formatDate(cert.issue_date)} -{" "}
+                        {formatDate(cert.expiration_date)}
+                      </p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right sm:hidden">
                       <p className="text-[#040609] text-sub-header">
                         {cert.certificate_s3_url ? (
                           <a

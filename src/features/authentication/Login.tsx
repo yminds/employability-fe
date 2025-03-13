@@ -72,25 +72,22 @@ const Login: React.FC = () => {
 
   return (
     <div className="flex h-screen w-screen bg-white dark:bg-gray-800">
-       {/* Left Section */}
-       <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
-          <img
-            src={grid || "/placeholder.svg"}
-            alt="Grid Background"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <img
-            src={man || "/placeholder.svg"}
-            alt="Hero"
-            className="absolute bottom-0 left-0 right-0 w-full object-contain"
-          />
-          <div className="absolute top-8 left-8 z-20">
-            <img
-              src={logo || "/placeholder.svg"}
-              alt="Logo"
-            />
-          </div>
+      {/* Left Section */}
+      <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
+        <img
+          src={grid || "/placeholder.svg"}
+          alt="Grid Background"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <img
+          src={man || "/placeholder.svg"}
+          alt="Hero"
+          className="absolute bottom-0 left-0 right-0 w-full object-contain"
+        />
+        <div className="absolute top-8 left-8 z-20">
+          <img src={logo || "/placeholder.svg"} alt="Logo" />
         </div>
+      </div>
 
       {/* Form Section */}
       <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
@@ -194,10 +191,9 @@ const Login: React.FC = () => {
                 "Login"
               )}
             </Button>
-
-            {/* Social Login */}
-            <SocialLogin onSocialLogin={handleSocialLogin} />
           </form>
+          {/* Social Login */}
+          <SocialLogin onSocialLogin={handleSocialLogin} />
         </div>
       </div>
     </div>

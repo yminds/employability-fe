@@ -276,7 +276,7 @@ const TryThingsSection: React.FC = () => {
     if (
       !user?.name ||
       !user?.email ||
-      !user?.phone_number ||
+      // !user?.phone_number ||
       !user?.gender ||
       !user?.address?.country ||
       !user?.address?.state ||

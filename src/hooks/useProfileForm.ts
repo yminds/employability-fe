@@ -23,7 +23,6 @@ import { validateExperience } from "@/features/profile/validation/validateExperi
 import { validateEducation } from "@/features/profile/validation/validateEducation";
 import { validateCertifications } from "@/features/profile/validation/validateCertification";
 import { parsedTransformData } from "@/utils/parsedTransformData";
-import { parseAddress } from "@/utils/addressParser";
 import { transformFormDataForDB } from "@/utils/transformData";
 import type { ProfileFormData } from "@/features/profile/types";
 import {
@@ -105,9 +104,6 @@ export const useProfileForm = (
         };
       }
 
-      const address = data?.contact?.address || "";
-      const { city, stateCode, countryCode } = parseAddress(address);
-
       setIsBasicInfoLoading(false);
       return {
         basicInfo: {
@@ -116,9 +112,9 @@ export const useProfileForm = (
           email: user.email || "",
           date_of_birth: data?.date_of_birth || "",
           gender: data?.gender || "",
-          country: countryCode,
-          state: stateCode,
-          city: city,
+          country: data?.contact?.location?.countryCode || "",
+          state: data?.contact?.location?.stateCode || "",
+          city: data?.contact?.location?.city || "",
           profile_image: data?.profile_image || "",
         },
         socialProfiles: {
@@ -711,21 +707,26 @@ export const useProfileForm = (
 
         console.log(`${section} section saved successfully`);
 
-        const currentIndex = [
-          "basic",
-          "skills",
-          "experience",
-          "education",
-          "certification",
-        ].indexOf(activeTab);
-        if (currentIndex < 4) {
-          setActiveTab(
-            ["basic", "skills", "experience", "education", "certification"][
-              currentIndex + 1
-            ]
-          );
+        if (section === "basic") {
+          if (!goalId) {
+            setActiveTab("experience");
+          } else {
+            setActiveTab("skills");
+          }
         } else {
-          onClose();
+          const sections = [
+            "basic",
+            "skills",
+            "experience",
+            "education",
+            "certification",
+          ];
+          const currentIndex = sections.indexOf(activeTab);
+          if (currentIndex < 4) {
+            setActiveTab(sections[currentIndex + 1]);
+          } else {
+            onClose();
+          }
         }
       } catch (err) {
         console.error(`Error saving ${section} section:`, err);
