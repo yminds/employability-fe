@@ -321,7 +321,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       </CardContent>
       {/* 
       <ReviewModal
-        open={isReviewModalOpen}
+        open={true}
         onOpenChange={setIsReviewModalOpen}
         project={project}
         username={user?.name}

@@ -62,11 +62,29 @@ interface SignupPayload {
         state: string;
         city: string;
     };
+    phoneNumber?:number;
 }
 
 interface LoginPayload {
     email: string;
     password: string;
+}
+
+interface CompanyResponse {
+    success: boolean;
+    message: string;
+    company: Company;
+}
+
+// Company Creation Payload
+interface CreateCompanyPayload {
+    name: string;
+    website: string;
+    industry: string;
+    organizationSize: string;
+    location: string;
+    tagline?: string;
+    logo?: string;
 }
 
 
@@ -118,7 +136,16 @@ export const employerApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Employer']
         }),
-    })
+        createCompany: builder.mutation<CompanyResponse, { employerId: string; formData: CreateCompanyPayload }>({
+            query: ({ employerId, formData }) => ({
+                url: `/api/v1/employer/${employerId}/company`,
+                method: "POST",
+                body: formData
+            }),
+            invalidatesTags: ['Employer']
+        }),
+    }),
+    overrideExisting:false
 });
 
 // Export hooks
@@ -126,5 +153,6 @@ export const {
     useEmployerSignupMutation,
     useEmployerLoginMutation,
     useGetEmployerDetailsQuery,
-    useUpdateEmployerProfileMutation
+    useUpdateEmployerProfileMutation,
+    useCreateCompanyMutation
 } = employerApiSlice;

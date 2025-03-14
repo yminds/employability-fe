@@ -1,6 +1,6 @@
 import { apiSlice } from "./apiSlice";
 import { Job } from "./employerJobsApiSlice";
-import { ScreeningCard } from "./screenCardApislice";
+import { ScreeningCard } from "./matchingCardApi";
 
 // Company interface (if not already defined elsewhere)
 export interface Company {

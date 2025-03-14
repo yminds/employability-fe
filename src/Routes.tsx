@@ -11,6 +11,11 @@ import type { Role } from "./models/Role";
 // Components
 import NotFound from "@/components/app/NotFound";
 import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
+import JobDetailsPage from "./components/employer/JobDetailsDialog.tsx";
+import CompanyForm from "./components/employer/CompanyForm.tsx";
+import CreateJobPage from "./pages/CreateJobPage.tsx";
+import EmployerJobsPage from "./pages/EmployerJobsPage.tsx";
+import EmployerCandidatesPage from "./pages/EmployerCandidatesPages.tsx";
 
 // Lazy load route components
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -121,6 +126,34 @@ export const routes: RouteConfig[] = [
     route: "/employer",
     component: <EmployerDashboard />,
   },
+  {
+    route:"/employer/jobs",
+    component:<EmployerJobsPage/>
+  },
+  {
+    route:"/employer/candidates",
+    component:<EmployerCandidatesPage/>
+  },
+  {
+    route:"/employer/jobs/:jobId",
+    component:<JobDetailsPage/>
+  },
+  {
+    route:"/employer/company/create",
+    component:<CompanyForm/>
+  },
+  {
+    route:"/employer/jobs/create",
+    component:<CreateJobPage/>
+  },
+  // {
+  //   route:"/employer/",
+  //   component:<
+  // },
+  // {
+  //   route:"/employer/candidates",
+  //   component:<CandidatesList/>
+  // },
   {
     route: "/setgoal",
     component: <SetGoal />,
