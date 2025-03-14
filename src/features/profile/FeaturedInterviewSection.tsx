@@ -6,22 +6,15 @@ import MockInterivewImage from "@/assets/profile/MockInterview.svg";
 import FeaturedInterviewImage from "@/assets/profile/featuredInterviewImage.svg";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FeaturedInterviewModal from "@/components/modal/FeaturedInterviewModal";
 
 interface MockInterviewProps {
   existingFeaturedInterview: any;
-  userId?: string;
-  goalId?: string;
-  goalName?: string;
   username?: string;
   isPublic?: boolean;
 }
 
 export default function FeaturedInterviewSection({
   existingFeaturedInterview,
-  userId,
-  goalId,
-  goalName = "",
   username,
   isPublic = false,
 }: MockInterviewProps) {
@@ -29,7 +22,6 @@ export default function FeaturedInterviewSection({
 
   const [formattedDuration, setFormattedDuration] = useState("0m 0s");
   const [timeAgo, setTimeAgo] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (existingFeaturedInterview) {
@@ -69,10 +61,6 @@ export default function FeaturedInterviewSection({
 
   const handleViewInterviews = () => {
     navigate("/interviews");
-  };
-
-  const handleSelectInterview = () => {
-    setDialogOpen(true);
   };
 
   const handleViewReport = (interviewId: string) => {
@@ -160,22 +148,13 @@ export default function FeaturedInterviewSection({
           </div>
 
           <button
-            onClick={handleSelectInterview}
+            onClick={handleViewInterviews}
             className="w-full border border-[#000000] rounded-md py-3 px-4 text-center text-[#000000] text-body2"
           >
             Select Interview
           </button>
         </CardContent>
       )}
-
-      {/* Featured Interview Modal as a separate component */}
-      <FeaturedInterviewModal
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        selectedGoal={goalName}
-        selectedGoalId={goalId}
-        userId={userId}
-      />
     </Card>
   );
 }

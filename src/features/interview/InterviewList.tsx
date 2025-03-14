@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
-import { useGetVerifiedSkillsMutation } from "@/api/interviewDetailsApiSlice";
+import { useGetInterviewDetailsQuery } from "@/api/interviewDetailsApiSlice";
 import InterviewCard from "./InterviewCard";
 import search from "@/assets/skills/search.svg";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import thumbnail from "@/assets/profile/MockInterview.svg";
 
 type InterviewType = "all" | "skill" | "project" | "mock";
 
@@ -15,47 +16,50 @@ interface InterviewListProps {
 
 const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
   const userId = useSelector((state: RootState) => state.auth.user?._id);
-  const [getVerifiedSkills, { data: skillsData, isLoading }] =
-    useGetVerifiedSkillsMutation();
+  const { data: interviewDetails, isLoading } =
+    useGetInterviewDetailsQuery(userId);
+
   const [selectedType, setSelectedType] = useState<InterviewType>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredSkills, setFilteredSkills] = useState<any[]>([]);
+  const [filteredInterviews, setFilteredInterviews] = useState<any[]>([]);
 
   useEffect(() => {
-    if (userId && goalId) {
-      fetchSkills(userId, goalId);
-    }
-  }, [userId, goalId]);
+    if (interviewDetails?.data?.reports) {
+      // Apply filters (search and type)
+      let filtered = interviewDetails.data.reports;
 
-  const fetchSkills = async (
-    userId: string | undefined,
-    goalId: string | null
-  ) => {
-    try {
-      await getVerifiedSkills({ userId, goalId }).unwrap();
-    } catch (err) {
-      console.error("Error fetching verified skills:", err);
-    }
-  };
+      // Filter by type if not "all"
+      if (selectedType !== "all") {
+        filtered = filtered.filter(
+          (report: any) =>
+            report.interview_id.type.toLowerCase() === selectedType
+        );
+      }
 
-  useEffect(() => {
-    if (skillsData?.data) {
-      // Apply search filter
-      const filtered = skillsData.data.userSkills.filter((skill: any) =>
-        skill.skill_pool_id.name
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      );
+      // Filter by search query
+      if (searchQuery) {
+        filtered = filtered.filter(
+          (report: any) =>
+            report.interview_id.title
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            (report.summary?.text &&
+              report.summary.text
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()))
+        );
+      }
 
-      setFilteredSkills(filtered);
+      setFilteredInterviews(filtered);
     }
-  }, [searchQuery, skillsData]);
+  }, [searchQuery, selectedType, interviewDetails]);
 
   const renderInterviewTypes = () => {
     const types = [
       { id: "all", label: "All" },
-      { id: "skill", label: "Skill" },
-      { id: "project", label: "Project" },
+      { id: "jobs", label: "Jobs" },
+      { id: "skill", label: "Skills" },
+      { id: "project", label: "Projects" },
       { id: "mock", label: "Mock" },
     ];
 
@@ -71,7 +75,6 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
                   ? "bg-[#001630] text-white hover:bg-[#062549]"
                   : "text-[#68696B]"
               }`}
-              disabled={type.id !== "all" && type.id !== "skill"} // Only enable 'all' and 'skill' for now
             >
               {type.label}
             </button>
@@ -122,28 +125,30 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
       <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
         {renderInterviewTypes()}
 
-        <div className="space-y-4">
+        <div className="space-y-7">
           {isLoading ? (
             Array.from({ length: 3 }).map(() => renderLoadingSkeleton())
-          ) : filteredSkills.length > 0 ? (
-            filteredSkills.map((skill: any, index: number) => (
-              <React.Fragment key={skill._id}>
+          ) : filteredInterviews.length > 0 ? (
+            filteredInterviews.map((report: any, index: number) => (
+              <React.Fragment key={report._id}>
                 <InterviewCard
-                  skillId={skill._id}
-                  skill={skill.skill_pool_id.name}
-                  skillImg={skill.skill_pool_id.icon}
-                  verified_rating={skill.verified_rating}
-                  bestInterview={skill.best_interview}
-                  interviews={skill.interviews}
+                  id={report.interview_id._id}
+                  title={report.interview_id.title}
+                  rating={report.final_rating}
+                  duration={report.s3_recording_url}
+                  createdAt={report.interview_id.createdAt}
+                  interviewType={report.interview_id.type}
+                  summary={report.summary?.text || "No summary available."}
+                  thumbnail={thumbnail}
+                  recordingUrls={report.s3_recording_url}
+                  goalId={goalId}
+                  isLast={index === filteredInterviews.length - 1}
                 />
-                {index < filteredSkills.length - 1 && (
-                  <div className="w-full h-[1px] bg-[#E0E0E0]" />
-                )}
               </React.Fragment>
             ))
           ) : (
             <div className="text-gray-500 text-body2 text-center py-4">
-              No verified skills found
+              No interviews found
             </div>
           )}
         </div>

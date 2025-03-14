@@ -18,7 +18,6 @@ import FeaturedInterviewSection from "./FeaturedInterviewSection";
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const { data: profile, isLoading } = useGetPublicProfileQuery({ username });
-  console.log("profile", profile);
 
   const completedProjects =
     profile?.projects.filter(
@@ -127,7 +126,11 @@ const PublicProfile: React.FC = () => {
       </div>
 
       <div className="hidden lg:grid xl:grid 2xl:grid grid-cols-10 gap-6 max-w-5xl mx-auto">
-        <div className="flex flex-col col-span-7">
+        <div
+          className={`flex flex-col ${
+            profile?.featuredInterview ? "col-span-7" : "col-span-10"
+          }`}
+        >
           <div className="">
             <ProfileBanner
               user={profile}
