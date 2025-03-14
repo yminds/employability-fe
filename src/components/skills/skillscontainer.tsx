@@ -16,6 +16,8 @@ const SkillsContainer: React.FC = () => {
   const [isUpdated, setIsUpdated] = useState<boolean>(false);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const user = useSelector((state: RootState) => state.auth.user);
+  console.log("User", user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const { data: goalData, } = useGetGoalsbyuserQuery(userId);

@@ -12,7 +12,7 @@ export default function CurrentStatusSection({
   user,
 }: CurrentStatusSectionProps) {
   const [currentStatus, setCurrentStatus] = useState<string>(
-    user.current_status || "Actively seeking job"
+    user.current_status || "Actively seeking jobs"
   );
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -31,7 +31,7 @@ export default function CurrentStatusSection({
             value={currentStatus}
             onChange={handleStatusChange}
           >
-            <option>Actively seeking job</option>
+            <option>Actively seeking jobs</option>
             <option>Open to offers</option>
             <option>Not looking</option>
           </select>

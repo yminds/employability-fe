@@ -141,7 +141,7 @@ const ProfileBanner = ({
                   />
                 )}
                 {/* SVG Semi-Circle */}
-                {user.current_status === "Actively seeking job" &&
+                {user.current_status === "Actively seeking jobs" &&
                   currentStatusSVG}
                 <div className="mb-[]">
                   <span className=" bg-slate-600 "></span>

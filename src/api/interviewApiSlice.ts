@@ -16,8 +16,14 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    getAllUserInterviews: builder.query({
+      query: (user_id) => ({
+        url: `/api/v1/interview/user/${user_id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateInterviewMutation, useGetInterviewbyIdQuery } =
+export const { useCreateInterviewMutation, useGetInterviewbyIdQuery, useGetAllUserInterviewsQuery } =
   interviewApiSlice;

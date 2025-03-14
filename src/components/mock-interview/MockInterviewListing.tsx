@@ -27,7 +27,7 @@ const MockInterviewsList: React.FC = () => {
   const { createInterview } = useCreateInterview();
   const handleTakeInterview = async (selectedGoal: any) => {
     const interviewId = await createInterview({
-      title: `Mock Interview for ${selectedGoal.title}`,
+      title: `${selectedGoal.title}`,
       type: "Mock",
     });
 
@@ -80,7 +80,7 @@ const MockInterviewsList: React.FC = () => {
         {selectedGoal && (
           <div className="p-6 h-full flex flex-col  overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-sub-header">{selectedGoal.title}</h3>
+              <h3 className="text-2xl font-bold text-sub-header">{selectedGoal.title} - {selectedGoal.experience_level == '1' ? "Entry level": selectedGoal.experience_level == '2'? "Mid Level" : "Senior level"}</h3>
               <button
                 className="text-gray-600 hover:text-gray-900"
                 onClick={closeSlider}
@@ -109,11 +109,6 @@ const MockInterviewsList: React.FC = () => {
             ) : (
               <p>No skills available.</p>
             )}
-
-            <div className='flex gap-5'>
-              <h4 className="font-semibold text-lg mb-3">Experience Level</h4>
-              <p>{selectedGoal.experience_level == '1' ? "Entry level": selectedGoal.experience_level == '2'? "Mid Level" : "Senior level"}</p>
-            </div>
             
             <div className="mt-auto">
               <button className="w-full bg-button text-white py-3 px-4 rounded" onClick={() => handleTakeInterview(selectedGoal)}>
