@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import arrowIcon from "@/assets/components/arrow_drop_down.svg";
+import FeaturedInterviewModal from "@/components/modal/FeaturedInterviewModal";
 
 interface InterviewHeaderProps {
   userId: string | undefined;
@@ -37,6 +38,7 @@ const InterviewHeader: React.FC<InterviewHeaderProps> = ({
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [selectedGoalId, setSelectedGoalId] = useState<string | undefined>("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Map experience levels to text
   const experienceLevelObj = {
@@ -131,7 +133,21 @@ const InterviewHeader: React.FC<InterviewHeaderProps> = ({
             <span className="text-gray-500 italic">Loading...</span>
           )}
         </div>
+        <button
+          onClick={() => setDialogOpen(true)}
+          className="py-2 text-sm w-[138px] h-[44px] md:h-[50px] md:w-[150px] md:px-2 md:py-0.5 font-medium text-[#001630] bg-white rounded-md border border-solid border-[#001630] hover:bg-[#00163033] hover:border-[#0522430D] hover:text-[#001630CC]"
+        >
+          Featured Interview
+        </button>
       </div>
+      {/* Featured Interview Modal as a separate component */}
+      <FeaturedInterviewModal
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        selectedGoal={selectedGoal}
+        selectedGoalId={selectedGoalId}
+        userId={userId}
+      />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
 import InterviewHeader from "./InterviewHeader";
 import InterviewList from "./InterviewList";
 import arrow from "@/assets/skills/arrow.svg";
+import InterviewInvites from "./InterviewInvites";
 
 const InterviewContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -59,8 +60,8 @@ const InterviewContainer: React.FC = () => {
       <section className="w-full h-[90vh] flex bg-[#F5F5F5] justify-center">
         <div className="flex w-full max-w-[1800px] gap-6 md:flex-col-reverse md:overflow-y-auto md:space-y-6 md:gap-0 md:scrollbar-hide sm:flex-col-reverse sm:overflow-y-auto sm:space-y-6 sm:gap-0 sm:scrollbar-hide sm:scroll-align-top">
           {/* Left Section */}
-          <div className="w-full xl:h-full lg:h-full xl:overflow-y-auto 2xl:h-full 2xl:overflow-y-auto lg:overflow-y-auto scrollbar-hide">
-            <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:min-w-[200px] sm:relative">
+          <div className="flex-[7.5] w-full xl:h-full lg:h-full xl:overflow-y-auto 2xl:h-full 2xl:overflow-y-auto lg:overflow-y-auto scrollbar-hide">
+            {/* <div className="sticky top-0 left-0 z-10 bg-[#F5F5F5] sm:min-w-[200px] sm:relative">
               <InterviewHeader
                 userId={userId}
                 goals={goalData}
@@ -68,15 +69,15 @@ const InterviewContainer: React.FC = () => {
                 onGoalChange={handleGoalChange}
                 selectedGoalExperienceLevel={selectedGoalExperienceLevel}
               />
-            </div>
-            <div className="mt-[70px] sm:min-w-[100%] space-y-4 overflow-y-auto sm:mt-4">
+            </div> */}
+            <div className="mt-1 sm:min-w-[100%] space-y-4 overflow-y-auto sm:mt-1">
               <InterviewList goalId={selectedGoalId} />
             </div>
           </div>
           {/* Right Section */}
           <div className="flex-[2.5] w-full space-y-4 sm:my-0">
             <div className="flex flex-col gap-6">
-              {/* Add any right sidebar components here */}
+              <InterviewInvites />
             </div>
           </div>
         </div>

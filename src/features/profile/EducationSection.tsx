@@ -139,7 +139,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
               <img
                 src={noEducation || "/placeholder.svg"}
                 alt="No education entries"
-                className="w-20 h-20 mb-6"
+                className="w-20 h-20 mb-6 sm:mb-1"
               />
               <h3 className="text-[#414447] text-body2 mb-2 text-center">
                 {isPublic
@@ -186,8 +186,24 @@ const EducationSection: React.FC<EducationSectionProps> = ({
                     <p className="text-[#414447] text-body2 mt-1">
                       {edu.institute}
                     </p>
+
+                    {/* New layout for small screens */}
+                    <div className="mt-2 flex gap-2 items-center sm:flex md:hidden lg:hidden xl:hidden 2xl:hidden">
+                      {" "}
+                      <p className="text-[#000000] text-sub-header">
+                        {edu.cgpa_or_marks
+                          ? `${edu.cgpa_or_marks} cgpa`
+                          : "N/A"}
+                      </p>
+                      <p className="text-[#909091] mt-[2px] font-sf-pro text-sm font-normal leading-6 tracking-[0.24px]">
+                        {formatDate(edu.from_date)} -{" "}
+                        {formatDate(edu.till_date)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
+
+                  {/* Original layout for medium and larger screens */}
+                  <div className="text-right hidden md:block">
                     <p className="text-[#040609] text-sub-header">
                       {edu.cgpa_or_marks ? `${edu.cgpa_or_marks} cgpa` : "N/A"}
                     </p>

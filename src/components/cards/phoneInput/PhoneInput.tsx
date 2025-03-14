@@ -55,10 +55,9 @@ const InputComponent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <Input
     className={cn(
-      "w-full py-[12px] px-[16px] bg-[#FAFBFE] rounded-[6px]", // Padding, background, and border radius
-      "border border-[rgba(0,0,0,0.10)]", // Light border style
-      "focus:outline-none focus:ring-2 focus:ring-[#0AD472]", // Green focus ring
-      "placeholder:text-[#808080] text-body2 placeholder-shown:align-middle ps-16", // Fix placeholder alignment
+      "w-full p-3 pl-14 border border-gray-300 rounded-lg text-sm",
+      "focus:ring-gray-500 focus:border-gray-500",
+      "placeholder:text-gray-400",
       className
     )}
     {...props}
@@ -90,7 +89,7 @@ const CountrySelect = ({
           variant="ghost"
           className={cn(
             "absolute left-2 top-1/2 -translate-y-1/2",
-            "h-8 px-2 hover:bg-transparent",
+            "h-8 px-1 hover:bg-transparent",
             "flex items-center gap-1",
             "border-0 shadow-none"
           )}

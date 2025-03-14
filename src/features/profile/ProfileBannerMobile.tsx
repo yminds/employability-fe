@@ -18,11 +18,9 @@ import {
   useGetStatesQuery,
 } from "@/api/locationApiSlice";
 import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
-import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 import Share from "@/assets/profile/share.svg";
 import { toast } from "sonner";
 import GoalDialog from "@/components/skills/setGoalDialog";
-import { TrendingUp } from "lucide-react";
 
 interface ProfileBannerMobileProps {
   user: any;
@@ -54,9 +52,6 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
 
   const [getUserSkillsSummary, { data: skillsSummaryData }] =
     useGetPublicUserSkillSummaryMutation();
-  const { data: userDetails } = useGetUserDetailsQuery(user._id || "", {
-    skip: isPublic,
-  });
 
   const totalSkills = skillsSummaryData?.data?.totalSkills || "0";
   const totalVerifiedSkills =
@@ -264,15 +259,24 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
             <div className="rounded-lg p-4">
               <p className="text-[#414447] text-body2">{bio || ""}</p>
             </div>
-            {!isPublic && (
-              <div className="flex items-center px-4 gap-2 text-[#03963f]">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-body2">
-                  {userDetails?.data?.profile_view_count} profile views
-                </span>
-              </div>
-            )}
           </div>
+
+          {/* contact */}
+          {isPublic && (
+            <div className="flex items-start justify-between px-8 sm:px-4 pb-4">
+              <Button
+                className="bg-[#001630] text-body2 text-white rounded-md px-6 py-2 hover:bg-[#001630]/90"
+                onClick={() =>
+                  window.open(
+                    `https://mail.google.com/mail/?view=cm&fs=1&to=${user?.email}`,
+                    "_blank"
+                  )
+                }
+              >
+                Contact
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       {!isPublic && (

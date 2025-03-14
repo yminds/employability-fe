@@ -12,7 +12,13 @@ export const interviewDetailsApi = apiSlice.injectEndpoints({
         },
       }),
     }),
+    getInterviewDetails: builder.query({
+      query: (userId) => ({
+        url: `/api/v1/interview-details/interviews/${userId}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useGetVerifiedSkillsMutation } = interviewDetailsApi;
+export const { useGetVerifiedSkillsMutation, useGetInterviewDetailsQuery } = interviewDetailsApi;

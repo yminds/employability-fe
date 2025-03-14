@@ -1,61 +1,124 @@
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
-import { useGetVerifiedSkillsMutation } from "@/api/interviewDetailsApiSlice";
+import { useGetInterviewDetailsQuery } from "@/api/interviewDetailsApiSlice";
 import InterviewCard from "./InterviewCard";
 import search from "@/assets/skills/search.svg";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import thumbnail from "@/assets/profile/MockInterview.svg";
 
-type InterviewType = "all" | "skill" | "project" | "mock";
+type InterviewType = "all" | "skill" | "project" | "mock" | "jobs";
 
 interface InterviewListProps {
   goalId: string | null;
 }
 
+interface Interview {
+  _id: string;
+  interview_id: {
+    _id: string;
+    title: string;
+    type: string;
+    createdAt: string;
+  };
+  final_rating: number;
+  s3_recording_url: string[];
+  summary?: {
+    text: string;
+  };
+}
+
+interface GroupedInterviews {
+  [key: string]: {
+    best: Interview;
+    history: Interview[];
+  };
+}
+
 const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
   const userId = useSelector((state: RootState) => state.auth.user?._id);
-  const [getVerifiedSkills, { data: skillsData, isLoading }] =
-    useGetVerifiedSkillsMutation();
+  const { data: interviewDetails, isLoading } =
+    useGetInterviewDetailsQuery(userId);
+
   const [selectedType, setSelectedType] = useState<InterviewType>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredSkills, setFilteredSkills] = useState<any[]>([]);
+  const [groupedInterviews, setGroupedInterviews] = useState<GroupedInterviews>(
+    {}
+  );
+  const [hoveredInterview, setHoveredInterview] = useState<string | null>(null);
 
+  // Group interviews by title and find the best one for each
   useEffect(() => {
-    if (userId && goalId) {
-      fetchSkills(userId, goalId);
-    }
-  }, [userId, goalId]);
+    if (interviewDetails?.data?.reports) {
+      // First apply type filter
+      let filtered = interviewDetails.data.reports;
 
-  const fetchSkills = async (
-    userId: string | undefined,
-    goalId: string | null
-  ) => {
-    try {
-      await getVerifiedSkills({ userId, goalId }).unwrap();
-    } catch (err) {
-      console.error("Error fetching verified skills:", err);
-    }
-  };
+      if (selectedType !== "all") {
+        filtered = filtered.filter(
+          (report: Interview) =>
+            report.interview_id.type.toLowerCase() === selectedType
+        );
+      }
 
-  useEffect(() => {
-    if (skillsData?.data) {
       // Apply search filter
-      const filtered = skillsData.data.userSkills.filter((skill: any) =>
-        skill.skill_pool_id.name
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      );
+      if (searchQuery) {
+        filtered = filtered.filter(
+          (report: Interview) =>
+            report.interview_id.title
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            (report.summary?.text &&
+              report.summary.text
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase()))
+        );
+      }
 
-      setFilteredSkills(filtered);
+      // Group by title
+      const grouped: GroupedInterviews = {};
+
+      filtered.forEach((report: Interview) => {
+        const title = report.interview_id.title;
+
+        if (!grouped[title]) {
+          grouped[title] = {
+            best: report,
+            history: [],
+          };
+        } else {
+          // If this report has a higher rating than the current best, make it the best
+          if (report.final_rating > grouped[title].best.final_rating) {
+            // Move the previous best to history
+            grouped[title].history.push(grouped[title].best);
+            grouped[title].best = report;
+          } else {
+            // Otherwise add to history
+            grouped[title].history.push(report);
+          }
+        }
+      });
+
+      // Sort history by date (newest first)
+      Object.keys(grouped).forEach((title) => {
+        grouped[title].history.sort(
+          (a, b) =>
+            new Date(b.interview_id.createdAt).getTime() -
+            new Date(a.interview_id.createdAt).getTime()
+        );
+      });
+
+      setGroupedInterviews(grouped);
     }
-  }, [searchQuery, skillsData]);
+  }, [searchQuery, selectedType, interviewDetails]);
 
   const renderInterviewTypes = () => {
     const types = [
       { id: "all", label: "All" },
-      { id: "skill", label: "Skill" },
-      { id: "project", label: "Project" },
+      { id: "jobs", label: "Jobs" },
+      { id: "skill", label: "Skills" },
+      { id: "project", label: "Projects" },
       { id: "mock", label: "Mock" },
     ];
 
@@ -71,7 +134,6 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
                   ? "bg-[#001630] text-white hover:bg-[#062549]"
                   : "text-[#68696B]"
               }`}
-              disabled={type.id !== "all" && type.id !== "skill"} // Only enable 'all' and 'skill' for now
             >
               {type.label}
             </button>
@@ -89,7 +151,7 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
             />
             <div className="absolute inset-y-0 left-3 flex items-center">
               <img
-                src={search || "/placeholder.svg"}
+                src={search || "/placeholder.svg?height=16&width=16"}
                 alt="Search Icon"
                 className="w-4 h-4 text-gray-400"
               />
@@ -117,33 +179,66 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
     </div>
   );
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString("default", { month: "short" });
+    const year = date.getFullYear();
+    return `${day}${getOrdinalSuffix(day)} ${month} ${year}`;
+  };
+
+  const getOrdinalSuffix = (day: number) => {
+    if (day > 3 && day < 21) return "th";
+    switch (day % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  };
+
   return (
     <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[32px] sm:p-6">
       <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
         {renderInterviewTypes()}
 
-        <div className="space-y-4">
+        <div className="space-y-7">
           {isLoading ? (
             Array.from({ length: 3 }).map(() => renderLoadingSkeleton())
-          ) : filteredSkills.length > 0 ? (
-            filteredSkills.map((skill: any, index: number) => (
-              <React.Fragment key={skill._id}>
+          ) : Object.keys(groupedInterviews).length > 0 ? (
+            Object.entries(groupedInterviews).map(
+              ([title, { best, history }], index) => (
                 <InterviewCard
-                  skillId={skill._id}
-                  skill={skill.skill_pool_id.name}
-                  skillImg={skill.skill_pool_id.icon}
-                  verified_rating={skill.verified_rating}
-                  bestInterview={skill.best_interview}
-                  interviews={skill.interviews}
+                  key={best._id}
+                  id={best.interview_id._id}
+                  title={best.interview_id.title}
+                  rating={best.final_rating}
+                  duration={best.s3_recording_url}
+                  createdAt={best.interview_id.createdAt}
+                  interviewType={best.interview_id.type}
+                  summary={best.summary?.text || "No summary available."}
+                  thumbnail={thumbnail}
+                  recordingUrls={best.s3_recording_url}
+                  goalId={goalId}
+                  isLast={
+                    index === Object.keys(groupedInterviews).length - 1 &&
+                    history.length === 0
+                  }
+                  history={history}
+                  isHovered={hoveredInterview === title}
+                  onMouseEnter={() => setHoveredInterview(title)}
+                  onMouseLeave={() => setHoveredInterview(null)}
+                  formatDate={formatDate}
                 />
-                {index < filteredSkills.length - 1 && (
-                  <div className="w-full h-[1px] bg-[#E0E0E0]" />
-                )}
-              </React.Fragment>
-            ))
+              )
+            )
           ) : (
             <div className="text-gray-500 text-body2 text-center py-4">
-              No verified skills found
+              No interviews found
             </div>
           )}
         </div>

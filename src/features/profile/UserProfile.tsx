@@ -22,6 +22,8 @@ import { updateUserProfile } from "../authentication/authSlice";
 import arrow from "@/assets/skills/arrow.svg";
 import ProjectList from "@/components/projects/ProjectList";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
+import { useGetFeaturedInterviewQuery } from "@/api/featuredInterviewApiSlice";
+import FeaturedInterviewSection from "./FeaturedInterviewSection";
 
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
@@ -32,10 +34,14 @@ const UserProfile: React.FC = () => {
   const { data: goalsData } = useGetUserGoalQuery(user._id) || "";
   const [updateUser] = useUpdateUserMutation();
   const goalId = goalsData?.data?.[0]?._id || "";
+  const goalName = goalsData?.data?.[0]?.name || "";
   const { data: userProjects } = useGetProjectsByUserIdQuery({
     userId: user._id,
     goalId: goalId,
   });
+  const { data: existingFeaturedInterview } = useGetFeaturedInterviewQuery(
+    user._id
+  );
   const profileUrl = `employability.ai/profile/${user?.username}`;
 
   const educationEntries: Education[] = [];
@@ -71,6 +77,12 @@ const UserProfile: React.FC = () => {
   // Render the right section components
   const renderRightSectionComponents = () => (
     <>
+      <FeaturedInterviewSection
+        existingFeaturedInterview={existingFeaturedInterview?.data}
+        userId={user._id}
+        goalId={goalId}
+        goalName={goalName}
+      />
       <CurrentStatusSection onStatusChange={handleEditStatus} user={user} />
       <StatsSection username={user?.username} />
       <ContactInformationSection

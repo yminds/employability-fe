@@ -2,25 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  useCreateJobPostingMutation,
-  useGetCompanyJobsQuery,
-  useUpdateJobMutation,
+  useGetEmployerJobsQuery,
 } from "../api/employerJobsApiSlice";
-import { Briefcase, Users, Clock, Inbox, Loader2 } from "lucide-react";
+import { Briefcase, Users, Clock, Inbox, Building } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import emojiWavingImg from "@/assets/dashboard/emoji_waving.svg";
-import { toast } from "sonner";
 
 // Import our components
 import DashboardOverview from "./ImprovedEmployerDashboard";
 import JobFilters from "@/components/employer/JobFilter";
 import JobCard, { IJob } from "@/components/employer/JobCard";
-import JobPostingForm from "@/components/employer/JobPostingForm";
-import JobDetailsDialog from "@/components/employer/JobDetailsDialog";
 import { jobUtils } from "../utils/jobUtils";
 
 // Skeleton Components
@@ -67,9 +61,6 @@ const JobCardSkeleton = () => (
 );
 
 const ImprovedEmployerDashboard: React.FC = () => {
-  const [isJobPostingOpen, setIsJobPostingOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<IJob | null>(null);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [filters, setFilters] = useState({
     type: "all",
     experience_level: "all",
@@ -78,10 +69,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
   });
   const navigate = useNavigate();
 
-  const employer = useSelector(
-    (state: RootState) => state.employerAuth.employer
-  );
-  console.log("employerCompany",employer?.company._id)
+  const employer = useSelector((state: RootState) => state.employerAuth.employer);
   const token = useSelector((state: RootState) => state.employerAuth.token);
 
   // Query for jobs with proper error handling and loading states
@@ -90,45 +78,41 @@ const ImprovedEmployerDashboard: React.FC = () => {
     isLoading,
     isFetching,
     refetch: refetchJobs,
-  } = useGetCompanyJobsQuery(
+  } = useGetEmployerJobsQuery(
     {
-      company_id: employer?.company || "",
+      employer_id: employer?._id || "",
     },
     {
-      // Only run the query if we have a company ID
-      skip: !employer?.company,
+      skip: !employer?._id,
       refetchOnMountOrArgChange: true,
     }
   );
-
-  const [createJob, { isLoading: isCreating }] = useCreateJobPostingMutation();
-  const [updateJob, { isLoading: isUpdating }] = useUpdateJobMutation();
 
   // Dashboard statistics with safe access patterns
   const dashboardStats = {
     activeJobs:
       jobsData?.data?.filter((job: any) => job.status === "active")?.length ||
       0,
-    newJobsThisWeek: 3, // Consider making this dynamic in the future
+    newJobsThisWeek: 3, // Example placeholder
     totalApplications:
       jobsData?.data?.reduce(
         (acc: number, job: any) => acc + (job.applications || 0),
         0
       ) || 0,
-    newApplicationsThisWeek: 15, // Consider making this dynamic in the future
+    newApplicationsThisWeek: 15, // Example placeholder
     totalShortlisted:
       jobsData?.data?.reduce(
         (acc: number, job: any) =>
           acc + (job.candidates?.shortlisted?.length || 0),
         0
       ) || 0,
-    shortlistedPercentage: 42, // Consider making this dynamic in the future
+    shortlistedPercentage: 42, // Example placeholder
     totalHired:
       jobsData?.data?.reduce(
         (acc: number, job: any) => acc + (job.candidates?.hired?.length || 0),
         0
       ) || 0,
-    hiredPercentage: 28, // Consider making this dynamic in the future
+    hiredPercentage: 28, // Example placeholder
   };
 
   // Redirect if not authenticated
@@ -138,53 +122,17 @@ const ImprovedEmployerDashboard: React.FC = () => {
     }
   }, [employer, token, navigate]);
 
-  // Handle job submission (create or update)
-  const handleJobSubmit = async (jobData: any) => {
-    try {
-      if (isEditMode && selectedJob) {
-        await updateJob({
-          id: selectedJob._id,
-          data: {
-            ...jobData,
-            employer_id: employer?._id,
-            company_id: employer?.company?._id,
-          },
-        }).unwrap();
-
-        toast.success("Job Updated", {
-          description: "The job posting has been successfully updated.",
-        });
-      } else {
-        await createJob({
-          ...jobData,
-          employer_id: employer?._id,
-          company_id: employer?.company,
-        }).unwrap();
-
-        toast.success("Job Posted", {
-          description: "Your job has been successfully posted.",
-        });
-      }
-      setIsJobPostingOpen(false);
-      setIsEditMode(false);
-      setSelectedJob(null);
-      refetchJobs(); // Refresh jobs after creating/updating
-    } catch (error) {
-      console.error("Error creating/updating job:", error);
-
-      toast.error("Error", {
-        description:
-          "There was an error processing your request. Please try again.",
-      });
-    }
-  };
-
+  // For navigating to job edit page
   const handleEditJob = (job: IJob) => {
-    setSelectedJob(job);
-    setIsEditMode(true);
-    setIsJobPostingOpen(true);
+    navigate(`/employer/jobs/edit/${job._id}`);
   };
 
+  // For navigating to the job details page
+  const handleSelectJob = (job: IJob) => {
+    navigate(`/employer/jobs/${job._id}`);
+  };
+
+  // Reset filters
   const resetFilters = () => {
     setFilters({
       type: "all",
@@ -193,14 +141,15 @@ const ImprovedEmployerDashboard: React.FC = () => {
       search: "",
     });
   };
-
-  // Safe access to filtered jobs
   const filteredJobs =
     jobsData?.data && jobsData.data.length > 0
       ? jobUtils.filterJobs(jobsData.data, filters)
       : [];
 
   const isContentLoading = isLoading || isFetching;
+
+
+  const hasCompany = employer?.company || false;
 
   return (
     <main className="h-screen w-full overflow-hidden font-ubuntu">
@@ -220,20 +169,29 @@ const ImprovedEmployerDashboard: React.FC = () => {
               </p>
             </div>
             <div className="flex space-x-3">
-              <Button
+              {/* <Button
                 variant="outline"
                 className="bg-white"
                 onClick={() => navigate("/employer/candidates")}
               >
                 <Users className="h-4 w-4 mr-2" />
                 All Candidates
-              </Button>
+              </Button> */}
+
+              {/* Show Create Company button if employer doesn't have a company */}
+              {!hasCompany && (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/employer/company/create")}
+                  className="bg-white"
+                >
+                  <Building className="h-4 w-4 mr-2" />
+                  Create Company
+                </Button>
+              )}
+
               <Button
-                onClick={() => {
-                  setSelectedJob(null);
-                  setIsEditMode(false);
-                  setIsJobPostingOpen(true);
-                }}
+                onClick={() => navigate("/employer/jobs/create")}
                 className="bg-[#001630] text-white hover:bg-[#062549]"
               >
                 <Briefcase className="h-4 w-4 mr-2" />
@@ -298,16 +256,25 @@ const ImprovedEmployerDashboard: React.FC = () => {
                         <p className="text-gray-500 mb-6">
                           Create your first job posting to start hiring talent
                         </p>
-                        <Button
-                          onClick={() => {
-                            setSelectedJob(null);
-                            setIsEditMode(false);
-                            setIsJobPostingOpen(true);
-                          }}
-                        >
-                          <Briefcase className="h-4 w-4 mr-2" />
-                          Post Your First Job
-                        </Button>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                          {/* Show Create Company button if employer doesn't have a company */}
+                          {!hasCompany && (
+                            <Button
+                              onClick={() => navigate("/employer/company/create")}
+                              className="bg-[#001630] text-white hover:bg-[#062549]"
+                            >
+                              <Building className="h-4 w-4 mr-2" />
+                              Create Company First
+                            </Button>
+                          )}
+                          <Button
+                            onClick={() => navigate("/employer/jobs/create")}
+                            className="bg-[#001630] text-white hover:bg-[#062549]"
+                          >
+                            <Briefcase className="h-4 w-4 mr-2" />
+                            Post Your First Job
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ) : (
@@ -316,7 +283,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
                         <JobCard
                           key={job._id}
                           job={job}
-                          onSelect={setSelectedJob}
+                          onSelect={handleSelectJob} // Navigate to job details page
                           onEdit={handleEditJob}
                         />
                       ))}
@@ -326,6 +293,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
               )}
             </TabsContent>
 
+            {/* Drafts Tab */}
             <TabsContent value="drafts">
               <Card className="text-center py-16">
                 <CardContent>
@@ -338,6 +306,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
               </Card>
             </TabsContent>
 
+            {/* Archived Tab */}
             <TabsContent value="archived">
               <Card className="text-center py-16">
                 <CardContent>
@@ -352,50 +321,6 @@ const ImprovedEmployerDashboard: React.FC = () => {
               </Card>
             </TabsContent>
           </Tabs>
-
-          {/* Job Posting Dialog */}
-          <Dialog
-            open={isJobPostingOpen}
-            onOpenChange={(open) => {
-              if (!open) {
-                setIsJobPostingOpen(false);
-                setIsEditMode(false);
-                setSelectedJob(null);
-              }
-            }}
-          >
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-6">
-              <DialogTitle className="text-xl mb-3">
-                {isEditMode ? "Edit Job" : "Post a New Job"}
-              </DialogTitle>
-              <JobPostingForm
-                onClose={() => {
-                  setIsJobPostingOpen(false);
-                  setIsEditMode(false);
-                  setSelectedJob(null);
-                }}
-                onSubmit={handleJobSubmit}
-                initialData={isEditMode ? selectedJob : null}
-                isLoading={isCreating || isUpdating}
-              />
-            </DialogContent>
-          </Dialog>
-
-          {/* Job Details Dialog */}
-          {selectedJob && !isEditMode && (
-            <Dialog
-              open={!!selectedJob && !isEditMode}
-              onOpenChange={(open) => {
-                if (!open) setSelectedJob(null);
-              }}
-            >
-              <JobDetailsDialog
-                job={selectedJob}
-                onClose={() => setSelectedJob(null)}
-                onEdit={handleEditJob}
-              />
-            </Dialog>
-          )}
         </div>
       </div>
     </main>

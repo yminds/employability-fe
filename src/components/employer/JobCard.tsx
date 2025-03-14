@@ -7,7 +7,21 @@ import { Briefcase, Building, ChevronRight, Users } from 'lucide-react';
 // Import utility functions
 import { jobUtils } from '@/utils/jobUtils';
 
-// Job Interface
+// Updated skill interface to match our implementation
+interface ISkill {
+  _id: string;
+  name: string;
+  icon?: string;
+  importance?: "Must-Have*" | "Preferred" | "Optional";
+}
+
+// Interface for skill with importance as used in the backend model
+interface ISkillRequired {
+  skill: string; // ObjectId reference
+  importance: "Must-Have*" | "Preferred" | "Optional";
+}
+
+// Candidate Interface
 interface ICandidate {
   _id: string;
   name: string;
@@ -17,36 +31,66 @@ interface ICandidate {
   education?: string;
 }
 
+  // Updated Job Interface to align with backend model
 export interface IJob {
   _id: string;
   title: string;
   description: string;
-  requirements: string[];
-  responsibilities: string[];
-  location: string;
-  type: "full-time" | "part-time" | "contract" | "remote";
+  company?: any; // Can be an ObjectId, string, or object with _id
+  employer?: any; // Can be an ObjectId or string
+  job_type: "full-time" | "part-time" | "contract" | "internship";
+  work_place_type: "remote" | "hybrid" | "on-site";
   experience_level: "entry" | "mid" | "senior";
-  salary_range: {
+  location: string;
+  // Updated to handle both formats - either array of skills or array of skill references with importance
+  skills_required: (ISkill | ISkillRequired | string)[];
+  screening_questions?: Array<{
+    question: string;
+    type: "multiple_choice" | "yes_no" | "text" | "numeric";
+    options?: string[];
+    is_mandatory: boolean;
+    is_eliminatory: boolean;
+    ideal_answer?: string;
+    customField?: string;
+    customFieldValue?: string;
+  }>;
+  interview_questions?: Array<{
+    id: string;
+    question: string;
+    category?: string;
+  }>;
+  status: "active" | "closed";
+  created_at?: Date | string;
+  updated_at?: Date | string;
+  
+  // Additional properties that might be populated or calculated
+  candidates?: {
+    applied?: ICandidate[];
+    shortlisted?: ICandidate[];
+    rejected?: ICandidate[];
+    hired?: ICandidate[];
+  };
+  views?: number;
+  applications?: number;
+  
+  // Legacy fields for backward compatibility
+  createdAt?: string;
+  posted_date?: string;
+  type?: string;
+  work_type?: string;
+  requirements?: string[];
+  responsibilities?: string[];
+  salary_range?: {
     min: number;
     max: number;
     currency: string;
   };
-  skills_required: string[];
-  posted_date: string;
-  status: "active" | "inactive" | "draft";
-  candidates: {
-    applied: ICandidate[];
-    shortlisted: ICandidate[];
-    rejected: ICandidate[];
-    hired: ICandidate[];
-  };
-  views: number;
-  applications: number;
 }
 
 interface JobCardProps {
   job: IJob;
   onSelect: (job: IJob) => void;
+  onEdit?: (job: IJob) => void;
 }
 
 // Eye icon component
@@ -68,7 +112,85 @@ const Eye = ({ className }: { className?: string }) => {
   );
 };
 
-const JobCard: React.FC<JobCardProps> = ({ job, onSelect }) => {
+const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
+  // Determine job type (using updated fields with fallbacks for backward compatibility)
+  const jobType = job.job_type || job.type || job.work_type || 'full-time';
+  
+  // Use appropriate date field, with fallbacks and type checking
+  const postedDate = typeof job.created_at === 'string' ? job.created_at : 
+                    typeof job.posted_date === 'string' ? job.posted_date : 
+                    typeof job.createdAt === 'string' ? job.createdAt : '';
+  
+  // Safely get counts with defaults
+  const appliedCount = job.candidates?.applied?.length || 0;
+  const shortlistedCount = job.candidates?.shortlisted?.length || 0;
+  const rejectedCount = job.candidates?.rejected?.length || 0;
+  const hiredCount = job.candidates?.hired?.length || 0;
+  
+  // Enhanced function to get the skill name from different skill formats
+  const getSkillName = (skillItem: any): string => {
+    // String case - direct string representing a skill name or ID
+    if (typeof skillItem === 'string') {
+      return skillItem;
+    } 
+    
+    // Object case - could be a direct skill object or a skill with importance
+    if (skillItem && typeof skillItem === 'object') {
+      // Direct skill object format like in form data (JobPostingPage sends this)
+      if (skillItem.name) {
+        return skillItem.name;
+      }
+      
+      // Backend model format with skill reference and importance
+      if (skillItem.skill) {
+        // If skill is a string (most likely an ID)
+        if (typeof skillItem.skill === 'string') {
+          return skillItem.skill;
+        }
+        // If skill is an object with name or _id
+        if (typeof skillItem.skill === 'object') {
+          return skillItem.skill.name || skillItem.skill._id || 'Unknown Skill';
+        }
+      }
+      
+      // Try getting _id directly if it exists
+      if (skillItem._id) {
+        return typeof skillItem._id === 'string' ? skillItem._id : String(skillItem._id);
+      }
+    }
+    
+    // Fallback
+    return 'Unknown Skill';
+  };
+  
+  // Transform skills_required to an array of skill names for display
+  const getSkillsForDisplay = (): string[] => {
+    if (!job.skills_required || !Array.isArray(job.skills_required)) {
+      return [];
+    }
+    
+    return job.skills_required.map(getSkillName);
+  };
+  
+  const skillsToDisplay = getSkillsForDisplay();
+  
+  // Format experience level for display
+  const formatExperienceLevel = (level: string = ''): string => {
+    const mapping: Record<string, string> = {
+      'entry': 'Entry Level',
+      'mid': 'Mid Level',
+      'senior': 'Senior Level',
+      // Legacy mappings for backward compatibility
+      'intermediate': 'Mid Level',
+      'executive': 'Senior Level',
+      'entry-level': 'Entry Level',
+      'mid-level': 'Mid Level',
+      'senior-level': 'Senior Level'
+    };
+    
+    return mapping[level.toLowerCase()] || level;
+  };
+  
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
       <CardContent className="p-0">
@@ -89,19 +211,33 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect }) => {
                 <span>{job.location}</span>
                 <span className="mx-2">•</span>
                 <Briefcase className="h-4 w-4 mr-1" />
-                <span>{jobUtils.formatJobType(job.type)}</span>
+                <span>{jobUtils.formatJobType(jobType)}</span>
+                {job.work_place_type && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <span>{job.work_place_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                  </>
+                )}
+                {job.experience_level && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <span>{formatExperienceLevel(job.experience_level)}</span>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-500">{jobUtils.getTimeAgo(job.posted_date)}</span>
+              <span className="text-xs text-gray-500">
+                {postedDate ? jobUtils.getTimeAgo(postedDate) : 'Recently posted'}
+              </span>
               <div className="mt-1 flex items-center">
                 <div className="flex items-center text-sm text-gray-500 mr-4">
                   <Users className="h-4 w-4 mr-1" />
-                  <span>{job.applications} applicants</span>
+                  <span>{job.applications || 0} applicants</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <Eye className="h-4 w-4 mr-1" />
-                  <span>{job.views} views</span>
+                  <span>{job.views || 0} views</span>
                 </div>
               </div>
             </div>
@@ -109,14 +245,14 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect }) => {
           
           <div className="mt-3">
             <div className="flex flex-wrap gap-2 mb-3">
-              {job.skills_required.slice(0, 4).map((skill, index) => (
+              {skillsToDisplay.slice(0, 4).map((skill, index) => (
                 <Badge key={index} variant="secondary" className="font-normal">
                   {skill}
                 </Badge>
               ))}
-              {job.skills_required.length > 4 && (
+              {skillsToDisplay.length > 4 && (
                 <Badge variant="outline" className="font-normal">
-                  +{job.skills_required.length - 4} more
+                  +{skillsToDisplay.length - 4} more
                 </Badge>
               )}
             </div>
@@ -128,19 +264,19 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect }) => {
           
           <div className="mt-4 grid grid-cols-4 gap-3">
             <div className="bg-blue-50 rounded-md p-2 text-center">
-              <p className="text-lg font-semibold text-blue-700">{job.candidates.applied.length}</p>
+              <p className="text-lg font-semibold text-blue-700">{appliedCount}</p>
               <p className="text-xs text-blue-800">Applied</p>
             </div>
             <div className="bg-purple-50 rounded-md p-2 text-center">
-              <p className="text-lg font-semibold text-purple-700">{job.candidates.shortlisted.length}</p>
+              <p className="text-lg font-semibold text-purple-700">{shortlistedCount}</p>
               <p className="text-xs text-purple-800">Shortlisted</p>
             </div>
             <div className="bg-red-50 rounded-md p-2 text-center">
-              <p className="text-lg font-semibold text-red-700">{job.candidates.rejected.length}</p>
+              <p className="text-lg font-semibold text-red-700">{rejectedCount}</p>
               <p className="text-xs text-red-800">Rejected</p>
             </div>
             <div className="bg-green-50 rounded-md p-2 text-center">
-              <p className="text-lg font-semibold text-green-700">{job.candidates.hired.length}</p>
+              <p className="text-lg font-semibold text-green-700">{hiredCount}</p>
               <p className="text-xs text-green-800">Hired</p>
             </div>
           </div>
@@ -150,6 +286,11 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect }) => {
             View Details
             <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
+          {onEdit && (
+            <Button variant="outline" className="ml-2" onClick={() => onEdit(job)}>
+              Edit
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
