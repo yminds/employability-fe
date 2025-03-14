@@ -80,8 +80,8 @@ export default function InterviewInvites() {
 
   const handleTakeInterview = async (interview: Interview) => {
     const interviewId = await createInterview({
-      title: `Mock Interview for ${interview.jobTitle}`,
-      type: "Mock",
+      title: `${interview.jobTitle}`,
+      type: "Job",
     });
 
     navigate(`/interview/${interviewId}`, {
