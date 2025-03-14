@@ -1,9 +1,10 @@
 import type React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical } from "lucide-react";
+import { Clock, MoreVertical } from "lucide-react";
 import PlayCircle from "@/assets/profile/playcircle.svg";
 import VerifiedBadge from "@/assets/interview/verifiedBadge.svg";
+import UnVerifiedBadge from "@/assets/interview/unverifiedBadge.svg";
 import {
   Popover,
   PopoverContent,
@@ -21,6 +22,21 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { toast } from "sonner";
 
+interface Interview {
+  _id: string;
+  interview_id: {
+    _id: string;
+    title: string;
+    type: string;
+    createdAt: string;
+  };
+  final_rating: number;
+  s3_recording_url: string[];
+  summary?: {
+    text: string;
+  };
+}
+
 interface InterviewCardProps {
   id: string;
   title: string;
@@ -33,6 +49,11 @@ interface InterviewCardProps {
   recordingUrls?: string[];
   goalId?: any;
   isLast?: boolean;
+  history?: Interview[];
+  isHovered?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  formatDate?: (dateString: string) => string;
 }
 
 const InterviewCard: React.FC<InterviewCardProps> = ({
@@ -47,6 +68,11 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
   recordingUrls = [],
   goalId,
   isLast = false,
+  history = [],
+  isHovered = false,
+  onMouseEnter = () => {},
+  onMouseLeave = () => {},
+  formatDate = (dateString) => dateString,
 }) => {
   const navigate = useNavigate();
   const [isSettingFeatured, setIsSettingFeatured] = useState(false);
@@ -113,6 +139,15 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
         },
       });
     }
+  };
+
+  const handleViewHistoryReport = (interviewId: string) => {
+    navigate(`/skill/report/${interviewId}`, {
+      state: {
+        best_interview: interviewId,
+        fromHistoryCard: true,
+      },
+    });
   };
 
   const handleSetAsFeatured = async () => {
@@ -183,6 +218,8 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       className={`w-full bg-white ${
         isLast ? "" : "border-b border-[#d9d9d9]/40"
       } pb-7`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div className="flex">
         {/* Left side - Thumbnail */}
@@ -214,14 +251,21 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
               <div className="flex items-center">
                 <span className="text-body2">{rating.toFixed(1)}/10</span>
                 <div className="w-5 h-5 ml-2 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <img src={VerifiedBadge} alt="Verified Badge" />
+                  <img
+                    src={VerifiedBadge || "/placeholder.svg"}
+                    alt="Verified Badge"
+                  />
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {isAlreadyFeatured && (
                 <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#f8f5e4] rounded-md text-[#BD8F1A]">
-                  <img src={Featured} alt="Featured" className="w-4 h-4" />
+                  <img
+                    src={Featured || "/placeholder.svg"}
+                    alt="Featured"
+                    className="w-4 h-4"
+                  />
                   <span className="text-[#BD8F1A] text-sm font-medium font-dm-sans">
                     Featured
                   </span>
@@ -287,6 +331,62 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
           </div>
 
           <p className="text-[#1c1b1f] text-body2 line-clamp-3">{summary}</p>
+
+          {/* Previous Interviews Section - Now inside the card with smooth transition */}
+          {history.length > 0 && (
+            <div
+              className={`mt-4 transition-all duration-300 ease-in-out overflow-hidden ${
+                isHovered
+                  ? "opacity-100 max-h-[500px]"
+                  : "opacity-0 max-h-0 pointer-events-none"
+              }`}
+            >
+              <div className="flex items-center gap-2 text-[#414447] mb-3">
+                <Clock className="w-[18px] h-[18px] text-[#68696B]" />
+                <span className="text-[#68696B] text-body2">
+                  Previous Interviews
+                </span>
+              </div>
+
+              <div className="space-y-4 ml-0.5">
+                {history.map((interview) => (
+                  <div key={interview._id} className="flex gap-6 items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#0C0F12] text-body2">
+                        {formatDate(interview.interview_id.createdAt)}
+                      </span>
+                      <div className="flex items-center">
+                        <span className="text-body2 ml-4">
+                          {interview.final_rating.toFixed(1)}/10
+                        </span>
+                        <div className="w-5 h-5 ml-2 rounded-full flex items-center justify-center">
+                          {interview.final_rating >= 4 ? (
+                            <img
+                              src={VerifiedBadge || "/placeholder.svg"}
+                              alt="Verified Badge"
+                            />
+                          ) : (
+                            <img
+                              src={UnVerifiedBadge || "/placeholder.svg"}
+                              alt="Unverified Badge"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() =>
+                        handleViewHistoryReport(interview.interview_id._id)
+                      }
+                      className="text-[#001630] underline font-medium font-dm-sans cursor-pointer bg-transparent border-none"
+                    >
+                      View report
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { useGetInterviewDetailsQuery } from "@/api/interviewDetailsApiSlice";
@@ -8,10 +9,32 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import thumbnail from "@/assets/profile/MockInterview.svg";
 
-type InterviewType = "all" | "skill" | "project" | "mock";
+type InterviewType = "all" | "skill" | "project" | "mock" | "jobs";
 
 interface InterviewListProps {
   goalId: string | null;
+}
+
+interface Interview {
+  _id: string;
+  interview_id: {
+    _id: string;
+    title: string;
+    type: string;
+    createdAt: string;
+  };
+  final_rating: number;
+  s3_recording_url: string[];
+  summary?: {
+    text: string;
+  };
+}
+
+interface GroupedInterviews {
+  [key: string]: {
+    best: Interview;
+    history: Interview[];
+  };
 }
 
 const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
@@ -21,25 +44,28 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
 
   const [selectedType, setSelectedType] = useState<InterviewType>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredInterviews, setFilteredInterviews] = useState<any[]>([]);
+  const [groupedInterviews, setGroupedInterviews] = useState<GroupedInterviews>(
+    {}
+  );
+  const [hoveredInterview, setHoveredInterview] = useState<string | null>(null);
 
+  // Group interviews by title and find the best one for each
   useEffect(() => {
     if (interviewDetails?.data?.reports) {
-      // Apply filters (search and type)
+      // First apply type filter
       let filtered = interviewDetails.data.reports;
 
-      // Filter by type if not "all"
       if (selectedType !== "all") {
         filtered = filtered.filter(
-          (report: any) =>
+          (report: Interview) =>
             report.interview_id.type.toLowerCase() === selectedType
         );
       }
 
-      // Filter by search query
+      // Apply search filter
       if (searchQuery) {
         filtered = filtered.filter(
-          (report: any) =>
+          (report: Interview) =>
             report.interview_id.title
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
@@ -50,7 +76,40 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
         );
       }
 
-      setFilteredInterviews(filtered);
+      // Group by title
+      const grouped: GroupedInterviews = {};
+
+      filtered.forEach((report: Interview) => {
+        const title = report.interview_id.title;
+
+        if (!grouped[title]) {
+          grouped[title] = {
+            best: report,
+            history: [],
+          };
+        } else {
+          // If this report has a higher rating than the current best, make it the best
+          if (report.final_rating > grouped[title].best.final_rating) {
+            // Move the previous best to history
+            grouped[title].history.push(grouped[title].best);
+            grouped[title].best = report;
+          } else {
+            // Otherwise add to history
+            grouped[title].history.push(report);
+          }
+        }
+      });
+
+      // Sort history by date (newest first)
+      Object.keys(grouped).forEach((title) => {
+        grouped[title].history.sort(
+          (a, b) =>
+            new Date(b.interview_id.createdAt).getTime() -
+            new Date(a.interview_id.createdAt).getTime()
+        );
+      });
+
+      setGroupedInterviews(grouped);
     }
   }, [searchQuery, selectedType, interviewDetails]);
 
@@ -92,7 +151,7 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
             />
             <div className="absolute inset-y-0 left-3 flex items-center">
               <img
-                src={search || "/placeholder.svg"}
+                src={search || "/placeholder.svg?height=16&width=16"}
                 alt="Search Icon"
                 className="w-4 h-4 text-gray-400"
               />
@@ -120,6 +179,28 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
     </div>
   );
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString("default", { month: "short" });
+    const year = date.getFullYear();
+    return `${day}${getOrdinalSuffix(day)} ${month} ${year}`;
+  };
+
+  const getOrdinalSuffix = (day: number) => {
+    if (day > 3 && day < 21) return "th";
+    switch (day % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  };
+
   return (
     <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[32px] sm:p-6">
       <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
@@ -128,24 +209,33 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
         <div className="space-y-7">
           {isLoading ? (
             Array.from({ length: 3 }).map(() => renderLoadingSkeleton())
-          ) : filteredInterviews.length > 0 ? (
-            filteredInterviews.map((report: any, index: number) => (
-              <React.Fragment key={report._id}>
+          ) : Object.keys(groupedInterviews).length > 0 ? (
+            Object.entries(groupedInterviews).map(
+              ([title, { best, history }], index) => (
                 <InterviewCard
-                  id={report.interview_id._id}
-                  title={report.interview_id.title}
-                  rating={report.final_rating}
-                  duration={report.s3_recording_url}
-                  createdAt={report.interview_id.createdAt}
-                  interviewType={report.interview_id.type}
-                  summary={report.summary?.text || "No summary available."}
+                  key={best._id}
+                  id={best.interview_id._id}
+                  title={best.interview_id.title}
+                  rating={best.final_rating}
+                  duration={best.s3_recording_url}
+                  createdAt={best.interview_id.createdAt}
+                  interviewType={best.interview_id.type}
+                  summary={best.summary?.text || "No summary available."}
                   thumbnail={thumbnail}
-                  recordingUrls={report.s3_recording_url}
+                  recordingUrls={best.s3_recording_url}
                   goalId={goalId}
-                  isLast={index === filteredInterviews.length - 1}
+                  isLast={
+                    index === Object.keys(groupedInterviews).length - 1 &&
+                    history.length === 0
+                  }
+                  history={history}
+                  isHovered={hoveredInterview === title}
+                  onMouseEnter={() => setHoveredInterview(title)}
+                  onMouseLeave={() => setHoveredInterview(null)}
+                  formatDate={formatDate}
                 />
-              </React.Fragment>
-            ))
+              )
+            )
           ) : (
             <div className="text-gray-500 text-body2 text-center py-4">
               No interviews found

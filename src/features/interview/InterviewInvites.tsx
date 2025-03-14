@@ -1,49 +1,97 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import ViewJD from "@/components/interview-list/ViewJD";
+import { mockInterviews } from "../dashboard/InterviewsInvites";
+import { useCreateInterview } from "@/hooks/useCreateInterview";
+
+interface JobDescription {
+  summary: string;
+  keyResponsibilities: string[];
+  requiredSkillsAndQualifications: string[];
+  experience: string;
+  perksAndBenefits: string;
+  whyJoinUs: string[];
+  role: string;
+  industryType: string;
+  department: string;
+  employmentType: string;
+  roleCategory: string;
+}
 
 interface JobListing {
-  id: string;
+  id: number;
   title: string;
   company: string;
   employmentType: string;
   postedTime: string;
   logoType: "accenture" | "paypal" | "zoho" | "ey";
+  jobDescription: any;
+  type: string;
+  dueDate: string;
+  jobTitle: string;
+}
+
+interface Interview {
+  id: number;
+  company: string;
+  type: string;
+  dueDate: string;
+  jobTitle: string;
+  jobDescription: JobDescription;
 }
 
 export default function InterviewInvites() {
-  const jobListings: JobListing[] = [
-    {
-      id: "1",
-      title: "Lead Full-stack Engineer",
-      company: "Accenture",
-      employmentType: "Full time",
-      postedTime: "1 day ago",
-      logoType: "accenture",
-    },
-    {
-      id: "2",
-      title: "Cloud Engineer",
-      company: "PayPal",
-      employmentType: "Contract",
-      postedTime: "1 day ago",
-      logoType: "paypal",
-    },
-    {
-      id: "3",
-      title: "Data Scientist",
-      company: "Zoho",
-      employmentType: "Full time",
-      postedTime: "1 day ago",
-      logoType: "zoho",
-    },
-    {
-      id: "4",
-      title: "Product Manager",
-      company: "Ernst & Young",
-      employmentType: "Full time",
-      postedTime: "",
-      logoType: "ey",
-    },
-  ];
+  const { createInterview } = useCreateInterview();
+  const navigate = useNavigate();
+  const [selectedInterview, setSelectedInterview] = useState<any | null>(null);
+
+  const getLogoType = (
+    company: string
+  ): "accenture" | "paypal" | "zoho" | "ey" => {
+    const companyLower = company.toLowerCase();
+    if (companyLower.includes("web") || companyLower.includes("craft"))
+      return "accenture";
+    if (companyLower.includes("mega") || companyLower.includes("byte"))
+      return "paypal";
+    if (companyLower.includes("cloud") || companyLower.includes("sky"))
+      return "zoho";
+    return "ey";
+  };
+
+  const jobListings: JobListing[] = mockInterviews.map((interview) => ({
+    id: interview.id,
+    title: interview.jobTitle,
+    company: interview.company,
+    employmentType: interview.jobDescription.employmentType.split(",")[0],
+    postedTime: `Due: ${interview.dueDate}`,
+    logoType: getLogoType(interview.company),
+    jobDescription: interview.jobDescription,
+    type: interview.type,
+    dueDate: interview.dueDate,
+    jobTitle: interview.jobTitle,
+  }));
+
+  const handleCardClick = (job: JobListing) => {
+    const interview = mockInterviews.find((i) => i.id === job.id);
+    setSelectedInterview(interview || null);
+  };
+
+  const handleTakeInterview = async (interview: Interview) => {
+    const interviewId = await createInterview({
+      title: `Mock Interview for ${interview.jobTitle}`,
+      type: "Mock",
+    });
+
+    navigate(`/interview/${interviewId}`, {
+      state: {
+        title: `${interview.jobTitle}`,
+        type: "Job",
+        jobDescription: interview,
+      },
+    });
+  };
 
   const renderLogo = (logoType: string) => {
     switch (logoType) {
@@ -119,29 +167,43 @@ export default function InterviewInvites() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-sm bg-white rounded-[8px] mt-1">
-      <CardHeader className="px-8 pt-8 pb-6 text-body2 text-[#414447]">
-        Interview Invites
-      </CardHeader>
-      <CardContent className="px-8 pb-8">
-        <div className="space-y-6">
-          {jobListings.map((job) => (
-            <div key={job.id} className="flex items-start space-x-4">
-              {renderLogo(job.logoType)}
-              <div className="space-y-1">
-                <h3 className="text-sub-header">{job.title}</h3>
-                <div className="text-[#414447] text-sm font-normal leading-6 tracking-[0.07px]">
-                  {job.company} <span className="mx-1">•</span>{" "}
-                  {job.employmentType}
-                </div>
-                <div className="text-[#414447] text-sm font-normal leading-6 tracking-[0.07px]">
-                  {job.postedTime}
+    <div className="relative">
+      <Card className="w-full max-w-md mx-auto shadow-sm bg-white rounded-[8px] mt-1">
+        <CardHeader className="px-8 pt-8 pb-6 text-body2 text-[#414447]">
+          Interview Invites
+        </CardHeader>
+        <CardContent className="px-8 pb-8">
+          <div className="space-y-5">
+            {jobListings.map((job) => (
+              <div
+                key={job.id}
+                className="flex items-start space-x-4 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+                onClick={() => handleCardClick(job)}
+              >
+                {renderLogo(job.logoType)}
+                <div className="space-y-1">
+                  <h3 className="text-sub-header">{job.title}</h3>
+                  <div className="text-[#414447] text-sm font-normal leading-6 tracking-[0.07px]">
+                    {job.company} <span className="mx-1">•</span>{" "}
+                    {job.employmentType}
+                  </div>
+                  <div className="text-[#414447] text-sm font-normal leading-6 tracking-[0.07px]">
+                    {job.postedTime}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedInterview && (
+        <ViewJD
+          selectedInterview={selectedInterview}
+          setSelectedInterview={setSelectedInterview}
+          handleTakeInterview={handleTakeInterview}
+        />
+      )}
+    </div>
   );
 }
