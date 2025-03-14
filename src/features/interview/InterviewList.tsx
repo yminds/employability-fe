@@ -9,7 +9,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import thumbnail from "@/assets/profile/MockInterview.svg";
 
-type InterviewType = "all" | "skill" | "project" | "mock" | "jobs";
+type InterviewType = "all" | "skill" | "project" | "mock" | "job";
 
 interface InterviewListProps {
   goalId: string | null;
@@ -116,7 +116,7 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
   const renderInterviewTypes = () => {
     const types = [
       { id: "all", label: "All" },
-      { id: "jobs", label: "Jobs" },
+      { id: "job", label: "Jobs" },
       { id: "skill", label: "Skills" },
       { id: "project", label: "Projects" },
       { id: "mock", label: "Mock" },

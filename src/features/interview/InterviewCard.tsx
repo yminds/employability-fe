@@ -131,14 +131,25 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
   };
 
   const handleViewReport = (interviewType: string) => {
-    if (interviewType === "Skill") {
-      navigate(`/skill/report/${id}`, {
-        state: {
-          best_interview: id,
-          fromInterviewCard: true,
-        },
-      });
+    let path;
+
+    switch (interviewType) {
+      case "Job":
+        path = `/skill/report/Job/${id}`;
+        break;
+      case "Mock":
+        path = `/skill/report/Mock/${id}`;
+        break;
+      default:
+        path = `/skill/report/${id}`;
     }
+
+    navigate(path, {
+      state: {
+        best_interview: id,
+        fromInterviewCard: true,
+      },
+    });
   };
 
   const handleViewHistoryReport = (interviewId: string) => {
