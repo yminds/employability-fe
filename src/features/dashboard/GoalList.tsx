@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useGetAllPreDefinedGoalsQuery, useFilterGoalsMutation } from "@/api/predefinedGoalsApiSlice";
 import PredefinedGoalDialog from "./PredefinedGoalDialog"; // Import GoalFormDialog
 import GoalListSkeleton from "./GoalListSkeleton";
-import { useLocation } from "react-router-dom";
 import GoalsBanner from "@/components/setgoals/GoalsBanner";
 
 interface Goal {
@@ -119,7 +118,7 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
         if (hoveredGoalID) {
             const timeout = setTimeout(() => {
                 setDelayedHoverGoalID(hoveredGoalID);
-            }, 1000); // ⏳ 1-second delay before showing hover block
+            }, 500); // ⏳ 1-second delay before showing hover block
             setHoverTimeout(timeout);
         } else {
             setDelayedHoverGoalID(null);
@@ -129,11 +128,6 @@ const GoalList: React.FC<Props> = ({ setJourneyDialog, searchGoals, displayTitle
             if (hoverTimeout) clearTimeout(hoverTimeout);
         };
     }, [hoveredGoalID]);
-
-    const location = useLocation(); // Get current location
-
-    // Check if the URL is `/setgoals`
-    const isSetGoalsPage = location.pathname === "/setgoal";
 
     return (
         <>

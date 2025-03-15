@@ -11,7 +11,11 @@ import type { Role } from "./models/Role";
 // Components
 import NotFound from "@/components/app/NotFound";
 import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
-import ProjectReportPage from "./pages/ProjectReportPage.tsx";
+import JobDetailsPage from "./components/employer/JobDetailsDialog.tsx";
+import CompanyForm from "./components/employer/CompanyForm.tsx";
+import CreateJobPage from "./pages/CreateJobPage.tsx";
+import EmployerJobsPage from "./pages/EmployerJobsPage.tsx";
+import EmployerCandidatesPage from "./pages/EmployerCandidatesPages.tsx";
 
 // Lazy load route components
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -43,9 +47,11 @@ const UserPublicProfilePage = lazy(
 const InterviewsLisingPage = lazy(
   () => import("./pages/InterviewsListingPage.tsx")
 );
-const InterviewInvites = lazy(
-  () => import("./features/dashboard/InterviewsInvites.tsx")
+const MockInterviewsPage = lazy(
+  () => import("./pages/MockInterviews.tsx")
 );
+
+const MockReportPage = lazy(() => import("./pages/MockReportPage.tsx"));
 const ReportPage = lazy(() => import("./pages/SkillsReportPage.tsx"));
 const VerifyPhoneOTP = lazy(() => import("./pages/VerifyPhoneOTP.tsx"));
 const EmployerSignup = lazy(() => import("./pages/EmployerSignUp.tsx"));
@@ -122,6 +128,34 @@ export const routes: RouteConfig[] = [
     route: "/employer",
     component: <EmployerDashboard />,
   },
+  {
+    route:"/employer/jobs",
+    component:<EmployerJobsPage/>
+  },
+  {
+    route:"/employer/candidates",
+    component:<EmployerCandidatesPage/>
+  },
+  {
+    route:"/employer/jobs/:jobId",
+    component:<JobDetailsPage/>
+  },
+  {
+    route:"/employer/company/create",
+    component:<CompanyForm/>
+  },
+  {
+    route:"/employer/jobs/create",
+    component:<CreateJobPage/>
+  },
+  // {
+  //   route:"/employer/",
+  //   component:<
+  // },
+  // {
+  //   route:"/employer/candidates",
+  //   component:<CandidatesList/>
+  // },
   {
     route: "/setgoal",
     component: <SetGoal />,
@@ -202,10 +236,14 @@ export const routes: RouteConfig[] = [
     route: "/interviews",
     component: <InterviewsPage />,
   },
-  // {
-  //   route: "/project/report/:id/:id",
-  //   component: <ProjectReportPage isSharedReport={false} />,
-  // },  
+  {
+    route: "/mock-interviews",
+    component: <MockInterviewsPage />,
+  },
+  {
+    route: "/skill/report/:id/:id",
+    component: <MockReportPage isSharedReport={false} />,
+  },  
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {

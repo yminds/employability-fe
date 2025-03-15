@@ -6,7 +6,9 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { useCreateInterview } from '@/hooks/useCreateInterview';
 import ViewJD from '@/components/interview-list/ViewJD';
-
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store/store';
+import { useGetAllUserInterviewsQuery } from '@/api/interviewApiSlice';
 export const mockInterviews = [
   {
     "id": 1,
@@ -282,13 +284,13 @@ const InterviewInvites: React.FC<InterviewListProps> = ({ isDashboard = false, i
 
   const handleTakeInterview = async (interview: Interview) => {
     const interviewId = await createInterview({
-      title: `Mock Interview for ${interview.jobTitle}`,
-      type: "Mock",
+      title: `${interview.jobTitle}`,
+      type: "Job",
     });
 
     // Start the interview directly if tutorial is disabled
     navigate(`/interview/${interviewId}`, {
-      state: {title: `${interview.jobTitle}`, type : 'Mock', jobDescription: interview},
+      state: {title: `${interview.jobTitle}`, type : 'Job', jobDescription: interview},
     });
   };
 

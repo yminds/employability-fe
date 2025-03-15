@@ -9,10 +9,10 @@ import { setEmployerCredentials } from "@/features/authentication/employerAuthSl
 
 // Import assets
 import logo from "@/assets/branding/logo.svg";
-import man from "@/assets/sign-up/man.png";
-import grid from "@/assets/sign-up/grid.svg";
+
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
+import employerSignuplogo from "@/assets/employer/employerSignup1.svg";
 import arrow from "@/assets/skills/arrow.svg";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -118,18 +118,15 @@ const EmployerLogin = () => {
     <div className="flex h-screen w-screen bg-white dark:bg-gray-800">
       {/* Left Section */}
       <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
+        {/* Single SVG filling the entire left section */}
         <img
-          src={grid}
-          alt="Grid Background"
+          src={employerSignuplogo}
+          alt="Employer Signup Background"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <img
-          src={man}
-          alt="Hero"
-          className="absolute bottom-0 left-0 right-0 w-full object-contain"
-        />
+        {/* Logo overlay */}
         <div className="absolute top-8 left-8 z-20">
-          <img src={logo} alt="Logo" />
+          <img src={logo} alt="Logo" className="w-32" />
         </div>
       </div>
 

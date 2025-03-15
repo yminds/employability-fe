@@ -13,6 +13,12 @@ import alertCircle from "@/assets/projects/alertCircle.svg";
 import SuccessModal from "./modal/steps/SuccessModal";
 import { useCreateInterview } from "@/hooks/useCreateInterview";
 import { useNavigate } from "react-router-dom";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { MoreVertical } from "lucide-react";
 
 interface Tech {
   _id: string;
@@ -169,7 +175,45 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
         <div className="flex items-center justify-between gap-3 flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full md:items-start sm:items-start">
           <div className="flex flex-col gap-4 md:w-full sm:w-full">
-            <h2 className="text-[#1f2226] text-sub-header">{project.name}</h2>
+            <div className="flex justify-between items-center w-full">
+              <h2 className="text-[#1f2226] text-sub-header">{project.name}</h2>
+              {/* 3-dot menu for mobile */}
+              {(project.githubLink?.length > 0 || project.liveLink) && (
+                <div className="hidden md:block sm:block">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="text-[#000000] focus:outline-none">
+                        <MoreVertical className="h-5 w-5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48 p-0">
+                      <div className="py-1">
+                        {project.githubLink?.length > 0 && (
+                          <a
+                            href={project.githubLink[0]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center px-4 py-2 text-body2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                          >
+                            View GIT repo
+                          </a>
+                        )}
+                        {project.liveLink && (
+                          <a
+                            href={project.liveLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center px-4 py-2 text-body2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                          >
+                            Live link
+                          </a>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+            </div>
             {project.tech?.length > 0 && (
               <div className="flex w-[200px] md:w-full sm:w-full">
                 <div className="flex gap-2 flex-wrap">
@@ -244,28 +288,43 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
       <CardContent className="flex flex-col px-0 w-full p-0 mt-3">
         <p className="text-[#67696b] text-body2">{project.description}</p>
-        {(project.githubLink?.length > 0 || project.liveLink) && (
-          <div className="flex gap-6 mt-3 md:flex-col sm:flex-col md:gap-2 sm:gap-2 md:items-start sm:items-start">
-            {project.githubLink?.length > 0 && (
-              <Button variant="link" className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto" asChild>
-                <a href={project.githubLink[0]} target="_blank" rel="noopener noreferrer">
-                  View GIT repo
-                </a>
-              </Button>
-            )}
-            {project.liveLink && (
-              <Button variant="link" className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto" asChild>
-                <a href={project.liveLink} target="_blank" rel="noopener noreferrer">
-                  Live link
-                </a>
-              </Button>
-            )}
-          </div>
-        )}
+
+        <div className="flex gap-6 mt-3 md:hidden sm:hidden">
+          {project.githubLink?.length > 0 && (
+            <Button
+              variant="link"
+              className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto"
+              asChild
+            >
+              <a
+                href={project.githubLink[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View GIT repo
+              </a>
+            </Button>
+          )}
+          {project.liveLink && (
+            <Button
+              variant="link"
+              className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto"
+              asChild
+            >
+              <a
+                href={project.liveLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Live link
+              </a>
+            </Button>
+          )}
+        </div>
       </CardContent>
       {/* 
       <ReviewModal
-        open={isReviewModalOpen}
+        open={true}
         onOpenChange={setIsReviewModalOpen}
         project={project}
         username={user?.name}

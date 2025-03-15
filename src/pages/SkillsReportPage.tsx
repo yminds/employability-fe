@@ -159,7 +159,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
 
   // Get user profile image from Redux.
   const userImg = useSelector(
-    (state: RootState) => state.auth.user?.profile_image
+    (state: RootState) => state.auth?.user?.profile_image
   ) ;
 
   // State to store report data.

@@ -68,7 +68,9 @@ const Interview: React.FC<{
   jobDescription: JobDescription;
   isResume: boolean;
   projectId: string;
-}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false,projectId }) => {
+  userExperience:string | undefined
+}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false,projectId, userExperience }) => {
+  console.log("in interviews jobDescription", jobDescription);
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
@@ -296,6 +298,7 @@ const Interview: React.FC<{
       jobDescription: jobDescription,
       userName: user?.name,
       projectId: projectId
+      userExperience: userExperience
     }).unwrap(); 
        
     console.log("response", response);

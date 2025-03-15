@@ -33,7 +33,7 @@ const SetGoal: React.FC = () => {
                 </div>
             </div>
             <div className="max-w-[1400px] w-[100%] rounded-[12px] p-6 bg-white">
-                <SetGoalCard setJourneyDialog={setJourneyDialog} selectedLevel={selectedLevel} />
+                <SetGoalCard setJourneyDialog={setJourneyDialog} selectedLevel={selectedLevel} onGoalUpdate={()=> setJourneyDialog(false)} />
             </div>
         </section>
       ) : (
