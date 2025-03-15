@@ -11,6 +11,7 @@ import type { Role } from "./models/Role";
 // Components
 import NotFound from "@/components/app/NotFound";
 import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
+import ProjectReportPage from "./pages/ProjectReportPage.tsx";
 
 // Lazy load route components
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -201,6 +202,10 @@ export const routes: RouteConfig[] = [
     route: "/interviews",
     component: <InterviewsPage />,
   },
+  // {
+  //   route: "/project/report/:id/:id",
+  //   component: <ProjectReportPage isSharedReport={false} />,
+  // },  
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {

@@ -35,6 +35,7 @@ interface Project {
   score?: number;
   lastCompletedStep?: number;
   goal_id?: string;
+
 }
 
 type ProjectStatus = "Verified" | "In-review" | "Unverified" | "Incomplete";
@@ -137,16 +138,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
   const config = getStatusConfig(project.status);
 
-  const handleVerifySProject = async () => {
-    // const interviewId = await createInterview({
-    //   title: `project Interview`,
-    //   type: "Project",
-    //   project_id: project._id,
-    // });
+  const handleVerifyProject = async () => {
+    const interviewId = await createInterview({
+      title: `project Interview`,
+      type: "Project",
+      project_id: project._id,
+    });
 
-    // navigate(`/interview/${interviewId}`, {
-    //   state: { title: "Project Interview", level: user?.experience_level, type: "Project" },
-    // });
+    navigate(`/interview/${interviewId}`, {
+      state: { title: "Project Interview", level: user?.experience_level, type: "Project", projectId: project._id },
+    });
   };
 
   return (
@@ -223,7 +224,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     ? handleIncompleteClick
                     : project.status === "In-review"
                     ? handleViewStatusClick
-                    : undefined
+                    : project.status === "Unverified"
+                    ? handleVerifyProject
+                    : () => {}
                 }
               >
                 {getActionConfig(project.status)}
