@@ -297,7 +297,7 @@ const Interview: React.FC<{
       type: type,
       jobDescription: jobDescription,
       userName: user?.name,
-      projectId: projectId
+      projectId: projectId,
       userExperience: userExperience
     }).unwrap(); 
        
