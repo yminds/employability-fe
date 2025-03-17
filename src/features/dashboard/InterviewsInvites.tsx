@@ -9,6 +9,7 @@ import ViewJD from '@/components/interview-list/ViewJD';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useGetAllUserInterviewsQuery } from '@/api/interviewApiSlice';
+
 export const mockInterviews = [
   {
     "id": 1,

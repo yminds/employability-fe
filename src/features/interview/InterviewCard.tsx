@@ -5,6 +5,7 @@ import { Clock, MoreVertical } from "lucide-react";
 import PlayCircle from "@/assets/profile/playcircle.svg";
 import VerifiedBadge from "@/assets/interview/verifiedBadge.svg";
 import UnVerifiedBadge from "@/assets/interview/unverifiedBadge.svg";
+import { useGetMessagesQuery } from "@/api/mentorUtils";
 import {
   Popover,
   PopoverContent,
@@ -54,6 +55,8 @@ interface InterviewCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   formatDate?: (dateString: string) => string;
+  thread_id?: string
+  user_id?: string|undefined
 }
 
 const InterviewCard: React.FC<InterviewCardProps> = ({
@@ -73,7 +76,9 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
   onMouseEnter = () => {},
   onMouseLeave = () => {},
   formatDate = (dateString) => dateString,
+  thread_id,
 }) => {
+  console.log("thread_id",thread_id)
   const navigate = useNavigate();
   const [isSettingFeatured, setIsSettingFeatured] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -148,6 +153,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       state: {
         best_interview: id,
         fromInterviewCard: true,
+        thread_id:thread_id
       },
     });
   };
@@ -157,6 +163,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       state: {
         best_interview: interviewId,
         fromHistoryCard: true,
+        thread_id:thread_id
       },
     });
   };
