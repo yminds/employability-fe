@@ -255,6 +255,29 @@ interface SearchJobsParams {
     limit?: number;
 }
 
+interface GetMatchingCandidatesParams {
+    job_id?: string;
+    skills_required?: string[];
+    importance_level?: string;
+  }
+
+interface GetSkillSuggestionsParams{
+    jobTitle:string;
+    jobDescription:string;
+}
+
+interface SkillSuggestionsResponse {
+    success: boolean;
+    data: AIRecommendedSkill[];
+}
+
+export interface AIRecommendedSkill {
+    skill: Skill;
+    importance: "Very Important" | "Important" | "Good-To-Have";
+    reasoning: string;
+}
+  
+
 // API Slice for Jobs
 export const employerJobsApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -327,16 +350,20 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
         }),
 
         // Get matching candidates
-        getMatchingCandidates: builder.query<MatchedCandidatesResponse, { skills_required: string[] }>({
-            query: (params) => ({
-                url: `/api/v1/employerJobs/matching`,
-                method: "GET",
-                params: {
-                    skills_required: params.skills_required
-                }
-            }),
-            transformResponse: (response: MatchedCandidatesResponse) => response,
-        }),
+        getMatchingCandidates: builder.query<MatchedCandidatesResponse, GetMatchingCandidatesParams>({
+            query: (params) => {
+              // Create query params
+              const queryParams = new URLSearchParams();
+              if (params.job_id) {
+                queryParams.append('job_id', params.job_id);
+              }
+              
+              return {
+                url: `api/v1/employerJobs/matching?${queryParams.toString()}`,
+                method: "GET"
+              };
+            },
+          }),
 
         // Get job details
         getJobDetails: builder.query<JobResponse, string>({
@@ -345,6 +372,20 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
                 method: "GET"
             }),
         }),
+        getSkillSuggestions: builder.mutation<SkillSuggestionsResponse, GetSkillSuggestionsParams>({
+            query: (params) => ({
+                url: `/api/v1/employerJobs/getSuggestedSkills`,
+                method: "POST",
+                body: params
+            }),
+        }),
+        getInterviewQuestions: builder.mutation({
+            query: (data) => ({
+              url: '/api/v1/employerJobs/interview-questions',
+              method: 'POST',
+              body: data,
+            }),
+          }),
     }),
     overrideExisting: false
 });
@@ -360,5 +401,7 @@ export const {
     useGetManageableJobsQuery,
     useSearchJobsQuery,
     useGetMatchingCandidatesQuery,
-    useGetJobDetailsQuery
+    useGetJobDetailsQuery,
+    useGetSkillSuggestionsMutation,
+    useGetInterviewQuestionsMutation
 } = employerJobsApiSlice;

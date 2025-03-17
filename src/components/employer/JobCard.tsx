@@ -7,18 +7,17 @@ import { Briefcase, Building, ChevronRight, Users } from 'lucide-react';
 // Import utility functions
 import { jobUtils } from '@/utils/jobUtils';
 
-// Updated skill interface to match our implementation
 interface ISkill {
   _id: string;
   name: string;
   icon?: string;
-  importance?: "Must-Have*" | "Preferred" | "Optional";
+  importance?: "Very Important" | "Important" | "Good-To-Have";
 }
 
-// Interface for skill with importance as used in the backend model
+
 interface ISkillRequired {
-  skill: string; // ObjectId reference
-  importance: "Must-Have*" | "Preferred" | "Optional";
+  skill: string; 
+  importance: "Very Important" | "Important" | "Good-To-Have";
 }
 
 // Candidate Interface
@@ -31,18 +30,18 @@ interface ICandidate {
   education?: string;
 }
 
-  // Updated Job Interface to align with backend model
+  
 export interface IJob {
   _id: string;
   title: string;
   description: string;
-  company?: any; // Can be an ObjectId, string, or object with _id
-  employer?: any; // Can be an ObjectId or string
+  company?: any;
+  employer?: any; 
   job_type: "full-time" | "part-time" | "contract" | "internship";
   work_place_type: "remote" | "hybrid" | "on-site";
   experience_level: "entry" | "mid" | "senior";
   location: string;
-  // Updated to handle both formats - either array of skills or array of skill references with importance
+  
   skills_required: (ISkill | ISkillRequired | string)[];
   screening_questions?: Array<{
     question: string;
@@ -63,7 +62,6 @@ export interface IJob {
   created_at?: Date | string;
   updated_at?: Date | string;
   
-  // Additional properties that might be populated or calculated
   candidates?: {
     applied?: ICandidate[];
     shortlisted?: ICandidate[];
