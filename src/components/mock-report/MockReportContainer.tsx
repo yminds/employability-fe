@@ -203,8 +203,8 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 							<img src={ProfileAvatar} alt="" className=" w-10 h-10 object-cover rounded-full" />
 						</div>
 						<div>
-							<h3>{jobDetails.jobTitle}</h3>
-							<p>{jobDetails.company}</p>
+							<h3>{reportData.interview_id.type === 'Job'? jobDetails.jobTitle : userName}</h3>
+							<p>{reportData.interview_id.type === 'Job'? jobDetails.company : jobDetails.title}</p>
 						</div>
 					</div>
 
@@ -757,8 +757,8 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 				<div className="mb-6">
 					<h2 className="text-sub-header font-semibold text-grey-6 mb-2 ">Job description</h2>
 					<p className="text-body2 text-grey-6">
-						{jobDetails?.jobDescription?.summary ||
-							"No job description available"}
+						{reportData.interview_id.type === 'Job'? jobDetails?.jobDescription?.summary : jobDetails.description}
+							
 					</p>
 				</div>
 
@@ -775,6 +775,16 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 									{skill}
 								</span>
 							))
+						) : Array.isArray(jobDetails?.skills_pool_ids) ? (
+							jobDetails.skills_pool_ids.map((skill: { name: string; icon: string }) => (
+								<span
+									key={skill.name}
+									className="inline-block bg-[#E7EFEB] text-[#03963F] text-xs font-medium px-2 py-1 rounded-full flex items-center gap-2"
+								>
+									<img src={skill.icon} alt={skill.name} className="w-4 h-4" />
+									{skill.name}
+								</span>
+							))
 						) : (
 							<p className="text-sm text-grey-5">No skills listed</p>
 						)}
@@ -782,20 +792,22 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 				</div>
 
 				{/* 4. Key Responsibilities */}
-				<div className="mb-6">
-					<h3 className="text-sub-header font-medium text-grey-6 mb-2 ">Key Responsibilities:</h3>
-					{Array.isArray(jobDetails?.jobDescription?.keyResponsibilities) ? (
-						<ol className="list-decimal list-inside space-y-1 text-body2 text-grey-6">
-							{jobDetails.jobDescription.keyResponsibilities.map(
-								(item: string, i: number) => (
-									<li key={i}>{item}</li>
-								)
-							)}
-						</ol>
-					) : (
-						<p className="text-sm text-grey-5">No responsibilities listed</p>
-					)}
-				</div>
+				{reportData.interview_id.type === 'Job'? (
+									<div className="mb-6">
+									<h3 className="text-sub-header font-medium text-grey-6 mb-2 ">Key Responsibilities:</h3>
+									{Array.isArray(jobDetails?.jobDescription?.keyResponsibilities) ? (
+										<ol className="list-decimal list-inside space-y-1 text-body2 text-grey-6">
+											{jobDetails.jobDescription.keyResponsibilities.map(
+												(item: string, i: number) => (
+													<li key={i}>{item}</li>
+												)
+											)}
+										</ol>
+									) : (
+										<p className="text-sm text-grey-5">No responsibilities listed</p>
+									)}
+								</div>
+				):(<></>)}
 
 				{/* 5. Concept / Competency Bars (existing code) */}
 				{/* <div className="flex-cols gap-6">

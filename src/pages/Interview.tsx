@@ -216,7 +216,6 @@ const InterviewSetupNew: React.FC = () => {
           isResume={isResume}
           projectId={projectId}
           userExperience={userExperience}
-          mockConcepts={mockFundamnetals}
         />
       )}
     </>

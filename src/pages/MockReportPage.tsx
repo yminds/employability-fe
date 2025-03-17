@@ -8,6 +8,7 @@ import MockReportContent from "@/components/mock-report/MockReportContainer";
 import Skeleton from "react-loading-skeleton";
 import { useGetPublicProfileQuery } from "@/api/userPublicApiSlice";
 import { mockInterviews } from "@/features/dashboard/InterviewsInvites";
+import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
 
 interface Performance {
     criteria: string;
@@ -133,7 +134,8 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isPublic = location.state?.isPublic || false;
-
+  const {data:predefinedGoalsData} =useGetAllPreDefinedGoalsQuery()
+  console.log(predefinedGoalsData)
   // Get username and interview ID from URL for shared reports
   const getInterviewIdFromUrl = () => {
     const pathParts = location.pathname.split("/");
@@ -183,6 +185,8 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   // State to store report data.
   const [reportData, setReportData] = useState<Report | null>(null);
 
+  const thread_id = location.state?.thread_id;
+  console.log(thread_id)
   // Fetch report data.
   const {
     data: fetchReportData,
@@ -217,10 +221,21 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   if (!profile || !reportData) {
     return <LoadingState />;
   }
+  console.log(predefinedGoalsData)
+  let matchedItem: any = {};
+  if (reportData.interview_id?.type === "Job") {
+    // If interview type is "Job," match from mockInterviews
+    matchedItem = mockInterviews.find(
+      (job) => job.jobTitle === reportData.interview_id.title
+    );
+  } else if (reportData.interview_id?.type === "Mock") {
+    // If reportType is "Mock," match from predefinedGoals by title
+    matchedItem = predefinedGoalsData?.data?.find(
+      (goal: any) => goal.title === reportData.interview_id.title
+    );
+  }
 
-  const matchedJob = mockInterviews.find(
-    (job) => job.jobTitle === reportData.interview_id.title
-  );
+  console.log(matchedItem)
 
   const handleBackToSkillsPage = () => {
     navigate(-1);
@@ -235,7 +250,8 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     sharedReport={isSharedReport}
     publicProfileName={profile?.username || ""}
     isPublic={isPublic}
-    jobDetails={matchedJob ?? {}}
+    jobDetails={matchedItem ?? {}}
+    thread_id={thread_id}
   />
   );
 };
