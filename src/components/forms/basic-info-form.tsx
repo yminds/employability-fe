@@ -273,9 +273,8 @@ export default function BasicInfoForm({
                 type="tel"
                 name="mobile"
                 value={formData.mobile}
-                readOnly
                 onChange={handleBasicInfoChange}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] bg-gray-100${
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]${
                   getError("mobile") ? "border-red-500" : ""
                 }`}
                 placeholder="+91 1234567891"
@@ -380,7 +379,7 @@ export default function BasicInfoForm({
           {/* Date of Birth field */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-              Date Of Birth
+              Date Of Birth <span className="text-red-500">*</span>
             </Label>
             <Input
               type="date"
@@ -402,7 +401,7 @@ export default function BasicInfoForm({
           {/* Gender field */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-              Gender
+              Gender <span className="text-red-500">*</span>
             </Label>
             <Select
               name="gender"
@@ -436,7 +435,7 @@ export default function BasicInfoForm({
           {/* Country Combobox */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-              Country
+              Country <span className="text-red-500">*</span>
             </Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -498,7 +497,7 @@ export default function BasicInfoForm({
           {/* State Combobox */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-              State
+              State <span className="text-red-500">*</span>
             </Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -558,7 +557,7 @@ export default function BasicInfoForm({
           {/* City Combobox */}
           <div className="space-y-2">
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
-              City
+              City <span className="text-red-500">*</span>
             </Label>
             <Popover>
               <PopoverTrigger asChild>

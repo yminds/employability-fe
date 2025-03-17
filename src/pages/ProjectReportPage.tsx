@@ -4,21 +4,42 @@ import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetReportByInterviewIdQuery } from "@/api/reportApiSlice";
 import { RootState } from "@/store/store";
-import ReportContent from "@/components/skills-report/SkillsReportContainer";
 import Skeleton from "react-loading-skeleton";
 import { useGetPublicProfileQuery } from "@/api/userPublicApiSlice";
+import MockReportContent from "@/components/project-report/ProjectInterviewContainer";
 
 interface Performance {
-  criteria: string;
-  rating: number;
-}
-
-interface Summary {
-  text: string;
-  strengths: string[];
-  improvements: string[];
-  performance_highlights: Performance[];
-}
+    criteria: string;
+    rating: number;
+  }
+  
+  interface TechnicalSkills {
+    score: number;
+    strengths: string[];
+    areasForImprovement: string[];
+  }
+  
+  interface ProblemSolvingSkills {
+    score: number;
+    strengths: string[];
+    areasForImprovement: string[];
+  }
+  
+  interface SoftSkills {
+    score: number;
+    strengths: string[];
+    areasForImprovement: string[];
+  }
+  
+  interface Summary {
+    text: string;
+    strengths: string[];
+    improvements: string[];
+    performance_highlights: Performance[];
+    technicalSkills: TechnicalSkills;
+    problemSolvingSkills: ProblemSolvingSkills;
+    softskills: SoftSkills;
+  }
 
 interface Report {
   interview_id: {
@@ -34,6 +55,7 @@ interface Report {
   updatedAt?: string;
   final_rating: number;
   s3_recording_url: [string];
+  reportType:string
 }
 
 // Loading Component
@@ -106,7 +128,7 @@ interface ReportPageProps {
   userName?: string;
 }
 
-const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
+const ProjectReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const isPublic = location.state?.isPublic || false;
@@ -151,16 +173,11 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     ? interviewId // from URL
     : location.state?.best_interview; // from React Router state
 
-  // For non-shared reports, goal name and skill icon can come via state.
-  const goal_name =
-    isSharedReport && profile?.goals?.length
-      ? profile.goals[0].name
-      : location.state?.goal_name || "";
-
   // Get user profile image from Redux.
   const userImg = useSelector(
     (state: RootState) => state.auth?.user?.profile_image
   ) ;
+  console.log("userImg",userImg)
 
   // State to store report data.
   const [reportData, setReportData] = useState<Report | null>(null);
@@ -199,40 +216,22 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   if (!profile || !reportData) {
     return <LoadingState />;
   }
-  console.log("interview",interviewId)
-  console.log("profile",profile.skills)
-  // Attempt to pull skill info from the user's profile
-  const skill = location.state?.fromInterviewCard
-  ? profile.skills?.find(() => true)
-  : profile.skills?.find((skillItem: any) => skillItem.best_interview === interviewId)
-  const { name: skillName, icon: skillIcon } = skill?.skill_pool_id;
-  console.log({ name: skillName, icon: skillIcon })
-
-  console.log(skill)
-
-  const level = skill?.level || "";
 
   const handleBackToSkillsPage = () => {
     navigate(-1);
   };
 
   return (
-    <ReportContent
-      reportData={reportData}
-      userName={profile?.name || ""} // or profile?.username, depending on your API
-      handleBackToSkillsPage={handleBackToSkillsPage}
-      goal_name={goal_name}
-      skill_icon={skillIcon}
-      userImg={userImg || profile.profile_image}
-      sharedReport={isSharedReport}
-      skillId={skill.skill_pool_id._id}
-      userSkillId={skill._id}
-      level={level}
-      skill={skill}
-      publicProfileName={profile?.username || ""}
-      isPublic={isPublic}
-    />
+    <MockReportContent
+    reportData={reportData}
+    userName={profile?.name || ""} // or profile?.username, depending on your API
+    handleBackToSkillsPage={handleBackToSkillsPage}
+    userImg={userImg || profile.profile_image}
+    sharedReport={isSharedReport}
+    publicProfileName={profile?.username || ""}
+    isPublic={isPublic}
+  />
   );
 };
 
-export default ReportPage;
+export default ProjectReportPage;

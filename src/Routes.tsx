@@ -52,6 +52,8 @@ const InterviewsLisingPage = lazy(
 const MockInterviewsPage = lazy(
   () => import("./pages/MockInterviews.tsx")
 );
+
+const MockReportPage = lazy(() => import("./pages/MockReportPage.tsx"));
 const ReportPage = lazy(() => import("./pages/SkillsReportPage.tsx"));
 const VerifyPhoneOTP = lazy(() => import("./pages/VerifyPhoneOTP.tsx"));
 const EmployerSignup = lazy(() => import("./pages/EmployerSignUp.tsx"));
@@ -240,6 +242,10 @@ export const routes: RouteConfig[] = [
     route: "/mock-interviews",
     component: <MockInterviewsPage />,
   },
+  {
+    route: "/skill/report/:id/:id",
+    component: <MockReportPage isSharedReport={false} />,
+  },  
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {

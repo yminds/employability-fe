@@ -25,6 +25,13 @@ export const featuredInterviewApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["FeaturedInterview"],
     }),
+    deleteFeaturedInterview: builder.mutation({
+      query: (userId) => ({
+        url: `/api/v1/featured-interview/delete/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["FeaturedInterview"],
+    }),
   }),
 });
 
@@ -32,4 +39,5 @@ export const {
   useAddFeaturedInterviewMutation,
   useUpdateFeaturedInterviewMutation,
   useGetFeaturedInterviewQuery,
+  useDeleteFeaturedInterviewMutation,
 } = featuredInterviewApi;
