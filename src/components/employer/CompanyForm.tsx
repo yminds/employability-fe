@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
-import { setEmployerCredentials } from "@/features/authentication/employerAuthSlice";
+import { 
+  setEmployerCredentials, 
+  updateCompanyLogo,
+  updateCompanyDetails 
+} from "@/features/authentication/employerAuthSlice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/store/store";
@@ -36,6 +40,11 @@ const CompanyForm: React.FC = () => {
     employerName: state.employerAuth.employer?.employerName,
     email: state.employerAuth.employer?.email,
     token: state.employerAuth.token,
+    role: state.employerAuth.employer?.role || "member",
+    is_email_verified: state.employerAuth.employer?.is_email_verified || false,
+    account_status: state.employerAuth.employer?.account_status || "active",
+    createdAt: state.employerAuth.employer?.createdAt || "",
+    updatedAt: state.employerAuth.employer?.updatedAt || ""
   }));
 
   const [formData, setFormData] = useState({
@@ -131,10 +140,15 @@ const CompanyForm: React.FC = () => {
       // Match response structure from your backend
       if (response.data && response.data.success && response.data.data && response.data.data.length > 0) {
         const uploadedFile = response.data.data[0];
-        setLogoData({
+        const newLogoData = {
           url: uploadedFile.fileUrl, // Note: backend returns fileUrl, not location
           key: uploadedFile.key,
-        });
+        };
+        
+        setLogoData(newLogoData);
+        
+        // Update Redux store with the logo information
+        dispatch(updateCompanyLogo(newLogoData));
       } else {
         throw new Error(response.data.message || 'Invalid server response');
       }
@@ -176,11 +190,15 @@ const CompanyForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Prepare company data including the logo URL
+      // Prepare company data including the logo URL and key
       const companyData = {
-        ...formData,
+        name: formData.name,
+        website: formData.website,
+        industry: formData.industry,
+        organizationSize: formData.organizationSize,
+        location: formData.location,
         logo: logoData.url,
-        logoKey: logoData.key // Include the S3 key for potential deletion later
+        logoKey: logoData.key
       };
 
       // Create company with the data
@@ -197,17 +215,19 @@ const CompanyForm: React.FC = () => {
               _id: employerData._id || "",
               employerName: employerData.employerName || "",
               email: employerData.email || "",
-              company: response.company._id,
-              role: "admin",
-              is_email_verified: false,
-              account_status: "active",
-              createdAt: "",
-              updatedAt: ""
+              role: employerData.role,
+              is_email_verified: employerData.is_email_verified,
+              account_status: employerData.account_status,
+              createdAt: employerData.createdAt,
+              updatedAt: employerData.updatedAt,
+              company: response.company._id
             },
             token: employerData.token || "",
             company: response.company,
           })
         );
+
+        dispatch(updateCompanyDetails(response?.company));
 
         navigate("/employer");
       }

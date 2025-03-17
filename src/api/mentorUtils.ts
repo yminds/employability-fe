@@ -31,7 +31,7 @@ interface GetThreadsResponse {
 }
 
 interface GetMessagesParams {
-  threadId: string;
+  threadId: string |undefined;
   userId: string|undefined;
   page?: number;
   limit?: number;
@@ -58,9 +58,16 @@ export const mentorUtilsApiSlice = apiSlice.injectEndpoints({
         params: { id:userId },
       }),
     }),
+
+    getMessagesByThreadId: builder.query<GetMessagesResponse, { threadId: string|undefined }>({
+      query: ({ threadId }) => ({
+        url: `/api/v1/messages/getMessagesbythreadid`,
+        params: { threadId }
+      })
+    })
   }),
 });
 
 // Export hooks for usage in components
-export const { useGetMessagesQuery, useGetThreadsByUserIdQuery } = mentorUtilsApiSlice;
+export const { useGetMessagesQuery, useGetThreadsByUserIdQuery, useGetMessagesByThreadIdQuery } = mentorUtilsApiSlice;
  

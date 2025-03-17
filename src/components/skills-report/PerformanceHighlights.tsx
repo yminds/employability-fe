@@ -45,7 +45,7 @@ const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights, isGenera
   };
 
   return (
-    <Card className="w-full bg-white rounded-xl">
+    <Card className="w-full bg-white rounded-lg">
       <div>
         <h2 className="text-body1 font-medium p-0 mb-6">Performance Highlights</h2>
       </div>

@@ -6,21 +6,13 @@ import { RootState } from "@/store/store";
 import { Thread } from "@/api/models/thread";
 
 const useCreateInterview = () => {
-  const user_id = useSelector(
-    (state: RootState) => state.auth.user?._id
-  ) as string;
+  const user_id = useSelector((state: RootState) => state.auth.user?._id) as string;
 
-  const [createInterviewMutation, { isLoading, isSuccess, isError, error }] =
-    useCreateInterviewMutation();
+  const [createInterviewMutation, { isLoading, isSuccess, isError, error }] = useCreateInterviewMutation();
 
   const [
     createThreadMutation,
-    {
-      isLoading: isThreadLoading,
-      isSuccess: isThreadSuccess,
-      isError: isThreadError,
-      error: threadError,
-    },
+    { isLoading: isThreadLoading, isSuccess: isThreadSuccess, isError: isThreadError, error: threadError },
   ] = useCreateThreadMutation();
 
   const createThread = useCallback(
@@ -44,7 +36,7 @@ const useCreateInterview = () => {
       type: string;
       user_skill_id?: string;
       skill_id?: string;
-      project_id?: string;  
+      project_id?: string;
     }) => {
       try {
         const thread_id = await createThread({
@@ -57,6 +49,7 @@ const useCreateInterview = () => {
           skill_id: interviewData.skill_id,
           user_id,
           thread_id,
+          project_id: interviewData.project_id,
         }).unwrap();
 
         return response.data._id;
