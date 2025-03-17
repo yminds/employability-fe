@@ -22,6 +22,7 @@ interface Interview {
     title: string;
     type: string;
     createdAt: string;
+    thread_id:string
   };
   final_rating: number;
   s3_recording_url: string[];
@@ -233,6 +234,8 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
                   onMouseEnter={() => setHoveredInterview(title)}
                   onMouseLeave={() => setHoveredInterview(null)}
                   formatDate={formatDate}
+                  thread_id={best.interview_id.thread_id}
+                  user_id={userId}
                 />
               )
             )
