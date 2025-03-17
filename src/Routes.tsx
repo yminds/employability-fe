@@ -16,6 +16,8 @@ import CompanyForm from "./components/employer/CompanyForm.tsx";
 import CreateJobPage from "./pages/CreateJobPage.tsx";
 import EmployerJobsPage from "./pages/EmployerJobsPage.tsx";
 import EmployerCandidatesPage from "./pages/EmployerCandidatesPages.tsx";
+import JobListingPage from "./components/employer/JobListingPage.tsx";
+import JobListingContainer from "./components/employer/JobListingContainer.tsx";
 
 // Lazy load route components
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -138,7 +140,7 @@ export const routes: RouteConfig[] = [
   },
   {
     route:"/employer/jobs/:jobId",
-    component:<JobDetailsPage/>
+    component:<JobListingContainer/>
   },
   {
     route:"/employer/company/create",

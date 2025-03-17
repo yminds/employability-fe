@@ -41,20 +41,20 @@ interface JobPostingPageProps {
 const JobPostingPage: React.FC<JobPostingPageProps> = ({
   onClose,
   onSubmit,
-  initialData = null,
+  initialData,
   isLoading = false,
   companyId,
   employerId,
 }) => {
   // Basic form data
   const [formData, setFormData] = useState({
-    title: initialData?.title || "Full Stack Developer",
+    title: initialData?.title || "",
     description: initialData?.description || "",
-    location: initialData?.location || "Bangalore, India",
-    job_type: initialData?.job_type || "full-time",
-    work_place_type: initialData?.work_place_type || "on-site",
-    experience_level: initialData?.experience_level || "mid-level",
-    company_name: initialData?.company_name || "Acme Inc.",
+    location: initialData?.location || "",
+    job_type: initialData?.job_type || "",
+    work_place_type: initialData?.work_place_type || "",
+    experience_level: initialData?.experience_level || "",
+    company_name: initialData?.company_name || "",
     job_id: initialData?._id || undefined,
   });
 
@@ -450,6 +450,8 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                         <InterviewQuestionsForm
                           interviewQuestions={interviewQuestions}
                           setInterviewQuestions={setInterviewQuestions}
+                          jobTitle={formData.title}
+                          jobDescription={formData.description}
                         />
                       )}
   

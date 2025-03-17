@@ -203,7 +203,8 @@ const CreateJobPage: React.FC = () => {
       companyId={employer.company}
       employerId={employer._id}
       initialData={{
-        company_name: companyName
+        company_name: companyName,
+        location:employer.company?.location
       }}
     />
   );
