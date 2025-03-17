@@ -250,7 +250,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
             <div className="space-y-2">
               <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                 Current CTC ({currencySymbol}){" "}
-                <span className="text-red-500">*</span>
+                {/* <span className="text-red-500">*</span> */}
               </Label>
               <Input
                 type="number"
@@ -275,7 +275,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
             <div className="space-y-2">
               <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                 Expected CTC ({currencySymbol}){" "}
-                <span className="text-red-500">*</span>
+                {/* <span className="text-red-500">*</span> */}
               </Label>
               <Input
                 type="number"

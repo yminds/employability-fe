@@ -224,10 +224,7 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
                   thumbnail={thumbnail}
                   recordingUrls={best.s3_recording_url}
                   goalId={goalId}
-                  isLast={
-                    index === Object.keys(groupedInterviews).length - 1 &&
-                    history.length === 0
-                  }
+                  isLast={index === Object.keys(groupedInterviews).length - 1}
                   history={history}
                   isHovered={hoveredInterview === title}
                   onMouseEnter={() => setHoveredInterview(title)}
