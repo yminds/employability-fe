@@ -24,9 +24,7 @@ const InterviewSetupNew: React.FC = () => {
   const [hasPermissions, setHasPermissions] = useState(false);
 
   const { title, skillPoolId, level, type, jobDescription, isResume, mockFundamnetals, projectId } = location.state || {};
-  if(type=== 'Mock' || type==='Job'){
-    setFundamentals(mockFundamnetals)
-  }
+
   console.log("jobDescription", jobDescription);
   const {
     isInterviewStarted,
@@ -218,6 +216,7 @@ const InterviewSetupNew: React.FC = () => {
           isResume={isResume}
           projectId={projectId}
           userExperience={userExperience}
+          mockConcepts={mockFundamnetals}
         />
       )}
     </>

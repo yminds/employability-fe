@@ -7,6 +7,7 @@ import { RootState } from "@/store/store";
 import MockReportContent from "@/components/mock-report/MockReportContainer";
 import Skeleton from "react-loading-skeleton";
 import { useGetPublicProfileQuery } from "@/api/userPublicApiSlice";
+import { mockInterviews } from "@/features/dashboard/InterviewsInvites";
 
 interface Performance {
     criteria: string;
@@ -217,6 +218,10 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     return <LoadingState />;
   }
 
+  const matchedJob = mockInterviews.find(
+    (job) => job.jobTitle === reportData.interview_id.title
+  );
+
   const handleBackToSkillsPage = () => {
     navigate(-1);
   };
@@ -230,6 +235,7 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     sharedReport={isSharedReport}
     publicProfileName={profile?.username || ""}
     isPublic={isPublic}
+    jobDetails={matchedJob ?? {}}
   />
   );
 };
