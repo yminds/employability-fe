@@ -5,4 +5,5 @@ export type Interview = {
   skill_id?: string;
   thread_id: string;
   user_id: string;
+  project_id?: string;
 };

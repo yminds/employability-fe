@@ -55,6 +55,8 @@ const initialState = {
   concept: "",
 };
 
+
+
 const Interview: React.FC<{
   id: string;
   cameraScale: number;
@@ -65,8 +67,9 @@ const Interview: React.FC<{
   type: "Skill" | "Mock" | "Project";
   jobDescription: JobDescription;
   isResume: boolean;
+  projectId: string;
   userExperience:string | undefined
-}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false, userExperience }) => {
+}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false,projectId, userExperience }) => {
   console.log("in interviews jobDescription", jobDescription);
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
@@ -123,12 +126,13 @@ const Interview: React.FC<{
         }
         addMessage(initialGreeting);
       }
-    };
-
+    }; 
+  
     const handleAIResponse = (data: string) => {
       console.log("[enetred to ai response]", question);
 
-      // if (!data) {
+      // if (data === "") {
+      //   // creating a fallback for empty response
       //   addMessage("Sorry, I didn't get that. Can you please repeat the question?");
       //   return;
       // }
@@ -192,9 +196,10 @@ const Interview: React.FC<{
         return updatedConcepts;
       });
     };
-
+      
+  
     // Socket event listeners
-    newSocket.on("connect", handleConnect);
+    newSocket.on("connect", handleConnect );
     newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
     newSocket.on(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
     newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
@@ -292,9 +297,10 @@ const Interview: React.FC<{
       type: type,
       jobDescription: jobDescription,
       userName: user?.name,
+      projectId: projectId,
       userExperience: userExperience
-    }).unwrap();
-
+    }).unwrap(); 
+       
     console.log("response", response);
 
     setAllConcepts((prev) => {
@@ -308,7 +314,7 @@ const Interview: React.FC<{
       return updatedConcepts;
     });
   };
-
+                  
   const navigate = useNavigate();
   const handleBackToSkills = () => {
     toggleBrowserFullscreen();
