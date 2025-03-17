@@ -38,7 +38,7 @@ export default function SuccessModal({ onClose,onRefresh }: SuccessModalProps) {
             </h2>
             <p className="text-gray-600 leading-relaxed">
               Your project has been successfully submitted and is now under review. 
-              Our team will verify the details and assess your project.
+              Our team will verify the details and You will G get email notification once it's completed.
             </p>
           </div>
 

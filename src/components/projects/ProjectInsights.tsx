@@ -11,7 +11,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-
+import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 interface Tech {
   name: string;
   _id: string;
@@ -202,9 +202,10 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({
     >
       <div className="flex items-center gap-2">
         <div>
+        
           <img
             className="w-[50px] h-[50px] rounded-full"
-            src={user?.profile_image || "/placeholder.svg"}
+            src={user?.profile_image || ProfileAvatar}
             alt="user"
           />
         </div>
