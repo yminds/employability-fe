@@ -1,3 +1,5 @@
+"use client";
+
 import type React from "react";
 import { useEffect, useState } from "react";
 import "react-phone-input-2/lib/style.css";
@@ -44,6 +46,7 @@ import VectorFile from "@/assets/profile/completeprofile/file.svg";
 import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
 import UploadProgressBar from "@/features/profile/UploadProgressBar";
 import type { BasicInfo } from "@/features/profile/types";
+import { PhoneInput } from "../cards/phoneInput/PhoneInput";
 
 interface BasicInfoFormProps {
   onChange: (
@@ -145,6 +148,13 @@ export default function BasicInfoForm({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      mobile: value,
+    }));
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -268,12 +278,11 @@ export default function BasicInfoForm({
               >
                 Mobile number <span className="text-red-500">*</span>
               </Label>
-              <Input
+              <PhoneInput
                 id="mobile"
-                type="tel"
                 name="mobile"
                 value={formData.mobile}
-                onChange={handleBasicInfoChange}
+                onChange={handlePhoneChange}
                 className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]${
                   getError("mobile") ? "border-red-500" : ""
                 }`}
@@ -306,24 +315,35 @@ export default function BasicInfoForm({
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
               Profile image
             </Label>
-            <div className="border-2 border-dashed border-[#E5E7EB] rounded-lg p-6 flex flex-col items-center justify-center min-h-[230px] bg-[#ffffff]">
+            <div
+              className={`border-2 border-dashed border-[#E5E7EB] rounded-lg p-6 flex flex-col items-center justify-center bg-[#ffffff] ${
+                imagePreview ? "min-h-[260px]" : "min-h-[230px]"
+              }`}
+            >
               {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview || "/placeholder.svg"}
-                    alt="Profile preview"
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
+                <>
+                  <div className="relative">
+                    <img
+                      src={imagePreview || "/placeholder.svg"}
+                      alt="Profile preview"
+                      className="w-24 h-24 rounded-full object-cover"
+                    />
+                  </div>
+
+                  {isUploading && (
+                    <UploadProgressBar progress={uploadProgress} />
+                  )}
+
                   <Button
                     type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 flex items-center gap-1"
                     onClick={removeImage}
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4" /> Remove image
                   </Button>
-                </div>
+                </>
               ) : (
                 <>
                   <div className="relative mb-4">
@@ -355,8 +375,6 @@ export default function BasicInfoForm({
                 </>
               )}
 
-              {isUploading && <UploadProgressBar progress={uploadProgress} />}
-
               {imageError && (
                 <p className="text-red-500 text-sm">{imageError}</p>
               )}
@@ -366,9 +384,11 @@ export default function BasicInfoForm({
                 </p>
               )}
             </div>
-            <p className="text-sm text-[#202326] mt-4">
-              Image should be 2mb or less
-            </p>
+            {!imagePreview && (
+              <p className="text-sm text-[#202326] mt-4">
+                Image should be 2mb or less
+              </p>
+            )}
           </div>
         </div>
       </div>

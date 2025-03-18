@@ -1,9 +1,13 @@
-import React, { useState, FormEvent, useRef } from "react";
+import React, { useState, FormEvent, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
-import { setEmployerCredentials } from "@/features/authentication/employerAuthSlice";
+import { 
+  setEmployerCredentials, 
+  updateCompanyLogo,
+  updateCompanyDetails 
+} from "@/features/authentication/employerAuthSlice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { RootState } from "@/store/store";
@@ -30,13 +34,31 @@ const CompanyForm: React.FC = () => {
   const dispatch = useDispatch();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Get employer data from Redux store
-  const employerData = useSelector((state: RootState) => ({
-    _id: state.employerAuth.employer?._id,
-    employerName: state.employerAuth.employer?.employerName,
-    email: state.employerAuth.employer?.email,
-    token: state.employerAuth.token,
-  }));
+  // Get employer data from Redux store - using useMemo to prevent unnecessary rerenders
+  const employerData = useSelector((state: RootState) => state.employerAuth);
+  
+  // Memoize the derived data to prevent unnecessary rerenders
+  const memoizedEmployerData = useMemo(() => ({
+    _id: employerData.employer?._id,
+    employerName: employerData.employer?.employerName,
+    email: employerData.employer?.email,
+    token: employerData.token,
+    role: employerData.employer?.role || "member",
+    is_email_verified: employerData.employer?.is_email_verified || false,
+    account_status: employerData.employer?.account_status || "active",
+    createdAt: employerData.employer?.createdAt || "",
+    updatedAt: employerData.employer?.updatedAt || ""
+  }), [
+    employerData.employer?._id,
+    employerData.employer?.employerName,
+    employerData.employer?.email,
+    employerData.token,
+    employerData.employer?.role,
+    employerData.employer?.is_email_verified,
+    employerData.employer?.account_status,
+    employerData.employer?.createdAt,
+    employerData.employer?.updatedAt
+  ]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -62,15 +84,22 @@ const CompanyForm: React.FC = () => {
   // Use the createCompany mutation
   const [createCompany] = useCreateCompanyMutation();
 
-  // -----------------------------
-  // Handlers
-  // -----------------------------
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
     const { name, value } = e.target;
+
+    if (name === "website") {
+      const websitePattern = /^(https:\/\/|www\.)[\w-]+(\.[\w-]+)+.*$/;
+  
+      if (value && !websitePattern.test(value)) {
+        setError("Website must start with 'https://' or 'www.'");
+      } else {
+        setError(null);
+      }
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -117,24 +146,29 @@ const CompanyForm: React.FC = () => {
       // Create form data
       const formData = new FormData();
       formData.append('files', file);
-      formData.append('userId', employerData._id || ''); // Add userId as required by the backend
+      formData.append('userId', memoizedEmployerData._id || ''); // Add userId as required by the backend
       formData.append('folder', 'company-logos'); // Add optional folder parameter
       
       // Make API request
-      const response = await axios.post('http://localhost:3000/api/v1/s3/upload', formData, {
+      const response = await axios.post(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${employerData.token}`,
+          Authorization: `Bearer ${memoizedEmployerData.token}`,
         },
       });
   
       // Match response structure from your backend
       if (response.data && response.data.success && response.data.data && response.data.data.length > 0) {
         const uploadedFile = response.data.data[0];
-        setLogoData({
+        const newLogoData = {
           url: uploadedFile.fileUrl, // Note: backend returns fileUrl, not location
           key: uploadedFile.key,
-        });
+        };
+        
+        setLogoData(newLogoData);
+        
+        // Update Redux store with the logo information
+        dispatch(updateCompanyLogo(newLogoData));
       } else {
         throw new Error(response.data.message || 'Invalid server response');
       }
@@ -154,7 +188,7 @@ const CompanyForm: React.FC = () => {
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault();
 
-    if (!employerData._id) {
+    if (!memoizedEmployerData._id) {
       setError("User not authenticated. Please log in again.");
       return;
     }
@@ -176,40 +210,51 @@ const CompanyForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Prepare company data including the logo URL
+      // Prepare company data including the logo URL and key
       const companyData = {
-        ...formData,
+        name: formData.name,
+        website: formData.website,
+        industry: formData.industry,
+        organization_size: formData.organizationSize,
+        location: formData.location,
         logo: logoData.url,
-        logoKey: logoData.key // Include the S3 key for potential deletion later
+        logoKey: logoData.key
       };
 
       // Create company with the data
       const response = await createCompany({
-        employerId: employerData._id,
+        employerId: memoizedEmployerData._id,
         formData: companyData,
       }).unwrap();
 
-      if (response.success) {
-        // Update Redux store with new company data
+      if (response && response.success && response.company) {
+        // Update Redux store with new company data - ensuring we have proper structure
         dispatch(
           setEmployerCredentials({
             employer_info: {
-              _id: employerData._id || "",
-              employerName: employerData.employerName || "",
-              email: employerData.email || "",
-              company: response.company._id,
-              role: "admin",
-              is_email_verified: false,
-              account_status: "active",
-              createdAt: "",
-              updatedAt: ""
+              _id: memoizedEmployerData._id || "",
+              employerName: memoizedEmployerData.employerName || "",
+              email: memoizedEmployerData.email || "",
+              role: memoizedEmployerData.role,
+              is_email_verified: memoizedEmployerData.is_email_verified,
+              account_status: memoizedEmployerData.account_status,
+              createdAt: memoizedEmployerData.createdAt,
+              updatedAt: memoizedEmployerData.updatedAt,
+              company: response.company._id
             },
-            token: employerData.token || "",
+            token: memoizedEmployerData.token || "",
             company: response.company,
           })
         );
 
+        // Update company details separately to ensure proper state update
+        if (response.company) {
+          dispatch(updateCompanyDetails(response.company));
+        }
+
         navigate("/employer");
+      } else {
+        throw new Error("Company creation failed");
       }
     } catch (err: any) {
       console.error("Company creation error:", err);
@@ -376,13 +421,13 @@ const CompanyForm: React.FC = () => {
             {/* Website */}
             <div className="relative">
               <input
-                type="url"
+                type="text"
                 name="website"
                 className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
-                placeholder="Company Website"
+                placeholder="Company Website (https:// or www.)"
                 value={formData.website}
+                pattern="^(https:\/\/|www\.).*$"
                 onChange={handleInputChange}
-                required
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">

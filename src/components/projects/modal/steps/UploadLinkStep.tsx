@@ -59,6 +59,7 @@ interface UploadLinksStepProps {
   setImages: (images: File[]) => void
   synopsisDoc: File | ""
   setSynopsisDoc: (file: File | "") => void
+  onRepoStatusChange?:(anyPrivate:boolean) => void
   githubLinks: string[]
   setGithubLinks: (links: string[]) => void
   liveLink: string
@@ -84,6 +85,7 @@ const UploadLinksStep: React.FC<UploadLinksStepProps> = ({
   setSynopsisDoc,
   githubLinks,
   setGithubLinks,
+  onRepoStatusChange,
   liveLink,
   setLiveLink,
   thumbnail,
@@ -209,6 +211,15 @@ const UploadLinksStep: React.FC<UploadLinksStepProps> = ({
 
   console.log("imageUploadState", imageUploadState)
   console.log("persistedFiles img", persistedFiles.images)
+
+  useEffect(() => {
+  
+    const anyPrivate = githubLinks.some((link) => {
+      return link.trim() !== "" && localRepoStatuses[link]?.status === false;
+    });
+    onRepoStatusChange?.(anyPrivate);
+    
+  }, [githubLinks, localRepoStatuses, onRepoStatusChange]);
 
   useEffect(() => {
     if (persistedFiles.thumbnail?.url) {

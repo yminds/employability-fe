@@ -17,10 +17,17 @@ import {
   useGetCountriesQuery,
   useGetStatesQuery,
 } from "@/api/locationApiSlice";
-import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
+import {
+  useGetPublicUserSkillSummaryMutation,
+  useGetUserContactInfoQuery,
+} from "@/api/userPublicApiSlice";
 import Share from "@/assets/profile/share.svg";
 import { toast } from "sonner";
 import GoalDialog from "@/components/skills/setGoalDialog";
+import { useSelector } from "react-redux";
+import EmailComposerModal from "@/components/modal/EmailComposerModal";
+import ContactInfoModal from "@/components/modal/ContactInfoModal";
+import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
 
 interface ProfileBannerMobileProps {
   user: any;
@@ -37,6 +44,9 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
   isPublic,
   goalData,
 }) => {
+  const candidate = useSelector((state: any) => state.auth.user);
+  const employer = useSelector((state: any) => state.employerAuth.employer);
+
   const { data: countries = [] } = useGetCountriesQuery();
   const { data: states = [] } = useGetStatesQuery(user.address?.country || "", {
     skip: !user.address?.country,
@@ -52,6 +62,10 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
 
   const [getUserSkillsSummary, { data: skillsSummaryData }] =
     useGetPublicUserSkillSummaryMutation();
+
+  const { data: contactInfo } = useGetUserContactInfoQuery({
+    username: user.username,
+  });
 
   const totalSkills = skillsSummaryData?.data?.totalSkills || "0";
   const totalVerifiedSkills =
@@ -79,6 +93,10 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
   const [isEditBioOpen, setIsEditBioOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [isContactInfoModalOpen, setIsContactInfoModalOpen] = useState(false);
+  const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
+    useState(false);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -106,9 +124,17 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
     }, 1500);
   };
 
-  const hasGoalData = isPublic
-    ? user.goals && user.goals.length > 0
-    : goalData?.data && goalData.data.length > 0;
+  const handleContact = () => {
+    if (!employer) {
+      setIsLoginRequiredModalOpen(true);
+    } else if (user.is_contact_info_public) {
+      setIsContactInfoModalOpen(true);
+    } else {
+      setIsEmailModalOpen(true);
+    }
+  };
+
+  const hasGoalData = user.goals && user.goals.length > 0;
 
   return (
     <div className="w-full flex flex-col">
@@ -202,7 +228,7 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
               {/* Job title */}
               <div className="mt-6 mb-[6px] px-8 sm:px-5">
                 <h3 className="text-[#202326] text-lg font-medium font-ubuntu">
-                  {isPublic ? user.goals?.[0]?.name : goalName}
+                  {user.goals?.[0]?.name}
                 </h3>
               </div>
 
@@ -262,16 +288,11 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
           </div>
 
           {/* contact */}
-          {isPublic && (
+          {isPublic && !candidate && (
             <div className="flex items-start justify-between px-8 sm:px-4 pb-4">
               <Button
                 className="bg-[#001630] text-body2 text-white rounded-md px-6 py-2 hover:bg-[#001630]/90"
-                onClick={() =>
-                  window.open(
-                    `https://mail.google.com/mail/?view=cm&fs=1&to=${user?.email}`,
-                    "_blank"
-                  )
-                }
+                onClick={handleContact}
               >
                 Contact
               </Button>
@@ -299,6 +320,29 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
         <GoalDialog
           isOpen={isGoalModalOpen}
           onClose={() => setIsGoalModalOpen(false)}
+        />
+      )}
+      {isPublic && (
+        <EmailComposerModal
+          isOpen={isEmailModalOpen}
+          onClose={() => setIsEmailModalOpen(false)}
+          recipientEmail={contactInfo?.data?.email || ""}
+          recipientName={user?.name || ""}
+        />
+      )}
+      {/* Contact Info Modal */}
+      {isPublic && (
+        <ContactInfoModal
+          isOpen={isContactInfoModalOpen}
+          onClose={() => setIsContactInfoModalOpen(false)}
+          email={contactInfo?.data?.email || ""}
+          phoneNumber={contactInfo?.data?.phone_number || ""}
+        />
+      )}
+      {isPublic && (
+        <LoginRequiredModal
+          isOpen={isLoginRequiredModalOpen}
+          onClose={() => setIsLoginRequiredModalOpen(false)}
         />
       )}
     </div>

@@ -76,7 +76,9 @@ interface JobPostingPayload {
 
 const CreateJobPage: React.FC = () => {
   const navigate = useNavigate();
-  const employer = useSelector((state: RootState) => state.employerAuth.employer);
+  const employer = useSelector(
+    (state: RootState) => state.employerAuth.employer
+  );
   const [createJob, { isLoading: isCreating }] = useCreateJobPostingMutation();
 
   // Check if employer data is available
@@ -92,18 +94,21 @@ const CreateJobPage: React.FC = () => {
   // Handle job creation submission
   const handleJobSubmit = async (jobData: JobFormData) => {
     console.log("handleJobSubmit called with data:", jobData);
-    
+
     try {
       if (!employer?._id || !employer?.company) {
         throw new Error("Employer information is missing");
       }
 
       // Map job_type values
-      const jobTypeMap: Record<string, "full-time" | "part-time" | "contract" | "internship"> = {
+      const jobTypeMap: Record<
+        string,
+        "full-time" | "part-time" | "contract" | "internship"
+      > = {
         "full-time": "full-time",
         "part-time": "part-time",
-        "contract": "contract",
-        "internship": "internship"
+        contract: "contract",
+        internship: "internship",
       };
 
       // Map experience_level values to match backend's expected values
@@ -114,29 +119,34 @@ const CreateJobPage: React.FC = () => {
       };
 
       // Map work_place_type values
-      const workplaceTypeMap: Record<string, "remote" | "hybrid" | "on-site"> = {
-        "remote": "remote",
-        "hybrid": "hybrid",
-        "on-site": "on-site"
-      };
+      const workplaceTypeMap: Record<string, "remote" | "hybrid" | "on-site"> =
+        {
+          remote: "remote",
+          hybrid: "hybrid",
+          "on-site": "on-site",
+        };
 
       // Default salary range
       const salaryRange: SalaryRange = {
         min: 0,
         max: 0,
-        currency: "USD"
+        currency: "USD",
       };
 
       // Process skills data to match backend model format
-      const processedSkills: SkillWithImportance[] = jobData.skills_required.map(item => ({
-        skill: item._id, // Using _id directly from each skill
-        importance: item.importance
-      }));
-      
+      const processedSkills: SkillWithImportance[] =
+        jobData.skills_required.map((item) => ({
+          skill: item._id, // Using _id directly from each skill
+          importance: item.importance,
+        }));
+
       // Get company and employer IDs
-      const companyId = typeof employer.company === 'object' ? employer.company._id : employer.company;
+      const companyId =
+        typeof employer.company === "object"
+          ? employer.company._id
+          : employer.company;
       const employerId = employer._id;
-      
+
       // Prepare the complete job data to match backend model
       const preparedJobData: JobPostingPayload = {
         company: companyId,
@@ -145,21 +155,23 @@ const CreateJobPage: React.FC = () => {
         description: jobData.description || "",
         job_type: jobTypeMap[jobData.job_type] || "full-time",
         work_place_type: workplaceTypeMap[jobData.work_place_type] || "on-site",
-        experience_level: experienceLevelMap[jobData.experience_level] || "intermediate",
+        experience_level:
+          experienceLevelMap[jobData.experience_level] || "intermediate",
         location: jobData.location || "",
         salary_range: salaryRange,
         skills_required: processedSkills,
         screening_questions: jobData.screening_questions,
-        interview_questions: jobData.interview_questions,
-        status: "active"
+        // Keep empty interview questions array for API compatibility
+        interview_questions: [],
+        status: "active",
       };
 
       console.log("Calling API with prepared data:", preparedJobData);
-      
+
       // Send the prepared data to the API
       const response = await createJob(preparedJobData as any).unwrap();
       console.log("API response:", response);
-      
+
       toast.success("Job Posted", {
         description: "Your job has been successfully posted.",
       });
@@ -169,7 +181,9 @@ const CreateJobPage: React.FC = () => {
     } catch (error: any) {
       console.error("Error creating job:", error);
       toast.error("Error", {
-        description: error.message || "There was an error processing your request. Please try again.",
+        description:
+          error.message ||
+          "There was an error processing your request. Please try again.",
       });
     }
   };
@@ -190,10 +204,19 @@ const CreateJobPage: React.FC = () => {
     );
   }
 
+  // Get company logo if available
+  let companyLogo = "";
+  if (typeof employer.company === "object" && employer.company?.logo) {
+    companyLogo = employer.company.logo;
+  }
+
+  console.log("companyLogo",companyLogo)
+
   // Prepare initial data for the form component
-  const companyName = typeof employer?.company === 'object' && employer?.company?.name 
-    ? employer?.company?.name 
-    : "Your Company";
+  const companyName =
+    typeof employer?.company === "object" && employer?.company?.name
+      ? employer?.company?.name
+      : "Your Company";
 
   return (
     <JobPostingPage
@@ -203,7 +226,9 @@ const CreateJobPage: React.FC = () => {
       companyId={employer.company}
       employerId={employer._id}
       initialData={{
-        company_name: companyName
+        company_name: companyName,
+        company_logo: companyLogo,
+        location: employer.company?.location,
       }}
     />
   );

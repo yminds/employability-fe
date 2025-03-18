@@ -17,20 +17,21 @@ const SkillsContainer: React.FC = () => {
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
   const user = useSelector((state: RootState) => state.auth.user);
+  const goals = user?.goals;
   console.log("User", user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-  const { data: goalData, } = useGetGoalsbyuserQuery(userId);
+  const { data: goalData } = useGetGoalsbyuserQuery(userId);
   
   useEffect(() => {
-    if(goalData?.data && goalData.data.length === 0) {
+    if(goals && goals?.length === 0) {
       setIsModalOpen(true);
       console.log("Goaldata", goalData)
     }
-    else if (goalData?.data?.length && selectedGoalId === null) {
-      setSelectedGoalId(goalData.data[0]._id);
+    else if (goals?.length && selectedGoalId === null) {
+      setSelectedGoalId(goals?.[0]._id);
     }
-  }, [goalData, selectedGoalId]);
+  }, [goals, selectedGoalId]);
 
   useEffect(() => {
     if (isUpdated && selectedGoalId) {
@@ -52,9 +53,9 @@ const SkillsContainer: React.FC = () => {
   const handleBackToDashboard = () => {
     navigate("/"); // Navigate to the dashboard page
   };
-
+  
   // Find the selected goal
-  const selectedGoal = goalData?.data.find((goal) => goal._id === selectedGoalId);
+  const selectedGoal = goals?.find((goal) => goal._id === selectedGoalId);
   const selectedGoalExperienceLevel = selectedGoal ? selectedGoal.experience : null;
 
   return (

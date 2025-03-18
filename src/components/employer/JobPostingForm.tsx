@@ -5,7 +5,7 @@ import JobPreviewSidebar from "./JobPreviewSidebar";
 import BasicInfoForm from "./BasicInfoFrom";
 import SuggestedSkillsForm from "./RequiredSkillsForm";
 import ScreeningQuestionsForm from "./ScreeningQuestionsFrom";
-import InterviewQuestionsForm from "./InterviewQuestionsForm";
+import { Navigate, useNavigate } from "react-router-dom";
 
 interface Skill {
   _id: string;
@@ -41,22 +41,25 @@ interface JobPostingPageProps {
 const JobPostingPage: React.FC<JobPostingPageProps> = ({
   onClose,
   onSubmit,
-  initialData = null,
+  initialData,
   isLoading = false,
   companyId,
   employerId,
 }) => {
   // Basic form data
   const [formData, setFormData] = useState({
-    title: initialData?.title || "Full Stack Developer",
+    title: initialData?.title || "",
     description: initialData?.description || "",
-    location: initialData?.location || "Bangalore, India",
-    job_type: initialData?.job_type || "full-time",
-    work_place_type: initialData?.work_place_type || "on-site",
-    experience_level: initialData?.experience_level || "mid-level",
-    company_name: initialData?.company_name || "Acme Inc.",
+    location: initialData?.location || "",
+    job_type: initialData?.job_type || "",
+    work_place_type: initialData?.work_place_type || "",
+    experience_level: initialData?.experience_level || "",
+    company_name: initialData?.company_name || "",
+    company_logo:initialData?.company_logo || "",
     job_id: initialData?._id || undefined,
   });
+
+  const navigate = useNavigate()
 
   // Skills state
   const [selectedSkills, setSelectedSkills] = useState<
@@ -95,14 +98,14 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
     ScreeningQuestion[]
   >(initialData?.screening_questions || []);
 
-  // Interview questions state
+  // Interview questions state (keeping for data structure compatibility)
   const [interviewQuestions, setInterviewQuestions] = useState<
     InterviewQuestion[]
   >(initialData?.interview_questions || []);
 
   // Step navigation
   const [activeStep, setActiveStep] = useState<
-    "basic" | "skills" | "screening" | "interview" | "preview"
+    "basic" | "skills" | "screening" | "preview"
   >("basic");
 
   // Preview state
@@ -116,17 +119,12 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
     } else if (activeStep === "skills") {
       setActiveStep("screening");
     } else if (activeStep === "screening") {
-      setActiveStep("interview");
-    } else if (activeStep === "interview") {
       setActiveStep("preview");
     }
   };
 
   const handlePreviousStep = () => {
     if (activeStep === "preview") {
-      setCompletedSteps((prev) => ({ ...prev, interview: false }));
-      setActiveStep("interview");
-    } else if (activeStep === "interview") {
       setCompletedSteps((prev) => ({ ...prev, screening: false }));
       setActiveStep("screening");
     } else if (activeStep === "screening") {
@@ -155,7 +153,6 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
       basic: true,
       skills: true,
       screening: true,
-      interview: true,
     });
 
     const company_id_str =
@@ -212,14 +209,12 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
     basic: boolean;
     skills: boolean;
     screening: boolean;
-    interview: boolean;
   }>({
     // Only mark steps as completed if we have initial data,
     // otherwise all steps should start as incomplete
     basic: false,
     skills: false,
     screening: false,
-    interview: false,
   });
 
   // Check if a step is valid and can be navigated to
@@ -233,19 +228,11 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
         (completedSteps.basic && completedSteps.skills) ||
         activeStep === "screening"
       );
-    if (stepId === "interview")
-      return (
-        (completedSteps.basic &&
-          completedSteps.skills &&
-          completedSteps.screening) ||
-        activeStep === "interview"
-      );
     if (stepId === "preview")
       return (
         (completedSteps.basic &&
           completedSteps.skills &&
-          completedSteps.screening &&
-          completedSteps.interview) ||
+          completedSteps.screening) ||
         activeStep === "preview"
       );
     return false;
@@ -257,7 +244,6 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
       if (activeStep === "basic") return { ...prev, basic: true };
       if (activeStep === "skills") return { ...prev, skills: true };
       if (activeStep === "screening") return { ...prev, screening: true };
-      if (activeStep === "interview") return { ...prev, interview: true };
       return prev;
     });
   };
@@ -268,7 +254,6 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
       { id: "basic", label: "Basic Info" },
       { id: "skills", label: "Required Skills" },
       { id: "screening", label: "Applicant Questions" },
-      { id: "interview", label: "Interview Questions" },
       { id: "preview", label: "Review & Save" },
     ];
 
@@ -281,18 +266,11 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
             ...prev,
             skills: false,
             screening: false,
-            interview: false,
           }));
         } else if (stepId === "skills") {
           setCompletedSteps((prev) => ({
             ...prev,
             screening: false,
-            interview: false,
-          }));
-        } else if (stepId === "screening") {
-          setCompletedSteps((prev) => ({
-            ...prev,
-            interview: false,
           }));
         }
 
@@ -308,8 +286,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
             !isActive &&
             ((tab.id === "basic" && completedSteps.basic) ||
               (tab.id === "skills" && completedSteps.skills) ||
-              (tab.id === "screening" && completedSteps.screening) ||
-              (tab.id === "interview" && completedSteps.interview));
+              (tab.id === "screening" && completedSteps.screening));
           const isClickable = canNavigateToStep(tab.id);
 
           return (
@@ -377,7 +354,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
         <div className="flex-1 px-[55px] pb-[5px] pt-[20px] min-h-0 flex flex-col">
           {/* Breadcrumb Navigation */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-[30px] h-[30px] bg-white rounded-3xl border border-black/10 flex items-center justify-center">
+            <div className="w-[30px] h-[30px] bg-white rounded-3xl border border-black/10 flex items-center justify-center" onClick={()=>navigate('/employer')}>
               {/* Arrow icon placeholder */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -445,15 +422,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                         />
                       )}
   
-                      {/* Step 4: Interview Questions */}
-                      {activeStep === "interview" && (
-                        <InterviewQuestionsForm
-                          interviewQuestions={interviewQuestions}
-                          setInterviewQuestions={setInterviewQuestions}
-                        />
-                      )}
-  
-                      {/* Step 5: Preview */}
+                      {/* Step 4: Preview */}
                       {activeStep === "preview" && (
                         <div className="flex flex-col gap-7">
                           <JobPreviewSidebar
@@ -465,7 +434,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                             description={formData.description}
                             skills={selectedSkills}
                             screeningQuestions={screeningQuestions}
-                            interviewQuestions={interviewQuestions}
+                            interviewQuestions={[]}
                             expanded={true}
                             onPreviewClick={handleTogglePreview}
                           />
@@ -519,13 +488,13 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                   <JobPreviewSidebar
                     jobTitle={formData.title}
                     companyName={formData.company_name}
+                    companyLogo={initialData.company_logo}
                     location={formData.location}
                     jobType={formData.job_type}
                     workplaceType={formData.work_place_type}
                     description={formData.description}
                     skills={selectedSkills}
                     screeningQuestions={screeningQuestions}
-                    interviewQuestions={interviewQuestions}
                     expanded={previewExpanded}
                     onPreviewClick={handleTogglePreview}
                   />

@@ -126,17 +126,16 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({
       description: description || "",
       predefined_goal_id: selectedGoal?._id || "",
     };
-    setIsSaving(true); // Set saving state to true when submitting
+    setIsSaving(true);
     try {
       const response = await createGoal(goalData).unwrap();
+      const newGoal = {
+        _id: response.data._id,
+        name: response.data.name,
+      };
+      const updatedGoals = [...(user?.goals || []), newGoal];
       if (user) {
-        dispatch(
-          updateUserProfile({
-            goals: user.goals.includes(response._id)
-              ? user.goals
-              : [...user.goals, response._id],
-          })
-        );
+        dispatch(updateUserProfile({ goals: updatedGoals }));
       }
 
       setIsSaved(false);

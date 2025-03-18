@@ -55,8 +55,8 @@ interface InterviewCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   formatDate?: (dateString: string) => string;
-  thread_id?: string
-  user_id?: string|undefined
+  thread_id?: string;
+  user_id?: string | undefined;
 }
 
 const InterviewCard: React.FC<InterviewCardProps> = ({
@@ -78,7 +78,6 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
   formatDate = (dateString) => dateString,
   thread_id,
 }) => {
-  console.log("thread_id",thread_id)
   const navigate = useNavigate();
   const [isSettingFeatured, setIsSettingFeatured] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -145,6 +144,9 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       case "Mock":
         path = `/skill/report/Mock/${id}`;
         break;
+      case "Project":
+        path = `/skill/report/Project/${id}`;
+        break;
       default:
         path = `/skill/report/${id}`;
     }
@@ -153,17 +155,33 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       state: {
         best_interview: id,
         fromInterviewCard: true,
-        thread_id:thread_id
+        thread_id: thread_id,
       },
     });
   };
 
-  const handleViewHistoryReport = (interviewId: string) => {
-    navigate(`/skill/report/${interviewId}`, {
+  const handleViewHistoryReport = (interviewId: string, type: string) => {
+    let path;
+
+    switch (type) {
+      case "Job":
+        path = `/skill/report/Job/${interviewId}`;
+        console.log(thread_id, "thread_id");
+        break;
+      case "Mock":
+        path = `/skill/report/Mock/${interviewId}`;
+        break;
+      case "Project":
+        path = `/skill/report/Project/${interviewId}`;
+        break;
+      default:
+        path = `/skill/report/${interviewId}`;
+    }
+
+    navigate(path, {
       state: {
         best_interview: interviewId,
         fromHistoryCard: true,
-        thread_id:thread_id
       },
     });
   };
@@ -234,8 +252,8 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
   return (
     <div
       className={`w-full bg-white ${
-        isLast ? "" : "border-b border-[#d9d9d9]/40"
-      } pb-7`}
+        isLast ? "pb-0" : "border-b border-[#d9d9d9]/40 pb-7"
+      }`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
@@ -289,54 +307,56 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
                   </span>
                 </div>
               )}
-              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <button className="p-1">
-                    <MoreVertical className="w-6 h-6 text-[#0c0f12]" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-0" align="end">
-                  <button
-                    className="flex w-full items-center px-4 py-2.5 text-body2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleSetAsFeatured}
-                    disabled={isSettingFeatured || isAlreadyFeatured}
-                  >
-                    <img
-                      src={FeaturedStar || "/placeholder.svg"}
-                      alt="Featured Star"
-                      className="mr-2 h-6 w-6"
-                    />
-                    <span>
-                      {isAlreadyFeatured
-                        ? "Currently Featured"
-                        : "Set as Featured"}
-                    </span>
-                  </button>
-                  {isAlreadyFeatured && (
+              {interviewType !== "Job" && (
+                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="p-1">
+                      <MoreVertical className="w-6 h-6 text-[#0c0f12]" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 p-0" align="end">
                     <button
                       className="flex w-full items-center px-4 py-2.5 text-body2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={handleRemoveFeatured}
-                      disabled={isSettingFeatured}
+                      onClick={handleSetAsFeatured}
+                      disabled={isSettingFeatured || isAlreadyFeatured}
                     >
-                      <svg
-                        className="mr-2 h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M3 6h18"></path>
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                      </svg>
-                      <span>Remove Featured</span>
+                      <img
+                        src={FeaturedStar || "/placeholder.svg"}
+                        alt="Featured Star"
+                        className="mr-2 h-6 w-6"
+                      />
+                      <span>
+                        {isAlreadyFeatured
+                          ? "Currently Featured"
+                          : "Set as Featured"}
+                      </span>
                     </button>
-                  )}
-                </PopoverContent>
-              </Popover>
+                    {isAlreadyFeatured && (
+                      <button
+                        className="flex w-full items-center px-4 py-2.5 text-body2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleRemoveFeatured}
+                        disabled={isSettingFeatured}
+                      >
+                        <svg
+                          className="mr-2 h-5 w-5"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3 6h18"></path>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                        <span>Remove Featured</span>
+                      </button>
+                    )}
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
           </div>
 
@@ -353,9 +373,9 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
           {/* Previous Interviews Section - Now inside the card with smooth transition */}
           {history.length > 0 && (
             <div
-              className={`mt-4 transition-all duration-300 ease-in-out overflow-hidden ${
+              className={`transition-all duration-300 ease-in-out overflow-hidden ${
                 isHovered
-                  ? "opacity-100 max-h-[500px]"
+                  ? "opacity-100 max-h-[500px] mt-4"
                   : "opacity-0 max-h-0 pointer-events-none"
               }`}
             >
@@ -394,7 +414,10 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
                     </div>
                     <button
                       onClick={() =>
-                        handleViewHistoryReport(interview.interview_id._id)
+                        handleViewHistoryReport(
+                          interview.interview_id._id,
+                          interview.interview_id.type
+                        )
                       }
                       className="text-[#001630] underline font-medium font-dm-sans cursor-pointer bg-transparent border-none"
                     >

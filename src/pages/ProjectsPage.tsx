@@ -70,8 +70,7 @@ const EmptyProjectState: React.FC<{
         </div>
       </div>
 
-      
-        {/* <div className="flex-[3] p-6">
+      {/* <div className="flex-[3] p-6">
           <div className="sticky top-[70px]">
             <ProjectInsights
               goalId={goalId}
@@ -80,7 +79,6 @@ const EmptyProjectState: React.FC<{
             />
           </div>
         </div> */}
-
     </div>
   </div>
 );
@@ -90,10 +88,8 @@ const ProjectsPage = () => {
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const goals = useSelector((state: RootState) => state.auth.user?.goals);
   const navigate = useNavigate();
-
-  const { data: goalData, isLoading: isGoalLoading } = useGetGoalsbyuserQuery(userId);
-  const goalDetails = goalData?.data;
 
   const {
     data: projectsData,
@@ -106,19 +102,19 @@ const ProjectsPage = () => {
   });
 
   useEffect(() => {
-    if (!goalData?.data) {
+    if (!goals) {
       return;
     }
-    const hasGoals = goalData.data.length > 0;
-    
+    const hasGoals = goals && goals.length > 0;
+
     if (!hasGoals) {
       setIsGoalModalOpen(true);
       return;
     }
     if (selectedGoalId === null) {
-      setSelectedGoalId(goalData.data[0]._id);
+      setSelectedGoalId(goals?.[0]._id);
     }
-  }, [goalData, selectedGoalId]);
+  }, [goals, selectedGoalId]);
 
   const handleModalClose = async () => {
     setIsModalOpen(false);
@@ -130,7 +126,7 @@ const ProjectsPage = () => {
     navigate("/");
   };
 
-  if (isGoalLoading || isProjectLoading) {
+  if (isProjectLoading) {
     return <ProjectListingSkeleton />;
   }
 
@@ -146,7 +142,7 @@ const ProjectsPage = () => {
     return <GoalDialog isOpen={isGoalModalOpen} onClose={handleGoalModal} />;
   }
 
-  const selectedGoal = goalData?.data.find((goal) => goal._id === selectedGoalId);
+  const selectedGoal = goals?.find((goal) => goal._id === selectedGoalId);
   const selectedGoalName = selectedGoal?.name || "";
 
   if (!projectsData?.data?.length) {
@@ -165,7 +161,7 @@ const ProjectsPage = () => {
           onUploadClick={() => setIsModalOpen(true)}
           goalId={selectedGoalId}
           userId={userId || ""}
-          goalDetails={goalDetails}
+          goalDetails={goals}
           selectedGoalName={selectedGoalName}
         />
       </>
