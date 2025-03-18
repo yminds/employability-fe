@@ -16,7 +16,7 @@ const InterviewSetupNew: React.FC = () => {
   const userExperience = useSelector((state: RootState) => state.auth.user?.experience_level);
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
-  const [screenCount, setScreenCount] = useState<number>(1); 
+  const [screenCount, setScreenCount] = useState<number>(0); 
 
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
