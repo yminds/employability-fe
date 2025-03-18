@@ -870,7 +870,7 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 								</button>
 							)}
 							<span className="text-body2">
-								{reportData?.reportType} Interview Report
+								{reportData?.interview_id.type} Interview Report
 							</span>
 						</h1>
 					</div>

@@ -78,7 +78,6 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
   formatDate = (dateString) => dateString,
   thread_id,
 }) => {
-  console.log("thread_id",thread_id)
   const navigate = useNavigate();
   const [isSettingFeatured, setIsSettingFeatured] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
