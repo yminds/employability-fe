@@ -16,6 +16,19 @@ import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 import CircularProgress from '../ui/circular-progress-bar';
 import logo from "@/assets/skills/e-Logo.svg";
 
+// Add Message interface
+interface Message {
+	_id: string;
+	thread_id: string;
+	user_id: string;
+	message: string;
+	content: any[];
+	role: string;
+	createdAt: string;
+	updatedAt: string;
+	index: number;
+}
+
 interface Performance {
 	criteria: string;
 	rating: number;
@@ -58,6 +71,7 @@ interface ConceptRating {
 interface Report {
 	interview_id: {
 		title: string;
+		type?: string;
 	};
 	summary: Summary;
 	concept_ratings?: {
@@ -72,6 +86,19 @@ interface Report {
 	reportType: string
 }
 
+interface JobDetails {
+	jobTitle?: string;
+	company?: string;
+	description?: string;
+	skills_pool_ids?: Array<{ name: string; icon: string }>;
+	jobDescription?: {
+	  summary: string;
+	  requiredSkillsAndQualifications: string[];
+	  keyResponsibilities: string[];
+	};
+	title?: string;
+}
+
 interface MockReportContentProps {
 	reportData: Report;
 	userName: string;
@@ -81,7 +108,7 @@ interface MockReportContentProps {
 	publicProfileName: string;
 	isPublic?: boolean;
 	thread_id?: string;
-	jobDetails: any;
+	jobDetails: JobDetails;
 }
 
 const getShareUrl = (publicProfileName: string) => {
@@ -193,7 +220,7 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 	// RENDER METHODS
 	// -------------------------------------------
 	// Inside your MockReportContent component, define a new method:
-	const renderHeaderCard = (jobDetails: any) => {
+	const renderHeaderCard = (jobDetails: JobDetails) => {
 		return (
 			<section className="bg-white rounded-md p-6 mb-6 shadow-sm">
 				{/* Header row for Job Title, Company, and Actions */}
@@ -203,8 +230,8 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 							<img src={ProfileAvatar} alt="" className=" w-10 h-10 object-cover rounded-full" />
 						</div>
 						<div>
-							<h3>{reportData.interview_id.type === 'Job'? jobDetails.jobTitle : userName}</h3>
-							<p>{reportData.interview_id.type === 'Job'? jobDetails.company : jobDetails.title}</p>
+							<h3>{reportData.interview_id.type === 'Job'? jobDetails?.jobTitle : userName}</h3>
+							<p>{reportData.interview_id.type === 'Job'? jobDetails?.company : jobDetails?.title}</p>
 						</div>
 					</div>
 
@@ -527,16 +554,16 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 		if (!threadMessages || !threadMessages.data) return null;
 		// Search functionality state and handlers
 
-
 		// Create an array of structured conversation data from the messages
 		const conversations: { speaker: string; message: string; }[] = [];
 
 		// Skip the first message and process the rest
-		const processedMessages = threadMessages.data.slice(1);
+		const processedMessages = threadMessages.data.slice(1) as Message[];
 
 		// Parse messages into a structured format for easier rendering
-		processedMessages.forEach((msg, index) => {
-			const speaker = index % 2 === 0 ? "Interviewer" : userName;
+		processedMessages.forEach((msg: Message) => {
+			// Determine speaker name based on role
+			const speaker = msg.role === "USER" ? userName : "Interviewer";
 			conversations.push({
 				speaker: speaker,
 				message: msg.message
@@ -719,7 +746,7 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 
 	// Inside your MockReportContent component
 
-	const renderRightSection = (jobDetails: { jobDescription: { summary: any; requiredSkillsAndQualifications: string[]; keyResponsibilities: string[]; }; } | undefined, reportData: { final_rating: number; } | undefined) => {
+	const renderRightSection = (jobDetails: JobDetails | undefined, reportData: Report | undefined) => {
 		return (
 			<section
 				className={`bg-white rounded-md shadow-sm p-8 ${isGeneratingPDF ? "mb-0" : "mb-6"
@@ -757,7 +784,9 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 				<div className="mb-6">
 					<h2 className="text-sub-header font-semibold text-grey-6 mb-2 ">Job description</h2>
 					<p className="text-body2 text-grey-6">
-						{reportData.interview_id.type === 'Job'? jobDetails?.jobDescription?.summary : jobDetails.description}
+						{reportData?.interview_id.type === 'Job' 
+							? jobDetails?.jobDescription?.summary 
+							: jobDetails?.description || ''}
 							
 					</p>
 				</div>
@@ -792,21 +821,21 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 				</div>
 
 				{/* 4. Key Responsibilities */}
-				{reportData.interview_id.type === 'Job'? (
-									<div className="mb-6">
-									<h3 className="text-sub-header font-medium text-grey-6 mb-2 ">Key Responsibilities:</h3>
-									{Array.isArray(jobDetails?.jobDescription?.keyResponsibilities) ? (
-										<ol className="list-decimal list-inside space-y-1 text-body2 text-grey-6">
-											{jobDetails.jobDescription.keyResponsibilities.map(
-												(item: string, i: number) => (
-													<li key={i}>{item}</li>
-												)
-											)}
-										</ol>
-									) : (
-										<p className="text-sm text-grey-5">No responsibilities listed</p>
-									)}
-								</div>
+				{reportData?.interview_id.type === 'Job'? (
+					<div className="mb-6">
+						<h3 className="text-sub-header font-medium text-grey-6 mb-2 ">Key Responsibilities:</h3>
+						{Array.isArray(jobDetails?.jobDescription?.keyResponsibilities) ? (
+							<ol className="list-decimal list-inside space-y-1 text-body2 text-grey-6">
+								{jobDetails.jobDescription.keyResponsibilities.map(
+									(item: string, i: number) => (
+										<li key={i}>{item}</li>
+									)
+								)}
+							</ol>
+						) : (
+							<p className="text-sm text-grey-5">No responsibilities listed</p>
+						)}
+					</div>
 				):(<></>)}
 
 				{/* 5. Concept / Competency Bars (existing code) */}
@@ -870,7 +899,7 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 								</button>
 							)}
 							<span className="text-body2">
-								{reportData?.interview_id.type} Interview Report
+								{reportData?.interview_id.type || ""} Interview Report
 							</span>
 						</h1>
 					</div>

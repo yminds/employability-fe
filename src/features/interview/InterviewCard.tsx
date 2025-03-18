@@ -144,6 +144,9 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       case "Mock":
         path = `/skill/report/Mock/${id}`;
         break;
+      case "Project":
+        path = `/skill/report/Project/${id}`;
+        break;
       default:
         path = `/skill/report/${id}`;
     }
@@ -166,6 +169,9 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
         break;
       case "Mock":
         path = `/skill/report/Mock/${interviewId}`;
+        break;
+      case "Project":
+        path = `/skill/report/Project/${interviewId}`;
         break;
       default:
         path = `/skill/report/${interviewId}`;

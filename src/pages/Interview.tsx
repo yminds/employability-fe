@@ -16,14 +16,15 @@ const InterviewSetupNew: React.FC = () => {
   const userExperience = useSelector((state: RootState) => state.auth.user?.experience_level);
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
-  const [screenCount, setScreenCount] = useState<number>(0); 
+  const [screenCount, setScreenCount] = useState<number>(1); 
 
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
   // New state to track if the user has the required camera and mic permissions
   const [hasPermissions, setHasPermissions] = useState(false);
 
-  const { title, skillPoolId, level, type, jobDescription, isResume, mockFundamnetals, projectId } = location.state || {};
+  const { title, skillPoolId, level, type, jobDescription, isResume, mockFundamentals, projectId } = location.state || {};
+
 
   console.log("jobDescription", jobDescription);
   const {
@@ -216,6 +217,7 @@ const InterviewSetupNew: React.FC = () => {
           isResume={isResume}
           projectId={projectId}
           userExperience={userExperience}
+          mockFundamentals={mockFundamentals}
         />
       )}
     </>
