@@ -1,23 +1,31 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useState } from "react";
+import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon } from "lucide-react";
 import ProfileURL from "@/assets/profile/profileURL.svg";
 import Phone from "@/assets/profile/phone.svg";
 import Mail from "@/assets/profile/mail.svg";
-import { toast } from "sonner";
-import { useState } from "react";
-import { CheckIcon, CopyIcon } from "lucide-react";
+import { useUpdateUserMutation } from "@/api/userApiSlice";
 
 interface ContactInformationProps {
   profileUrl: string;
   phoneNumber: string;
   email: string;
+  initialPrivacy?: boolean;
+  userId: string;
 }
 
 export default function ContactInformationSection({
   profileUrl,
   phoneNumber,
   email,
+  initialPrivacy,
+  userId,
 }: ContactInformationProps) {
+  const [updateUser] = useUpdateUserMutation();
+
   const [isCopied, setIsCopied] = useState(false);
+  const [isPublic, setIsPublic] = useState(initialPrivacy);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -31,17 +39,69 @@ export default function ContactInformationSection({
       toast.error("Failed to Copy URL");
     }
   };
+
+  const togglePrivacy = async () => {
+    try {
+      const newPrivacyState = !isPublic;
+      await updateUser({
+        userId,
+        data: {
+          is_contact_info_public: newPrivacyState,
+        },
+      }).unwrap();
+      setIsPublic(newPrivacyState);
+      toast.success(
+        `Contact information is now ${newPrivacyState ? "public" : "private"}`
+      );
+    } catch (error) {
+      toast.error("Failed to update privacy settings");
+      console.error("Error updating privacy settings:", error);
+    }
+  };
+
   return (
     <Card className="w-full bg-white p-0 rounded-lg">
       <CardContent className="p-8 space-y-8">
-        <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">
-          Contact Information
-        </h2>
+        <div className="flex justify-between items-center">
+          <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">
+            Contact Information
+          </h2>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              {isPublic ? (
+                <EyeIcon className="h-4 w-4 text-gray-500" />
+              ) : (
+                <EyeOffIcon className="h-4 w-4 text-gray-500" />
+              )}
+              <span className="text-sm text-[#909091]">
+                {isPublic ? "Public" : "Private"}
+              </span>
+            </div>
+            {/* Custom toggle switch */}
+            <button
+              onClick={togglePrivacy}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white ${
+                isPublic ? "bg-[#10B754]" : "bg-[#001630]"
+              }`}
+            >
+              <span className="sr-only">Toggle privacy</span>
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  isPublic ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
         <div className="space-y-3 w-full">
           {/* Profile URL */}
           <div className="flex items-start space-x-4 pb-4 border-b border-[#E5E7EB]">
             <div className="flex-shrink-0 flex w-12 h-12 justify-center items-center rounded-md border border-black/10 bg-white">
-              <img src={ProfileURL} alt="Profile Url" className="w-6 h-6" />
+              <img
+                src={ProfileURL || "/placeholder.svg"}
+                alt="Profile Url"
+                className="w-6 h-6"
+              />
             </div>
             <div
               className="min-w-0 flex-1 group cursor-pointer"
@@ -68,7 +128,11 @@ export default function ContactInformationSection({
           {/* Mobile Number */}
           <div className="flex items-start space-x-4 pb-4 border-b border-[#E5E7EB]">
             <div className="flex-shrink-0 flex w-12 h-12 justify-center items-center rounded-md border border-black/10 bg-white">
-              <img src={Phone} alt="Phone" className="w-6 h-6" />
+              <img
+                src={Phone || "/placeholder.svg"}
+                alt="Phone"
+                className="w-6 h-6"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px] mb-1">
@@ -83,7 +147,11 @@ export default function ContactInformationSection({
           {/* Email ID */}
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0 flex w-12 h-12 justify-center items-center rounded-md border border-black/10 bg-white">
-              <img src={Mail} alt="Email" className="w-6 h-6" />
+              <img
+                src={Mail || "/placeholder.svg"}
+                alt="Email"
+                className="w-6 h-6"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px] mb-1">

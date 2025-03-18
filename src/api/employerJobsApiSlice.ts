@@ -386,6 +386,13 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
               body: data,
             }),
           }),
+        getAllCandidates: builder.query({
+            query: (params) => ({
+                url: '/api/v1/employerJobs/all-candidates',
+                method: 'GET',
+                params
+            })
+        }),
     }),
     overrideExisting: false
 });
@@ -403,5 +410,6 @@ export const {
     useGetMatchingCandidatesQuery,
     useGetJobDetailsQuery,
     useGetEmployerSkillSuggestionsMutation,
-    useGetInterviewQuestionsMutation
+    useGetInterviewQuestionsMutation,
+    useGetAllCandidatesQuery,
 } = employerJobsApiSlice;

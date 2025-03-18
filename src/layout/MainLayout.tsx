@@ -52,15 +52,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const isEmailVerified = user?.is_email_verified;
   const isPhoneVerified = user?.is_phone_verified;
+  const experience_level = user?.experience_level;
   const account_status = user?.account_status;
 
   const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 
-  // useEffect(() => {
-  //   if (user && !isPhoneVerified) {
-  //     navigate("/setexperience");
-  //   }
-  // }, [user, isPhoneVerified]);
+  useEffect(() => {
+    if (user && !experience_level) {
+      navigate("/setexperience");
+    }
+  }, [user, experience_level]);
 
   useEffect(() => {
     setIsDisabledModalOpen(account_status === "disabled");

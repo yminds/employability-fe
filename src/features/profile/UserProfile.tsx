@@ -86,6 +86,8 @@ const UserProfile: React.FC = () => {
         profileUrl={profileUrl}
         phoneNumber={user.phone_number || "Number not provided"}
         email={user.email}
+        initialPrivacy={user.is_contact_info_public}
+        userId={user._id}
       />
     </>
   );
@@ -205,5 +207,6 @@ const UserProfile: React.FC = () => {
     </div>
   );
 };
+
 
 export default UserProfile;
