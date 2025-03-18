@@ -34,13 +34,14 @@ interface JobPreviewSidebarProps {
   workplaceType: string;
   experienceLevel?: string;
   description?: string;
+  companyLogo?: string;
   skills?: any[];
   screeningQuestions?: ScreeningQuestion[];
   interviewQuestions?: InterviewQuestion[];
   expanded?: boolean;
   onPreviewClick?: () => void;
   onEditClick?: (
-    section: "basic" | "skills" | "screening" | "interview" | "review"
+    section: "basic" | "skills" | "screening" | "review"
   ) => void;
   isReviewMode?: boolean;
 }
@@ -55,7 +56,7 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
   description = "",
   skills = [],
   screeningQuestions = [],
-  interviewQuestions = [],
+  companyLogo,
   expanded = false,
   onPreviewClick,
   onEditClick,
@@ -65,7 +66,6 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
     description: true,
     skills: true,
     screening: true,
-    interview: true,
   });
 
   // Format job type for display
@@ -119,7 +119,7 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
 
   // Handle navigation to edit sections
   const handleEditClick = (
-    section: "basic" | "skills" | "screening" | "interview" | "review",
+    section: "basic" | "skills" | "screening" | "review",
     e?: React.MouseEvent
   ) => {
     if (e) {
@@ -144,21 +144,31 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
       {/* Basic Preview (Always Visible) */}
       <div className="p-6 flex justify-between items-start bg-white rounded-t-xl">
         <div className="flex gap-3">
-          {/* Company logo/icon */}
-          <div className="w-[50px] h-[50px] relative bg-[#ecedef] rounded-full border-white/0 overflow-hidden">
-            <div className="w-[69px] h-[73px] left-[-9px] top-[-6px] absolute">
-              <div className="w-[69px] h-[73px] left-0 top-0 absolute" />
-              <div className="w-[31px] h-[40px] left-[19px] top-[17px] absolute">
-                <div className="w-[21px] h-[40px] left-0 top-0 absolute bg-[#cdead9]" />
-                <div className="w-[21px] h-[21px] left-[9.5px] top-[18.5px] absolute bg-[#bbddc9]" />
-                <div className="w-[17px] h-[12px] left-[2.2px] top-[2.5px] absolute inline-flex flex-col justify-start items-start gap-[2.3px]">
-                  <div className="self-stretch h-[1.5px] bg-[#a6c4b2]" />
-                  <div className="self-stretch h-[1.5px] bg-[#a6c4b2]" />
-                  <div className="self-stretch h-[1.5px] bg-[#a6c4b2]" />
-                  <div className="self-stretch h-[1.5px] bg-[#a6c4b2]" />
+          {/* Company logo/icon - Conditionally render logo or default icon */}
+          <div className="w-[50px] h-[50px] relative bg-[#ecedef] rounded-full border-white/0 overflow-hidden flex items-center justify-center">
+            {companyLogo ? (
+              // Display the company logo if provided
+              <img 
+                src={companyLogo} 
+                alt={`${companyName} logo`} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              // Display the default logo/icon
+              <div className="w-[69px] h-[73px] left-[-9px] top-[-6px] absolute">
+                <div className="w-[69px] h-[73px] left-0 top-0 absolute" />
+                <div className="w-[31px] h-[40px] left-[19px] top-[17px] absolute">
+                  <div className="w-[21px] h-[40px] left-0 top-0 absolute bg-[#cdead9]" />
+                  <div className="w-[21px] h-[21px] left-[9.5px] top-[18.5px] absolute bg-[#bbddc9]" />
+                  <div className="w-[17px] h-[12px] left-[2.2px] top-[2.5px] absolute inline-flex flex-col justify-start items-start gap-[2.3px]">
+                    <div className="self-stretch h-[1.5px] bg-[#a6c4b2]" />
+                    <div className="self-stretch h-[1.5px] bg-[#a6c4b2]" />
+                    <div className="self-stretch h-[1.5px] bg-[#a6c4b2]" />
+                    <div className="self-stretch h-[1.5px] bg-[#a6c4b2]" />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Job details */}
@@ -359,54 +369,13 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
             </div>
           </div>
 
-          {/* Interview Questions Section */}
-          <div className="bg-white rounded-lg mx-4 border border-gray-100 overflow-hidden mb-4">
-            <div className="flex justify-between items-center p-4">
-              <h3 className="text-[#414447] text-base font-medium">Interview Questions</h3>
-              {(isReviewMode || expanded) && (
-                <div
-                  className="cursor-pointer"
-                  onClick={(e) => handleEditClick("interview", e)}
-                  title="Edit interview questions"
-                >
-                  <PenIcon className="w-5 h-5 text-[#10b754]" />
-                </div>
-              )}
-            </div>
-            <div className="px-4 pb-4">
-              {interviewQuestions && interviewQuestions.length > 0 ? (
-                <div className="space-y-3">
-                  {interviewQuestions.map((question, index) => (
-                    <div
-                      key={index}
-                      className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0"
-                    >
-                      <p className="text-sm font-medium text-[#414447]">
-                        {index + 1}. {question.question}
-                      </p>
-                      {question.category && (
-                        <span className="text-xs text-[#68696b] mt-1 block">
-                          Category: {question.category}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-[#68696b]">
-                  No interview questions added yet.
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Action Buttons for review mode */}
           {isReviewMode && (
             <div className="flex justify-end gap-4 p-4 bg-white border-t border-gray-100 mx-4 rounded-lg">
               <Button
                 variant="outline"
                 className="text-[#414447] border-[#68696b]"
-                onClick={() => handleEditClick("interview")}
+                onClick={() => handleEditClick("screening")}
               >
                 Previous
               </Button>

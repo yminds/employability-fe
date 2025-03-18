@@ -372,7 +372,7 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
                 method: "GET"
             }),
         }),
-        getSkillSuggestions: builder.mutation<SkillSuggestionsResponse, GetSkillSuggestionsParams>({
+        getEmployerSkillSuggestions: builder.mutation<SkillSuggestionsResponse, GetSkillSuggestionsParams>({
             query: (params) => ({
                 url: `/api/v1/employerJobs/getSuggestedSkills`,
                 method: "POST",
@@ -402,6 +402,6 @@ export const {
     useSearchJobsQuery,
     useGetMatchingCandidatesQuery,
     useGetJobDetailsQuery,
-    useGetSkillSuggestionsMutation,
+    useGetEmployerSkillSuggestionsMutation,
     useGetInterviewQuestionsMutation
 } = employerJobsApiSlice;

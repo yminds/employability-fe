@@ -127,6 +127,7 @@ export function ProjectUploadModal({
   selectedGoalId,
 }: ProjectUploadModalProps) {
   const [currentStep, setCurrentStep] = React.useState(0);
+  const [anyLinkIsPrivate, setAnyLinkIsPrivate] = React.useState(false);
   const [errors, setErrors] = React.useState<FormErrors>({});
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = React.useState(false);
@@ -723,6 +724,7 @@ export function ProjectUploadModal({
                 <UploadLinksStep
                   images={formData.images}
                   setImages={(images) => handleFileChange("images", images)}
+                  onRepoStatusChange={(anyPrivate) => setAnyLinkIsPrivate(anyPrivate)}
                   synopsisDoc={formData.synopsisDoc}
                   setSynopsisDoc={(pdf) =>
                     handleFileChange("synopsisDoc", pdf)
@@ -819,6 +821,7 @@ export function ProjectUploadModal({
               <button
                 type="button"
                 onClick={handleNext}
+                disabled={anyLinkIsPrivate}
                 className="flex px-[32px] py-[10px] justify-center items-center gap-2 self-stretch bg-black text-white rounded-md hover:bg-gray-600 disabled:opacity-50"
               >
                 Next
