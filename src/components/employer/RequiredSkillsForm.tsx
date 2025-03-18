@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useGetSkillSuggestionsMutation } from "@/api/employerJobsApiSlice";
+import { useGetEmployerSkillSuggestionsMutation } from "@/api/employerJobsApiSlice";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import { useDebounce } from "use-debounce";
 import { Plus, Trash, Info } from "lucide-react";
@@ -13,6 +13,7 @@ import {
 interface Skill {
   _id: string;
   name: string;
+  description?: string;
   icon?: string;
 }
  
@@ -23,6 +24,15 @@ interface SkillRecommendation {
   skill: Skill;
   importance: ImportanceLevel;
   reasoning: string;
+}
+
+// Define the API response structure - making it more flexible
+interface ApiResponse {
+  success: boolean;
+  data: SkillRecommendation[] | { 
+    skills: SkillRecommendation[];
+    [key: string]: any; 
+  };
 }
  
 interface RequiredSkillsProps {
@@ -44,17 +54,19 @@ interface RequiredSkillsProps {
 }
 
 
-const getImportanceColor = (importance: ImportanceLevel) => {
-  switch (importance) {
-    case "Very Important":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "Important":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "Good-To-Have":
-      return "bg-green-100 text-green-800 border-green-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
+
+
+// Function to sort skills by importance
+const sortSkillsByImportance = (skills: SkillRecommendation[]) => {
+  const importanceOrder = {
+    "Very Important": 1,
+    "Important": 2,
+    "Good-To-Have": 3
+  };
+
+  return [...skills].sort((a, b) => 
+    importanceOrder[a.importance] - importanceOrder[b.importance]
+  );
 };
  
 const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
@@ -83,7 +95,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
     skip: debouncedSearchTerm.length < 1,
   });
  
-  const [getSkillSuggestions, { isLoading }] = useGetSkillSuggestionsMutation();
+  const [getSkillSuggestions, { isLoading }] = useGetEmployerSkillSuggestionsMutation();
  
   // Fetch AI skill recommendations based on job title and description
   useEffect(() => {
@@ -123,13 +135,34 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
         jobDescription,
       }).unwrap();
  
+      console.log("API Response:", response); // Log the full response for debugging
+
       // Process the skills with their importance levels and reasoning
       if (response.success && response.data) {
-        setRecommendedSkills(response.data);
-       
+        // The API returns data that might be in different formats
+        let skillsData: SkillRecommendation[] = [];
+        
+        // Case 1: response.data is the skills array directly
+        if (Array.isArray(response.data)) {
+          skillsData = response.data;
+        } 
+        // Case 2: response.data has a skills property that is an array
+        else if ('skills' in response.data && Array.isArray((response.data as { skills: SkillRecommendation[] }).skills)) {
+          skillsData = (response.data as { skills: SkillRecommendation[] }).skills;
+        }
+        // Case 3: response.data is an object with other structure
+        else {
+          console.error("Unexpected response format:", response.data);
+          return; // Exit early
+        }
+        
+        // Sort skills by importance before setting
+        const sortedSkills = sortSkillsByImportance(skillsData);
+        setRecommendedSkills(sortedSkills);
+        
         // Create a mapping of skill IDs to their reasoning
         const reasoningMap: Record<string, string> = {};
-        response.data.forEach((item: SkillRecommendation) => {
+        skillsData.forEach((item: SkillRecommendation) => {
           reasoningMap[item.skill._id] = item.reasoning;
         });
         setReasonings(reasoningMap);
@@ -141,6 +174,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
  
   const populateInitialSkills = () => {
     // Use the AI recommended skills with their importance levels
+    // (they're already sorted by importance)
     const initialSkills = recommendedSkills.map((rec) => ({
       skill: rec.skill,
       importance: rec.importance,
@@ -185,7 +219,18 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
  
     const newSkills = [...selectedSkills];
     newSkills[index] = { ...newSkills[index], importance };
-    setSelectedSkills(newSkills);
+    
+    // Sort skills by importance after changing
+    const sortedSkills = [...newSkills].sort((a, b) => {
+      const importanceOrder = {
+        "Very Important": 1,
+        "Important": 2,
+        "Good-To-Have": 3
+      };
+      return importanceOrder[a.importance] - importanceOrder[b.importance];
+    });
+    
+    setSelectedSkills(sortedSkills);
   };
  
   const handleRemoveSkill = (index: number) => {
@@ -295,7 +340,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                       )}
                       <span className="font-medium">{rec.skill.name}</span>
                     </div>
-                    <span className={`px-2 py-1 text-xs rounded-full border ${getImportanceColor(rec.importance)}`}>
+                    <span className={`px-2 py-1 text-xs rounded-full border `}>
                       {rec.importance}
                     </span>
                   </div>
@@ -334,7 +379,8 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
           EmployAbility has analyzed your job description and recommended {recommendedSkills.length} skills with appropriate importance levels.
         </div>
       )}
- 
+
+      
       <div className="relative">
         {/* Selected Skills List */}
         {selectedSkills.map((skillItem, index) => (
@@ -361,7 +407,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                     {skillItem.skill.name || "Select a skill"}
                   </span>
                 </div>
-                <div className={`px-2 py-1 text-xs rounded-full border mr-2 ${getImportanceColor(skillItem.importance)}`}>
+                <div className={`px-2 py-1 text-xs rounded-full border `}>
                   {skillItem.importance}
                 </div>
                 <svg
@@ -378,7 +424,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
               </div>
             </div>
  
-            {/* Importance selector */}
+            {/* Importance selector - removed color gradient */}
             <div className="w-[450px]">
               <div className="relative">
                 <select
@@ -389,13 +435,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                       e.target.value as ImportanceLevel
                     )
                   }
-                  className={`w-full appearance-none bg-white p-4 border rounded-md cursor-pointer text-base hover:border-gray-300 focus:outline-none ${
-                    skillItem.importance === "Very Important" 
-                      ? "border-red-200 bg-red-50 text-red-800" 
-                      : skillItem.importance === "Important"
-                      ? "border-blue-200 bg-blue-50 text-blue-800"
-                      : "border-green-200 bg-green-50 text-green-800"
-                  }`}
+                  className="w-full appearance-none bg-white p-4 border border-gray-200 rounded-md cursor-pointer text-base hover:border-gray-300 focus:outline-none"
                 >
                   <option value="Very Important">Very Important</option>
                   <option value="Important">Important</option>

@@ -1,24 +1,26 @@
-
 import { apiSlice } from "./apiSlice";
 
-// Interfaces
+// Updated Interfaces to match backend model
 export interface Company {
     _id: string;
     name: string;
     website: string;
     industry?: string;
-    location?: {
-        country: string;
-        state: string;
-        city: string;
-    };
+    organization_size?: string; // Changed to match backend
+    tagline?: string;
+    location?: string; // Changed to simple string to match backend
+    logo?: string;
+    logoKey?: string; // For tracking S3 key
+    employers?: string[];
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface Employer {
     _id: string;
     employerName: string;
     email: string;
-    company_id: Company;
+    company?: Company; // Changed from company_id to company
     role: "admin" | "member";
     profile_image?: string;
     contact?: {
@@ -40,7 +42,7 @@ interface EmployerAuthResponse {
     token: string;
     data: {
         employer_info: Employer;
-        company: Company;
+        company?: Company; // Optional as it may not exist initially
     };
 }
 
@@ -57,12 +59,8 @@ interface SignupPayload {
     companyName: string;
     website: string;
     industry?: string;
-    location?: {
-        country: string;
-        state: string;
-        city: string;
-    };
-    phoneNumber?:number;
+    location?: string; // Changed to simple string to match backend
+    phoneNumber?: number;
 }
 
 interface LoginPayload {
@@ -76,17 +74,17 @@ interface CompanyResponse {
     company: Company;
 }
 
-// Company Creation Payload
+// Company Creation Payload - updated to match backend model
 interface CreateCompanyPayload {
     name: string;
     website: string;
     industry: string;
-    organizationSize: string;
-    location: string;
+    organization_size: string; // Changed to snake_case
+    location: string; // Simple string
     tagline?: string;
     logo?: string;
+    logoKey?: string; // Added for S3 tracking
 }
-
 
 interface UpdateProfilePayload {
     employerName?: string;
@@ -136,6 +134,8 @@ export const employerApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Employer']
         }),
+        
+        // Create company endpoint - payload updated to match backend expectations
         createCompany: builder.mutation<CompanyResponse, { employerId: string; formData: CreateCompanyPayload }>({
             query: ({ employerId, formData }) => ({
                 url: `/api/v1/employer/${employerId}/company`,
@@ -145,7 +145,7 @@ export const employerApiSlice = apiSlice.injectEndpoints({
             invalidatesTags: ['Employer']
         }),
     }),
-    overrideExisting:false
+    overrideExisting: false
 });
 
 // Export hooks

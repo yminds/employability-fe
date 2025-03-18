@@ -102,7 +102,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         value={formData.description}
         onChange={(e) => handleFormDataChange("description", e.target.value)}
         placeholder="Job Description"
-        rows={14}
+        rows={20}
         className="resize-none"
         required
       />

@@ -85,22 +85,25 @@ const employerAuthSlice = createSlice({
     setEmployerCredentials: (state, action: PayloadAction<SetEmployerCredentialsPayload>) => {
       const { employer_info, token, company } = action.payload;
       
-      state.employer = {
-        ...employer_info,
-        company: company || null,
-        role: employer_info.role || "member",
-        is_email_verified: employer_info.is_email_verified || false,
-        account_status: employer_info.account_status || "active",
-      } as Employer;
-      
-      state.token = token;
-      state.role = employer_info.role;
-      state.company = company || null;
-      
-      state.profileCompletionStatus = {
-        basic: employer_info.is_email_verified ? "updated" : "pending",
-        company: company ? "updated" : "pending",
-      };
+      // Ensure we have valid employer_info before setting state
+      if (employer_info) {
+        state.employer = {
+          ...employer_info,
+          company: company || null,
+          role: employer_info.role || "member",
+          is_email_verified: employer_info.is_email_verified || false,
+          account_status: employer_info.account_status || "active",
+        } as Employer;
+        
+        state.token = token;
+        state.role = employer_info.role;
+        state.company = company || null;
+        
+        state.profileCompletionStatus = {
+          basic: employer_info.is_email_verified ? "updated" : "pending",
+          company: company ? "updated" : "pending",
+        };
+      }
     },
 
     logOutEmployer: (state) => {
@@ -127,6 +130,9 @@ const employerAuthSlice = createSlice({
     },
 
     updateCompanyDetails: (state, action: PayloadAction<Partial<Company>>) => {
+      // Check if payload exists before processing
+      if (!action.payload) return;
+      
       if (state.company) {
         // Preserve logo and logoKey if they're not included in the payload
         const logo = action.payload.logo || state.company.logo;
@@ -144,8 +150,8 @@ const employerAuthSlice = createSlice({
         if (state.employer) {
           state.employer.company = state.company;
         }
-      } else if (action.payload._id) {
-        // If we don't have a company yet but received company data with an ID
+      } else if (action.payload && action.payload._id) {
+        // Fixed: Check that we have both payload and _id property
         state.company = action.payload as Company;
         state.profileCompletionStatus.company = "updated";
         
@@ -175,8 +181,8 @@ const employerAuthSlice = createSlice({
       .addMatcher(
         (action) => action.type.endsWith("api/executeMutation/fulfilled"),
         (state, action: { 
-          payload: { 
-            data: {
+          payload?: { 
+            data?: {
               _id: string;
               employerName: string;
               email: string;
@@ -200,46 +206,52 @@ const employerAuthSlice = createSlice({
             } 
           } 
         }) => {
+          // Guard against undefined payload
+          if (!action.payload?.data) return;
+          
           const endpointName = action.meta.arg.endpointName;
           if (endpointName === "employerLogin" || endpointName === "employerSignup" || endpointName === "createCompany") {
             const employerData = action.payload.data;
             
-            state.employer = {
-              _id: employerData._id,
-              employerName: employerData.employerName,
-              email: employerData.email,
-              role: employerData.role,
-              profile_image: employerData.profile_image,
-              is_email_verified: employerData.is_email_verified,
-              account_status: employerData.account_status,
-              contact: employerData.contact,
-              createdAt: employerData.createdAt,
-              updatedAt: employerData.updatedAt,
-              company: employerData.company
-            } as Employer;
-            
-            state.token = employerData.token;
-            state.role = employerData.role;
-            
-            // Handle company data which might be directly in the response for createCompany
-            if (employerData.company) {
-              state.company = employerData.company;
-            } else {
-              state.company = null;
+            // Only update if we have valid data
+            if (employerData && employerData._id) {
+              state.employer = {
+                _id: employerData._id,
+                employerName: employerData.employerName,
+                email: employerData.email,
+                role: employerData.role,
+                profile_image: employerData.profile_image,
+                is_email_verified: employerData.is_email_verified,
+                account_status: employerData.account_status,
+                contact: employerData.contact,
+                createdAt: employerData.createdAt,
+                updatedAt: employerData.updatedAt,
+                company: employerData.company
+              } as Employer;
+              
+              state.token = employerData.token;
+              state.role = employerData.role;
+              
+              // Handle company data which might be directly in the response for createCompany
+              if (employerData.company) {
+                state.company = employerData.company;
+              } else {
+                state.company = null;
+              }
+              
+              state.profileCompletionStatus = {
+                basic: employerData.is_email_verified ? "updated" : "pending",
+                company: state.company ? "updated" : "pending",
+              };
             }
-            
-            state.profileCompletionStatus = {
-              basic: employerData.is_email_verified ? "updated" : "pending",
-              company: state.company ? "updated" : "pending",
-            };
           }
         }
       )
       .addMatcher(
         (action) => action.type.endsWith("api/executeQuery/fulfilled"),
         (state, action: { 
-          payload: { 
-            data: Employer & { company?: Company }
+          payload?: { 
+            data?: Employer & { company?: Company }
           }; 
           meta: { 
             arg: { 
@@ -247,9 +259,13 @@ const employerAuthSlice = createSlice({
             } 
           } 
         }) => {
+          // Guard against undefined payload
+          if (!action.payload?.data) return;
+          
           const endpointName = action.meta.arg.endpointName;
-          if (endpointName === "getEmployerProfile") {
-            const data = action.payload.data;
+          const data = action.payload.data;
+          
+          if (endpointName === "getEmployerProfile" && data) {
             state.employer = data;
             
             if (data.company) {
@@ -258,7 +274,7 @@ const employerAuthSlice = createSlice({
             }
           } else if (endpointName === "getCompanyDetails") {
             // Handle fetching company details separately
-            const companyData = action.payload.data?.company;
+            const companyData = data?.company;
             if (companyData) {
               state.company = companyData;
               state.profileCompletionStatus.company = "updated";
@@ -270,17 +286,16 @@ const employerAuthSlice = createSlice({
             }
           } else if (endpointName === "uploadCompanyLogo") {
             // Handle response from logo upload if it's a separate API call
-            const logoData = action.payload.data as unknown as { fileUrl: string; key: string };
-            if (logoData.fileUrl && state.company) {
+            const logoData = data as unknown as { fileUrl: string; key: string };
+            if (logoData?.fileUrl && state.company) {
               state.company.logo = logoData.fileUrl;
               state.company.logoKey = logoData.key;
             }
           }
-          }
-        )
         }
-      })
-
+      )
+  }
+});
 
 export const {
   setEmployerCredentials,
