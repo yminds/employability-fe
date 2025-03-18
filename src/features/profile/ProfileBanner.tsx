@@ -49,7 +49,6 @@ const ProfileBanner = ({
   const employer = useSelector((state: any) => state.employerAuth.employer);
 
   console.log("employer", employer);
-  
 
   const { data: countries = [] } = useGetCountriesQuery();
   const { data: states = [] } = useGetStatesQuery(user.address?.country || "", {
@@ -83,7 +82,6 @@ const ProfileBanner = ({
   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
     useState(false);
 
-  const goalName = goalData?.data?.[0]?.name || "";
   const goalId = goalData?.data?.[0]?._id || "";
 
   useEffect(() => {
@@ -134,9 +132,7 @@ const ProfileBanner = ({
     }
   };
 
-  const hasGoalData = isPublic
-    ? user.goals && user.goals.length > 0
-    : goalData?.data && goalData.data.length > 0;
+  const hasGoalData = user?.goals && user?.goals.length > 0;
   return (
     <div
       className=" rounded-lg sm:bg-cover md:bg-contain lg:bg-auto "
@@ -217,7 +213,7 @@ const ProfileBanner = ({
               {hasGoalData ? (
                 <>
                   <h2 className="text-[#414447] text-h2">
-                    {isPublic ? user.goals?.[0]?.name : goalName}
+                    {user.goals?.[0]?.name}
                   </h2>
                   <div className="flex items-center gap-2 rounded-lg">
                     <div className="flex items-baseline gap-1">

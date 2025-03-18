@@ -55,8 +55,8 @@ interface InterviewCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   formatDate?: (dateString: string) => string;
-  thread_id?: string
-  user_id?: string|undefined
+  thread_id?: string;
+  user_id?: string | undefined;
 }
 
 const InterviewCard: React.FC<InterviewCardProps> = ({
@@ -155,7 +155,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       state: {
         best_interview: id,
         fromInterviewCard: true,
-        thread_id:thread_id
+        thread_id: thread_id,
       },
     });
   };
@@ -166,6 +166,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
     switch (type) {
       case "Job":
         path = `/skill/report/Job/${interviewId}`;
+        console.log(thread_id, "thread_id");
         break;
       case "Mock":
         path = `/skill/report/Mock/${interviewId}`;
@@ -181,7 +182,6 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       state: {
         best_interview: interviewId,
         fromHistoryCard: true,
-        thread_id:thread_id
       },
     });
   };

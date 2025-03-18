@@ -65,10 +65,18 @@ const ProjectList: React.FC<ProjectListProps> = ({
   return (
     <div className="p-[32px] sm:p-[20px]">
       <div className="flex flex-col gap-8">
-        <div className="flex items-center">
+        <div className="flex justify-between items-center">
           <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
             Projects ({totalProjects})
           </h2>
+          {totalProjects > 0 && !isPublic && (
+            <span
+              onClick={() => navigate("/projects")}
+              className="text-body2 underline cursor-pointer"
+            >
+              Manage Projects
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col">
@@ -80,7 +88,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <>
               {displayProjects.map((project, index) => (
                 <React.Fragment key={project._id}>
-                  <div className="cursor-pointer" onClick={handleProjectClick}>
+                  <div>
                     <ProjectCard
                       project={project}
                       onOpenUploadModal={onOpenUploadModal}

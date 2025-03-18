@@ -134,9 +134,7 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
     }
   };
 
-  const hasGoalData = isPublic
-    ? user.goals && user.goals.length > 0
-    : goalData?.data && goalData.data.length > 0;
+  const hasGoalData = user.goals && user.goals.length > 0;
 
   return (
     <div className="w-full flex flex-col">
@@ -230,7 +228,7 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
               {/* Job title */}
               <div className="mt-6 mb-[6px] px-8 sm:px-5">
                 <h3 className="text-[#202326] text-lg font-medium font-ubuntu">
-                  {isPublic ? user.goals?.[0]?.name : goalName}
+                  {user.goals?.[0]?.name}
                 </h3>
               </div>
 

@@ -11,6 +11,8 @@ import JobDetailsModal from "@/features/jobs/JobDetailsModal";
 import { useGetAllJobsMutation } from "@/api/jobsApiSlice";
 import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
 import { useGetSavedJobsQuery } from "@/api/jobsApiSlice";
+import { useNavigate } from "react-router-dom";
+import GoalDialog from "@/components/skills/setGoalDialog";
 
 export interface Skill {
   _id: string;
@@ -72,6 +74,7 @@ const JobPage: React.FC = () => {
   const [reachedEnd, setReachedEnd] = useState<boolean>(true);
   const [filters, setFilters] = useState(defaultJobFilters);
   const userId = useSelector((state: RootState) => state?.auth.user?._id);
+  const goals = useSelector((state: RootState) => state?.auth.user?.goals);
   const { data: goalData, isLoading: goalLoading } =
     useGetGoalsbyuserQuery(userId);
 
@@ -92,6 +95,19 @@ const JobPage: React.FC = () => {
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [jobsCategory, setJobsCategory] = useState("All");
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (goals && goals.length === 0) {
+      setIsGoalModalOpen(true);
+    }
+  }, [goals]);
+
+  const handleGoalModal = () => {
+    setIsGoalModalOpen(false);
+    navigate("/");
+  };
 
   useEffect(() => {
     if (goalData != undefined && goalData.data.length > 0) {
@@ -203,7 +219,9 @@ const JobPage: React.FC = () => {
 
   const displayedJobs = jobsCategory === "Saved" ? savedJobs || [] : jobsList;
 
-  return (
+  return isGoalModalOpen ? (
+    <GoalDialog isOpen={isGoalModalOpen} onClose={handleGoalModal} />
+  ) : (
     <div className="h-screen w-[95%] max-w-[1800px] bg-[#F5F5F5] p-5 flex flex-row gap-8 mx-auto">
       <div className="w-full max-w-screen-xl flex flex-col gap-8">
         <JobsHeader

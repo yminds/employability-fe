@@ -9,15 +9,15 @@ import useScrollToTop from "./hooks/useScrollTop.ts";
 import type { Role } from "./models/Role";
 
 // Components
-import NotFound from "@/components/app/NotFound";
-import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
-import JobDetailsPage from "./components/employer/JobDetailsDialog.tsx";
-import CompanyForm from "./components/employer/CompanyForm.tsx";
-import CreateJobPage from "./pages/CreateJobPage.tsx";
-import EmployerJobsPage from "./pages/EmployerJobsPage.tsx";
-import EmployerCandidatesPage from "./pages/EmployerCandidatesPages.tsx";
-import JobListingPage from "./components/employer/JobListingPage.tsx";
-import JobListingContainer from "./components/employer/JobListingContainer.tsx";
+const NotFound = lazy(() => import("@/components/app/NotFound"))
+const ProtectedRoute = lazy(() => import("./features/authentication/ProtectedRoute.tsx"))
+const JobDetailsPage = lazy(() => import("./components/employer/JobDetailsDialog.tsx"))
+const CompanyForm = lazy(() => import("./components/employer/CompanyForm.tsx"))
+const CreateJobPage = lazy(() => import("./pages/CreateJobPage.tsx"))
+const EmployerJobsPage = lazy(() => import("./pages/EmployerJobsPage.tsx"))
+const EmployerCandidatesPage = lazy(() => import("./pages/EmployerCandidatesPages.tsx"))
+const JobListingPage = lazy(() => import("./components/employer/JobListingPage.tsx"))
+const JobListingContainer = lazy(() => import("./components/employer/JobListingContainer.tsx"))
 
 // Lazy load route components
 const Dashboard = lazy(() => import("./pages/Dashboard"));

@@ -12,6 +12,12 @@ interface Resume {
   key: string;
 }
 
+interface goals {
+  _id: string;
+  name: string;
+  experience: string;
+}
+
 export type User = {
   experience_level: string;
   _id: string;
@@ -20,7 +26,7 @@ export type User = {
   name: string;
   createdAt: Date;
   updatedAt: Date;
-  goals: string[];
+  goals: goals[];
   skills: string[]; // Array of skill IDs
   address: Address;
   education: string[]; // Array of education IDs

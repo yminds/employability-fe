@@ -3,42 +3,38 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
-import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
 import InterviewHeader from "./InterviewHeader";
 import InterviewList from "./InterviewList";
 import arrow from "@/assets/skills/arrow.svg";
 import InterviewInvites from "./InterviewInvites";
+import GoalDialog from "@/components/skills/setGoalDialog";
 
 const InterviewContainer: React.FC = () => {
   const navigate = useNavigate();
-  const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const goals = useSelector((state: RootState) => state.auth.user?.goals);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
-
-  const { data: goalData } = useGetGoalsbyuserQuery(userId);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   useEffect(() => {
-    if (goalData?.data?.length && selectedGoalId === null) {
-      setSelectedGoalId(goalData.data[0]._id);
+    if (goals && goals?.length === 0) {
+      setIsGoalModalOpen(true);
+    } else if (goals?.length && selectedGoalId === null) {
+      setSelectedGoalId(goals?.[0]._id);
     }
-  }, [goalData, selectedGoalId]);
+  }, [selectedGoalId, goals]);
 
   const handleBackToDashboard = () => {
     navigate("/");
   };
 
-  const handleGoalChange = (goalId: string) => {
-    setSelectedGoalId(goalId);
+  const handleGoalModal = () => {
+    setIsGoalModalOpen(false);
+    navigate("/");
   };
 
-  // Find the selected goal
-  const selectedGoal = goalData?.data.find(
-    (goal) => goal._id === selectedGoalId
-  );
-  const selectedGoalExperienceLevel = selectedGoal
-    ? selectedGoal.experience
-    : null;
-
-  return (
+  return isGoalModalOpen ? (
+    <GoalDialog isOpen={isGoalModalOpen} onClose={handleGoalModal} />
+  ) : (
     <>
       <div className="flex justify-between items-center mb-4 sm:mt-3">
         <div className="flex items-center space-x-2 gap-3">
