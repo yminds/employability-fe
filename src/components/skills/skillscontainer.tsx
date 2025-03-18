@@ -21,7 +21,7 @@ const SkillsContainer: React.FC = () => {
   console.log("User", user);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-  const { data: goalData, } = useGetGoalsbyuserQuery(userId);
+  const { data: goalData } = useGetGoalsbyuserQuery(userId);
   
   useEffect(() => {
     if(goals && goals?.length === 0) {
