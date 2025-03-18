@@ -41,6 +41,10 @@ interface Project {
   score?: number;
   lastCompletedStep?: number;
   goal_id?: string;
+  latest_interview_status: {
+    interview_id:string;
+    isCompleted: boolean;
+  };
 
 }
 
@@ -156,6 +160,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     });
   };
 
+
+  console.log("project", project);
+
+  const handleViewProject = () => {
+    if(!project.latest_interview_status.interview_id) {
+      return 
+    }
+    navigate(`/skill/report/Project/${project.latest_interview_status.interview_id}`,{
+      state:{
+        best_interview: project.latest_interview_status.interview_id,
+        fromInterviewCard: true,
+        thread_id:""
+      }
+    });
+  }; 
+  
   return (
     <Card
       className={`flex flex-col items-start p-0 bg-white rounded-lg ${
@@ -260,9 +280,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 </div>
               </div>
 
+     
               <Button
+              onClick={handleViewProject}
                 variant="link"
                 className="text-[#68696B] text-body2 underline justify-center text-center md:w-full sm:w-full"
+                >
+                View Report
+              </Button>
+
+              <Button
+                  className="border-[#68696B] text-[#68696B] text-body2 justify-center md:w-full sm:w-full"
+                variant="outline"
                 onClick={
                   project.status === "Incomplete"
                     ? handleIncompleteClick
@@ -274,12 +303,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 }
               >
                 {getActionConfig(project.status)}
-              </Button>
-              <Button
-                variant="outline"
-                className="border-[#68696B] text-[#68696B] text-body2 justify-center md:w-full sm:w-full"
-              >
-                View Project
               </Button>
             </div>
           )}

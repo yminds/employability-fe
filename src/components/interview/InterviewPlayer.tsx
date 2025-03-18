@@ -156,7 +156,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
           });
 
           setNextChunkPreloaded(false);
-          setUpdatedProgression(progressWithinChunk);
+          // setUpdatedProgression(progressWithinChunk);
 
           if (chunkIndex < urls.length - 1) {
             preloadNextChunk();

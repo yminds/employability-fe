@@ -14,7 +14,7 @@ export default function SuccessModal({ onClose,onRefresh }: SuccessModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 font-ubuntu">
       <div className="relative bg-white rounded-lg max-w-md w-full p-8 shadow-xl">
         <button
           onClick={handleClose}
