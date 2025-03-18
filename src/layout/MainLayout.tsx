@@ -8,6 +8,7 @@ import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
 import EmployerSidebar from "@/features/sidebar/EmployerSidebar";
 import DisabledAccountModal from "@/components/modal/DisabledAccountModal";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
 
 interface MainLayoutProps {
   children: React.ReactNode;

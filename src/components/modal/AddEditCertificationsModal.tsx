@@ -1,29 +1,27 @@
-import type React from "react";
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import {
   useAddCertificationMutation,
   useUpdateCertificationMutation,
   useDeleteCertificationMutation,
-} from "@/api/certificatesApiSlice";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import CertificationsForm from "../forms/certification-form";
-import type { Certification } from "@/features/profile/types";
-import { toast } from "sonner";
-import { validateCertifications } from "@/features/profile/validation/validateCertification";
-import { updateUserProfile } from "@/features/authentication/authSlice";
+} from "@/api/certificatesApiSlice"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import CertificationsForm from "../forms/certification-form"
+import type { Certification } from "@/features/profile/types"
+import { toast } from "sonner"
+import { validateCertifications } from "@/features/profile/validation/validateCertification"
+import { updateUserProfile } from "@/features/authentication/authSlice"
+import { s3Delete } from "@/utils/s3Service"
 
 interface AddEditCertificationsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  initialCertifications: Certification[];
-  mode: "add" | "edit" | null;
+  isOpen: boolean
+  onClose: () => void
+  initialCertifications: Certification[]
+  mode: "add" | "edit" | null
 }
 
 const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
@@ -32,15 +30,16 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
   initialCertifications,
   mode,
 }) => {
-  const [isSaving, setIsSaving] = useState(false);
-  const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const user = useSelector((state: any) => state.auth.user);
-  const dispatch = useDispatch();
+  const [isSaving, setIsSaving] = useState(false)
+  const [certifications, setCertifications] = useState<Certification[]>([])
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const user = useSelector((state: any) => state.auth.user)
+  const dispatch = useDispatch()
+  const [pendingS3Deletions, setPendingS3Deletions] = useState<string[]>([])
 
-  const [addCertification] = useAddCertificationMutation();
-  const [updateCertification] = useUpdateCertificationMutation();
-  const [deleteCertification] = useDeleteCertificationMutation();
+  const [addCertification] = useAddCertificationMutation()
+  const [updateCertification] = useUpdateCertificationMutation()
+  const [deleteCertification] = useDeleteCertificationMutation()
 
   useEffect(() => {
     if (isOpen) {
@@ -55,16 +54,17 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
                 certificate_s3_url: "",
               },
             ]
-          : initialCertifications
-      );
-      setErrors({});
-      setIsSaving(false);
+          : initialCertifications,
+      )
+      setErrors({})
+      setIsSaving(false)
+      setPendingS3Deletions([])
     }
-  }, [isOpen, initialCertifications, mode]);
+  }, [isOpen, initialCertifications, mode])
 
   const handleFormChange = (updatedCertifications: Certification[]) => {
-    setCertifications(updatedCertifications);
-  };
+    setCertifications(updatedCertifications)
+  }
 
   const handleAddCertification = () => {
     const newCertification: Certification = {
@@ -73,49 +73,51 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
       issue_date: "",
       expiration_date: "",
       certificate_s3_url: "",
-    };
-    setCertifications([...certifications, newCertification]);
-  };
+    }
+    setCertifications([...certifications, newCertification])
+  }
 
   const handleDeleteCertification = async (index: number) => {
-    const certificationToDelete = certifications[index];
+    const certificationToDelete = certifications[index]
     if (certificationToDelete._id) {
       try {
-        await deleteCertification(certificationToDelete._id).unwrap();
-        toast.success("Certification entry deleted successfully");
-        const updatedCertification = user.certificates.filter(
-          (id: string) => id !== certificationToDelete._id
-        );
-        dispatch(updateUserProfile({ certificates: updatedCertification }));
+        await deleteCertification(certificationToDelete._id).unwrap()
+        toast.success("Certification entry deleted successfully")
+        const updatedCertification = user.certificates.filter((id: string) => id !== certificationToDelete._id)
+        dispatch(updateUserProfile({ certificates: updatedCertification }))
       } catch (error) {
-        console.error("Failed to delete certification:", error);
-        setErrors({ ...errors, delete: "Failed to delete certification" });
-        toast.error("Failed to delete certification entry");
-        return;
+        console.error("Failed to delete certification:", error)
+        setErrors({ ...errors, delete: "Failed to delete certification" })
+        toast.error("Failed to delete certification entry")
+        return
       }
     }
-    const updatedCertifications = certifications.filter((_, i) => i !== index);
-    setCertifications(updatedCertifications);
-  };
+    const updatedCertifications = certifications.filter((_, i) => i !== index)
+    setCertifications(updatedCertifications)
+  }
 
   const validateForm = (): boolean => {
-    const newErrors = validateCertifications(certifications);
-    setErrors(newErrors);
-    setTimeout(() => setErrors({}), 2000);
-    return Object.keys(newErrors).length === 0;
-  };
+    const newErrors = validateCertifications(certifications)
+    setErrors(newErrors)
+    setTimeout(() => setErrors({}), 2000)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handlePendingDeletions = (deletions: string[]) => {
+    setPendingS3Deletions(deletions)
+  }
 
   const handleSave = async () => {
     if (!validateForm()) {
-      return;
+      return
     }
 
     try {
-      setIsSaving(true);
+      setIsSaving(true)
 
-      let addedCount = 0;
-      let updatedCount = 0;
-      const newCertificateIds: any[] = [];
+      let addedCount = 0
+      let updatedCount = 0
+      const newCertificateIds: any[] = []
 
       await Promise.all(
         certifications.map(async (cert) => {
@@ -123,59 +125,68 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
             await updateCertification({
               id: cert._id,
               updatedCertification: cert,
-            }).unwrap();
-            updatedCount++;
+            }).unwrap()
+            updatedCount++
           } else {
             const response = await addCertification({
               ...cert,
               user_id: user._id,
-            }).unwrap();
-            newCertificateIds.push(response.data._id);
-            addedCount++;
+            }).unwrap()
+            newCertificateIds.push(response.data._id)
+            addedCount++
           }
-        })
-      );
+        }),
+      )
+
+      // Process any pending S3 deletions after successful save
+      if (pendingS3Deletions.length > 0) {
+        const bucketBaseUrl = "https://employability-user-profile.s3.us-east-1.amazonaws.com/"
+        await Promise.all(
+          pendingS3Deletions.map(async (url) => {
+            const key = url.replace(bucketBaseUrl, "")
+            try {
+              await s3Delete(key, user._id, "certifications")
+            } catch (error) {
+              console.error("Failed to delete file from S3:", error)
+              // Continue with other deletions even if one fails
+            }
+          }),
+        )
+      }
+
       if (newCertificateIds.length > 0) {
         dispatch(
           updateUserProfile({
             certificates: [...user.certificates, ...newCertificateIds],
-          })
-        );
+          }),
+        )
       }
 
       if (addedCount > 0) {
-        toast.success(
-          `${addedCount} certificate ${
-            addedCount === 1 ? "entry" : "entries"
-          } added successfully`
-        );
+        toast.success(`${addedCount} certificate ${addedCount === 1 ? "entry" : "entries"} added successfully`)
       } else if (updatedCount > 0) {
-        toast.success(
-          `Certificate ${
-            updatedCount === 1 ? "entry" : "entries"
-          } updated successfully`
-        );
+        toast.success(`Certificate ${updatedCount === 1 ? "entry" : "entries"} updated successfully`)
       }
 
-      onClose();
+      onClose()
     } catch (error) {
-      console.error("Failed to save certifications:", error);
+      console.error("Failed to save certifications:", error)
       setErrors({
         ...errors,
         saveCertification: "Failed to save certifications",
-      });
-      toast.error("Failed to save certification entries");
+      })
+      toast.error("Failed to save certification entries")
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
   return (
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
-          onClose();
+          onClose()
         }
       }}
     >
@@ -192,9 +203,7 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
                 fontFamily: '"SF Pro Display", sans-serif',
               }}
             >
-              {mode === "add"
-                ? "Enter your new certification details"
-                : "Edit your certification details"}
+              {mode === "add" ? "Enter your new certification details" : "Edit your certification details"}
             </p>
           </div>
         </DialogHeader>
@@ -206,12 +215,9 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
             onDeleteCertification={handleDeleteCertification}
             onAddCertification={handleAddCertification}
             mode={mode}
+            onPendingDeletions={handlePendingDeletions}
           />
-          {errors.saveCertification && (
-            <p className="text-red-500 text-sm mt-2">
-              {errors.saveCertification}
-            </p>
-          )}
+          {errors.saveCertification && <p className="text-red-500 text-sm mt-2">{errors.saveCertification}</p>}
         </div>
         <Button
           onClick={handleSave}
@@ -222,7 +228,8 @@ const AddEditCertificationsModal: React.FC<AddEditCertificationsModalProps> = ({
         </Button>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default AddEditCertificationsModal;
+export default AddEditCertificationsModal
+

@@ -79,9 +79,6 @@ const UserProfile: React.FC = () => {
     <>
       <FeaturedInterviewSection
         existingFeaturedInterview={existingFeaturedInterview?.data}
-        userId={user._id}
-        goalId={goalId}
-        goalName={goalName}
       />
       <CurrentStatusSection onStatusChange={handleEditStatus} user={user} />
       <StatsSection username={user?.username} />
