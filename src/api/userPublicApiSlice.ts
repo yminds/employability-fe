@@ -22,6 +22,19 @@ export const userPublicApiSlice = apiSlice.injectEndpoints({
         body: { username, visitorId },
       }),
     }),
+    getUserContactInfo: builder.query({
+      query: ({ username }) => ({
+        url: `/api/v1/user-profile/contact-info/${username}`,
+        method: "GET",
+      }),
+    }),
+    sendEmail: builder.mutation({
+      query: (emailData) => ({
+        url: "/api/v1/user-profile/email/send",
+        method: "POST",
+        body: emailData,
+      }),
+    }),
   }),
 });
 
@@ -29,4 +42,6 @@ export const {
   useGetPublicProfileQuery,
   useGetPublicUserSkillSummaryMutation,
   useGetPublicProfileViewCountMutation,
+  useGetUserContactInfoQuery,
+  useSendEmailMutation,
 } = userPublicApiSlice;

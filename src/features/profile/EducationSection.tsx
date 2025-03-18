@@ -203,7 +203,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({
                   </div>
 
                   {/* Original layout for medium and larger screens */}
-                  <div className="text-right hidden md:block">
+                  <div className="text-right sm:hidden block">
                     <p className="text-[#040609] text-sub-header">
                       {edu.cgpa_or_marks ? `${edu.cgpa_or_marks} cgpa` : "N/A"}
                     </p>

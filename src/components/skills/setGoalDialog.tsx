@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button"; // Ensure Button component is correctly imported
 
 import SetGoalCard from "@/features/dashboard/SetGoalCard"; // Ensure SetGoalCard is correctly imported
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface GoalDialogProps {
   isOpen: boolean; // To control dialog visibility
@@ -18,6 +20,10 @@ interface GoalDialogProps {
 }
 
 const GoalDialog: React.FC<GoalDialogProps> = ({ isOpen, onClose }) => {
+  const experience_level = useSelector(
+    (state: RootState) => state.auth?.user?.experience_level
+  );
+
   const [journeyDialog, setJourneyDialog] = useState(false);
 
   return (
@@ -38,8 +44,7 @@ const GoalDialog: React.FC<GoalDialogProps> = ({ isOpen, onClose }) => {
         }`}
       >
         {/* Close Button */}
-        <DialogClose asChild>
-        </DialogClose>
+        <DialogClose asChild></DialogClose>
 
         {/* Conditional Content */}
         {!journeyDialog ? (
@@ -71,7 +76,19 @@ const GoalDialog: React.FC<GoalDialogProps> = ({ isOpen, onClose }) => {
               </DialogTitle>
             </DialogHeader>
             <hr className="w-full border-gray-300 my-4" />
-            <SetGoalCard setJourneyDialog={setJourneyDialog} selectedLevel="all" />
+            <SetGoalCard
+              setJourneyDialog={setJourneyDialog}
+              selectedLevel={
+                experience_level === "entry"
+                  ? "1"
+                  : experience_level === "mid"
+                  ? "2"
+                  : experience_level === "senior"
+                  ? "3"
+                  : "all"
+              }
+              onGoalUpdate={onClose}
+            />
           </>
         )}
       </DialogContent>

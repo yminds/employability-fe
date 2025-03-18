@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGetAllPreDefinedGoalsQuery } from '@/api/predefinedGoalsApiSlice';
 import { useNavigate } from 'react-router-dom';
 import { useCreateInterview } from '@/hooks/useCreateInterview';
+import {  } from '@/api/fundementalSlice';
 
 const MockInterviewsList: React.FC = () => {
   const { data: allGoals,  isLoading: isFetching } = useGetAllPreDefinedGoalsQuery();
