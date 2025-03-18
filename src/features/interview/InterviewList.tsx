@@ -202,6 +202,7 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
     }
   };
 
+  
   return (
     <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[32px] sm:p-6">
       <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">

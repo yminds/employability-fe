@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { MoreVertical } from "lucide-react";
+import { toast } from "sonner";
 
 interface Tech {
   _id: string;
@@ -166,6 +167,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const handleViewProject = () => {
     if(!project.latest_interview_status.interview_id) {
       return 
+    }
+    if(!project.latest_interview_status.isCompleted){
+      return toast.error("Interview is not completed yet");
     }
     navigate(`/skill/report/Project/${project.latest_interview_status.interview_id}`,{
       state:{
