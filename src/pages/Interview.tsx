@@ -9,6 +9,7 @@ import MultiScreenDetector from "@/components/interview/multiScreendetector";
 import { projectConcepts } from "@/utils/projects/projectConcpets";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import useOnline from "@/hooks/useOnline";
 
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
@@ -18,12 +19,14 @@ const InterviewSetupNew: React.FC = () => {
   const [fundamentals, setFundamentals] = useState<any[]>([]);
   const [screenCount, setScreenCount] = useState<number>(0); 
 
+  const online = useOnline();
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
   // New state to track if the user has the required camera and mic permissions
   const [hasPermissions, setHasPermissions] = useState(false);
 
-  const { title, skillPoolId, level, type, jobDescription, isResume, mockFundamnetals, projectId } = location.state || {};
+  const { title, skillPoolId, level, type, jobDescription, isResume, mockFundamentals, projectId } = location.state || {};
+
 
   console.log("jobDescription", jobDescription);
   const {
@@ -126,6 +129,19 @@ const InterviewSetupNew: React.FC = () => {
   // the fundamentals have loaded, and the interview is started.
   const canShowInterview = isInterviewStarted && (fundamentals.length > 0 || type != "Skill") && hasPermissions;
 
+  // if user connection gone redirct to home
+  console.log("online", online);
+  
+  useEffect(() => {
+    if (!online) {
+      console.log("Connection lost, redirecting...");
+      setTimeout(() => {
+        window.location.replace("/");
+      }, 500);
+    }
+  }, [online]);
+
+  if (!online) return <div>You are offline</div>
   return (
     <>
       {/* Permission Note Modal */}
@@ -216,6 +232,7 @@ const InterviewSetupNew: React.FC = () => {
           isResume={isResume}
           projectId={projectId}
           userExperience={userExperience}
+          mockFundamentals={mockFundamentals}
         />
       )}
     </>

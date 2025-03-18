@@ -225,8 +225,8 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
       skill_icon={skillIcon}
       userImg={userImg || profile.profile_image}
       sharedReport={isSharedReport}
-      skillId={skill.skill_pool_id._id}
-      userSkillId={skill._id}
+      skillId={skill?.skill_pool_id._id}
+      userSkillId={skill?._id}
       level={level}
       skill={skill}
       publicProfileName={profile?.username || ""}

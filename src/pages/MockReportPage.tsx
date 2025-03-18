@@ -291,6 +291,8 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const handleBackToSkillsPage = () => {
     navigate(-1);
   };
+console.log("thread_id",thread_id);
+
 
   return (
     <MockReportContent

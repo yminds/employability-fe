@@ -69,7 +69,8 @@ const Interview: React.FC<{
   isResume: boolean;
   projectId: string;
   userExperience:string | undefined
-}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false,projectId, userExperience }) => {
+  mockFundamentals: string;
+}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false,projectId, userExperience, mockFundamentals }) => {
   console.log("in interviews jobDescription", jobDescription);
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
@@ -291,7 +292,7 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: concepts,
+      concepts: type === "Mock" ? mockFundamentals : concepts,
       interview_id: interviewDetails.data._id,
       level: user?.experience_level || "entry",
       type: type,

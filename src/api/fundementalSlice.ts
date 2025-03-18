@@ -15,7 +15,6 @@ export const fundamentalsApiSlice = apiSlice.injectEndpoints({
 
     //get Fundementals bySkill id and level
     getUserFundamentalsBySkillId: builder.mutation<any, { skill_pool_id: string,level:string }>(
-        
         {
             query: ({ skill_pool_id ,level}) => ({
             url: '/api/v1/fundamentals/getFundamentalbySkill',
@@ -24,14 +23,20 @@ export const fundamentalsApiSlice = apiSlice.injectEndpoints({
           }),
         }
       ),
-  
-    
-    
+      
+    // Get fundamentals by predefined goal ID
+    getFundamentalsByPredefinedGoal: builder.query<any, string>({
+      query: (predefinedGoalId) => ({
+        url: `/api/v1/fundamentals/byPredefinedGoal/${predefinedGoalId}`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
 // Export hooks for components
 export const {
   useGetUserFundamentalsByIdMutation,
-  useGetUserFundamentalsBySkillIdMutation
+  useGetUserFundamentalsBySkillIdMutation,
+  useGetFundamentalsByPredefinedGoalQuery
 } = fundamentalsApiSlice;
