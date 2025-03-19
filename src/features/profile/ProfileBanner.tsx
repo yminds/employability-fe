@@ -35,7 +35,6 @@ interface ProfileBannerProps {
   bio: string;
   onBioUpdate: (newBio: string) => void;
   isPublic: boolean;
-  goalData: any;
 }
 
 const ProfileBanner = ({
@@ -43,7 +42,6 @@ const ProfileBanner = ({
   bio,
   onBioUpdate,
   isPublic,
-  goalData,
 }: ProfileBannerProps) => {
   const candidate = useSelector((state: any) => state.auth.user);
   const employer = useSelector((state: any) => state.employerAuth.employer);
@@ -81,7 +79,7 @@ const ProfileBanner = ({
     useState(false);
   const [isProfileImageModalOpen, setIsProfileImageModalOpen] = useState(false);
 
-  const goalId = goalData?.data?.[0]?._id || "";
+  const goalId = user.goals?.[0]?._id || "";
 
   useEffect(() => {
     if (user) {

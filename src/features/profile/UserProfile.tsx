@@ -13,10 +13,10 @@ import SkillList from "@/components/skills/skillslist";
 import ProfileBanner from "./ProfileBanner";
 import ProfileBannerMobile from "./ProfileBannerMobile";
 import { useNavigate } from "react-router-dom";
-import StatsSection from "./StatsSection";
+// import StatsSection from "./StatsSection";
 import CurrentStatusSection from "./CurrentStatusSection";
 import ContactInformationSection from "./ContactInformationSection";
-import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
+// import { useGetUserGoalQuery } from "@/api/predefinedGoalsApiSlice";
 import { useUpdateUserMutation } from "@/api/userApiSlice";
 import { updateUserProfile } from "../authentication/authSlice";
 import arrow from "@/assets/skills/arrow.svg";
@@ -31,10 +31,13 @@ const UserProfile: React.FC = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data: goalsData } = useGetUserGoalQuery(user._id) || "";
+  // const { data: goalsData } = useGetUserGoalQuery(user._id) || "";
   const [updateUser] = useUpdateUserMutation();
-  const goalId = goalsData?.data?.[0]?._id || "";
-  const goalName = goalsData?.data?.[0]?.name || "";
+  // const goalId = goalsData?.data?.[0]?._id || "";
+  // const goalName = goalsData?.data?.[0]?.name || "";
+  const goals = user?.goals;
+  const goalId = goals?.[0]?._id || "";
+
   const { data: userProjects } = useGetProjectsByUserIdQuery({
     userId: user._id,
     goalId: goalId,
@@ -81,7 +84,7 @@ const UserProfile: React.FC = () => {
         existingFeaturedInterview={existingFeaturedInterview?.data}
       />
       <CurrentStatusSection onStatusChange={handleEditStatus} user={user} />
-      <StatsSection username={user?.username} />
+      {/* <StatsSection username={user?.username} /> */}
       <ContactInformationSection
         profileUrl={profileUrl}
         phoneNumber={user.phone_number || "Number not provided"}
@@ -102,7 +105,7 @@ const UserProfile: React.FC = () => {
             goalId={goalId}
             onSkillsUpdate={() => {}}
             isSkillsUpdated={false}
-            goals={goalsData}
+            goals={goals}
           />
         </div>
       )}
@@ -170,7 +173,6 @@ const UserProfile: React.FC = () => {
             bio={bio}
             onBioUpdate={handleEditBio}
             isPublic={false}
-            goalData={goalsData}
           />
         </div>
 
@@ -191,7 +193,6 @@ const UserProfile: React.FC = () => {
               bio={bio}
               onBioUpdate={handleEditBio}
               isPublic={false}
-              goalData={goalsData}
             />
           </div>
 

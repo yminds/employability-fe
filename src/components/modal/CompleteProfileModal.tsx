@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import BasicInfoForm from "../forms/basic-info-form";
-import SkillsForm from "../forms/skills-form";
+// import SkillsForm from "../forms/skills-form";
 import ExperienceForm from "@/components/forms/experience-form";
 import EducationForm from "../forms/education-form";
 import CertificationsForm from "../forms/certification-form";
@@ -20,7 +20,7 @@ import {
   EducationFormSkeleton,
   CertificationsFormSkeleton,
   BasicInfoFormSkeleton,
-  SkillsFormSkeleton,
+  // SkillsFormSkeleton,
 } from "../forms/form-skeletons";
 
 interface CompleteProfileModalProps {
@@ -55,7 +55,7 @@ const CompleteProfileModal = ({
     setNewlyUploadedImage,
     profileStatus,
     isLoading,
-    skillsLoading,
+    // skillsLoading,
     isBasicInfoLoading,
     userLoading,
   } = useProfileForm(type, user, goalId, onClose);
@@ -63,7 +63,7 @@ const CompleteProfileModal = ({
   const tabs = useMemo(
     () => [
       { id: "basic", label: "Basic Info" },
-      ...(goalId ? [{ id: "skills", label: "Skills" }] : []),
+      // ...(goalId ? [{ id: "skills", label: "Skills" }] : []),
       { id: "experience", label: "Experience" },
       { id: "education", label: "Education" },
       { id: "certification", label: "Certifications" },
@@ -103,25 +103,25 @@ const CompleteProfileModal = ({
             )}
           </>
         );
-      case "skills":
-        return (
-          <>
-            <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] mb-4">
-              Skills
-            </h2>
-            {skillsLoading ? (
-              <SkillsFormSkeleton />
-            ) : (
-              <SkillsForm
-                skills={formData?.skills}
-                allSkills={userDetails?.skills}
-                onChange={(skills) => updateFormData("skills", skills)}
-                errors={errors}
-                onDeleteSkill={(index) => handleDelete("skills", index)}
-              />
-            )}
-          </>
-        );
+      // case "skills":
+      //   return (
+      //     <>
+      //       <h2 className="text-[#000000] text-base font-medium font-ubuntu leading-[22px] mb-4">
+      //         Skills
+      //       </h2>
+      //       {skillsLoading ? (
+      //         <SkillsFormSkeleton />
+      //       ) : (
+      //         <SkillsForm
+      //           skills={formData?.skills}
+      //           allSkills={userDetails?.skills}
+      //           onChange={(skills) => updateFormData("skills", skills)}
+      //           errors={errors}
+      //           onDeleteSkill={(index) => handleDelete("skills", index)}
+      //         />
+      //       )}
+      //     </>
+      //   );
       case "experience":
         return (
           <>

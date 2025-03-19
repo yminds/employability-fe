@@ -35,7 +35,6 @@ interface ProfileBannerMobileProps {
   bio: string;
   onBioUpdate: (bio: string) => void;
   isPublic: boolean;
-  goalData?: any;
 }
 
 const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
@@ -43,7 +42,6 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
   bio,
   onBioUpdate,
   isPublic,
-  goalData,
 }) => {
   const candidate = useSelector((state: any) => state.auth.user);
   const employer = useSelector((state: any) => state.employerAuth.employer);
@@ -103,9 +101,7 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const fullName = user.name;
-  const goalName = goalData?.data?.[0]?.name || "";
-  const goalId = goalData?.data?.[0]?._id || "";
-
+  const goalId = user.goals?.[0]?._id || "";
   const handleBioSave = (newBio: string) => {
     onBioUpdate(newBio);
   };

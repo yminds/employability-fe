@@ -27,6 +27,12 @@ interface LatestInterviewStatus {
   isCompleted: boolean;
 }
 
+interface Goals {
+  _id: string;
+  name: string;
+  experience: string;
+}
+
 export interface Skill {
   _id: string;
   skill_pool_id: SkillPoolId;
@@ -41,16 +47,7 @@ interface SkillListProps {
   goalId: string | null;
   onSkillsUpdate: (isUpdated: boolean) => void;
   isSkillsUpdated?: boolean;
-  goals:
-    | {
-        message: string;
-        data: Array<{
-          experience: string | undefined;
-          _id: string;
-          name: string;
-        }>;
-      }
-    | undefined;
+  goals: Goals[];
   selectedGoalName: string;
 }
 
