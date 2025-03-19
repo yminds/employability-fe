@@ -266,7 +266,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
             onClick={() => handleViewReport(interviewType)}
           >
             <img
-              src={thumbnail || "/placeholder.svg?height=128&width=207"}
+              src="https://employability-user-profile.s3.us-east-1.amazonaws.com/profile-image/67d69edd7bfa010c01e63076-1742300766533-png-screenshot-png"
               alt="Mock Interview Session"
               className="w-full h-full object-cover"
             />

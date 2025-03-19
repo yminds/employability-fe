@@ -15,6 +15,7 @@ import { useGetMessagesByThreadIdQuery } from "@/api/mentorUtils";
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 import CircularProgress from '../ui/circular-progress-bar';
 import logo from "@/assets/skills/e-Logo.svg";
+import { Share2 } from "lucide-react";
 
 // Add Message interface
 interface Message {
@@ -116,7 +117,7 @@ const getShareUrl = (publicProfileName: string) => {
 	const currentPath = window.location.pathname;
 	const interviewId = currentPath.split("/").pop();
 	const baseUrl = window.location.origin;
-	const url = new URL(`${baseUrl}/skills-report/${publicProfileName}/${interviewId}`);
+	const url = new URL(`${baseUrl}/skill-report/${publicProfileName}/Project/${interviewId}`);
 	return url.toString();
 };
 
@@ -905,7 +906,7 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 					</div>
 
 					{/* Share Button and Popup */}
-					{/* {!sharedReport && (
+					{true && (
                         <div className="flex gap-4 relative">
                             <button
                                 className="flex gap-2 items-center px-4 py-2 rounded-md text-grey-7 hover:bg-gray-100 relative"
@@ -940,7 +941,7 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
                                 </div>
                             )}
                         </div>
-                    )} */}
+                    )}
 				</header>
 
 				{/* Main Content */}

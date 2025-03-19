@@ -20,6 +20,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import toggleBrowserFullscreen from "../skills/fullscreen";
 import { JobDescription } from "../interview-list/ViewJD";
+import useScreenShot from "@/hooks/useScreenShot";
+import { useUpdateThumbnailMutation } from "@/api/reportApiSlice";
 
 // Constants and Types
 const SOCKET_URL =
@@ -55,8 +57,6 @@ const initialState = {
   concept: "",
 };
 
-
-
 const Interview: React.FC<{
   id: string;
   cameraScale: number;
@@ -68,14 +68,28 @@ const Interview: React.FC<{
   jobDescription: JobDescription;
   isResume: boolean;
   projectId: string;
-  userExperience:string | undefined
+  userExperience: string | undefined;
   mockFundamentals: string;
-}> = ({ interviewTopic, concepts, stopScreenSharing, skillLevel, type, jobDescription, isResume = false,projectId, userExperience, mockFundamentals }) => {
+}> = ({
+  interviewTopic,
+  concepts,
+  stopScreenSharing,
+  skillLevel,
+  type,
+  jobDescription,
+  isResume = false,
+  projectId,
+  userExperience,
+  mockFundamentals,
+}) => {
   console.log("in interviews jobDescription", jobDescription);
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
   const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
+  const [updateThumbnail] = useUpdateThumbnailMutation();
+
+  const { captureScreenshot, screenshot } = useScreenShot();
   // Queries and Speech Hooks
   const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
   const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(interviewId as string, {
@@ -113,10 +127,16 @@ const Interview: React.FC<{
     const newSocket = io(SOCKET_URL, {
       transports: ["websocket", "polling"],
     });
-    const handleConnect = () => {
+    const handleConnect = async () => {
       console.log("entred handleConnect from handleConnect");
       if (!isInitialized) {
         console.log("Connected handleConnect isInitialized");
+        
+        // taking screenshot for candidate
+        setTimeout(async () => {
+          const response = await captureScreenshot();
+          updateThumbnail({ thubmnail_url: response as string, interview_id: interviewDetails.data._id });
+        }, 1000 * 30);
 
         setIsInitialized(true);
         const initialGreeting = "Hello, before starting the interview, introduce yourself?";
@@ -127,8 +147,8 @@ const Interview: React.FC<{
         }
         addMessage(initialGreeting);
       }
-    }; 
-  
+    };
+
     const handleAIResponse = (data: string) => {
       console.log("[enetred to ai response]", question);
 
@@ -142,7 +162,7 @@ const Interview: React.FC<{
 
       handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
     };
-  
+
     const handleShiftLayout = (data: string) => {
       setLayoutType(data === "1" ? 1 : 2);
       setQuestion((prev) => ({
@@ -197,10 +217,9 @@ const Interview: React.FC<{
         return updatedConcepts;
       });
     };
-      
-  
+
     // Socket event listeners
-    newSocket.on("connect", handleConnect );
+    newSocket.on("connect", handleConnect);
     newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
     newSocket.on(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
     newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
@@ -227,7 +246,7 @@ const Interview: React.FC<{
       handleMessage(text, "USER");
       addMessage(text);
     }
-  
+
     if (sttError) {
       console.error("Speech-to-text error:", sttError);
     }
@@ -299,9 +318,9 @@ const Interview: React.FC<{
       jobDescription: jobDescription,
       userName: user?.name,
       projectId: projectId,
-      userExperience: userExperience
-    }).unwrap(); 
-       
+      userExperience: userExperience,
+    }).unwrap();
+
     console.log("response", response);
 
     setAllConcepts((prev) => {
@@ -315,9 +334,10 @@ const Interview: React.FC<{
       return updatedConcepts;
     });
   };
-                  
+
   const navigate = useNavigate();
   const handleBackToSkills = () => {
+    stopScreenSharing();
     toggleBrowserFullscreen();
     navigate("/skills");
   };
