@@ -35,7 +35,6 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
   thread_id,
   experience_level,
 }) => {
-  console.log("currentQuizTopic", currentQuizTopic);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);

@@ -65,7 +65,7 @@ export default function FeaturedInterviewSection({
 
   const handleViewReport = (interviewId: string) => {
     if (isPublic) {
-      navigate(`/skills-report/${username}/${interviewId}`, {
+      navigate(`/skills-report/${username}/Mock/${interviewId}`, {
         state: { isPublic: true },
       });
     } else {

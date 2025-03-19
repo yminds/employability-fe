@@ -93,7 +93,7 @@ interface JobDetails {
 	skills_pool_ids?: Array<{ name: string; icon: string }>;
 	jobDescription?: {
 	  summary: string;
-	  requiredSkillsAndQualifications: string[];
+	  requiredSkillsAndQualifications:  Array<{ name: string; importance: string }>;
 	  keyResponsibilities: string[];
 	};
 	title?: string;
@@ -796,19 +796,19 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
 					<h3 className="text-sub-header font-medium text-grey-6 mb-2">Skills required</h3>
 					<div className="flex flex-wrap gap-2">
 						{Array.isArray(jobDetails?.jobDescription?.requiredSkillsAndQualifications) ? (
-							jobDetails.jobDescription.requiredSkillsAndQualifications.map((skill: string) => (
+							jobDetails.jobDescription.requiredSkillsAndQualifications.map((skillObj) => (
 								<span
-									key={skill}
+									key={skillObj.importance}
 									className="inline-block bg-[#E7EFEB] text-[#03963F] text-xs font-medium px-2 py-1 rounded-full"
 								>
-									{skill}
+									{skillObj.name}
 								</span>
 							))
 						) : Array.isArray(jobDetails?.skills_pool_ids) ? (
 							jobDetails.skills_pool_ids.map((skill: { name: string; icon: string }) => (
 								<span
 									key={skill.name}
-									className="inline-block bg-[#E7EFEB] text-[#03963F] text-xs font-medium px-2 py-1 rounded-full flex items-center gap-2"
+									className=" bg-[#E7EFEB] text-[#03963F] text-xs font-medium flex px-2 py-1 rounded-full items-center gap-2"
 								>
 									<img src={skill.icon} alt={skill.name} className="w-4 h-4" />
 									{skill.name}
