@@ -9,6 +9,8 @@ import EmailVerification from "@/components/signup/EmailVerification";
 import EmployerSidebar from "@/features/sidebar/EmployerSidebar";
 import DisabledAccountModal from "@/components/modal/DisabledAccountModal";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import { cleanRecordingReference } from "@/store/slices/recorderSlice";
+import { useDispatch } from "react-redux";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -53,6 +55,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const isEmailVerified = user?.is_email_verified;
   const isPhoneVerified = user?.is_phone_verified;
   const account_status = user?.account_status;
+  const dispatch = useDispatch();
 
   const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 
@@ -104,6 +107,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return shouldDisplaySidebar() && Boolean(user) && isEmailVerified===false && !isEmployerRoute();
   };
 
+  // if recorder is active, we need to clean up the recorder object
+  useEffect(() => {
+    // This will run when the component unmounts  
+
+     
+    return () => {
+      dispatch(cleanRecordingReference());
+    };
+  }, [dispatch]);
   const renderAppropriateLayout = () => {
     if (!shouldDisplaySidebar()) {
       return (

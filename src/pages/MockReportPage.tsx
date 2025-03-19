@@ -186,7 +186,7 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const getInterviewIdFromUrl = () => {
     const pathParts = location.pathname.split("/");
     // URL format: /skills-report/username/interviewId
-    const username = pathParts[pathParts.length - 2]; // e.g. "someUser"
+    const username = pathParts[pathParts.length - 3]; // e.g. "someUser"
     const interviewId = pathParts[pathParts.length - 1]; // e.g. "abc123"
     console.log({
       username,

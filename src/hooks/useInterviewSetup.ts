@@ -1,6 +1,8 @@
 import { useUpdateReportRecordingMutation } from "@/api/reportApiSlice";
+import { setRecordingReference } from "@/store/slices/recorderSlice";
 import { RootState } from "@/store/store";
 import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
@@ -18,11 +20,11 @@ const getPresignedUrl = async (interviewId: string, chunkNumber: number, folder 
         folder,
       }),
     });
-  
+
     const data = await response.json();
     console.log("data", data);
 
-    return data.data.url; 
+    return data.data.url;
   } catch (error) {
     console.error("Error getting presigned URL:", error);
     return null;
@@ -37,7 +39,6 @@ const uploadFileToS3 = async (
   folder = "interviews"
 ) => {
   try {
-
     const presignedUrl = await getPresignedUrl(interviewId, chunkNumber, folder);
 
     console.log("presignedUrl", presignedUrl);
@@ -46,13 +47,12 @@ const uploadFileToS3 = async (
       throw new Error("Failed to get pre-signed URL.");
     }
 
-  
-   // Upload the file to S3 using the pre-signed URL
+    // Upload the file to S3 using the pre-signed URL
     const uploadResponse = await fetch(presignedUrl, {
       method: "PUT",
-      mode: 'cors',
+      mode: "cors",
       headers: {
-        "Content-Type": file.type, 
+        "Content-Type": file.type,
       },
       body: file,
     });
@@ -95,8 +95,10 @@ const useInterviewSetup = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const lastChunkRef = useRef<Promise<void> | null>(null);
   const [allBlobFiles, setAllBlobFiles] = useState<Blob[]>([]);
+  const [globalReference, setGlobalReference] = useState<any>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const chunkNumberRef = useRef<number>(1);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (videoRef.current && screenStream) {
@@ -109,7 +111,6 @@ const useInterviewSetup = () => {
       }
     };
   }, [screenStream]);
-
 
   const handleMicQualityChange = (isSelected: boolean, isMicTested: boolean) => {
     setIsMicSelected(isSelected);
@@ -128,14 +129,14 @@ const useInterviewSetup = () => {
         video: true,
         audio: true,
       });
-  
+
       // Check if system audio is enabled (i.e. if there are audio tracks)
       if (screenStream.getAudioTracks().length === 0) {
         screenStream.getTracks().forEach((track) => track.stop());
         alert("Please enable system audio when sharing your screen (share the entire window with audio enabled).");
         return;
       }
-    
+
       const micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -143,55 +144,64 @@ const useInterviewSetup = () => {
           autoGainControl: true,
         },
       });
-    
+
       const audioContext = new AudioContext();
       const destination = audioContext.createMediaStreamDestination();
-    
+
       const micSource = audioContext.createMediaStreamSource(micStream);
       micSource.connect(destination);
-    
-      const systemAudioSource = audioContext.createMediaStreamSource(
-        new MediaStream(screenStream.getAudioTracks())
-      );
+
+      const systemAudioSource = audioContext.createMediaStreamSource(new MediaStream(screenStream.getAudioTracks()));
       systemAudioSource.connect(destination);
-    
+
       const combinedStream = new MediaStream([
         ...screenStream.getVideoTracks(),
         ...destination.stream.getAudioTracks(),
       ]);
-    
+      setGlobalReference({
+        screenStream,
+        micStream,
+        audioContext,
+        destination,
+        micSource,
+        systemAudioSource,
+      });
+      dispatch(
+        setRecordingReference({ screenStream, micStream, audioContext, destination, micSource, systemAudioSource })
+      );
+
       setScreenStream(combinedStream);
       setIsScreenSharing(true);
-    
+
       const startRecording = () => {
         const recorder = new MediaRecorder(combinedStream, {
           mimeType: "video/webm; codecs=vp8,opus",
         });
-    
+
         recorder.ondataavailable = async (event) => {
           if (event.data.size > 0) {
             recordedChunksRef.current.push(event.data);
-    
+
             // If we're stopping or this is a regular chunk, upload it
             if (isStoppingRef.current || recordedChunksRef.current.length >= 1) {
               const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
               await uploadFileToS3(updateReportRecording, blob, interviewId, chunkNumberRef.current);
-    
+
               chunkNumberRef.current++;
               recordedChunksRef.current = [];
             }
           }
         };
-    
+
         recorder.onstop = () => {
           if (!isStoppingRef.current) {
             setTimeout(startRecording, 500);
           }
         };
-    
+
         recorder.start();
         recorderRef.current = recorder;
-    
+
         // Stop recording after 3 minutes
         setTimeout(() => {
           if (recorder && recorder.state !== "inactive") {
@@ -199,44 +209,51 @@ const useInterviewSetup = () => {
           }
         }, 30000);
       };
-    
+
       startRecording();
     } catch (error) {
       console.error("Error capturing screen and microphone:", error);
     }
   };
-  
-const stopScreenSharing = async () => {
-  try {
-    isStoppingRef.current = true;
 
-    if (recorderRef.current && recorderRef.current.state !== "inactive") {
-      recorderRef.current.stop(); 
+  const stopScreenSharing = async () => {
+    try {
+      isStoppingRef.current = true;
+
+      if (recorderRef.current && recorderRef.current.state !== "inactive") {
+        recorderRef.current.stop();
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      recordedChunksRef.current = [];
+
+      if (screenStream) {
+        screenStream.getTracks().forEach((track) => track.stop());
+        setScreenStream(null);
+      }
+
+      // reset the all things in glbal reference
+      if (globalReference) {
+        globalReference.audioContext.close();
+        globalReference.micStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        globalReference.screenStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        globalReference.destination.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        globalReference.micSource.disconnect();
+        globalReference.systemAudioSource.disconnect();
+        
+        setGlobalReference(null);
+      }
+      setIsScreenSharing(false);
+      isStoppingRef.current = false;
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      recorderRef.current = null;
+    } catch (error) {
+      console.error("Error stopping screen sharing:", error);
     }
-
-    
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    
-    recordedChunksRef.current = [];
-
-  
-    if (screenStream) {
-      screenStream.getTracks().forEach((track) => track.stop());
-      setScreenStream(null);
-    }
-
-    setIsScreenSharing(false);
-    isStoppingRef.current = false;
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    recorderRef.current = null;
-  } catch (error) {
-    console.error("Error stopping screen sharing:", error);
-  }
-};
-
+  };
 
   const handleScaleChange = (scale: number) => {
     setCameraScale(scale);

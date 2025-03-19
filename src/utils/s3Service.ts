@@ -34,6 +34,31 @@ const s3Upload = async (
   }
 };
 
+export const s3ThumbnailUpload = async (formData: any) => {
+  try {
+    const response = await axios.post(
+      `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data || error.message;
+      } else {
+        throw error;
+      }
+    } else {
+      throw error;
+    }
+  }
+}
+
 const s3Delete = async (key: any, userId: any, folder: any) => {
   try {
     const response = await axios.delete(
