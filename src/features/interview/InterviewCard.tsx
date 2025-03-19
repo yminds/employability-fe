@@ -202,6 +202,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
         date: createdAt || new Date().toISOString(),
         verifiedRatingAttachment: rating,
         interviewId: id,
+        type: interviewType,
       };
 
       if (hasExistingInterview) {
