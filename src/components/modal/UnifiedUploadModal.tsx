@@ -11,7 +11,6 @@ import VectorFile from "@/assets/profile/completeprofile/file.svg";
 import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
 import LinkedinInstruction from "@/assets/images/Frame 1410077928.png";
 import { updateUserProfile } from "@/features/authentication/authSlice";
-import { useUpdateUserMutation } from "@/api/userApiSlice";
 
 interface UnifiedUploadModalProps {
   isOpen: boolean;
@@ -27,7 +26,6 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [uploadResume] = useUploadResumeMutation();
-  const [updateUser] = useUpdateUserMutation();
   const [activeTab, setActiveTab] = useState<"resume" | "linkedin">("resume");
   const [dragActive, setDragActive] = useState(false);
   const [uploadState, setUploadState] = useState<{
@@ -99,9 +97,6 @@ const UnifiedUploadModal: React.FC<UnifiedUploadModalProps> = ({
       }
 
       const result = await s3Response.json();
-      await updateUser({
-        userId,
-      });
       setResume({ resumeUrl: result.data[0].fileUrl });
       setUploadState((prev) => ({ ...prev, progress: 100 }));
     } catch (error) {

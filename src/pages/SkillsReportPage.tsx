@@ -117,6 +117,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     // URL format: /skills-report/username/interviewId
     const username = pathParts[pathParts.length - 2]; // e.g. "someUser"
     const interviewId = pathParts[pathParts.length - 1]; // e.g. "abc123"
+    const type = pathParts[pathParts.length - 3]; // e.g. "skills-report"
     console.log({
       username,
       interviewId,

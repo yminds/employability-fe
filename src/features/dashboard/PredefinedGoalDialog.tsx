@@ -128,10 +128,11 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({
     };
     setIsSaving(true);
     try {
-      const response = await createGoal(goalData).unwrap();
+      const response = await createGoal(goalData).unwrap(); 
       const newGoal = {
         _id: response.data._id,
         name: response.data.name,
+        experience: response.data.experience,
       };
       const updatedGoals = [...(user?.goals || []), newGoal];
       if (user) {

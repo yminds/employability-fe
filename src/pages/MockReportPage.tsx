@@ -169,9 +169,9 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   
   const getInterviewIdFromUrl = () => {
     const pathParts = location.pathname.split("/");
-    const skillReportIndex = pathParts.indexOf("skill-report");
-    const username = pathParts[skillReportIndex + 1];
-    const interviewId = pathParts[pathParts.length - 1];
+    // URL format: /skills-report/username/interviewId
+    const username = pathParts[pathParts.length - 3]; // e.g. "someUser"
+    const interviewId = pathParts[pathParts.length - 1]; // e.g. "abc123"
     console.log({
       username,
       interviewId,
@@ -260,6 +260,8 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const handleBackToSkillsPage = () => {
     navigate(-1);
   };
+console.log("thread_id",thread_id);
+
 
   return (
     <MockReportContent

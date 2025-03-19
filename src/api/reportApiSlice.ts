@@ -14,7 +14,6 @@ export const reportApiSlice = apiSlice.injectEndpoints({
       }),
       // no cahce for now
       keepUnusedDataFor: 0,
-      
     }),
 
     updateReportSummary: builder.mutation<any, UpdateReportSummaryPayload>({
@@ -29,7 +28,15 @@ export const reportApiSlice = apiSlice.injectEndpoints({
       query: ({ interview_id, s3RecordingUrl }) => ({
         url: "/api/v1/report/update-s3-recording-url",
         method: "PUT",
-        body: { interview_id, s3_recording_url:s3RecordingUrl },
+        body: { interview_id, s3_recording_url: s3RecordingUrl },
+      }),
+    }),
+
+    updateThumbnail: builder.mutation<any, { interview_id: string; thubmnail_url: string }>({
+      query: ({ interview_id, thubmnail_url }) => ({
+        url: "/api/v1/report/update-thumbnail",
+        method: "PUT",
+        body: { interview_id, thubmnail_url },
       }),
     }),
   }),
@@ -38,5 +45,6 @@ export const reportApiSlice = apiSlice.injectEndpoints({
 export const {
   useGetReportByInterviewIdQuery,
   useUpdateReportSummaryMutation,
-  useUpdateReportRecordingMutation
+  useUpdateReportRecordingMutation,
+  useUpdateThumbnailMutation,
 } = reportApiSlice;

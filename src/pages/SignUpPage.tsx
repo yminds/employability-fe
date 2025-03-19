@@ -1,4 +1,6 @@
-import { useState, useEffect, FormEvent } from "react";
+"use client";
+
+import { useState, useEffect, type FormEvent } from "react";
 import { useLoginMutation, useRegisterUserMutation } from "@/api/authApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import User from "@/assets/sign-up/user.png";
@@ -16,7 +18,8 @@ import { Button } from "@/components/ui/button";
 interface SignupData {
   email: string;
   password: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: any;
 }
 
@@ -28,7 +31,8 @@ const SignupForm = () => {
   const [password, setPassword] = useState<string>("");
   const [login] = useLoginMutation();
   const [signup] = useRegisterUserMutation();
-  const [name, setName] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,14 +42,8 @@ const SignupForm = () => {
     setError(null);
     setIsLoading(true);
 
-    if (!name.trim()) {
-      setError("Name is required!");
-      setIsLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match!");
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("First name and last name are required!");
       setIsLoading(false);
       return;
     }
@@ -53,7 +51,8 @@ const SignupForm = () => {
     const signupData: SignupData = {
       email,
       password,
-      name: name.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       role: urlRole,
     };
     try {
@@ -160,7 +159,11 @@ const SignupForm = () => {
               onClick={() => navigate("/login")}
               className="d-block hover:text-green-600 text-black text-sm flex items-center"
             >
-              <img className="w-4 h-4 mr-2" src={arrow} alt="Back Arrow" />{" "}
+              <img
+                className="w-4 h-4 mr-2"
+                src={arrow || "/placeholder.svg"}
+                alt="Back Arrow"
+              />{" "}
               <span>Back</span>
             </button>
           </div>
@@ -194,20 +197,32 @@ const SignupForm = () => {
               </Alert>
             )}
 
-            <div className="relative">
-              <input
-                type="text"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <img
-                src={User}
-                alt="User Icon"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-              />
+            <div className="flex gap-4">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+                <img
+                  src={User || "/placeholder.svg"}
+                  alt="User Icon"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                />
+              </div>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
             <div className="relative">
@@ -220,7 +235,7 @@ const SignupForm = () => {
                 required
               />
               <img
-                src={Mail}
+                src={Mail || "/placeholder.svg"}
                 alt="Email Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
@@ -236,7 +251,7 @@ const SignupForm = () => {
                 required
               />
               <img
-                src={Password}
+                src={Password || "/placeholder.svg"}
                 alt="Password Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
@@ -252,7 +267,7 @@ const SignupForm = () => {
                 required
               />
               <img
-                src={Password}
+                src={Password || "/placeholder.svg"}
                 alt="Password Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />

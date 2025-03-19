@@ -1,6 +1,6 @@
 export const parsedTransformData = async (
   data: any,
-  skillsData: any
+  // skillsData: any
 ) => {
 
   const transformDate = (dateStr: string) => {
@@ -44,15 +44,15 @@ export const parsedTransformData = async (
 
 
   return {
-    skills:
-      skillsData.map((skill: any) => ({
-        skill_Id: skill._id || "",
-        name: skill.name || "",
-        rating: 0,
-        level: "1",
-        visibility: "All users",
-        transformedSkill: true,
-      })) || [],
+    // skills:
+    //   skillsData.map((skill: any) => ({
+    //     skill_Id: skill._id || "",
+    //     name: skill.name || "",
+    //     rating: 0,
+    //     level: "1",
+    //     visibility: "All users",
+    //     transformedSkill: true,
+    //   })) || [],
     experience:
       data.experience?.map((exp: any) => {
         const startDate = transformDate(exp.startDate);

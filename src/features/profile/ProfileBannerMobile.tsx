@@ -28,13 +28,13 @@ import { useSelector } from "react-redux";
 import EmailComposerModal from "@/components/modal/EmailComposerModal";
 import ContactInfoModal from "@/components/modal/ContactInfoModal";
 import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
+import EditProfileImageModal from "@/components/modal/EditProfileImageModal";
 
 interface ProfileBannerMobileProps {
   user: any;
   bio: string;
   onBioUpdate: (bio: string) => void;
   isPublic: boolean;
-  goalData?: any;
 }
 
 const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
@@ -42,7 +42,6 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
   bio,
   onBioUpdate,
   isPublic,
-  goalData,
 }) => {
   const candidate = useSelector((state: any) => state.auth.user);
   const employer = useSelector((state: any) => state.employerAuth.employer);
@@ -97,13 +96,12 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
   const [isContactInfoModalOpen, setIsContactInfoModalOpen] = useState(false);
   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
     useState(false);
+  const [isProfileImageModalOpen, setIsProfileImageModalOpen] = useState(false);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const fullName = user.name;
-  const goalName = goalData?.data?.[0]?.name || "";
-  const goalId = goalData?.data?.[0]?._id || "";
-
+  const goalId = user.goals?.[0]?._id || "";
   const handleBioSave = (newBio: string) => {
     onBioUpdate(newBio);
   };
@@ -151,7 +149,12 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
           {/* Profile header section */}
           <div className="flex items-center justify-between px-8 sm:px-5">
             {/* Profile image */}
-            <div className="w-[96px] h-[96px]">
+            <div
+              className={`w-[96px] h-[96px] ${
+                !isPublic ? "cursor-pointer" : ""
+              }`}
+              onClick={() => !isPublic && setIsProfileImageModalOpen(true)}
+            >
               {user?.profile_image ? (
                 <img
                   src={user?.profile_image || "/placeholder.svg"}
@@ -343,6 +346,13 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
         <LoginRequiredModal
           isOpen={isLoginRequiredModalOpen}
           onClose={() => setIsLoginRequiredModalOpen(false)}
+        />
+      )}
+      {!isPublic && (
+        <EditProfileImageModal
+          isOpen={isProfileImageModalOpen}
+          onClose={() => setIsProfileImageModalOpen(false)}
+          currentImage={user?.profile_image || null}
         />
       )}
     </div>

@@ -195,7 +195,7 @@ export default function BasicInfoForm({
       formData.append("name", file.name);
 
       const response = await s3Upload(formData, setUploadProgress);
-
+       
       setNewlyUploadedImage(response.data[0].fileUrl);
       setImagePreview(response.data[0].fileUrl);
       setFormData((prev) => ({

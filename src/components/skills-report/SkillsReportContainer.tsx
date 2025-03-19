@@ -186,7 +186,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
     <>
       {/* Summary Section */}
       <section
-        className={`bg-white rounded-md shadow-sm p-8 ${
+        className={`bg-white rounded-md shadow-sm p-8 sm:p-5 ${
           isGeneratingPDF ? "mb-0" : "mb-6"
         }`}
       >
@@ -262,7 +262,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
       </section>
 
       <section
-        className={`bg-white rounded-md shadow-sm p-8 ${
+        className={`bg-white rounded-md shadow-sm p-8 sm:p-5 ${
           isGeneratingPDF ? "mb-0" : "mb-6"
         }`}
       >
@@ -273,7 +273,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
       </section>
 
       {/* Concept Breakdown */}
-      <section className="mb-6 bg-white rounded-xl p-8">
+      <section className="mb-6 bg-white rounded-xl p-8 sm:p-5">
         <h2 className="text-h2 font-medium text-grey-7 mb-4">
           Concept Breakdown
         </h2>
@@ -316,7 +316,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
 
       {/* Progress Bars for Concept Ratings */}
       <section
-        className={`bg-white rounded-md shadow-sm mt-6 p-8 ${
+        className={`bg-white rounded-md shadow-sm mt-6 p-8 sm:p-5 ${
           isGeneratingPDF ? "mb-0" : "mb-6"
         }`}
       >
@@ -349,7 +349,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
       {!sharedReport && (
         <div className="flex flex-col gap-6">
           <section
-            className={`bg-white rounded-md p-8 pdf-hide ${
+            className={`bg-white rounded-md p-8 sm:p-6 pdf-hide ${
               !isGeneratingPDF ? "" : "hidden"
             }`}
           >
@@ -392,16 +392,16 @@ const ReportContent: React.FC<ReportContentProps> = ({
 
   const renderInterviewPlayer = () =>
     reportData.s3_recording_url && (
-      <section className="flex justify-center pdf-hide mb-6">
-        <div className="continer-player w-full h-[28rem] relative">
+      <section className="flex justify-center pdf-hide mb-6 md:mb-0 sm:mb-0">
+        <div className="continer-player w-full h-[28rem] sm:h-[14rem] relative">
           <InterviewPlayer urls={reportData.s3_recording_url} />
         </div>
       </section>
     );
 
   return (
-    <div className="flex w-full h-screen print:h-auto justify-center overflow-y-auto print:overflow-visible font-ubuntu p-6">
-      <div className="w-[90%] max-w-[1800px]">
+    <div className="flex w-full h-screen print:h-auto justify-center overflow-y-auto print:overflow-visible font-ubuntu p-6 sm:p-0">
+      <div className="w-[90%] sm:w-full max-w-[1800px]">
         {/* Header */}
         <header className="py-6 flex justify-between">
           <div className="max-w-[70%] px-4 flex flex-col gap-2">

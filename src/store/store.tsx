@@ -16,6 +16,7 @@ import errorReducer from "@/features/error/errorSlice";
 import successReducer from "@/features/success/successSlice";
 import resumeSlice from "./slices/resumeSlice";
 import roleSlice from "./slices/roleSlice";
+import recorderSlice from "./slices/recorderSlice";
 
 import { apiSlice } from "../api/apiSlice";
 import { errorMiddleware } from "./errorMiddleware";
@@ -54,6 +55,7 @@ const rootReducer = combineReducers({
   success: successReducer,
   role: roleSlice,
   resume: resumeSlice,
+  recorder: recorderSlice,
 });
 
 // Persisted reducer

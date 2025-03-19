@@ -20,12 +20,12 @@ const ReportScore: React.FC<ReportScoreProps> = ({
   const verifiedrating = ReportScore;
 
   return (
-    <div className="bg-white flex flex-col w-[100%] rounded-lg  p-8 gap-6 md:mt-0 sm:mt-0">
+    <div className="bg-white flex flex-col w-[100%] rounded-lg  p-8 sm:p-5 gap-6 md:mt-0 sm:mt-0">
       <div className="flex items-center gap-2">
         <div>
           {userImg ? (
             <img
-              className="w-[50px] h-[50px] rounded-full"
+              className="w-[50px] h-[50px] rounded-full object-cover"
               src={userImg}
               alt="user"
             />
@@ -60,9 +60,9 @@ const ReportScore: React.FC<ReportScoreProps> = ({
           <img className="absolute w-8 h-8" src={skill_icon} alt="short logo" />
         </div>
         <div>
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-2xl sm:text-xl font-bold text-gray-900">
             {verifiedrating > 0 ? verifiedrating.toFixed(2) : verifiedrating}
-            <span className="text-2xl font-bold text-[#00000099]">/10</span>
+            <span className="text-2xl sm:text-xl font-bold text-[#00000099]">/10</span>
           </p>
           <p className="text-gray-900 font-sf-pro-display text-lg font-medium leading-6 tracking-[0.27px]">
             Skill Score
