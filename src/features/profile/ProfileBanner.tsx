@@ -1,5 +1,3 @@
-"use client";
-
 import { currentStatusSVG } from "./svg/currentStatusSVG";
 import { Button } from "@/components/ui/button";
 import threeDots from "@/assets/profile/threedots.svg";
@@ -49,8 +47,6 @@ const ProfileBanner = ({
 }: ProfileBannerProps) => {
   const candidate = useSelector((state: any) => state.auth.user);
   const employer = useSelector((state: any) => state.employerAuth.employer);
-
-  console.log("employer", employer);
 
   const { data: countries = [] } = useGetCountriesQuery();
   const { data: states = [] } = useGetStatesQuery(user.address?.country || "", {
@@ -152,7 +148,9 @@ const ProfileBanner = ({
           <div className="flex items-center justify-between ">
             <div className="relative flex gap-6 items-center">
               <div
-                className="relative w-[130px] h-[130px] cursor-pointer"
+                className={`relative w-[130px] h-[130px] ${
+                  !isPublic ? "cursor-pointer" : ""
+                }`}
                 onClick={() => !isPublic && setIsProfileImageModalOpen(true)}
               >
                 {/* Profile Image */}

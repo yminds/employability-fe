@@ -345,17 +345,17 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-4 z-50">
+      <div className="absolute bottom-0 left-0 right-0 bg-black/50 rounded-sm p-4 sm:p-2 z-50">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className="text-white hover:text-green-500 transition-colors"
             disabled={isLoading}
           >
-            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+            {isPlaying ? <Pause className="w-6 h-6 sm:w-4 sm-h-4" /> : <Play className="w-6 h-6 sm:w-4 sm:4" />}
           </button>
 
-          <div className="flex-1">
+          <div className="flex-1 -mt-1">
             <input
               ref={timelineRef}
               type="range"
@@ -386,10 +386,10 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
               className="text-white hover:text-green-500 transition-colors"
               disabled={isLoading}
             >
-              {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+              {isMuted ? <VolumeX className="w-6 h-6 sm:w-4 sm-h-4" /> : <Volume2 className="w-6 h-6 sm:w-4 sm-h-4" />}
             </button>
 
-            <div className="w-20">
+            <div className="w-20 -mt-1 sm:hidden">
               <input
                 ref={volumeSliderRef}
                 type="range"
@@ -421,7 +421,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
             className="text-white hover:text-green-500 transition-colors"
             disabled={isLoading}
           >
-            {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+            {isFullscreen ? <Minimize className="w-6 h-6 sm:w-4 sm-h-4" /> : <Maximize className="w-6 h-6 sm:w-4 sm-h-4" />}
           </button>
         </div>
       </div>
