@@ -57,6 +57,7 @@ export default function FeaturedInterviewSection({
 
   const role = existingFeaturedInterview?.title || "Interview";
   const interviewId = existingFeaturedInterview?.interviewId;
+  const interviewType = existingFeaturedInterview?.type;
   const thumbnailUrl = MockInterivewImage;
 
   const handleViewInterviews = () => {
@@ -64,12 +65,30 @@ export default function FeaturedInterviewSection({
   };
 
   const handleViewReport = (interviewId: string) => {
+    if (!interviewType) return;
+
+    let reportUrl = "";
+
+    switch (interviewType) {
+      case "Mock":
+        reportUrl = `/skill/report/Mock/${interviewId}`;
+        break;
+      case "Skill":
+        reportUrl = `/skill/report/${interviewId}`;
+        break;
+      case "Project":
+        reportUrl = `/skill/report/Project/${interviewId}`;
+        break;
+      default:
+        reportUrl = `/skill/report/${interviewId}`;
+    }
+
     if (isPublic) {
       navigate(`/skills-report/${username}/${interviewId}`, {
         state: { isPublic: true },
       });
     } else {
-      navigate(`/skill/report/${interviewId}`, {
+      navigate(reportUrl, {
         state: {
           best_interview: interviewId,
           fromInterviewCard: true,

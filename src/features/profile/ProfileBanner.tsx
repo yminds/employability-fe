@@ -28,7 +28,7 @@ import { useSelector } from "react-redux";
 import EmailComposerModal from "@/components/modal/EmailComposerModal";
 import ContactInfoModal from "@/components/modal/ContactInfoModal";
 import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
-import { useGetEmployerJobsQuery } from "@/api/employerJobsApiSlice";
+import EditProfileImageModal from "@/components/modal/EditProfileImageModal";
 
 interface ProfileBannerProps {
   user: any;
@@ -47,8 +47,6 @@ const ProfileBanner = ({
 }: ProfileBannerProps) => {
   const candidate = useSelector((state: any) => state.auth.user);
   const employer = useSelector((state: any) => state.employerAuth.employer);
-
-  console.log("employer", employer);
 
   const { data: countries = [] } = useGetCountriesQuery();
   const { data: states = [] } = useGetStatesQuery(user.address?.country || "", {
@@ -81,6 +79,7 @@ const ProfileBanner = ({
   const [isContactInfoModalOpen, setIsContactInfoModalOpen] = useState(false);
   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
     useState(false);
+  const [isProfileImageModalOpen, setIsProfileImageModalOpen] = useState(false);
 
   const goalId = goalData?.data?.[0]?._id || "";
 
@@ -148,7 +147,12 @@ const ProfileBanner = ({
           {/* Profile Header */}
           <div className="flex items-center justify-between ">
             <div className="relative flex gap-6 items-center">
-              <div className="relative w-[130px] h-[130px]">
+              <div
+                className={`relative w-[130px] h-[130px] ${
+                  !isPublic ? "cursor-pointer" : ""
+                }`}
+                onClick={() => !isPublic && setIsProfileImageModalOpen(true)}
+              >
                 {/* Profile Image */}
                 {user?.profile_image ? (
                   <img
@@ -288,7 +292,7 @@ const ProfileBanner = ({
                   className="flex w-[130px] h-[40px] px-3 py-2 justify-center items-center gap-3 text-black text-body2 hover:bg-transparent hover:text-black focus:ring-0"
                   onClick={handleShareProfile}
                 >
-                  <img src={Share} alt="Share" />
+                  <img src={Share || "/placeholder.svg"} alt="Share" />
                   Share Profile
                 </Button>
 
@@ -310,7 +314,10 @@ const ProfileBanner = ({
                         className="w-full justify-start text-[#414447] text-body2 px-3 py-2 h-auto"
                         onClick={() => setIsProfileModalOpen(true)}
                       >
-                        <img src={EditProfile} alt="Edit Profile" />
+                        <img
+                          src={EditProfile || "/placeholder.svg"}
+                          alt="Edit Profile"
+                        />
                         Edit profile
                       </Button>
                       <Button
@@ -318,7 +325,10 @@ const ProfileBanner = ({
                         className="w-full justify-start text-[#414447] text-body2 px-3 py-2 h-auto"
                         onClick={() => setIsEditBioOpen(true)}
                       >
-                        <img src={EditBio} alt="Edit Bio" />
+                        <img
+                          src={EditBio || "/placeholder.svg"}
+                          alt="Edit Bio"
+                        />
                         Edit bio
                       </Button>
                     </div>
@@ -373,6 +383,13 @@ const ProfileBanner = ({
         <LoginRequiredModal
           isOpen={isLoginRequiredModalOpen}
           onClose={() => setIsLoginRequiredModalOpen(false)}
+        />
+      )}
+      {!isPublic && (
+        <EditProfileImageModal
+          isOpen={isProfileImageModalOpen}
+          onClose={() => setIsProfileImageModalOpen(false)}
+          currentImage={user?.profile_image || null}
         />
       )}
     </div>
