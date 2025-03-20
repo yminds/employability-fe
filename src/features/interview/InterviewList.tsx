@@ -26,6 +26,7 @@ interface Interview {
   };
   final_rating: number;
   s3_recording_url: string[];
+  thubmnail_url: string;
   summary?: {
     text: string;
   };
@@ -223,7 +224,7 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
                   createdAt={best.interview_id.createdAt}
                   interviewType={best.interview_id.type}
                   summary={best.summary?.text || "No summary available."}
-                  thumbnail={thumbnail}
+                  thumbnail={best.thubmnail_url || thumbnail}
                   recordingUrls={best.s3_recording_url}
                   goalId={goalId}
                   isLast={index === Object.keys(groupedInterviews).length - 1}

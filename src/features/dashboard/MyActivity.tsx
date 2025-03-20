@@ -1,6 +1,7 @@
 import type React from "react";
 import { useEffect } from "react";
-import { useGetUserSkillsSummaryMutation } from "@/api/skillsApiSlice";
+// import { useGetUserSkillsSummaryMutation } from "@/api/skillsApiSlice";
+import { useGetPublicUserSkillSummaryMutation } from "@/api/userPublicApiSlice";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { Card } from "@/components/ui/card";
@@ -25,38 +26,23 @@ const CompleteActivityCard: React.FC<CompleteActivityProps> = ({
   goalName,
 }) => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const user_id = user ? user._id : "";
+  const username = user ? user.username : "";
   const navigate = useNavigate();
 
   const [getUserSkillsSummary, { data: skillsSummaryData }] =
-    useGetUserSkillsSummaryMutation();
-
-  const totalSkills = skillsSummaryData?.data?.totalSkills || "0";
-  const totalVerifiedSkills =
-    skillsSummaryData?.data?.totalVerifiedSkills || "0";
+    useGetPublicUserSkillSummaryMutation();
 
   useEffect(() => {
-    if (user_id && goalId) {
-      getUserSkillsSummary({ userId: user_id, goalId });
+    if (username) {
+      getUserSkillsSummary({ username });
     }
-  }, [user_id, goalId, getUserSkillsSummary]);
+  }, [username, getUserSkillsSummary]);
 
   const handleNavigateToProfile = () => {
     navigate("/user-profile");
   };
 
-  const totalSkillsNum = Number(totalSkills) || 0;
-  const totalVerifiedSkillsNum = Number(totalVerifiedSkills) || 0;
-  const averageVerifiedPercentage =
-    totalSkillsNum > 0
-      ? Number.parseFloat(
-          ((totalVerifiedSkillsNum / totalSkillsNum) * 100).toFixed(2)
-        )
-      : 0;
-  const employabilityScore =
-    totalSkillsNum > 0
-      ? Number.parseFloat((averageVerifiedPercentage / 10).toFixed(1))
-      : 0;
+  const employabilityScore = skillsSummaryData?.data?.employabilityScore || 0;
 
   return (
     <Card
@@ -89,7 +75,7 @@ const CompleteActivityCard: React.FC<CompleteActivityProps> = ({
             {user?.name || "User Name"}
           </h2>
           <p className="text-body2 text-[#909091]">
-            {user?.address?.city || "Location"}
+            {user?.address?.city || ""}
           </p>
         </div>
       </div>
@@ -109,7 +95,11 @@ const CompleteActivityCard: React.FC<CompleteActivityProps> = ({
               </span>
               <span className="text-2xl font-medium text-[#00000099]">/10</span>
             </div>
-            <img src={employabilityScore >= 4 ? VerfiedIcon : UnverifiedIcon} className="w-28px h-28px" alt="Verified" />
+            <img
+              src={employabilityScore >= 4 ? VerfiedIcon : UnverifiedIcon}
+              className="w-28px h-28px"
+              alt="Verified"
+            />
           </div>
           <p className="text-body2 text-[#414447]">Employability score</p>
         </div>

@@ -94,7 +94,7 @@ export const useProfileForm = (
             country: user?.address?.country || "",
             state: user?.address?.state || "",
             city: user?.address?.city || "",
-            profile_image: user.profile_image || "",
+            profile_image: user?.profile_image || "",
           },
           socialProfiles: {
             gitHub: user.github || "",
@@ -115,7 +115,7 @@ export const useProfileForm = (
           country: data?.contact?.location?.countryCode || "",
           state: data?.contact?.location?.stateCode || "",
           city: data?.contact?.location?.city || "",
-          profile_image: data?.profile_image || "",
+          profile_image: user?.profile_image || "",
         },
         socialProfiles: {
           gitHub: data?.contact?.github || "",

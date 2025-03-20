@@ -24,6 +24,7 @@ export type User = {
   email: string;
   role: Role;
   name: string;
+  username: string;
   createdAt: Date;
   updatedAt: Date;
   goals: goals[];

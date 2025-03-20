@@ -306,7 +306,7 @@ const Dashboard: React.FC<Props> = () => {
               {/* Header */}
               <header className="flex-none mb-6">
                 <h1 className="text-gray-600 text-h1 flex items-center gap-3">
-                  Welcome Back, {user_name}
+                  Hey, {user_name}
                   <span className="wave">
                     <img
                       src={emojiWavingImg || "/placeholder.svg"}

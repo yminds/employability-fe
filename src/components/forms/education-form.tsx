@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Education } from "@/features/profile/types";
+import { DatePicker } from "../ui/date-picker";
 
 interface EducationFormProps {
   education: Education[];
@@ -156,18 +157,16 @@ const EducationForm: React.FC<EducationFormProps> = ({
               <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                 From Date <span className="text-red-500">*</span>
               </Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={formatDateForInput(edu.from_date)}
-                onChange={(e) =>
-                  updateEducation(index, "from_date", e.target.value)
-                }
-                max={new Date().toISOString().split("T")[0]}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                onChange={(value) => updateEducation(index, "from_date", value)}
+                maxDate={new Date().toISOString().split("T")[0]}
+                placeholder="Select from date"
+                className={`${
                   getError(`education.${index}.from_date`)
                     ? "border-red-500"
                     : ""
-                }`}
+                } truncate`}
               />
               {getError(`education.${index}.from_date`) && (
                 <p className="text-red-500 text-xs mt-1">
@@ -180,18 +179,16 @@ const EducationForm: React.FC<EducationFormProps> = ({
               <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                 Till Date
               </Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={formatDateForInput(edu.till_date)}
-                onChange={(e) =>
-                  updateEducation(index, "till_date", e.target.value)
-                }
-                min={formatDateForInput(edu.from_date)}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                onChange={(value) => updateEducation(index, "till_date", value)}
+                minDate={formatDateForInput(edu.from_date)}
+                placeholder="Select till date"
+                className={
                   getError(`education.${index}.till_date`)
                     ? "border-red-500"
                     : ""
-                }`}
+                }
               />
               {getError(`education.${index}.till_date`) && (
                 <p className="text-red-500 text-xs mt-1">
