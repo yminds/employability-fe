@@ -7,7 +7,7 @@ import User from "@/assets/sign-up/user.png";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import SocialLogin from "@/features/authentication/SocialAuth";
 
 import logo from "@/assets/branding/logo.svg";
@@ -36,6 +36,8 @@ const SignupForm = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleCustomSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -130,6 +132,15 @@ const SignupForm = () => {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Add toggle password visibility function
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   return (
     <section className="flex h-screen w-screen bg-white relative dark:bg-gray-800">
@@ -243,7 +254,7 @@ const SignupForm = () => {
 
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                 placeholder="Password"
                 value={password}
@@ -255,11 +266,22 @@ const SignupForm = () => {
                 alt="Password Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <Eye className="w-5 h-5 text-gray-500" />
+                )}
+              </button>
             </div>
 
             <div className="relative">
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                 placeholder="Confirm Password"
                 value={confirmPassword}
@@ -271,6 +293,17 @@ const SignupForm = () => {
                 alt="Password Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
+              <button
+                type="button"
+                onClick={toggleConfirmPasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <Eye className="w-5 h-5 text-gray-500" />
+                )}
+              </button>
             </div>
 
             {/* Submit Button */}

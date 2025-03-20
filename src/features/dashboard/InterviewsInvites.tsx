@@ -144,24 +144,32 @@ export const mockInterviews = [
       ],
       "requiredSkillsAndQualifications": [
         {
-          skill: "React.js or Vue.js",
-          importance: "critical"
+          skill: "React.js",
+          importance: "Very Important"
         },
         {
-          skill: "Node.js or Python",
-          importance: "critical"
+          skill: "Node.js",
+          importance: "Very Important"
         },
         {
-          skill: "API Design and Integration",
+          skill: "MongoDB",
+          importance: "Very Important"
+        },
+        {
+          skill: "Express.js",
+          importance: "Very Important"
+        },
+        {
+          skill: "HTML",
           importance: "important"
         },
         {
-          skill: "Database Management (SQL or NoSQL)",
+          skill: "CSS",
           importance: "important"
         },
         {
-          skill: "DevOps Fundamentals",
-          importance: "somewhat important"
+          skill: "JavaScript",
+          importance: "important"
         }
       ],
       "experience": "2-5 years in full-stack web development.",

@@ -81,10 +81,8 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
   // Handle outside click to close modal
   const handleOutsideClick = useCallback(
     (event: MouseEvent) => {
-      const modal = document.getElementById("quiz-modal");
-      if (modal && !modal.contains(event.target as Node)) {
-        onClose();
-      }
+      // Removing this functionality to prevent dialog from closing on outside click
+      return;
     },
     [onClose]
   );
@@ -97,11 +95,12 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
     };
 
     document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("mousedown", handleOutsideClick);
+    // Removing the mouse event listener
+    // document.addEventListener("mousedown", handleOutsideClick);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleOutsideClick);
+      // document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, [onClose, handleOutsideClick]);
 

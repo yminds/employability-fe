@@ -176,11 +176,29 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     }
   }, [userId, selectedGoalId]);
 
+  // Create a ref to store the previous skills' names
+  const [prevSkillNames, setPrevSkillNames] = useState<string[]>([]);
+
+  // Only fetch suggested skills when skill names change or on initial load
   useEffect(() => {
     if (userId && selectedGoalId) {
-      fetchSuggestedSkills();
+      // Extract current skill names
+      const currentSkillNames = skills.map(skill => skill.name).filter(name => name !== "");
+      
+      // Sort both arrays to ensure consistent comparison
+      const sortedCurrentNames = [...currentSkillNames].sort();
+      const sortedPrevNames = [...prevSkillNames].sort();
+      
+      // Check if the skill names have changed
+      const namesChanged = sortedCurrentNames.length !== sortedPrevNames.length || 
+                          sortedCurrentNames.some((name, index) => name !== sortedPrevNames[index]);
+      
+      if (namesChanged) {
+        fetchSuggestedSkills();
+        setPrevSkillNames(currentSkillNames);
+      }
     }
-  }, [skills]);
+  }, [skills.map(skill => skill.name).join(',')]);  // Only depend on skill names
 
   const ratings = Array.from({ length: 10 }, (_, i) => `${i + 1}/10`);
   const [open, setOpen] = useState<boolean[]>([]);

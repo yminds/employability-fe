@@ -6,8 +6,9 @@ import type { RootState } from "@/store/store";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { ArrowRight, CheckCircle2, VerifiedIcon } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import VerfiedIcon from "../../assets/skills/verified.svg";
+import UnverifiedIcon from "../../assets/skills/unverifies.svg";
 import Background from "../../assets/dashboard/Background.svg";
 import { useNavigate } from "react-router-dom";
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
@@ -108,7 +109,7 @@ const CompleteActivityCard: React.FC<CompleteActivityProps> = ({
               </span>
               <span className="text-2xl font-medium text-[#00000099]">/10</span>
             </div>
-            <img src={VerfiedIcon} className="w-28px h-28px" alt="Verified" />
+            <img src={employabilityScore >= 4 ? VerfiedIcon : UnverifiedIcon} className="w-28px h-28px" alt="Verified" />
           </div>
           <p className="text-body2 text-[#414447]">Employability score</p>
         </div>
