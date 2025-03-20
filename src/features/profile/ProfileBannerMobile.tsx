@@ -223,8 +223,8 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
               </div>
 
               {/* Employability score */}
-              <div className="px-8 sm:px-5 flex items-center">
-                <div className="flex items-baseline">
+              <div className="px-8 sm:px-5 flex items-center gap-2">
+                <div className="flex items-baseline gap-1">
                   <span className="text-black text-[28px] font-ubuntu font-bold leading-[42px] tracking-[-0.5px]">
                     {employabilityScore}
                   </span>
