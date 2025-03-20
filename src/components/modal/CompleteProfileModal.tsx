@@ -333,9 +333,9 @@ const CompleteProfileModal = ({
             <DialogTitle className="text-black text-[20px] font-medium leading-[26px] tracking-[-0.2px] font-ubuntu">
               Complete Your Profile
             </DialogTitle>
-            <p className="text-[16px] font-normal leading-6 tracking-[0.24px] text-black/60 font-['SF Pro Display', sans-serif]">
+            {/* <p className="text-[16px] font-normal leading-6 tracking-[0.24px] text-black/60 font-['SF Pro Display', sans-serif]">
               Enter your goal and tailor your learning path.
-            </p>
+            </p> */}
           </div>
         </DialogHeader>
 

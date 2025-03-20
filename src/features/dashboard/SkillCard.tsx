@@ -318,7 +318,7 @@ const SkillProgress: React.FC<SkillProgressProps> = ({
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-black text-base font-normal font-['DM Sans'] leading-normal tracking-tight">
+        <div className="text-black text-body2">
           Let's build your verified profile that employers trust 
         </div>
         <div className="ml-4 inline-flex items-center h-[46px] rounded-lg bg-white pl-4">
