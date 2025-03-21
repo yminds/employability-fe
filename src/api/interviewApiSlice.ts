@@ -23,7 +23,7 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     getInvitesByUserId: builder.query({
-      query: (userId: string) => ({
+      query: (userId: string | undefined) => ({
         url: `/api/v1/employerInterviewInvitation/invite/user/${userId}`,
         method: "GET",
       }),

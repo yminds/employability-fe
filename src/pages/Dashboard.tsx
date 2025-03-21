@@ -6,7 +6,7 @@ import SkillList from "@/components/skills/skillslist";
 import TryThingsSection from "@/features/dashboard/TryThingsSection";
 import MyActivityCard from "@/features/dashboard/MyActivity";
 import ProjectList from "@/components/projects/ProjectList";
-import InterviewList from "@/features/dashboard/InterviewList";
+import InterviewList from "@/features/dashboard/InterviewInvitationsList";
 import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
@@ -148,7 +148,7 @@ const Dashboard: React.FC<Props> = () => {
   const [getUserSkills, { data: skillsData, isLoading: isSkillsLoading }] =
     useGetUserSkillsMutation();
 
-  const { data: invitesData, isLoading: isInvitesLoading } = useGetInvitesByUserIdQuery(user_id);
+  const { data: invitesData, isLoading: isInvitesLoading, error: invitesError } = useGetInvitesByUserIdQuery(user_id);
 
   // Define hasGoals first
   const hasGoals = goalsData?.data && goalsData.data.length > 0;
@@ -369,24 +369,27 @@ const Dashboard: React.FC<Props> = () => {
                         </div>
 
                         {/* Interview List */}
-                        <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                          {isContentLoading ? (
-                            <SkillListSkeleton />
-                          ) : (
-                            <InterviewList 
-                              isDashboard={true} 
-                              invites={invitesData?.data}
-                              onAccept={(id) => {
-                                console.log("Accept interview", id);
-                                // Add your acceptance logic here
-                              }}
-                              onDecline={(id) => {
-                                console.log("Decline interview", id);
-                                // Add your decline logic here
-                              }}
-                            />
-                          )}
-                        </section>
+                        {isContentLoading ? (
+                          <SkillListSkeleton />
+                        ) : (
+                          // Only show interview list if there are invites
+                          (invitesData?.data && invitesData.data.length > 0) && (
+                            <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                              <InterviewList 
+                                isDashboard={true} 
+                                invites={invitesData?.data}
+                                onAccept={(id) => {
+                                  console.log("Accept interview", id);
+                                  // Add your acceptance logic here
+                                }}
+                                onDecline={(id) => {
+                                  console.log("Decline interview", id);
+                                  // Add your decline logic here
+                                }}
+                              />
+                            </section>
+                          )
+                        )}
 
                         {/* Try Things Section */}
                         {isContentLoading ? (

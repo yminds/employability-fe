@@ -46,9 +46,6 @@ const Candidate = lazy(() => import("./pages/Candidate.tsx"));
 const UserPublicProfilePage = lazy(
   () => import("./pages/UserPublicProfilePage.tsx")
 );
-const InterviewsLisingPage = lazy(
-  () => import("./pages/InterviewsListingPage.tsx")
-);
 const MockInterviewsPage = lazy(
   () => import("./pages/MockInterviews.tsx")
 );
@@ -229,10 +226,6 @@ export const routes: RouteConfig[] = [
   {
     route: "/skills-report/:id/:id",
     component: <ReportPage isSharedReport={true} />,
-  },
-  {
-    route: "/invites",
-    component: <InterviewsLisingPage />,
   },
   {
     route: "/interviews",
