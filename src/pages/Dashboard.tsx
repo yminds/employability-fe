@@ -155,7 +155,7 @@ const Dashboard: React.FC<Props> = () => {
   
   // Unified loading state that covers all data fetching operations
   const isInitialLoading = isGoalsLoading || isUserDetailsLoading;
-  const isAnyDataNull = !goalsData || (hasGoals && (!userProjects || !skillsData || !invitesData));
+  const isAnyDataNull = !goalsData || (hasGoals && (!userProjects || !skillsData));
   const isContentLoading =
     isGoalsFetching || isProjectsLoading || isSkillsLoading || isInvitesLoading || isAnyDataNull;
 
@@ -372,8 +372,8 @@ const Dashboard: React.FC<Props> = () => {
                         {isContentLoading ? (
                           <SkillListSkeleton />
                         ) : (
-                          // Only show interview list if there are invites
-                          (invitesData?.data && invitesData.data.length > 0) && (
+                          // Only show interview list if there are invites and no error
+                          invitesData?.data && Array.isArray(invitesData.data) && invitesData.data.length > 0 && !invitesError && (
                             <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
                               <InterviewList 
                                 isDashboard={true} 
