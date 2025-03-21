@@ -20,6 +20,8 @@ import {
   useGetUserDetailsQuery,
   useUpdateUserMutation,
 } from "@/api/userApiSlice";
+import EditBioModal from "@/components/modal/EditBioModal";
+import EditProfileImageModal from "@/components/modal/EditProfileImageModal";
 
 interface SectionState {
   completed: boolean;
@@ -27,6 +29,8 @@ interface SectionState {
 }
 
 interface Sections {
+  addBio: SectionState;
+  profileImage: SectionState;
   basicInfo: SectionState;
   experience: SectionState;
   education: SectionState;
@@ -55,8 +59,12 @@ const TryThingsSection: React.FC = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [currentProfileSection, setCurrentProfileSection] =
     useState<string>("");
+  const [showBioModal, setShowBioModal] = useState(false);
+  const [showProfileImageModal, setShowProfileImageModal] = useState(false);
 
   const [sections, setSections] = useState<Sections>({
+    addBio: { completed: false },
+    profileImage: { completed: false },
     basicInfo: { completed: false },
     experience: { completed: false, skipped: false },
     education: { completed: false },
@@ -75,6 +83,21 @@ const TryThingsSection: React.FC = () => {
   const [updateUser] = useUpdateUserMutation();
 
   const goalId = goalsData?.data?.[0]?._id || "";
+
+  // Check if resume upload is complete
+  const isUploadResumeComplete = (user: any) => {
+    return  !!user?.parsedResume;
+  }
+
+  // Check if bio is complete
+  const isBioComplete = (user: any) => {
+    return !!user?.bio;
+  };
+
+  // Check if profile image is complete
+  const isProfileImageComplete = (user: any) => {
+    return !!user?.profile_image;
+  };
 
   // Check if basic info is complete
   const isBasicInfoComplete = (user: any) => {
@@ -176,9 +199,35 @@ const TryThingsSection: React.FC = () => {
     if (userDetails) {
       const user = userDetails.data;
       let progress = 0;
+      const totalSections = user?.has_resume === false ? 6 : 7
+      const sectionWeight = 100 / totalSections
+
+      if (isUploadResumeComplete(user)) {
+        progress += sectionWeight;
+        setSections((prev) => ({
+          ...prev,
+          uploadResume: { completed: true },
+        }));
+      }
+
+      if (isBioComplete(user)) {
+        progress += sectionWeight;
+        setSections((prev) => ({
+          ...prev,
+          addBio: { completed: true },
+        }));
+      }
+
+      if (isProfileImageComplete(user)) {
+        progress += sectionWeight;
+        setSections((prev) => ({
+          ...prev,
+          profileImage: { completed: true },
+        }));
+      }
 
       if (isBasicInfoComplete(user)) {
-        progress += 25;
+        progress += sectionWeight;
         setSections((prev) => ({
           ...prev,
           basicInfo: { completed: true },
@@ -186,7 +235,7 @@ const TryThingsSection: React.FC = () => {
       }
 
       if (isExperienceComplete(user)) {
-        progress += 25;
+        progress += sectionWeight;
         setSections((prev) => ({
           ...prev,
           experience: { completed: true },
@@ -194,7 +243,7 @@ const TryThingsSection: React.FC = () => {
       }
 
       if (isEducationComplete(user)) {
-        progress += 25;
+        progress += sectionWeight;
         setSections((prev) => ({
           ...prev,
           education: { completed: true },
@@ -202,14 +251,14 @@ const TryThingsSection: React.FC = () => {
       }
 
       if (isCertificationComplete(user)) {
-        progress += 25;
+        progress += sectionWeight;
         setSections((prev) => ({
           ...prev,
           certification: { completed: true },
         }));
       }
 
-      setProfileProgress(progress);
+      setProfileProgress(Math.round(progress));
     }
   }, [userDetails]);
 
@@ -225,6 +274,12 @@ const TryThingsSection: React.FC = () => {
   const handleLinkClick = (route: string) => {
     if (route === "/upload-resume") {
       setShowUploadModal(true);
+      return;
+    } else if (route === "/add-bio") {
+      setShowBioModal(true);
+      return;
+    } else if (route === "/add-profile-image") {
+      setShowProfileImageModal(true);
       return;
     }
 
@@ -272,6 +327,31 @@ const TryThingsSection: React.FC = () => {
     const user = userDetails?.data;
 
     if (!user) return defaultCards;
+
+    // Add Bio card if user doesn't have a bio
+    if (!user?.bio) {
+      defaultCards.push({
+        image: Addbioimg,
+        alt: "Bio",
+        description: "Tell us about yourself and your professional journey.",
+        buttonText: "Add Bio",
+        route: "/add-bio",
+        progressSection: "addBio", // We'll consider this part of basic info for progress tracking
+      });
+    }
+
+    if (!user?.profile_image) {
+      defaultCards.push({
+        image: AddPictureimg,
+        alt: "Profile Image",
+        description:
+          "Add a professional profile picture to make your profile stand out.",
+        buttonText: "Add Profile Image",
+        route: "/add-profile-image",
+        progressSection: "profileImage",
+      });
+    }
+
     // Only add Basic Info card if user doesn't have basic info
     if (
       !user?.name ||
@@ -372,6 +452,17 @@ const TryThingsSection: React.FC = () => {
   const handleNextClick = () => {
     if (canScrollRight) {
       setStartIndex((prev) => prev + 1);
+    }
+  };
+
+  const handleBioSave = async (updatedBio: string) => {
+    try {
+      await updateUser({
+        userId: user._id,
+        data: { bio: updatedBio },
+      }).unwrap();
+    } catch (error) {
+      console.error("Failed to update bio:", error);
     }
   };
 
@@ -493,6 +584,23 @@ const TryThingsSection: React.FC = () => {
           onClose={handleModalClose}
           userId={userId || ""}
           goalId={goalId}
+        />
+      )}
+
+      {showBioModal && (
+        <EditBioModal
+          isOpen={showBioModal}
+          onClose={() => setShowBioModal(false)}
+          onSave={handleBioSave}
+          currentBio=""
+        />
+      )}
+
+      {showProfileImageModal && (
+        <EditProfileImageModal
+          isOpen={showProfileImageModal}
+          onClose={() => setShowProfileImageModal(false)}
+          currentImage={null}
         />
       )}
     </section>
