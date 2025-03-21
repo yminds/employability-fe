@@ -87,7 +87,7 @@ const UserProfile: React.FC = () => {
       {/* <StatsSection username={user?.username} /> */}
       <ContactInformationSection
         profileUrl={profileUrl}
-        phoneNumber={user.phone_number || "Number not provided"}
+        phoneNumber={user?.phone_number}
         email={user.email}
         initialPrivacy={user.is_contact_info_public}
         userId={user._id}
