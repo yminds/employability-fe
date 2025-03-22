@@ -491,6 +491,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                             jobType={formData.job_type}
                             workplaceType={formData.work_place_type}
                             description={formData.description}
+                            companyLogo={initialData.company_logo}
                             skills={selectedSkills}
                             screeningQuestions={screeningQuestions}
                             interviewQuestions={[]}

@@ -13,9 +13,11 @@ import logo from "@/assets/branding/logo.svg";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
 import employerSignuplogo from "@/assets/employer/employerSignup1.svg";
+import employerLoginSvg from "@/assets/employer/employerLoginSvg.svg";
 import arrow from "@/assets/skills/arrow.svg";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import CandidateProfileCard from "@/components/employer/CandidateProfileCard";
 
 // Types
 interface LoginFormData {
@@ -120,13 +122,30 @@ const EmployerLogin = () => {
       <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
         {/* Single SVG filling the entire left section */}
         <img
-          src={employerSignuplogo}
+          src={employerLoginSvg}
           alt="Employer Signup Background"
           className="absolute inset-0 h-full w-full object-cover"
         />
         {/* Logo overlay */}
         <div className="absolute top-8 left-8 z-20">
-          <img src={logo} alt="Logo" className="w-32" />
+          <img src={logo} alt="Logo" className="w-[160px]" />
+        </div>
+
+        {/* Heading text at the top */}
+        <div className="absolute inset-0 flex flex-col justify-center items-start max-w-[400px] mx-auto z-10 px-6 pb-[340px]">
+          <h1 className="text-[30px] font-ubuntu font-medium leading-[45px] tracking-[-0.6px] text-[#202326] mb-[-4px]">
+            Cut the Guesswork.
+          </h1>
+          <h2 className="text-[30px] font-ubuntu font-bold leading-[45px] tracking-[-0.6px] text-[#10b754]">
+            Discover Proven Talent
+            <br />
+            at Speed.
+          </h2>
+        </div>
+
+        {/* Candidate profile card in the center */}
+        <div className="absolute inset-0 flex items-center justify-center z-10 px-6">
+          <CandidateProfileCard />
         </div>
       </div>
 
