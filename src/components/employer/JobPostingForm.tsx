@@ -117,29 +117,35 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
   const [shouldFetchSkills, setShouldFetchSkills] = useState(
     !initialData?.isEditMode || initialData?.skills_required?.length === 0
   );
-  
+
   // Remember the last job description we used to fetch skills
   const lastJobDescriptionRef = useRef(formData.description);
 
   // Handle form data change - track when job description changes
   const handleFormDataChange = (updatedData: any) => {
     // If the description changes, set the flag to fetch skills
-    if ('description' in updatedData && updatedData.description !== formData.description) {
+    if (
+      "description" in updatedData &&
+      updatedData.description !== formData.description
+    ) {
       // Only if description actually changed meaningfully, not just whitespace or small edits
       const oldDescription = formData.description.trim();
       const newDescription = updatedData.description.trim();
-      
+
       // If description is significantly different, fetch new skills
-      if (newDescription !== oldDescription && 
-          (oldDescription.length === 0 || 
-           Math.abs(newDescription.length - oldDescription.length) > 50 ||
-           !newDescription.includes(oldDescription.substring(0, 100)))) {
-        
-        console.log("Job description changed significantly, will fetch new skills recommendations");
+      if (
+        newDescription !== oldDescription &&
+        (oldDescription.length === 0 ||
+          Math.abs(newDescription.length - oldDescription.length) > 50 ||
+          !newDescription.includes(oldDescription.substring(0, 100)))
+      ) {
+        console.log(
+          "Job description changed significantly, will fetch new skills recommendations"
+        );
         setShouldFetchSkills(true);
       }
     }
-    
+
     setFormData({ ...formData, ...updatedData });
   };
 
@@ -286,7 +292,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
   const TabNavigation = () => {
     const tabs = [
       { id: "basic", label: "Basic Info" },
-      { id: "skills", label: "Required Skills" },
+      { id: "skills", label: "Skills" },
       { id: "screening", label: "Applicant Questions" },
       { id: "preview", label: "Review & Save" },
     ];
@@ -497,7 +503,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                     </div>
 
                     {/* Fixed Navigation Buttons - Always visible at bottom */}
-                    <div className="bg-white border-t border-gray-200 py-4 px-8 flex justify-between">
+                    <div className="bg-white border-t border-gray-200 text-body2 py-4 px-8 flex justify-between">
                       {activeStep !== "basic" && (
                         <Button
                           type="button"

@@ -271,8 +271,8 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
 
   return (
     <div>
-      <h3 className="text-lg font-medium">Applicant questions</h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <h2 className="text-body2 mb-2">Applicant questions</h2>
+      <p className="text-[14px] font-dm-sans font-normal leading-6 tracking-[0.07px] text-gray-500 mb-4">
         We recommend adding 3 or more questions. Applicants must answer each
         question.
       </p>
@@ -293,9 +293,11 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
                   variant="outline"
                   size="sm"
                   disabled
-                  className="flex items-center opacity-60 bg-gray-100 "
+                  className="flex items-center opacity-60 bg-gray-100"
                 >
-                  <span className="w-4 h-4 mr-1 text-green-600">✓</span>
+                  <span className="w-4 h-4 mr-1 text-green-600 font-dm-sans text-[16px] font-normal leading-6 tracking-[0.08px]">
+                    ✓
+                  </span>
                   {template.label}
                 </Button>
               );
@@ -306,7 +308,7 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="flex items-center text-gray-500"
+                className="flex items-center text-gray-500 font-dm-sans text-[16px] font-normal leading-6 tracking-[0.08px]"
                 onClick={() => handleAddPredefinedQuestion(template.id)}
               >
                 <Plus className="w-4 h-4 mr-1" />
@@ -319,14 +321,16 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
           type="button"
           variant="outline"
           size="sm"
-          className={`flex items-center text-gray-500 ${
+          className={`flex items-center text-gray-500 font-dm-sans text-[16px] font-normal leading-6 tracking-[0.08px] ${
             customQuestionMode ? "bg-gray-100" : ""
           }`}
           onClick={toggleCustomQuestionMode}
           disabled={customQuestionMode}
         >
           {customQuestionMode ? (
-            <span className="w-4 h-4 mr-1 text-green-600">✓</span>
+            <span className="w-4 h-4 mr-1 text-green-600 font-dm-sans text-[16px] font-normal leading-6 tracking-[0.08px]">
+              ✓
+            </span>
           ) : (
             <Plus className="w-4 h-4 mr-1" />
           )}
@@ -336,7 +340,7 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
 
       {/* Custom Question Form */}
       {customQuestionMode && (
-        <div className="border border-gray-300 bg-[#fafbfe] mb-3 rounded-md overflow-hidden">
+        <div className="border border-gray-300 bg-[#fafbfe] text-body2 mb-3 rounded-md overflow-hidden">
           <div className="flex justify-between items-center p-4 border-b border-gray-200">
             <h3 className="font-medium">Write a custom screening question</h3>
             <Button
@@ -453,7 +457,7 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
                       is_eliminatory: !!checked,
                     })
                   }
-                  className="h-5 w-5 rounded border-2 mr-2"
+                  className="h-5 w-5 rounded border-2 mr-2 border-gray-600 data-[state=checked]:bg-gray-200"
                 />
                 <Label
                   htmlFor="must-have-qualification"
@@ -486,7 +490,7 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
       )}
 
       {/* Existing questions list */}
-      <div className="space-y-3 mb-4">
+      <div className="space-y-3 mb-4 text-body2">
         {screeningQuestions.map((question, index) => (
           <div
             key={index}
@@ -567,7 +571,7 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
                     id={`must-have-${index}`}
                     checked={question.is_eliminatory}
                     onCheckedChange={() => toggleQuestionEliminatory(index)}
-                    className="mr-2 h-5 w-5 border-2 rounded"
+                    className="mr-2 h-5 w-5 border-2 rounded border-gray-600 data-[state=checked]:bg-gray-200"
                   />
                   <Label
                     htmlFor={`must-have-${index}`}

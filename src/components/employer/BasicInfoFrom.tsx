@@ -1,7 +1,13 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface BasicInfoFormProps {
   formData: {
@@ -48,7 +54,9 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   };
 
   // Transform the formData.experience_level to the format needed for the Select component
-  const experienceLevelValue = mapExperienceLevelForSelect(formData.experience_level);
+  const experienceLevelValue = mapExperienceLevelForSelect(
+    formData.experience_level
+  );
 
   const handleFormDataChange = (field: string, value: string) => {
     // If it's the experience_level field, map the value to backend format before updating the formData
@@ -96,7 +104,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
             <SelectItem value="internship">Internship</SelectItem>
           </SelectContent>
         </Select>
-        
+
         <Select
           value={formData.work_place_type}
           onValueChange={(val) => handleFormDataChange("work_place_type", val)}

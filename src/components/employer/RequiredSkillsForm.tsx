@@ -9,17 +9,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
- 
+
 interface Skill {
   _id: string;
   name: string;
   description?: string;
   icon?: string;
 }
- 
+
 // Define a consistent type for importance levels
 type ImportanceLevel = "Very Important" | "Important" | "Good-To-Have";
- 
+
 interface SkillRecommendation {
   skill: Skill;
   importance: ImportanceLevel;
@@ -29,12 +29,14 @@ interface SkillRecommendation {
 // Define the API response structure - making it more flexible
 interface ApiResponse {
   success: boolean;
-  data: SkillRecommendation[] | { 
-    skills: SkillRecommendation[];
-    [key: string]: any; 
-  };
+  data:
+    | SkillRecommendation[]
+    | {
+        skills: SkillRecommendation[];
+        [key: string]: any;
+      };
 }
- 
+
 interface RequiredSkillsProps {
   selectedSkills: Array<{
     skill: Skill;
@@ -61,15 +63,15 @@ interface RequiredSkillsProps {
 const sortSkillsByImportance = (skills: SkillRecommendation[]) => {
   const importanceOrder = {
     "Very Important": 1,
-    "Important": 2,
-    "Good-To-Have": 3
+    Important: 2,
+    "Good-To-Have": 3,
   };
 
-  return [...skills].sort((a, b) => 
-    importanceOrder[a.importance] - importanceOrder[b.importance]
+  return [...skills].sort(
+    (a, b) => importanceOrder[a.importance] - importanceOrder[b.importance]
   );
 };
- 
+
 const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   selectedSkills,
   setSelectedSkills,
@@ -82,14 +84,18 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedSkillIndex, setSelectedSkillIndex] = useState<number | null>(null);
-  const [recommendedSkills, setRecommendedSkills] = useState<SkillRecommendation[]>([]);
+  const [selectedSkillIndex, setSelectedSkillIndex] = useState<number | null>(
+    null
+  );
+  const [recommendedSkills, setRecommendedSkills] = useState<
+    SkillRecommendation[]
+  >([]);
   const [reasonings, setReasonings] = useState<Record<string, string>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // To track if we're currently fetching
   const [isFetching, setIsFetching] = useState(false);
-  
+
   // API hooks
   const {
     data: searchResults,
@@ -99,15 +105,23 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
     skip: debouncedSearchTerm.length < 1,
   });
 
-  const [getSkillSuggestions, { isLoading }] = useGetEmployerSkillSuggestionsMutation();
- 
+  const [getSkillSuggestions, { isLoading }] =
+    useGetEmployerSkillSuggestionsMutation();
+
   // This is the key part: Only fetch when the parent component tells us to
   useEffect(() => {
     // Only fetch if the flag is true and we're not already fetching
-    if (shouldFetchRecommendations && !isFetching && jobDescription && jobDescription.trim() !== "") {
-      console.log("Fetching skill recommendations based on parent's instruction");
+    if (
+      shouldFetchRecommendations &&
+      !isFetching &&
+      jobDescription &&
+      jobDescription.trim() !== ""
+    ) {
+      console.log(
+        "Fetching skill recommendations based on parent's instruction"
+      );
       setIsFetching(true);
-      
+
       fetchAISkillRecommendations()
         .then(() => {
           // Let the parent know we're done
@@ -122,14 +136,14 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
         });
     }
   }, [shouldFetchRecommendations, jobDescription]);
- 
+
   // Populate initial skills from AI recommendations
   useEffect(() => {
     if (recommendedSkills.length > 0 && selectedSkills.length === 0) {
       populateInitialSkills();
     }
   }, [recommendedSkills]);
- 
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -139,13 +153,13 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
         setIsDropdownOpen(false);
       }
     };
- 
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
- 
+
   const fetchAISkillRecommendations = async () => {
     try {
       // Call the RTK Query mutation to get AI skill recommendations
@@ -153,32 +167,38 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
         jobTitle,
         jobDescription,
       }).unwrap();
- 
+
       console.log("API Response:", response); // Log the full response for debugging
 
       // Process the skills with their importance levels and reasoning
       if (response.success && response.data) {
         // The API returns data that might be in different formats
         let skillsData: SkillRecommendation[] = [];
-        
+
         // Case 1: response.data is the skills array directly
         if (Array.isArray(response.data)) {
           skillsData = response.data;
-        } 
+        }
         // Case 2: response.data has a skills property that is an array
-        else if ('skills' in response.data && Array.isArray((response.data as { skills: SkillRecommendation[] }).skills)) {
-          skillsData = (response.data as { skills: SkillRecommendation[] }).skills;
+        else if (
+          "skills" in response.data &&
+          Array.isArray(
+            (response.data as { skills: SkillRecommendation[] }).skills
+          )
+        ) {
+          skillsData = (response.data as { skills: SkillRecommendation[] })
+            .skills;
         }
         // Case 3: response.data is an object with other structure
         else {
           console.error("Unexpected response format:", response.data);
           return; // Exit early
         }
-        
+
         // Sort skills by importance before setting
         const sortedSkills = sortSkillsByImportance(skillsData);
         setRecommendedSkills(sortedSkills);
-        
+
         // Create a mapping of skill IDs to their reasoning
         const reasoningMap: Record<string, string> = {};
         skillsData.forEach((item: SkillRecommendation) => {
@@ -191,35 +211,35 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
       throw error;
     }
   };
- 
+
   const populateInitialSkills = () => {
     const initialSkills = recommendedSkills.map((rec) => ({
       skill: rec.skill,
       importance: rec.importance,
     }));
- 
+
     setSelectedSkills(initialSkills);
   };
- 
+
   const handleAddSkill = () => {
     const newSkill = {
       skill: { _id: "", name: "" },
       importance: "Important" as ImportanceLevel,
     };
- 
+
     setSelectedSkills([...selectedSkills, newSkill]);
     // Open dropdown for the newly added skill
     setSelectedSkillIndex(selectedSkills.length);
     setIsDropdownOpen(true);
   };
- 
+
   const handleSkillSelect = (index: number, skill: Skill) => {
     const newSkills = [...selectedSkills];
     newSkills[index] = { ...newSkills[index], skill };
     setSelectedSkills(newSkills);
     setIsDropdownOpen(false);
   };
- 
+
   const handleImportanceChange = (
     index: number,
     importance: ImportanceLevel
@@ -228,44 +248,44 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
     const mustHaveCount = selectedSkills.filter(
       (s, idx) => idx !== index && s.importance === "Very Important"
     ).length;
- 
+
     // If changing to Must-Have and already at limit, don't allow
     if (importance === "Very Important" && mustHaveCount >= maxMustHaveSkills) {
       alert(`You can only have ${maxMustHaveSkills} Very Important skills.`);
       return;
     }
- 
+
     const newSkills = [...selectedSkills];
     newSkills[index] = { ...newSkills[index], importance };
-    
+
     // Sort skills by importance after changing
     const sortedSkills = [...newSkills].sort((a, b) => {
       const importanceOrder = {
         "Very Important": 1,
-        "Important": 2,
-        "Good-To-Have": 3
+        Important: 2,
+        "Good-To-Have": 3,
       };
       return importanceOrder[a.importance] - importanceOrder[b.importance];
     });
-    
+
     setSelectedSkills(sortedSkills);
   };
- 
+
   const handleRemoveSkill = (index: number) => {
     const newSkills = [...selectedSkills];
     newSkills.splice(index, 1);
     setSelectedSkills(newSkills);
   };
- 
+
   const handleOpenSkillDropdown = (index: number) => {
     setSelectedSkillIndex(index);
     setIsDropdownOpen(true);
     setSearchTerm("");
   };
- 
+
   const renderSkillDropdown = () => {
     if (!isDropdownOpen || selectedSkillIndex === null) return null;
- 
+
     return (
       <div
         ref={dropdownRef}
@@ -286,7 +306,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
- 
+
         <div>
           {/* Show search results if there's a search term */}
           {debouncedSearchTerm ? (
@@ -313,11 +333,11 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                   </div>
                 ))
               ) : (
-                <div className="p-3 text-center text-gray-500">
+                <div className="p-3 text-center text-gray-500 text-body2">
                   No skills found matching "{debouncedSearchTerm}"
                 </div>
               )}
- 
+
               {/* Option to add custom skill */}
               <div
                 onClick={() =>
@@ -326,7 +346,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                     name: debouncedSearchTerm,
                   })
                 }
-                className="p-3 border-t border-gray-200 hover:bg-gray-100 cursor-pointer text-blue-600"
+                className="p-3 border-t border-gray-200 hover:bg-gray-100 cursor-pointer text-blue-600 text-body2"
               >
                 + Add custom skill "{debouncedSearchTerm}"
               </div>
@@ -335,36 +355,46 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
             // Show AI recommended skills when there's no search term
             <>
               <div className="p-2 bg-gray-50 border-b border-gray-200">
-                <h3 className="font-medium text-sm">AI Recommended Skills</h3>
-                <p className="text-xs text-gray-500">
+                <h3 className="font-medium text-sm font-dm-sans">
+                  AI Recommended Skills
+                </h3>
+                <p className="text-xs font-dm-sans text-gray-500">
                   Based on job description analysis
                 </p>
               </div>
- 
+
               {isLoading || isFetching ? (
-                <div className="p-3 text-center text-gray-500">
+                <div className="p-3 text-center text-gray-500 font-dm-sans">
                   Loading AI recommended skills...
                 </div>
               ) : recommendedSkills.length > 0 ? (
                 recommendedSkills.map((rec) => (
                   <div
                     key={rec.skill._id}
-                    onClick={() => handleSkillSelect(selectedSkillIndex, rec.skill)}
+                    onClick={() =>
+                      handleSkillSelect(selectedSkillIndex, rec.skill)
+                    }
                     className="p-3 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
                   >
                     <div className="flex items-center">
                       {rec.skill.icon && (
-                        <img src={rec.skill.icon} alt="" className="w-6 h-6 mr-2" />
+                        <img
+                          src={rec.skill.icon}
+                          alt=""
+                          className="w-6 h-6 mr-2"
+                        />
                       )}
-                      <span className="font-medium">{rec.skill.name}</span>
+                      <span className="text-body2">{rec.skill.name}</span>
                     </div>
-                    <span className={`px-2 py-1 text-xs rounded-full border `}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full border text-body2`}
+                    >
                       {rec.importance}
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="p-3 text-center text-gray-500">
+                <div className="p-3 text-center text-gray-500 font-dm-sans">
                   No AI recommendations available
                 </div>
               )}
@@ -374,31 +404,48 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
       </div>
     );
   };
- 
+
   return (
     <div>
       <h2 className="text-body2 mb-2">Skills</h2>
       <p className="text-[14px] font-dm-sans font-normal leading-6 tracking-[0.07px] text-gray-500 mb-2">
         A maximum of {maxMustHaveSkills} skills can be considered Very Important
       </p>
-      
+
       {(isLoading || isFetching) && (
-        <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md flex items-center">
-          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <div className="mb-4 p-3 bg-blue-50 text-blue-700 text-body2 rounded-md flex items-center">
+          <svg
+            className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-700"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
           </svg>
-          EmployAbility is analyzing your job description to recommend relevant skills...
-        </div>
-      )}
-     
-      {!isLoading && !isFetching && recommendedSkills.length > 0 && (
-        <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md">
-          EmployAbility has analyzed your job description and recommended {recommendedSkills.length} skills with appropriate importance levels.
+          EmployAbility is analyzing your job description to recommend relevant
+          skills...
         </div>
       )}
 
-      
+      {!isLoading && !isFetching && recommendedSkills.length > 0 && (
+        <div className="mb-4 p-3 bg-green-50 text-green-700 text-body2 rounded-md">
+          EmployAbility has analyzed your job description and recommended{" "}
+          {recommendedSkills.length} skills with appropriate importance levels.
+        </div>
+      )}
+
       <div className="relative">
         {/* Selected Skills List */}
         {selectedSkills.map((skillItem, index) => (
@@ -418,14 +465,16 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                     />
                   ) : (
                     <div className="w-6 h-6 mr-3 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-xs text-gray-500">{skillItem.skill.name?.substring(0, 1)}</span>
+                      <span className="text-xs text-gray-500">
+                        {skillItem.skill.name?.substring(0, 1)}
+                      </span>
                     </div>
                   )}
-                  <span className="text-gray-800 text-base font-medium">
+                  <span className="text-gray-800 text-body2">
                     {skillItem.skill.name || "Select a skill"}
                   </span>
                 </div>
-                
+
                 <svg
                   className="h-5 w-5 text-gray-400"
                   viewBox="0 0 20 20"
@@ -439,7 +488,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                 </svg>
               </div>
             </div>
- 
+
             {/* Importance selector - removed color gradient */}
             <div className="w-[450px]">
               <div className="relative">
@@ -451,7 +500,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                       e.target.value as ImportanceLevel
                     )
                   }
-                  className="w-full appearance-none bg-white p-4 border border-gray-200 rounded-md cursor-pointer text-base hover:border-gray-300 focus:outline-none"
+                  className="w-full appearance-none bg-white p-4 border border-gray-200 rounded-md cursor-pointer text-body2 hover:border-gray-300 focus:outline-none"
                 >
                   <option value="Very Important">Very Important</option>
                   <option value="Important">Important</option>
@@ -472,7 +521,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                 </div>
               </div>
             </div>
- 
+
             {/* Actions section */}
             <div className="flex items-center">
               {/* Reasoning tooltip */}
@@ -494,7 +543,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                   </Tooltip>
                 </TooltipProvider>
               )}
- 
+
               {/* Remove skill button */}
               <button
                 type="button"
@@ -507,9 +556,9 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
             </div>
           </div>
         ))}
- 
+
         {renderSkillDropdown()}
- 
+
         {/* Add Skill button */}
         <button
           type="button"
@@ -517,11 +566,13 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
           className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
         >
           <Plus size={20} className="mr-2" />
-          <span className="text-base">Add Skill</span>
+          <span className="text-[14px] font-dm-sans font-medium leading-5 tracking-[0.21px]">
+            Add Skill
+          </span>
         </button>
       </div>
     </div>
   );
 };
- 
+
 export default RequiredSkillsComponent;
