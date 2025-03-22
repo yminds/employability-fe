@@ -206,7 +206,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                   updateExperience(index, "start_date", value)
                 }
                 maxDate={new Date().toISOString().split("T")[0]}
-                placeholder="Select start date"
+                placeholder="dd/mm/yyyy"
                 className={
                   getError(`experience.${index}.start_date`)
                     ? "border-red-500"
@@ -231,7 +231,7 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                   }
                   minDate={exp.start_date}
                   maxDate={new Date().toISOString().split("T")[0]}
-                  placeholder="Select end date"
+                  placeholder="dd/mm/yyyy"
                   className={
                     getError(`experience.${index}.end_date`)
                       ? "border-red-500"
