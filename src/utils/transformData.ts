@@ -1,6 +1,3 @@
-import { RootState } from "@/store/store";
-import { useSelector } from "react-redux";
-
 export interface TransformedData {
   name: string;
   email: string;
@@ -12,7 +9,7 @@ export interface TransformedData {
     state: string;
     city: string;
   };
-  skills: any[];
+  // skills: any[];
   education: any[];
   certificates: any[];
   experience: any[];
@@ -38,7 +35,7 @@ export const transformFormDataForDB = (formData: any): TransformedData => {
       state: formData.basicInfo?.state || "",
       city: formData.basicInfo?.city || "",
     },
-    skills: [],
+    // skills: [],
     education: [],
     certificates: [],
     experience: [],
@@ -49,17 +46,17 @@ export const transformFormDataForDB = (formData: any): TransformedData => {
     is_basic_info: true,
   };
 
-  if (Array.isArray(formData.skills)) {
-    transformedData.skills = formData.skills.map((skill: any) => {
-      return {
-        skill_pool_id: skill.skill_Id || "",
-        self_rating: skill.rating || "",
-        level: skill.level || "",
-      };
-    });
-  } else {
-    console.error("Skill data is not an array:", formData.skills);
-  }
+  // if (Array.isArray(formData.skills)) {
+  //   transformedData.skills = formData.skills.map((skill: any) => {
+  //     return {
+  //       skill_pool_id: skill.skill_Id || "",
+  //       self_rating: skill.rating || "",
+  //       level: skill.level || "",
+  //     };
+  //   });
+  // } else {
+  //   console.error("Skill data is not an array:", formData.skills);
+  // }
 
   // Transform education data
   if (Array.isArray(formData.education)) {

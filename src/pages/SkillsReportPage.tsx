@@ -117,6 +117,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     // URL format: /skills-report/username/interviewId
     const username = pathParts[pathParts.length - 2]; // e.g. "someUser"
     const interviewId = pathParts[pathParts.length - 1]; // e.g. "abc123"
+    const type = pathParts[pathParts.length - 3]; // e.g. "skills-report"
     console.log({
       username,
       interviewId,
@@ -219,17 +220,17 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   return (
     <ReportContent
       reportData={reportData}
-      userName={profile?.name || ""} // or profile?.username, depending on your API
+      userName={profile?.name || username || ""} // Use username from URL if profile name is not available
       handleBackToSkillsPage={handleBackToSkillsPage}
       goal_name={goal_name}
       skill_icon={skillIcon}
       userImg={userImg || profile.profile_image}
       sharedReport={isSharedReport}
-      skillId={skill.skill_pool_id._id}
-      userSkillId={skill._id}
+      skillId={skill?.skill_pool_id._id}
+      userSkillId={skill?._id}
       level={level}
       skill={skill}
-      publicProfileName={profile?.username || ""}
+      publicProfileName={profile?.username || username || ""} // Use username from URL if profile username is not available
       isPublic={isPublic}
     />
   );

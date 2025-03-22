@@ -9,15 +9,15 @@ import useScrollToTop from "./hooks/useScrollTop.ts";
 import type { Role } from "./models/Role";
 
 // Components
-import NotFound from "@/components/app/NotFound";
-import ProtectedRoute from "./features/authentication/ProtectedRoute.tsx";
-import JobDetailsPage from "./components/employer/JobDetailsDialog.tsx";
-import CompanyForm from "./components/employer/CompanyForm.tsx";
-import CreateJobPage from "./pages/CreateJobPage.tsx";
-import EmployerJobsPage from "./pages/EmployerJobsPage.tsx";
-import EmployerCandidatesPage from "./pages/EmployerCandidatesPages.tsx";
-import JobListingPage from "./components/employer/JobListingPage.tsx";
-import JobListingContainer from "./components/employer/JobListingContainer.tsx";
+const NotFound = lazy(() => import("@/components/app/NotFound"))
+const ProtectedRoute = lazy(() => import("./features/authentication/ProtectedRoute.tsx"))
+const JobDetailsPage = lazy(() => import("./components/employer/JobDetailsDialog.tsx"))
+const CompanyForm = lazy(() => import("./components/employer/CompanyForm.tsx"))
+const CreateJobPage = lazy(() => import("./pages/CreateJobPage.tsx"))
+const EmployerJobsPage = lazy(() => import("./pages/EmployerJobsPage.tsx"))
+const EmployerCandidatesPage = lazy(() => import("./pages/EmployerCandidatesPages.tsx"))
+const JobListingPage = lazy(() => import("./components/employer/JobListingPage.tsx"))
+const JobListingContainer = lazy(() => import("./components/employer/JobListingContainer.tsx"))
 import EditJobPage from "./pages/EditJobPage.tsx";
 import InterviewInvitationHandler from "./components/employer/InterviewInvitationHandler.tsx";
 
@@ -47,9 +47,6 @@ const Canidates = lazy(() => import("./pages/Canidates.tsx"));
 const Candidate = lazy(() => import("./pages/Candidate.tsx"));
 const UserPublicProfilePage = lazy(
   () => import("./pages/UserPublicProfilePage.tsx")
-);
-const InterviewsLisingPage = lazy(
-  () => import("./pages/InterviewsListingPage.tsx")
 );
 const MockInterviewsPage = lazy(
   () => import("./pages/MockInterviews.tsx")
@@ -241,10 +238,6 @@ export const routes: RouteConfig[] = [
     component: <ReportPage isSharedReport={true} />,
   },
   {
-    route: "/invites",
-    component: <InterviewsLisingPage />,
-  },
-  {
     route: "/interviews",
     component: <InterviewsPage />,
   },
@@ -255,7 +248,11 @@ export const routes: RouteConfig[] = [
   {
     route: "/skill/report/:id/:id",
     component: <MockReportPage isSharedReport={false} />,
-  },  
+  },
+  {
+    route: "/skill-report/:id/:id/:id",
+    component: <MockReportPage isSharedReport={true} />,
+  },   
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {

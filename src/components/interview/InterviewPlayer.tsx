@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import ReactPlayer from "react-player";
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader } from "lucide-react";
+import { flushSync } from "react-dom";
 
 interface InterviewPlayerProps {
   urls: string[];
@@ -55,12 +56,14 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
     }
   }, [currentChunk, urls, nextChunkPreloaded]);
 
-  const handleProgress = useCallback((state: { played: number; playedSeconds: number }) => {
+  const handleProgress = (state: { played: number; playedSeconds: number }) => {
     if (seeking) return;
 
     const totalDuration = urls.length * CHUNK_DURATION;
     const currentProgress = Math.floor(((currentChunk * CHUNK_DURATION + state.playedSeconds) / totalDuration) * 100);
     setProgress(currentProgress);
+    console.log("currentProgress", currentProgress);
+    
     setCurrentTime(formatTime(currentChunk * CHUNK_DURATION + Math.floor(state.playedSeconds)));
 
     // Start preloading when we're 5 seconds away from the end
@@ -74,7 +77,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
       setCurrentChunk((prev) => prev + 1);
       setNextChunkPreloaded(false);
     }
-  }, []);
+  }
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -130,34 +133,39 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
 
   // Common end interaction handler for both mouse and touch
   const handleTimelineEnd = async () => {
-    if (!isDragging) return;
-
     setIsDragging(false);
     const totalDuration = urls.length * CHUNK_DURATION;
     const newTime = Math.floor((tempProgress / 100) * totalDuration);
     const chunkIndex = Math.floor(newTime / CHUNK_DURATION);
     const progressWithinChunk = Math.floor(newTime % CHUNK_DURATION);
-
+  
     setIsLoading(true);
     setProgress(tempProgress);
-    setCurrentTime(formatTime(newTime));
-
+    console.log("tempProgress", tempProgress);
+    
+      
+    setTimeout(() => {
+      setCurrentTime(formatTime(newTime));
+    }, 500);
+  
     if (playerRef.current) {
       const player = playerRef.current.getInternalPlayer();
       if (player) {
         try {
           player.pause();
-          // player.src = urls[chunkIndex];
           setSeeking(true);
-          setCurrentChunk(chunkIndex);
-
+          flushSync(() => {
+            setCurrentChunk(chunkIndex);
+          }
+          );
+  
           await new Promise((resolve) => {
             player.addEventListener("loadedmetadata", resolve, { once: true });
           });
-
+  
           setNextChunkPreloaded(false);
           setUpdatedProgression(progressWithinChunk);
-
+  
           if (chunkIndex < urls.length - 1) {
             preloadNextChunk();
           }
@@ -169,7 +177,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
       }
     }
   };
-
+  
   // Volume control touch events
   const handleVolumeTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
     e.preventDefault(); // Prevent page scrolling
@@ -280,12 +288,14 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
 
   useEffect(() => {
     setProgress(Math.floor((currentChunk / urls.length) * 100));
+    console.log("inside useEffect", Math.floor((currentChunk / urls.length) * 100));
+    
     setDuration(formatTime(urls.length * CHUNK_DURATION));
   }, [currentChunk, urls.length]);
 
-  console.log("--------------------------------------------------");
-  console.log("rendered InterviewPlayer");
-  console.log("--------------------------------------------------");
+  // console.log("--------------------------------------------------");
+  // console.log("progress" ,progress);
+  // console.log("--------------------------------------------------");
 
   return (
     <div ref={containerRef} className="relative w-full h-full">
@@ -335,17 +345,17 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-4 z-50">
+      <div className="absolute bottom-0 left-0 right-0 bg-black/50 rounded-sm p-4 sm:p-2 z-50">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className="text-white hover:text-green-500 transition-colors"
             disabled={isLoading}
           >
-            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+            {isPlaying ? <Pause className="w-6 h-6 sm:w-4 sm-h-4" /> : <Play className="w-6 h-6 sm:w-4 sm:4" />}
           </button>
 
-          <div className="flex-1">
+          <div className="flex-1 -mt-1">
             <input
               ref={timelineRef}
               type="range"
@@ -376,10 +386,10 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
               className="text-white hover:text-green-500 transition-colors"
               disabled={isLoading}
             >
-              {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+              {isMuted ? <VolumeX className="w-6 h-6 sm:w-4 sm-h-4" /> : <Volume2 className="w-6 h-6 sm:w-4 sm-h-4" />}
             </button>
 
-            <div className="w-20">
+            <div className="w-20 -mt-1 sm:hidden">
               <input
                 ref={volumeSliderRef}
                 type="range"
@@ -411,7 +421,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
             className="text-white hover:text-green-500 transition-colors"
             disabled={isLoading}
           >
-            {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+            {isFullscreen ? <Minimize className="w-6 h-6 sm:w-4 sm-h-4" /> : <Maximize className="w-6 h-6 sm:w-4 sm-h-4" />}
           </button>
         </div>
       </div>

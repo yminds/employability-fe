@@ -1,11 +1,13 @@
-import { useState, useEffect, FormEvent } from "react";
+"use client";
+
+import { useState, useEffect, type FormEvent } from "react";
 import { useLoginMutation, useRegisterUserMutation } from "@/api/authApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import User from "@/assets/sign-up/user.png";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import SocialLogin from "@/features/authentication/SocialAuth";
 
 import logo from "@/assets/branding/logo.svg";
@@ -16,7 +18,8 @@ import { Button } from "@/components/ui/button";
 interface SignupData {
   email: string;
   password: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: any;
 }
 
@@ -28,24 +31,21 @@ const SignupForm = () => {
   const [password, setPassword] = useState<string>("");
   const [login] = useLoginMutation();
   const [signup] = useRegisterUserMutation();
-  const [name, setName] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleCustomSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
-    if (!name.trim()) {
-      setError("Name is required!");
-      setIsLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match!");
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("First name and last name are required!");
       setIsLoading(false);
       return;
     }
@@ -53,7 +53,8 @@ const SignupForm = () => {
     const signupData: SignupData = {
       email,
       password,
-      name: name.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       role: urlRole,
     };
     try {
@@ -132,6 +133,15 @@ const SignupForm = () => {
     }
   }, [error]);
 
+  // Add toggle password visibility function
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
     <section className="flex h-screen w-screen bg-white relative dark:bg-gray-800">
       {/* Left Section */}
@@ -160,7 +170,11 @@ const SignupForm = () => {
               onClick={() => navigate("/login")}
               className="d-block hover:text-green-600 text-black text-sm flex items-center"
             >
-              <img className="w-4 h-4 mr-2" src={arrow} alt="Back Arrow" />{" "}
+              <img
+                className="w-4 h-4 mr-2"
+                src={arrow || "/placeholder.svg"}
+                alt="Back Arrow"
+              />{" "}
               <span>Back</span>
             </button>
           </div>
@@ -194,20 +208,32 @@ const SignupForm = () => {
               </Alert>
             )}
 
-            <div className="relative">
-              <input
-                type="text"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-              <img
-                src={User}
-                alt="User Icon"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-              />
+            <div className="flex gap-4">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+                <img
+                  src={User || "/placeholder.svg"}
+                  alt="User Icon"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                />
+              </div>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
             <div className="relative">
@@ -220,7 +246,7 @@ const SignupForm = () => {
                 required
               />
               <img
-                src={Mail}
+                src={Mail || "/placeholder.svg"}
                 alt="Email Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
@@ -228,7 +254,7 @@ const SignupForm = () => {
 
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                 placeholder="Password"
                 value={password}
@@ -236,15 +262,26 @@ const SignupForm = () => {
                 required
               />
               <img
-                src={Password}
+                src={Password || "/placeholder.svg"}
                 alt="Password Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <Eye className="w-5 h-5 text-gray-500" />
+                )}
+              </button>
             </div>
 
             <div className="relative">
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                 placeholder="Confirm Password"
                 value={confirmPassword}
@@ -252,10 +289,21 @@ const SignupForm = () => {
                 required
               />
               <img
-                src={Password}
+                src={Password || "/placeholder.svg"}
                 alt="Password Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
+              <button
+                type="button"
+                onClick={toggleConfirmPasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <Eye className="w-5 h-5 text-gray-500" />
+                )}
+              </button>
             </div>
 
             {/* Submit Button */}

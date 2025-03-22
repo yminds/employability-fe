@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { s3Upload } from "@/utils/s3Service";
 import plusIcon from "@/assets/profile/plusicon.svg";
 import { useSelector } from "react-redux";
+import { DatePicker } from "../ui/date-picker";
 
 interface Certification {
   _id?: string;
@@ -220,18 +221,18 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
               <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                 Issue Date <span className="text-red-500">*</span>
               </Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={formatDateForInput(cert.issue_date)}
-                onChange={(e) =>
-                  updateCertification(index, "issue_date", e.target.value)
+                onChange={(value) =>
+                  updateCertification(index, "issue_date", value)
                 }
-                max={new Date().toISOString().split("T")[0]}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                maxDate={new Date().toISOString().split("T")[0]}
+                placeholder="Select issue date"
+                className={
                   getError(`certifications.${index}.issue_date`)
                     ? "border-red-500"
                     : ""
-                }`}
+                }
               />
               {getError(`certifications.${index}.issue_date`) && (
                 <p className="text-red-500 text-xs mt-1">
@@ -244,18 +245,18 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
               <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                 Expiration Date
               </Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={formatDateForInput(cert.expiration_date || "")}
-                onChange={(e) =>
-                  updateCertification(index, "expiration_date", e.target.value)
+                onChange={(value) =>
+                  updateCertification(index, "expiration_date", value)
                 }
-                min={formatDateForInput(cert.issue_date)}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                minDate={formatDateForInput(cert.issue_date)}
+                placeholder="Select expiration date"
+                className={
                   getError(`certifications.${index}.expiration_date`)
                     ? "border-red-500"
                     : ""
-                }`}
+                }
               />
               {getError(`certifications.${index}.expiration_date`) && (
                 <p className="text-red-500 text-xs mt-1">

@@ -26,7 +26,7 @@ import { parsedTransformData } from "@/utils/parsedTransformData";
 import { transformFormDataForDB } from "@/utils/transformData";
 import type { ProfileFormData } from "@/features/profile/types";
 import {
-  updateSkillsStatus,
+  // updateSkillsStatus,
   updateUserProfile,
 } from "@/features/authentication/authSlice";
 import { s3Delete } from "@/utils/s3Service";
@@ -48,7 +48,7 @@ export const useProfileForm = (
     !user.has_certificates
   );
   const [errors, setErrors] = useState({});
-  const [parsedSkills, setParsedSkills] = useState([]);
+  // const [parsedSkills, setParsedSkills] = useState([]);
   const [isImageDeleted, setIsImageDeleted] = useState(false);
   const [newlyUploadedImage, setNewlyUploadedImage] = useState<string | null>(
     null
@@ -74,9 +74,9 @@ export const useProfileForm = (
   const [addCertification] = useAddCertificationMutation();
   const [updateCertification] = useUpdateCertificationMutation();
   const [createUserSkills] = useCreateUserSkillsMutation();
-  const [getUserSkills, { isLoading: skillsLoading }] =
-    useGetUserSkillsMutation();
-  const [getVerifySkills] = useVerifyMultipleSkillsMutation();
+  // const [getUserSkills, { isLoading: skillsLoading }] =
+  //   useGetUserSkillsMutation();
+  // const [getVerifySkills] = useVerifyMultipleSkillsMutation();
 
   const [parsedBasicData, setParsedBasicData] = useState(() => {
     setIsBasicInfoLoading(true);
@@ -94,7 +94,7 @@ export const useProfileForm = (
             country: user?.address?.country || "",
             state: user?.address?.state || "",
             city: user?.address?.city || "",
-            profile_image: user.profile_image || "",
+            profile_image: user?.profile_image || "",
           },
           socialProfiles: {
             gitHub: user.github || "",
@@ -115,7 +115,7 @@ export const useProfileForm = (
           country: data?.contact?.location?.countryCode || "",
           state: data?.contact?.location?.stateCode || "",
           city: data?.contact?.location?.city || "",
-          profile_image: data?.profile_image || "",
+          profile_image: user?.profile_image || "",
         },
         socialProfiles: {
           gitHub: data?.contact?.github || "",
@@ -149,7 +149,7 @@ export const useProfileForm = (
   useEffect(() => {
     const initializeData = async () => {
       let transformedData = {
-        skills: [],
+        // skills: [],
         experience: [],
         education: [],
         certifications: [],
@@ -157,14 +157,14 @@ export const useProfileForm = (
 
       if (user.parsedResume) {
         try {
-          const result = await getVerifySkills(
-            user.parsedResume.skills
-          ).unwrap();
+          // const result = await getVerifySkills(
+          //   user.parsedResume.skills
+          // ).unwrap();
           transformedData = await parsedTransformData(
-            user.parsedResume,
-            result.data
+            user.parsedResume
+            // result.data
           );
-          setParsedSkills(transformedData.skills);
+          // setParsedSkills(transformedData.skills);
         } catch (error) {
           console.error("Error transforming data:", error);
         }
@@ -230,59 +230,59 @@ export const useProfileForm = (
     initializeData();
   }, [userDetails]);
 
-  useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        if (user._id && goalId) {
-          const response = await getUserSkills({
-            userId: user._id,
-            goalId,
-          }).unwrap();
-          if (response?.data.optional && response.data.optional.length > 0) {
-            setFormData((prevData: any) => ({
-              ...prevData,
-              skills: response.data.optional.map((skill) => ({
-                skill_Id: skill.skill_pool_id._id,
-                name: skill.skill_pool_id.name,
-                rating: skill.self_rating,
-                level: skill.level,
-                visibility: "All users",
-              })),
-            }));
-          } else if (parsedSkills.length > 0) {
-            const updatedSkills = parsedSkills.filter(
-              (parsedSkill: any) =>
-                !response.data.all.some(
-                  (skill: any) =>
-                    skill.skill_pool_id._id === parsedSkill.skill_Id
-                )
-            );
-            setFormData((prevData: any) => ({
-              ...prevData,
-              skills: updatedSkills,
-            }));
-          } else {
-            setFormData((prevData: any) => ({
-              ...prevData,
-              skills: [
-                {
-                  skill_Id: "",
-                  name: "",
-                  rating: 0,
-                  level: "1",
-                  visibility: "All users",
-                },
-              ],
-            }));
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching skills:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchSkills = async () => {
+  //     try {
+  //       if (user._id && goalId) {
+  //         const response = await getUserSkills({
+  //           userId: user._id,
+  //           goalId,
+  //         }).unwrap();
+  //         if (response?.data.optional && response.data.optional.length > 0) {
+  //           setFormData((prevData: any) => ({
+  //             ...prevData,
+  //             skills: response.data.optional.map((skill) => ({
+  //               skill_Id: skill.skill_pool_id._id,
+  //               name: skill.skill_pool_id.name,
+  //               rating: skill.self_rating,
+  //               level: skill.level,
+  //               visibility: "All users",
+  //             })),
+  //           }));
+  //         } else if (parsedSkills.length > 0) {
+  //           const updatedSkills = parsedSkills.filter(
+  //             (parsedSkill: any) =>
+  //               !response.data.all.some(
+  //                 (skill: any) =>
+  //                   skill.skill_pool_id._id === parsedSkill.skill_Id
+  //               )
+  //           );
+  //           setFormData((prevData: any) => ({
+  //             ...prevData,
+  //             skills: updatedSkills,
+  //           }));
+  //         } else {
+  //           setFormData((prevData: any) => ({
+  //             ...prevData,
+  //             skills: [
+  //               {
+  //                 skill_Id: "",
+  //                 name: "",
+  //                 rating: 0,
+  //                 level: "1",
+  //                 visibility: "All users",
+  //               },
+  //             ],
+  //           }));
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching skills:", error);
+  //     }
+  //   };
 
-    fetchSkills();
-  }, [parsedSkills]);
+  //   fetchSkills();
+  // }, [parsedSkills]);
 
   const updateFormData = useCallback(
     (
@@ -322,9 +322,9 @@ export const useProfileForm = (
         case "basic":
           sectionErrors = validateBasicInfo(formData.basicInfo || {});
           break;
-        case "skills":
-          // Add skills validation if needed
-          break;
+        // case "skills":
+        //   // Add skills validation if needed
+        //   break;
         case "experience":
           sectionErrors = validateExperience(formData.experience || []);
           break;
@@ -357,11 +357,7 @@ export const useProfileForm = (
       const deletedItem = formData[section][index];
 
       try {
-        if (section === "skills") {
-          if (deletedItem.transformedSkill) {
-            await updateUserParsedResume(section, updatedResume);
-          }
-        } else if (!deletedItem._id) {
+        if (!deletedItem._id) {
           await updateUserParsedResume(section, updatedResume);
         }
       } catch (error) {
@@ -416,7 +412,7 @@ export const useProfileForm = (
               experience,
               education,
               certificates,
-              skills,
+              // skills,
               ...updatedUserData
             } = transformedData;
 
@@ -463,23 +459,23 @@ export const useProfileForm = (
               throw error;
             }
             break;
-          case "skills":
-            if (transformedData.skills && transformedData.skills.length > 0) {
-              const skillsPayload = {
-                user_id: user._id,
-                skills: transformedData.skills,
-                goal_id: goalId,
-              };
-              await createUserSkills(skillsPayload).unwrap();
-              dispatch(updateSkillsStatus("updated"));
-              if (user.parsedResume !== null) {
-                await updateUser({
-                  userId: user._id,
-                  data: { parsedResume: { ...user.parsedResume, skills: [] } },
-                });
-              }
-            }
-            break;
+          // case "skills":
+          //   if (transformedData.skills && transformedData.skills.length > 0) {
+          //     const skillsPayload = {
+          //       user_id: user._id,
+          //       skills: transformedData.skills,
+          //       goal_id: goalId,
+          //     };
+          //     await createUserSkills(skillsPayload).unwrap();
+          //     dispatch(updateSkillsStatus("updated"));
+          //     if (user.parsedResume !== null) {
+          //       await updateUser({
+          //         userId: user._id,
+          //         data: { parsedResume: { ...user.parsedResume, skills: [] } },
+          //       });
+          //     }
+          //   }
+          //   break;
           case "experience":
             if (isFresher) {
               transformedData.experience = [];
@@ -707,27 +703,27 @@ export const useProfileForm = (
 
         console.log(`${section} section saved successfully`);
 
-        if (section === "basic") {
-          if (!goalId) {
-            setActiveTab("experience");
-          } else {
-            setActiveTab("skills");
-          }
+        // if (section === "basic") {
+        //   if (!goalId) {
+        //     setActiveTab("experience");
+        //   } else {
+        //     setActiveTab("skills");
+        //   }
+        // } else {
+        const sections = [
+          "basic",
+          // "skills",
+          "experience",
+          "education",
+          "certification",
+        ];
+        const currentIndex = sections.indexOf(activeTab);
+        if (currentIndex < 3) {
+          setActiveTab(sections[currentIndex + 1]);
         } else {
-          const sections = [
-            "basic",
-            "skills",
-            "experience",
-            "education",
-            "certification",
-          ];
-          const currentIndex = sections.indexOf(activeTab);
-          if (currentIndex < 4) {
-            setActiveTab(sections[currentIndex + 1]);
-          } else {
-            onClose();
-          }
+          onClose();
         }
+        // }
       } catch (err) {
         console.error(`Error saving ${section} section:`, err);
         if (err instanceof Error) {
@@ -770,7 +766,7 @@ export const useProfileForm = (
     hasCertifications,
     setHasCertifications,
     errors,
-    parsedSkills,
+    // parsedSkills,
     userDetails,
     parsedBasicData,
     updateFormData,
@@ -783,7 +779,7 @@ export const useProfileForm = (
     setNewlyUploadedImage,
     profileStatus,
     isLoading,
-    skillsLoading,
+    // skillsLoading,
     isBasicInfoLoading,
     userLoading,
   };

@@ -27,6 +27,12 @@ interface LatestInterviewStatus {
   isCompleted: boolean;
 }
 
+interface Goals {
+  _id: string;
+  name: string;
+  experience: string;
+}
+
 export interface Skill {
   _id: string;
   skill_pool_id: SkillPoolId;
@@ -41,16 +47,7 @@ interface SkillListProps {
   goalId: string | null;
   onSkillsUpdate: (isUpdated: boolean) => void;
   isSkillsUpdated?: boolean;
-  goals:
-    | {
-        message: string;
-        data: Array<{
-          experience: string | undefined;
-          _id: string;
-          name: string;
-        }>;
-      }
-    | undefined;
+  goals: Goals[];
   selectedGoalName: string;
 }
 
@@ -358,6 +355,14 @@ const SkillList: React.FC<SkillListProps> = ({
             <h2 className="text-base font-medium text-black font-['Ubuntu'] leading-[22px]">
               Skills ({skillsData?.data?.all.length || 0})
             </h2>
+            {(skillsData?.data?.all?.length ?? 0) > 0 && (
+              <span
+                onClick={() => navigate("/skills")}
+                className="text-body2 underline cursor-pointer"
+              >
+                Manage Skills
+              </span>
+            )}
           </div>
         )}
 

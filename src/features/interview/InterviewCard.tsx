@@ -55,8 +55,8 @@ interface InterviewCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   formatDate?: (dateString: string) => string;
-  thread_id?: string
-  user_id?: string|undefined
+  thread_id?: string;
+  user_id?: string | undefined;
 }
 
 const InterviewCard: React.FC<InterviewCardProps> = ({
@@ -144,6 +144,9 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       case "Mock":
         path = `/skill/report/Mock/${id}`;
         break;
+      case "Project":
+        path = `/skill/report/Project/${id}`;
+        break;
       default:
         path = `/skill/report/${id}`;
     }
@@ -152,7 +155,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       state: {
         best_interview: id,
         fromInterviewCard: true,
-        thread_id:thread_id
+        thread_id: thread_id,
       },
     });
   };
@@ -163,9 +166,13 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
     switch (type) {
       case "Job":
         path = `/skill/report/Job/${interviewId}`;
+        console.log(thread_id, "thread_id");
         break;
       case "Mock":
         path = `/skill/report/Mock/${interviewId}`;
+        break;
+      case "Project":
+        path = `/skill/report/Project/${interviewId}`;
         break;
       default:
         path = `/skill/report/${interviewId}`;
@@ -175,7 +182,6 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       state: {
         best_interview: interviewId,
         fromHistoryCard: true,
-        thread_id:thread_id
       },
     });
   };
@@ -196,6 +202,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
         date: createdAt || new Date().toISOString(),
         verifiedRatingAttachment: rating,
         interviewId: id,
+        type: interviewType,
       };
 
       if (hasExistingInterview) {
@@ -259,7 +266,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
             onClick={() => handleViewReport(interviewType)}
           >
             <img
-              src={thumbnail || "/placeholder.svg?height=128&width=207"}
+              src={thumbnail || "/placeholder.svg?height=207&width=135"}
               alt="Mock Interview Session"
               className="w-full h-full object-cover"
             />

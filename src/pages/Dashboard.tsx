@@ -6,7 +6,7 @@ import SkillList from "@/components/skills/skillslist";
 import TryThingsSection from "@/features/dashboard/TryThingsSection";
 import MyActivityCard from "@/features/dashboard/MyActivity";
 import ProjectList from "@/components/projects/ProjectList";
-import InterviewList from "@/features/dashboard/InterviewList";
+import InterviewList from "@/features/dashboard/InterviewInvitationsList";
 import { useGetUserDetailsQuery } from "@/api/userApiSlice";
 import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
@@ -23,6 +23,7 @@ import logo from "@/assets/skills/e-Logo.svg";
 import CircularProgress from "@/components/ui/circular-progress-bar";
 import { useNavigate } from "react-router-dom";
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
+import { useGetInvitesByUserIdQuery } from "@/api/interviewApiSlice";
 
 // Skeleton Components
 const SkillCardSkeleton = () => (
@@ -147,11 +148,17 @@ const Dashboard: React.FC<Props> = () => {
   const [getUserSkills, { data: skillsData, isLoading: isSkillsLoading }] =
     useGetUserSkillsMutation();
 
-  const isInitialLoading = isGoalsLoading || isUserDetailsLoading;
-  const isContentLoading =
-    isGoalsFetching || isProjectsLoading || isSkillsLoading;
+  const { data: invitesData, isLoading: isInvitesLoading, error: invitesError } = useGetInvitesByUserIdQuery(user_id);
 
+  // Define hasGoals first
   const hasGoals = goalsData?.data && goalsData.data.length > 0;
+  
+  // Unified loading state that covers all data fetching operations
+  const isInitialLoading = isGoalsLoading || isUserDetailsLoading;
+  const isAnyDataNull = !goalsData || (hasGoals && (!userProjects || !skillsData));
+  const isContentLoading =
+    isGoalsFetching || isProjectsLoading || isSkillsLoading || isInvitesLoading || isAnyDataNull;
+
   const is_Email_Verified = userDetails?.data?.is_email_verified;
 
   // Calculate project percentage based on mandatory skills usage
@@ -301,12 +308,18 @@ const Dashboard: React.FC<Props> = () => {
     <main className="h-screen w-full overflow-hidden font-ubuntu">
       <div className="h-full flex flex-col bg-[#F5F5F5]">
         <div className="flex-1 p-[55px] min-h-0">
-          {hasGoals ? (
+          {isInitialLoading ? (
+            // Initial loading state for the entire dashboard
+            <div className="h-full flex flex-col justify-center items-center">
+              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+            </div>
+          ) : hasGoals ? (
             <div className="h-full flex flex-col">
               {/* Header */}
               <header className="flex-none mb-6">
-                <h1 className="text-gray-600 text-h1 flex items-center gap-3">
-                  Welcome Back, {user_name}
+                <h1 className="text-[#414447] text-h1 flex items-center gap-3">
+                  Hey, {user_name}
                   <span className="wave">
                     <img
                       src={emojiWavingImg || "/placeholder.svg"}
@@ -355,6 +368,29 @@ const Dashboard: React.FC<Props> = () => {
                           )}
                         </div>
 
+                        {/* Interview List */}
+                        {isContentLoading ? (
+                          <SkillListSkeleton />
+                        ) : (
+                          // Only show interview list if there are invites and no error
+                          invitesData?.data && Array.isArray(invitesData.data) && invitesData.data.length > 0 && !invitesError && (
+                            <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                              <InterviewList 
+                                isDashboard={true} 
+                                invites={invitesData?.data}
+                                onAccept={(id) => {
+                                  console.log("Accept interview", id);
+                                  // Add your acceptance logic here
+                                }}
+                                onDecline={(id) => {
+                                  console.log("Decline interview", id);
+                                  // Add your decline logic here
+                                }}
+                              />
+                            </section>
+                          )
+                        )}
+
                         {/* Try Things Section */}
                         {isContentLoading ? (
                           <SkillCardSkeleton />
@@ -372,7 +408,10 @@ const Dashboard: React.FC<Props> = () => {
                               goalId={currentGoal?._id || null}
                               onSkillsUpdate={() => fetchSkills()}
                               isSkillsUpdated={false}
-                              goals={goalsData}
+                              goals={goalsData?.data.map(goal => ({
+                                ...goal,
+                                experience: goal.experience || ""
+                              })) || []}
                               selectedGoalName={currentGoal?.name || ""}
                             />
                           )}
@@ -390,15 +429,6 @@ const Dashboard: React.FC<Props> = () => {
                               onOpenUploadModal={() => {}}
                               onOpenDeleteModal={() => {}}
                             />
-                          )}
-                        </section>
-
-                        {/* Interview List */}
-                        <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                          {isContentLoading ? (
-                            <SkillListSkeleton />
-                          ) : (
-                            <InterviewList isDashboard={true} />
                           )}
                         </section>
 

@@ -187,6 +187,7 @@ const MentorContainer: React.FC<MentorContainerProps> = ({
     } else {
       console.log("Topic inside handleStartQuiz:", topic);
       setIsQuizOpen(true);
+      setCanTakeFinalQuiz(false);
       setSelectedQuizTopic(topic);
     }
   };

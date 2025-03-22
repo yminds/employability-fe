@@ -8,13 +8,17 @@ import InterviewList from "./InterviewList";
 import arrow from "@/assets/skills/arrow.svg";
 import InterviewInvites from "./InterviewInvites";
 import GoalDialog from "@/components/skills/setGoalDialog";
+import InterviewInvitationsList from "@/features/dashboard/InterviewInvitationsList";
+import { useGetInvitesByUserIdQuery } from "@/api/interviewApiSlice";
 
 const InterviewContainer: React.FC = () => {
   const navigate = useNavigate();
   const goals = useSelector((state: RootState) => state.auth.user?.goals);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-
+  const user_id = useSelector((state: RootState) => state.auth.user?._id);
+  const { data: invitesData, isLoading: isInvitesLoading } = useGetInvitesByUserIdQuery(user_id);
+  console.log("invitesData", invitesData);
   useEffect(() => {
     if (goals && goals?.length === 0) {
       setIsGoalModalOpen(true);
@@ -72,8 +76,8 @@ const InterviewContainer: React.FC = () => {
           </div>
           {/* Right Section */}
           <div className="flex-[2.5] w-full space-y-4 sm:my-0">
-            <div className="flex flex-col gap-6">
-              <InterviewInvites />
+            <div className="flex flex-col gap-6 bg-white rounded-lg p-4">
+              <InterviewInvitationsList invites={invitesData?.data} />
             </div>
           </div>
         </div>

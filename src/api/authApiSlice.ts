@@ -3,7 +3,8 @@ import { apiSlice } from "./apiSlice";
 interface RegisterUserPayload {
   email: string;
   password: string;
-  name: string;
+  firstName: string;
+  lastName: string;
 }
 
 interface SocialAuthPayload {

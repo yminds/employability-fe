@@ -14,7 +14,7 @@ import arrow from "@/assets/skills/arrow.svg";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
 import SocialLogin from "./SocialAuth";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -25,6 +25,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -47,6 +48,11 @@ const Login: React.FC = () => {
     provider: "google" | "linkedin" | "apple" | "github"
   ) => {
     console.log(`Social Login with ${provider}`);
+  };
+
+  // Add toggle password visibility function
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   useEffect(() => {
@@ -154,7 +160,7 @@ const Login: React.FC = () => {
             {/* Password Input */}
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 id="password"
                 className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
@@ -168,6 +174,17 @@ const Login: React.FC = () => {
                 alt="Password Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <Eye className="w-5 h-5 text-gray-500" />
+                )}
+              </button>
             </div>
 
             {/* Login Button */}
