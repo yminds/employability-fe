@@ -227,7 +227,7 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
                   updateCertification(index, "issue_date", value)
                 }
                 maxDate={new Date().toISOString().split("T")[0]}
-                placeholder="Select issue date"
+                placeholder="dd/mm/yyyy"
                 className={
                   getError(`certifications.${index}.issue_date`)
                     ? "border-red-500"
@@ -251,7 +251,7 @@ const CertificationsForm: React.FC<CertificationsFormProps> = ({
                   updateCertification(index, "expiration_date", value)
                 }
                 minDate={formatDateForInput(cert.issue_date)}
-                placeholder="Select expiration date"
+                placeholder="dd/mm/yyyy"
                 className={
                   getError(`certifications.${index}.expiration_date`)
                     ? "border-red-500"

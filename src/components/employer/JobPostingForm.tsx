@@ -6,6 +6,7 @@ import BasicInfoForm from "./BasicInfoFrom";
 import SuggestedSkillsForm from "./RequiredSkillsForm";
 import ScreeningQuestionsForm from "./ScreeningQuestionsFrom";
 import { Navigate, useNavigate } from "react-router-dom";
+import JobCreateSidebar from "./JobCreateSidebar";
 
 interface Skill {
   _id: string;
@@ -55,11 +56,11 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
     work_place_type: initialData?.work_place_type || "",
     experience_level: initialData?.experience_level || "",
     company_name: initialData?.company_name || "",
-    company_logo:initialData?.company_logo || "",
+    company_logo: initialData?.company_logo || "",
     job_id: initialData?._id || undefined,
   });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Skills state
   const [selectedSkills, setSelectedSkills] = useState<
@@ -175,8 +176,8 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
       company_id: company_id_str,
       employer_id: employerId,
     };
-    
-    if(typeof onSubmit === "function") {
+
+    if (typeof onSubmit === "function") {
       onSubmit(processedData);
     }
   };
@@ -300,11 +301,11 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
               {isActive ? (
                 <>
                   <div className="w-5 h-5 bg-[#10b753] rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
+                    <span className="text-white font-dm-sans text-xs font-bold">
                       {index + 1}
                     </span>
                   </div>
-                  <div className="text-sm font-medium text-[#10b753]">
+                  <div className="text-[14px] leading-6 font-medium font-dm-sans text-[#10b753]">
                     {tab.label}
                   </div>
                 </>
@@ -332,11 +333,11 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
               ) : (
                 <>
                   <div className="w-5 h-5 rounded-full border border-[#b3b3b3] flex items-center justify-center">
-                    <div className="text-[10px] font-medium text-[#b3b3b3]">
+                    <div className="text-[10px] font-dm-sans font-medium text-[#b3b3b3]">
                       {index + 1}
                     </div>
                   </div>
-                  <div className="text-sm font-medium text-[#b3b3b3]">
+                  <div className="text-[14px] leading-6 font-medium font-dm-sans text-[#B3B3B3]">
                     {tab.label}
                   </div>
                 </>
@@ -348,13 +349,30 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
     );
   };
 
+  const handleEditClick = (
+    section: "basic" | "skills" | "screening" | "review"
+  ) => {
+    if (section === "basic") {
+      setActiveStep("basic");
+    } else if (section === "skills") {
+      setActiveStep("skills");
+    } else if (section === "screening") {
+      setActiveStep("screening");
+    } else if (section === "review") {
+      handleFinalSubmit();
+    }
+  };
+
   return (
     <main className="h-screen w-full  overflow-hidden font-ubuntu">
       <div className="h-full flex flex-col bg-[#F5F5F5]">
         <div className="flex-1 px-[55px] pb-[5px] pt-[20px] min-h-0 flex flex-col">
           {/* Breadcrumb Navigation */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-[30px] h-[30px] bg-white rounded-3xl border border-black/10 flex items-center justify-center" onClick={()=>navigate('/employer')}>
+            <div
+              className="w-[30px] h-[30px] bg-white rounded-3xl border border-black/10 flex items-center justify-center"
+              onClick={() => navigate("/employer")}
+            >
               {/* Arrow icon placeholder */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -376,7 +394,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
               <span className="text-[#030609]">Create Job</span>
             </div>
           </div>
-  
+
           {/* Main Content */}
           <div className="flex-1 h-full overflow-hidden">
             <div className="grid grid-cols-4 gap-6 h-full">
@@ -384,15 +402,15 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
               <div className="col-span-3 min-h-full flex flex-col">
                 <div className="bg-white rounded-xl shadow-sm border border-[#d9d9d9]/20 flex flex-col h-full overflow-hidden">
                   {/* Fixed Header - Always visible */}
-                  <div className="bg-white px-8 pt-8 pb-4 border-b border-gray-100 shadow-sm z-10">
+                  <div className="bg-white p-8 shadow-sm z-10">
                     <div className="flex flex-col gap-3">
-                      <h1 className="text-2xl font-medium text-[#414347] leading-[38px]">
+                      <h1 className="text-[24px] font-medium font-ubuntu leading-[38.4px] tracking-[-0.36px] text-[#414447]">
                         Create Job
                       </h1>
                       <TabNavigation />
                     </div>
                   </div>
-  
+
                   {/* Scrollable Form Content */}
                   <div className="flex flex-col flex-1 overflow-hidden">
                     <div className="flex-1 overflow-y-auto p-8 pt-6 scrollbar-hide">
@@ -403,7 +421,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                           onChange={handleFormDataChange}
                         />
                       )}
-  
+
                       {/* Step 2: Required Skills */}
                       {activeStep === "skills" && (
                         <SuggestedSkillsForm
@@ -413,7 +431,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                           setSelectedSkills={setSelectedSkills}
                         />
                       )}
-  
+
                       {/* Step 3: Screening Questions */}
                       {activeStep === "screening" && (
                         <ScreeningQuestionsForm
@@ -421,7 +439,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                           setScreeningQuestions={setScreeningQuestions}
                         />
                       )}
-  
+
                       {/* Step 4: Preview */}
                       {activeStep === "preview" && (
                         <div className="flex flex-col gap-7">
@@ -437,11 +455,12 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                             interviewQuestions={[]}
                             expanded={true}
                             onPreviewClick={handleTogglePreview}
+                            onEditClick={handleEditClick}
                           />
                         </div>
                       )}
                     </div>
-  
+
                     {/* Fixed Navigation Buttons - Always visible at bottom */}
                     <div className="bg-white border-t border-gray-200 py-4 px-8 flex justify-between">
                       {activeStep !== "basic" && (
@@ -481,11 +500,17 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                   </div>
                 </div>
               </div>
-  
+
               {/* Right Column - Preview Panel */}
               <div className="col-span-1">
                 <div className="sticky top-0">
-                  <JobPreviewSidebar
+                  <JobCreateSidebar
+                    jobTitle={formData.title}
+                    companyName={formData.company_name}
+                    companyLogo={initialData.company_logo}
+                    location={formData.location}
+                  />
+                  {/* <JobPreviewSidebar
                     jobTitle={formData.title}
                     companyName={formData.company_name}
                     companyLogo={initialData.company_logo}
@@ -497,7 +522,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                     screeningQuestions={screeningQuestions}
                     expanded={previewExpanded}
                     onPreviewClick={handleTogglePreview}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>

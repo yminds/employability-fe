@@ -32,14 +32,14 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           value={formData.title}
           onChange={(e) => handleFormDataChange("title", e.target.value)}
           placeholder="Job Title (e.g., Full Stack Developer)"
-          className="flex-1 h-10"
+          className="flex-1 h-[50px] text-body2"
           required
         />
         <Input
           value={formData.location}
           onChange={(e) => handleFormDataChange("location", e.target.value)}
           placeholder="Location (e.g., New York, USA)"
-          className="flex-1 h-10"
+          className="flex-1 h-[50px] text-body2"
           required
         />
       </div>
@@ -51,7 +51,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           onValueChange={(val) => handleFormDataChange("job_type", val)}
           required
         >
-          <SelectTrigger className="flex-1 h-10">
+          <SelectTrigger className="flex-1 h-[50px] text-body2">
             <SelectValue placeholder="Job Type (e.g., Full Time)" />
           </SelectTrigger>
           <SelectContent>
@@ -67,7 +67,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           onValueChange={(val) => handleFormDataChange("work_place_type", val)}
           required
         >
-          <SelectTrigger className="flex-1 h-10">
+          <SelectTrigger className="flex-1 h-[50px] text-body2">
             <SelectValue placeholder="Workplace Type (e.g., Remote)" />
           </SelectTrigger>
           <SelectContent>
@@ -85,7 +85,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           onValueChange={(val) => handleFormDataChange("experience_level", val)}
           required
         >
-          <SelectTrigger className="flex-1 h-10">
+          <SelectTrigger className="flex-1 h-[50px] text-body2">
             <SelectValue placeholder="Experience Level (e.g., Mid Level)" />
           </SelectTrigger>
           <SelectContent>
@@ -103,7 +103,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         onChange={(e) => handleFormDataChange("description", e.target.value)}
         placeholder="Job Description"
         rows={20}
-        className="resize-none"
+        className="resize-none text-body2"
         required
       />
     </div>

@@ -84,9 +84,27 @@ export default function FeaturedInterviewSection({
     }
 
     if (isPublic) {
-      navigate(`/skills-report/${username}/Mock/${interviewId}`, {
-        state: { isPublic: true },
-      });
+      switch (interviewType) {
+        case "Skill":
+          navigate(`/skills-report/${username}/${interviewId}`, {
+            state: { isPublic: true },
+          });
+          break;
+        case "Project":
+          navigate(`/skill-report/${username}/Project/${interviewId}`, {
+            state: { isPublic: true },
+          });
+          break;
+        case "Mock":
+          navigate(`/skill-report/${username}/Mock/${interviewId}`, {
+            state: { isPublic: true },
+          });
+          break;
+        default:
+          navigate(`/skills-report/${username}/${interviewId}`, {
+            state: { isPublic: true },
+          });
+      }
     } else {
       navigate(reportUrl, {
         state: {
