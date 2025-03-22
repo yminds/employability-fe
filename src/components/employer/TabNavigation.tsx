@@ -3,15 +3,24 @@ import React from "react";
 interface TabNavigationProps {
   selectedTab: string;
   setSelectedTab: (tab: string) => void;
+  interviewCount?: number; // Added prop for interview count
 }
 
-const TabNavigation: React.FC<TabNavigationProps> = ({ selectedTab, setSelectedTab }) => {
+const TabNavigation: React.FC<TabNavigationProps> = ({ 
+  selectedTab, 
+  setSelectedTab,
+  interviewCount = 0 // Default to 0 if not provided
+}) => {
   const tabs = [
-    { id: "matching", label: "Matching Candidates" },
-    { id: "all", label: "All Applicants" },
-    { id: "screening", label: "Screening" },
-    { id: "tasks", label: "Tasks" },
-    { id: "pipeline", label: "In Pipeline" },
+    { id: "inviteCandidates", label: "Invite Candidates" },
+    { 
+      id: "interviews", 
+      label: "Interviews", 
+      count: interviewCount,
+      hasBadge: true
+    },
+    { id: "shortlistedCandidates", label: "Shortlisted Candidates" },
+    { id: "sentInvitations", label: "Sent Invitations" },
   ];
 
   return (
@@ -22,12 +31,20 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ selectedTab, setSelectedT
             key={tab.id}
             className={`px-4 py-3 text-sm font-medium ${
               selectedTab === tab.id
-                ? "text-[#001630] border-b-2 border-[#001630]"
+                ? "text-[#001630] border-b-2 border-[#24d680]"
                 : "text-[#68696b]"
             }`}
             onClick={() => setSelectedTab(tab.id)}
           >
-            {tab.label}
+            {tab.hasBadge ? (
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#24d680]"></span>
+                <span>{tab.label}</span>
+                <span className="text-xs">({tab.count})</span>
+              </div>
+            ) : (
+              tab.label
+            )}
           </button>
         ))}
       </div>

@@ -16,8 +16,9 @@ import StatsCards from "./StatsCard";
 import ResumeUploadBanner from "./ResumeUploadBanner";
 import JobDetailsCard from "./JobDetailsCard";
 import ResumeUploadModal, { ProcessedResume } from "./UploadResumesModal";
-// Import the Interview Modal
 import InterviewModal from "./InterviewInvitationModal";
+// Import the new InterviewCandidatesView component
+import InterviewCandidatesView from "./InterviewCandidatesView";
 
 interface JobListingPageProps {
   job_id: string;
@@ -26,7 +27,8 @@ interface JobListingPageProps {
 export default function JobListingPage({ job_id }: JobListingPageProps) {
   const navigate = useNavigate();
 
-  const [selectedTab, setSelectedTab] = useState("matching");
+  // Changed default tab to "inviteCandidates" to match new naming
+  const [selectedTab, setSelectedTab] = useState("inviteCandidates");
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,12 +36,11 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Add state for interview modal
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
-  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>(
-    []
-  );
+  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  // Add state for interview count
+  const [interviewCount, setInterviewCount] = useState(60); // Default to 60 for demo purposes
 
   // Fetch job details
   const {
@@ -233,47 +234,71 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
         <div className="flex gap-6">
           {/* Left section - Candidate list */}
           <div className="flex-1">
-            {/* Tabs */}
+            {/* Tabs - Pass the interview count to display in the tab */}
             <TabNavigation
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
             />
 
-            {/* Search and filters */}
-            <SearchAndFilters
-              searchTerm={searchTerm}
-              handleSearchChange={handleSearchChange}
-              filterOpen={filterOpen}
-              setFilterOpen={setFilterOpen}
-            />
+            {/* Conditional rendering based on selected tab */}
+            {selectedTab === "inviteCandidates" && (
+              <>
+                {/* Search and filters */}
+                <SearchAndFilters
+                  searchTerm={searchTerm}
+                  handleSearchChange={handleSearchChange}
+                  filterOpen={filterOpen}
+                  setFilterOpen={setFilterOpen}
+                />
 
-            {/* Filter panel */}
-            <FilterPanel
-              isOpen={filterOpen}
-              onReset={handleFilterReset}
-              onApply={handleFilterApply}
-            />
+                {/* Filter panel */}
+                <FilterPanel
+                  isOpen={filterOpen}
+                  onReset={handleFilterReset}
+                  onApply={handleFilterApply}
+                />
 
-            {/* Candidate list */}
-            <CandidateList
-              isLoading={isLoading}
-              error={!!error}
-              currentCandidates={currentCandidates}
-              filteredCandidates={filteredCandidates}
-              selectAll={selectAll}
-              selectedCandidates={selectedCandidates}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              rowsPerPage={rowsPerPage}
-              indexOfFirstCandidate={indexOfFirstCandidate}
-              indexOfLastCandidate={indexOfLastCandidate}
-              handleSelectAllCurrentPage={handleSelectAllCurrentPage}
-              handleSelectAllCandidates={handleSelectAllCandidates}
-              handleSelectCandidate={handleSelectCandidate}
-              handleSendInterviewInvite={handleSendInterviewInvite}
-              handlePageChange={handlePageChange}
-              setRowsPerPage={setRowsPerPage}
-            />
+                {/* Candidate list */}
+                <CandidateList
+                  isLoading={isLoading}
+                  error={!!error}
+                  currentCandidates={currentCandidates}
+                  filteredCandidates={filteredCandidates}
+                  selectAll={selectAll}
+                  selectedCandidates={selectedCandidates}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  rowsPerPage={rowsPerPage}
+                  indexOfFirstCandidate={indexOfFirstCandidate}
+                  indexOfLastCandidate={indexOfLastCandidate}
+                  handleSelectAllCurrentPage={handleSelectAllCurrentPage}
+                  handleSelectAllCandidates={handleSelectAllCandidates}
+                  handleSelectCandidate={handleSelectCandidate}
+                  handleSendInterviewInvite={handleSendInterviewInvite}
+                  handlePageChange={handlePageChange}
+                  setRowsPerPage={setRowsPerPage}
+                />
+              </>
+            )}
+
+            {/* Render the Interviews tab content */}
+            {selectedTab === "interviews" && (
+              <InterviewCandidatesView jobId={job_id} />
+            )}
+
+            {/* Placeholder for Shortlisted Candidates tab */}
+            {selectedTab === "shortlistedCandidates" && (
+              <div className="mt-4 p-12 bg-white rounded-lg border border-[#d6d7d9] text-center">
+                <p className="text-[#68696b]">Shortlisted Candidates view is coming soon</p>
+              </div>
+            )}
+
+            {/* Placeholder for Sent Invitations tab */}
+            {selectedTab === "sentInvitations" && (
+              <div className="mt-4 p-12 bg-white rounded-lg border border-[#d6d7d9] text-center">
+                <p className="text-[#68696b]">Sent Invitations view is coming soon</p>
+              </div>
+            )}
           </div>
 
           {/* Right section - Stats and job details */}
@@ -319,7 +344,9 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
         isOpen={isInterviewModalOpen}
         onClose={handleCloseInterviewModal}
         selectedCandidatesCount={selectedCandidates.length}
-        selectedCandidates={allCandidates.map(candidate => ({
+        selectedCandidates={allCandidates.filter(candidate => 
+          selectedCandidates.includes(candidate._id)
+        ).map(candidate => ({
           user_id: candidate._id,
           name: candidate.name,
           profile_image: candidate.profile_image
