@@ -51,10 +51,11 @@ interface RequiredSkillsProps {
   maxMustHaveSkills?: number;
   jobTitle: string;
   jobDescription: string;
+  // New flag to control when to fetch recommendations
+  shouldFetchRecommendations?: boolean;
+  // Callback to let the parent know we've fetched
+  onRecommendationsFetched?: () => void;
 }
-
-
-
 
 // Function to sort skills by importance
 const sortSkillsByImportance = (skills: SkillRecommendation[]) => {
@@ -75,17 +76,20 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   maxMustHaveSkills = 6,
   jobTitle,
   jobDescription,
+  shouldFetchRecommendations = false,
+  onRecommendationsFetched,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedSkillIndex, setSelectedSkillIndex] = useState<number | null>(
-    null
-  );
+  const [selectedSkillIndex, setSelectedSkillIndex] = useState<number | null>(null);
   const [recommendedSkills, setRecommendedSkills] = useState<SkillRecommendation[]>([]);
   const [reasonings, setReasonings] = useState<Record<string, string>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
- 
+  
+  // To track if we're currently fetching
+  const [isFetching, setIsFetching] = useState(false);
+  
   // API hooks
   const {
     data: searchResults,
@@ -94,15 +98,30 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   } = useGetMultipleSkillsQuery(debouncedSearchTerm, {
     skip: debouncedSearchTerm.length < 1,
   });
- 
+
   const [getSkillSuggestions, { isLoading }] = useGetEmployerSkillSuggestionsMutation();
  
-  // Fetch AI skill recommendations based on job title and description
+  // This is the key part: Only fetch when the parent component tells us to
   useEffect(() => {
-    if (jobTitle && jobDescription) {
-      fetchAISkillRecommendations();
+    // Only fetch if the flag is true and we're not already fetching
+    if (shouldFetchRecommendations && !isFetching && jobDescription && jobDescription.trim() !== "") {
+      console.log("Fetching skill recommendations based on parent's instruction");
+      setIsFetching(true);
+      
+      fetchAISkillRecommendations()
+        .then(() => {
+          // Let the parent know we're done
+          if (onRecommendationsFetched) {
+            onRecommendationsFetched();
+          }
+          setIsFetching(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching skill recommendations:", error);
+          setIsFetching(false);
+        });
     }
-  }, [jobTitle, jobDescription]);
+  }, [shouldFetchRecommendations, jobDescription]);
  
   // Populate initial skills from AI recommendations
   useEffect(() => {
@@ -169,12 +188,11 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
       }
     } catch (error) {
       console.error("Error fetching AI skill recommendations:", error);
+      throw error;
     }
   };
  
   const populateInitialSkills = () => {
-    // Use the AI recommended skills with their importance levels
-    // (they're already sorted by importance)
     const initialSkills = recommendedSkills.map((rec) => ({
       skill: rec.skill,
       importance: rec.importance,
@@ -323,7 +341,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                 </p>
               </div>
  
-              {isLoading ? (
+              {isLoading || isFetching ? (
                 <div className="p-3 text-center text-gray-500">
                   Loading AI recommended skills...
                 </div>
@@ -364,7 +382,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
         A maximum of {maxMustHaveSkills} skills can be considered Very Important
       </p>
       
-      {isLoading && (
+      {(isLoading || isFetching) && (
         <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md flex items-center">
           <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -374,7 +392,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
         </div>
       )}
      
-      {!isLoading && recommendedSkills.length > 0 && (
+      {!isLoading && !isFetching && recommendedSkills.length > 0 && (
         <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md">
           EmployAbility has analyzed your job description and recommended {recommendedSkills.length} skills with appropriate importance levels.
         </div>
@@ -407,9 +425,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                     {skillItem.skill.name || "Select a skill"}
                   </span>
                 </div>
-                <div className={`px-2 py-1 text-xs rounded-full border `}>
-                  {skillItem.importance}
-                </div>
+                
                 <svg
                   className="h-5 w-5 text-gray-400"
                   viewBox="0 0 20 20"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 import JobPreviewSidebar from "./JobPreviewSidebar";
@@ -59,7 +59,9 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
     job_id: initialData?._id || undefined,
   });
 
-  const navigate = useNavigate()
+  console.log("formData", formData);
+
+  const navigate = useNavigate();
 
   // Skills state
   const [selectedSkills, setSelectedSkills] = useState<
@@ -110,6 +112,44 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
 
   // Preview state
   const [previewExpanded, setPreviewExpanded] = useState(false);
+
+  // Track if we should fetch skill recommendations
+  // If we're in edit mode and have skills already, don't fetch on first load
+  const [shouldFetchSkills, setShouldFetchSkills] = useState(
+    !initialData?.isEditMode || initialData?.skills_required?.length === 0
+  );
+  
+  // Remember the last job description we used to fetch skills
+  const lastJobDescriptionRef = useRef(formData.description);
+
+  // Handle form data change - track when job description changes
+  const handleFormDataChange = (updatedData: any) => {
+    // If the description changes, set the flag to fetch skills
+    if ('description' in updatedData && updatedData.description !== formData.description) {
+      // Only if description actually changed meaningfully, not just whitespace or small edits
+      const oldDescription = formData.description.trim();
+      const newDescription = updatedData.description.trim();
+      
+      // If description is significantly different, fetch new skills
+      if (newDescription !== oldDescription && 
+          (oldDescription.length === 0 || 
+           Math.abs(newDescription.length - oldDescription.length) > 50 ||
+           !newDescription.includes(oldDescription.substring(0, 100)))) {
+        
+        console.log("Job description changed significantly, will fetch new skills recommendations");
+        setShouldFetchSkills(true);
+      }
+    }
+    
+    setFormData({ ...formData, ...updatedData });
+  };
+
+  // Callback when skill recommendations have been fetched
+  const handleSkillsFetched = () => {
+    setShouldFetchSkills(false);
+    lastJobDescriptionRef.current = formData.description;
+    console.log("Skills recommendations fetched successfully");
+  };
 
   const handleNextStep = () => {
     markCurrentStepComplete();
@@ -192,11 +232,6 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
       // Otherwise just advance to the next step
       handleNextStep();
     }
-  };
-
-  // Handle form data change
-  const handleFormDataChange = (updatedData: any) => {
-    setFormData({ ...formData, ...updatedData });
   };
 
   // Preview toggle handler
@@ -349,7 +384,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
   };
 
   return (
-    <main className="h-screen w-full  overflow-hidden font-ubuntu">
+    <main className="h-screen w-full overflow-hidden font-ubuntu">
       <div className="h-full flex flex-col bg-[#F5F5F5]">
         <div className="flex-1 px-[55px] pb-[5px] pt-[20px] min-h-0 flex flex-col">
           {/* Breadcrumb Navigation */}
@@ -411,6 +446,8 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                           jobDescription={formData.description}
                           selectedSkills={selectedSkills}
                           setSelectedSkills={setSelectedSkills}
+                          shouldFetchRecommendations={shouldFetchSkills}
+                          onRecommendationsFetched={handleSkillsFetched}
                         />
                       )}
   

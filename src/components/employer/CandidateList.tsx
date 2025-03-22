@@ -43,7 +43,7 @@ const CandidateList: React.FC<CandidateListProps> = ({
   setRowsPerPage,
 }) => {
   return (
-    <div className="bg-white rounded-lg border border-[#d6d7d9] overflow-hidden">
+    <div className="bg-white rounded-lg border border-[#d6d7d9] overflow-hidden ">
       {/* Header with selection controls */}
       <CandidateListHeader
         selectAll={selectAll}
@@ -117,7 +117,6 @@ const CandidateList: React.FC<CandidateListProps> = ({
           onPageChange={handlePageChange}
           onRowsPerPageChange={(value:any) => {
             setRowsPerPage(value);
-            // Reset to page 1 when changing rows per page
             handlePageChange(1);
           }}
         />
