@@ -8,7 +8,6 @@ import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
 import EmployerSidebar from "@/features/sidebar/EmployerSidebar";
 import DisabledAccountModal from "@/components/modal/DisabledAccountModal";
-import ErrorBoundary from "@/components/error/ErrorBoundary";
 import { cleanRecordingReference } from "@/store/slices/recorderSlice";
 import { useDispatch } from "react-redux";
 
@@ -33,7 +32,8 @@ const noSidebarRoutes = [
   "/skills-report",
   "/skill-report",
   "/privacy-policy",
-  "/employer/company/create"
+  "/employer/company/create",
+  "/invitation/:inviteId",
 ];
 
 const employerRoutes = [
@@ -46,7 +46,8 @@ const employerRoutes = [
   "/employer/uploadResume",
   "/employer/jobs",
   "/employer/jobs/:jobId",
-  "/employer/company/create"
+  "/employer/company/create",
+  "/employer/jobs/edit/:jobId"
 ]
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

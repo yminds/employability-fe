@@ -6,7 +6,7 @@ import {
   useGetJobDetailsQuery,
 } from "../../api/employerJobsApiSlice";
 
-// Import our new components
+// Import our components
 import BreadcrumbNav from "./nav/BreadcrumbNav";
 import TabNavigation from "./TabNavigation";
 import SearchAndFilters from "./SearchAndFilters";
@@ -16,6 +16,8 @@ import StatsCards from "./StatsCard";
 import ResumeUploadBanner from "./ResumeUploadBanner";
 import JobDetailsCard from "./JobDetailsCard";
 import ResumeUploadModal, { ProcessedResume } from "./UploadResumesModal";
+// Import the Interview Modal
+import InterviewModal from "./InterviewInvitationModal";
 
 interface JobListingPageProps {
   job_id: string;
@@ -32,6 +34,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Add state for interview modal
+  const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
   const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>(
     []
   );
@@ -161,21 +165,25 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     setCurrentPage(1); // Reset to page 1 on new search
   };
 
-  // Send interview invites for selected candidates
+  // Send interview invites for selected candidates - Updated to open modal
   const handleSendInterviewInvite = () => {
     if (selectedCandidates.length === 0) return;
 
-    // Grab details for the selected IDs
+    // Open the interview modal instead of showing an alert
+    setIsInterviewModalOpen(true);
+    
+    // Grab details for the selected IDs (keep for future reference)
     const selectedCandidateDetails = allCandidates.filter((candidate: any) =>
       selectedCandidates.includes(candidate.user_id)
     );
 
-    // Call your API logic here...
+    // Original console log
     console.log("Sending interview invites to:", selectedCandidateDetails);
-
-    alert(
-      `Sending interview invites to ${selectedCandidates.length} candidates`
-    );
+  };
+  
+  // Handler to close the interview modal
+  const handleCloseInterviewModal = () => {
+    setIsInterviewModalOpen(false);
   };
 
   // Open the resume upload modal
@@ -278,7 +286,12 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
 
             {/* Job details card */}
             <JobDetailsCard
-              jobDetails={jobDetails?.data}
+              jobDetails={jobDetails?.data ? {
+                ...jobDetails.data,
+                company: typeof jobDetails.data.company === 'string' 
+                  ? { _id: jobDetails.data.company, name: '' }
+                  : jobDetails.data.company
+              } : undefined}
               onViewDetails={() => {
                 // Navigate to detailed job view
                 navigate(`/employer/jobs/${job_id}/details`);
@@ -294,12 +307,25 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           isOpen={isModalOpen}
           setIsOpen={setIsModalOpen}
           jobId={job_id}
-          employerId={employerId?._id}
-          companyId={companyId?._id}
+          employerId={typeof employerId === 'string' ? employerId : employerId?._id}
+          companyId={typeof companyId === 'string' ? companyId : companyId?._id}
           onResumesProcessed={handleResumesProcessed}
           onSelectCandidates={handleSelectCandidates}
         />
       )}
+      
+      {/* Interview Modal */}
+      <InterviewModal
+        isOpen={isInterviewModalOpen}
+        onClose={handleCloseInterviewModal}
+        selectedCandidatesCount={selectedCandidates.length}
+        selectedCandidates={allCandidates.map(candidate => ({
+          user_id: candidate._id,
+          name: candidate.name,
+          profile_image: candidate.profile_image
+        }))}
+        jobId={job_id}
+      />
     </div>
   );
 }

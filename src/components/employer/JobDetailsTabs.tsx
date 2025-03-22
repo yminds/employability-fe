@@ -24,7 +24,7 @@ import {
   useInviteCandidatesMutation,
   useResendInvitationMutation,
   useGetInvitationStatusesQuery,
-} from "../../api/emailInvitationApiSlice";
+} from "../../api/InterviewInvitation";
  
 interface JobDetailsTabsProps {
   job: IJob;

@@ -22,8 +22,14 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    getInvitesByUserId: builder.query({
+      query: (userId: string | undefined) => ({
+        url: `/api/v1/employerInterviewInvitation/invite/user/${userId}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useCreateInterviewMutation, useGetInterviewbyIdQuery, useGetAllUserInterviewsQuery } =
+export const { useCreateInterviewMutation, useGetInterviewbyIdQuery, useGetAllUserInterviewsQuery, useGetInvitesByUserIdQuery } =
   interviewApiSlice;

@@ -15,12 +15,47 @@ interface BasicInfoFormProps {
   onChange: (formData: any) => void;
 }
 
-const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ 
-  formData, 
-  onChange
+const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
+  formData,
+  onChange,
 }) => {
-  
+  // Map the backend experience_level value to the format for the Select field
+  const mapExperienceLevelForSelect = (value: string) => {
+    switch (value) {
+      case "entry":
+        return "entry-level";
+      case "mid":
+        return "mid-level";
+      case "senior":
+        return "senior-level";
+      default:
+        return ""; // Default case if the value is not recognized
+    }
+  };
+
+  // Map the selected experience level value back to backend format when submitting
+  const mapExperienceLevelForBackend = (value: string) => {
+    switch (value) {
+      case "entry-level":
+        return "entry";
+      case "mid-level":
+        return "mid";
+      case "senior-level":
+        return "senior";
+      default:
+        return ""; // Default case if the value is not recognized
+    }
+  };
+
+  // Transform the formData.experience_level to the format needed for the Select component
+  const experienceLevelValue = mapExperienceLevelForSelect(formData.experience_level);
+
   const handleFormDataChange = (field: string, value: string) => {
+    // If it's the experience_level field, map the value to backend format before updating the formData
+    if (field === "experience_level") {
+      value = mapExperienceLevelForBackend(value);
+    }
+
     onChange({ ...formData, [field]: value });
   };
 
@@ -81,8 +116,8 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
       {/* Row: Experience Level */}
       <div className="flex gap-4">
         <Select
-          value={formData.experience_level}
-          onValueChange={(val) => handleFormDataChange("experience_level", val)}
+          value={experienceLevelValue} // Set the transformed value for Select
+          onValueChange={(val) => handleFormDataChange("experience_level", val)} // Send transformed value back to the form
           required
         >
           <SelectTrigger className="flex-1 h-[50px] text-body2">

@@ -348,10 +348,6 @@ const InterviewInvites: React.FC<InterviewListProps> = ({ isDashboard = false, i
     setSelectedInterview((prev) => (prev?.id === interview.id ? null : interview));
   };
 
-  const handleSeeDetails = (interview: Interview) => {
-    // Navigate to a detailed view (replace with your route)
-    navigate(`/interviews/${interview.id}`);
-  };
 
   const handleTakeInterview = async (interview: Interview) => {
     const interviewId = await createInterview({
