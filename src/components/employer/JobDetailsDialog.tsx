@@ -322,11 +322,11 @@ const JobDetailsPage: React.FC = () => {
             </TabsContent>
 
             {/* Additional tabs (Candidates, Screening, etc.) */}
-            <JobDetailsTabs
+            {/* <JobDetailsTabs
               job={job}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
-            />
+            /> */}
           </Tabs>
         </section>
       </div>

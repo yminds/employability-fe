@@ -26,7 +26,7 @@ interface SkillRecommendation {
   reasoning: string;
 }
 
-// Define the API response structure - making it more flexible
+// Define the API response structure
 interface ApiResponse {
   success: boolean;
   data:
@@ -53,9 +53,7 @@ interface RequiredSkillsProps {
   maxMustHaveSkills?: number;
   jobTitle: string;
   jobDescription: string;
-  // New flag to control when to fetch recommendations
   shouldFetchRecommendations?: boolean;
-  // Callback to let the parent know we've fetched
   onRecommendationsFetched?: () => void;
 }
 
@@ -489,7 +487,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
               </div>
             </div>
 
-            {/* Importance selector - removed color gradient */}
+            {/* Importance selector */}
             <div className="w-[450px]">
               <div className="relative">
                 <select

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Check, ChevronLeft, ChevronRight, MoreVertical, Search, SlidersHorizontal } from 'lucide-react';
+import { 
+  Check, ChevronLeft, ChevronRight, MoreVertical, 
+  Search, SlidersHorizontal, Bookmark 
+} from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,21 +12,9 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   useGetInterviewCandidatesQuery,
   useGetInterviewStatsQuery,
-  useShortlistCandidateMutation 
+  useShortlistCandidateMutation,
+  InterviewCandidate 
 } from '../../api/InterviewInvitation';
-
-interface Candidate {
-  _id: string;
-  candidate_name: string;
-  candidate_location?: string;
-  profile_image?: string;
-  has_report: boolean;
-  report_submitted_at?: string;
-  interview_score?: number;
-  report_id?: string;
-  candidate_id: string;
-  shortlist?: boolean;
-}
 
 interface InterviewCandidatesViewProps {
   jobId: string;
@@ -74,7 +65,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({ jobId
   };
   
   // Filter candidates by search term
-  const filteredCandidates = candidates.filter((candidate: Candidate) => {
+  const filteredCandidates = candidates.filter((candidate: InterviewCandidate) => {
     if (!searchTerm) return true;
     
     const searchLower = searchTerm.toLowerCase();
@@ -93,7 +84,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({ jobId
   // Handle select all
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedCandidates(currentCandidates.map((c: Candidate) => c._id));
+      setSelectedCandidates(currentCandidates.map((c: InterviewCandidate) => c._id));
     } else {
       setSelectedCandidates([]);
     }
@@ -231,8 +222,254 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({ jobId
     setCurrentPage(1);
   };
 
-  console.log("candidates", candidates);
-  
+  const renderCandidateCard = (candidate: InterviewCandidate) => {
+    // For "completed" status, use the new profile design
+    if (candidate.status === 'completed') {
+      return (
+        <div className="bg-white border-b p-0">
+          <div className="border-b border-[#d9d9d9]">
+            <div className="flex items-center p-6 gap-4">
+              {/* Checkbox */}
+              <div className="flex-shrink-0">
+                <Checkbox 
+                  id={`candidate-${candidate._id}`}
+                  checked={selectedCandidates.includes(candidate._id)}
+                  onCheckedChange={(checked) => handleSelectCandidate(candidate._id, !!checked)}
+                  className="rounded border-[#68696b]"
+                />
+              </div>
+              
+              {/* Profile section */}
+              <div className="flex flex-1 items-center gap-4">
+                {/* Profile image with badge */}
+                <div className="relative flex-shrink-0">
+                  {candidate.profile_image ? (
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white">
+                      <img 
+                        src={candidate.profile_image} 
+                        alt={candidate.candidate_name} 
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      className="w-20 h-20 rounded-full overflow-hidden border-2 border-white flex items-center justify-center"
+                      style={{ backgroundColor: getInitialsBackgroundColor(candidate.candidate_name) }}
+                    >
+                      <span className="text-white text-lg font-medium">
+                        {getInitials(candidate.candidate_name)}
+                      </span>
+                    </div>
+                  )}
+                  {/* We could add a badge here if needed */}
+                </div>
+                
+                {/* Candidate info */}
+                <div className="flex-1">
+                  <h2 className="text-2xl font-medium text-[#202326]">{candidate.candidate_name}</h2>
+                  {/* <p className="text-[#414447] text-sm">{candidate.candidate_location || "Location not available"}</p> */}
+                  <p className="text-[#68696b] text-sm mt-1">
+                    Submitted {candidate.report_submitted_at ? formatRelativeTime(candidate.report_submitted_at) : 'N/A'}
+                  </p>
+                </div>
+                
+                {/* Score section - Only shown if has_report is true */}
+                {candidate.has_report && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl font-semibold text-[#202326]">{candidate.interview_score?.toFixed(1)}</span>
+                        <span className="text-[#68696b]">/10</span>
+                        <div className="bg-[#10b754] rounded-full p-1">
+                          <Check className="w-4 h-4 text-white" />
+                        </div>
+                      </div>
+                      <span className="text-sm text-[#68696b]">Interview score</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Action buttons */}
+                <div className="flex items-center gap-3">
+                  {candidate.has_report && (
+                    <Button
+                      variant="outline"
+                      className="bg-[#dfe7f2] hover:bg-[#d0dbe9] text-[#001630] font-medium py-2 px-4 rounded"
+                      onClick={() => window.open(`/reports/${candidate.report_id}`, '_blank')}
+                    >
+                      View Report
+                    </Button>
+                  )}
+                  
+                  <Button
+                    variant="outline"
+                    className={`border ${
+                      candidate.shortlist 
+                      ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-100" 
+                      : "border-[#d9d9d9] hover:bg-gray-50 text-[#202326]"
+                    } font-medium py-2 px-4 rounded flex items-center gap-2`}
+                    onClick={() => handleShortlist(candidate.candidate_id)}
+                    disabled={isShortlisting || !!shortlistingCandidateId || candidate.shortlist}
+                  >
+                    {shortlistingCandidateId === candidate.candidate_id ? (
+                      <span className="flex items-center">
+                        <span className="w-3 h-3 border-2 border-t-[#68696b] border-r-[#68696b] border-b-transparent border-l-transparent rounded-full animate-spin mr-1"></span>
+                        Shortlisting...
+                      </span>
+                    ) : (
+                      <>
+                        <Bookmark className="w-5 h-5" />
+                        {candidate.shortlist ? 'Shortlisted' : 'Shortlist'}
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Dropdown>
+                    <DropdownTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-[#202326] p-1 rounded hover:bg-gray-100">
+                        <MoreVertical className="w-6 h-6" />
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownContent align="end">
+                      <DropdownItem>Send Message</DropdownItem>
+                      <DropdownItem>Schedule Interview</DropdownItem>
+                      <DropdownItem>Download Resume</DropdownItem>
+                      <DropdownItem className="text-red-500">Decline Candidate</DropdownItem>
+                    </DropdownContent>
+                  </Dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      // Original design for non-completed candidates
+      return (
+        <div className="bg-white border-b p-4">
+          <div className="flex items-center">
+            <Checkbox 
+              id={`candidate-${candidate._id}`} 
+              className="mr-4 rounded border-[#d6d7d9]"
+              checked={selectedCandidates.includes(candidate._id)}
+              onCheckedChange={(checked) => handleSelectCandidate(candidate._id, !!checked)}
+            />
+            <div className="relative">
+              {candidate.profile_image ? (
+                <div className="w-12 h-12 rounded-full overflow-hidden border">
+                  <img 
+                    src={candidate.profile_image} 
+                    alt={candidate.candidate_name} 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="w-12 h-12 rounded-full overflow-hidden border flex items-center justify-center"
+                  style={{ backgroundColor: getInitialsBackgroundColor(candidate.candidate_name) }}
+                >
+                  <span className="text-white text-lg font-medium">
+                    {getInitials(candidate.candidate_name)}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="ml-4 flex-1">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-medium text-[#0c0f12]">{candidate.candidate_name}</h3>
+                  {candidate.candidate_location && (
+                    <p className="text-sm text-[#68696b]">{candidate.candidate_location}</p>
+                  )}
+                  {candidate.has_report && (
+                    <p className="text-xs text-[#68696b] mt-1">
+                      Submitted {candidate.report_submitted_at ? formatRelativeTime(candidate.report_submitted_at) : 'N/A'}
+                    </p>
+                  )}
+                  {/* Show shortlisted tag if candidate is shortlisted */}
+                  {candidate.shortlist && (
+                    <span className="inline-block px-2 py-0.5 mt-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                      Shortlisted
+                    </span>
+                  )}
+                </div>
+                
+                {/* If candidate has not submitted report yet */}
+                {!candidate.has_report && (
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-[#24d680]">Invite Accepted</div>
+                    <p className="text-sm text-[#68696b]">Waiting for Interview Submission</p>
+                  </div>
+                )}
+                
+                {/* If candidate has submitted interview report */}
+                {candidate.has_report && (
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="flex items-center gap-1">
+                        <span className="text-lg font-bold text-[#0c0f12]">{candidate.interview_score?.toFixed(1)}</span>
+                        <span className="text-sm text-[#68696b]">/10</span>
+                        <div className="w-5 h-5 rounded-full bg-[#24d680] flex items-center justify-center ml-1">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      </div>
+                      <p className="text-xs text-[#68696b]">Interview score</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        className="h-8 px-3 py-1 text-sm bg-[#d2e9ff] text-[#2d96ff] border-[#d2e9ff] hover:bg-[#d2e9ff] hover:text-[#2d96ff]"
+                        onClick={() => window.open(`/reports/${candidate.report_id}`, '_blank')}
+                      >
+                        View Report
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className={`h-8 px-3 py-1 text-sm ${
+                          candidate.shortlist 
+                          ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-100" 
+                          : "border-[#d6d7d9] text-[#68696b] hover:bg-transparent"
+                        }`}
+                        onClick={() => handleShortlist(candidate.candidate_id)}
+                        disabled={isShortlisting || !!shortlistingCandidateId || candidate.shortlist}
+                      >
+                        {shortlistingCandidateId === candidate.candidate_id ? (
+                          <span className="flex items-center">
+                            <span className="w-3 h-3 border-2 border-t-[#68696b] border-r-[#68696b] border-b-transparent border-l-transparent rounded-full animate-spin mr-1"></span>
+                            Shortlisting...
+                          </span>
+                        ) : candidate.shortlist ? (
+                          <span className="flex items-center">
+                            <Check className="w-3 h-3 mr-1" />
+                            Shortlisted
+                          </span>
+                        ) : (
+                          <span>Shortlist</span>
+                        )}
+                      </Button>
+                      <Dropdown>
+                        <DropdownTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-[#68696b]">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownTrigger>
+                        <DropdownContent align="end">
+                          <DropdownItem>Send Message</DropdownItem>
+                          <DropdownItem>Schedule Interview</DropdownItem>
+                          <DropdownItem>Download Resume</DropdownItem>
+                          <DropdownItem className="text-red-500">Decline Candidate</DropdownItem>
+                        </DropdownContent>
+                      </Dropdown>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
   
   return (
     <div className="flex">
@@ -335,131 +572,8 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({ jobId
 
           {!isFetching && !error && currentCandidates.length > 0 && (
             <>
-              {/* Map through candidates */}
-              {currentCandidates.map((candidate: Candidate) => (
-                <div key={candidate._id} className="bg-white border-b p-4">
-                  <div className="flex items-center">
-                    <Checkbox 
-                      id={`candidate-${candidate._id}`} 
-                      className="mr-4 rounded border-[#d6d7d9]"
-                      checked={selectedCandidates.includes(candidate._id)}
-                      onCheckedChange={(checked) => handleSelectCandidate(candidate._id, !!checked)}
-                    />
-                    <div className="relative">
-                      {candidate.profile_image ? (
-                        <div className="w-12 h-12 rounded-full overflow-hidden border">
-                          <img 
-                            src={candidate.profile_image} 
-                            alt={candidate.candidate_name} 
-                            className="w-full h-full object-cover" 
-                          />
-                        </div>
-                      ) : (
-                        <div 
-                          className="w-12 h-12 rounded-full overflow-hidden border flex items-center justify-center"
-                          style={{ backgroundColor: getInitialsBackgroundColor(candidate.candidate_name) }}
-                        >
-                          <span className="text-white text-lg font-medium">
-                            {getInitials(candidate.candidate_name)}
-                          </span>
-                        </div>
-                      )}
-                      <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-[#24d680] border-2 border-white flex items-center justify-center">
-                        <span className="text-white text-[8px]">AI</span>
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-1">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="font-medium text-[#0c0f12]">{candidate.candidate_name}</h3>
-                          <p className="text-sm text-[#68696b]">{candidate.candidate_location || "Location not available"}</p>
-                          {candidate.has_report && (
-                            <p className="text-xs text-[#68696b] mt-1">
-                              Submitted {candidate.report_submitted_at ? formatRelativeTime(candidate.report_submitted_at) : 'N/A'}
-                            </p>
-                          )}
-                          {/* Show shortlisted tag if candidate is shortlisted */}
-                          {candidate.shortlist && (
-                            <span className="inline-block px-2 py-0.5 mt-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                              Shortlisted
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* If candidate has not submitted report yet */}
-                        {!candidate.has_report && (
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-[#24d680]">Invite Accepted</div>
-                            <p className="text-sm text-[#68696b]">Waiting for Interview Submission</p>
-                          </div>
-                        )}
-                        
-                        {/* If candidate has submitted interview report */}
-                        {candidate.has_report && (
-                          <div className="flex items-center gap-6">
-                            <div className="text-center">
-                              <div className="flex items-center gap-1">
-                                <span className="text-lg font-bold text-[#0c0f12]">{candidate.interview_score?.toFixed(1)}</span>
-                                <span className="text-sm text-[#68696b]">/10</span>
-                                <div className="w-5 h-5 rounded-full bg-[#24d680] flex items-center justify-center ml-1">
-                                  <Check className="w-3 h-3 text-white" />
-                                </div>
-                              </div>
-                              <p className="text-xs text-[#68696b]">Interview score</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                className="h-8 px-3 py-1 text-sm bg-[#d2e9ff] text-[#2d96ff] border-[#d2e9ff] hover:bg-[#d2e9ff] hover:text-[#2d96ff]"
-                                onClick={() => window.open(`/reports/${candidate.report_id}`, '_blank')}
-                              >
-                                View Report
-                              </Button>
-                              <Button
-                                variant="outline"
-                                className={`h-8 px-3 py-1 text-sm ${
-                                  candidate.shortlist 
-                                  ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-100" 
-                                  : "border-[#d6d7d9] text-[#68696b] hover:bg-transparent"
-                                }`}
-                                onClick={() => handleShortlist(candidate.candidate_id)}
-                                disabled={isShortlisting || !!shortlistingCandidateId || candidate.shortlist}
-                              >
-                                {shortlistingCandidateId === candidate.candidate_id ? (
-                                  <span className="flex items-center">
-                                    <span className="w-3 h-3 border-2 border-t-[#68696b] border-r-[#68696b] border-b-transparent border-l-transparent rounded-full animate-spin mr-1"></span>
-                                    Shortlisting...
-                                  </span>
-                                ) : candidate.shortlist ? (
-                                  <span className="flex items-center">
-                                    <Check className="w-3 h-3 mr-1" />
-                                    Shortlisted
-                                  </span>
-                                ) : (
-                                  <span>Shortlist</span>
-                                )}
-                              </Button>
-                              <Dropdown>
-                                <DropdownTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-[#68696b]">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownTrigger>
-                                <DropdownContent align="end">
-                                  <DropdownItem>Send Message</DropdownItem>
-                                  <DropdownItem>Schedule Interview</DropdownItem>
-                                  <DropdownItem>Download Resume</DropdownItem>
-                                  <DropdownItem className="text-red-500">Decline Candidate</DropdownItem>
-                                </DropdownContent>
-                              </Dropdown>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {/* Map through candidates with conditional rendering based on status */}
+              {currentCandidates.map((candidate: InterviewCandidate) => renderCandidateCard(candidate))}
             </>
           )}
 

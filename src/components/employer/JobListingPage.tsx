@@ -49,6 +49,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     error: jobError,
   } = useGetJobDetailsQuery(job_id);
 
+  console.log("Selected Candidates", selectedCandidates);
+
   // Fetch matching candidates
   const {
     data: matchingCandidatesResponse,
@@ -220,6 +222,19 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     setFilterOpen(false);
   };
 
+  console.log("selectedCandidates", selectedCandidates);
+  console.log("allCandidates", allCandidates);
+
+  const getSelectedCandidateDetails = () => {
+    return allCandidates
+      .filter(candidate => selectedCandidates.includes(candidate.user_id))
+      .map(candidate => ({
+        user_id: candidate.user_id,
+        name: candidate.name,
+        profile_image: candidate.profile_image
+      }));
+  };
+
   // Employer & Company IDs from job details if available
   const employerId = jobDetails?.data?.employer || undefined;
   const companyId = jobDetails?.data?.company || undefined;
@@ -344,13 +359,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
         isOpen={isInterviewModalOpen}
         onClose={handleCloseInterviewModal}
         selectedCandidatesCount={selectedCandidates.length}
-        selectedCandidates={allCandidates.filter(candidate => 
-          selectedCandidates.includes(candidate._id)
-        ).map(candidate => ({
-          user_id: candidate._id,
-          name: candidate.name,
-          profile_image: candidate.profile_image
-        }))}
+        selectedCandidates={getSelectedCandidateDetails()}
         jobId={job_id}
       />
     </div>
