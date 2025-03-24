@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
-import { 
-  setEmployerCredentials, 
+import {
+  setEmployerCredentials,
   updateCompanyLogo,
-  updateCompanyDetails 
+  updateCompanyDetails,
 } from "@/features/authentication/employerAuthSlice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,12 @@ import Elogo from "@/assets/branding/logo.svg";
 import employerBackground from "@/assets/employer/createCompany.svg";
 import placeholderLogo from "@/assets/employer/placeHolderLogo.svg";
 import employerUpload from "@/assets/employer/employerUpload.svg";
+import companyName from "@/assets/employer-company/companyName.svg";
+import companyWebsite from "@/assets/employer-company/companyWebsite.svg";
+import companyLocation from "@/assets/employer-company/companyLocation.svg";
+import industry from "@/assets/employer-company/industry.svg";
+import organizationSize from "@/assets/employer-company/organizationSize.svg";
+import dropdownArrow from "@/assets/employer-company/dropdownArrow.svg";
 
 const organizationSizes = [
   "1-10",
@@ -36,29 +42,32 @@ const CompanyForm: React.FC = () => {
 
   // Get employer data from Redux store - using useMemo to prevent unnecessary rerenders
   const employerData = useSelector((state: RootState) => state.employerAuth);
-  
+
   // Memoize the derived data to prevent unnecessary rerenders
-  const memoizedEmployerData = useMemo(() => ({
-    _id: employerData.employer?._id,
-    employerName: employerData.employer?.employerName,
-    email: employerData.employer?.email,
-    token: employerData.token,
-    role: employerData.employer?.role || "member",
-    is_email_verified: employerData.employer?.is_email_verified || false,
-    account_status: employerData.employer?.account_status || "active",
-    createdAt: employerData.employer?.createdAt || "",
-    updatedAt: employerData.employer?.updatedAt || ""
-  }), [
-    employerData.employer?._id,
-    employerData.employer?.employerName,
-    employerData.employer?.email,
-    employerData.token,
-    employerData.employer?.role,
-    employerData.employer?.is_email_verified,
-    employerData.employer?.account_status,
-    employerData.employer?.createdAt,
-    employerData.employer?.updatedAt
-  ]);
+  const memoizedEmployerData = useMemo(
+    () => ({
+      _id: employerData.employer?._id,
+      employerName: employerData.employer?.employerName,
+      email: employerData.employer?.email,
+      token: employerData.token,
+      role: employerData.employer?.role || "member",
+      is_email_verified: employerData.employer?.is_email_verified || false,
+      account_status: employerData.employer?.account_status || "active",
+      createdAt: employerData.employer?.createdAt || "",
+      updatedAt: employerData.employer?.updatedAt || "",
+    }),
+    [
+      employerData.employer?._id,
+      employerData.employer?.employerName,
+      employerData.employer?.email,
+      employerData.token,
+      employerData.employer?.role,
+      employerData.employer?.is_email_verified,
+      employerData.employer?.account_status,
+      employerData.employer?.createdAt,
+      employerData.employer?.updatedAt,
+    ]
+  );
 
   const [formData, setFormData] = useState({
     name: "",
@@ -93,7 +102,7 @@ const CompanyForm: React.FC = () => {
 
     if (name === "website") {
       const websitePattern = /^(https:\/\/|www\.)[\w-]+(\.[\w-]+)+.*$/;
-  
+
       if (value && !websitePattern.test(value)) {
         setError("Website must start with 'https://' or 'www.'");
       } else {
@@ -114,21 +123,21 @@ const CompanyForm: React.FC = () => {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-  
+
     const file = files[0];
-    
+
     // Check file type
-    if (!file.type.match('image.*')) {
-      setError('Please select an image file (JPEG, PNG, etc.)');
+    if (!file.type.match("image.*")) {
+      setError("Please select an image file (JPEG, PNG, etc.)");
       return;
     }
-    
+
     // Check file size (limit to 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setError('File size should be less than 5MB');
+      setError("File size should be less than 5MB");
       return;
     }
-  
+
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -137,46 +146,55 @@ const CompanyForm: React.FC = () => {
       }
     };
     reader.readAsDataURL(file);
-  
+
     // Upload to server
     try {
       setUploadingLogo(true);
       setError(null);
-      
+
       // Create form data
       const formData = new FormData();
-      formData.append('files', file);
-      formData.append('userId', memoizedEmployerData._id || ''); // Add userId as required by the backend
-      formData.append('folder', 'company-logos'); // Add optional folder parameter
-      
+      formData.append("files", file);
+      formData.append("userId", memoizedEmployerData._id || ""); // Add userId as required by the backend
+      formData.append("folder", "company-logos"); // Add optional folder parameter
+
       // Make API request
-      const response = await axios.post(`${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${memoizedEmployerData.token}`,
-        },
-      });
-  
+      const response = await axios.post(
+        `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${memoizedEmployerData.token}`,
+          },
+        }
+      );
+
       // Match response structure from your backend
-      if (response.data && response.data.success && response.data.data && response.data.data.length > 0) {
+      if (
+        response.data &&
+        response.data.success &&
+        response.data.data &&
+        response.data.data.length > 0
+      ) {
         const uploadedFile = response.data.data[0];
         const newLogoData = {
           url: uploadedFile.fileUrl, // Note: backend returns fileUrl, not location
           key: uploadedFile.key,
         };
-        
+
         setLogoData(newLogoData);
-        
+
         // Update Redux store with the logo information
         dispatch(updateCompanyLogo(newLogoData));
       } else {
-        throw new Error(response.data.message || 'Invalid server response');
+        throw new Error(response.data.message || "Invalid server response");
       }
     } catch (err: any) {
-      console.error('Logo upload error:', err);
+      console.error("Logo upload error:", err);
       setError(
-        err.response?.data?.message || 
-        'Failed to upload logo. Please try again.'
+        err.response?.data?.message ||
+          "Failed to upload logo. Please try again."
       );
       // Clear preview on error
       setLogoPreview(null);
@@ -218,7 +236,7 @@ const CompanyForm: React.FC = () => {
         organization_size: formData.organizationSize,
         location: formData.location,
         logo: logoData.url,
-        logoKey: logoData.key
+        logoKey: logoData.key,
       };
 
       // Create company with the data
@@ -240,7 +258,7 @@ const CompanyForm: React.FC = () => {
               account_status: memoizedEmployerData.account_status,
               createdAt: memoizedEmployerData.createdAt,
               updatedAt: memoizedEmployerData.updatedAt,
-              company: response.company._id
+              company: response.company._id,
             },
             token: memoizedEmployerData.token || "",
             company: response.company,
@@ -346,9 +364,9 @@ const CompanyForm: React.FC = () => {
 
       {/* RIGHT SECTION (Form) */}
       <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
-        <div className="w-full max-w-md bg-white rounded-lg p-8">
+        <div className="w-full max-w-md bg-white rounded-lg">
           {/* Back Button */}
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => navigate(-1)}
               className="hover:text-green-600 text-black text-sm flex items-center"
@@ -371,23 +389,20 @@ const CompanyForm: React.FC = () => {
             </button>
           </div>
 
+          {/* Header */}
+          <div className="flex flex-col justify-around mx-auto py-7">
+            <h1 className="text-[32px] leading-[42px] tracking-[-0.48px] font-bold text-gray-900">
+              Create a New Company Page
+            </h1>
+          </div>
+
           {/* Form */}
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Header */}
-            <div className="h-[84px] flex flex-col justify-around mx-auto">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Create a New Company Page
-              </h1>
-              <p className="text-sm text-gray-500">
-                Fill in your company details to create your profile
-              </p>
-            </div>
-
             {/* Error Alert */}
             {error && (
               <Alert
                 variant="destructive"
-                className="mb-8 bg-[#ff3b30]/10 border border-[#ff3b30] text-[#ff3b30]"
+                className="bg-[#ff3b30]/10 border border-[#ff3b30] text-[#ff3b30]"
               >
                 <AlertDescription className="text-[#ff3b30]">
                   {error}
@@ -400,21 +415,14 @@ const CompanyForm: React.FC = () => {
               <input
                 type="text"
                 name="name"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-body2 focus:ring-green-500 focus:border-green-500"
                 placeholder="Company Name"
                 value={formData.name}
                 onChange={handleInputChange}
                 required
               />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2M3 21h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  />
-                </svg>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-[19px] h-[18px] text-gray-400">
+                <img src={companyName} alt="Company Name" />
               </div>
             </div>
 
@@ -423,21 +431,30 @@ const CompanyForm: React.FC = () => {
               <input
                 type="text"
                 name="website"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
-                placeholder="Company Website (https:// or www.)"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-body2 focus:ring-green-500 focus:border-green-500"
+                placeholder="Company Website"
                 value={formData.website}
                 pattern="^(https:\/\/|www\.).*$"
                 onChange={handleInputChange}
               />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 12a9 9 0 01-9 9m0 0a9 9 0 110-18 9 9 0 019 9zM3 12h18"
-                  />
-                </svg>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-[19px] h-[19px] text-gray-400">
+                <img src={companyWebsite} alt="Company Website" />
+              </div>
+            </div>
+
+            {/* Location - Single field */}
+            <div className="relative">
+              <input
+                type="text"
+                name="location"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-body2 focus:ring-green-500 focus:border-green-500"
+                placeholder="Company Location e.g., Bangalore, India"
+                value={formData.location}
+                onChange={handleInputChange}
+                required
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-[15px] h-[18px] text-gray-400">
+                <img src={companyLocation} alt="Company Location" />
               </div>
             </div>
 
@@ -446,21 +463,14 @@ const CompanyForm: React.FC = () => {
               <input
                 type="text"
                 name="industry"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-body2 focus:ring-green-500 focus:border-green-500"
                 placeholder="Industry"
                 value={formData.industry}
                 onChange={handleInputChange}
                 required
               />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"
-                  />
-                </svg>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-[18px] h-[19px] text-gray-400">
+                <img src={industry} alt="Industry" />
               </div>
             </div>
 
@@ -468,7 +478,7 @@ const CompanyForm: React.FC = () => {
             <div className="relative">
               <select
                 name="organizationSize"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500 appearance-none"
+                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-body2 focus:ring-green-500 focus:border-green-500 appearance-none"
                 value={formData.organizationSize}
                 onChange={handleInputChange}
                 required
@@ -482,66 +492,19 @@ const CompanyForm: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2"
-                  />
-                </svg>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-[21px] h-[10px] text-gray-400">
+                <img src={organizationSize} alt="Organization Size" />
               </div>
               <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* Location - Single field */}
-            <div className="relative">
-              <input
-                type="text"
-                name="location"
-                className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
-                placeholder="Location (e.g., Bangalore, India)"
-                value={formData.location}
-                onChange={handleInputChange}
-                required
-              />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
+                <img src={dropdownArrow} alt="DropDown Arrow" />
               </div>
             </div>
 
             {/* Logo Upload */}
             <div className="mt-6">
-              <label className="block text-sm font-medium text-[#333333] mb-2">Logo</label>
+              <label className="block text-[#68696B] text-body2 mb-2">
+                Logo
+              </label>
               <div className="w-full p-6 bg-white border border-[#cdead9] rounded-md flex flex-col items-center justify-center gap-3">
                 {/* Hidden file input */}
                 <input
@@ -551,15 +514,15 @@ const CompanyForm: React.FC = () => {
                   accept="image/*"
                   className="hidden"
                 />
-                
+
                 {logoPreview ? (
                   // Show logo preview if available
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-20 h-20 rounded-full overflow-hidden border border-gray-200">
-                      <img 
-                        src={logoPreview} 
-                        alt="Logo Preview" 
-                        className="w-full h-full object-cover" 
+                      <img
+                        src={logoPreview}
+                        alt="Logo Preview"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                     <button
@@ -578,7 +541,8 @@ const CompanyForm: React.FC = () => {
                     </div>
                     <div className="text-center">
                       <p className="text-[12px] leading-5 text-[#666666] mb-1">
-                        Add logo to your company page. Recommended size: 600x200 pixels.
+                        Add logo to your company page. Recommended size: 600x200
+                        pixels.
                       </p>
                       <button
                         type="button"
@@ -639,7 +603,7 @@ const CompanyForm: React.FC = () => {
                   </svg>
                 )}
               </div>
-              <span className="text-sm text-gray-700">
+              <span className="text-sm text-[#68696B]">
                 I confirm I'm authorized to create and manage this page on
                 behalf of my organization.
               </span>

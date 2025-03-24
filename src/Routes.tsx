@@ -18,6 +18,8 @@ const EmployerJobsPage = lazy(() => import("./pages/EmployerJobsPage.tsx"))
 const EmployerCandidatesPage = lazy(() => import("./pages/EmployerCandidatesPages.tsx"))
 const JobListingPage = lazy(() => import("./components/employer/JobListingPage.tsx"))
 const JobListingContainer = lazy(() => import("./components/employer/JobListingContainer.tsx"))
+import EditJobPage from "./pages/EditJobPage.tsx";
+import InterviewInvitationHandler from "./components/employer/InterviewInvitationHandler.tsx";
 
 // Lazy load route components
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -140,12 +142,20 @@ export const routes: RouteConfig[] = [
     component:<JobListingContainer/>
   },
   {
+    route:"/employer/jobs/edit/:jobId",
+    component:<EditJobPage/>
+  },
+  {
     route:"/employer/company/create",
     component:<CompanyForm/>
   },
   {
     route:"/employer/jobs/create",
     component:<CreateJobPage/>
+  },
+  {
+    route: "/invitation/:inviteId",
+    component: <InterviewInvitationHandler />,
   },
   // {
   //   route:"/employer/",

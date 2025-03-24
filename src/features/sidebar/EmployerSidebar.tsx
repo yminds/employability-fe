@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { BadgeCheck, Menu, MoreVertical, Power } from "lucide-react";
 import LogoIcon from "../../assets/sidebar/logo.svg";
+import DashboardIcon from "../../assets/sidebar/dashboard.svg";
+import ProfileIcon from "../../assets/sidebar/profile.svg";
+import JobsIcon from "../../assets/sidebar/jobs.svg";
+import CandidatesIcon from "../../assets/sidebar/candidates.svg";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,19 +29,36 @@ const EmployerSidebar: React.FC = () => {
       : "text-[#68696B]";
   };
 
-  const renderIcon = (Icon: JSX.Element, path: string) => {
-    return (
-      <div className={`w-5 h-5 ${getActiveClass(path)}`}>
-        {Icon}
-      </div>
+  const renderIcon = (Icon: string, path: string) => {
+    return window.location.pathname === path ? (
+      <img
+        src={Icon || "/placeholder.svg"}
+        alt=""
+        style={{
+          filter:
+            "invert(38%) sepia(93%) saturate(515%) hue-rotate(98deg) brightness(95%) contrast(92%)",
+        }}
+      />
+    ) : (
+      <img
+        src={Icon || "/placeholder.svg"}
+        alt=""
+        style={{
+          filter: "invert(42%) sepia(5%) saturate(20%) hue-rotate(180deg)",
+        }}
+      />
     );
   };
 
- const user_name = useSelector((state: RootState) => state.employerAuth.employer?.employerName);
-    const user_email = useSelector((state: RootState) => state.employerAuth.employer?.email);
-    const user_profile_image = useSelector(
-      (state: RootState) => state.employerAuth.employer?.profile_image
-    );
+  const user_name = useSelector(
+    (state: RootState) => state.employerAuth.employer?.employerName
+  );
+  const user_email = useSelector(
+    (state: RootState) => state.employerAuth.employer?.email
+  );
+  const user_profile_image = useSelector(
+    (state: RootState) => state.employerAuth.employer?.profile_image
+  );
 
   const handleLogout = () => {
     setIsLogoutDialogOpen(true);
@@ -60,11 +82,7 @@ const EmployerSidebar: React.FC = () => {
             isCollapsed ? "justify-center" : ""
           }`}
         >
-          <img
-            src={LogoIcon}
-            alt=""
-            className="w-[29px] h-[26px]"
-          />
+          <img src={LogoIcon} alt="" className="w-[29px] h-[26px]" />
           {!isCollapsed && (
             <div className="text-[#001630] font-ubuntu text-base font-bold">
               <span>Employ</span>
@@ -82,12 +100,7 @@ const EmployerSidebar: React.FC = () => {
                   "/employer"
                 )}`}
               >
-                {renderIcon(
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13zm7 7v-5h4v5h-4zm2-15.586 6 6V15l.001 5H16v-5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v5H6v-9.586l6-6z"/>
-                  </svg>,
-                  "/employer"
-                )}
+                {renderIcon(DashboardIcon, "/employer")}
                 {!isCollapsed && <span className="text-body2">Dashboard</span>}
               </Link>
             </li>
@@ -98,12 +111,7 @@ const EmployerSidebar: React.FC = () => {
                   "/employer/candidates"
                 )}`}
               >
-                {renderIcon(
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                  </svg>,
-                  "/employer/candidates"
-                )}
+                {renderIcon(CandidatesIcon, "/employer/candidates")}
                 {!isCollapsed && <span className="text-body2">Candidates</span>}
               </Link>
             </li>
@@ -114,12 +122,7 @@ const EmployerSidebar: React.FC = () => {
                   "/employer/jobs"
                 )}`}
               >
-                {renderIcon(
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/>
-                  </svg>,
-                  "/employer/jobs"
-                )}
+                {renderIcon(JobsIcon, "/employer/jobs")}
                 {!isCollapsed && <span className="text-body2">Jobs</span>}
               </Link>
             </li>
@@ -130,12 +133,7 @@ const EmployerSidebar: React.FC = () => {
                   "/employer/profile"
                 )}`}
               >
-                {renderIcon(
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                  </svg>,
-                  "/employer/profile"
-                )}
+                {renderIcon(ProfileIcon, "/employer/profile")}
                 {!isCollapsed && <span className="text-body2">Profile</span>}
               </Link>
             </li>
@@ -211,11 +209,19 @@ const EmployerSidebar: React.FC = () => {
       >
         {isCollapsed ? (
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            <path
+              fillRule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clipRule="evenodd"
+            />
           </svg>
         ) : (
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            <path
+              fillRule="evenodd"
+              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+              clipRule="evenodd"
+            />
           </svg>
         )}
       </button>
@@ -223,11 +229,7 @@ const EmployerSidebar: React.FC = () => {
       {/* Mobile Menu */}
       <div className="sm:flex sm:items-center sm:justify-between sm:bg-white sm:shadow-md sm:p-4 sm:px-6 hidden">
         <Link to="/employer" className="flex items-center gap-2">
-          <img
-            src={LogoIcon}
-            alt=""
-            className="w-[29px] h-[26px]"
-          />
+          <img src={LogoIcon} alt="" className="w-[29px] h-[26px]" />
           <div className="text-[#001630] font-ubuntu text-base font-bold">
             <span>Employ</span>
             <span className="text-[#0AD472]">Ability.AI</span>
@@ -254,12 +256,7 @@ const EmployerSidebar: React.FC = () => {
                     "/employer"
                   )}`}
                 >
-                  {renderIcon(
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13z"/>
-                    </svg>,
-                    "/employer"
-                  )}
+                  {renderIcon(DashboardIcon, "/employer")}
                   <span className="text-body2">Dashboard</span>
                 </Link>
               </li>

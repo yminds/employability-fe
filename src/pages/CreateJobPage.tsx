@@ -15,7 +15,7 @@ interface SalaryRange {
 
 interface SkillWithImportance {
   skill: string; // ObjectId reference
-  importance: "Must-Have*" | "Preferred" | "Optional";
+  importance:"Very Important" | "Important" | "Good-To-Have";
 }
 
 interface ScreeningQuestion {
@@ -48,7 +48,7 @@ interface JobFormData {
     _id: string;
     name: string;
     icon?: string;
-    importance: "Must-Have*" | "Preferred" | "Optional";
+    importance: "Very Important" | "Important" | "Good-To-Have"
   }>;
   screening_questions: Array<ScreeningQuestion>;
   interview_questions: Array<InterviewQuestion>;

@@ -504,7 +504,7 @@ const EmailVerification: React.FC<EmailVerificationProps> = ({
 
       {/* Verification Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="sm:max-w-md rounded-lg ">
+        <DialogContent className="sm:max-w-md rounded-lg">
           {currentView === "edit" ? renderEditView() : renderOtpView()}
         </DialogContent>
       </Dialog>

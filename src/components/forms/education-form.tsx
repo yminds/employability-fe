@@ -161,7 +161,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
                 value={formatDateForInput(edu.from_date)}
                 onChange={(value) => updateEducation(index, "from_date", value)}
                 maxDate={new Date().toISOString().split("T")[0]}
-                placeholder="Select from date"
+                placeholder="dd/mm/yyyy"
                 className={`${
                   getError(`education.${index}.from_date`)
                     ? "border-red-500"
@@ -183,7 +183,7 @@ const EducationForm: React.FC<EducationFormProps> = ({
                 value={formatDateForInput(edu.till_date)}
                 onChange={(value) => updateEducation(index, "till_date", value)}
                 minDate={formatDateForInput(edu.from_date)}
-                placeholder="Select till date"
+                placeholder="dd/mm/yyyy"
                 className={
                   getError(`education.${index}.till_date`)
                     ? "border-red-500"

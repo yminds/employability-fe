@@ -410,7 +410,7 @@ export default function BasicInfoForm({
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
               maxDate={new Date().toISOString().split("T")[0]}
-              placeholder="Select date of birth"
+              placeholder="dd/mm/yyyy"
               className={getError("date_of_birth") ? "border-red-500" : ""}
             />
             {getError("date_of_birth") && (

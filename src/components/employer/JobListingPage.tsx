@@ -6,7 +6,7 @@ import {
   useGetJobDetailsQuery,
 } from "../../api/employerJobsApiSlice";
 
-// Import our new components
+// Import our components
 import BreadcrumbNav from "./nav/BreadcrumbNav";
 import TabNavigation from "./TabNavigation";
 import SearchAndFilters from "./SearchAndFilters";
@@ -16,6 +16,9 @@ import StatsCards from "./StatsCard";
 import ResumeUploadBanner from "./ResumeUploadBanner";
 import JobDetailsCard from "./JobDetailsCard";
 import ResumeUploadModal, { ProcessedResume } from "./UploadResumesModal";
+import InterviewModal from "./InterviewInvitationModal";
+// Import the new InterviewCandidatesView component
+import InterviewCandidatesView from "./InterviewCandidatesView";
 
 interface JobListingPageProps {
   job_id: string;
@@ -24,7 +27,8 @@ interface JobListingPageProps {
 export default function JobListingPage({ job_id }: JobListingPageProps) {
   const navigate = useNavigate();
 
-  const [selectedTab, setSelectedTab] = useState("matching");
+  // Changed default tab to "inviteCandidates" to match new naming
+  const [selectedTab, setSelectedTab] = useState("inviteCandidates");
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,10 +36,11 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>(
-    []
-  );
+  const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
+  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  // Add state for interview count
+  const [interviewCount, setInterviewCount] = useState(60); // Default to 60 for demo purposes
 
   // Fetch job details
   const {
@@ -161,21 +166,25 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     setCurrentPage(1); // Reset to page 1 on new search
   };
 
-  // Send interview invites for selected candidates
+  // Send interview invites for selected candidates - Updated to open modal
   const handleSendInterviewInvite = () => {
     if (selectedCandidates.length === 0) return;
 
-    // Grab details for the selected IDs
+    // Open the interview modal instead of showing an alert
+    setIsInterviewModalOpen(true);
+    
+    // Grab details for the selected IDs (keep for future reference)
     const selectedCandidateDetails = allCandidates.filter((candidate: any) =>
       selectedCandidates.includes(candidate.user_id)
     );
 
-    // Call your API logic here...
+    // Original console log
     console.log("Sending interview invites to:", selectedCandidateDetails);
-
-    alert(
-      `Sending interview invites to ${selectedCandidates.length} candidates`
-    );
+  };
+  
+  // Handler to close the interview modal
+  const handleCloseInterviewModal = () => {
+    setIsInterviewModalOpen(false);
   };
 
   // Open the resume upload modal
@@ -225,47 +234,71 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
         <div className="flex gap-6">
           {/* Left section - Candidate list */}
           <div className="flex-1">
-            {/* Tabs */}
+            {/* Tabs - Pass the interview count to display in the tab */}
             <TabNavigation
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
             />
 
-            {/* Search and filters */}
-            <SearchAndFilters
-              searchTerm={searchTerm}
-              handleSearchChange={handleSearchChange}
-              filterOpen={filterOpen}
-              setFilterOpen={setFilterOpen}
-            />
+            {/* Conditional rendering based on selected tab */}
+            {selectedTab === "inviteCandidates" && (
+              <>
+                {/* Search and filters */}
+                <SearchAndFilters
+                  searchTerm={searchTerm}
+                  handleSearchChange={handleSearchChange}
+                  filterOpen={filterOpen}
+                  setFilterOpen={setFilterOpen}
+                />
 
-            {/* Filter panel */}
-            <FilterPanel
-              isOpen={filterOpen}
-              onReset={handleFilterReset}
-              onApply={handleFilterApply}
-            />
+                {/* Filter panel */}
+                <FilterPanel
+                  isOpen={filterOpen}
+                  onReset={handleFilterReset}
+                  onApply={handleFilterApply}
+                />
 
-            {/* Candidate list */}
-            <CandidateList
-              isLoading={isLoading}
-              error={!!error}
-              currentCandidates={currentCandidates}
-              filteredCandidates={filteredCandidates}
-              selectAll={selectAll}
-              selectedCandidates={selectedCandidates}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              rowsPerPage={rowsPerPage}
-              indexOfFirstCandidate={indexOfFirstCandidate}
-              indexOfLastCandidate={indexOfLastCandidate}
-              handleSelectAllCurrentPage={handleSelectAllCurrentPage}
-              handleSelectAllCandidates={handleSelectAllCandidates}
-              handleSelectCandidate={handleSelectCandidate}
-              handleSendInterviewInvite={handleSendInterviewInvite}
-              handlePageChange={handlePageChange}
-              setRowsPerPage={setRowsPerPage}
-            />
+                {/* Candidate list */}
+                <CandidateList
+                  isLoading={isLoading}
+                  error={!!error}
+                  currentCandidates={currentCandidates}
+                  filteredCandidates={filteredCandidates}
+                  selectAll={selectAll}
+                  selectedCandidates={selectedCandidates}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  rowsPerPage={rowsPerPage}
+                  indexOfFirstCandidate={indexOfFirstCandidate}
+                  indexOfLastCandidate={indexOfLastCandidate}
+                  handleSelectAllCurrentPage={handleSelectAllCurrentPage}
+                  handleSelectAllCandidates={handleSelectAllCandidates}
+                  handleSelectCandidate={handleSelectCandidate}
+                  handleSendInterviewInvite={handleSendInterviewInvite}
+                  handlePageChange={handlePageChange}
+                  setRowsPerPage={setRowsPerPage}
+                />
+              </>
+            )}
+
+            {/* Render the Interviews tab content */}
+            {selectedTab === "interviews" && (
+              <InterviewCandidatesView jobId={job_id} />
+            )}
+
+            {/* Placeholder for Shortlisted Candidates tab */}
+            {selectedTab === "shortlistedCandidates" && (
+              <div className="mt-4 p-12 bg-white rounded-lg border border-[#d6d7d9] text-center">
+                <p className="text-[#68696b]">Shortlisted Candidates view is coming soon</p>
+              </div>
+            )}
+
+            {/* Placeholder for Sent Invitations tab */}
+            {selectedTab === "sentInvitations" && (
+              <div className="mt-4 p-12 bg-white rounded-lg border border-[#d6d7d9] text-center">
+                <p className="text-[#68696b]">Sent Invitations view is coming soon</p>
+              </div>
+            )}
           </div>
 
           {/* Right section - Stats and job details */}
@@ -278,7 +311,12 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
 
             {/* Job details card */}
             <JobDetailsCard
-              jobDetails={jobDetails?.data}
+              jobDetails={jobDetails?.data ? {
+                ...jobDetails.data,
+                company: typeof jobDetails.data.company === 'string' 
+                  ? { _id: jobDetails.data.company, name: '' }
+                  : jobDetails.data.company
+              } : undefined}
               onViewDetails={() => {
                 // Navigate to detailed job view
                 navigate(`/employer/jobs/${job_id}/details`);
@@ -294,12 +332,27 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           isOpen={isModalOpen}
           setIsOpen={setIsModalOpen}
           jobId={job_id}
-          employerId={employerId?._id}
-          companyId={companyId?._id}
+          employerId={typeof employerId === 'string' ? employerId : employerId?._id}
+          companyId={typeof companyId === 'string' ? companyId : companyId?._id}
           onResumesProcessed={handleResumesProcessed}
           onSelectCandidates={handleSelectCandidates}
         />
       )}
+      
+      {/* Interview Modal */}
+      <InterviewModal
+        isOpen={isInterviewModalOpen}
+        onClose={handleCloseInterviewModal}
+        selectedCandidatesCount={selectedCandidates.length}
+        selectedCandidates={allCandidates.filter(candidate => 
+          selectedCandidates.includes(candidate._id)
+        ).map(candidate => ({
+          user_id: candidate._id,
+          name: candidate.name,
+          profile_image: candidate.profile_image
+        }))}
+        jobId={job_id}
+      />
     </div>
   );
 }
