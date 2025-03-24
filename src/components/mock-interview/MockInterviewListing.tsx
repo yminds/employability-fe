@@ -49,7 +49,7 @@ const MockInterviewsList: React.FC = () => {
 
     // Start the interview directly if tutorial is disabled
     navigate(`/interview/${interviewId}`, {
-      state: {title: `${selectedGoal.title}`, type : 'Mock', jobDescription: selectedGoal, mockFundamentals: conceptNamesCSV},
+      state: {title: `${selectedGoal.title}`, type : 'Mock', jobDescription: selectedGoal, Fundamentals: conceptNamesCSV},
     });
   };
   // Choose the skills list that includes level info if available.

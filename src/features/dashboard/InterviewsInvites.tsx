@@ -6,9 +6,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { useCreateInterview } from '@/hooks/useCreateInterview';
 import ViewJD, { JobDescription } from '@/components/interview-list/ViewJD';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { useGetAllUserInterviewsQuery } from '@/api/interviewApiSlice';
+
 
 export const mockInterviews = [
   {
