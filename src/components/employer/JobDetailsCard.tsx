@@ -25,7 +25,7 @@ const JobDetailsCard = ({ jobDetails, onViewDetails }: JobDetailsCardProps) => {
   // If job details aren't loaded yet, show a loading state
   if (!jobDetails) {
     return (
-      <div className="bg-white rounded-lg overflow-hidden mb-8">
+      <div className="bg-white rounded-lg overflow-hidden">
         <div className="p-6 flex justify-between items-start">
           <div className="flex gap-4">
             <div className="w-[70px] h-[70px] bg-[#eceef0] rounded-full animate-pulse"></div>
@@ -44,7 +44,7 @@ const JobDetailsCard = ({ jobDetails, onViewDetails }: JobDetailsCardProps) => {
   }
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden mb-8">
+    <div className="bg-white rounded-lg overflow-hidden">
       {/* Header */}
       <div className="p-6 flex justify-between items-start">
         <div className="flex gap-4">
