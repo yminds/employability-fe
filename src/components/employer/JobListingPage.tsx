@@ -12,13 +12,16 @@ import TabNavigation from "./TabNavigation";
 import SearchAndFilters from "./SearchAndFilters";
 import FilterPanel from "./FilterPanel";
 import CandidateList from "./CandidateList";
-import StatsCards from "./StatsCard";
+// import StatsCards from "./StatsCard";
 import ResumeUploadBanner from "./ResumeUploadBanner";
 import JobDetailsCard from "./JobDetailsCard";
 import ResumeUploadModal, { ProcessedResume } from "./UploadResumesModal";
 import InterviewModal from "./InterviewInvitationModal";
 // Import the new InterviewCandidatesView component
 import InterviewCandidatesView from "./InterviewCandidatesView";
+import FullInterviewsCard from "./FullInterviewsCard";
+import ScreeningInterviewsCard from "./ScreeningInterviewsCard";
+import MatchingCandidatesCard from "./MatchingCandidatesCard";
 
 interface JobListingPageProps {
   job_id: string;
@@ -37,7 +40,9 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
-  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([]);
+  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>(
+    []
+  );
   const [searchTerm, setSearchTerm] = useState("");
   // Add state for interview count
   const [interviewCount, setInterviewCount] = useState(60); // Default to 60 for demo purposes
@@ -172,7 +177,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
 
     // Open the interview modal instead of showing an alert
     setIsInterviewModalOpen(true);
-    
+
     // Grab details for the selected IDs (keep for future reference)
     const selectedCandidateDetails = allCandidates.filter((candidate: any) =>
       selectedCandidates.includes(candidate.user_id)
@@ -181,7 +186,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     // Original console log
     console.log("Sending interview invites to:", selectedCandidateDetails);
   };
-  
+
   // Handler to close the interview modal
   const handleCloseInterviewModal = () => {
     setIsInterviewModalOpen(false);
@@ -230,15 +235,42 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
         {/* Breadcrumb */}
         <BreadcrumbNav jobTitle={jobDetails?.data.title} />
 
+        {/* Job details card */}
+        <JobDetailsCard
+          jobDetails={
+            jobDetails?.data
+              ? {
+                  ...jobDetails.data,
+                  company:
+                    typeof jobDetails.data.company === "string"
+                      ? { _id: jobDetails.data.company, name: "" }
+                      : jobDetails.data.company,
+                }
+              : undefined
+          }
+          onViewDetails={() => {
+            // Navigate to detailed job view
+            navigate(`/employer/jobs/${job_id}/details`);
+          }}
+        />
+
         {/* Main content */}
         <div className="flex gap-6">
           {/* Left section - Candidate list */}
-          <div className="flex-1">
+          <div className="flex-1 space-y-8">
             {/* Tabs - Pass the interview count to display in the tab */}
             <TabNavigation
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
             />
+
+            <div className="flex mb-6 space-x-4">
+              {/* Matching Candidate Card */}
+              <MatchingCandidatesCard />
+
+              {/* Upload resumes banner */}
+              <ResumeUploadBanner onClick={handleOpenResumeModal} />
+            </div>
 
             {/* Conditional rendering based on selected tab */}
             {selectedTab === "inviteCandidates" && (
@@ -289,39 +321,32 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
             {/* Placeholder for Shortlisted Candidates tab */}
             {selectedTab === "shortlistedCandidates" && (
               <div className="mt-4 p-12 bg-white rounded-lg border border-[#d6d7d9] text-center">
-                <p className="text-[#68696b]">Shortlisted Candidates view is coming soon</p>
+                <p className="text-[#68696b]">
+                  Shortlisted Candidates view is coming soon
+                </p>
               </div>
             )}
 
             {/* Placeholder for Sent Invitations tab */}
             {selectedTab === "sentInvitations" && (
               <div className="mt-4 p-12 bg-white rounded-lg border border-[#d6d7d9] text-center">
-                <p className="text-[#68696b]">Sent Invitations view is coming soon</p>
+                <p className="text-[#68696b]">
+                  Sent Invitations view is coming soon
+                </p>
               </div>
             )}
           </div>
 
           {/* Right section - Stats and job details */}
-          <div className="w-[350px]">
+          <div className="w-[350px] space-y-3.5">
             {/* Stats cards */}
-            <StatsCards candidatesCount={allCandidates.length} />
+            {/* <StatsCards candidatesCount={allCandidates.length} /> */}
 
-            {/* Upload resumes banner */}
-            <ResumeUploadBanner onClick={handleOpenResumeModal} />
+            {/* Full Interviews */}
+            <FullInterviewsCard />
 
-            {/* Job details card */}
-            <JobDetailsCard
-              jobDetails={jobDetails?.data ? {
-                ...jobDetails.data,
-                company: typeof jobDetails.data.company === 'string' 
-                  ? { _id: jobDetails.data.company, name: '' }
-                  : jobDetails.data.company
-              } : undefined}
-              onViewDetails={() => {
-                // Navigate to detailed job view
-                navigate(`/employer/jobs/${job_id}/details`);
-              }}
-            />
+            {/* Screening Interviews */}
+            <ScreeningInterviewsCard />
           </div>
         </div>
       </div>
@@ -332,25 +357,27 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           isOpen={isModalOpen}
           setIsOpen={setIsModalOpen}
           jobId={job_id}
-          employerId={typeof employerId === 'string' ? employerId : employerId?._id}
-          companyId={typeof companyId === 'string' ? companyId : companyId?._id}
+          employerId={
+            typeof employerId === "string" ? employerId : employerId?._id
+          }
+          companyId={typeof companyId === "string" ? companyId : companyId?._id}
           onResumesProcessed={handleResumesProcessed}
           onSelectCandidates={handleSelectCandidates}
         />
       )}
-      
+
       {/* Interview Modal */}
       <InterviewModal
         isOpen={isInterviewModalOpen}
         onClose={handleCloseInterviewModal}
         selectedCandidatesCount={selectedCandidates.length}
-        selectedCandidates={allCandidates.filter(candidate => 
-          selectedCandidates.includes(candidate._id)
-        ).map(candidate => ({
-          user_id: candidate._id,
-          name: candidate.name,
-          profile_image: candidate.profile_image
-        }))}
+        selectedCandidates={allCandidates
+          .filter((candidate) => selectedCandidates.includes(candidate._id))
+          .map((candidate) => ({
+            user_id: candidate._id,
+            name: candidate.name,
+            profile_image: candidate.profile_image,
+          }))}
         jobId={job_id}
       />
     </div>
