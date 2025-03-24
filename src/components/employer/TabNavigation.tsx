@@ -29,7 +29,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`px-4 py-3 text-sm font-medium ${
+            className={`px-4 pb-3 text-sm font-medium ${
               selectedTab === tab.id
                 ? "text-[#001630] border-b-2 border-[#24d680]"
                 : "text-[#68696b]"
