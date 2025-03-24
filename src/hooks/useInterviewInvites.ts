@@ -5,8 +5,8 @@ import {
   useRespondToInviteMutation, 
 } from '@/api/interviewInvitesApiSlice';
 import { useSelector } from 'react-redux';
-
 // Define interface for interview invite
+
 export interface InterviewInvite {
   _id: string;
   job?: {
@@ -17,6 +17,9 @@ export interface InterviewInvite {
     job_type?: string;
     work_place_type?: string;
     experience_level?: string;
+    skills_required?: {
+      skill: string;
+    }[];
   };
   company?: {
     name?: string;
@@ -26,6 +29,7 @@ export interface InterviewInvite {
   };
   status: string;
   application_deadline: string;
+  fundamentalsCsv?: string | null;
 }
 
 export const useInterviewInvites = (userId?: string) => {

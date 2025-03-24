@@ -25,11 +25,29 @@ export const interviewInvitesApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       })
     }),
+    // Get fundamentals names as CSV by skill pool IDs
+    getFundamentalNamesAsCsv: builder.mutation<{data:string}, string[]>({
+      query: (skill_pool_ids) => ({
+        url: '/api/v1/fundamentals/getNamesAsCsv',
+        method: 'POST',
+        body: { skill_pool_ids },
+      }),
+    }),
+    updateInterviewId: builder.mutation({
+      query: ({ inviteId, interviewId }) => ({
+        url: `/api/v1/employerInterviewInvitation/invite/${inviteId}`,
+        method: "POST",
+        body: { interviewId },
+      }),
+      invalidatesTags: ['InterviewInvites'],
+    }),
   }),
 });
 
 export const { 
   useGetInvitesByUserIdQuery,
   useRespondToInviteMutation,
-  useGetInviteDetailsQuery
+  useGetInviteDetailsQuery,
+  useGetFundamentalNamesAsCsvMutation,
+  useUpdateInterviewIdMutation
 } = interviewInvitesApiSlice; 

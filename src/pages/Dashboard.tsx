@@ -308,13 +308,7 @@ const Dashboard: React.FC<Props> = () => {
     <main className="h-screen w-full overflow-hidden font-ubuntu">
       <div className="h-full flex flex-col bg-[#F5F5F5]">
         <div className="flex-1 p-[55px] min-h-0">
-          {isInitialLoading ? (
-            // Initial loading state for the entire dashboard
-            <div className="h-full flex flex-col justify-center items-center">
-              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="mt-4 text-gray-600">Loading your dashboard...</p>
-            </div>
-          ) : hasGoals ? (
+          {!isInitialLoading && hasGoals ? (
             <div className="h-full flex flex-col">
               {/* Header */}
               <header className="flex-none mb-6">
@@ -337,6 +331,30 @@ const Dashboard: React.FC<Props> = () => {
                   <div className="col-span-3 min-h-0 flex flex-col">
                     <div className="overflow-y-auto pr-4 scrollbar-hide">
                       <div className="flex flex-col gap-6">
+                        {/* Interview List - Moved to top */}
+                        {isContentLoading ? (
+                          <SkillListSkeleton />
+                        ) : (
+                          <>
+                            {invitesData?.data && Array.isArray(invitesData.data) && invitesData.data.length > 0 && !invitesError && (
+                              <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                                <InterviewList 
+                                  isDashboard={true} 
+                                  invites={invitesData.data}
+                                  onAccept={(id) => {
+                                    console.log("Accept interview", id);
+                                    // Add your acceptance logic here
+                                  }}
+                                  onDecline={(id) => {
+                                    console.log("Decline interview", id);
+                                    // Add your decline logic here
+                                  }}
+                                />
+                              </section>
+                            )}
+                          </>
+                        )}
+                        
                         {/* Skill Progress */}
                         <div>
                           {isContentLoading ? (
@@ -367,29 +385,6 @@ const Dashboard: React.FC<Props> = () => {
                             />
                           )}
                         </div>
-
-                        {/* Interview List */}
-                        {isContentLoading ? (
-                          <SkillListSkeleton />
-                        ) : (
-                          // Only show interview list if there are invites and no error
-                          invitesData?.data && Array.isArray(invitesData.data) && invitesData.data.length > 0 && !invitesError && (
-                            <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
-                              <InterviewList 
-                                isDashboard={true} 
-                                invites={invitesData?.data}
-                                onAccept={(id) => {
-                                  console.log("Accept interview", id);
-                                  // Add your acceptance logic here
-                                }}
-                                onDecline={(id) => {
-                                  console.log("Decline interview", id);
-                                  // Add your decline logic here
-                                }}
-                              />
-                            </section>
-                          )
-                        )}
 
                         {/* Try Things Section */}
                         {isContentLoading ? (

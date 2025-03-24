@@ -35,6 +35,7 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
   thread_id,
   experience_level,
 }) => {
+  console.log("currentQuizTopic", currentQuizTopic);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [score, setScore] = useState(0);
@@ -81,8 +82,10 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
   // Handle outside click to close modal
   const handleOutsideClick = useCallback(
     (event: MouseEvent) => {
-      // Removing this functionality to prevent dialog from closing on outside click
-      return;
+      const modal = document.getElementById("quiz-modal");
+      if (modal && !modal.contains(event.target as Node)) {
+        onClose();
+      }
     },
     [onClose]
   );
@@ -95,12 +98,11 @@ const QuizDialog: React.FC<QuizDialogProps> = ({
     };
 
     document.addEventListener("keydown", handleKeyDown);
-    // Removing the mouse event listener
-    // document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("mousedown", handleOutsideClick);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      // document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, [onClose, handleOutsideClick]);
 
