@@ -168,8 +168,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
                 <div key={index}><LoadingSkeleton /></div>
               ))}
             </div>
-          ) : isDashboard ? (
-            // Dashboard view - List layout
+          ) : (
             <div className="flex flex-col gap-4">
               {displayedInterviews.map((invite: InterviewInvite) => {
                 const isProcessing = processingIds.includes(invite._id);
@@ -177,27 +176,6 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
 
                 return (
                   <InvitationListItem
-                    key={invite._id}
-                    invite={invite}
-                    isProcessing={isProcessing}
-                    isSelected={!!isSelected}
-                    onInviteClick={handleInviteClick}
-                    onAccept={onInviteAccept}
-                    onDecline={onInviteDecline}
-                    showSidebar={showSidebar}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            // Non-dashboard view - Grid card layout
-            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedInterviews.map((invite: InterviewInvite) => {
-                const isProcessing = processingIds.includes(invite._id);
-                const isSelected = selectedInvite && selectedInvite._id === invite._id;
-
-                return (
-                  <InvitationGridItem
                     key={invite._id}
                     invite={invite}
                     isProcessing={isProcessing}
