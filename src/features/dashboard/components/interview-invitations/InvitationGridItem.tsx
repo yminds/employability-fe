@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { InviteItemProps } from './types';
 import { ActionButtons } from './ActionButtons';
 import { capitalizeString, formatDate, getDaysRemaining, getGridItemClassName, getStatusColor } from './utils';
-import { useGetFundamentalNamesAsCsvMutation } from '@/api/fundementalSlice';
 
 export const InvitationGridItem: React.FC<InviteItemProps> = ({
   invite,
@@ -15,12 +14,6 @@ export const InvitationGridItem: React.FC<InviteItemProps> = ({
 }) => {
   const [fundamentalsCsv, setFundamentalsCsv] = useState<string | null>(null);
   const [isLoadingFundamentals, setIsLoadingFundamentals] = useState(false);
- 
-  
-  // Extract skill pool IDs from the invite
-  const skillPoolIds = invite.job?.skills_required?.map((skill) => skill.skill) || [];
-  
-  // Fetch fundamentals only once when component mounts or when skillPoolIds change
 
 
   
