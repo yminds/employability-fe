@@ -220,7 +220,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   return (
     <ReportContent
       reportData={reportData}
-      userName={profile?.name || ""} // or profile?.username, depending on your API
+      userName={profile?.name || username || ""} // Use username from URL if profile name is not available
       handleBackToSkillsPage={handleBackToSkillsPage}
       goal_name={goal_name}
       skill_icon={skillIcon}
@@ -230,7 +230,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
       userSkillId={skill?._id}
       level={level}
       skill={skill}
-      publicProfileName={profile?.username || ""}
+      publicProfileName={profile?.username || username || ""} // Use username from URL if profile username is not available
       isPublic={isPublic}
     />
   );

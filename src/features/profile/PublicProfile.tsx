@@ -14,6 +14,7 @@ import ProfileBannerMobile from "./ProfileBannerMobile";
 import { useEffect } from "react";
 import ProfileSkeleton from "./publicProfileSkeleton/profile-skeleton";
 import FeaturedInterviewSection from "./FeaturedInterviewSection";
+import LogoIcon from "../../assets/sidebar/logo.svg";
 
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -109,13 +110,23 @@ const PublicProfile: React.FC = () => {
   return (
     <div className="w-full max-w-screen-xl mx-auto p-4">
       <div className="lg:hidden xl:hidden 2xl:hidden">
+        <div className="flex gap-2 mb-3.5">
+          <img
+            src={LogoIcon || "/placeholder.svg"}
+            alt=""
+            className="w-[29px] h-[26px]"
+          />
+          <div className="text-[#001630] font-ubuntu text-[16px] font-bold">
+            <span>Employ</span>
+            <span className="text-[#0AD472]">Ability.AI</span>
+          </div>
+        </div>
         <div className="mb-6">
           <ProfileBannerMobile
             user={profile}
             bio={bio}
             onBioUpdate={handleEdit}
             isPublic={true}
-            goalData={""}
           />
         </div>
         {/* Mobile Right Section Components */}
@@ -131,13 +142,23 @@ const PublicProfile: React.FC = () => {
             profile?.featuredInterview ? "col-span-7" : "col-span-10"
           }`}
         >
+          <div className="flex gap-2 mb-6">
+            <img
+              src={LogoIcon || "/placeholder.svg"}
+              alt=""
+              className="w-[29px] h-[26px]"
+            />
+            <div className="text-[#001630] font-ubuntu text-[16px] font-bold">
+              <span>Employ</span>
+              <span className="text-[#0AD472]">Ability.AI</span>
+            </div>
+          </div>
           <div className="">
             <ProfileBanner
               user={profile}
               bio={bio}
               onBioUpdate={handleEdit}
               isPublic={true}
-              goalData={""}
             />
           </div>
 
@@ -145,7 +166,7 @@ const PublicProfile: React.FC = () => {
           <div className="space-y-6">{renderMainContentSections()}</div>
         </div>
         {/* Right Section */}
-        <div className="flex flex-col space-y-6 flex-1 col-span-3">
+        <div className="flex flex-col space-y-6 mt-[50px] flex-1 col-span-3">
           {renderRightSectionComponents()}
         </div>
       </div>

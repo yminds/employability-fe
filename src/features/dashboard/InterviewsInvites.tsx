@@ -5,10 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { useCreateInterview } from '@/hooks/useCreateInterview';
-import ViewJD from '@/components/interview-list/ViewJD';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { useGetAllUserInterviewsQuery } from '@/api/interviewApiSlice';
+import ViewJD, { JobDescription } from '@/components/interview-list/ViewJD';
+
 
 export const mockInterviews = [
   {
@@ -27,11 +25,26 @@ export const mockInterviews = [
         "Write and execute test cases for new features and bug fixes."
       ],
       "requiredSkillsAndQualifications": [
-        "HTML5/CSS3",
-        "JavaScript (ES6+)",
-        "React.js",
-        "Responsive Web Design",
-        "Version Control (Git)"
+        {
+          skill: "HTML5/CSS3",
+          importance: "important"
+        },
+        {
+          skill: "JavaScript (ES6+)",
+          importance: "important"
+        },
+        {
+          skill: "React.js",
+          importance: "critical"
+        },
+        {
+          skill: "Responsive Web Design",
+          importance: "important"
+        },
+        {
+          skill: "Version Control (Git)",
+          importance: "somewhat important"
+        }
       ],
       "experience": "2-4 years in frontend web development.",
       "perksAndBenefits": "A dynamic environment where your innovative ideas are valued. We offer health insurance, flexible work hours, and opportunities for continuous learning.",
@@ -70,11 +83,26 @@ export const mockInterviews = [
         "Troubleshoot and resolve backend-related issues promptly."
       ],
       "requiredSkillsAndQualifications": [
-        "Node.js",
-        "Express.js",
-        "RESTful API Development",
-        "MongoDB / SQL",
-        "Testing Frameworks (Jest or Mocha)"
+        {
+          skill: "Node.js",
+          importance: "important"
+        },
+        {
+          skill: "Express.js", 
+          importance: "important"
+        },
+        {
+          skill: "RESTful API Development",
+          importance: "important"
+        },
+        {
+          skill: "MongoDB / SQL",
+          importance: "important"
+        },
+        {
+          skill: "Testing Frameworks (Jest or Mocha)",
+          importance: "somewhat important"
+        }
       ],
       "experience": "3-5 years in backend web development.",
       "perksAndBenefits": "Competitive salary with bonuses, medical insurance, and a collaborative environment that fosters innovation and professional growth.",
@@ -113,11 +141,34 @@ export const mockInterviews = [
         "Perform troubleshooting and debugging across the entire web stack."
       ],
       "requiredSkillsAndQualifications": [
-        "React.js or Vue.js",
-        "Node.js or Python",
-        "API Design and Integration",
-        "Database Management (SQL or NoSQL)",
-        "DevOps Fundamentals"
+        {
+          skill: "React.js",
+          importance: "Very Important"
+        },
+        {
+          skill: "Node.js",
+          importance: "Very Important"
+        },
+        {
+          skill: "MongoDB",
+          importance: "Very Important"
+        },
+        {
+          skill: "Express.js",
+          importance: "Very Important"
+        },
+        {
+          skill: "HTML",
+          importance: "important"
+        },
+        {
+          skill: "CSS",
+          importance: "important"
+        },
+        {
+          skill: "JavaScript",
+          importance: "important"
+        }
       ],
       "experience": "2-5 years in full-stack web development.",
       "perksAndBenefits": "Highly competitive salary, stock options, remote work flexibility, and a culture that promotes professional growth through continuous learning.",
@@ -147,7 +198,7 @@ export const mockInterviews = [
     "jobTitle": "UI/UX Web Developer",
     "dueDate": "2023-10-05",
     "jobDescription": {
-      "summary": "PixelCraft Labs is on the lookout for a UI/UX Web Developer with a strong eye for design and a passion for creating intuitive user experiences. You’ll work closely with designers and product managers to translate wireframes and mockups into high-fidelity, interactive web pages.",
+      "summary": "PixelCraft Labs is on the lookout for a UI/UX Web Developer with a strong eye for design and a passion for creating intuitive user experiences. You'll work closely with designers and product managers to translate wireframes and mockups into high-fidelity, interactive web pages.",
       "keyResponsibilities": [
         "Implement pixel-perfect, responsive web layouts using HTML, CSS, and JavaScript.",
         "Integrate design tools (Figma, Sketch, or Adobe XD) to streamline workflow.",
@@ -156,11 +207,26 @@ export const mockInterviews = [
         "Collaborate with cross-functional teams to ensure design integrity."
       ],
       "requiredSkillsAndQualifications": [
-        "HTML/CSS/JavaScript",
-        "Responsive & Adaptive Design",
-        "UI/UX Principles",
-        "Design Tool Proficiency (Figma/Sketch/XD)",
-        "Cross-Browser Testing"
+        {
+          skill: "HTML/CSS/JavaScript",
+          importance: "critical"
+        },
+        {
+          skill: "Responsive & Adaptive Design",
+          importance: "critical"
+        },
+        {
+          skill: "UI/UX Principles",
+          importance: "critical"
+        },
+        {
+          skill: "Design Tool Proficiency (Figma/Sketch/XD)",
+          importance: "important"
+        },
+        {
+          skill: "Cross-Browser Testing",
+          importance: "important"
+        }
       ],
       "experience": "1-3 years in UI/UX or frontend development.",
       "perksAndBenefits": "Employee wellness programs, ongoing training opportunities, and an open office environment that encourages creativity and collaboration.",
@@ -178,7 +244,7 @@ export const mockInterviews = [
       "keySkills": "HTML CSS JavaScript UI/UX Figma Sketch"
     },
     "specificQuestions": [
-      "What’s your process for transforming wireframes into interactive prototypes?",
+      "What's your process for transforming wireframes into interactive prototypes?",
       "Describe a time you improved the accessibility of a web application.",
       "How do you balance aesthetics with performance optimization?"
     ]
@@ -199,11 +265,26 @@ export const mockInterviews = [
         "Troubleshoot and resolve website performance and usability issues."
       ],
       "requiredSkillsAndQualifications": [
-        "HTML/CSS/JavaScript",
-        "Backend Integration (PHP, Node.js, or similar)",
-        "Database Knowledge (MySQL or MongoDB)",
-        "Cross-Platform & Cross-Browser Optimization",
-        "CMS Experience (WordPress or Drupal)"
+        {
+          skill: "HTML/CSS/JavaScript",
+          importance: "important"
+        },
+        {
+          skill: "Backend Integration (PHP, Node.js, or similar)",
+          importance: "important"
+        },
+        {
+          skill: "Database Knowledge (MySQL or MongoDB)",
+          importance: "somewhat important"
+        },
+        {
+          skill: "Cross-Platform & Cross-Browser Optimization",
+          importance: "important"
+        },
+        {
+          skill: "CMS Experience (WordPress or Drupal)",
+          importance: "somewhat important"
+        }
       ],
       "experience": "1-3 years in general web development.",
       "perksAndBenefits": "Competitive salary, a friendly work atmosphere, regular team lunches, and career growth opportunities within a rapidly expanding company.",
@@ -223,25 +304,11 @@ export const mockInterviews = [
     "specificQuestions": [
       "What strategies do you use to ensure a website is mobile-responsive?",
       "How do you handle server-side rendering versus client-side rendering?",
-      "Can you describe a complex integration you’ve managed involving multiple APIs?"
+      "Can you describe a complex integration you've managed involving multiple APIs?"
     ]
   }
 ]
 ;
-
-interface JobDescription {
-  summary: string;
-  keyResponsibilities: string[];
-  requiredSkillsAndQualifications: string[];
-  experience: string;
-  perksAndBenefits: string;
-  whyJoinUs: string[];
-  role: string;
-  industryType: string;
-  department: string;
-  employmentType: string;
-  roleCategory: string;
-}
 
 interface Interview {
   id: number;
@@ -250,6 +317,7 @@ interface Interview {
   dueDate: string;
   jobTitle: string;
   jobDescription: JobDescription;
+  specificQuestions?: string[];
 }
 
 interface InterviewListProps {
@@ -278,10 +346,6 @@ const InterviewInvites: React.FC<InterviewListProps> = ({ isDashboard = false, i
     setSelectedInterview((prev) => (prev?.id === interview.id ? null : interview));
   };
 
-  const handleSeeDetails = (interview: Interview) => {
-    // Navigate to a detailed view (replace with your route)
-    navigate(`/interviews/${interview.id}`);
-  };
 
   const handleTakeInterview = async (interview: Interview) => {
     const interviewId = await createInterview({

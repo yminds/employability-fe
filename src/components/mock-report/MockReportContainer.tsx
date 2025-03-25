@@ -89,16 +89,16 @@ interface Report {
 }
 
 interface JobDetails {
-  jobTitle?: string;
-  company?: string;
-  description?: string;
-  skills_pool_ids?: Array<{ name: string; icon: string }>;
-  jobDescription?: {
-    summary: string;
-    requiredSkillsAndQualifications: string[];
-    keyResponsibilities: string[];
-  };
-  title?: string;
+	jobTitle?: string;
+	company?: string;
+	description?: string;
+	skills_pool_ids?: Array<{ name: string; icon: string }>;
+	jobDescription?: {
+	  summary: string;
+	  requiredSkillsAndQualifications:  Array<{ name: string; importance: string }>;
+	  keyResponsibilities: string[];
+	};
+	title?: string;
 }
 
 interface MockReportContentProps {
@@ -773,34 +773,34 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
           </p>
         </div>
 
-        {/* 3. Skills Required */}
-        <div className="mb-6">
-          <h3 className="text-sub-header font-medium text-grey-6 mb-2">Skills required</h3>
-          <div className="flex flex-wrap gap-2">
-            {Array.isArray(jobDetails?.jobDescription?.requiredSkillsAndQualifications) ? (
-              jobDetails.jobDescription.requiredSkillsAndQualifications.map((skill: string) => (
-                <span
-                  key={skill}
-                  className="inline-block bg-[#E7EFEB] text-[#03963F] text-xs font-medium px-2 py-1 rounded-full"
-                >
-                  {skill}
-                </span>
-              ))
-            ) : Array.isArray(jobDetails?.skills_pool_ids) ? (
-              jobDetails.skills_pool_ids.map((skill: { name: string; icon: string }) => (
-                <span
-                  key={skill.name}
-                  className="inline-block bg-[#E7EFEB] text-[#03963F] text-xs font-medium px-2 py-1 rounded-full flex items-center gap-2"
-                >
-                  <img src={skill.icon} alt={skill.name} className="w-4 h-4" />
-                  {skill.name}
-                </span>
-              ))
-            ) : (
-              <p className="text-sm text-grey-5">No skills listed</p>
-            )}
-          </div>
-        </div>
+				{/* 3. Skills Required */}
+				<div className="mb-6">
+					<h3 className="text-sub-header font-medium text-grey-6 mb-2">Skills required</h3>
+					<div className="flex flex-wrap gap-2">
+						{Array.isArray(jobDetails?.jobDescription?.requiredSkillsAndQualifications) ? (
+							jobDetails.jobDescription.requiredSkillsAndQualifications.map((skillObj) => (
+								<span
+									key={skillObj.importance}
+									className="inline-block bg-[#E7EFEB] text-[#03963F] text-xs font-medium px-2 py-1 rounded-full"
+								>
+									{skillObj.name}
+								</span>
+							))
+						) : Array.isArray(jobDetails?.skills_pool_ids) ? (
+							jobDetails.skills_pool_ids.map((skill: { name: string; icon: string }) => (
+								<span
+									key={skill.name}
+									className=" bg-[#E7EFEB] text-[#03963F] text-xs font-medium flex px-2 py-1 rounded-full items-center gap-2"
+								>
+									<img src={skill.icon} alt={skill.name} className="w-4 h-4" />
+									{skill.name}
+								</span>
+							))
+						) : (
+							<p className="text-sm text-grey-5">No skills listed</p>
+						)}
+					</div>
+				</div>
 
         {/* 4. Key Responsibilities */}
         {reportData?.interview_id.type === "Job" ? (

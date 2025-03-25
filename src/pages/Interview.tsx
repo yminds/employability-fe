@@ -25,10 +25,8 @@ const InterviewSetupNew: React.FC = () => {
   // New state to track if the user has the required camera and mic permissions
   const [hasPermissions, setHasPermissions] = useState(false);
 
-  const { title, skillPoolId, level, type, jobDescription, isResume, mockFundamentals, projectId } = location.state || {};
+  const { title, skillPoolId, level, type, jobDescription, isResume, Fundamentals = "", projectId, skills_required } = location.state || {};
 
-
-  console.log("jobDescription", jobDescription);
   const {
     isInterviewStarted,
     setIsInterviewStarted,
@@ -232,7 +230,8 @@ const InterviewSetupNew: React.FC = () => {
           isResume={isResume}
           projectId={projectId}
           userExperience={userExperience}
-          mockFundamentals={mockFundamentals}
+          Fundamentals={Fundamentals ? Fundamentals.split(',').map((concept: string)   => concept.trim()) : []}
+          skills_required={skills_required || []}
         />
       )}
     </>

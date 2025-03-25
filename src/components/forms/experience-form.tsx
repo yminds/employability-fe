@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "../ui/date-picker";
 
 interface ExperienceFormProps {
   experience: ExperienceItem[];
@@ -199,18 +200,18 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
               <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                 Start Date <span className="text-red-500">*</span>
               </Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={formatDateForInput(exp.start_date)}
-                onChange={(e) =>
-                  updateExperience(index, "start_date", e.target.value)
+                onChange={(value) =>
+                  updateExperience(index, "start_date", value)
                 }
-                max={new Date().toISOString().split("T")[0]}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                maxDate={new Date().toISOString().split("T")[0]}
+                placeholder="dd/mm/yyyy"
+                className={
                   getError(`experience.${index}.start_date`)
                     ? "border-red-500"
                     : ""
-                }`}
+                }
               />
               {getError(`experience.${index}.start_date`) && (
                 <p className="text-red-500 text-xs mt-1">
@@ -223,19 +224,19 @@ const ExperienceForm: React.FC<ExperienceFormProps> = ({
                 <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
                   End Date <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={formatDateForInput(exp.end_date || "")}
-                  onChange={(e) =>
-                    updateExperience(index, "end_date", e.target.value)
+                  onChange={(value) =>
+                    updateExperience(index, "end_date", value)
                   }
-                  min={exp.start_date}
-                  max={new Date().toISOString().split("T")[0]}
-                  className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
+                  minDate={exp.start_date}
+                  maxDate={new Date().toISOString().split("T")[0]}
+                  placeholder="dd/mm/yyyy"
+                  className={
                     getError(`experience.${index}.end_date`)
                       ? "border-red-500"
                       : ""
-                  }`}
+                  }
                 />
                 {getError(`experience.${index}.end_date`) && (
                   <p className="text-red-500 text-xs mt-1">

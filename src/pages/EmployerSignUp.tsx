@@ -1,38 +1,39 @@
-import { useState, FormEvent, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { Loader2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { useState, FormEvent, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
-import { useEmployerSignupMutation } from '@/api/employerApiSlice';
-import { setEmployerCredentials } from '@/features/authentication/employerAuthSlice';
+import { useEmployerSignupMutation } from "@/api/employerApiSlice";
+import { setEmployerCredentials } from "@/features/authentication/employerAuthSlice";
 
-import logo from '@/assets/branding/logo.svg';
-import arrow from '@/assets/skills/arrow.svg';
-import employerSignuplogo from '@/assets/employer/employerSignup1.svg';
+import logo from "@/assets/branding/logo.svg";
+import arrow from "@/assets/skills/arrow.svg";
+import employerSignuplogo from "@/assets/employer/employerSignup1.svg";
+import employerLoginSvg from "@/assets/employer/employerLoginSvg.svg";
 
-import User from '@/assets/sign-up/user.png';
-import Mail from '@/assets/sign-up/mail.png';
-import Password from '@/assets/sign-up/password.png';
+import User from "@/assets/sign-up/user.png";
+import Mail from "@/assets/sign-up/mail.png";
+import Password from "@/assets/sign-up/password.png";
 
-import { PhoneInput } from '@/components/cards/phoneInput/PhoneInput';
+import { PhoneInput } from "@/components/cards/phoneInput/PhoneInput";
+import CandidateProfileCard from "@/components/employer/CandidateProfileCard";
 
 export const EmployerSignup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
-    employerName: '',
-    email: '',
-    phoneNumber: '',
-    password: '',
-    confirmPassword: '',
+    employerName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
 
   const [signup] = useEmployerSignupMutation();
 
@@ -47,7 +48,7 @@ export const EmployerSignup = () => {
 
     // Basic password confirmation check
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match!');
+      setError("Passwords do not match!");
       setIsLoading(false);
       return;
     }
@@ -75,7 +76,7 @@ export const EmployerSignup = () => {
               createdAt: employerData.createdAt,
               updatedAt: employerData.updatedAt,
               // Company may be set if a matching company was found
-              company_id: employerData.company || null
+              company_id: employerData.company || null,
             },
             token: employerData.token,
             // Company info if found during signup
@@ -85,24 +86,28 @@ export const EmployerSignup = () => {
 
         // Reset form
         setFormData({
-          employerName: '',
-          email: '',
-          phoneNumber: '',
-          password: '',
-          confirmPassword: '',
+          employerName: "",
+          email: "",
+          phoneNumber: "",
+          password: "",
+          confirmPassword: "",
         });
-          navigate('/employer');
+        navigate("/employer");
       }
     } catch (err: any) {
-      console.error('Signup error:', err);
+      console.error("Signup error:", err);
       if (err.status === 400) {
-        if (err.data?.message?.includes('Email already exists')) {
-          setError('This email is already registered. Please try logging in instead.');
+        if (err.data?.message?.includes("Email already exists")) {
+          setError(
+            "This email is already registered. Please try logging in instead."
+          );
         } else {
-          setError(err.data?.message || 'Please check your input and try again.');
+          setError(
+            err.data?.message || "Please check your input and try again."
+          );
         }
       } else {
-        setError('An error occurred during signup. Please try again.');
+        setError("An error occurred during signup. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -121,13 +126,30 @@ export const EmployerSignup = () => {
       {/* Left Section with SVG */}
       <div className="relative flex w-1/2 items-center justify-center overflow-hidden">
         <img
-          src={employerSignuplogo}
+          src={employerLoginSvg}
           alt="Employer Signup Background"
           className="absolute inset-0 h-full w-full object-cover"
         />
         {/* Logo overlay */}
         <div className="absolute top-8 left-8 z-20">
-          <img src={logo} alt="Logo" className="w-32" />
+          <img src={logo} alt="Logo" className="w-[160px]" />
+        </div>
+
+        {/* Heading text at the top */}
+        <div className="absolute inset-0 flex flex-col justify-center items-start max-w-[400px] mx-auto z-10 px-6 pb-[340px]">
+          <h1 className="text-[30px] font-ubuntu font-medium leading-[45px] tracking-[-0.6px] text-[#202326] mb-[-4px]">
+            Cut the Guesswork.
+          </h1>
+          <h2 className="text-[30px] font-ubuntu font-bold leading-[45px] tracking-[-0.6px] text-[#10b754]">
+            Discover Proven Talent
+            <br />
+            at Speed.
+          </h2>
+        </div>
+
+        {/* Candidate profile card in the center */}
+        <div className="absolute inset-0 flex items-center justify-center z-10 px-6">
+          <CandidateProfileCard />
         </div>
       </div>
 
@@ -170,7 +192,9 @@ export const EmployerSignup = () => {
                 variant="destructive"
                 className="mb-8 bg-[#ff3b30]/10 border border-[#ff3b30] text-[#ff3b30]"
               >
-                <AlertDescription className="text-[#ff3b30]">{error}</AlertDescription>
+                <AlertDescription className="text-[#ff3b30]">
+                  {error}
+                </AlertDescription>
               </Alert>
             )}
 
@@ -182,7 +206,9 @@ export const EmployerSignup = () => {
                 className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                 placeholder="Name"
                 value={formData.employerName}
-                onChange={(e) => setFormData({ ...formData, employerName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, employerName: e.target.value })
+                }
                 required
               />
               <img
@@ -200,7 +226,9 @@ export const EmployerSignup = () => {
                 className="w-full p-3 pl-10 border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
                 placeholder="Enter your company email id"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 required
               />
               <img
@@ -231,7 +259,9 @@ export const EmployerSignup = () => {
                            focus:ring-green-500 focus:border-green-500"
                 placeholder="Password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 required
               />
               <img
@@ -250,7 +280,9 @@ export const EmployerSignup = () => {
                            focus:ring-green-500 focus:border-green-500"
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, confirmPassword: e.target.value })
+                }
                 required
               />
               <img
@@ -268,7 +300,7 @@ export const EmployerSignup = () => {
                          bg-[#062549] text-white font-medium rounded-[4px]
                          hover:bg-[#083264] transition-colors duration-200 ease-in-out"
               style={{
-                boxShadow: '0px 10px 16px -2px rgba(6, 90, 216, 0.15)',
+                boxShadow: "0px 10px 16px -2px rgba(6, 90, 216, 0.15)",
               }}
             >
               {isLoading ? (
@@ -277,7 +309,7 @@ export const EmployerSignup = () => {
                   Signing up...
                 </>
               ) : (
-                'Sign Up'
+                "Sign Up"
               )}
             </Button>
           </form>

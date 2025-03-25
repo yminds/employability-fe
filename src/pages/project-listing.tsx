@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { useGetProjectsByUserIdQuery } from "@/api/projectApiSlice";
-import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
+// import { useGetGoalsbyuserQuery } from "@/api/goalsApiSlice";
 import SkillsHeader from "@/components/skills/skillsheader";
 import ProjectCard, { ProjectCardSkeleton } from "@/components/projects/ProjectCard";
 import ProjectInsights from "@/components/projects/ProjectInsights";
@@ -149,9 +149,10 @@ const ProjectListing = () => {
   const [isChangingGoal, setIsChangingGoal] = useState(false);
   const [shouldPoll, setShouldPoll] = useState(false);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
+  const goals = useSelector((state: RootState) => state.auth.user?.goals);
 
-  const { data: goalData, isLoading: goalsLoading } = useGetGoalsbyuserQuery(userId);
-  const goalDetails = goalData?.data;
+  // const { data: goalData, isLoading: goalsLoading } = useGetGoalsbyuserQuery(userId);
+  // const goalDetails = goalData?.data;
 
   const {
     data: projectsData,
@@ -185,10 +186,10 @@ const ProjectListing = () => {
   }, [shouldPoll, refetchProjects]);
 
   useEffect(() => {
-    if (goalData?.data?.length && selectedGoalId === null) {
-      setSelectedGoalId(goalData.data[0]._id);
+    if (goals?.length && selectedGoalId === null) {
+      setSelectedGoalId(goals[0]._id);
     }
-  }, [goalData, selectedGoalId]);
+  }, [goals, selectedGoalId]);
 
   useEffect(() => {
     if (selectedGoalId) {
@@ -234,11 +235,11 @@ const ProjectListing = () => {
   };
 
   // Only show full page skeleton during initial goals loading
-  if (goalsLoading) {
+  if (projectsLoading) {
     return <ProjectListingSkeleton />;
   }
 
-  const selectedGoal = goalData?.data.find((goal) => goal._id === selectedGoalId);
+  const selectedGoal = goals?.find((goal) => goal._id === selectedGoalId);
   const selectedGoalName = selectedGoal?.name || "";
   const selectedGoalExperience = selectedGoal?.experience || null;
 
@@ -287,10 +288,10 @@ const ProjectListing = () => {
             <div className="w-full flex gap-6 md:flex-col-reverse sm:flex-col-reverse">
               <div className="xl:flex-[7] 2xl:flex-[7] lg:flex-[7] flex flex-col h-full">
                 <div className="sticky top-0 left-0 z-10 sm:relative">
-                  {goalData && (
+                  {goals && (
                     <SkillsHeader
                       userId={userId}
-                      goals={goalData}
+                      goals={goals || []}
                       selectedGoalName={selectedGoalName}
                       onSkillsStatusChange={setSkillsUpdated}
                       onGoalChange={handleGoalChange}
@@ -328,7 +329,7 @@ const ProjectListing = () => {
                   {projectsLoading || isChangingGoal ? (
                     <ProjectInsightsSkeleton />
                   ) : (
-                    <ProjectInsights goalId={selectedGoalId || ""} userId={userId || ""} goalDetails={goalDetails} />
+                    <ProjectInsights goalId={selectedGoalId || ""} userId={userId || ""} goalDetails={goals} />
                   )}
                 </div>
               </div>

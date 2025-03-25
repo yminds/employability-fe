@@ -4,12 +4,18 @@ import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
 import AddSkillsModal from "./addskills";
 import Skeleton from "react-loading-skeleton";
 
+interface Goals {
+  _id: string;
+  name: string;
+  experience: string;
+}
+
 interface SuggestedSkillsProps {
   userId: string | undefined;
   goalId: string | null;
   onSkillsUpdate: (isUpdated: boolean) => void;
   isSkillsUpdated: boolean;
-  goals: any;
+  goals: Goals[];
 }
 
 const SuggestedSkills: React.FC<SuggestedSkillsProps> = ({

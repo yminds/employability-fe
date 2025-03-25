@@ -33,7 +33,7 @@ export const resumeUploadApiSlice = createApi({
           const element = files[i];
           formData.append("resumes", element);
         }
-        formData.append("name", "dilshad");
+        
         return {
           url: "/api/v1/resume/bulkUpload-resumes",
           method: "POST",

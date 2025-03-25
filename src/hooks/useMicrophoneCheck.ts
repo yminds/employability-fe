@@ -7,7 +7,8 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
   const [soundQuality, setSoundQuality] = useState<string>("Low");
   const [isMicSelected, setIsMicSelected] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
-  const [qualityTested, setQualityTested] = useState<boolean>(false);
+  const [qualityTested, setQualityTested] = useState<boolean>(true);
+  const [isMicTested, setIsMicTested] = useState<boolean>(true);
 
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -26,6 +27,7 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
       if (storedMic) setSelectedMic(storedMic);
       setIsMicSelected(storedMicSelected);
       onMicQualityChange(storedMicSelected, isMicTested);
+      setIsMicTested(isMicTested);
     };
 
     getMicrophones();
@@ -35,7 +37,10 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
     if (isMicSelected && qualityTested) {
       onMicQualityChange(isMicSelected, qualityTested);
     }
-  }, [isMicSelected, qualityTested]);
+    else if (isMicSelected && isMicTested) {
+      onMicQualityChange(isMicSelected, isMicTested);
+    }
+  }, [isMicSelected, qualityTested, isMicTested]);
 
   useEffect(() => {
     if (selectedMic && isSpeaking) {
@@ -66,8 +71,8 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
             analyser.getByteFrequencyData(dataArray);
             const volume = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
 
-            // If the mic is not selected, set all dots to gray
-            if (!isMicSelected) {
+            // If the mic is not selected or quality is tested, set all dots to gray
+            if (!isMicSelected || qualityTested || !isMicTested) {
               setDots(Array(16).fill(false));
             } else {
               setDots(Array(16).fill(false).map((_, i) => volume > i * 10));
@@ -84,16 +89,20 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
             if (avgMid > 100 && avgHigh > 80) {
               setSoundQuality("High");
               setQualityTested(true);
+              setIsSpeaking(false);
+              setIsMicTested(true);
               localStorage.setItem("isTested", "true");
             } else if (avgMid > 20 && avgLow < 10) {
               setSoundQuality("Medium");
               setQualityTested(true);
+              setIsSpeaking(false);
+              setIsMicTested(true);
               localStorage.setItem("isTested", "true");
             } else {
               setSoundQuality("Low");
             }
 
-            if (isSpeaking) requestAnimationFrame(update);
+            if (isSpeaking && !qualityTested && !isMicTested) requestAnimationFrame(update);
           };
 
           update();
@@ -113,14 +122,16 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [selectedMic, isSpeaking, isMicSelected]);
+  }, [selectedMic, isSpeaking, isMicSelected, qualityTested]);
 
   const handleMicChange = (micId: string) => {
     setIsSpeaking(false)
     setQualityTested(false);
+    setIsMicTested(false);
     setSelectedMic(micId || null);
     if (micId) {
       localStorage.setItem("selectedMic", micId);
+
       setIsMicSelected(true);
       localStorage.setItem("isMicSelected", "true");
     } else {
@@ -143,6 +154,7 @@ export const useMicrophoneCheck = (onMicQualityChange: (isMicSelected: boolean, 
     isMicSelected,
     isSpeaking,
     qualityTested,
+    isMicTested,
     handleMicChange,
     handleSpeakClick,
   };

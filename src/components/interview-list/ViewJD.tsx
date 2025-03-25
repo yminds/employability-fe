@@ -3,7 +3,7 @@ import React from 'react';
 export type JobDescription = {
   summary: string;
   keyResponsibilities: string[];
-  requiredSkillsAndQualifications: string[];
+  requiredSkillsAndQualifications: { skill: string; importance: string }[];
   experience: string;
   perksAndBenefits: string;
   whyJoinUs: string[];
@@ -68,9 +68,18 @@ const ViewJD: React.FC<InterviewDetailsProps> = ({
         {/* 3. Required Skills */}
         <div className="mb-4">
           <h4 className="font-medium text-gray-800 mb-2">Required Skills & Qualifications</h4>
-          {jobDescription.requiredSkillsAndQualifications.map((skill, idx) => (
-            <div key={idx} className="mb-2">
-              <strong className="block text-sm text-gray-800">{skill}</strong>
+          {jobDescription.requiredSkillsAndQualifications.map((skillObj, idx) => (
+            <div key={idx} className="mb-2 flex justify-between">
+              <strong className="block text-sm text-gray-800">{skillObj.skill}</strong>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                skillObj.importance === 'critical' 
+                  ? 'bg-red-100 text-red-800' 
+                  : skillObj.importance === 'important' 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-gray-100 text-gray-800'
+              }`}>
+                {skillObj.importance}
+              </span>
             </div>
           ))}
         </div>

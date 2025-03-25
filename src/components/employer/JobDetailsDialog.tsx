@@ -23,7 +23,7 @@ import arrow from "@/assets/skills/arrow.svg"; // ← Update this import to your
 import { RootState } from "@/store/store";
 // This is your RTK Query that fetches the job details
 import { useGetJobDetailsQuery } from "../../api/employerJobsApiSlice";
-import JobDetailsTabs from "@/components/employer/JobDetailsTabs";
+// import JobDetailsTabs from "@/components/employer/JobDetailsTabs";
 
 export interface IJob {
   _id: string;
@@ -322,11 +322,11 @@ const JobDetailsPage: React.FC = () => {
             </TabsContent>
 
             {/* Additional tabs (Candidates, Screening, etc.) */}
-            <JobDetailsTabs
+            {/* <JobDetailsTabs
               job={job}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
-            />
+            /> */}
           </Tabs>
         </section>
       </div>

@@ -61,44 +61,34 @@ interface Report {
   reportType:string
 }
 
-// Define PredefinedGoal interface
 interface PredefinedGoal {
   _id: string;
   title: string;
   description?: string;
   skills?: string[];
   category?: string;
-  // Add any other properties that might be in the predefined goal
 }
 
-
-// Define the API response type
 interface ApiResponse<T> {
   data: T;
   message: string;
   status?: number;
 }
 
-// Define User interface for auth state
 interface User {
   username: string;
   profile_image?: string;
   name?: string;
-  // Add other user properties as needed
 }
 
-// Define profile interface
 interface UserProfile {
   name: string;
   username: string;
   profile_image: string;
-  // Add other profile properties as needed
 }
 
-// Loading Component
 const LoadingState = () => (
   <div className="w-full max-w-[1800px] mx-auto max-h-[95vh] m-4 p-10 space-y-8 overflow-y-auto">
-    {/* Summary section */}
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">
         <Skeleton width={100} />
@@ -108,9 +98,7 @@ const LoadingState = () => (
       </div>
     </div>
 
-    {/* Two column layout */}
     <div className="grid md:grid-cols-2 gap-6">
-      {/* Strengths section */}
       <div className="space-y-4">
         <h3 className="font-medium">
           <Skeleton width={80} />
@@ -124,7 +112,6 @@ const LoadingState = () => (
         </ul>
       </div>
 
-      {/* Performance Highlights */}
       <div className="space-y-4">
         <h3 className="font-medium">
           <Skeleton width={150} />
@@ -140,7 +127,6 @@ const LoadingState = () => (
       </div>
     </div>
 
-    {/* Performance Criteria Table */}
     <div className="space-y-4">
       <h3 className="font-medium">
         <Skeleton width={180} />
@@ -176,13 +162,11 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const navigate = useNavigate();
   const isPublic = location.state?.isPublic || false;
   
-  // Fix the destructuring with proper typing for predefined goals
   const { data: predefinedGoalsResponse } = useGetAllPreDefinedGoalsQuery() as { 
     data: ApiResponse<PredefinedGoal[]> | undefined 
   };
   const predefinedGoals = predefinedGoalsResponse?.data || [];
   
-  // Get username and interview ID from URL for shared reports
   const getInterviewIdFromUrl = () => {
     const pathParts = location.pathname.split("/");
     // URL format: /skills-report/username/interviewId
@@ -198,47 +182,38 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     };
   };
 
-  // Logged-in username from Redux with type assertion
   const loggedInUsername = useSelector((state: RootState) => {
     const authState = state as unknown as { auth: { user: User | null } };
     return authState.auth.user?.username || "";
   });
-  console.log("loggedInUsername", loggedInUsername);
 
-  // Parse username & interviewId from URL (for shared):
   const { username, interviewId } = getInterviewIdFromUrl();
 
-  // Determine what username to use for the public profile query.
-  // If it's a shared report, use the username from the URL, otherwise the logged-in username.
   const profileUsername = isSharedReport ? username : loggedInUsername;
 
-  // We only skip if we have NO username at all to query.
   const { data: profileData, isLoading: profileLoading } = useGetPublicProfileQuery(
     { username: profileUsername || "" },
     { skip: !profileUsername }
   ) as { data: UserProfile | undefined, isLoading: boolean };
   
   const profile = profileData as UserProfile;
+  console.log("profile details", profile);
 
-  // Determine the correct interview ID:
   const resolvedInterviewId = isSharedReport
-    ? interviewId // from URL
-    : location.state?.best_interview; // from React Router state
+    ? interviewId
+    : location.state?.best_interview;
 
-  // Get user profile image from Redux with type assertion
   const userImg = useSelector((state: RootState) => {
     const authState = state as unknown as { auth: { user: User | null } };
     return authState.auth.user?.profile_image;
   });
   console.log("userImg", userImg);
 
-  // State to store report data.
   const [reportData, setReportData] = useState<Report | null>(null);
 
   const thread_id = location.state?.thread_id;
   console.log(thread_id);
   
-  // Fetch report data.
   const {
     data: fetchReportData,
     isLoading: reportLoading,
@@ -247,19 +222,16 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     skip: !resolvedInterviewId,
   });
 
-  // Once both interview data and report data are available, set the report state.
   useEffect(() => {
     if (fetchReportData?.data) {
       setReportData(fetchReportData.data as Report);
     }
   }, [fetchReportData]);
 
-  // If any required data is still loading, show the loading state.
   if (profileLoading || reportLoading) {
     return <LoadingState />;
   }
 
-  // Handle error states.
   if (reportError) {
     return (
       <div className="text-red-500 text-center mt-10">
@@ -268,19 +240,16 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     );
   }
 
-  // If we've finished loading but don't have the data, show a loading skeleton or error
   if (!profile || !reportData) {
     return <LoadingState />;
   }
 
   let matchedItem: any = {};
   if (reportData.interview_id?.type === "Job") {
-    // If interview type is "Job," match from mockInterviews
     matchedItem = mockInterviews.find(
       (job) => job.jobTitle === reportData.interview_id.title
     );
   } else if (reportData.interview_id?.type === "Mock") {
-    // If reportType is "Mock," match from predefinedGoals by title
     matchedItem = predefinedGoals.find(
       (goal: PredefinedGoal) => goal.title === reportData.interview_id.title
     );
@@ -297,7 +266,7 @@ console.log("thread_id",thread_id);
   return (
     <MockReportContent
       reportData={reportData}
-      userName={profile?.name || ""} // or profile?.username, depending on your API
+      userName={profile?.name || ""}
       handleBackToSkillsPage={handleBackToSkillsPage}
       userImg={userImg || profile.profile_image}
       sharedReport={isSharedReport}

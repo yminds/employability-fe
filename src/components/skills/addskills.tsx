@@ -1,7 +1,10 @@
 // AddSkillsModal.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
-import { useCreateUserSkillsMutation, useGetUserSkillsMutation } from "@/api/skillsApiSlice";
+import {
+  useCreateUserSkillsMutation,
+  useGetUserSkillsMutation,
+} from "@/api/skillsApiSlice";
 import {
   Command,
   CommandEmpty,
@@ -25,8 +28,8 @@ import "react-loading-skeleton/dist/skeleton.css";
 import icon from "@/assets/skills/icon.svg";
 import addicon from "@/assets/skills/add_circle.svg";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice"
-import plusicon from '@/assets/skills/add_icon.png';
+import { useGetSkillSuggestionsMutation } from "@/api/skillSuggestionsApiSlice";
+import plusicon from "@/assets/skills/add_icon.png";
 
 interface Skill {
   skill_Id: string;
@@ -36,23 +39,18 @@ interface Skill {
   visibility: string;
 }
 
+interface Goals {
+  _id: string;
+  name: string;
+  experience: string;
+}
 
 interface AddSkillsModalProps {
   goalId: string | null;
   onClose: () => void;
   userId: string | undefined;
   onSkillsUpdate: (isUpdated: boolean) => void;
-  goals:
-  | {
-    message: string;
-    data: 
-      Array<{
-        experience: string | undefined;
-        _id: string;
-        name: string;
-      }>
-  }
-  | undefined;
+  goals: Goals[];
   prefillSkills: Skill[]; // Prefilled skills data
 }
 
@@ -62,20 +60,18 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   userId,
   onSkillsUpdate,
   goals,
-  prefillSkills
+  prefillSkills,
 }) => {
   const [isGoalPopoverOpen, setIsGoalPopoverOpen] = useState(false);
   const [user_Id] = useState<string>(userId ?? "");
-  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(
-    goalId
-  );
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(goalId);
   const transformSkills = (prefillSkills: any[]) => {
-    return prefillSkills.map(skill => ({
+    return prefillSkills.map((skill) => ({
       skill_Id: skill.id,
       name: skill.name,
       rating: "0",
       level: "1",
-      visibility: "All users"
+      visibility: "All users",
     }));
   };
 
@@ -83,19 +79,20 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   const [skills, setSkills] = useState<Skill[]>(
     prefillSkills.length > 0
       ? transformSkills(prefillSkills)
-      : [{
-        skill_Id: "",
-        name: "",
-        rating: "0",
-        level: "1",
-        visibility: "All users",
-      }]
+      : [
+          {
+            skill_Id: "",
+            name: "",
+            rating: "0",
+            level: "1",
+            visibility: "All users",
+          },
+        ]
   );
 
   const [isSkillOpen] = useState(false); //setIsSkillOpen
 
-  const [getUserSkills, { data: userSkillsData }] =
-    useGetUserSkillsMutation();
+  const [getUserSkills, { data: userSkillsData }] = useGetUserSkillsMutation();
 
   const [getSuggestedSkills] = useGetSkillSuggestionsMutation();
   const [isSuggestedLoading, setIsLoading] = useState(false);
@@ -123,10 +120,12 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
       // Separate fetch calls
       const userSkills = await getUserSkills({ userId, goalId }).unwrap();
       const allSkillNames = getSkillNames(userSkills.data.all);
-      const suggestedSkills = await getSuggestedSkills({ query: allSkillNames }).unwrap();
+      const suggestedSkills = await getSuggestedSkills({
+        query: allSkillNames,
+      }).unwrap();
       setSuggestedSkillsData(suggestedSkills);
     } catch (err) {
-      console.error('Error fetching skills:', err);
+      console.error("Error fetching skills:", err);
     } finally {
       setIsLoading(false);
     }
@@ -152,7 +151,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         ];
         const allSkillNames = getSkillNames(allSkills);
         // Fetch suggested skills based on the current skills
-        const suggestedSkills = await getSuggestedSkills({ query: allSkillNames }).unwrap();
+        const suggestedSkills = await getSuggestedSkills({
+          query: allSkillNames,
+        }).unwrap();
         setSuggestedSkillsData(suggestedSkills);
       } catch (err) {
         console.error("Error fetching suggested skills:", err);
@@ -161,7 +162,6 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
       }
     }
   };
-
 
   useEffect(() => {
     if (goalId !== selectedGoalId) {
@@ -172,15 +172,33 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
   useEffect(() => {
     if (userId && selectedGoalId) {
       fetchSkills(userId, selectedGoalId);
-      fetchData()
+      fetchData();
     }
   }, [userId, selectedGoalId]);
 
+  // Create a ref to store the previous skills' names
+  const [prevSkillNames, setPrevSkillNames] = useState<string[]>([]);
+
+  // Only fetch suggested skills when skill names change or on initial load
   useEffect(() => {
     if (userId && selectedGoalId) {
-      fetchSuggestedSkills()
+      // Extract current skill names
+      const currentSkillNames = skills.map(skill => skill.name).filter(name => name !== "");
+      
+      // Sort both arrays to ensure consistent comparison
+      const sortedCurrentNames = [...currentSkillNames].sort();
+      const sortedPrevNames = [...prevSkillNames].sort();
+      
+      // Check if the skill names have changed
+      const namesChanged = sortedCurrentNames.length !== sortedPrevNames.length || 
+                          sortedCurrentNames.some((name, index) => name !== sortedPrevNames[index]);
+      
+      if (namesChanged) {
+        fetchSuggestedSkills();
+        setPrevSkillNames(currentSkillNames);
+      }
     }
-  }, [skills]);
+  }, [skills.map(skill => skill.name).join(',')]);  // Only depend on skill names
 
   const ratings = Array.from({ length: 10 }, (_, i) => `${i + 1}/10`);
   const [open, setOpen] = useState<boolean[]>([]);
@@ -218,7 +236,6 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     // Refetch suggested skills
   };
 
-
   const handleSkillPopoverOpenChange = (index: number, isOpen: boolean) => {
     setOpenSkillPopovers((prevState) =>
       prevState.map((open, i) => (i === index ? isOpen : open))
@@ -250,7 +267,6 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         const existingSkill = userSkillsData?.data?.allUserSkills.find(
           (userSkill: any) => userSkill.skill_pool_id._id === skill.skill_Id
         );
-
 
         return {
           skill_pool_id: skill.skill_Id,
@@ -287,7 +303,11 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
     }
   }, [skills]);
 
-  const experienceLevelObj = { 1: "Entry-level", 2: "Mid-level", 3: "Senior-level" };
+  const experienceLevelObj = {
+    1: "Entry-level",
+    2: "Mid-level",
+    3: "Senior-level",
+  };
 
   const SkeletonChip = () => (
     <div className="rounded-full">
@@ -299,7 +319,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
         borderRadius="20px"
       />
     </div>
-  )
+  );
 
   return (
     <Dialog
@@ -318,8 +338,10 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
               Select the skills you want to appear in the profile
             </p>
           </div>
-          <DialogClose asChild className="h-6 w-6 p-0 outline-none">
-          </DialogClose>
+          <DialogClose
+            asChild
+            className="h-6 w-6 p-0 outline-none"
+          ></DialogClose>
         </DialogHeader>
 
         {/* Goal Selection Popover */}
@@ -336,8 +358,15 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                 aria-expanded={isGoalPopoverOpen}
                 className="w-2/6 justify-between hover:bg-white"
               >
-                {goals?.data.find((goal) => goal._id === selectedGoalId)
-                  ? `${goals?.data.find((goal) => goal._id === selectedGoalId)?.name} (${experienceLevelObj[goals?.data.find((goal) => goal._id === selectedGoalId)?.experience as unknown as keyof typeof experienceLevelObj] || 'N/A'})`
+                {goals.find((goal) => goal._id === selectedGoalId)
+                  ? `${
+                      goals.find((goal) => goal._id === selectedGoalId)?.name
+                    } (${
+                      experienceLevelObj[
+                        goals.find((goal) => goal._id === selectedGoalId)
+                          ?.experience as unknown as keyof typeof experienceLevelObj
+                      ] || "N/A"
+                    })`
                   : "Select a goal"}
                 {isGoalPopoverOpen ? (
                   <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -351,7 +380,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                 <CommandInput placeholder="Search goals" />
                 <CommandEmpty>No goals found.</CommandEmpty>
                 <CommandGroup>
-                  {goals?.data.map((goal) => (
+                  {goals.map((goal) => (
                     <CommandItem
                       key={goal._id}
                       onSelect={() => {
@@ -362,10 +391,19 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                       <Check
                         className={cn(
                           "mr-2 h-4 w-4",
-                          selectedGoalId === goal._id ? "opacity-100" : "opacity-0"
+                          selectedGoalId === goal._id
+                            ? "opacity-100"
+                            : "opacity-0"
                         )}
                       />
-                      {goal.name} ({experienceLevelObj[goal.experience as unknown as keyof typeof experienceLevelObj || 0]})
+                      {goal.name} (
+                      {
+                        experienceLevelObj[
+                          (goal.experience as unknown as keyof typeof experienceLevelObj) ||
+                            0
+                        ]
+                      }
+                      )
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -448,10 +486,10 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                                         skills.map((s, i) =>
                                           i === index
                                             ? {
-                                              ...s,
-                                              skill_Id: item._id,
-                                              name: item.name,
-                                            }
+                                                ...s,
+                                                skill_Id: item._id,
+                                                name: item.name,
+                                              }
                                             : s
                                         )
                                       );
@@ -478,7 +516,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   )}
                 </div>
 
-                <div >
+                <div>
                   <label className="text-sm font-medium mb-2 block">
                     Self rating
                   </label>
@@ -495,7 +533,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   ) : (
                     <Popover
                       open={openRatingPopovers[index]}
-                      onOpenChange={(isOpen) => handleRatingPopoverOpenChange(index, isOpen)}
+                      onOpenChange={(isOpen) =>
+                        handleRatingPopoverOpenChange(index, isOpen)
+                      }
                     >
                       <PopoverTrigger asChild>
                         <Button
@@ -509,12 +549,16 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                           }
                         >
                           {userSkillsData?.data?.allUserSkills?.find(
-                            (userSkill: any) => userSkill.skill_pool_id?._id === skill.skill_Id
+                            (userSkill: any) =>
+                              userSkill.skill_pool_id?._id === skill.skill_Id
                           )?.self_rating
-                            ? `${userSkillsData?.data?.allUserSkills?.find(
-                              (userSkill: any) =>
-                                userSkill.skill_pool_id?._id === skill.skill_Id
-                            )?.self_rating}/10`
+                            ? `${
+                                userSkillsData?.data?.allUserSkills?.find(
+                                  (userSkill: any) =>
+                                    userSkill.skill_pool_id?._id ===
+                                    skill.skill_Id
+                                )?.self_rating
+                              }/10`
                             : skill.rating || "Select rating..."}
                           {openRatingPopovers[index] ? (
                             <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -541,7 +585,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    skill.rating === rating ? "opacity-100" : "opacity-0"
+                                    skill.rating === rating
+                                      ? "opacity-100"
+                                      : "opacity-0"
                                   )}
                                 />
                                 {rating}
@@ -561,7 +607,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                     open={open[index]}
                     onOpenChange={(isOpen) =>
                       setOpen((prevState) =>
-                        prevState.map((openState, i) => (i === index ? isOpen : openState))
+                        prevState.map((openState, i) =>
+                          i === index ? isOpen : openState
+                        )
                       )
                     }
                   >
@@ -573,8 +621,8 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                         {skill.level === "1"
                           ? "Basic"
                           : skill.level === "2"
-                            ? "Intermediate"
-                            : "Advanced"}
+                          ? "Intermediate"
+                          : "Advanced"}
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -600,14 +648,16 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  skill.level === level ? "opacity-100" : "opacity-0"
+                                  skill.level === level
+                                    ? "opacity-100"
+                                    : "opacity-0"
                                 )}
                               />
                               {level === "1"
                                 ? "Basic"
                                 : level === "2"
-                                  ? "Intermediate"
-                                  : "Advanced"}
+                                ? "Intermediate"
+                                : "Advanced"}
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -622,7 +672,6 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                 >
                   <img src={icon} alt="Remove Skill" />
                 </Button>
-
               </div>
             </div>
           ))}
@@ -646,7 +695,9 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
           <div className="flex flex-wrap gap-2">
             {isSuggestedLoading
               ? // Show skeleton chips while loading
-                Array.from({ length: 6 }).map((_, index) => <SkeletonChip key={index} />)
+                Array.from({ length: 6 }).map((_, index) => (
+                  <SkeletonChip key={index} />
+                ))
               : // Render actual data when available
                 suggestedSkillsData?.map((suggestedSkill) => (
                   <Button
@@ -683,7 +734,7 @@ const AddSkillsModal: React.FC<AddSkillsModalProps> = ({
                   </Button>
                 ))}
           </div>
-        </div>   
+        </div>
 
         {/* Save Button */}
         <Button

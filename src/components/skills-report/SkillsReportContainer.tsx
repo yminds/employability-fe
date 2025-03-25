@@ -189,7 +189,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
         <div className="mb-8">
           <p className="text-body2 text-grey-6 leading-relaxed">{reportData.summary?.text || "No summary available"}</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
           {/* Strengths */}
           <div className="bg-grey-1 rounded-lg p-4">
             <div className="flex items-center gap-3 mb-4">

@@ -3,6 +3,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,7 +55,7 @@ export default function EditBioModal({
               <DialogTitle className="text-[#000000] text-sub-header">
                 Edit Bio
               </DialogTitle>
-              <DialogDescription className="text-left text-body2 text-[rgba(0,0,0,0.60)] ">
+              <DialogDescription className="text-left text-sm text-[rgba(0,0,0,0.60)] ">
                 Make your bio stand out.
               </DialogDescription>
             </div>
@@ -75,13 +76,22 @@ export default function EditBioModal({
                 {charCount}/300 characters
               </span>
             </div>
-            <Button
-              onClick={handleSave}
-              disabled={!isValidLength}
-              className="flex h-11 px-8 justify-center items-center gap-2 self-stretch bg-[#00183d] text-white hover:bg-[#00183d]/90 rounded text-base font-medium w-full disabled:opacity-50"
-            >
-              Save
-            </Button>
+            <DialogFooter className="flex flex-row justify-end gap-4">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="text-body2 hover:bg-transparent"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!isValidLength}
+                className="bg-[#00183D] hover:bg-[#062549] text-body2 text-white transition-colors"
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
           </div>
         </div>
       </DialogContent>

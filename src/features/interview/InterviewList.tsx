@@ -8,11 +8,14 @@ import search from "@/assets/skills/search.svg";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import thumbnail from "@/assets/profile/MockInterview.svg";
+import InterviewInvitationsList from "@/features/dashboard/InterviewInvitationsList";
+import { InterviewInvite } from "@/hooks/useInterviewInvites";
 
-type InterviewType = "all" | "skill" | "project" | "mock" | "job";
+type InterviewType = "all" | "skill" | "project" | "mock" | "job" | "invites";
 
 interface InterviewListProps {
   goalId: string | null;
+  invites?: InterviewInvite[];
 }
 
 interface Interview {
@@ -26,6 +29,7 @@ interface Interview {
   };
   final_rating: number;
   s3_recording_url: string[];
+  thubmnail_url: string;
   summary?: {
     text: string;
   };
@@ -38,17 +42,29 @@ interface GroupedInterviews {
   };
 }
 
-const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
+const InterviewList: React.FC<InterviewListProps> = ({ goalId, invites }) => {
   const userId = useSelector((state: RootState) => state.auth.user?._id);
   const { data: interviewDetails, isLoading } =
     useGetInterviewDetailsQuery(userId);
 
-  const [selectedType, setSelectedType] = useState<InterviewType>("all");
+  // Set initial tab to invites if invites are present
+  const [selectedType, setSelectedType] = useState<InterviewType>(
+    invites && invites.length > 0 ? "invites" : "all"
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [groupedInterviews, setGroupedInterviews] = useState<GroupedInterviews>(
     {}
   );
   const [hoveredInterview, setHoveredInterview] = useState<string | null>(null);
+  const [hasInitialized, setHasInitialized] = useState<boolean>(false);
+
+  // Effect to update selected type if invites data changes and it's the initial load
+  useEffect(() => {
+    if (!hasInitialized && invites && invites.length > 0) {
+      setSelectedType("invites");
+      setHasInitialized(true);
+    }
+  }, [invites, hasInitialized]);
 
   // Group interviews by title and find the best one for each
   useEffect(() => {
@@ -115,12 +131,19 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
   }, [searchQuery, selectedType, interviewDetails]);
 
   const renderInterviewTypes = () => {
-    const types = [
+    interface TypeItem {
+      id: string;
+      label: string;
+      count?: number;
+    }
+    
+    const types: TypeItem[] = [
       { id: "all", label: "All" },
       { id: "job", label: "Jobs" },
       { id: "skill", label: "Skills" },
       { id: "project", label: "Projects" },
       { id: "mock", label: "Mock" },
+      { id: "invites", label: "Invites" }
     ];
 
     return (
@@ -202,16 +225,31 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
     }
   };
 
-  
   return (
     <section className="w-full flex flex-col rounded-[8px] items-center bg-white justify-center p-[32px] sm:p-6">
       <div className="w-full h-full bg-white flex flex-col rounded-t-[8px]">
         {renderInterviewTypes()}
 
         <div className="space-y-7">
-          {isLoading ? (
+          {selectedType === "invites" ? (
+            // Show invitations
+            invites && invites.length > 0 ? (
+              <InterviewInvitationsList 
+                invites={invites} 
+                userId={userId} 
+                isDashboard={false}
+                hideHeader={true}
+              />
+            ) : (
+              <div className="text-gray-500 text-body2 text-center py-8">
+                No interview invitations found
+              </div>
+            )
+          ) : isLoading ? (
+            // Loading interviews
             Array.from({ length: 3 }).map(() => renderLoadingSkeleton())
           ) : Object.keys(groupedInterviews).length > 0 ? (
+            // Show filtered interviews
             Object.entries(groupedInterviews).map(
               ([title, { best, history }], index) => (
                 <InterviewCard
@@ -223,7 +261,7 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId }) => {
                   createdAt={best.interview_id.createdAt}
                   interviewType={best.interview_id.type}
                   summary={best.summary?.text || "No summary available."}
-                  thumbnail={thumbnail}
+                  thumbnail={best.thubmnail_url || thumbnail}
                   recordingUrls={best.s3_recording_url}
                   goalId={goalId}
                   isLast={index === Object.keys(groupedInterviews).length - 1}

@@ -64,12 +64,13 @@ const Interview: React.FC<{
   concepts: any[];
   stopScreenSharing: () => void;
   skillLevel: "1" | "2" | "3";
-  type: "Skill" | "Mock" | "Project";
+  type: "Skill" | "Mock" | "Project" | "Job";
   jobDescription: JobDescription;
   isResume: boolean;
   projectId: string;
   userExperience: string | undefined;
-  mockFundamentals: string;
+  Fundamentals: string | string[];
+  skills_required: string | string[];
 }> = ({
   interviewTopic,
   concepts,
@@ -80,7 +81,8 @@ const Interview: React.FC<{
   isResume = false,
   projectId,
   userExperience,
-  mockFundamentals,
+  Fundamentals,
+  skills_required,
 }) => {
   console.log("in interviews jobDescription", jobDescription);
   const { id: interviewId } = useParams<{ id: string }>();
@@ -311,7 +313,9 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: type === "Mock" ? mockFundamentals : concepts,
+      concepts: type === "Mock" || type === "Job" ? 
+        (Array.isArray(Fundamentals) ? Fundamentals : typeof Fundamentals === 'string' ? Fundamentals.split(',').map((c: string) => c.trim()) : []) 
+        : concepts,
       interview_id: interviewDetails.data._id,
       level: user?.experience_level || "entry",
       type: type,
@@ -319,6 +323,7 @@ const Interview: React.FC<{
       userName: user?.name,
       projectId: projectId,
       userExperience: userExperience,
+      skills_required: skills_required,
     }).unwrap();
 
     console.log("response", response);
@@ -336,10 +341,10 @@ const Interview: React.FC<{
   };
 
   const navigate = useNavigate();
-  const handleBackToSkills = () => {
+  const handleBackBtn = () => {
     stopScreenSharing();
     toggleBrowserFullscreen();
-    navigate("/skills");
+    navigate(-1);
   };
 
   return (
@@ -349,8 +354,8 @@ const Interview: React.FC<{
         {isInterviewEnded ? (
           <div className="text-center text-gray-500  font-ubuntu">
             <p>Thank you for your time. We will get back to you soon.</p>
-            <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackToSkills}>
-              Back to Skills page
+            <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackBtn}>
+              Back
             </button>
           </div>
         ) : (

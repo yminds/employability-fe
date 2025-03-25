@@ -47,6 +47,7 @@ import UploadFileArrow from "@/assets/profile/completeprofile/uploadfile.svg";
 import UploadProgressBar from "@/features/profile/UploadProgressBar";
 import type { BasicInfo } from "@/features/profile/types";
 import { PhoneInput } from "../cards/phoneInput/PhoneInput";
+import { DatePicker } from "../ui/date-picker";
 
 interface BasicInfoFormProps {
   onChange: (
@@ -195,7 +196,7 @@ export default function BasicInfoForm({
       formData.append("name", file.name);
 
       const response = await s3Upload(formData, setUploadProgress);
-       
+
       setNewlyUploadedImage(response.data[0].fileUrl);
       setImagePreview(response.data[0].fileUrl);
       setFormData((prev) => ({
@@ -283,7 +284,7 @@ export default function BasicInfoForm({
                 name="mobile"
                 value={formData.mobile}
                 onChange={handlePhoneChange}
-                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px]${
+                className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
                   getError("mobile") ? "border-red-500" : ""
                 }`}
                 placeholder="+91 1234567891"
@@ -401,15 +402,16 @@ export default function BasicInfoForm({
             <Label className="text-[#000] text-base font-medium font-ubuntu leading-[22px]">
               Date Of Birth <span className="text-red-500">*</span>
             </Label>
-            <Input
-              type="date"
-              name="date_of_birth"
+            <DatePicker
               value={formData.date_of_birth}
-              onChange={handleBasicInfoChange}
-              max={new Date().toISOString().split("T")[0]}
-              className={`w-full text-[#000] h-[50px] font-sf-pro text-base font-normal leading-6 tracking-[0.24px] ${
-                getError("date_of_birth") ? "border-red-500" : ""
-              }`}
+              onChange={(value) =>
+                handleBasicInfoChange({
+                  target: { name: "date_of_birth", value },
+                } as React.ChangeEvent<HTMLSelectElement>)
+              }
+              maxDate={new Date().toISOString().split("T")[0]}
+              placeholder="dd/mm/yyyy"
+              className={getError("date_of_birth") ? "border-red-500" : ""}
             />
             {getError("date_of_birth") && (
               <p className="text-red-500 text-sm">
