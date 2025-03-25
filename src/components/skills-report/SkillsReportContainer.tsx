@@ -14,6 +14,7 @@ import ReportScore from "./ReportScorecard";
 import InterviewPlayer from "../interview/InterviewPlayer";
 import { useNavigate } from "react-router-dom";
 import { useCreateInterview } from "@/hooks/useCreateInterview";
+import NewInterviewPlayer from "../interview/NewInterviewPlayer";
 
 interface Performance {
   criteria: string;
@@ -64,9 +65,7 @@ const getShareUrl = (publicProfileName: string) => {
   const currentPath = window.location.pathname;
   const interviewId = currentPath.split("/").pop();
   const baseUrl = window.location.origin;
-  const url = new URL(
-    `${baseUrl}/skills-report/${publicProfileName}/${interviewId}`
-  );
+  const url = new URL(`${baseUrl}/skills-report/${publicProfileName}/${interviewId}`);
   return url.toString();
 };
 
@@ -185,16 +184,10 @@ const ReportContent: React.FC<ReportContentProps> = ({
   const renderLeftSection = () => (
     <>
       {/* Summary Section */}
-      <section
-        className={`bg-white rounded-md shadow-sm p-8 sm:p-5 ${
-          isGeneratingPDF ? "mb-0" : "mb-6"
-        }`}
-      >
+      <section className={`bg-white rounded-md shadow-sm p-8 sm:p-5 ${isGeneratingPDF ? "mb-0" : "mb-6"}`}>
         <h2 className="text-h2 font-medium text-grey-7 mb-6">Summary</h2>
         <div className="mb-8">
-          <p className="text-body2 text-grey-6 leading-relaxed">
-            {reportData.summary?.text || "No summary available"}
-          </p>
+          <p className="text-body2 text-grey-6 leading-relaxed">{reportData.summary?.text || "No summary available"}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Strengths */}
@@ -208,9 +201,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                   className="w-[20px] h-[20px]"
                 />
               </div>
-              <h3 className="text-sub-header font-medium text-grey-7 flex items-center gap-2">
-                Strengths
-              </h3>
+              <h3 className="text-sub-header font-medium text-grey-7 flex items-center gap-2">Strengths</h3>
             </div>
             <ul className="space-y-2">
               {reportData.summary?.strengths?.length ? (
@@ -220,9 +211,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                   </li>
                 ))
               ) : (
-                <li className="text-body2 text-grey-5">
-                  No strengths available
-                </li>
+                <li className="text-body2 text-grey-5">No strengths available</li>
               )}
             </ul>
           </div>
@@ -238,34 +227,24 @@ const ReportContent: React.FC<ReportContentProps> = ({
                   className="w-[24px] h-[24px]"
                 />
               </div>
-              <h3 className="text-sub-header font-medium text-grey-7 flex items-center gap-2">
-                Areas for Improvement
-              </h3>
+              <h3 className="text-sub-header font-medium text-grey-7 flex items-center gap-2">Areas for Improvement</h3>
             </div>
             <ul className="space-y-2">
               {reportData.summary?.improvements?.length ? (
                 reportData.summary.improvements.map((improvement, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <span className="text-body2 text-grey-6">
-                      {improvement}
-                    </span>
+                    <span className="text-body2 text-grey-6">{improvement}</span>
                   </li>
                 ))
               ) : (
-                <li className="text-body2 text-grey-5">
-                  No improvements available
-                </li>
+                <li className="text-body2 text-grey-5">No improvements available</li>
               )}
             </ul>
           </div>
         </div>
       </section>
 
-      <section
-        className={`bg-white rounded-md shadow-sm p-8 sm:p-5 ${
-          isGeneratingPDF ? "mb-0" : "mb-6"
-        }`}
-      >
+      <section className={`bg-white rounded-md shadow-sm p-8 sm:p-5 ${isGeneratingPDF ? "mb-0" : "mb-6"}`}>
         <PerformanceHighlights
           highlights={reportData.summary?.performance_highlights}
           isGeneratingPDF={isGeneratingPDF}
@@ -274,21 +253,14 @@ const ReportContent: React.FC<ReportContentProps> = ({
 
       {/* Concept Breakdown */}
       <section className="mb-6 bg-white rounded-xl p-8 sm:p-5">
-        <h2 className="text-h2 font-medium text-grey-7 mb-4">
-          Concept Breakdown
-        </h2>
+        <h2 className="text-h2 font-medium text-grey-7 mb-4">Concept Breakdown</h2>
         <div className="grid grid-cols-1 gap-6">
           {reportData.concept_ratings?.length ? (
             reportData.concept_ratings.map((rating, index) => (
-              <Card
-                key={index}
-                className="bg-white border border-grey-2 rounded-md shadow-sm"
-              >
+              <Card key={index} className="bg-white border border-grey-2 rounded-md shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sub-header font-medium text-grey-7">
-                      {rating.concept}
-                    </h3>
+                    <h3 className="text-sub-header font-medium text-grey-7">{rating.concept}</h3>
                     <span>{rating.rating}/5</span>
                   </div>
                   <p className="text-body2 text-grey-6">{rating.reason}</p>
@@ -315,19 +287,13 @@ const ReportContent: React.FC<ReportContentProps> = ({
       />
 
       {/* Progress Bars for Concept Ratings */}
-      <section
-        className={`bg-white rounded-md shadow-sm mt-6 p-8 sm:p-5 ${
-          isGeneratingPDF ? "mb-0" : "mb-6"
-        }`}
-      >
+      <section className={`bg-white rounded-md shadow-sm mt-6 p-8 sm:p-5 ${isGeneratingPDF ? "mb-0" : "mb-6"}`}>
         <div className="flex-cols gap-6">
           {reportData.concept_ratings?.length ? (
             reportData.concept_ratings.map((rating, index) => (
               <div key={index} className=" py-2">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sub-header font-medium text-grey-7">
-                    {rating.concept}
-                  </h3>
+                  <h3 className="text-sub-header font-medium text-grey-7">{rating.concept}</h3>
                 </div>
                 <div className="min-w-full bg-background-grey min-h-2 relative rounded-full overflow-hidden mt-2">
                   <div
@@ -348,14 +314,9 @@ const ReportContent: React.FC<ReportContentProps> = ({
       {/* PDF Download Section – hidden in PDF */}
       {!sharedReport && (
         <div className="flex flex-col gap-6">
-          <section
-            className={`bg-white rounded-md p-8 sm:p-6 pdf-hide ${
-              !isGeneratingPDF ? "" : "hidden"
-            }`}
-          >
+          <section className={`bg-white rounded-md p-8 sm:p-6 pdf-hide ${!isGeneratingPDF ? "" : "hidden"}`}>
             <div className="text-body2 mb-6">
-              Retake the interview to refine your skill verification and achieve
-              a higher score.
+              Retake the interview to refine your skill verification and achieve a higher score.
             </div>
             <button
               className="flex gap-2 items-center px-4 py-2 bg-[#001630] text-white hover:bg-[#062549] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
@@ -364,24 +325,14 @@ const ReportContent: React.FC<ReportContentProps> = ({
               Improve Score
             </button>
           </section>
-          <section
-            className={`bg-white rounded-md p-8 pdf-hide ${
-              !isGeneratingPDF ? "" : "hidden"
-            }`}
-          >
-            <div className="text-body2 mb-6">
-              Get a PDF version of this skill report to share with employers
-            </div>
+          <section className={`bg-white rounded-md p-8 pdf-hide ${!isGeneratingPDF ? "" : "hidden"}`}>
+            <div className="text-body2 mb-6">Get a PDF version of this skill report to share with employers</div>
             <button
               className="flex gap-2 items-center w-full justify-center px-4 py-2 bg-white border border-[#001630] rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={generatePDF}
               disabled={isGeneratingPDF}
             >
-              <img
-                className="w-4 h-4"
-                src={download || "/placeholder.svg"}
-                alt="Download PDF"
-              />
+              <img className="w-4 h-4" src={download || "/placeholder.svg"} alt="Download PDF" />
               {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
             </button>
           </section>
@@ -394,7 +345,11 @@ const ReportContent: React.FC<ReportContentProps> = ({
     reportData.s3_recording_url && (
       <section className="flex justify-center pdf-hide mb-6 md:mb-0 sm:mb-0">
         <div className="continer-player w-full h-[28rem] sm:h-[14rem] relative">
-          <InterviewPlayer urls={reportData.s3_recording_url} />
+          {reportData.s3_recording_url.length > 1 ? (
+            <InterviewPlayer urls={reportData.s3_recording_url} />
+          ) : (
+            <NewInterviewPlayer url={reportData.s3_recording_url[0]} />
+          )}
         </div>
       </section>
     );
@@ -419,9 +374,7 @@ const ReportContent: React.FC<ReportContentProps> = ({
                   />
                 </button>
               )}
-              <span className="text-h1">
-                {reportData.interview_id?.title} Report
-              </span>
+              <span className="text-h1">{reportData.interview_id?.title} Report</span>
             </h1>
           </div>
 
@@ -485,17 +438,12 @@ const ReportContent: React.FC<ReportContentProps> = ({
 
           {/* Desktop Layout - Two-column view for screens 1024px and above */}
           <div className="hidden lg:block xl:block 2xl:block">
-            <div
-              id="printable-area"
-              className="relative grid grid-cols-10 gap-6"
-            >
+            <div id="printable-area" className="relative grid grid-cols-10 gap-6">
               <div className="col-span-7 flex flex-col">
                 {!isGeneratingPDF && renderInterviewPlayer()}
                 <div className="space-y-6">{renderLeftSection()}</div>
               </div>
-              <div className="col-span-3 flex flex-col space-y-6">
-                {renderRightSection()}
-              </div>
+              <div className="col-span-3 flex flex-col space-y-6">{renderRightSection()}</div>
             </div>
           </div>
         </main>

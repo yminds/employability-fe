@@ -13,11 +13,7 @@ import alertCircle from "@/assets/projects/alertCircle.svg";
 import SuccessModal from "./modal/steps/SuccessModal";
 import { useCreateInterview } from "@/hooks/useCreateInterview";
 import { useNavigate } from "react-router-dom";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,10 +39,9 @@ interface Project {
   lastCompletedStep?: number;
   goal_id?: string;
   latest_interview_status: {
-    interview_id:string;
+    interview_id: string;
     isCompleted: boolean;
   };
-
 }
 
 type ProjectStatus = "Verified" | "In-review" | "Unverified" | "Incomplete";
@@ -157,29 +152,33 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     });
 
     navigate(`/interview/${interviewId}`, {
-      state: { title: "Project Interview", level: user?.experience_level, type: "Project", projectId: project._id },
+      state: {
+        title: project?.name || "Project Interview",
+        level: user?.experience_level,
+        type: "Project",
+        projectId: project._id,
+      },
     });
   };
-
 
   console.log("project", project);
 
   const handleViewProject = () => {
-    if(!project.latest_interview_status.interview_id) {
-      return 
+    if (!project.latest_interview_status.interview_id) {
+      return;
     }
-    if(!project.latest_interview_status.isCompleted){
+    if (!project.latest_interview_status.isCompleted) {
       return toast.error("Interview is not completed yet");
     }
-    navigate(`/skill/report/Project/${project.latest_interview_status.interview_id}`,{
-      state:{
+    navigate(`/skill/report/Project/${project.latest_interview_status.interview_id}`, {
+      state: {
         best_interview: project.latest_interview_status.interview_id,
         fromInterviewCard: true,
-        thread_id:""
-      }
+        thread_id: "",
+      },
     });
-  }; 
-  
+  };
+
   return (
     <Card
       className={`flex flex-col items-start p-0 bg-white rounded-lg ${
@@ -284,17 +283,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 </div>
               </div>
 
-     
               <Button
-              onClick={handleViewProject}
+                onClick={handleViewProject}
                 variant="link"
                 className="text-[#68696B] text-body2 underline justify-center text-center md:w-full sm:w-full"
-                >
+              >
                 View Report
               </Button>
 
               <Button
-                  className="border-[#68696B] text-[#68696B] text-body2 justify-center md:w-full sm:w-full"
+                className="border-[#68696B] text-[#68696B] text-body2 justify-center md:w-full sm:w-full"
                 variant="outline"
                 onClick={
                   project.status === "Incomplete"
@@ -302,6 +300,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     : project.status === "In-review"
                     ? handleViewStatusClick
                     : project.status === "Unverified"
+                    ? handleVerifyProject
+                    : project.status === "Verified"
                     ? handleVerifyProject
                     : () => {}
                 }
@@ -318,31 +318,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
         <div className="flex gap-6 mt-3 md:hidden sm:hidden">
           {project.githubLink?.length > 0 && (
-            <Button
-              variant="link"
-              className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto"
-              asChild
-            >
-              <a
-                href={project.githubLink[0]}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+            <Button variant="link" className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto" asChild>
+              <a href={project.githubLink[0]} target="_blank" rel="noopener noreferrer">
                 View GIT repo
               </a>
             </Button>
           )}
           {project.liveLink && (
-            <Button
-              variant="link"
-              className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto"
-              asChild
-            >
-              <a
-                href={project.liveLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+            <Button variant="link" className="text-[#001630] hover:text-[#001630CC] underline p-0 h-auto" asChild>
+              <a href={project.liveLink} target="_blank" rel="noopener noreferrer">
                 Live link
               </a>
             </Button>
