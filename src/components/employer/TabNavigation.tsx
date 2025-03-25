@@ -6,25 +6,25 @@ interface TabNavigationProps {
   interviewCount?: number; // Added prop for interview count
 }
 
-const TabNavigation: React.FC<TabNavigationProps> = ({ 
-  selectedTab, 
+const TabNavigation: React.FC<TabNavigationProps> = ({
+  selectedTab,
   setSelectedTab,
-  interviewCount = 0 // Default to 0 if not provided
+  interviewCount = 0, // Default to 0 if not provided
 }) => {
   const tabs = [
     { id: "inviteCandidates", label: "Invite Candidates" },
-    { 
-      id: "interviews", 
-      label: "Interviews", 
+    {
+      id: "interviews",
+      label: "Interviews",
       count: interviewCount,
-      hasBadge: true
+      hasBadge: true,
     },
     { id: "shortlistedCandidates", label: "Shortlisted Candidates" },
     { id: "sentInvitations", label: "Sent Invitations" },
   ];
 
   return (
-    <div className="border-b border-[#d6d7d9]">
+    <div className="border-b border-[#d6d7d9] pt-8">
       <div className="flex">
         {tabs.map((tab) => (
           <button

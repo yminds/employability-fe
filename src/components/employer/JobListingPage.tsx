@@ -232,11 +232,11 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
 
   const getSelectedCandidateDetails = () => {
     return allCandidates
-      .filter(candidate => selectedCandidates.includes(candidate.user_id))
-      .map(candidate => ({
+      .filter((candidate) => selectedCandidates.includes(candidate.user_id))
+      .map((candidate) => ({
         user_id: candidate.user_id,
         name: candidate.name,
-        profile_image: candidate.profile_image
+        profile_image: candidate.profile_image,
       }));
   };
 
@@ -245,7 +245,10 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const companyId = jobDetails?.data?.company || undefined;
 
   return (
-    <div className="bg-[#F5F5F5] min-h-screen font-sans">
+    <div
+      className="bg-[#F5F5F5] h-screen overflow-y-auto font-sans"
+      style={{ scrollbarWidth: "none" }}
+    >
       <div className="max-w-[1400px] mx-auto px-4 py-6">
         {/* Breadcrumb */}
         <BreadcrumbNav jobTitle={jobDetails?.data.title} />
@@ -274,10 +277,12 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           {/* Left section - Candidate list */}
           <div className="flex-1 space-y-8">
             {/* Tabs - Pass the interview count to display in the tab */}
-            <TabNavigation
-              selectedTab={selectedTab}
-              setSelectedTab={setSelectedTab}
-            />
+            <div className="sticky top-0 z-10 bg-[#F5F5F5]">
+              <TabNavigation
+                selectedTab={selectedTab}
+                setSelectedTab={setSelectedTab}
+              />
+            </div>
 
             <div className="flex mb-6 space-x-4">
               {/* Matching Candidate Card */}
@@ -353,7 +358,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           </div>
 
           {/* Right section - Stats and job details */}
-          <div className="w-[350px] space-y-3.5">
+          <div className="w-[350px] mt-8 space-y-3.5 sticky top-5 h-fit">
             {/* Stats cards */}
             {/* <StatsCards candidatesCount={allCandidates.length} /> */}
 
