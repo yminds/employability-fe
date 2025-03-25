@@ -18,6 +18,7 @@ const MicCheck: React.FC<MicCheckProps> = ({ onMicQualityChange }) => {
     isMicSelected,
     isSpeaking,
     qualityTested,
+    isMicTested,
     handleMicChange,
     handleSpeakClick,
   } = useMicrophoneCheck(onMicQualityChange);
@@ -60,7 +61,7 @@ const MicCheck: React.FC<MicCheckProps> = ({ onMicQualityChange }) => {
         <button
           className={` h-[3vh] w-[10vw] rounded text-[12px]  ${qualityTested ? "bg-gray-800" : "bg-button"} text-white`}
           onClick={handleSpeakClick}
-          disabled={!isMicSelected}
+          disabled={!isMicSelected || isMicTested}
         >
           {qualityTested ? "Tested" : isMicSelected && isSpeaking ? "Testing..." : "Speak"}
         </button>
