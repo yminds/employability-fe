@@ -47,7 +47,9 @@ export default function InterviewModal({
   jobId,
 }: InterviewModalProps) {
   // State variables
-  const [selectedOption, setSelectedOption] = useState<"full" | "screening">("full");
+  const [selectedOption, setSelectedOption] = useState<"full" | "screening">(
+    "full"
+  );
   const [isVisible, setIsVisible] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -58,10 +60,10 @@ export default function InterviewModal({
   const [error, setError] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  
+
   // API base URL
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-  
+
   // Web Worker reference
   const workerRef = useRef<Worker | null>(null);
 
@@ -69,14 +71,17 @@ export default function InterviewModal({
   useEffect(() => {
     // Create the worker only if it doesn't exist yet
     if (!workerRef.current && window.Worker) {
-      workerRef.current = new Worker(new URL('../../workers/invitationWorker.ts', import.meta.url), { 
-        type: 'module' 
-      });
-      
+      workerRef.current = new Worker(
+        new URL("../../workers/invitationWorker.ts", import.meta.url),
+        {
+          type: "module",
+        }
+      );
+
       // Set up message handler for worker communication
-      workerRef.current.addEventListener('message', handleWorkerMessage);
+      workerRef.current.addEventListener("message", handleWorkerMessage);
     }
-    
+
     // Cleanup worker on component unmount
     return () => {
       if (workerRef.current) {
@@ -87,52 +92,57 @@ export default function InterviewModal({
   }, []);
 
   // Handle messages from worker
-  const handleWorkerMessage = useCallback((event: MessageEvent) => {
-    const { type, data } = event.data;
-    
-    switch (type) {
-      case "INTERVIEW_WORKER_READY":
-        console.log("Interview worker is ready");
-        break;
-        
-      case "BATCH_CREATED":
-        setBatchId(data.batchId);
-        toast.info(`Sending ${selectedCandidatesCount} interview invitations...`);
-        break;
-        
-      case "INVITATION_PROGRESS":
-        setProgress(data);
-        break;
-        
-      case "INVITATION_COMPLETE":
-        setIsSending(false);
-        
-        const total = data.total || 0;
-        const completed = data.completed || 0;
-        
-        // Show success modal and clear batch ID to hide progress UI
-        if (total > 0 && completed > 0) {
-          const message =
-            completed === total
-              ? `All ${completed} interview invitations were sent successfully!`
-              : `${completed} out of ${total} interview invitations were sent successfully.`;
-          
-          setSuccessMessage(message);
-          setShowSuccessModal(true);
-          setBatchId(null); // Hide the progress bar immediately
-        }
-        break;
-        
-      case "INTERVIEW_ERROR":
-        setError(data.error);
-        setIsSending(false);
-        toast.error(data.error);
-        break;
-        
-      default:
-        console.warn(`Unknown message type from worker: ${type}`);
-    }
-  }, [selectedCandidatesCount]);
+  const handleWorkerMessage = useCallback(
+    (event: MessageEvent) => {
+      const { type, data } = event.data;
+
+      switch (type) {
+        case "INTERVIEW_WORKER_READY":
+          console.log("Interview worker is ready");
+          break;
+
+        case "BATCH_CREATED":
+          setBatchId(data.batchId);
+          toast.info(
+            `Sending ${selectedCandidatesCount} interview invitations...`
+          );
+          break;
+
+        case "INVITATION_PROGRESS":
+          setProgress(data);
+          break;
+
+        case "INVITATION_COMPLETE":
+          setIsSending(false);
+
+          const total = data.total || 0;
+          const completed = data.completed || 0;
+
+          // Show success modal and clear batch ID to hide progress UI
+          if (total > 0 && completed > 0) {
+            const message =
+              completed === total
+                ? `All ${completed} interview invitations were sent successfully!`
+                : `${completed} out of ${total} interview invitations were sent successfully.`;
+
+            setSuccessMessage(message);
+            setShowSuccessModal(true);
+            setBatchId(null); // Hide the progress bar immediately
+          }
+          break;
+
+        case "INTERVIEW_ERROR":
+          setError(data.error);
+          setIsSending(false);
+          toast.error(data.error);
+          break;
+
+        default:
+          console.warn(`Unknown message type from worker: ${type}`);
+      }
+    },
+    [selectedCandidatesCount]
+  );
 
   // Resume polling if batchId exists when component mounts
   useEffect(() => {
@@ -141,8 +151,8 @@ export default function InterviewModal({
         type: "START_INVITATION_PROGRESS",
         data: {
           batchId,
-          apiBaseUrl
-        }
+          apiBaseUrl,
+        },
       });
     }
   }, [batchId, apiBaseUrl, isOpen]);
@@ -169,7 +179,13 @@ export default function InterviewModal({
 
   // Handle send invites
   const handleSendInvites = useCallback(() => {
-    if (!date || selectedCandidatesCount === 0 || isSending || !workerRef.current) return;
+    if (
+      !date ||
+      selectedCandidatesCount === 0 ||
+      isSending ||
+      !workerRef.current
+    )
+      return;
 
     setIsSending(true);
     setError(null);
@@ -188,13 +204,16 @@ export default function InterviewModal({
           candidateIds,
           interviewType: selectedOption,
           applicationDeadline: date.toISOString(),
-          apiBaseUrl
-        }
+          apiBaseUrl,
+        },
       });
     } catch (err) {
       // This try/catch is mostly for handling any errors that might
       // occur when posting the message to the worker
-      const errorMsg = err instanceof Error ? err.message : 'Failed to start interview invitation process';
+      const errorMsg =
+        err instanceof Error
+          ? err.message
+          : "Failed to start interview invitation process";
       setError(errorMsg);
       setIsSending(false);
       toast.error(errorMsg);
@@ -206,7 +225,7 @@ export default function InterviewModal({
     jobId,
     selectedOption,
     selectedCandidates,
-    apiBaseUrl
+    apiBaseUrl,
   ]);
 
   // Calculate progress percentage
@@ -328,6 +347,57 @@ export default function InterviewModal({
                 </div>
               )}
 
+              {/* Candidates info */}
+              <div className="flex flex-col gap-3">
+                {/* Text information on top line */}
+                <div className="flex items-center">
+                  <p className="text-[#4c4c4c] text-sm">
+                    You're about to send an interview invitation to
+                  </p>
+                </div>
+
+                {/* Candidate profile images with count on the right */}
+                <div className="flex items-center">
+                  <div className="flex -space-x-3">
+                    {/* Display up to 4 selected candidates */}
+                    {selectedCandidates.slice(0, 4).map((candidate, index) => (
+                      <div
+                        key={candidate?.user_id || index}
+                        className="w-10 h-10 rounded-full border-2 border-white overflow-hidden relative"
+                      >
+                        {candidate?.profile_image ? (
+                          <img
+                            src={candidate.profile_image}
+                            alt={candidate.name || `Candidate ${index + 1}`}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-700 font-semibold text-lg">
+                            {candidate?.name
+                              ? candidate.name.charAt(0).toUpperCase()
+                              : `${index + 1}`}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* If no candidates are selected, show placeholder */}
+                    {selectedCandidates.length === 0 && (
+                      <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden">
+                        <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">
+                          ?
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Count displayed to the right of the images */}
+                  <span className="font-medium text-[#000000] ml-4 underline">
+                    {selectedCandidatesCount} Candidates
+                  </span>
+                </div>
+              </div>
+
               {/* Only show form if not currently processing */}
               {!batchId && (
                 <>
@@ -336,91 +406,102 @@ export default function InterviewModal({
                     <h3 className="text-base font-normal text-[#000000]">
                       What do you want the candidate to do?
                     </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-                      {/* Full Interview Option */}
+                    <div className="flex flex-col gap-4">
                       <div
-                        className={`border rounded-lg p-6 cursor-pointer transition-all duration-200 flex items-center gap-4 hover:shadow-md ${
+                        className={`border rounded-lg cursor-pointer transition-all duration-200 flex items-start gap-6 hover:shadow-md ${
                           selectedOption === "full"
-                            ? "border-2 border-[#001630] bg-gradient-to-r from-blue-50 to-transparent"
+                            ? "border-1 border-[#001630] bg-[#ecf5ff]"
                             : "border border-[#e6e6e6] hover:border-gray-300"
                         }`}
                         onClick={() => setSelectedOption("full")}
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
+                        <div className="flex-1 p-6">
+                          <div className="flex items-center gap-3 mb-4">
                             <div
                               className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
                                 selectedOption === "full"
                                   ? "border-[#001630] bg-[#001630]"
-                                  : "border-2 border-[#6a6a6a]"
+                                  : "border-2 border-[#68696b]"
                               }`}
                             >
                               {selectedOption === "full" && (
-                                <div className="w-2 h-2 rounded-full bg-white "></div>
+                                <div className="w-2 h-2 rounded-full bg-white"></div>
                               )}
                             </div>
-                            <span className="font-semibold text-[#001630]">
+                            <span className="text-[#001630] text-h2">
                               Full Interview
                             </span>
                           </div>
-                          <p className="text-[#6a6a6a] text-sm leading-relaxed">
-                            Comprehensive interview covering specific skills,
-                            custom questions, and in-
+
+                          <p className="text-[#68696b] text-[14px] font-normal leading-6 tracking-[0.07px] mb-6">
+                            Interview covering specific skills, custom
+                            questions, and{" "}
                             <span className="font-medium text-[#001630]">
-                              depth topics
+                              in-depth topics
                             </span>
                             .
                           </p>
+
+                          <button className="border border-[#001630] rounded-lg py-2 px-6 text-[#414447] font-medium leading-5 tracking-[0.07px] hover:bg-[#d7ebff] transition-colors">
+                            View Sample Report
+                          </button>
                         </div>
-                        <div className="w-24 h-24 relative flex-shrink-0 transition-transform duration-200 hover:scale-105">
+
+                        <div className=" flex transition-transform duration-200 hover:scale-105">
                           <img
                             src={FullInterview}
                             alt="Full Interview"
-                            className="object-contain w-full h-full"
+                            className="object-contain h-[200px] max-h-full"
+                            style={{ maxWidth: "none" }}
                           />
                         </div>
                       </div>
 
-                      {/* Screening Option */}
                       <div
-                        className={`border rounded-lg p-6 cursor-pointer transition-all duration-200 flex items-center gap-4 hover:shadow-md ${
+                        className={`border rounded-lg cursor-pointer transition-all duration-200 flex items-start gap-6 hover:shadow-md ${
                           selectedOption === "screening"
-                            ? "border-2 border-[#001630] bg-gradient-to-r from-purple-50 to-transparent"
+                            ? "border-1 border-[#001630] bg-gradient-to-r from-white to-[#eeebff]"
                             : "border border-[#e6e6e6] hover:border-gray-300"
                         }`}
                         onClick={() => setSelectedOption("screening")}
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
+                        <div className="flex-1 p-6">
+                          <div className="flex items-center gap-3 mb-4">
                             <div
                               className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
                                 selectedOption === "screening"
                                   ? "border-[#001630] bg-[#001630]"
-                                  : "border-2 border-[#6a6a6a]"
+                                  : "border-2 border-[#68696b]"
                               }`}
                             >
                               {selectedOption === "screening" && (
-                                <div className="w-2 h-2 rounded-full bg-white "></div>
+                                <div className="w-2 h-2 rounded-full bg-white"></div>
                               )}
                             </div>
-                            <span className="font-semibold text-[#001630]">
+                            <span className="text-[#001630] text-h2">
                               Screening
                             </span>
                           </div>
-                          <p className="text-[#6a6a6a] text-sm leading-relaxed">
-                            A quick session to gauge basic qualifications and
-                            interest—usually{" "}
+
+                          <p className="text-[#68696b] text-[14px] font-normal leading-6 tracking-[0.07px] mb-6">
+                            A quick session to gauge a candidate's
+                            basics—usually{" "}
                             <span className="font-medium text-[#001630]">
                               15 minutes
                             </span>{" "}
                             or less.
                           </p>
+
+                          <button className="border border-[#001630] rounded-lg py-2 px-6 text-[#414447] font-medium leading-5 tracking-[0.07px] hover:bg-[#eeebff] transition-colors">
+                            View Sample Report
+                          </button>
                         </div>
-                        <div className="w-24 h-24 relative flex-shrink-0 transition-transform duration-200 hover:scale-105">
+
+                        <div className="relative flex transition-transform duration-200 hover:scale-105">
                           <img
                             src={screening}
                             alt="Screening"
-                            className="object-contain w-full h-full"
+                            className="object-contain h-[200px] max-h-full"
                           />
                         </div>
                       </div>
@@ -455,61 +536,6 @@ export default function InterviewModal({
                         Candidates will receive an email with a link to complete
                         this interview by this date.
                       </p>
-                    </div>
-                  </div>
-
-                  {/* Candidates info */}
-                  <div className="flex flex-col gap-3">
-                    {/* Text information on top line */}
-                    <div className="flex items-center">
-                      <p className="text-[#4c4c4c] text-sm">
-                        You're about to send an interview invitation to
-                      </p>
-                    </div>
-
-                    {/* Candidate profile images with count on the right */}
-                    <div className="flex items-center">
-                      <div className="flex -space-x-3">
-                        {/* Display up to 4 selected candidates */}
-                        {selectedCandidates
-                          .slice(0, 4)
-                          .map((candidate, index) => (
-                            <div
-                              key={candidate?.user_id || index}
-                              className="w-10 h-10 rounded-full border-2 border-white overflow-hidden relative"
-                            >
-                              {candidate?.profile_image ? (
-                                <img
-                                  src={candidate.profile_image}
-                                  alt={
-                                    candidate.name || `Candidate ${index + 1}`
-                                  }
-                                  className="object-cover w-full h-full"
-                                />
-                              ) : (
-                                <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-700 font-semibold text-lg">
-                                  {candidate?.name
-                                    ? candidate.name.charAt(0).toUpperCase()
-                                    : `${index + 1}`}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-
-                        {/* If no candidates are selected, show placeholder */}
-                        {selectedCandidates.length === 0 && (
-                          <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden">
-                            <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">
-                              ?
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Count displayed to the right of the images */}
-                      <span className="font-medium text-[#000000] ml-4 underline">
-                        {selectedCandidatesCount} Candidates
-                      </span>
                     </div>
                   </div>
                 </>

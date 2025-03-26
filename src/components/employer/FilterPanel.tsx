@@ -14,16 +14,18 @@ interface FilterPanelProps {
   onApply: () => void;
 }
 
-const FilterPanel: React.FC<FilterPanelProps> = ({ isOpen, onReset, onApply }) => {
+const FilterPanel: React.FC<FilterPanelProps> = ({
+  isOpen,
+  onReset,
+  onApply,
+}) => {
   if (!isOpen) return null;
 
   return (
-    <div className="bg-white rounded-lg border border-[#d6d7d9] p-4 mb-4">
+    <div className="bg-white rounded-lg border border-[#d6d7d9] p-4 mb-4 text-body2">
       <div className="grid grid-cols-3 gap-4">
         <div>
-          <label className="text-sm font-medium block mb-2">
-            Experience
-          </label>
+          <label className="text-sm font-medium block mb-2">Experience</label>
           <Select defaultValue="any">
             <SelectTrigger className="border-[#d6d7d9] bg-white">
               <SelectValue placeholder="Any experience" />
@@ -37,9 +39,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ isOpen, onReset, onApply }) =
           </Select>
         </div>
         <div>
-          <label className="text-sm font-medium block mb-2">
-            Location
-          </label>
+          <label className="text-sm font-medium block mb-2">Location</label>
           <Select defaultValue="any">
             <SelectTrigger className="border-[#d6d7d9] bg-white">
               <SelectValue placeholder="Any location" />
@@ -53,9 +53,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ isOpen, onReset, onApply }) =
           </Select>
         </div>
         <div>
-          <label className="text-sm font-medium block mb-2">
-            Skill Rating
-          </label>
+          <label className="text-sm font-medium block mb-2">Skill Rating</label>
           <Select defaultValue="any">
             <SelectTrigger className="border-[#d6d7d9] bg-white">
               <SelectValue placeholder="Any rating" />
@@ -73,7 +71,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ isOpen, onReset, onApply }) =
         <Button variant="outline" className="mr-2" onClick={onReset}>
           Reset
         </Button>
-        <Button 
+        <Button
           className="bg-[#001630] hover:bg-[#001630]/90 text-white"
           onClick={onApply}
         >

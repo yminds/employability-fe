@@ -22,7 +22,7 @@ export interface InterviewInvite {
   status: 'pending' | 'accepted' | 'completed' | 'declined' | 'expired';
   sent_at: string;
   updated_at: string;
-  report_id?: string;
+  interview_id?: string; // Updated to match the schema
   shortlist: boolean;
 }
 
@@ -41,13 +41,58 @@ export interface InterviewCandidate {
     interview_type: 'full' | 'screening';
   };
   has_report: boolean;
-  report_id?: string;
-  interview_score?: number;
+  interview_id?: string; // Added field for fetching reports
   report_submitted_at?: string;
   sent_at: string;
   updated_at: string;
   source: 'candidate_db' | 'user_db';
   shortlist: boolean;
+}
+
+// Report interface based on the schema
+export interface Report {
+  _id: string;
+  interview_id: string;
+  summary: {
+    text: string;
+    strengths: string[];
+    improvements: string[];
+    performance_highlights: Array<{
+      criteria: string;
+      rating: number;
+    }>;
+    technicalSkills?: {
+      score?: number;
+      strengths?: string[];
+      areasForImprovement?: string[];
+    };
+    problemSolvingSkills?: {
+      score?: number;
+      strengths?: string[];
+      areasForImprovement?: string[];
+    };
+    softskills?: {
+      score?: number;
+      strengths?: string[];
+      areasForImprovement?: string[];
+    };
+  };
+  concept_ratings: Array<{
+    reason: string;
+    concept: string;
+    rating: number;
+    skill?: string;
+  }>;
+  final_rating: number;
+  specificQuestions?: Array<{
+    question: string;
+    response: string;
+  }>;
+  interview_phase?: Array<{
+    phase: string;
+    reason: string;
+    rating: number;
+  }>;
 }
 
 export interface InterviewStats {
@@ -143,6 +188,12 @@ interface ShortlistResponse {
   };
 }
 
+// New interface for report response
+interface ReportResponse {
+  success: boolean;
+  data: Report;
+}
+
 // Request Payload Interfaces
 interface SendInvitationsPayload {
   job_id: string;
@@ -158,13 +209,13 @@ interface UpdateStatusPayload {
 
 interface GetJobInvitesParams {
   jobId: string;
-  status?: 'pending' | 'accepted' | 'declined' | 'expired';
+  status?: 'pending' | 'accepted' | 'completed' | 'declined' | 'expired';
 }
 
 interface GetInterviewCandidatesParams {
   jobId: string;
   interviewType?: 'full' | 'screening' | 'all';
-  status?: 'submitted' | 'pending' | 'all';
+  status?: 'completed' | 'pending' | 'all';
   sortBy?: 'recent' | 'oldest' | 'name';
 }
 
@@ -209,7 +260,6 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         url: `/api/v1/employerInterviewInvitation/job/${jobId}`,
         params: status ? { status } : undefined
       }),
-
     }),
     
     // Get all invites for the current candidate
@@ -323,5 +373,5 @@ export const {
   useGetInvitesByUserIdQuery,
   useGetInterviewCandidatesQuery,
   useGetInterviewStatsQuery,
-  useShortlistCandidateMutation
+  useShortlistCandidateMutation,
 } = interviewApiSlice;
