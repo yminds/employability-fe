@@ -22,6 +22,8 @@ import toggleBrowserFullscreen from "../skills/fullscreen";
 import { JobDescription } from "../interview-list/ViewJD";
 import useScreenShot from "@/hooks/useScreenShot";
 import { useUpdateThumbnailMutation } from "@/api/reportApiSlice";
+import Example from "@/features/cap/Example";
+import { flushSync } from "react-dom";
 
 // Constants and Types
 const SOCKET_URL =
@@ -40,6 +42,11 @@ export interface IMessage {
   id: number;
   message: string;
   role: "USER" | "AI";
+}
+
+export interface IDsaQuestionResponse {
+  code: string;
+  testCases: any[];
 }
 
 interface QuestionState {
@@ -90,6 +97,9 @@ const Interview: React.FC<{
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
   const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
   const [updateThumbnail] = useUpdateThumbnailMutation();
+  const [isDsaRoundStarted, setIsDsaRoundStarted] = useState(false);
+  const [isDsaRoundActive, setIsDsaRoundActive] = useState(false);
+  const [dsaQuestion, setDsaQuestion] = useState<any>(null);
 
   const { captureScreenshot, screenshot } = useScreenShot();
   // Queries and Speech Hooks
@@ -133,7 +143,7 @@ const Interview: React.FC<{
       console.log("entred handleConnect from handleConnect");
       if (!isInitialized) {
         console.log("Connected handleConnect isInitialized");
-        
+
         // taking screenshot for candidate
         setTimeout(async () => {
           const response = await captureScreenshot();
@@ -193,6 +203,15 @@ const Interview: React.FC<{
       }));
     };
 
+    const handleGenerateDsaQuestion = (question: any) => {
+      console.log("[DSA Question]", question);
+      // making sure the state is updated synchronously
+      flushSync(() => {
+        setDsaQuestion(question);
+      });
+      setIsDsaRoundStarted(true);
+      setIsDsaRoundActive(true);
+    };
     const handleEndInterview = () => {
       setTimeout(() => {
         setIsInterviewEnded(true);
@@ -201,10 +220,6 @@ const Interview: React.FC<{
     };
 
     const handleConceptValidation = (concepts: any) => {
-      console.log("========================+");
-      console.log(concepts);
-      console.log("========================+");
-
       setAllConcepts((prev) => {
         const updatedConcepts = prev.map((concept) => {
           if (concepts?.ratedConcepts?.includes(concept?.name)) {
@@ -228,6 +243,7 @@ const Interview: React.FC<{
     newSocket.on(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
     newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
     newSocket.on(`conceptValidation${interviewDetails.data._id}`, handleConceptValidation);
+    newSocket.on(`generateDsaQuestion${interviewDetails.data._id}`, handleGenerateDsaQuestion);
 
     return () => {
       isComponentMounted.current = false;
@@ -243,6 +259,9 @@ const Interview: React.FC<{
 
   // Speech-to-Text handling
   useEffect(() => {
+    // if dsaround started then return
+    if (isDsaRoundActive) return;
+
     if (isSttSuccess && sttResponse) {
       const { text } = sttResponse.transcription;
       handleMessage(text, "USER");
@@ -313,9 +332,14 @@ const Interview: React.FC<{
       code_snippet: question.codeSnippet?.code || "",
       question: question.question,
       skill_name: interviewTopic,
-      concepts: type === "Mock" || type === "Job" ? 
-        (Array.isArray(Fundamentals) ? Fundamentals : typeof Fundamentals === 'string' ? Fundamentals.split(',').map((c: string) => c.trim()) : []) 
-        : concepts,
+      concepts:
+        type === "Mock" || type === "Job"
+          ? Array.isArray(Fundamentals)
+            ? Fundamentals
+            : typeof Fundamentals === "string"
+            ? Fundamentals.split(",").map((c: string) => c.trim())
+            : []
+          : concepts,
       interview_id: interviewDetails.data._id,
       level: user?.experience_level || "entry",
       type: type,
@@ -347,16 +371,39 @@ const Interview: React.FC<{
     navigate(-1);
   };
 
+  const handleDsaQuestionSubmit = ({ code, testCases }: IDsaQuestionResponse) => {
+    console.log("DSA Question Submitted", code);
+
+    const response = `
+    user submitted code: ${code} \n
+    test cases: ${JSON.stringify(testCases)}
+    `;
+    addMessage(response);
+    handleDoneAnswering();
+
+    setIsDsaRoundStarted(false);
+    
+    setTimeout(() => {
+      setIsDsaRoundActive(false);
+    }, 5000);
+  };
+  
   return (
-    <div className="w-full h-screen pt-12 ">
+    <div className={`w-full h-[${isDsaRoundStarted ? "80vh" : "100vh"}] pt-12 `}>
       <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
         <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} />
+        {/* check dsa round started or not */}
+
         {isInterviewEnded ? (
           <div className="text-center text-gray-500  font-ubuntu">
             <p>Thank you for your time. We will get back to you soon.</p>
             <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackBtn}>
               Back
             </button>
+          </div>
+        ) : isDsaRoundStarted ? (
+          <div className=" h-[70vh] mx-auto">
+            <Example question={dsaQuestion} handleDsaQuestionSubmit={handleDsaQuestionSubmit} />
           </div>
         ) : (
           <LayoutBuilder
@@ -419,6 +466,7 @@ const LayoutBuilder = ({
   return layoutType === 1 ? (
     <div className="w-full flex gap-8 max-h-screen">
       <div className="w-[60%] flex flex-col gap-8">
+        
         <WebCam />
         {isUserAnswering ? (
           <Controls doneAnswering={handleDoneAnswering} />
