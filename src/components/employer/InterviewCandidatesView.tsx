@@ -70,6 +70,8 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     "all" | "shortlisted" | "not_shortlisted"
   >("all");
 
+  const[localCandidates, setLocalCandidates] = useState<InterviewCandidate[]>([]);
+
   // Toast notification
   const { toast } = useToast();
 
@@ -96,8 +98,11 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   const [shortlistCandidate, { isLoading: isShortlisting }] =
     useShortlistCandidateMutation();
 
+
+
   // Extract data
-  const candidates = candidatesResponse?.data || [];
+
+  const candidates = localCandidates.length > 0 ? localCandidates : candidatesResponse?.data || [];
 
   const stats = statsResponse?.data || {
     fullInterviews: {
@@ -173,19 +178,20 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     try {
       setShortlistingCandidateId(candidateId);
 
-      const response = await shortlistCandidate({
-        jobId,
-        candidateId,
-      }).unwrap();
-
-      // Update the local state to show the candidate as shortlisted immediately
-      // This means we don't have to wait for the refetch to complete
-      const updatedCandidates = candidates.map((candidate: any) => {
+      const updatedCandidates = localCandidates.map((candidate) => {
         if (candidate.candidate_id === candidateId) {
           return { ...candidate, shortlist: true };
         }
         return candidate;
       });
+
+      setLocalCandidates(updatedCandidates);
+      
+
+     await shortlistCandidate({
+        jobId,
+        candidateId,
+      }).unwrap();
 
       // Show success notification
       if (toast) {
@@ -196,10 +202,17 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
         });
       }
 
-      // Refetch the candidates to ensure our data is in sync with the server
-      refetch();
     } catch (error) {
       console.error("Error shortlisting candidate:", error);
+
+      const revertedCandidates = localCandidates.map((candidate) => {
+        if (candidate.candidate_id === candidateId) {
+          return { ...candidate, shortlist: false };
+        }
+        return candidate;
+      });
+
+      setLocalCandidates(revertedCandidates);
 
       // Show error notification
       if (toast) {
@@ -213,6 +226,8 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       setShortlistingCandidateId(null);
     }
   };
+
+  
 
   // Format date
   const formatDate = (dateString?: string) => {
