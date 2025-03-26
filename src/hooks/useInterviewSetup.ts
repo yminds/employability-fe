@@ -137,6 +137,13 @@ const useInterviewSetup = () => {
         return;
       }
 
+      if (screenStream.getAudioTracks().length === 0) {
+        screenStream.getTracks().forEach((track) => track.stop());
+        alert("Please enable system audio when sharing your screen (share the entire window with audio enabled).");
+        return;
+      }
+      
+
       const micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -241,7 +248,7 @@ const useInterviewSetup = () => {
         globalReference.destination.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
         globalReference.micSource.disconnect();
         globalReference.systemAudioSource.disconnect();
-        
+
         setGlobalReference(null);
       }
       setIsScreenSharing(false);

@@ -10,6 +10,8 @@ interface OutputConsoleProps {
 }
 
 const OutputConsole: React.FC<OutputConsoleProps> = ({ output }) => {
+  console.log("output", output);
+  
   return (
     <div className="h-full w-full bg-[#1e1e1e] text-white rounded-lg overflow-y-auto p-4">
       <div className="font-mono text-sm">
