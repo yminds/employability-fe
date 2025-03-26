@@ -17,14 +17,14 @@ interface SearchAndFiltersProps {
   setFilterOpen: (open: boolean) => void;
 }
 
-const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({ 
-  searchTerm, 
-  handleSearchChange, 
-  filterOpen, 
-  setFilterOpen 
+const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
+  searchTerm,
+  handleSearchChange,
+  filterOpen,
+  setFilterOpen,
 }) => {
   return (
-    <div className="flex gap-4 my-6">
+    <div className="flex gap-4 my-6 text-body2">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#909091] w-4 h-4" />
         <Input

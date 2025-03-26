@@ -8,11 +8,11 @@ interface ResumeUploadBannerProps {
 const ResumeUploadBanner: React.FC<ResumeUploadBannerProps> = ({ onClick }) => {
   return (
     <div
-      className="w-full max-w-lg rounded-lg bg-gradient-to-r from-[#f1f0f7] to-[#d8d4f2] cursor-pointer overflow-hidden"
+      className="w-full border-4 border-white max-w-lg rounded-lg bg-gradient-to-r from-[#f1f0f7] to-[#d8d4f2] cursor-pointer overflow-hidden"
       onClick={onClick}
     >
-      <div className="flex">
         {/* Text content */}
+      <div className="flex">
         <div className="flex-1 p-8 space-y-3">
           <h2 className="flex items-center text-[20px] font-ubuntu font-medium leading-8 tracking-[-0.3px] text-[#333333]">
             Upload Resumes <span className="ml-2">→</span>
