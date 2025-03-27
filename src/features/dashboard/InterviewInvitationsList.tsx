@@ -6,7 +6,6 @@ import { useInterviewInvites, InterviewInvite } from '@/hooks/useInterviewInvite
 
 import {
   InvitationListItem,
-  InvitationGridItem,
   InvitationDetailSidebar,
   LoadingSkeleton,
   EmptyState,
@@ -53,6 +52,9 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
       return invite;
     });
   }, [invites, localModifiedInvites]);
+
+  const isTaskCompleted = processedInvites.every((invite: InterviewInvite) => invite.task?.interview_type?.status === 'completed' && invite.task?.skills?.every((skill: any) => skill.status === 'completed'));
+  console.log("isTaskCompleted:", isTaskCompleted);
 
   const displayedInterviews = isDashboard ? processedInvites.slice(0, 3) : processedInvites;
   const totalInterviews = processedInvites.length;
@@ -184,6 +186,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
                     onAccept={onInviteAccept}
                     onDecline={onInviteDecline}
                     showSidebar={showSidebar}
+                    isTaskCompleted={isTaskCompleted}
                   />
                 );
               })}
@@ -233,6 +236,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
         handleDecline={handleDecline}
         setSelectedInvite={setSelectedInvite}
         setLocalModifiedInvites={setLocalModifiedInvites}
+        isTaskCompleted={isTaskCompleted}
       />
 
       {/* Overlay when sidebar is open */}

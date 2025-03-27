@@ -5,11 +5,11 @@ import Interview from "@/components/interview/Interview";
 import CheckSetup from "../components/setup/CheckSetup";
 import { useGetUserFundamentalsBySkillIdMutation } from "@/api/fundementalSlice";
 import toggleBrowserFullscreen from "@/components/skills/fullscreen";
-import MultiScreenDetector from "@/components/interview/multiScreendetector";
 import { projectConcepts } from "@/utils/projects/projectConcpets";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import useOnline from "@/hooks/useOnline";
+import { toast } from "sonner";
 
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
@@ -17,7 +17,7 @@ const InterviewSetupNew: React.FC = () => {
   const userExperience = useSelector((state: RootState) => state.auth.user?.experience_level);
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
-  const [screenCount, setScreenCount] = useState<number>(0); 
+  const [screenCount, setScreenCount] = useState<number>(0);
 
   const online = useOnline();
   // State to control showing the permission note modal
@@ -41,6 +41,8 @@ const InterviewSetupNew: React.FC = () => {
     cameraScale,
     isProceedButtonEnabled,
   } = useInterviewSetup();
+
+  const [showMultipleScreenWarning, setShowMultipleScreenWarning] = useState(false);
 
   // Function to request camera and microphone permissions.
   const requestPermissions = async () => {
@@ -103,6 +105,37 @@ const InterviewSetupNew: React.FC = () => {
       });
   }, []);
 
+  // Monitor screens every 30 seconds
+  useEffect(() => {
+    const monitorScreens = async () => {
+      if ('getScreenDetails' in window) {
+        try {
+          const screenDetails = await (window as any).getScreenDetails();
+          const updateScreenCount = () => {
+            const screens = screenDetails.screens.length;
+            if (screens > 1) {
+              setShowMultipleScreenWarning(true);
+            } else {
+              setShowMultipleScreenWarning(false);
+            }
+          };
+
+          updateScreenCount(); // Initial check
+
+          screenDetails.addEventListener('screenschange', updateScreenCount);
+        } catch (error) {
+          console.error("Screen monitoring failed:", error);
+        }
+      }
+    };
+
+    monitorScreens();
+    const intervalId = setInterval(monitorScreens, 5000); // Check every 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
   // Fetch the fundamentals for the interview
   useEffect(() => {
     const sync = async () => {
@@ -129,17 +162,18 @@ const InterviewSetupNew: React.FC = () => {
 
   // if user connection gone redirct to home
   console.log("online", online);
-  
+
   useEffect(() => {
     if (!online) {
       console.log("Connection lost, redirecting...");
       setTimeout(() => {
-        window.location.replace("/");
+        window.location.replace("/"); // Redirect to home page after 500ms
       }, 500);
     }
   }, [online]);
 
-  if (!online) return <div>You are offline</div>
+  if (!online) return <div>You are offline</div>;
+
   return (
     <>
       {/* Permission Note Modal */}
@@ -189,21 +223,30 @@ const InterviewSetupNew: React.FC = () => {
                 </p>
               </div>
 
-              {screenCount != 1 && <MultiScreenDetector onScreenCountChange={setScreenCount} />}
-              {screenCount === 1 && (
-                <button
-                  className={`bg-button ${
-                    isProceedButtonEnabled ? "hover:bg-[#062549]" : "cursor-not-allowed opacity-50"
-                  } text-white rounded-[4px] font-normal text-[14px] w-72 py-2 leading-5`}
-                  onClick={() => {
-                    setIsInterviewStarted(true);
-                    toggleBrowserFullscreen();
-                  }}
-                  disabled={!isProceedButtonEnabled}
-                >
-                  Proceed to Interview
-                </button>
-              )}
+              <div>
+                <div className="flex flex-col justify-end items-end gap-2">
+                  <button
+                    className={`bg-button ${isProceedButtonEnabled && !showMultipleScreenWarning ? "hover:bg-[#062549]" : "cursor-not-allowed opacity-50"
+                      } text-white rounded-[4px] font-normal text-[14px] w-72 py-2 leading-5`}
+                    onClick={() => {
+                      setIsInterviewStarted(true);
+                      toggleBrowserFullscreen();
+                    }}
+                    disabled={showMultipleScreenWarning || !isProceedButtonEnabled}
+                  >
+                    Proceed to Interview
+                  </button>
+
+                  <div>
+                    {showMultipleScreenWarning && (
+                      <div className="text-red-500 text-sm">
+                        *Multiple screens detected. Please use a single screen to proceed. 
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
             </div>
             <CheckSetup
               isScreenSharing={isScreenSharing}
@@ -222,7 +265,7 @@ const InterviewSetupNew: React.FC = () => {
           cameraScale={100}
           id={id as string}
           interviewTopic={title}
-          concepts={ projectId ? projectConcepts : fundamentals }
+          concepts={projectId ? projectConcepts : fundamentals}
           stopScreenSharing={stopScreenSharing}
           skillLevel={level}
           type={type}
@@ -230,7 +273,7 @@ const InterviewSetupNew: React.FC = () => {
           isResume={isResume}
           projectId={projectId}
           userExperience={userExperience}
-          Fundamentals={Fundamentals ? Fundamentals.split(',').map((concept: string)   => concept.trim()) : []}
+          Fundamentals={Fundamentals ? Fundamentals.split(',').map((concept: string) => concept.trim()) : []}
           skills_required={skills_required || []}
         />
       )}
