@@ -95,9 +95,10 @@ const useInterviewSetup = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const lastChunkRef = useRef<Promise<void> | null>(null);
   const [allBlobFiles, setAllBlobFiles] = useState<Blob[]>([]);
-  const [globalReference, setGlobalReference] = useState<any>(null);
+  const globalReference = useRef<any>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const chunkNumberRef = useRef<number>(1);
+  const screenStreamRef = useRef<MediaStream | null>(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -137,6 +138,12 @@ const useInterviewSetup = () => {
         return;
       }
 
+      if (screenStream.getAudioTracks().length === 0) {
+        screenStream.getTracks().forEach((track) => track.stop());
+        alert("Please enable system audio when sharing your screen (share the entire window with audio enabled).");
+        return;
+      }
+
       const micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -158,14 +165,22 @@ const useInterviewSetup = () => {
         ...screenStream.getVideoTracks(),
         ...destination.stream.getAudioTracks(),
       ]);
-      setGlobalReference({
+      // setGlobalReference({
+      //   screenStream,
+      //   micStream,
+      //   audioContext,
+      //   destination,
+      //   micSource,
+      //   systemAudioSource,
+      // });
+      globalReference.current = {
         screenStream,
         micStream,
         audioContext,
         destination,
         micSource,
         systemAudioSource,
-      });
+      };
       dispatch(
         setRecordingReference({ screenStream, micStream, audioContext, destination, micSource, systemAudioSource })
       );
@@ -227,27 +242,43 @@ const useInterviewSetup = () => {
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       recordedChunksRef.current = [];
+      console.log("screenStream", screenStream);
 
       if (screenStream) {
+        console.log("oh we got some stream");
+
         screenStream.getTracks().forEach((track) => track.stop());
         setScreenStream(null);
+      } else {
+        console.log("oh we got no stream");
       }
 
       // reset the all things in glbal reference
-      if (globalReference) {
-        globalReference.audioContext.close();
-        globalReference.micStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-        globalReference.screenStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-        globalReference.destination.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-        globalReference.micSource.disconnect();
-        globalReference.systemAudioSource.disconnect();
+      if (globalReference.current) {
+        console.log("entred to global reference");
         
-        setGlobalReference(null);
+        globalReference.current.audioContext.close();
+        globalReference.current.micStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        globalReference.current.screenStream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        globalReference.current.destination.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        globalReference.current.micSource.disconnect();
+        globalReference.current.systemAudioSource.disconnect();
+        globalReference.current = null;
+        recorderRef.current = null;
       }
+
       setIsScreenSharing(false);
       isStoppingRef.current = false;
       if (videoRef.current) {
+        console.log("videoRef", videoRef.current);
+        
         videoRef.current.srcObject = null;
+      }
+      if (screenStreamRef.current) {
+        console.log("screenStreamRef", screenStreamRef.current);
+        
+        screenStreamRef.current.getTracks().forEach((track) => track.stop());
+        screenStreamRef.current = null;
       }
       recorderRef.current = null;
     } catch (error) {
@@ -266,13 +297,36 @@ const useInterviewSetup = () => {
     }
   }, []);
 
+  useEffect(() => {
+    // check is there any instance of recording availabele
+    if (isInterviewStarted) {
+      const interval = setInterval(() => {
+        if (recorderRef.current && recorderRef.current.state !== "inactive") {
+          recorderRef.current.stop();
+        }
+      }, 30000);
+      intervalRef.current = interval;
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+
+    return () => {
+      stopScreenSharing();
+      console.log('-------------------------------------------------------');
+      console.log('cleaning the recorings');
+      console.log('-------------------------------------------------------');
+      
+    };
+  }, []);
   const handleReinitiateScreenSharing = async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true,
       });
-
+      screenStreamRef.current = stream;
       setScreenStream(stream);
       setIsScreenSharing(true);
       setMicTested(false);

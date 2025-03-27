@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Dropdown from "@/components/ui/custom-dropdown";
 import { useCameraCheck } from "@/hooks/useCameraCheck";
 
@@ -36,6 +36,15 @@ const CameraCheck: React.FC<CameraCheckProps> = ({
     onScaleChange(zoom / 100);
   }, [zoom, onScaleChange]);
 
+  useEffect(() => {
+   return () => {
+     if (videoRef.current) {
+        videoRef.current.srcObject = null;
+        videoRef.current = null;
+     }
+
+   }
+  },[])
   return (
     <div
       className={`bg-[#FAFAFA] p-6 pe-8 flex h-[75vh] flex-col  justify-around rounded-xl ${

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { useSttMutation } from "@/api/aiApiSlice";
 
@@ -29,6 +29,12 @@ export const useSTT = () => {
     },
   });
 
+  useEffect(() => {
+   return () => {
+     clearBlobUrl();
+     stopRecording();
+   }
+  }, []);
   return {
     startRecording,
     stopRecording,

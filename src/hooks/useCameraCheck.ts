@@ -5,6 +5,7 @@ export const useCameraCheck = () => {
   const [selectedCamera, setSelectedCamera] = useState<string | null>(null);
   const [zoom, setZoom] = useState<number>(100); // Zoom percentage
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoStream = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     const getCameras = async () => {
@@ -37,11 +38,26 @@ export const useCameraCheck = () => {
         .then((stream) => {
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
+            videoStream.current = stream;
           }
         })
         .catch((error) => {
           console.error("Error accessing selected camera:", error);
         });
+
+      // Cleanup function
+      return () => {
+        console.log('Cleaning up video stream');
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
+        
+        if (videoStream.current) {
+          videoStream.current.getTracks().forEach((track) => track.stop());
+          videoStream.current = null;
+        }
+      };
     }
   }, [selectedCamera]);
 

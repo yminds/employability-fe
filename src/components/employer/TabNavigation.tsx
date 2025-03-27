@@ -29,7 +29,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`px-4 pb-3 text-sm font-medium ${
+            className={`px-4 pb-3 text-body2 ${
               selectedTab === tab.id
                 ? "text-[#001630] border-b-2 border-[#24d680]"
                 : "text-[#68696b]"
@@ -40,7 +40,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#24d680]"></span>
                 <span>{tab.label}</span>
-                <span className="text-xs">({tab.count})</span>
+                <span className="text-body2">({tab.count})</span>
               </div>
             ) : (
               tab.label

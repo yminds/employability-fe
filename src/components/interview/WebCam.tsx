@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Webcam from "react-webcam";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
 const WebCam: React.FC = () => {
   const userName = useSelector((state: RootState) => state.auth.user?.name);
+
+  // cean up the webcam component
+
+  
   return (
     <div className="relative w-full max-w-full h-[45vh]">
       <Webcam

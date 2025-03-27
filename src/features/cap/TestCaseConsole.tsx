@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 interface TestCase {
   input: string;
@@ -17,42 +17,151 @@ interface TestResult {
 interface TestCaseConsoleProps {
   testCases: TestCase[];
   code: string;
+  language?: string;
+  functionName: string;
+  setTestResults:(testResults:TestResult[])=>void;
 }
 
-const executeTestCase = (code: string, input: string): any => {
+const executeTestCase = (code: string, input: string,functionName:string
+): any => {
   try {
     // Create a function from the code and input
-    const fullCode = `${code}\nflattenArray(${input})`;
+    const fullCode = `${code}\n ${functionName}(${input})`;
     return eval(fullCode);
   } catch (error) {
     return (error as Error).message;
   }
 };
 
-const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code }) => {
-  const runTestCases = (): TestResult[] => {
-    return testCases.map((testCase) => {
-      const actualOutput = executeTestCase(code, testCase.input);
-      const expectedOutputValue = JSON.parse(testCase.expectedOutput);
-      
-      // Compare arrays for equality
-      const passed = Array.isArray(actualOutput) && 
-        Array.isArray(expectedOutputValue) &&
-        actualOutput.length === expectedOutputValue.length &&
-        actualOutput.every((val, index) => val === expectedOutputValue[index]);
+const executePythonTestCase = async (code: string, input: string,functionName:string): Promise<any> => {
+  const trimmedCode = code.trim();
 
-      return {
-        passed,
-        description: testCase.description,
-        input: testCase.input,
-        expectedOutput: testCase.expectedOutput,
-        actualOutput: JSON.stringify(actualOutput)
-      };
+  // Create the code to execute without extra indentation
+  const codeToExecute = `${trimmedCode}
+
+result = ${functionName}(${input})
+print(result)`;  // Just print the result without "Result:" prefix
+
+  const runPython = async () => {
+    if (!(window as any).Sk) {
+      return "Skulpt is not loaded";
+    }
+
+    function builtinRead(x: string) {
+      if ((window as any).Sk.builtinFiles === undefined || (window as any).Sk.builtinFiles["files"][x] === undefined) {
+        throw `File not found: '${x}'`;
+      }
+      return (window as any).Sk.builtinFiles["files"][x];
+    }
+    
+    let output = "";
+    (window as any).Sk.configure({
+      output: (text: string) => {
+        output = text.trim(); // Store the output and trim whitespace
+      },
+      read: builtinRead,
+      __future__: (window as any).Sk.python3,
     });
+
+    try {
+      // Execute Python code
+      await (window as any).Sk.misceval.asyncToPromise(() => {
+        return (window as any).Sk.importMainWithBody("<stdin>", false, codeToExecute, true);
+      });
+      return output;
+    } catch (err) {
+      console.error("Python execution error:", err);
+      return String(err);
+    }
   };
 
-  const results = runTestCases();
-  const passedTests = results.filter(r => r.passed).length;
+  try {
+    return await runPython();
+  } catch (err) {
+    console.error("Failed to run Python:", err);
+    return String(err);
+  }
+};
+
+// Helper function to parse output from different languages
+const parseOutput = (output: string, language: string): any => {
+  if (language === "python") {
+    try {
+      // Try to parse the Python output as JSON
+      // Remove any "Result:" prefix if it exists
+      const cleanOutput = output.replace(/^Result:\s*/, "").trim();
+      return JSON.parse(cleanOutput);
+    } catch (e) {
+      // If parsing fails, return as is
+      return output;
+    }
+  }
+  return output;
+};
+
+// Helper function to compare results
+const compareResults = (actual: any, expected: any): boolean => {
+  if (Array.isArray(actual) && Array.isArray(expected)) {
+    return actual.length === expected.length && 
+           actual.every((val, idx) => val === expected[idx]);
+  }
+  return actual === expected;
+};
+
+const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code, language = "javascript" ,functionName,setTestResults}) => {
+  const [results, setResults] = useState<TestResult[]>([]);
+  const [loading, setLoading] = useState(true);
+  console.log("testcase result",results);
+  
+  
+  useEffect(() => {
+    const runTests = async () => {
+      setLoading(true);
+      
+      const testResults = await Promise.all(
+        testCases.map(async (testCase) => {
+          let actualOutput;
+          
+          if (language === "python") {
+            actualOutput = await executePythonTestCase(code, testCase.input,functionName);
+          } else {
+            actualOutput = executeTestCase(code, testCase.input,functionName);
+          }
+          
+          const expectedOutputValue = JSON.parse(testCase.expectedOutput);
+          const parsedActualOutput = parseOutput(actualOutput, language);
+          
+          const passed = compareResults(parsedActualOutput, expectedOutputValue);
+          
+          return {
+            passed,
+            description: testCase.description,
+            input: testCase.input,
+            expectedOutput: testCase.expectedOutput,
+            actualOutput: JSON.stringify(parsedActualOutput),
+          };
+        })
+      );
+      
+      setResults(testResults);
+      setTestResults(testResults);
+      setLoading(false);
+    };
+    
+    runTests();
+  }, [testCases, code, language]);
+
+  const passedTests = results.filter((r) => r.passed).length;
+
+  if (loading) {
+    return (
+      <div className="border border-black/10 rounded-lg overflow-hidden">
+        <div className="bg-[#11df7c] px-3.5 py-2.5">
+          <h3 className="text-[#05733E] text-base font-medium">Running tests...</h3>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-black/10 rounded-lg overflow-hidden">
@@ -65,8 +174,8 @@ const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code }) =>
         {results.map((result, index) => (
           <div key={index} className="mb-4 last:mb-0">
             <div className="flex items-center gap-2">
-              <span className={`text-${result.passed ? 'green' : 'red'}-500`}>
-                {result.passed ? '✓' : '✗'}
+              <span className={result.passed ? "text-green-500" : "text-red-500"}>
+                {result.passed ? "✓" : "✗"}
               </span>
               <span className="font-medium">{result.description}</span>
             </div>
@@ -84,4 +193,4 @@ const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code }) =>
   );
 };
 
-export default TestCaseConsole; 
+export default TestCaseConsole;
