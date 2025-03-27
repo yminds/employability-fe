@@ -51,3 +51,18 @@ export const getItemClassName = (isProcessing: boolean, isSelected: boolean) => 
 export const getGridItemClassName = (isProcessing: boolean, isSelected: boolean) => {
   return `bg-white ${isProcessing ? 'opacity-70' : ''} ${isSelected ? 'bg-background-grey' : ''} p-4 rounded-lg shadow-sm border border-grey-1 cursor-pointer hover:shadow-md hover:bg-background-grey transition-all flex flex-col h-full justify-between relative`;
 }; 
+
+ export const formatDuration = (totalMinutes: number) => {
+  if (totalMinutes < 60) {
+    return `${totalMinutes} min${totalMinutes !== 1 ? 's' : ''}`;
+  } else {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    if (minutes === 0) {
+      return `${hours} hr${hours !== 1 ? 's' : ''}`;
+    } else {
+      return `${hours} hr${hours !== 1 ? 's' : ''} ${minutes} min${minutes !== 1 ? 's' : ''}`;
+    }
+  }
+};

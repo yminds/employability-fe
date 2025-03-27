@@ -204,7 +204,7 @@ interface SendInvitationsPayload {
 
 interface UpdateStatusPayload {
   inviteId: string;
-  status: 'accepted' | 'declined';
+  status: 'accepted' | 'declined' | 'completed';
 }
 
 interface GetJobInvitesParams {

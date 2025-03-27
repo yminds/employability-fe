@@ -53,8 +53,17 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
     });
   }, [invites, localModifiedInvites]);
 
-  const isTaskCompleted = processedInvites.every((invite: InterviewInvite) => invite.task?.interview_type?.status === 'completed' && invite.task?.skills?.every((skill: any) => skill.status === 'completed'));
-  console.log("isTaskCompleted:", isTaskCompleted);
+  const isInterviewTypeCompleted = (invite: InterviewInvite | null) => {
+    return invite?.task?.interview_type?.status === 'completed';
+  };
+
+  const isSkillsCompleted = (invite: InterviewInvite | null) => {
+    return invite?.task?.skills?.every((skill: any) => skill.status === 'completed');
+  };
+
+  const isTaskCompleted = (invite: InterviewInvite | null) => {
+    return isInterviewTypeCompleted(invite) && isSkillsCompleted(invite);
+  };
 
   const displayedInterviews = isDashboard ? processedInvites.slice(0, 3) : processedInvites;
   const totalInterviews = processedInvites.length;
@@ -186,7 +195,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
                     onAccept={onInviteAccept}
                     onDecline={onInviteDecline}
                     showSidebar={showSidebar}
-                    isTaskCompleted={isTaskCompleted}
+                    isTaskCompleted={isTaskCompleted(invite)}
                   />
                 );
               })}
@@ -236,7 +245,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
         handleDecline={handleDecline}
         setSelectedInvite={setSelectedInvite}
         setLocalModifiedInvites={setLocalModifiedInvites}
-        isTaskCompleted={isTaskCompleted}
+        isTaskCompleted={isTaskCompleted(selectedInvite)}
       />
 
       {/* Overlay when sidebar is open */}

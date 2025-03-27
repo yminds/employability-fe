@@ -1,15 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { DetailSidebarProps } from './interviewInvitesTypes';
 import { capitalizeString, formatDate, getDaysRemaining } from './utils';
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { useCreateInterview } from "@/hooks/useCreateInterview";
-import {
-  useGetFundamentalNamesAsCsvMutation,
-  useUpdateInterviewIdMutation
-} from "@/api/interviewInvitesApiSlice";
 import duratuionIcon from "@/assets/interview/pace.svg";
 import dueDate from "@/assets/interview/event.svg";
 import statusIcon from "@/assets/interview/status.png";
@@ -27,67 +20,6 @@ export const InvitationDetailSidebar: React.FC<DetailSidebarProps> = ({
   isTaskCompleted
 }) => {
   if (!selectedInvite) return null;
-  const navigate = useNavigate();
-  const { createInterview } = useCreateInterview();
-  const [getFundamentalNamesAsCsv] = useGetFundamentalNamesAsCsvMutation();
-  const [updateInterviewId] = useUpdateInterviewIdMutation();
-
-  const [isLoadingFundamentals, setIsLoadingFundamentals] = useState(false);
-
-  const handleTakeInterview = async () => {
-    if (!selectedInvite) {
-      console.error("No selected invite found");
-      return;
-    }
-
-    // Make sure we have valid skill_pool_ids
-    const skillPoolIds = selectedInvite.job?.skills_required?.map((skill) => skill.skill) || [];
-    if (!skillPoolIds.length) {
-      toast.error("No skill requirements found – cannot proceed with interview.");
-      return;
-    }
-
-    setIsLoadingFundamentals(true);
-    try {
-      // 1. Fetch fundamentals CSV
-      const { data: fundamentalsData } = await getFundamentalNamesAsCsv(skillPoolIds).unwrap();
-      if (!fundamentalsData) {
-        toast.error("No fundamentals data returned. Cannot proceed with interview.");
-        return;
-      }
-
-      // 2. Create interview
-      const interviewId = await createInterview({
-        title: `${selectedInvite.job?.title} Interview`,
-        type: "Job",
-      });
-      console.log("Created interview with ID:", interviewId);
-
-      // 3. Update the invite with the newly created interviewId
-      //    so that the backend also knows which interview is tied to this invitation.
-      await updateInterviewId({
-        inviteId: selectedInvite._id,
-        interviewId,
-      }).unwrap();
-      console.log("Updated invite with interview ID:", interviewId);
-
-      // 4. Navigate to interview
-      navigate(`/interview/${interviewId}`, {
-        state: {
-          title: selectedInvite.job?.title,
-          type: "Job",
-          jobDescription: selectedInvite.job?.description,
-          skills_required: selectedInvite.job?.skills_required,
-          Fundamentals: fundamentalsData,
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching fundamentals or creating/updating interview:", error);
-      toast.error("Failed to create interview. Please try again.");
-    } finally {
-      setIsLoadingFundamentals(false);
-    }
-  };
 
   return (
     <div
@@ -175,10 +107,8 @@ export const InvitationDetailSidebar: React.FC<DetailSidebarProps> = ({
                 </div>
                 <div>
                   <div className=' flex items-center gap-3'><span><img src={dueDate} alt="" /></span>Due Date</div><p>{formatDate(selectedInvite.application_deadline)} | {getDaysRemaining(selectedInvite.application_deadline) > 0 && (
-                    <span className={`text-body2 font-medium ${getDaysRemaining(selectedInvite.application_deadline) <= 2
+                    <span className={`text-body2 font-medium ${getDaysRemaining(selectedInvite.application_deadline) <= 1
                       ? 'text-[#FF3B30]'
-                      : getDaysRemaining(selectedInvite.application_deadline) <= 5
-                        ? 'text-[#FF9500]'
                         : 'text-grey-6'
                       }`}>
                       {getDaysRemaining(selectedInvite.application_deadline)} days left
@@ -191,7 +121,7 @@ export const InvitationDetailSidebar: React.FC<DetailSidebarProps> = ({
 
               <div className='flex flex-col gap-7'>
                 <h3 className='text-body2 font-medium text-grey-6'>Complete these steps to submit</h3>
-                <TaskTable task={selectedInvite.task} />
+                <TaskTable task={selectedInvite.task} jobDescription={selectedInvite.job} inviteId={selectedInvite._id} />
               </div>
 
               <div className=' h-[1px] bg-grey-2 w-full mt-10'></div>
