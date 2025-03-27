@@ -27,51 +27,49 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
   const slides = component === "SkillsCard" ? [
     {
       image: `${step1}`,
-      title: "Step 1: Check Your Setup",
+      title: "Check Your Setup",
       description: "Before you dive in, make sure your microphone and camera are working properly, and screen is shared correctly.",
+      step: `${currentSlide + 1}`
     },
     {
       image: `${step2}`,
-      title: "Step 2: Enable the Audio",
+      title: "Enable the Audio",
       description: "While sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
+      step: `${currentSlide + 1}`
     },
     {
       image: `${step3}`,
-      title: "Step 3: Proceed to Interview",
+      title: "Proceed to Interview",
       description: "Once you've checked your setup, click on 'Proceed to Interview' to begin the skill interview.",
+      step: `${currentSlide + 1}`
     },
     {
       image: `${step4}`,
-      title: "Step 4: Interview Process",
+      title: "Interview Process",
       description: "During the interview, respond to the AI Agent's questions. Press 'Done Answering' to move to the next one.",
-    },
-    {
-      image: `${step5}`,
-      title: "Step 5: Verified Rating & Report",
-      description: "Once the interview is complete, you'll receive a verified rating and report based on your performance.",
+      step: `${currentSlide + 1}`
     }
   ] : [
     {
       image: `${step2}`,
       title: "Enable Screen Sharing",
       description: "While sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
+      step: `${currentSlide + 2}`
     }
   ];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dialogRef.current && 
+        dialogRef.current &&
         !dialogRef.current.contains(event.target as Node)
       ) {
         onClose();
       }
     };
 
-    // Add event listener
     document.addEventListener('mousedown', handleClickOutside);
-    
-    // Cleanup the event listener
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -93,40 +91,47 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
-      <div 
+      <div
         ref={dialogRef}
-        className="bg-white rounded-xl shadow-lg w-full max-w-xl"
+        className="bg-white rounded-2xl shadow-lg w-full max-w-[958px] flex flex-col"
       >
-        <div className="p-6">
-          {/* Header with Step Indicator */}
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-sm text-gray-600">Step {currentSlide + 1} of {slides.length}</div>
-            <button 
-              onClick={onClose} 
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X size={16}/>
-            </button>
+        {/* Image at the top */}
+        <div className="w-full">
+          <img
+            src={slides[currentSlide].image}
+            alt={`Step ${currentSlide + 1}`}
+            className="w-full object-cover rounded-t-2xl"
+          />
+        </div>
+
+        {/* Content below the image */}
+        <div className="p-9 pt-6">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10"
+          >
+            <X size={24} />
+          </button>
+
+          {/* Step Indicator */}
+          <div className=" flex-col items-center justify-start text-sm text-gray-600 mb-2 space-y-2 ">
+            <div className="flex items-center justify-start gap-1">
+              {slides.map((_, index) => (
+                <div key={index} className={` h-1 p-1 rounded-full ${index === currentSlide ? 'bg-grey-8 w-8' : 'bg-gray-300 w-4'}`} />
+              ))}
+            </div>
+            <div className="text-sm text-gray-600 mb-2">Step {slides[currentSlide].step} of {slides.length}</div>
           </div>
 
           {/* Title */}
-          <h2 className="text-h2 font-bold mb-4">{slides[currentSlide].title}</h2>
+          <h2 className="text-2xl font-bold text-[#001630] mb-4">{slides[currentSlide].title}</h2>
 
           {/* Description */}
           <p className="text-gray-600 mb-6">{slides[currentSlide].description}</p>
 
-          {/* Image */}
-          <div className="mb-6 rounded-xl border">
-            <img 
-              src={slides[currentSlide].image} 
-              alt={`Step ${currentSlide + 1}`} 
-              className="w-full rounded-lg"
-            />
-          </div>
-
           {/* Bottom Controls */}
-          <div className="flex items-center">
-            <label className=" flex text-center text-[#001630] font-dm-sans text-sm font-medium leading-5 tracking-[0.21px] flex-1 gap-1">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center text-[#001630] text-sm font-medium gap-2">
               <input
                 type="checkbox"
                 checked={dontShowAgain}
@@ -140,14 +145,14 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
               {currentSlide > 0 && (
                 <button
                   onClick={handlePrev}
-                  className="px-4 py-2 text-body2 text-gray-600 hover:bg-gray-100 rounded"
+                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
                 >
                   Previous
                 </button>
               )}
               <button
                 onClick={handleNext}
-                className="px-4 py-2 text-sm bg-button text-body1 text-white rounded hover:bg-[#062549]"
+                className="px-4 py-2 text-sm bg-[#062549] text-white rounded hover:bg-[#0A3B6C]"
               >
                 {currentSlide < slides.length - 1 ? 'Continue' : 'Start Interview'}
               </button>

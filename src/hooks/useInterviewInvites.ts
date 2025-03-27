@@ -25,7 +25,18 @@ export interface InterviewInvite {
     name?: string;
   };
   task?: {
-    interview_type?: string;
+    interview_type?: {
+      type?: string;
+      status?: string;
+      estimated_time?: number;
+      interview_id?: string;
+    };
+    skills?: {
+      name?: string;
+      status?: string;
+      estimated_time?: number;
+      _id?: string;
+    }[];
   };
   status: string;
   application_deadline: string;

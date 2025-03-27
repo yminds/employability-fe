@@ -44,7 +44,7 @@ export const getStatusColor = (status: string) => {
 
 // Generate list item class name based on processing state
 export const getItemClassName = (isProcessing: boolean, isSelected: boolean) => {
-  return `bg-white ${isProcessing ? 'opacity-70' : ''} ${isSelected ? 'bg-background-grey' : ''} p-5 rounded-lg cursor-pointer border border-[#0000001A] transition-all relative`;
+  return `bg-white ${isProcessing ? 'opacity-70' : ''} ${isSelected ? 'bg-background-grey' : ''} p-5 rounded-lg border border-[#0000001A] transition-all relative`;
 };
 
 // Generate grid item class name based on processing state

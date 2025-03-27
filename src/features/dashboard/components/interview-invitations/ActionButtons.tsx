@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ActionButtonsProps } from './types';
+import { ActionButtonsProps } from './interviewInvitesTypes';
 import { capitalizeString, getStatusColor } from './utils';
-import check from "@/assets/interview/check.png";
-import decline from "@/assets/interview/close.png";
+import { Check } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
   invite,
@@ -19,33 +19,33 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     return (
       <div className="flex gap-2">
         <Button
-          className="bg-[#aa040f1a] hover:bg-[#aa040f33] text-button text-red-700 py-2 px-4 rounded-md transition-colors"
+          className="bg-white hover:bg-[#0000001A] font-dm-sans text-sm font-medium leading-5 tracking-[0.21px] border border-button "
           onClick={(e) => onDecline(invite._id, e)}
           disabled={isBeingProcessed}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-5 py-3">
             {isBeingProcessed ? (
               'Processing...'
             ) : (
               <>
-                <img src={decline} alt="Decline" className="w-5 h-5" />
+                <X/>
                 Decline
               </>
             )}
           </div>
         </Button>
         <Button
-          className="bg-[#03963F1A] hover:bg-[#03963F33] text-white py-2 px-4 rounded-md transition-colors"
+          className="bg-button hover:bg-[#062549] text-white py-2 px-4 rounded-md transition-colors"
           onClick={(e) => onAccept(invite._id, e)}
           disabled={isBeingProcessed}
         >
-          <div className="flex items-center gap-2 text-[#03963F]">
+          <div className="flex items-center gap-2 text-white font-dm-sans text-sm font-medium leading-5 tracking-[0.21px] px-5 py-3">
             {isBeingProcessed ? (
               'Processing...'
             ) : (
               <>
-                <img src={check} alt="Accept" className="w-5 h-5" />
-                Accept
+                <Check/>
+                Accept Invite
               </>
             )}
           </div>

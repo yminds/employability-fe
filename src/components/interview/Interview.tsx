@@ -92,6 +92,7 @@ const Interview: React.FC<{
   skills_required,
 }) => {
   console.log("in interviews jobDescription", jobDescription);
+  const [showScreenWarning, setShowScreenWarning] = useState(false);
   const { id: interviewId } = useParams<{ id: string }>();
   const [interviewStream] = useInterviewStreamMutation();
   const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
@@ -130,6 +131,30 @@ const Interview: React.FC<{
       }, 50);
     },
   });
+
+  useEffect(() => {
+    const monitorScreens = async () => {
+      if ('getScreenDetails' in window) {
+        try {
+          const screenDetails = await (window as any).getScreenDetails();
+          const updateScreenCount = () => {
+            const screens = screenDetails.screens.length;
+            if (screens > 1) {
+              setShowScreenWarning(true);
+            }
+          };
+
+          updateScreenCount(); // Initial check
+
+          screenDetails.addEventListener('screenschange', updateScreenCount);
+        } catch (error) {
+          console.error("Screen monitoring failed:", error);
+        }
+      }
+    };
+
+    monitorScreens();
+  }, []);
 
   // Socket Connection
   useEffect(() => {
@@ -388,36 +413,60 @@ const Interview: React.FC<{
   };
   
   return (
-    <div className={`w-full h-[${isDsaRoundStarted ? "80vh" : "100vh"}] pt-12 `}>
-      <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-        <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} />
-        {/* check dsa round started or not */}
+    <>
+    {showScreenWarning && (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="relative bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+          <h2 className="text-2xl font-bold mb-6 text-h2 text-red-600">Second Screen Detected</h2>
+          <div className="text-body space-y-3 mb-4">
+            <p>We detected an additional screen connected during the interview.</p>
+            <p>Please disconnect it to continue. You will be redirected to the setup screen.</p>
+          </div>
+          <button
+            className="text-button bg-button text-white px-4 py-2 rounded"
+            onClick={() => {
+              stopScreenSharing();
+              toggleBrowserFullscreen();
+              navigate(-1); // go back to previous screen (Check Setup)
+            }}
+          >
+            Return to Setup
+          </button>
+        </div>
+      </div>
+    )}
+      <div className={`w-full h-[${isDsaRoundStarted ? "80vh" : "100vh"}] pt-12 `}>
+        <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
+          <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} />
+          {/* check dsa round started or not */}
 
         {isInterviewEnded ? (
-          <div className="text-center text-gray-500  font-ubuntu">
-            <p>Thank you for your time. We will get back to you soon.</p>
-            <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackBtn}>
-              Back
-            </button>
-          </div>
-        ) : isDsaRoundStarted ? (
+            <div className="text-center text-gray-500  font-ubuntu">
+              <p>Thank you for your time. We will get back to you soon.</p>
+              <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackBtn}>
+                Back
+              </button>
+            </div>
+          ) : isDsaRoundStarted ? (
           <div className=" h-[70vh] mx-auto">
             <Example question={dsaQuestion} handleDsaQuestionSubmit={handleDsaQuestionSubmit} />
           </div>
         ) : (
-          <LayoutBuilder
-            isUserAnswering={isUserAnswering}
-            handleDoneAnswering={handleDoneAnswering}
-            question={question}
-            frequencyData={frequencyData}
-            messages={messages}
-            layoutType={2}
-            interviewState={interviewState}
-            concepts={allConcepts}
-          />
-        )}
+            <LayoutBuilder
+              isUserAnswering={isUserAnswering}
+              handleDoneAnswering={handleDoneAnswering}
+              question={question}
+              frequencyData={frequencyData}
+              messages={messages}
+              layoutType={2}
+              interviewState={interviewState}
+              concepts={allConcepts}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </>
+
   );
 };
 
