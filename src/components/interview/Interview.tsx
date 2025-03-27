@@ -101,7 +101,6 @@ const Interview: React.FC<{
   const [isDsaRoundStarted, setIsDsaRoundStarted] = useState(false);
   const [isDsaRoundActive, setIsDsaRoundActive] = useState(false);
   const [dsaQuestion, setDsaQuestion] = useState<any>(null);
-
   const { captureScreenshot, screenshot } = useScreenShot();
   // Queries and Speech Hooks
   const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
