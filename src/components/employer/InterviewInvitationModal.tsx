@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 // Import assets
@@ -31,6 +32,19 @@ interface Candidate {
   profile_image?: string;
 }
 
+interface Skill {
+  _id: string;
+  skill?: string;
+  name: string;
+  importance: "Very Important" | "Important" | "Good-To-Have";
+}
+
+interface JobDetails {
+  _id: string;
+  title: string;
+  skills_required: Skill[];
+}
+
 interface InterviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,9 +61,7 @@ export default function InterviewModal({
   jobId,
 }: InterviewModalProps) {
   // State variables
-  const [selectedOption, setSelectedOption] = useState<"full" | "screening">(
-    "full"
-  );
+  const [selectedOption, setSelectedOption] = useState<"full" | "screening">("full");
   const [isVisible, setIsVisible] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -60,28 +72,83 @@ export default function InterviewModal({
   const [error, setError] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-
+  const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
+  const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
+  const [isLoadingJob, setIsLoadingJob] = useState(false);
+  const [showSkillsSection, setShowSkillsSection] = useState(false);
+  
   // API base URL
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
+  
   // Web Worker reference
   const workerRef = useRef<Worker | null>(null);
+
+  // Fetch job details when the modal opens
+  useEffect(() => {
+    if (isOpen && jobId) {
+      fetchJobDetails();
+    }
+  }, [isOpen, jobId]);
+
+  // Update skills section visibility when interview type changes
+  useEffect(() => {
+    setShowSkillsSection(selectedOption === "full" && !!jobDetails?.skills_required?.length);
+  }, [selectedOption, jobDetails]);
+
+  // Fetch job details
+  const fetchJobDetails = async () => {
+    if (!jobId) return;
+    
+    setIsLoadingJob(true);
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/employerJobs/jobs/${jobId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch job details');
+      }
+      
+      const data = await response.json();
+      if (data.success && data.data) {
+        setJobDetails(data.data);
+        
+        // Auto-select "Very Important" skills
+        const importantSkills = data.data.skills_required.filter(
+          (skill: Skill) => skill.importance === "Very Important"
+        );
+        setSelectedSkills(importantSkills);
+      }
+    } catch (error) {
+      console.error('Error fetching job details:', error);
+      toast.error('Failed to load job skills');
+    } finally {
+      setIsLoadingJob(false);
+    }
+  };
+
+  // Handle skill selection
+  const handleSkillToggle = (skill: Skill) => {
+    setSelectedSkills(prev => {
+      const isSelected = prev.some(s => s._id === skill._id);
+      
+      if (isSelected) {
+        return prev.filter(s => s._id !== skill._id);
+      } else {
+        return [...prev, skill];
+      }
+    });
+  };
 
   // Initialize the worker
   useEffect(() => {
     // Create the worker only if it doesn't exist yet
     if (!workerRef.current && window.Worker) {
-      workerRef.current = new Worker(
-        new URL("../../workers/invitationWorker.ts", import.meta.url),
-        {
-          type: "module",
-        }
-      );
-
+      workerRef.current = new Worker(new URL('../../workers/invitationWorker.ts', import.meta.url), { 
+        type: 'module' 
+      });
+      
       // Set up message handler for worker communication
-      workerRef.current.addEventListener("message", handleWorkerMessage);
+      workerRef.current.addEventListener('message', handleWorkerMessage);
     }
-
+    
     // Cleanup worker on component unmount
     return () => {
       if (workerRef.current) {
@@ -92,57 +159,52 @@ export default function InterviewModal({
   }, []);
 
   // Handle messages from worker
-  const handleWorkerMessage = useCallback(
-    (event: MessageEvent) => {
-      const { type, data } = event.data;
-
-      switch (type) {
-        case "INTERVIEW_WORKER_READY":
-          console.log("Interview worker is ready");
-          break;
-
-        case "BATCH_CREATED":
-          setBatchId(data.batchId);
-          toast.info(
-            `Sending ${selectedCandidatesCount} interview invitations...`
-          );
-          break;
-
-        case "INVITATION_PROGRESS":
-          setProgress(data);
-          break;
-
-        case "INVITATION_COMPLETE":
-          setIsSending(false);
-
-          const total = data.total || 0;
-          const completed = data.completed || 0;
-
-          // Show success modal and clear batch ID to hide progress UI
-          if (total > 0 && completed > 0) {
-            const message =
-              completed === total
-                ? `All ${completed} interview invitations were sent successfully!`
-                : `${completed} out of ${total} interview invitations were sent successfully.`;
-
-            setSuccessMessage(message);
-            setShowSuccessModal(true);
-            setBatchId(null); // Hide the progress bar immediately
-          }
-          break;
-
-        case "INTERVIEW_ERROR":
-          setError(data.error);
-          setIsSending(false);
-          toast.error(data.error);
-          break;
-
-        default:
-          console.warn(`Unknown message type from worker: ${type}`);
-      }
-    },
-    [selectedCandidatesCount]
-  );
+  const handleWorkerMessage = useCallback((event: MessageEvent) => {
+    const { type, data } = event.data;
+    
+    switch (type) {
+      case "INTERVIEW_WORKER_READY":
+        console.log("Interview worker is ready");
+        break;
+        
+      case "BATCH_CREATED":
+        setBatchId(data.batchId);
+        toast.info(`Sending ${selectedCandidatesCount} interview invitations...`);
+        break;
+        
+      case "INVITATION_PROGRESS":
+        setProgress(data);
+        break;
+        
+      case "INVITATION_COMPLETE":
+        setIsSending(false);
+        
+        const total = data.total || 0;
+        const completed = data.completed || 0;
+        
+        // Show success modal and clear batch ID to hide progress UI
+        if (total > 0 && completed > 0) {
+          const message =
+            completed === total
+              ? `All ${completed} interview invitations were sent successfully!`
+              : `${completed} out of ${total} interview invitations were sent successfully.`;
+          
+          setSuccessMessage(message);
+          setShowSuccessModal(true);
+          setBatchId(null); // Hide the progress bar immediately
+        }
+        break;
+        
+      case "INTERVIEW_ERROR":
+        setError(data.error);
+        setIsSending(false);
+        toast.error(data.error);
+        break;
+        
+      default:
+        console.warn(`Unknown message type from worker: ${type}`);
+    }
+  }, [selectedCandidatesCount]);
 
   // Resume polling if batchId exists when component mounts
   useEffect(() => {
@@ -151,8 +213,8 @@ export default function InterviewModal({
         type: "START_INVITATION_PROGRESS",
         data: {
           batchId,
-          apiBaseUrl,
-        },
+          apiBaseUrl
+        }
       });
     }
   }, [batchId, apiBaseUrl, isOpen]);
@@ -179,13 +241,7 @@ export default function InterviewModal({
 
   // Handle send invites
   const handleSendInvites = useCallback(() => {
-    if (
-      !date ||
-      selectedCandidatesCount === 0 ||
-      isSending ||
-      !workerRef.current
-    )
-      return;
+    if (!date || selectedCandidatesCount === 0 || isSending || !workerRef.current) return;
 
     setIsSending(true);
     setError(null);
@@ -194,6 +250,14 @@ export default function InterviewModal({
     const candidateIds = selectedCandidates.map(
       (candidate) => candidate.user_id
     );
+
+    // Prepare skills array for API
+    const skills_array = selectedOption === "full" && selectedSkills.length > 0 ? 
+      selectedSkills.map(skill => ({
+        _id: skill._id,
+        name: skill.name
+      })) : 
+      undefined;
 
     try {
       // Send message to worker to start invitation process
@@ -204,16 +268,14 @@ export default function InterviewModal({
           candidateIds,
           interviewType: selectedOption,
           applicationDeadline: date.toISOString(),
-          apiBaseUrl,
-        },
+          skills_array,
+          apiBaseUrl
+        }
       });
     } catch (err) {
       // This try/catch is mostly for handling any errors that might
       // occur when posting the message to the worker
-      const errorMsg =
-        err instanceof Error
-          ? err.message
-          : "Failed to start interview invitation process";
+      const errorMsg = err instanceof Error ? err.message : 'Failed to start interview invitation process';
       setError(errorMsg);
       setIsSending(false);
       toast.error(errorMsg);
@@ -225,7 +287,8 @@ export default function InterviewModal({
     jobId,
     selectedOption,
     selectedCandidates,
-    apiBaseUrl,
+    selectedSkills,
+    apiBaseUrl
   ]);
 
   // Calculate progress percentage
@@ -447,7 +510,7 @@ export default function InterviewModal({
                           </button>
                         </div>
 
-                        <div className=" flex transition-transform duration-200 hover:scale-105">
+                        <div className="flex transition-transform duration-200 hover:scale-105">
                           <img
                             src={FullInterview}
                             alt="Full Interview"
@@ -507,6 +570,72 @@ export default function InterviewModal({
                       </div>
                     </div>
                   </div>
+
+                  {/* Skills selection - only show for full interviews */}
+                  {showSkillsSection && (
+                    <div className="space-y-3 mt-6 border border-blue-200 rounded-lg p-4 bg-blue-50">
+                      <h3 className="text-base font-semibold text-[#001630]">
+                        Select skills to assess in-depth
+                      </h3>
+                      
+                      {isLoadingJob ? (
+                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                          <span>Loading job skills...</span>
+                        </div>
+                      ) : jobDetails?.skills_required && jobDetails.skills_required.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto px-2 py-1">
+                          {jobDetails.skills_required.map((skill) => (
+                            <div 
+                              key={skill._id} 
+                              className="flex items-start space-x-2 p-2 hover:bg-blue-100 rounded transition-colors"
+                            >
+                              <Checkbox 
+                                id={`skill-${skill._id}`}
+                                checked={selectedSkills.some(s => s._id === skill._id)}
+                                onCheckedChange={() => handleSkillToggle(skill)}
+                                className="mt-0.5"
+                              />
+                              <div className="flex flex-col">
+                                <label 
+                                  htmlFor={`skill-${skill._id}`}
+                                  className="font-medium cursor-pointer text-[#414447]"
+                                >
+                                  {skill.name}
+                                </label>
+                                <span className="text-xs">
+                                  {skill.importance === "Very Important" && (
+                                    <span className="text-red-600 font-medium">★ Very Important</span>
+                                  )}
+                                  {skill.importance === "Important" && (
+                                    <span className="text-amber-600">Important</span>
+                                  )}
+                                  {skill.importance === "Good-To-Have" && (
+                                    <span className="text-gray-500">Good-To-Have</span>
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">
+                          No skills found for this job.
+                        </p>
+                      )}
+                      
+                      {selectedSkills.length > 0 && (
+                        <div className="flex items-center text-sm text-blue-700 mt-2">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          {selectedSkills.length} skill{selectedSkills.length > 1 ? 's' : ''} selected for in-depth assessment
+                        </div>
+                      )}
+                      
+                      <p className="text-xs text-gray-600 mt-1">
+                        Select the skills that you'd like the AI to test thoroughly in the interview. Very important skills are pre-selected.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Expiry date */}
                   <div className="space-y-3">

@@ -5,20 +5,39 @@ interface WorkerMessage {
   data: any;
 }
 
+interface Skill {
+  _id: string;
+  name: string;
+}
+
 // Function to send invitations
-async function sendInvitations(jobId: string, candidateIds: string[], interviewType: "full" | "screening", applicationDeadline: string, apiBaseUrl: string) {
+async function sendInvitations(
+  jobId: string, 
+  candidateIds: string[], 
+  interviewType: "full" | "screening", 
+  applicationDeadline: string, 
+  apiBaseUrl: string,
+  skills_array?: Skill[]
+) {
   try {
+    const requestBody: any = {
+      job_id: jobId,
+      candidate_ids: candidateIds,
+      interview_type: interviewType,
+      application_deadline: applicationDeadline
+    };
+
+    // Only include skills_array if it exists and has items
+    if (skills_array && skills_array.length > 0) {
+      requestBody.skills_array = skills_array;
+    }
+
     const response = await fetch(`${apiBaseUrl}/api/v1/employerInterviewInvitation/invite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        job_id: jobId,
-        candidate_ids: candidateIds,
-        interview_type: interviewType,
-        application_deadline: applicationDeadline
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -106,7 +125,7 @@ self.addEventListener("message", async (event: MessageEvent<WorkerMessage>) => {
   switch (type) {
     case "SEND_INVITATIONS":
       try {
-        const { jobId, candidateIds, interviewType, applicationDeadline, apiBaseUrl } = data;
+        const { jobId, candidateIds, interviewType, applicationDeadline, apiBaseUrl, skills_array } = data;
         
         // Send invitations and get batch ID
         const batchId = await sendInvitations(
@@ -114,7 +133,8 @@ self.addEventListener("message", async (event: MessageEvent<WorkerMessage>) => {
           candidateIds,
           interviewType,
           applicationDeadline,
-          apiBaseUrl
+          apiBaseUrl,
+          skills_array
         );
         
         // Start polling for this batch
