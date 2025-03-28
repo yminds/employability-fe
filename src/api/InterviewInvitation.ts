@@ -311,11 +311,11 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
     }),
 
     // Submit a response to an invite (public endpoint)
-    respondToInvite: builder.mutation<InterviewInviteResponse, { inviteId: string, action: 'accept' | 'decline' }>({
-      query: ({ inviteId, action }) => ({
+    respondToInvite: builder.mutation<InterviewInviteResponse, { inviteId: string, action: 'accept' | 'decline', commited_due_date?: string }>({
+      query: ({ inviteId, action, commited_due_date }) => ({
         url: `/api/v1/employerInterviewInvitation/${inviteId}/response`,
         method: "POST",
-        body: { action },
+        body: { action, commited_due_date },
       }),
     }),
     

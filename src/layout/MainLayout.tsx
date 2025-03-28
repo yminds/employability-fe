@@ -34,6 +34,7 @@ const noSidebarRoutes = [
   "/privacy-policy",
   "/employer/company/create",
   "/invitation/:inviteId",
+  "/invitations"
 ];
 
 const employerRoutes = [
