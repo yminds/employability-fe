@@ -15,6 +15,8 @@ export const useTTS = (options: UseTTSOptions = {}) => {
   const sentenceIndexRef = useRef<number>(0);
   const nextSentenceToPlayRef = useRef<number>(0);
   const audioBufferMap = useRef<Map<number, Blob>>(new Map());
+  const activeAudioElementRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Function to play audio and handle frequency analysis
   const playAudio = async (audioBlob: Blob): Promise<void> => {
@@ -22,9 +24,11 @@ export const useTTS = (options: UseTTSOptions = {}) => {
       const audioUrl = URL.createObjectURL(audioBlob);
       const audioElement = new Audio(audioUrl);
       audioElement.crossOrigin = "anonymous";
+      activeAudioElementRef.current = audioElement;
 
       const audioContext = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
+        audioContextRef.current = audioContext;
       const source = audioContext.createMediaElementSource(audioElement);
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
@@ -137,6 +141,17 @@ export const useTTS = (options: UseTTSOptions = {}) => {
     audioBufferMap.current.clear();
     frequencyDataRef.current = 0;
     setFrequencyData(0);
+    if (activeAudioElementRef.current) {
+      activeAudioElementRef.current.pause();
+      activeAudioElementRef.current.src = '';
+      activeAudioElementRef.current = null;
+    }
+
+    // Close audio context
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
   };
 
   useEffect(() => {

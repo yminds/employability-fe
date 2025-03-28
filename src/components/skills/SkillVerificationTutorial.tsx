@@ -4,7 +4,16 @@ import step1 from "@/assets/skills/step1.png"
 import step2 from "@/assets/skills/step2.png"
 import step3 from "@/assets/skills/step3.png"
 import step4 from "@/assets/skills/step4.png"
-import step5 from "@/assets/skills/step5.png"
+import { Checkbox } from "@/components/ui/checkbox"
+
+interface SlideItem {
+  image: string;
+  title: string;
+  description: string;
+  step: string;
+  listItems?: string[];
+  footer?: string;
+}
 
 interface SkillVerificationTutorialProps {
   onClose: () => void;
@@ -24,54 +33,74 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
   const [currentSlide, setCurrentSlide] = useState(0);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  const slides = component === "SkillsCard" ? [
+  const slides: SlideItem[] = component === "SkillsCard" ? [
     {
       image: `${step1}`,
-      title: "Step 1: Check Your Setup",
-      description: "Before you dive in, make sure your microphone and camera are working properly, and screen is shared correctly.",
+      title: "Check Your Setup",
+      description: "Before starting, make sure to",
+      step: `${currentSlide + 1}`,
+      listItems: [
+        "Ensure your microphone is working",
+        "Check that your camera is functioning properly"
+      ]
     },
     {
       image: `${step2}`,
-      title: "Step 2: Enable the Audio",
-      description: "While sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
+      title: "Enable Screen sharing",
+      description: "Before starting, make sure to",
+      step: `${currentSlide + 1}`,
+      listItems: [
+        "Ensure your share Entire Screen",
+        "Make sure to Enable audio sharing as well."
+      ]
     },
     {
       image: `${step3}`,
-      title: "Step 3: Proceed to Interview",
-      description: "Once you've checked your setup, click on 'Proceed to Interview' to begin the skill interview.",
+      title: "Interview Process",
+      description: "Answering Questions in Interview",
+      step: `${currentSlide + 1}`,
+      listItems: [
+        "Employability AI will ask questions",
+        "Respond to the AI Agent's questions. Press 'Done Answering' to move to the next one."
+      ]
     },
     {
       image: `${step4}`,
-      title: "Step 4: Interview Process",
-      description: "During the interview, respond to the AI Agent's questions. Press 'Done Answering' to move to the next one.",
-    },
-    {
-      image: `${step5}`,
-      title: "Step 5: Verified Rating & Report",
-      description: "Once the interview is complete, you'll receive a verified rating and report based on your performance.",
+      title: "Play Fair, Perform Your Best: Follow the Rules",
+      description: "Before starting, please review these rules to ensure fairness and integrity.",
+      step: `${currentSlide + 1}`,
+      listItems: [
+        "Do not use multiple screens or external resources to answer questions.",
+        "Be honest in your responses—as we automatically detect suspicious activity.",
+        "Your interview results will be reviewed by the employer, including your recorded video."
+      ],
+      footer: "*Any attempts to cheat or bypass these rules will result in Permanent Suspension from the platform."
     }
   ] : [
     {
       image: `${step2}`,
-      title: "Enable Screen Sharing",
-      description: "While sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
+      title: "Enable Screen sharing",
+      description: "Before starting, make sure to",
+      step: "",
+      listItems: [
+        "Ensure your share Entire Screen",
+        "Make sure to Enable audio sharing as well."
+      ]
     }
   ];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dialogRef.current && 
+        dialogRef.current &&
         !dialogRef.current.contains(event.target as Node)
       ) {
         onClose();
       }
     };
 
-    // Add event listener
     document.addEventListener('mousedown', handleClickOutside);
-    
-    // Cleanup the event listener
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -93,61 +122,88 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
-      <div 
+      <div
         ref={dialogRef}
-        className="bg-white rounded-xl shadow-lg w-full max-w-xl"
+        className="bg-white rounded-2xl shadow-lg w-full max-w-[958px] relative flex flex-col"
       >
-        <div className="p-6">
-          {/* Header with Step Indicator */}
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-sm text-gray-600">Step {currentSlide + 1} of {slides.length}</div>
-            <button 
-              onClick={onClose} 
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X size={16}/>
-            </button>
-          </div>
+        {/* Image at the top */}
+        <div className="w-full">
+          <img
+            src={slides[currentSlide].image}
+            alt={`Step ${currentSlide + 1}`}
+            className="w-full object-cover rounded-t-2xl"
+          />
+        </div>
+
+        {/* Content below the image */}
+        <div className="p-8 pt-6">
+          <button
+            onClick={onClose}
+            className="absolute top-[35px] right-8 text-gray-500 hover:text-gray-700 z-10"
+          >
+            <X size={24} />
+          </button>
+
+          {/* Step Indicator */}
+          {slides[currentSlide].step !== "" && (
+            <div className=" flex-col items-center justify-start text-sm text-gray-600 mb-2 space-y-7 ">
+              <div className="flex items-center justify-start gap-1">
+                {slides.map((_, index) => (
+                  <div key={index} className={` h-1 p-1 rounded-full ${index === currentSlide ? 'bg-grey-8 w-8' : 'bg-gray-300 w-4'}`} />
+                ))}
+              </div>
+              <div className="text-sm text-gray-600 mb-2">Step {slides[currentSlide].step} of {slides.length}</div>
+            </div>
+          )}
 
           {/* Title */}
-          <h2 className="text-h2 font-bold mb-4">{slides[currentSlide].title}</h2>
+          <h2 className="text-h1 font-dm-sans font-bold text-grey-7 mb-3">{slides[currentSlide].title}</h2>
 
           {/* Description */}
-          <p className="text-gray-600 mb-6">{slides[currentSlide].description}</p>
+          <p className="text-gray-700 font-dm-sans text-lg normal-case font-normal leading-6 tracking-[0.27px] mb-4">{slides[currentSlide].description}</p>
 
-          {/* Image */}
-          <div className="mb-6 rounded-xl border">
-            <img 
-              src={slides[currentSlide].image} 
-              alt={`Step ${currentSlide + 1}`} 
-              className="w-full rounded-lg"
-            />
-          </div>
+          {/* List Items */}
+          {slides[currentSlide].listItems && (
+            <ul className="list-disc pl-5 mb-4 text-grey-9 font-dm-sans text-lg normal-case font-medium leading-6 tracking-[0.27px]">
+              {slides[currentSlide].listItems?.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          )}
+
+          {/* Footer */}
+          {slides[currentSlide].footer && (
+            <p className="text-[#B17002] font-dm-sans text-lg normal-case font-normal leading-6 tracking-[0.27px] mb-4">{slides[currentSlide].footer}</p>
+          )}
 
           {/* Bottom Controls */}
-          <div className="flex items-center">
-            <label className=" flex text-center text-[#001630] font-dm-sans text-sm font-medium leading-5 tracking-[0.21px] flex-1 gap-1">
-              <input
-                type="checkbox"
+          <div className="flex items-center justify-between">
+            <label className="flex items-center text-[#001630] text-sm font-medium gap-2">
+              <Checkbox
                 checked={dontShowAgain}
-                onChange={(e) => setDontShowAgain(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                onCheckedChange={(checked) => setDontShowAgain(!!checked)}
+                className=" h-4 w-4
+                data-[state=unchecked]:border-[#000006] 
+                data-[state=checked]:bg-[#001630] 
+                data-[state=checked]:border-[#001630]
+                data-[state=checked]:text-white"
+                onClick={(e) => e.stopPropagation()} // Prevent triggering the parent div's click
               />
-              <span>Don't show again</span>
+              <span className=" text-button">Don't show again</span>
             </label>
 
             <div className="flex space-x-2">
               {currentSlide > 0 && (
                 <button
                   onClick={handlePrev}
-                  className="px-4 py-2 text-body2 text-gray-600 hover:bg-gray-100 rounded"
+                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
                 >
                   Previous
                 </button>
               )}
               <button
                 onClick={handleNext}
-                className="px-4 py-2 text-sm bg-button text-body1 text-white rounded hover:bg-[#062549]"
+                className="px-4 py-2 text-sm bg-[#062549] text-white rounded hover:bg-[#0A3B6C]"
               >
                 {currentSlide < slides.length - 1 ? 'Continue' : 'Start Interview'}
               </button>
