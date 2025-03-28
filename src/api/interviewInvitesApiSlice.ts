@@ -34,10 +34,10 @@ export const interviewInvitesApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     updateInterviewId: builder.mutation({
-      query: ({ inviteId, interviewId }) => ({
+      query: ({ inviteId, interviewId, type }) => ({
         url: `/api/v1/employerInterviewInvitation/invite/${inviteId}`,
         method: "POST",
-        body: { interviewId },
+        body: { interviewId, type },
       }),
       invalidatesTags: ['InterviewInvites'],
     }),

@@ -101,7 +101,7 @@ const CompleteActivityCard: React.FC<CompleteActivityProps> = ({
               alt="Verified"
             />
           </div>
-          <p className="text-body2 text-[#414447]">Employability score</p>
+          <p className="text-body2 text-[#414447]">EmployAbility Score</p>
         </div>
       </div>
 

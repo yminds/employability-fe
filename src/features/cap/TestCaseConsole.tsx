@@ -18,25 +18,28 @@ interface TestCaseConsoleProps {
   testCases: TestCase[];
   code: string;
   language?: string;
+  functionName: string;
+  setTestResults:(testResults:TestResult[])=>void;
 }
 
-const executeTestCase = (code: string, input: string): any => {
+const executeTestCase = (code: string, input: string,functionName:string
+): any => {
   try {
     // Create a function from the code and input
-    const fullCode = `${code}\nflattenArray(${input})`;
+    const fullCode = `${code}\n ${functionName}(${input})`;
     return eval(fullCode);
   } catch (error) {
     return (error as Error).message;
   }
 };
 
-const executePythonTestCase = async (code: string, input: string): Promise<any> => {
+const executePythonTestCase = async (code: string, input: string,functionName:string): Promise<any> => {
   const trimmedCode = code.trim();
 
   // Create the code to execute without extra indentation
   const codeToExecute = `${trimmedCode}
 
-result = flattenArray(${input})
+result = ${functionName}(${input})
 print(result)`;  // Just print the result without "Result:" prefix
 
   const runPython = async () => {
@@ -105,10 +108,12 @@ const compareResults = (actual: any, expected: any): boolean => {
   return actual === expected;
 };
 
-const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code, language = "javascript" }) => {
+const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code, language = "javascript" ,functionName,setTestResults}) => {
   const [results, setResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
-
+  console.log("testcase result",results);
+  
+  
   useEffect(() => {
     const runTests = async () => {
       setLoading(true);
@@ -118,9 +123,9 @@ const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code, lang
           let actualOutput;
           
           if (language === "python") {
-            actualOutput = await executePythonTestCase(code, testCase.input);
+            actualOutput = await executePythonTestCase(code, testCase.input,functionName);
           } else {
-            actualOutput = executeTestCase(code, testCase.input);
+            actualOutput = executeTestCase(code, testCase.input,functionName);
           }
           
           const expectedOutputValue = JSON.parse(testCase.expectedOutput);
@@ -139,6 +144,7 @@ const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code, lang
       );
       
       setResults(testResults);
+      setTestResults(testResults);
       setLoading(false);
     };
     

@@ -8,6 +8,7 @@ export interface InviteItemProps {
   onAccept: (id: string, e: React.MouseEvent) => void;
   onDecline: (id: string, e: React.MouseEvent) => void;
   showSidebar: boolean;
+  isTaskCompleted: boolean | undefined;
 }
 
 export interface ActionButtonsProps {
@@ -27,6 +28,7 @@ export interface DetailSidebarProps {
   handleDecline: (id: string) => Promise<boolean>;
   setSelectedInvite: React.Dispatch<React.SetStateAction<InterviewInvite | null>>;
   setLocalModifiedInvites: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  isTaskCompleted: boolean | undefined;
 }
 
 export interface InterviewListProps {
