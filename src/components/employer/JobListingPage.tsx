@@ -23,6 +23,8 @@ import FullInterviewsCard from "./FullInterviewsCard";
 import ScreeningInterviewsCard from "./ScreeningInterviewsCard";
 import MatchingCandidatesCard from "./MatchingCandidatesCard";
 
+import { useGetInterviewCandidatesQuery } from "../../api/InterviewInvitation";
+
 interface JobListingPageProps {
   job_id: string;
 }
@@ -44,8 +46,14 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     []
   );
   const [searchTerm, setSearchTerm] = useState("");
-  // Add state for interview count
-  const [interviewCount, setInterviewCount] = useState(60); // Default to 60 for demo purposes
+  const [selectedSource, setSelectedSource] = useState("all");
+  const [sortBy, setSortBy] = useState("matching");
+  const [interviewCount, setInterviewCount] = useState(0);
+
+
+  const handleCandidateCountChange = (count: number) => {
+    setInterviewCount(count);
+  };
 
   // Fetch job details
   const {
@@ -62,7 +70,39 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     isLoading,
     error,
     refetch: refetchCandidates,
-  } = useGetMatchingCandidatesQuery({ job_id });
+  } = useGetMatchingCandidatesQuery({ job_id, source: selectedSource, sortBy });
+
+
+
+const {
+  data: interviewCandidatesResponse,
+  isLoading: isLoadingInterviews
+} = useGetInterviewCandidatesQuery({
+  jobId: job_id,
+}, {
+  skip: !job_id
+});
+
+useEffect(()=>{
+  if(interviewCandidatesResponse?.data){
+    const filteredCandidates = interviewCandidatesResponse.data.filter((candidate: any)=>
+      candidate.status === "accepted" || candidate.status === "pending"
+    );
+    setInterviewCount(filteredCandidates.length);
+  }
+},[interviewCandidatesResponse])
+
+
+
+  const handleSourceChange = (source: string) => {
+    setSelectedSource(source);
+    setCurrentPage(1);
+  };
+
+  const handleSortByChange = (sortBy: string) => {
+    setSortBy(sortBy);
+    setCurrentPage(1);
+  };
 
   const allCandidates = matchingCandidatesResponse?.data || [];
 
@@ -92,7 +132,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     }
   }, [filteredCandidates, rowsPerPage, currentPage]);
 
-  // Determine which candidates are on the current page
+
   const indexOfLastCandidate = currentPage * rowsPerPage;
   const indexOfFirstCandidate = indexOfLastCandidate - rowsPerPage;
   const currentCandidates = filteredCandidates.slice(
@@ -100,7 +140,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     indexOfLastCandidate
   );
 
-  // Check if all current page candidates are selected
+
   useEffect(() => {
     if (currentCandidates.length === 0) {
       setSelectAll(false);
@@ -199,10 +239,9 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     setIsModalOpen(true);
   };
 
-  // When new resumes are processed successfully
+
   const handleResumesProcessed = (resumes: ProcessedResume[]) => {
     setProcessedResumes(resumes);
-    // Re-fetch to include newly processed resumes
     refetchCandidates();
   };
 
@@ -240,7 +279,6 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
       }));
   };
 
-  // Employer & Company IDs from job details if available
   const employerId = jobDetails?.data?.employer || undefined;
   const companyId = jobDetails?.data?.company || undefined;
 
@@ -250,10 +288,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
       style={{ scrollbarWidth: "none" }}
     >
       <div className="max-w-[1400px] mx-auto px-4 py-6">
-        {/* Breadcrumb */}
         <BreadcrumbNav jobTitle={jobDetails?.data.title} />
 
-        {/* Job details card */}
         <JobDetailsCard
           jobDetails={
             jobDetails?.data
@@ -272,7 +308,6 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           }}
         />
 
-        {/* Main content */}
         <div className="flex gap-6">
           {/* Left section - Candidate list */}
           <div className="flex-1 space-y-8">
@@ -281,6 +316,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
               <TabNavigation
                 selectedTab={selectedTab}
                 setSelectedTab={setSelectedTab}
+                interviewCount={interviewCount}
               />
             </div>
 
@@ -295,22 +331,23 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
             {/* Conditional rendering based on selected tab */}
             {selectedTab === "inviteCandidates" && (
               <>
-                {/* Search and filters */}
                 <SearchAndFilters
                   searchTerm={searchTerm}
                   handleSearchChange={handleSearchChange}
-                  filterOpen={filterOpen}
-                  setFilterOpen={setFilterOpen}
+                  selectedSource={selectedSource}
+                  handleSourceChange={handleSourceChange}
+                  sortBy={sortBy}
+                  handleSortByChange={handleSortByChange}
+                  // filterOpen={filterOpen}
+                  // setFilterOpen={setFilterOpen}
                 />
 
-                {/* Filter panel */}
                 <FilterPanel
                   isOpen={filterOpen}
                   onReset={handleFilterReset}
                   onApply={handleFilterApply}
                 />
 
-                {/* Candidate list */}
                 <CandidateList
                   isLoading={isLoading}
                   error={!!error}
@@ -335,7 +372,10 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
 
             {/* Render the Interviews tab content */}
             {selectedTab === "interviews" && (
-              <InterviewCandidatesView jobId={job_id} />
+              <InterviewCandidatesView jobId={job_id} 
+              onCandidateCountChange={handleCandidateCountChange}
+              initialCount={interviewCount}
+               />
             )}
 
             {/* Placeholder for Shortlisted Candidates tab */}
@@ -359,14 +399,12 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
 
           {/* Right section - Stats and job details */}
           <div className="w-[350px] mt-8 space-y-3.5 sticky top-5 h-fit">
-            {/* Stats cards */}
-            {/* <StatsCards candidatesCount={allCandidates.length} /> */}
 
             {/* Full Interviews */}
-            <FullInterviewsCard />
+            <FullInterviewsCard jobId={job_id} />
 
             {/* Screening Interviews */}
-            <ScreeningInterviewsCard />
+            <ScreeningInterviewsCard jobId={job_id} />
           </div>
         </div>
       </div>

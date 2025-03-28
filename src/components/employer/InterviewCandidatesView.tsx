@@ -45,6 +45,8 @@ import {
 
 interface InterviewCandidatesViewProps {
   jobId: string;
+  onCandidateCountChange: (count: number) => void;
+  initialCount: number;
 }
 
 type InterviewType = "full" | "screening" | "all";
@@ -57,6 +59,8 @@ type SortOption =
 
 const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   jobId,
+  onCandidateCountChange,
+  initialCount = 0,
 }) => {
   // State for filters and pagination
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
@@ -247,6 +251,13 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     }
   );
 
+  useEffect(() => {
+    const newCount = filteredCandidates.length;
+
+    if (newCount !== initialCount) {
+      onCandidateCountChange(newCount);
+    }
+  }, [filteredCandidates.length, onCandidateCountChange, initialCount]);
   // Sort the filtered candidates
   const sortedFilteredCandidates = sortCandidates(filteredCandidates);
 
@@ -677,6 +688,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
                   {/* Action buttons */}
                   <div className="flex items-center gap-2">
                     {/* Show "View Report" only if completed status and has task.interview_type.interview_id */}
+                    {/* Show "View Report" only if completed status and has task.interview_type.interview_id */}
                     {showReportAndShortlist && candidate.has_report && (
                       <Button
                         variant="outline"
@@ -686,6 +698,32 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
                         View Report
                       </Button>
                     )}
+
+                    {/* Show "Shortlisted" button if already shortlisted */}
+                    {candidate.status === "completed" &&
+                      candidate.task?.interview_type?.interview_id &&
+                      candidate.shortlist && (
+                        <Button
+                          variant="outline"
+                          className="h-8 px-3 py-1 text-sm bg-[rgba(3,150,63,0.10)] text-[#03963f] border-[#d9d9d9] hover:bg-[#d9d9d9] hover:text-[#03963f] flex items-center"
+                          disabled
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="w-4 h-4 mr-1"
+                          >
+                            <path
+                              d="M17.4693 8.99944L15 6.53019L16.0443 5.46094L17.4693 6.88594L20.9943 3.33594L22.0635 4.40519L17.4693 8.99944ZM5.5 20.2494V5.30719C5.5 4.80202 5.675 4.37444 6.025 4.02444C6.375 3.67444 6.80258 3.49944 7.30775 3.49944H13V4.99944H7.30775C7.23075 4.99944 7.16025 5.03152 7.09625 5.09569C7.03208 5.15969 7 5.23019 7 5.30719V17.9494L12 15.7994L17 17.9494V10.9994H18.5V20.2494L12 17.4609L5.5 20.2494Z"
+                              fill="#03963F"
+                            />
+                          </svg>
+                          Shortlisted
+                        </Button>
+                      )}
 
                     {/* Show "Shortlist" button if not shortlisted and has task.interview_type.interview_id */}
                     {showReportAndShortlist && !candidate.shortlist && (

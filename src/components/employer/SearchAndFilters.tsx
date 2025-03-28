@@ -1,6 +1,6 @@
+// SearchAndFilters.tsx
 import React from "react";
-import { Search, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,15 +13,19 @@ import {
 interface SearchAndFiltersProps {
   searchTerm: string;
   handleSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  filterOpen: boolean;
-  setFilterOpen: (open: boolean) => void;
+  selectedSource?: string;
+  handleSourceChange?: (source: string) => void;
+  sortBy?: string;
+  handleSortByChange?: (sortBy: string) => void;
 }
 
 const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
   searchTerm,
   handleSearchChange,
-  filterOpen,
-  setFilterOpen,
+  selectedSource = "all",
+  handleSourceChange = () => {},
+  sortBy = "matching",
+  handleSortByChange = () => {},
 }) => {
   return (
     <div className="flex gap-4 my-6 text-body2">
@@ -34,16 +38,24 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           onChange={handleSearchChange}
         />
       </div>
-      <Button
-        variant="outline"
-        className="border-[#d6d7d9] bg-white h-12"
-        onClick={() => setFilterOpen(!filterOpen)}
-      >
-        <Filter className="w-4 h-4 mr-2" />
-        Filters
-      </Button>
       <div className="w-64">
-        <Select defaultValue="matching">
+        <Select value={selectedSource} onValueChange={handleSourceChange}>
+          <SelectTrigger className="border-[#d6d7d9] bg-white h-12">
+            <div className="flex items-center gap-2">
+              <span className="text-[#909091]">Source :</span>
+              <SelectValue placeholder="All Candidates" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Candidates</SelectItem>
+            <SelectItem value="employability">Employability Pool</SelectItem>
+            <SelectItem value="uploaded">All Uploaded Resumes</SelectItem>
+            <SelectItem value="job">Resumes For this Job</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="w-64">
+        <Select value={sortBy} onValueChange={handleSortByChange}>
           <SelectTrigger className="border-[#d6d7d9] bg-white h-12">
             <div className="flex items-center gap-2">
               <span className="text-[#909091]">Sort by :</span>
@@ -52,8 +64,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="matching">Matching Score</SelectItem>
-            <SelectItem value="recent">Most Recent</SelectItem>
-            <SelectItem value="name">Name</SelectItem>
+            <SelectItem value="employability">EmployabilityScore</SelectItem>
           </SelectContent>
         </Select>
       </div>
