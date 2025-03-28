@@ -49,7 +49,11 @@ interface InterviewCandidatesViewProps {
 
 type InterviewType = "full" | "screening" | "all";
 type SubmissionStatus = "all" | "submitted" | "not_submitted";
-type SortOption = "rating_high_to_low" | "rating_low_to_high" | "recent_submissions" | "past_submissions";
+type SortOption =
+  | "rating_high_to_low"
+  | "rating_low_to_high"
+  | "recent_submissions"
+  | "past_submissions";
 
 const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   jobId,
@@ -57,7 +61,8 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   // State for filters and pagination
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [interviewType, setInterviewType] = useState<InterviewType>("full");
-  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>("all");
+  const [submissionStatus, setSubmissionStatus] =
+    useState<SubmissionStatus>("all");
   const [sortBy, setSortBy] = useState<SortOption>("recent_submissions");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,8 +70,10 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   const [shortlistingCandidateId, setShortlistingCandidateId] = useState<
     string | null
   >(null);
-  
-  const [localCandidates, setLocalCandidates] = useState<InterviewCandidate[]>([]);
+
+  const [localCandidates, setLocalCandidates] = useState<InterviewCandidate[]>(
+    []
+  );
 
   // Toast notification
   const { toast } = useToast();
@@ -81,8 +88,15 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   } = useGetInterviewCandidatesQuery({
     jobId,
     interviewType: interviewType === "all" ? undefined : interviewType,
-    status: submissionStatus === "all" ? undefined : submissionStatus as "pending" | "completed" | "all",
-    sortBy: getSortQueryParam(sortBy) as "name" | "recent" | "oldest" | undefined,
+    status:
+      submissionStatus === "all"
+        ? undefined
+        : (submissionStatus as "pending" | "completed" | "all"),
+    sortBy: getSortQueryParam(sortBy) as
+      | "name"
+      | "recent"
+      | "oldest"
+      | undefined,
   });
 
   // Convert frontend sort options to API query parameters
@@ -116,7 +130,10 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   }, [candidatesResponse]);
 
   // Extract data
-  const candidates = localCandidates.length > 0 ? localCandidates : candidatesResponse?.data || [];
+  const candidates =
+    localCandidates.length > 0
+      ? localCandidates
+      : candidatesResponse?.data || [];
 
   const stats = statsResponse?.data || {
     fullInterviews: {
@@ -136,7 +153,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   // Client-side sorting if needed
   const sortCandidates = (candidatesToSort: InterviewCandidate[]) => {
     const sortedCandidates = [...candidatesToSort];
-    
+
     if (sortBy === "rating_high_to_low") {
       return sortedCandidates.sort((a, b) => {
         const ratingA = getEffectiveRating(a) || 0;
@@ -162,58 +179,73 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
         return new Date(dateA).getTime() - new Date(dateB).getTime();
       });
     }
-    
+
     return sortedCandidates;
   };
 
   const getEffectiveRating = (candidate: InterviewCandidate) => {
-    return candidate.effective_final_rating || 
-           candidate.type_final_rating || 
-           candidate.final_rating || 
-           0;
+    return (
+      candidate.effective_final_rating ||
+      candidate.type_final_rating ||
+      candidate.final_rating ||
+      0
+    );
   };
 
   const getEffectiveDate = (candidate: InterviewCandidate) => {
-    return candidate.effective_report_updated_at || 
-           candidate.type_report_updated_at ||
-           candidate.report_updated_at || 
-           candidate.updated_at || 
-           candidate.sent_at;
+    return (
+      candidate.effective_report_updated_at ||
+      candidate.type_report_updated_at ||
+      candidate.report_updated_at ||
+      candidate.updated_at ||
+      candidate.sent_at
+    );
   };
 
   // Filter candidates by search term and submission status
-  const filteredCandidates = candidates.filter((candidate: InterviewCandidate) => {
-    // First apply search term filter
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      const nameMatch = candidate.candidate_name
-        .toLowerCase()
-        .includes(searchLower);
-      const locationMatch =
-        candidate.candidate_location &&
-        candidate.candidate_location.toLowerCase().includes(searchLower);
+  const filteredCandidates = candidates.filter(
+    (candidate: InterviewCandidate) => {
+      // First apply search term filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const nameMatch = candidate.candidate_name
+          .toLowerCase()
+          .includes(searchLower);
+        const locationMatch =
+          candidate.candidate_location &&
+          candidate.candidate_location.toLowerCase().includes(searchLower);
 
-      if (!nameMatch && !locationMatch) {
+        if (!nameMatch && !locationMatch) {
+          return false;
+        }
+      }
+
+      // Filter out pending candidates - only show accepted or completed
+      if (candidate.status !== "accepted" && candidate.status !== "completed") {
         return false;
       }
-    }
 
-    // Apply interview type filter
-    if (interviewType !== "all") {
-      if (candidate.task?.interview_type?.type !== interviewType) {
-        return false;
+      // Apply interview type filter
+      if (interviewType !== "all") {
+        if (candidate.task?.interview_type?.type !== interviewType) {
+          return false;
+        }
       }
-    }
 
-    // Apply submission status filter
-    if (submissionStatus === "submitted") {
-      return candidate.status === "completed" && candidate.has_report === true;
-    } else if (submissionStatus === "not_submitted") {
-      return !(candidate.status === "completed" && candidate.has_report === true);
-    }
+      // Apply submission status filter
+      if (submissionStatus === "submitted") {
+        return (
+          candidate.status === "completed" && candidate.has_report === true
+        );
+      } else if (submissionStatus === "not_submitted") {
+        return !(
+          candidate.status === "completed" && candidate.has_report === true
+        );
+      }
 
-    return true;
-  });
+      return true;
+    }
+  );
 
   // Sort the filtered candidates
   const sortedFilteredCandidates = sortCandidates(filteredCandidates);
@@ -225,7 +257,10 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     startIndex + rowsPerPage,
     sortedFilteredCandidates.length
   );
-  const currentCandidates = sortedFilteredCandidates.slice(startIndex, endIndex);
+  const currentCandidates = sortedFilteredCandidates.slice(
+    startIndex,
+    endIndex
+  );
 
   // Handle select all
   const handleSelectAll = (checked: boolean) => {
@@ -258,7 +293,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       });
 
       setLocalCandidates(updatedCandidates);
-     
+
       await shortlistCandidate({
         jobId,
         candidateId,
@@ -272,7 +307,6 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
           variant: "default",
         });
       }
-
     } catch (error) {
       console.error("Error shortlisting candidate:", error);
 
@@ -301,10 +335,11 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   // Handle view report
   const handleViewReport = (candidate: InterviewCandidate) => {
     // Get the appropriate report ID
-    const reportId = candidate.effective_report_id || 
-                     candidate.type_report_id || 
-                     candidate.report_id;
-    
+    const reportId =
+      candidate.effective_report_id ||
+      candidate.type_report_id ||
+      candidate.report_id;
+
     if (!reportId) {
       toast({
         title: "Error",
@@ -313,7 +348,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       });
       return;
     }
-    
+
     // Navigate to report view page
     window.location.href = `/reports/${reportId}`;
   };
@@ -354,17 +389,17 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   // Format days remaining
   const formatDaysRemaining = (dateString?: string) => {
     if (!dateString) return null;
-   
+
     const targetDate = new Date(dateString);
     const now = new Date();
-   
+
     // Set times to midnight for accurate day calculation
     targetDate.setHours(0, 0, 0, 0);
     now.setHours(0, 0, 0, 0);
-   
+
     const diffInTime = targetDate.getTime() - now.getTime();
     const diffInDays = Math.ceil(diffInTime / (1000 * 60 * 60 * 24));
-   
+
     if (diffInDays < 0) {
       return "Overdue";
     } else if (diffInDays === 0) {
@@ -453,7 +488,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
         text: "Interview Accepted",
       };
     }
-   
+
     // If candidate has a report, they've submitted
     if (candidate.has_report) {
       return {
@@ -478,12 +513,12 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   const getTimeSinceUpdate = (candidate: InterviewCandidate) => {
     // Use the most recent update time from any available field
     const updateDate =
-      candidate.effective_report_updated_at || 
-      candidate.type_report_updated_at || 
-      candidate.report_updated_at || 
-      candidate.updated_at || 
+      candidate.effective_report_updated_at ||
+      candidate.type_report_updated_at ||
+      candidate.report_updated_at ||
+      candidate.updated_at ||
       candidate.sent_at;
-      
+
     if (!updateDate) return null;
 
     return formatRelativeTime(updateDate);
@@ -492,7 +527,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   // Check if candidate is eligible for View Report and Shortlist
   const canShowReportAndShortlist = (candidate: InterviewCandidate) => {
     return (
-      candidate.status === "completed" && 
+      candidate.status === "completed" &&
       candidate.task?.interview_type?.interview_id !== undefined
     );
   };
@@ -503,8 +538,8 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     return candidate.effective_final_rating !== undefined
       ? candidate.effective_final_rating
       : candidate.type_final_rating !== undefined
-        ? candidate.type_final_rating
-        : candidate.final_rating;
+      ? candidate.type_final_rating
+      : candidate.final_rating;
   };
 
   const renderCandidateCard = (candidate: InterviewCandidate) => {
@@ -515,8 +550,10 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     const timeSinceUpdate = getTimeSinceUpdate(candidate);
 
     // For accepted status, check submission deadline
-    const submissionDeadline = candidate.status === "accepted" ?
-      formatDaysRemaining(candidate.submission_expected_date) : null;
+    const submissionDeadline =
+      candidate.status === "accepted"
+        ? formatDaysRemaining(candidate.submission_expected_date)
+        : null;
 
     // Check if we should show report and shortlist options
     const showReportAndShortlist = canShowReportAndShortlist(candidate);
@@ -609,8 +646,12 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
                 {/* Status text on the top right */}
                 {candidate.status === "accepted" && (
                   <div className="text-right mb-2">
-                    <p className="text-sm font-medium text-[#0c0f12]">Invite Accepted</p>
-                    <p className="text-sm text-[#68696b]">Waiting for Interview Submission</p>
+                    <p className="text-sm font-medium text-[#0c0f12]">
+                      Invite Accepted
+                    </p>
+                    <p className="text-sm text-[#68696b]">
+                      Waiting for Interview Submission
+                    </p>
                   </div>
                 )}
 
@@ -683,33 +724,33 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
                             Shortlisting...
                           </span>
                         ) : (
-                          <>
-                            Shortlist
-                          </>
+                          <>Shortlist</>
                         )}
                       </Button>
                     )}
 
-                    {/* More options dropdown */}
-                    <Dropdown>
-                      <DropdownTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-[#68696b]"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownTrigger>
-                      <DropdownContent align="end">
-                        <DropdownItem>Send Message</DropdownItem>
-                        <DropdownItem>Schedule Interview</DropdownItem>
-                        <DropdownItem>Download Resume</DropdownItem>
-                        <DropdownItem className="text-red-500">
-                          Decline Candidate
-                        </DropdownItem>
-                      </DropdownContent>
-                    </Dropdown>
+                    {/* More options dropdown - only show for completed status, not for accepted */}
+                    {candidate.status === "completed" && (
+                      <Dropdown>
+                        <DropdownTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-[#68696b]"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownTrigger>
+                        <DropdownContent align="end">
+                          <DropdownItem>Send Message</DropdownItem>
+                          <DropdownItem>Schedule Interview</DropdownItem>
+                          <DropdownItem>Download Resume</DropdownItem>
+                          <DropdownItem className="text-red-500">
+                            Decline Candidate
+                          </DropdownItem>
+                        </DropdownContent>
+                      </Dropdown>
+                    )}
                   </div>
                 </div>
               </div>
@@ -725,7 +766,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       {/* Simplified filter bar */}
       <div className="flex flex-wrap gap-2 p-4">
         {/* Search */}
-        <div className="relative w-[240px]">
+        <div className="relative w-[200px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#68696b] w-4 h-4" />
           <input
             type="text"
@@ -736,38 +777,76 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
           />
         </div>
 
-        {/* Interview Type Radio Buttons */}
-        <RadioGroup 
-          value={interviewType} 
+        {/* Interview Type Radio Buttons - Separated */}
+        <RadioGroup
+          value={interviewType}
           onValueChange={(value) => setInterviewType(value as InterviewType)}
-          className="flex"
+          className="flex gap-2"
         >
-          <div className="flex items-center border rounded-md overflow-hidden">
-            <div className={`flex items-center space-x-1 px-4 py-2 ${interviewType === "full" ? "bg-[#f0f3f7]" : "bg-white"}`}>
-              <RadioGroupItem value="full" id="full-interview" className="hidden" />
-              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${interviewType === "full" ? "border-[#2563eb]" : "border-gray-300"}`}>
-                {interviewType === "full" && (
-                  <div className="w-2 h-2 rounded-full bg-[#2563eb]"></div>
-                )}
-              </div>
-              <Label htmlFor="full-interview" className="cursor-pointer text-sm">Full Interview</Label>
+          {/* Full Interview Option */}
+          <div
+            className={`flex items-center space-x-2 px-4 py-2 border rounded-md ${
+              interviewType === "full" ? "bg-[#f0f3f7]" : "bg-white"
+            }`}
+          >
+            <RadioGroupItem
+              value="full"
+              id="full-interview"
+              className="hidden"
+            />
+            <div
+              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                interviewType === "full"
+                  ? "border-[#2563eb]"
+                  : "border-gray-300"
+              }`}
+            >
+              {interviewType === "full" && (
+                <div className="w-2 h-2 rounded-full bg-[#2563eb]"></div>
+              )}
             </div>
-            <div className={`flex items-center space-x-1 px-4 py-2 ${interviewType === "screening" ? "bg-[#f0f3f7]" : "bg-white"}`}>
-              <RadioGroupItem value="screening" id="screening-interview" className="hidden" />
-              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${interviewType === "screening" ? "border-[#2563eb]" : "border-gray-300"}`}>
-                {interviewType === "screening" && (
-                  <div className="w-2 h-2 rounded-full bg-[#2563eb]"></div>
-                )}
-              </div>
-              <Label htmlFor="screening-interview" className="cursor-pointer text-sm">Screening</Label>
+            <Label htmlFor="full-interview" className="cursor-pointer text-sm">
+              Full Interview
+            </Label>
+          </div>
+
+          {/* Screening Option */}
+          <div
+            className={`flex items-center space-x-2 px-4 py-2 border rounded-md ${
+              interviewType === "screening" ? "bg-[#f0f3f7]" : "bg-white"
+            }`}
+          >
+            <RadioGroupItem
+              value="screening"
+              id="screening-interview"
+              className="hidden"
+            />
+            <div
+              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                interviewType === "screening"
+                  ? "border-[#2563eb]"
+                  : "border-gray-300"
+              }`}
+            >
+              {interviewType === "screening" && (
+                <div className="w-2 h-2 rounded-full bg-[#2563eb]"></div>
+              )}
             </div>
+            <Label
+              htmlFor="screening-interview"
+              className="cursor-pointer text-sm"
+            >
+              Screening
+            </Label>
           </div>
         </RadioGroup>
 
         {/* Submission Status Filter */}
         <Select
           value={submissionStatus}
-          onValueChange={(value: SubmissionStatus) => setSubmissionStatus(value)}
+          onValueChange={(value: SubmissionStatus) =>
+            setSubmissionStatus(value)
+          }
         >
           <SelectTrigger className="w-[180px] border rounded-md bg-white">
             <SelectValue placeholder="Submission Status">
@@ -783,11 +862,6 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
           </SelectContent>
         </Select>
 
-        {/* Advanced Filters Button */}
-        <Button variant="outline" size="icon" className="border rounded-md">
-          <SlidersHorizontal className="h-4 w-4" />
-        </Button>
-
         {/* Sort by dropdown */}
         <div className="ml-auto flex items-center gap-2">
           <span className="text-sm text-[#68696b]">Sort by :</span>
@@ -795,7 +869,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
             value={sortBy}
             onValueChange={(value: SortOption) => setSortBy(value)}
           >
-            <SelectTrigger className="w-[220px] border rounded-md bg-white">
+            <SelectTrigger className="w-[200px] border rounded-md bg-white">
               <SelectValue placeholder="Sort by">
                 {sortBy === "rating_high_to_low" && "Rating (High to Low)"}
                 {sortBy === "rating_low_to_high" && "Rating (Low to High)"}
@@ -804,10 +878,16 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="recent_submissions">Recent Submissions</SelectItem>
+              <SelectItem value="recent_submissions">
+                Recent Submissions
+              </SelectItem>
               <SelectItem value="past_submissions">Past Submissions</SelectItem>
-              <SelectItem value="rating_high_to_low">Rating (High to Low)</SelectItem>
-              <SelectItem value="rating_low_to_high">Rating (Low to High)</SelectItem>
+              <SelectItem value="rating_high_to_low">
+                Rating (High to Low)
+              </SelectItem>
+              <SelectItem value="rating_low_to_high">
+                Rating (Low to High)
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -863,12 +943,8 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
         {!isFetching && !error && currentCandidates.length === 0 && (
           <div className="flex items-center justify-center p-12">
             <div className="text-center">
-              <p className="text-[#666666] font-medium">
-                No candidates found
-              </p>
-              <p className="text-[#909091] mt-2">
-                Try adjusting your filters
-              </p>
+              <p className="text-[#666666] font-medium">No candidates found</p>
+              <p className="text-[#909091] mt-2">Try adjusting your filters</p>
             </div>
           </div>
         )}
