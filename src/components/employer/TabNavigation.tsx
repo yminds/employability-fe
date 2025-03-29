@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 
 interface TabNavigationProps {
   selectedTab: string;
@@ -11,54 +11,28 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
   setSelectedTab,
   interviewCount = 0, 
 }) => {
-  // Store the previous count to prevent reset
-  const [previousCount, setPreviousCount] = React.useState(interviewCount);
   
-  // Reference to track if this is the initial render
-  const isInitialRender = useRef(true);
-  
-  // Only update previous count when interviewCount changes and is not zero
-  useEffect(() => {
-    if (interviewCount > 0) {
-      setPreviousCount(interviewCount);
-    }
-  }, [interviewCount]);
-  
-  // Display previous count or current count, whichever is higher
-  const displayCount = Math.max(previousCount, interviewCount);
-
-  // Automatically select the interviews tab when displayCount becomes > 0
-  useEffect(() => {
-    if (isInitialRender.current && displayCount > 0) {
-      setSelectedTab("interviews");
-      isInitialRender.current = false;
-    }
-  }, [displayCount, setSelectedTab]);
-
-  // Define all tabs
-  const allTabs = [
+  const tabsData = [
     { id: "inviteCandidates", label: "Invite Candidates", hasBadge: false },
     {
       id: "interviews",
       label: "Interviews",
-      count: displayCount,
+      count: interviewCount,
       hasBadge: true,
     },
     { id: "shortlistedCandidates", label: "Shortlisted Candidates", hasBadge: false },
     { id: "sentInvitations", label: "Sent Invitations", hasBadge: false },
   ];
+
   
-  // Dynamically order tabs based on interview count
-  const orderedTabs = React.useMemo(() => {
-    if (displayCount > 0) {
-      // If there are interviews, move the interviews tab to the front
-      const interviewsTab = allTabs.find(tab => tab.id === "interviews");
-      const otherTabs = allTabs.filter(tab => tab.id !== "interviews");
-      return [interviewsTab, ...otherTabs];
-    }
-    // Otherwise, use the default order
-    return allTabs;
-  }, [displayCount]);
+  const orderedTabs = interviewCount > 0
+    ? [
+       
+        tabsData.find(tab => tab.id === "interviews"),
+       
+        ...tabsData.filter(tab => tab.id !== "interviews")
+      ]
+    : tabsData;
 
   return (
     <div className="border-b border-[#d6d7d9] pt-8">

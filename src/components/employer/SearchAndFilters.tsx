@@ -32,7 +32,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#909091] w-4 h-4" />
         <Input
-          placeholder="Search by name, skills, or location"
+          placeholder="Search"
           className="pl-10 border-[#d6d7d9] bg-white h-12"
           value={searchTerm}
           onChange={handleSearchChange}
