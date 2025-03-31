@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import ProgressBar from "@/components/projects/modal/ProgressBar";
+
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,

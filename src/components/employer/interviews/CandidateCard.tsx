@@ -18,6 +18,7 @@ import {
   canShowReportAndShortlist,
   getCandidateFinalRating
 } from "../InterviewCandidatesView";
+import verified from '../../../assets/skills/verified.svg'
 
 interface CandidateCardProps {
   candidate: InterviewCandidate;
@@ -48,6 +49,22 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   // Get final rating
   const finalRating = getCandidateFinalRating(candidate);
 
+  console.log("candidate", candidate);
+
+  // Format candidate location from object to string
+  const formattedLocation = React.useMemo(() => {
+    if (!candidate.candidate_location) return "";
+    
+    const { city, state, country } : any = candidate.candidate_location;
+    
+    const parts = [];
+    if (city) parts.push(city);
+    if (state) parts.push(state);
+    if (country) parts.push(country);
+    
+    return parts.filter(Boolean).join(", ");
+  }, [candidate.candidate_location]);
+
   // Render badge icon based on type
   const renderBadgeIcon = () => {
     if (submissionBadge.icon === "check") {
@@ -66,10 +83,10 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
 
   return (
     <div className="bg-white border-b p-4">
-      <div className="flex items-center">
+      <div className="flex items-center space-x-4">
         <Checkbox
           id={`candidate-${candidate._id}`}
-          className="mr-4 rounded border-[#d6d7d9]"
+          className="rounded border-[#d6d7d9]"
           checked={isSelected}
           onCheckedChange={(checked) =>
             handleSelectCandidate(candidate._id, !!checked)
@@ -77,7 +94,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
         />
         <div className="relative">
           {candidate.profile_image ? (
-            <div className="w-12 h-12 rounded-full overflow-hidden border">
+            <div className="w-14 h-14 rounded-full overflow-hidden border">
               <img
                 src={candidate.profile_image || "/placeholder.svg"}
                 alt={candidate.candidate_name}
@@ -86,33 +103,33 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
             </div>
           ) : (
             <div
-              className="w-12 h-12 rounded-full overflow-hidden border flex items-center justify-center"
+              className="w-14 h-14 rounded-full overflow-hidden border flex items-center justify-center"
               style={{
                 backgroundColor: getInitialsBackgroundColor(
                   candidate.candidate_name
                 ),
               }}
             >
-              <span className="text-white text-lg font-medium">
+              <span className="text-white text-xl font-medium">
                 {getInitials(candidate.candidate_name)}
               </span>
             </div>
           )}
-          {candidate.has_report && (
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#10b754] rounded-full flex items-center justify-center border-2 border-white">
-              <Check className="w-3 h-3 text-white" />
+          {/* {candidate.has_report && (
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#10b754] rounded-full flex items-center justify-center border-2 border-white">
+              <Check className="w-4 h-4 text-white" />
             </div>
-          )}
+          )} */}
         </div>
-        <div className="ml-4 flex-1">
+        <div className="flex-1">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="font-medium text-[#0c0f12]">
+              <h3 className="font-medium text-[#0c0f12] text-base">
                 {candidate.candidate_name}
               </h3>
-              {candidate.candidate_location && (
+              {formattedLocation && (
                 <p className="text-sm text-[#68696b]">
-                  {candidate.candidate_location}
+                  {formattedLocation}
                 </p>
               )}
               <div className="flex items-center gap-2 mt-2">
@@ -128,7 +145,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
             </div>
 
             {/* Right side of card */}
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col items-end justify-center h-full">
               {/* Status text on the top right */}
               {candidate.status === "accepted" && (
                 <div className="text-right mb-2">
@@ -136,12 +153,13 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                     Invite Accepted
                   </p>
                   <p className="text-sm text-[#68696b]">
-                    Waiting for Interview Submission
+                    Submission Expected on 3rd April
                   </p>
                 </div>
               )}
 
-              <div className="flex items-center gap-4">
+              {/* Action section - centered vertically */}
+              <div className="flex items-center gap-4 mt-2">
                 {/* Show rating if completed and has report */}
                 {showReportAndShortlist && candidate.has_report && (
                   <div className="text-center mr-2">
@@ -152,8 +170,8 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                           : "N/A"}
                       </span>
                       <span className="text-sm text-[#68696b]">/10</span>
-                      <div className="w-5 h-5 rounded-full bg-[#10b754] flex items-center justify-center ml-1">
-                        <Check className="w-3 h-3 text-white" />
+                      <div className="w-5 h-5 ml-1">
+                        <img src={verified} alt="verified.png"/>
                       </div>
                     </div>
                     <p className="text-xs text-[#68696b]">Interview score</p>
@@ -166,7 +184,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                   {showReportAndShortlist && candidate.has_report && (
                     <Button
                       variant="outline"
-                      className="h-8 px-3 py-1 text-sm bg-[#f0f3f7] text-[#001630] border-[#f0f3f7] hover:bg-[#f0f3f7] hover:text-[#001630]"
+                      className="h-8 px-3 py-1 text-sm bg-[#DFE7F2] underline text-[#001630] border-[#f0f3f7] hover:bg-[#f0f3f7] hover:text-[#001630]"
                       onClick={() => handleViewReport(candidate)}
                     >
                       View Report
@@ -250,11 +268,9 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                         </Button>
                       </DropdownTrigger>
                       <DropdownContent align="end">
-                        <DropdownItem>Send Message</DropdownItem>
-                        <DropdownItem>Schedule Interview</DropdownItem>
-                        <DropdownItem>Download Resume</DropdownItem>
+                        <DropdownItem>Send Invite</DropdownItem>
                         <DropdownItem className="text-red-500">
-                          Decline Candidate
+                          Reject Candidate
                         </DropdownItem>
                       </DropdownContent>
                     </Dropdown>
