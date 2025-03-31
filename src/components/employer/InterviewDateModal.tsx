@@ -46,7 +46,6 @@ export function InterviewDateModal({
   });
 
   const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Reset the calendar when modal opens
   useEffect(() => {
@@ -148,27 +147,48 @@ export function InterviewDateModal({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientY);
-    setTouchEnd(null);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientY);
+    if (!touchStart) return;
+
+    const currentY = e.targetTouches[0].clientY;
+    const deltaY = currentY - touchStart;
+
+    if (deltaY > 0) {
+      const drawerContent = e.currentTarget.closest(
+        ".drawer-content"
+      ) as HTMLElement;
+      if (drawerContent) {
+        drawerContent.style.transform = `translateY(${deltaY}px)`;
+        drawerContent.style.transition = "none"; // Remove transition during drag
+      }
+    }
   };
 
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
 
-    // Minimum swipe distance (in px)
-    const minSwipeDistance = 50;
-    const distance = touchEnd - touchStart;
+    const currentY = e.changedTouches[0].clientY;
+    const deltaY = currentY - touchStart;
+    const drawerContent = e.currentTarget.closest(
+      ".drawer-content"
+    ) as HTMLElement;
 
-    // If swipe down and distance is greater than minimum
-    if (distance > minSwipeDistance) {
-      onClose();
+    if (drawerContent) {
+      drawerContent.style.transition = "transform 0.3s ease-out";
+
+      if (deltaY > 300) {
+        drawerContent.style.transform = `translateY(100%)`;
+        setTimeout(() => {
+          onClose();
+        }, 300);
+      } else {
+        drawerContent.style.transform = "translateY(0)";
+      }
     }
 
     setTouchStart(null);
-    setTouchEnd(null);
   };
 
   const renderCalendar = () => {
@@ -304,12 +324,12 @@ export function InterviewDateModal({
       <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DrawerContent
           side="bottom"
-          className="px-8 pt-5 max-h-[90vh] w-full overflow-auto pb-24"
+          className="drawer-content px-8 pt-5 max-h-[90%] w-full overflow-auto pb-24"
           showCloseButton={false}
         >
           {/* Drawer handle/indicator */}
           <div
-            className="absolute top-2 left-0 right-0 flex justify-center mt-3"
+            className="absolute top-0 left-0 right-0 flex justify-center p-5"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
