@@ -200,6 +200,7 @@ interface ExpiryStatusResponse {
     interviewType: string;
     candidateInfo: any;
     source: string;
+    task: any;
   };
 }
 
@@ -271,6 +272,21 @@ export interface UserExistsResponse {
   userId?: string;
   candidateId?: string;
   source?: 'user_db' | 'candidate_db' | null;
+}
+
+interface SendInvitationResponseMailPayload {
+  inviteId: string;
+  candidateEmail: string;
+  candidateName?: string;
+  jobTitle?: string;
+  companyName?: string;
+  status: "accepted" | "declined";
+  submissionDate?: string;
+}
+
+interface SendInvitationResponseMailResponse {
+  success: boolean;
+  message: string;
 }
 
 // API Slice for Interview Invitations
@@ -391,6 +407,14 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         body: { candidate_id: candidateId }
       }),
     }),
+
+    sendInvitationResponseMail: builder.mutation<SendInvitationResponseMailResponse, SendInvitationResponseMailPayload>({
+      query: (data) => ({
+        url: `/api/v1/employerInterviewInvitation/send-response-mail`,
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
   overrideExisting: false
 });
@@ -412,4 +436,5 @@ export const {
   useGetInterviewCandidatesQuery,
   useGetInterviewStatsQuery,
   useShortlistCandidateMutation,
+  useSendInvitationResponseMailMutation,
 } = interviewApiSlice;

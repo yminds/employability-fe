@@ -159,7 +159,7 @@ export const routes: RouteConfig[] = [
     component: <InterviewInvitationHandler />,
   },
   {
-    route: "/invitations/invite",
+    route: "/invitations/:inviteId",
     component: <EmployerInterviewInvitaion />
   },
   // {

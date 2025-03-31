@@ -4,7 +4,7 @@ import React from "react";
 const EmployerInterviewInvitaion: React.FC = () => {
   return (
     <div className="flex w-full justify-center sm:overflow-y-auto sm:flex-col">
-      <main className=" flex-col bg-[#F5F5F5] max-w-[1800px] p-5">
+      <main className=" flex-col bg-[#F5F5F5] max-w-[1800px] p-5 sm:p-0">
         <JobInvitation />
       </main>
     </div>
