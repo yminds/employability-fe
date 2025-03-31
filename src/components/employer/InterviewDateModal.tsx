@@ -242,17 +242,6 @@ export function InterviewDateModal({
         <div className="grid grid-cols-7 gap-1">{renderCalendar()}</div>
       </div>
 
-      {deadlineDate && (
-        <div className="mt-4 text-[#fd5964] text-[14px] font-normal leading-5 tracking-[0.21px]">
-          *You must submit before{" "}
-          {deadlineDate.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </div>
-      )}
-
       <div className="bg-[#dbf7e7] rounded-lg p-4 mt-6">
         <p className="text-[#414447] text-[14px] font-normal leading-6 tracking-[0.21px]">
           Tip: Early submissions give an advantage over other candidates
@@ -289,7 +278,7 @@ export function InterviewDateModal({
         >
 
           {/* Drawer handle/indicator */}
-          <div className="absolute top-2 left-0 right-0 flex justify-center mt-4">
+          <div className="absolute top-2 left-0 right-0 flex justify-center mt-3">
             <div className="w-12 h-1.5 rounded-full bg-[#e2e2e2]"></div>
           </div>
 
