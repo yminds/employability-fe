@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect, type FormEvent } from "react";
 import { useLoginMutation, useRegisterUserMutation } from "@/api/authApiSlice";
 import { useNavigate, useParams } from "react-router-dom";

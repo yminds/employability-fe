@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -99,52 +97,61 @@ const CandidateItem: React.FC<CandidateItemProps> = ({ candidate, isChecked, onC
             </div>
           </div>
 
-          <div className="flex items-center mr-4">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger onClick={(e) => e.stopPropagation()}>
-                  <div className="text-center">
-                    {hasVerifiedSkills ? (
-                      <>
-                        <div className="flex items-center">
-                          <span className="text-lg font-medium">
-                            {typeof candidate.averageRating === "number" ? candidate.averageRating.toFixed(1) : "0.0"}
-                          </span>
-                          <span className="text-sm text-[#909091]">/10</span>
-                          <img src={verified || "/placeholder.svg"} alt="verified" className="w-4 h-4 ml-1" />
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-xs text-[#414447]">Employability score</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center justify-center">
-                          <span className="text-sm text-[#909091]">No verified ratings</span>
-                        </div>
-                        <div className="flex items-center justify-center">
-                          <span className="text-xs text-[#414447]">Skills not assessed</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">
-                    {hasVerifiedSkills
-                      ? hasSelfRatedSkills
-                        ? "Calculated from verified ratings (70% weight) and self-assessments (30% weight)"
-                        : "Average verified rating across all matched skills"
-                      : "This candidate has no verified skill assessments"}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          {/* Fixed-width container for both scores to ensure alignment */}
+          <div className="flex items-center justify-end w-72 space-x-12">
+            {/* Employability Score - fixed width */}
+            <div className="w-32">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger onClick={(e) => e.stopPropagation()}>
+                    <div className="text-center">
+                      {hasVerifiedSkills ? (
+                        <>
+                          <div className="flex items-center justify-center">
+                            <span className="text-m font-medium">
+                              {typeof candidate.averageRating === "number" 
+                                ? candidate.averageRating === 10 
+                                  ? "10" 
+                                  : candidate.averageRating.toFixed(1) 
+                                : "0.0"}
+                            </span>
+                            <span className="text-sm text-[#909091]">/10</span>
+                            <img src={verified || "/placeholder.svg"} alt="verified" className="w-4 h-4 ml-1" />
+                          </div>
+                          <div className="flex items-center justify-center">
+                            <span className="text-xs text-[#414447]">Employability score</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-center">
+                            <span className="text-sm text-[#909091]">No verified ratings</span>
+                          </div>
+                          <div className="flex items-center justify-center">
+                            <span className="text-xs text-[#414447]">Skills not assessed</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">
+                      {hasVerifiedSkills
+                        ? hasSelfRatedSkills
+                          ? "Calculated from verified ratings (70% weight) and self-assessments (30% weight)"
+                          : "Average verified rating across all matched skills"
+                        : "This candidate has no verified skill assessments"}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
 
-          <div className="text-center ml-4">
-            <div className="text-lg font-bold text-[#10b754]">{Math.round(candidate.matchPercentage)}%</div>
-            <div className="text-xs text-[#414447]">Match</div>
+            {/* Match Percentage - fixed width with highlighted appearance */}
+            <div className="w-24 text-center p-2">
+              <div className="text-xl font-bold text-[#10b754]">{Math.round(candidate.matchPercentage)}%</div>
+              <div className="text-xs text-[#414447]">Match</div>
+            </div>
           </div>
         </div>
       </div>
@@ -160,4 +167,3 @@ const CandidateItem: React.FC<CandidateItemProps> = ({ candidate, isChecked, onC
 }
 
 export default CandidateItem
-

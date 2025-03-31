@@ -20,7 +20,6 @@ import InterviewCandidatesView from "./InterviewCandidatesView";
 import FullInterviewsCard from "./FullInterviewsCard";
 import ScreeningInterviewsCard from "./ScreeningInterviewsCard";
 import MatchingCandidatesCard from "./MatchingCandidatesCard";
-// import TabSkeletonLoader from "./TabSkeletonLoader";
 
 import { useGetInterviewCandidatesQuery } from "../../api/InterviewInvitation";
 

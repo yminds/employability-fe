@@ -33,8 +33,8 @@ const CandidateListHeader: React.FC<CandidateListHeaderProps> = ({
               data-[state=checked]:border-[#001630]
               data-[state=checked]:text-white"
           />
-          <label htmlFor="select-all" className="text-sm font-medium">
-            Select All Candidates
+          <label htmlFor="select-all" className="text-sm font-normal text-[#68696B]">
+            Select All
           </label>
         </div>
 

@@ -1,4 +1,4 @@
-// InterviewCandidatesView.tsx
+
 import type React from "react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -458,12 +458,13 @@ export const formatDaysRemaining = (dateString?: string) => {
 
 export const getSubmissionBadge = (candidate: InterviewCandidate) => {
   // If candidate status is accepted, show special badge
-  if (candidate.status === "accepted") {
+  if (candidate.status === "accepted" && !candidate.has_report) {
     return {
-      bgColor: "bg-[#fff8e6]",
-      textColor: "text-[#f59e0b]",
-      icon: "clock",
-      text: "Interview Accepted",
+      bgColor: "bg-[#eceef0]",
+      textColor: "text-[#414447]",
+      icon: "x",
+      iconBg: "bg-[#414447]",
+      text: "Not Submitted",
     };
   }
 
@@ -476,8 +477,6 @@ export const getSubmissionBadge = (candidate: InterviewCandidate) => {
       text: "Submitted",
     };
   }
-
-  // Otherwise, they haven't submitted
   return {
     bgColor: "bg-[#eceef0]",
     textColor: "text-[#414447]",
