@@ -37,32 +37,20 @@ export interface InterviewCandidate {
   status: 'pending' | 'accepted' | 'completed' | 'declined' | 'expired';
   shortlist: boolean;
   interview_id?: string;
-  
-  // Report flags and fields
   has_report: boolean;
-  
-  // Main interview report fields
   report_id?: string;
   final_rating?: number;
   report_updated_at?: string;
-  
-  // Task interview report fields
   type_report_id?: string;
   type_final_rating?: number;
   type_report_updated_at?: string;
-  
-  // Effective report (prioritizing task interview report)
   effective_report_id?: string;
   effective_final_rating?: number;
   effective_report_updated_at?: string;
-  
-  // Timing fields
   updated_at?: string;
   sent_at: string;
   submission_expected_date?: string;
   submission_date?: string;
-  
-  // Task structure
   task: {
     interview_type: {
       type: 'full' | 'screening';
@@ -78,8 +66,6 @@ export interface InterviewCandidate {
       interview_id?: string;
     }[];
   };
-  
-  // Skills with interview and report details
   skill_interviews?: {
     skill_id: string;
     skill_name: string;
@@ -88,8 +74,6 @@ export interface InterviewCandidate {
     interview_details?: any;
     report_details?: any;
   }[];
-  
-  // Interview info objects
   interview_info?: {
     interview_id: string;
     interview_date?: string;
@@ -100,8 +84,6 @@ export interface InterviewCandidate {
     interview_date?: string;
     interview_status?: string;
   };
-  
-  // Interview flags
   has_interview_in_type: boolean;
 }
 

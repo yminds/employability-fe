@@ -259,6 +259,8 @@ interface GetMatchingCandidatesParams {
     job_id?: string;
     skills_required?: string[];
     importance_level?: string;
+    source?: string;
+    sortBy?: string;
   }
 
 interface GetSkillSuggestionsParams{
@@ -348,6 +350,12 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
               const queryParams = new URLSearchParams();
               if (params.job_id) {
                 queryParams.append('job_id', params.job_id);
+              }
+              if (params.source && params.source !== 'all') {
+                queryParams.append('source', params.source);
+              }
+              if (params.sortBy) {
+                queryParams.append('sortBy', params.sortBy);
               }
               
               return {

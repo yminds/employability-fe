@@ -3,30 +3,41 @@ import React from "react";
 interface TabNavigationProps {
   selectedTab: string;
   setSelectedTab: (tab: string) => void;
-  interviewCount?: number; // Added prop for interview count
+  interviewCount?: number; 
 }
 
 const TabNavigation: React.FC<TabNavigationProps> = ({
   selectedTab,
   setSelectedTab,
-  interviewCount = 0, // Default to 0 if not provided
+  interviewCount = 0, 
 }) => {
-  const tabs = [
-    { id: "inviteCandidates", label: "Invite Candidates" },
+  
+  const tabsData = [
+    { id: "inviteCandidates", label: "Invite Candidates", hasBadge: false },
     {
       id: "interviews",
       label: "Interviews",
       count: interviewCount,
       hasBadge: true,
     },
-    { id: "shortlistedCandidates", label: "Shortlisted Candidates" },
-    { id: "sentInvitations", label: "Sent Invitations" },
+    { id: "shortlistedCandidates", label: "Shortlisted Candidates", hasBadge: false },
+    { id: "sentInvitations", label: "Sent Invitations", hasBadge: false },
   ];
+
+  
+  const orderedTabs = interviewCount > 0
+    ? [
+       
+        tabsData.find(tab => tab.id === "interviews"),
+       
+        ...tabsData.filter(tab => tab.id !== "interviews")
+      ]
+    : tabsData;
 
   return (
     <div className="border-b border-[#d6d7d9] pt-8">
       <div className="flex">
-        {tabs.map((tab) => (
+        {orderedTabs.map((tab:any) => (
           <button
             key={tab.id}
             className={`px-4 pb-3 text-body2 ${
