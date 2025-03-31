@@ -1,5 +1,4 @@
-"use client";
-
+import type React from "react";
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
+  DrawerFooter,
 } from "@/components/ui/drawer";
 import { DialogDescription } from "@radix-ui/react-dialog";
 
@@ -44,6 +44,9 @@ export function InterviewDateModal({
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth());
   });
+
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Reset the calendar when modal opens
   useEffect(() => {
@@ -141,6 +144,31 @@ export function InterviewDateModal({
     if (selectedDate) {
       onConfirm(selectedDate);
     }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+    setTouchEnd(null);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    // Minimum swipe distance (in px)
+    const minSwipeDistance = 50;
+    const distance = touchEnd - touchStart;
+
+    // If swipe down and distance is greater than minimum
+    if (distance > minSwipeDistance) {
+      onClose();
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   const renderCalendar = () => {
@@ -247,24 +275,27 @@ export function InterviewDateModal({
           Tip: Early submissions give an advantage over other candidates
         </p>
       </div>
-
-      <div className="flex justify-between mt-6 gap-4">
-        <Button
-          variant="outline"
-          onClick={onClose}
-          className="flex-1 border-[#d6d7d9] text-[#202326]"
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={handleConfirm}
-          disabled={!selectedDate}
-          className="flex-1 bg-[#001630] hover:bg-[#001630]/90 text-white"
-        >
-          Confirm Date
-        </Button>
-      </div>
     </>
+  );
+
+  // Action buttons for desktop dialog
+  const actionButtons = (
+    <div className="flex justify-between mt-6 gap-4">
+      <Button
+        variant="outline"
+        onClick={onClose}
+        className="flex-1 border-[#d6d7d9] text-[#202326]"
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={handleConfirm}
+        disabled={!selectedDate}
+        className="flex-1 bg-[#001630] hover:bg-[#001630]/90 text-white"
+      >
+        Confirm Date
+      </Button>
+    </div>
   );
 
   // Render either Dialog or Drawer based on screen size
@@ -273,12 +304,16 @@ export function InterviewDateModal({
       <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DrawerContent
           side="bottom"
-          className="px-8 pb-8 pt-5 max-h-[90vh] w-full"
+          className="px-8 pt-5 max-h-[90vh] w-full overflow-auto pb-24"
           showCloseButton={false}
         >
-
           {/* Drawer handle/indicator */}
-          <div className="absolute top-2 left-0 right-0 flex justify-center mt-3">
+          <div
+            className="absolute top-2 left-0 right-0 flex justify-center mt-3"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div className="w-12 h-1.5 rounded-full bg-[#e2e2e2]"></div>
           </div>
 
@@ -290,7 +325,27 @@ export function InterviewDateModal({
               *This helps your employer know when to expect your submission
             </p>
           </DrawerHeader>
+
           {calendarContent}
+
+          <DrawerFooter className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#eceef0] mt-0">
+            <div className="flex flex-row gap-4 w-full">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="flex-1 border-[#d6d7d9] text-[#202326]"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={!selectedDate}
+                className="flex-1 bg-[#001630] hover:bg-[#001630]/90 text-white"
+              >
+                Confirm Date
+              </Button>
+            </div>
+          </DrawerFooter>
         </DrawerContent>
       </Drawer>
     );
@@ -310,7 +365,10 @@ export function InterviewDateModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6">{calendarContent}</div>
+        <div className="p-6">
+          {calendarContent}
+          {actionButtons}
+        </div>
       </DialogContent>
     </Dialog>
   );
