@@ -6,7 +6,7 @@ import { Check, Clock, FileText, X, AlertCircle, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
+import { detectMobileDevice } from "@/utils/deviceDetection";
 import eLogo from "@/assets/branding/eLogo.svg";
 import { InterviewDateModal } from "./InterviewDateModal";
 
@@ -14,14 +14,15 @@ import {
   useCheckInviteStatusQuery,
   useRespondToInviteMutation,
   useCheckUserExistsMutation,
+  useSendInvitationResponseMailMutation,
 } from "@/api/InterviewInvitation";
 import { useGetJobDetailsQuery } from "@/api/employerJobsApiSlice";
+import { SwitchToDesktopModal } from "./SwitchToDesktopModal";
 
 export default function JobInvitation() {
-  const params = useParams();
+  const { inviteId } = useParams<{ inviteId: string }>();
   const [searchParams] = useSearchParams();
-  const inviteId = "67e62c0ec73df887ba78e261";
-  const action = searchParams.get("action") || "accept";
+  const action = searchParams.get("action");
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [processingComplete, setProcessingComplete] = useState(false);
@@ -30,6 +31,9 @@ export default function JobInvitation() {
   const [userExists, setUserExists] = useState<boolean | null>(null);
   const [userCheckInitiated, setUserCheckInitiated] = useState(false);
   const [dateSelected, setDateSelected] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [isDesktopSwitchModalOpen, setIsDesktopSwitchModalOpen] =
+    useState(false);
 
   const {
     data: inviteStatusData,
@@ -43,10 +47,11 @@ export default function JobInvitation() {
   console.log("InviteStatusData", inviteStatusData);
   const jobId = inviteStatusData?.data?.jobDetails;
 
-  const { data: jobDetailsData } = useGetJobDetailsQuery(jobId || "", {
-    skip: !jobId,
-    refetchOnMountOrArgChange: true,
-  });
+  const { data: jobDetailsData, isLoading: jobDetailsLoading } =
+    useGetJobDetailsQuery(jobId || "", {
+      skip: !jobId,
+      refetchOnMountOrArgChange: true,
+    });
 
   console.log("JobDetails", jobDetailsData);
 
@@ -55,8 +60,17 @@ export default function JobInvitation() {
     { data: responseData, error: responseError, isLoading: responseLoading },
   ] = useRespondToInviteMutation();
 
+  console.log("Response data", responseData);
+
   const [checkUserExists, { isLoading: userCheckLoading }] =
     useCheckUserExistsMutation();
+
+  // Check if user is on mobile device
+  useEffect(() => {
+    setIsMobileDevice(detectMobileDevice());
+  }, []);
+
+  const [sendInvitationResponseMail] = useSendInvitationResponseMailMutation();
 
   // Format deadline date
   const deadlineDate = inviteStatusData?.data?.deadline
@@ -124,16 +138,16 @@ export default function JobInvitation() {
       }
 
       // Check invitation status
-      if (
-        inviteStatusData?.data?.status &&
-        inviteStatusData.data.status !== "pending"
-      ) {
-        setErrorMessage(
-          `This invitation has already been ${inviteStatusData.data.status}`
-        );
-        setProcessingComplete(true);
-        return;
-      }
+      // if (
+      //   inviteStatusData?.data?.status &&
+      //   inviteStatusData.data.status !== "pending"
+      // ) {
+      //   setErrorMessage(
+      //     `This invitation has already been ${inviteStatusData.data.status}`
+      //   );
+      //   setProcessingComplete(true);
+      //   return;
+      // }
 
       if (inviteStatusData?.data?.isExpired) {
         setProcessingComplete(true);
@@ -153,6 +167,10 @@ export default function JobInvitation() {
           setErrorMessage("Failed to process your response. Please try again.");
           setProcessingComplete(true);
         }
+      } else if (action === "accept") {
+        setTimeout(() => {
+          setIsModalOpen(true);
+        }, 1000);
       }
     };
 
@@ -208,6 +226,7 @@ export default function JobInvitation() {
         inviteId: inviteId || "",
         action: "decline",
       }).unwrap();
+
       setProcessingComplete(true);
     } catch (err) {
       console.error("Error declining invitation:", err);
@@ -222,11 +241,26 @@ export default function JobInvitation() {
     }
 
     try {
-      await respondToInvite({
+      const response = await respondToInvite({
         inviteId: inviteId || "",
         action: "accept",
         commited_due_date: selectedDate.toISOString(),
       }).unwrap();
+
+      if (response.success && inviteStatusData?.data?.candidateInfo) {
+        await sendInvitationResponseMail({
+          inviteId: inviteId || "",
+          candidateEmail: inviteStatusData.data.candidateInfo.email,
+          candidateName: inviteStatusData.data.candidateInfo.name,
+          jobTitle: jobDetailsData?.data.title,
+          companyName:
+            typeof jobDetailsData?.data.company === "object"
+              ? jobDetailsData?.data.company?.name
+              : "",
+          status: "accepted",
+          submissionDate: selectedDate.toISOString(),
+        });
+      }
 
       setProcessingComplete(true);
     } catch (err) {
@@ -239,6 +273,10 @@ export default function JobInvitation() {
     setIsModalOpen(false);
   };
 
+  const handleCloseDesktopSwitchModal = () => {
+    setIsDesktopSwitchModalOpen(false);
+  };
+
   const handleConfirmDate = (date: Date) => {
     setSelectedDate(date);
     setDateSelected(true);
@@ -248,6 +286,10 @@ export default function JobInvitation() {
   };
 
   const redirectToAccount = () => {
+    if (isMobileDevice) {
+      setIsDesktopSwitchModalOpen(true);
+      return;
+    }
     if (userExists) {
       window.location.href =
         "https://employability.ai/login?redirect=dashboard";
@@ -260,7 +302,8 @@ export default function JobInvitation() {
   if (
     statusLoading ||
     (responseLoading && !processingComplete) ||
-    userCheckLoading
+    userCheckLoading ||
+    jobDetailsLoading
   ) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -380,109 +423,9 @@ export default function JobInvitation() {
     );
   }
 
-  // Success message after responding
-  // if (responseData?.success && processingComplete) {
-  //   return (
-  //     <div className="container mx-auto mt-16 max-w-4xl">
-  //       {/* Success Banner */}
-  //       <div className="flex items-center justify-between bg-white p-4 mb-6 rounded-lg shadow-sm">
-  //         <div className="flex items-center gap-4">
-  //           <img
-  //             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Employability.AI-dHQbgFHoQqmzHDbaw1IPprk8POamu0.png"
-  //             alt="Celebration"
-  //             className="w-12 h-12"
-  //           />
-  //           <h2 className="text-2xl font-semibold text-[#202326]">
-  //             Thank you for{" "}
-  //             {action === "accept" ? "Accepting" : "Responding to"} the Invite
-  //           </h2>
-  //         </div>
-  //         {action === "accept" ? (
-  //           <Button
-  //             onClick={redirectToAccount}
-  //             className="bg-[#001630] hover:bg-[#001630]/90 text-white px-8 py-2 rounded-lg"
-  //           >
-  //             Continue
-  //           </Button>
-  //         ) : (
-  //           <Button
-  //             onClick={() =>
-  //               (window.location.href = "https://employability.ai")
-  //             }
-  //             className="bg-[#001630] hover:bg-[#001630]/90 text-white px-8 py-2 rounded-lg"
-  //           >
-  //             Return to Homepage
-  //           </Button>
-  //         )}
-  //       </div>
-
-  //       <Card className="p-6">
-  //         <div
-  //           className={`bg-${
-  //             action === "accept" ? "green" : "gray"
-  //           }-50 p-4 rounded-lg mb-4`}
-  //         >
-  //           <div
-  //             className={`flex items-center text-${
-  //               action === "accept" ? "green" : "gray"
-  //             }-700 font-semibold text-lg mb-2`}
-  //           >
-  //             {action === "accept" ? (
-  //               <>
-  //                 <Check className="mr-2" /> Interview Accepted
-  //               </>
-  //             ) : (
-  //               <>
-  //                 <X className="mr-2" /> Interview Declined
-  //               </>
-  //             )}
-  //           </div>
-  //           {action === "accept" && (
-  //             <p className="text-gray-700 mb-2">
-  //               {jobDetailsData?.data.title || "This position"} at{" "}
-  //               {companyName || "the company"}
-  //             </p>
-  //           )}
-  //           <p>{responseData.message || "Your response has been recorded."}</p>
-
-  //           {action === "accept" && (
-  //             <Alert className="mt-4" variant="default">
-  //               <Check className="h-4 w-4" />
-  //               <AlertTitle>Interview Accepted Successfully!</AlertTitle>
-  //               <AlertDescription>
-  //                 Thank you for accepting this interview invitation. You can now
-  //                 proceed to take your interview.
-  //               </AlertDescription>
-  //             </Alert>
-  //           )}
-  //         </div>
-  //         {action === "accept" ? (
-  //           <Button
-  //             onClick={redirectToAccount}
-  //             className="w-full bg-[#16a34a] text-white"
-  //           >
-  //             {userExists
-  //               ? "Login & Take Interview"
-  //               : "Create Account & Take Interview"}
-  //           </Button>
-  //         ) : (
-  //           <Button
-  //             onClick={() =>
-  //               (window.location.href = "https://employability.ai")
-  //             }
-  //             className="w-full bg-[#001630] text-white"
-  //           >
-  //             Return to Homepage
-  //           </Button>
-  //         )}
-  //       </Card>
-  //     </div>
-  //   );
-  // }
-
   // Main UI for pending invitation
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-[#ffffff]">
+    <div className="max-w-4xl mx-auto p-8 sm:p-6 bg-[#ffffff]">
       {/* Header with logo and job title */}
       <div className="flex items-center mb-8">
         <div className="flex items-center font-ubuntu text-[22px] font-bold leading-normal">
@@ -500,14 +443,23 @@ export default function JobInvitation() {
       {responseData?.success && processingComplete && (
         <div className="flex items-center justify-between bg-white mb-10">
           <div className="flex items-center gap-4">
-            <h2 className="text-[20px] font-medium leading-5 text-[#202326]">
-              <span className="text-3xl">🎉</span> Thank you for Accepting the
-              Invite
-            </h2>
+            {responseData?.data?.status === "accepted" ? (
+              <h2 className="text-[18px] font-medium leading-5 text-[#202326]">
+                <span className="text-3xl">🎉</span> Thank you for Accepting the
+                Invite
+              </h2>
+            ) : (
+              responseData?.data?.status === "declined" && (
+                <h2 className="text-[18px] font-medium leading-5 text-[#202326]">
+                  <span className="text-3xl">📩</span> We appreciate your time
+                  and hope to connect in the future. 🤝
+                </h2>
+              )
+            )}
           </div>
           <Button
             onClick={redirectToAccount}
-            className="bg-[#001630] hover:bg-[#001630]/90 text-[14px] font-medium leading-5 tracking-[0.21px] text-white px-8 py-2 rounded-lg"
+            className="bg-[#001630] hover:bg-[#001630]/90 text-[14px] font-medium leading-5 tracking-[0.21px] text-white px-8 py-2 rounded-lg sm:hidden"
           >
             Continue
           </Button>
@@ -534,8 +486,9 @@ export default function JobInvitation() {
             </p>
           </div>
         </div>
-        <div className="flex gap-3">
-          {!dateSelected && (
+        {/* Replace with responsive button container that's fixed on small screens */}
+        <div className="flex gap-3 sm:hidden">
+          {!dateSelected && !responseData?.success && (
             <Button
               variant="outline"
               className="flex items-center gap-2 px-6 border-[#d6d7d9] text-[#202326]"
@@ -557,7 +510,7 @@ export default function JobInvitation() {
         </div>
       </div>
       {/* Divider */}
-      <div className="border-t border-[#eceef0] my-10"></div>
+      <div className="border-t border-[#eceef0] my-10 sm:my-7"></div>
       {selectedDate && (
         <div className="mb-8">
           <h3 className="text-h2 text-[#202326] mb-2">
@@ -590,7 +543,7 @@ export default function JobInvitation() {
       <div className="mb-6">
         <h3 className="text-h2 text-[#202326] mb-6">About Interview</h3>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-1 sm:grid-cols-1 gap-6">
           <div>
             <div className="flex items-center gap-2 text-[#f0a422] mb-2">
               <FileText className="w-4 h-4" />
@@ -616,7 +569,6 @@ export default function JobInvitation() {
           </div>
         </div>
       </div>
-      {/* Interview Process */}
       <Card className="border border-[#eceef0] rounded-lg mb-8">
         <div className="grid grid-cols-2 md:grid-cols-2 gap-6 py-3 px-5 border-b border-[#eceef0]">
           <div className="flex items-center gap-2">
@@ -635,15 +587,24 @@ export default function JobInvitation() {
         </div>
 
         <div className="py-3">
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-6 px-5 py-2">
-            <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
-              Full Interview
-            </p>
-            <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
-              25 Mins
-            </p>
-          </div>
+          {/* Main interview type */}
+          {inviteStatusData?.data?.task?.interview_type.type && (
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-6 px-5 py-2">
+              <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
+                {inviteStatusData.data.task.interview_type.type
+                  .charAt(0)
+                  .toUpperCase() +
+                  inviteStatusData.data.task.interview_type.type.slice(1)}{" "}
+                Interview
+              </p>
+              <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
+                {inviteStatusData.data.task.interview_type.estimated_time || 40}{" "}
+                Mins
+              </p>
+            </div>
+          )}
 
+          {/* Questionnaire - static entry */}
           <div className="grid grid-cols-2 md:grid-cols-2 gap-6 px-5 py-2">
             <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
               Questionnaire
@@ -653,23 +614,22 @@ export default function JobInvitation() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-6 px-5 py-2">
-            <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
-              React Skill Test
-            </p>
-            <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
-              30 Mins
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-6 px-5 py-2">
-            <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
-              Python Skill Test
-            </p>
-            <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
-              30 Mins
-            </p>
-          </div>
+          {/* Skills assessment */}
+          {inviteStatusData?.data?.task.skills &&
+            inviteStatusData.data.task.skills.map((skill: any, index: any) => (
+              <div
+                key={skill._id || index}
+                className="grid grid-cols-2 md:grid-cols-2 gap-6 px-5 py-2"
+              >
+                <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
+                  {skill.name}{" "}
+                  {skill.status !== "incomplete" && `(${skill.status})`}
+                </p>
+                <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
+                  {skill.estimated_time} Mins
+                </p>
+              </div>
+            ))}
         </div>
       </Card>
       {/* Divider */}
@@ -694,12 +654,53 @@ export default function JobInvitation() {
           </p>
         </div>
       )}
+      {/* Fixed bottom buttons for small screens */}
+      {!processingComplete ? (
+        <div className="hidden sm:flex fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#eceef0] gap-3 justify-between z-10">
+          {!dateSelected && !responseData?.success && (
+            <Button
+              variant="outline"
+              className="flex-1 flex items-center justify-center gap-2 border-[#d6d7d9] text-[#202326]"
+              onClick={handleDeclineInvite}
+            >
+              <X className="w-4 h-4" /> Decline
+            </Button>
+          )}
+
+          {!responseData?.success && (
+            <Button
+              className="flex-1 flex items-center justify-center gap-2 bg-[#68696B] hover:bg-[#bbddc9] text-white border-none"
+              onClick={handleAcceptInvite}
+            >
+              <Check className="w-4 h-4" />{" "}
+              {dateSelected ? "Continue" : "Accept Invite"}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="hidden sm:flex fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#eceef0] gap-3 justify-between z-10">
+          {responseData?.success && (
+            <Button
+              onClick={redirectToAccount}
+              className="flex-1 flex items-center justify-center bg-[#001630] hover:bg-[#001630]/90 text-[14px] font-medium leading-5 tracking-[0.21px] text-white px-8 py-2 rounded-lg"
+            >
+              Continue
+            </Button>
+          )}
+        </div>
+      )}
       {/* Interview Date Modal */}
       <InterviewDateModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onConfirm={handleConfirmDate}
         deadlineDate={deadlineDate}
+        isMobileDevice={isMobileDevice}
+      />
+      {/* Switch to Desktop Modal */}
+      <SwitchToDesktopModal
+        isOpen={isDesktopSwitchModalOpen}
+        onClose={handleCloseDesktopSwitchModal}
       />
     </div>
   );
