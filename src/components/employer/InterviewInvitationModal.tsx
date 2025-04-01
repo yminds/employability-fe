@@ -9,14 +9,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 // Import assets
 import screening from "../../assets/employer/Screening.svg";
 import FullInterview from "../../assets/employer/FullInterview.svg";
 
+// Import components
 import SuccessModal from "./SuccessModal";
+import SkillSelection from "./SkillSelection"; 
 
 // Define interfaces
 interface ProgressData {
@@ -32,11 +33,17 @@ interface Candidate {
   profile_image?: string;
 }
 
+interface SkillData {
+  _id: string;
+  name: string;
+  icon: string;
+}
+
 interface Skill {
   _id: string;
-  skill?: string;
   name: string;
   importance: "Very Important" | "Important" | "Good-To-Have";
+  skill: SkillData;
 }
 
 interface JobDetails {
@@ -122,19 +129,6 @@ export default function InterviewModal({
     } finally {
       setIsLoadingJob(false);
     }
-  };
-
-  // Handle skill selection
-  const handleSkillToggle = (skill: Skill) => {
-    setSelectedSkills(prev => {
-      const isSelected = prev.some(s => s._id === skill._id);
-      
-      if (isSelected) {
-        return prev.filter(s => s._id !== skill._id);
-      } else {
-        return [...prev, skill];
-      }
-    });
   };
 
   // Initialize the worker
@@ -254,7 +248,7 @@ export default function InterviewModal({
     // Prepare skills array for API
     const skills_array = selectedOption === "full" && selectedSkills.length > 0 ? 
       selectedSkills.map(skill => ({
-        _id: skill._id,
+        _id: skill.skill._id,
         name: skill.name
       })) : 
       undefined;
@@ -571,69 +565,28 @@ export default function InterviewModal({
                     </div>
                   </div>
 
-                  {/* Skills selection - only show for full interviews */}
-                  {showSkillsSection && (
-                    <div className="space-y-3 mt-6 border border-blue-200 rounded-lg p-4 bg-blue-50">
-                      <h3 className="text-base font-semibold text-[#001630]">
-                        Select skills to assess in-depth
-                      </h3>
-                      
+                  {/* NEW SKILLS SECTION - Using the updated SkillSelection component */}
+                  {selectedOption === "full" && (
+                    <div className="space-y-3 mt-6">
                       {isLoadingJob ? (
-                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                        <div className="flex items-center space-x-2 text-sm text-gray-500 p-4 border border-gray-200 rounded-lg">
                           <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                           <span>Loading job skills...</span>
                         </div>
                       ) : jobDetails?.skills_required && jobDetails.skills_required.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto px-2 py-1">
-                          {jobDetails.skills_required.map((skill) => (
-                            <div 
-                              key={skill._id} 
-                              className="flex items-start space-x-2 p-2 hover:bg-blue-100 rounded transition-colors"
-                            >
-                              <Checkbox 
-                                id={`skill-${skill._id}`}
-                                checked={selectedSkills.some(s => s._id === skill._id)}
-                                onCheckedChange={() => handleSkillToggle(skill)}
-                                className="mt-0.5"
-                              />
-                              <div className="flex flex-col">
-                                <label 
-                                  htmlFor={`skill-${skill._id}`}
-                                  className="font-medium cursor-pointer text-[#414447]"
-                                >
-                                  {skill.name}
-                                </label>
-                                <span className="text-xs">
-                                  {skill.importance === "Very Important" && (
-                                    <span className="text-red-600 font-medium">★ Very Important</span>
-                                  )}
-                                  {skill.importance === "Important" && (
-                                    <span className="text-amber-600">Important</span>
-                                  )}
-                                  {skill.importance === "Good-To-Have" && (
-                                    <span className="text-gray-500">Good-To-Have</span>
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        <SkillSelection
+                          availableSkills={jobDetails.skills_required}
+                          selectedSkills={selectedSkills}
+                          setSelectedSkills={setSelectedSkills}
+                          maxSkills={6}
+                        />
                       ) : (
-                        <p className="text-sm text-gray-500 italic">
-                          No skills found for this job.
-                        </p>
-                      )}
-                      
-                      {selectedSkills.length > 0 && (
-                        <div className="flex items-center text-sm text-blue-700 mt-2">
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          {selectedSkills.length} skill{selectedSkills.length > 1 ? 's' : ''} selected for in-depth assessment
+                        <div className="p-4 border border-gray-200 rounded-lg">
+                          <p className="text-sm text-gray-500 italic">
+                            No skills found for this job.
+                          </p>
                         </div>
                       )}
-                      
-                      <p className="text-xs text-gray-600 mt-1">
-                        Select the skills that you'd like the AI to test thoroughly in the interview. Very important skills are pre-selected.
-                      </p>
                     </div>
                   )}
 

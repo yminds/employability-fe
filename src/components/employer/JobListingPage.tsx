@@ -53,7 +53,7 @@ const CandidateListSkeleton = () => (
       <div className="h-10 bg-gray-200 rounded w-1/3"></div>
       <div className="h-10 bg-gray-200 rounded w-1/4"></div>
     </div>
-    
+
     {[...Array(5)].map((_, i) => (
       <div key={i} className="bg-white rounded-lg p-4 mb-2 flex">
         <div className="h-10 w-10 bg-gray-200 rounded-full mr-4"></div>
@@ -64,7 +64,7 @@ const CandidateListSkeleton = () => (
         <div className="h-8 w-20 bg-gray-200 rounded"></div>
       </div>
     ))}
-    
+
     <div className="mt-4 flex justify-between">
       <div className="h-8 bg-gray-200 rounded w-1/4"></div>
       <div className="h-8 bg-gray-200 rounded w-1/4"></div>
@@ -74,14 +74,14 @@ const CandidateListSkeleton = () => (
 
 export default function JobListingPage({ job_id }: JobListingPageProps) {
   const navigate = useNavigate();
-  
+
   // Page state
   const [pageReady, setPageReady] = useState(false);
-  
+
   // Tab state
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
   const [interviewCount, setInterviewCount] = useState(0);
-  
+
   // Other state variables
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -91,7 +91,9 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
-  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([]);
+  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>(
+    []
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSource, setSelectedSource] = useState("all");
   const [sortBy, setSortBy] = useState("matching");
@@ -101,10 +103,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   };
 
   // Fetch job details
-  const {
-    data: jobDetails,
-    isLoading: isLoadingJob,
-  } = useGetJobDetailsQuery(job_id);
+  const { data: jobDetails, isLoading: isLoadingJob } =
+    useGetJobDetailsQuery(job_id);
 
   // Fetch matching candidates
   const {
@@ -114,20 +114,23 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     refetch: refetchCandidates,
   } = useGetMatchingCandidatesQuery({ job_id, source: selectedSource, sortBy });
 
-  const { 
-    data: interviewCandidatesResponse, 
+  const {
+    data: interviewCandidatesResponse,
     isLoading: isLoadingInterviews,
-    isSuccess: isInterviewsSuccess
-  } = useGetInterviewCandidatesQuery({
-    jobId: job_id,
-  }, {
-    skip: !job_id,
-  });
+    isSuccess: isInterviewsSuccess,
+  } = useGetInterviewCandidatesQuery(
+    {
+      jobId: job_id,
+    },
+    {
+      skip: !job_id,
+    }
+  );
 
   // Calculate interview count and determine initial tab when data is available
   useEffect(() => {
     // Skip if page is already ready or data is still loading
-    if (pageReady || (isLoadingInterviews || !isInterviewsSuccess)) {
+    if (pageReady || isLoadingInterviews || !isInterviewsSuccess) {
       return;
     }
 
@@ -143,7 +146,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
 
     // Set interview count
     setInterviewCount(count);
-    
+
     // Determine initial tab based on count
     const initialTab = count > 0 ? "interviews" : "inviteCandidates";
     setSelectedTab(initialTab);
@@ -152,7 +155,12 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     setTimeout(() => {
       setPageReady(true);
     }, 100); // Short delay to ensure React has time to process state updates
-  }, [interviewCandidatesResponse, isLoadingInterviews, isInterviewsSuccess, pageReady]);
+  }, [
+    interviewCandidatesResponse,
+    isLoadingInterviews,
+    isInterviewsSuccess,
+    pageReady,
+  ]);
 
   const allCandidates = matchingCandidatesResponse?.data || [];
 
@@ -202,7 +210,9 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   // Other handlers (simplified for brevity)
   const handleSelectAllCurrentPage = (checked: boolean) => {
     if (checked) {
-      const currentIds = currentCandidates.map((candidate: any) => candidate.user_id);
+      const currentIds = currentCandidates.map(
+        (candidate: any) => candidate.user_id
+      );
       setSelectedCandidates((prevSelected) => {
         const newSet = new Set([...prevSelected, ...currentIds]);
         return Array.from(newSet);
@@ -219,7 +229,9 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     if (selectedCandidates.length === filteredCandidates.length) {
       setSelectedCandidates([]);
     } else {
-      const allIds = filteredCandidates.map((candidate: any) => candidate.user_id);
+      const allIds = filteredCandidates.map(
+        (candidate: any) => candidate.user_id
+      );
       setSelectedCandidates(allIds);
     }
   };
@@ -310,7 +322,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   // Function to render tab content
   const renderTabContent = () => {
     if (!selectedTab) return null;
-    
+
     if (selectedTab === "inviteCandidates") {
       return (
         <>
@@ -328,44 +340,48 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
             )}
           </div>
 
-          <SearchAndFilters
-            searchTerm={searchTerm}
-            handleSearchChange={handleSearchChange}
-            selectedSource={selectedSource}
-            handleSourceChange={handleSourceChange}
-            sortBy={sortBy}
-            handleSortByChange={handleSortByChange}
-          />
-
-          <FilterPanel
-            isOpen={filterOpen}
-            onReset={handleFilterReset}
-            onApply={handleFilterApply}
-          />
-
-          {isLoading ? (
-            <CandidateListSkeleton />
-          ) : (
-            <CandidateList
-              isLoading={isLoading}
-              error={!!error}
-              currentCandidates={currentCandidates}
-              filteredCandidates={filteredCandidates}
-              selectAll={selectAll}
-              selectedCandidates={selectedCandidates}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              rowsPerPage={rowsPerPage}
-              indexOfFirstCandidate={indexOfFirstCandidate}
-              indexOfLastCandidate={indexOfLastCandidate}
-              handleSelectAllCurrentPage={handleSelectAllCurrentPage}
-              handleSelectAllCandidates={handleSelectAllCandidates}
-              handleSelectCandidate={handleSelectCandidate}
-              handleSendInterviewInvite={handleSendInterviewInvite}
-              handlePageChange={handlePageChange}
-              setRowsPerPage={setRowsPerPage}
+          <div className="sticky top-[50px] z-10 bg-white p-6 rounded-[12px]">
+            <SearchAndFilters
+              searchTerm={searchTerm}
+              handleSearchChange={handleSearchChange}
+              selectedSource={selectedSource}
+              handleSourceChange={handleSourceChange}
+              sortBy={sortBy}
+              handleSortByChange={handleSortByChange}
             />
-          )}
+
+            <FilterPanel
+              isOpen={filterOpen}
+              onReset={handleFilterReset}
+              onApply={handleFilterApply}
+            />
+
+            <div className="h-[calc(100vh-235px)]">
+              {isLoading ? (
+                <CandidateListSkeleton />
+              ) : (
+                <CandidateList
+                  isLoading={isLoading}
+                  error={!!error}
+                  currentCandidates={currentCandidates}
+                  filteredCandidates={filteredCandidates}
+                  selectAll={selectAll}
+                  selectedCandidates={selectedCandidates}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  rowsPerPage={rowsPerPage}
+                  indexOfFirstCandidate={indexOfFirstCandidate}
+                  indexOfLastCandidate={indexOfLastCandidate}
+                  handleSelectAllCurrentPage={handleSelectAllCurrentPage}
+                  handleSelectAllCandidates={handleSelectAllCandidates}
+                  handleSelectCandidate={handleSelectCandidate}
+                  handleSendInterviewInvite={handleSendInterviewInvite}
+                  handlePageChange={handlePageChange}
+                  setRowsPerPage={setRowsPerPage}
+                />
+              )}
+            </div>
+          </div>
         </>
       );
     } else if (selectedTab === "interviews") {
@@ -374,11 +390,13 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           {isLoadingInterviews ? (
             <CandidateListSkeleton />
           ) : (
-            <InterviewCandidatesView
-              jobId={job_id}
-              onCandidateCountChange={handleCandidateCountChange}
-              initialCount={interviewCount}
-            />
+            <div className="h-[calc(100vh-125px)]">
+              <InterviewCandidatesView
+                jobId={job_id}
+                onCandidateCountChange={handleCandidateCountChange}
+                initialCount={interviewCount}
+              />
+            </div>
           )}
         </div>
       );
@@ -393,13 +411,11 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     } else if (selectedTab === "sentInvitations") {
       return (
         <div className="mt-8 p-12 bg-white rounded-lg border border-[#d6d7d9] text-center">
-          <p className="text-[#68696b]">
-            Sent Invitations view is coming soon
-          </p>
+          <p className="text-[#68696b]">Sent Invitations view is coming soon</p>
         </div>
       );
     }
-    
+
     return null;
   };
 
@@ -410,18 +426,16 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
         <div className="max-w-[1400px] mx-auto px-4 py-6">
           {/* Breadcrumb skeleton */}
           <div className="h-6 bg-gray-200 rounded w-1/3 mb-6 animate-pulse"></div>
-          
+
           {/* Job details skeleton */}
           <JobDetailsSkeleton />
-          
+
           <div className="flex gap-6">
             <div className="flex-1 space-y-8">
-              
-              
               {/* Main content skeleton */}
               <CandidateListSkeleton />
             </div>
-            
+
             {/* Right section skeleton */}
             <div className="w-[350px] mt-8 space-y-3.5 sticky top-5 h-fit">
               <CardSkeleton />
@@ -438,7 +452,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
       className="bg-[#F5F5F5] h-screen overflow-y-auto font-sans"
       style={{ scrollbarWidth: "none" }}
     >
-      <div className="max-w-[1400px] mx-auto px-4 py-6">
+      <div className="max-w-[1600px] mx-auto px-4 py-6">
         <BreadcrumbNav jobTitle={jobDetails?.data.title} />
 
         <JobDetailsCard
@@ -467,10 +481,9 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
                 setSelectedTab={setSelectedTab}
                 interviewCount={interviewCount}
               />
-              
-              {/* Render tab content */}
-              {renderTabContent()}
             </div>
+            {/* Render tab content */}
+            {renderTabContent()}
           </div>
 
           {/* Right section */}

@@ -1,6 +1,6 @@
 // components/CandidateCard.tsx
 import React from "react";
-import { Check, MoreVertical, X, Clock } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,9 +16,11 @@ import {
   getSubmissionBadge,
   getTimeSinceUpdate,
   canShowReportAndShortlist,
-  getCandidateFinalRating
+  getCandidateFinalRating,
 } from "../InterviewCandidatesView";
-import verified from '../../../assets/skills/verified.svg'
+import verified from "../../../assets/skills/verified.svg";
+import Submitted from "@/assets/employer/Submitted.svg";
+import NotSubmitted from "@/assets/employer/NotSubmitted.svg";
 
 interface CandidateCardProps {
   candidate: InterviewCandidate;
@@ -54,27 +56,29 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   // Format candidate location from object to string
   const formattedLocation = React.useMemo(() => {
     if (!candidate.candidate_location) return "";
-    
-    const { city, state, country } : any = candidate.candidate_location;
-    
+
+    const { city, state, country }: any = candidate.candidate_location;
+
     const parts = [];
     if (city) parts.push(city);
     if (state) parts.push(state);
     if (country) parts.push(country);
-    
+
     return parts.filter(Boolean).join(", ");
   }, [candidate.candidate_location]);
 
   // Render badge icon based on type
   const renderBadgeIcon = () => {
     if (submissionBadge.icon === "check") {
-      return <Check className={`w-4 h-4 ${submissionBadge.textColor}`} />;
-    } else if (submissionBadge.icon === "clock") {
-      return <Clock className={`w-4 h-4 ${submissionBadge.textColor}`} />;
+      return (
+        <div className="w-4 h-4 mr-2 flex items-center justify-center rounded-full">
+          <img src={Submitted} alt="Submitted" />
+        </div>
+      );
     } else if (submissionBadge.icon === "x") {
       return (
-        <div className="w-4 h-4 flex items-center justify-center rounded-full bg-[#414447]">
-          <X className="w-3 h-3 text-white" />
+        <div className="w-4 h-4 mr-2 flex items-center justify-center rounded-full">
+          <img src={NotSubmitted} alt="Not Submitted" />
         </div>
       );
     }
@@ -82,11 +86,17 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   };
 
   return (
-    <div className="bg-white border-b p-4">
+    <div className="bg-white p-5  border-b border-[#d6d7d9]">
       <div className="flex items-center space-x-4">
         <Checkbox
           id={`candidate-${candidate._id}`}
-          className="rounded border-[#d6d7d9]"
+          className="h-4 w-4
+            data-[state=checked]:bg-[#001630] 
+            data-[state=checked]:border-[#001630]
+            data-[state=checked]:text-white
+            data-[state=unchecked]:bg-white
+              data-[state=unchecked]:border-2
+            data-[state=unchecked]:border-[#68696B]"
           checked={isSelected}
           onCheckedChange={(checked) =>
             handleSelectCandidate(candidate._id, !!checked)
@@ -128,17 +138,21 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                 {candidate.candidate_name}
               </h3>
               {formattedLocation && (
-                <p className="text-sm text-[#68696b]">
-                  {formattedLocation}
-                </p>
+                <p className="text-sm text-[#68696b]">{formattedLocation}</p>
               )}
               <div className="flex items-center gap-2 mt-2">
                 {/* Status badge */}
-                <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full ${submissionBadge.bgColor}`}>
+                <div
+                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full ${submissionBadge.bgColor}`}
+                >
                   {renderBadgeIcon()}
-                  <span className={`text-sm font-medium ${submissionBadge.textColor}`}>
+                  <span
+                    className={`text-sm font-medium ${submissionBadge.textColor}`}
+                  >
                     {submissionBadge.text}
-                    {candidate.has_report && timeSinceUpdate && ` ${timeSinceUpdate}`}
+                    {candidate.has_report &&
+                      timeSinceUpdate &&
+                      ` ${timeSinceUpdate}`}
                   </span>
                 </div>
               </div>
@@ -171,7 +185,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                       </span>
                       <span className="text-sm text-[#68696b]">/10</span>
                       <div className="w-5 h-5 ml-1">
-                        <img src={verified} alt="verified.png"/>
+                        <img src={verified} alt="verified.png" />
                       </div>
                     </div>
                     <p className="text-xs text-[#68696b]">Interview score</p>

@@ -1,4 +1,3 @@
-
 import type React from "react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -11,9 +10,9 @@ import {
 
 import { InterviewFilters } from "../employer/interviews/InterviewFilters";
 import { CandidateCard } from "../employer/interviews/CandidateCard";
-import { PaginationControls } from "../employer/interviews/PaginationControls";
 import { StatusMessage } from "../employer/interviews/StatusMessageComponent";
 import { SelectAllHeader } from "../employer/interviews/SelectAllHeader";
+import Pagination from "./Pagination";
 
 // Types
 export type InterviewType = "full" | "screening" | "all";
@@ -324,70 +323,82 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   };
 
   // Update row count and reset to first page
-  const handleRowsPerPageChange = (value: string) => {
+  const handleRowsPerPageChange = (value: any) => {
     setRowsPerPage(Number(value));
     setCurrentPage(1);
   };
 
   return (
-    <div className="flex flex-col">
-      {/* Filters */}
-      <InterviewFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        interviewType={interviewType}
-        setInterviewType={setInterviewType}
-        submissionStatus={submissionStatus}
-        setSubmissionStatus={setSubmissionStatus}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-      />
-
-      {/* Candidates list */}
-      <div className="border rounded-md mx-4 mb-4 bg-[#f0f3f7]">
-        {/* Select All Header */}
-        <SelectAllHeader
-          selectedCandidates={selectedCandidates}
-          currentCandidates={currentCandidates}
-          handleSelectAll={handleSelectAll}
+    <div className="flex flex-col bg-white rounded-lg overflow-hidden h-full p-6">
+      {/* Filters - fixed at the top */}
+      <div className="sticky top-0 z-10 bg-white mb-5">
+        <InterviewFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          interviewType={interviewType}
+          setInterviewType={setInterviewType}
+          submissionStatus={submissionStatus}
+          setSubmissionStatus={setSubmissionStatus}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
         />
+      </div>
 
-        {/* Loading, Error, or Empty State */}
-        {isFetching && <StatusMessage type="loading" />}
-        {!!error && !isFetching && <StatusMessage type="error" error={error} />}
-        {!isFetching && !error && currentCandidates.length === 0 && (
-          <StatusMessage type="empty" />
-        )}
+      <div className="bg-white rounded-lg border border-[#d6d7d9] flex flex-col h-full">
+        {/* Candidates list - scrollable content */}
+        <div className="flex-grow overflow-y-auto scrollbar-hide">
+          {/* Select All Header - sticky within the scrollable area */}
+          <div className="sticky top-0 z-10 ">
+            <SelectAllHeader
+              selectedCandidates={selectedCandidates}
+              currentCandidates={currentCandidates}
+              handleSelectAll={handleSelectAll}
+            />
+          </div>
 
-        {/* Candidate Cards */}
-        {!isFetching && !error && currentCandidates.length > 0 && (
-          <>
-            {currentCandidates.map((candidate: InterviewCandidate) => (
-              <CandidateCard
-                key={candidate._id}
-                candidate={candidate}
-                isSelected={selectedCandidates.includes(candidate._id)}
-                isShortlisting={
-                  isShortlisting &&
-                  shortlistingCandidateId === candidate.candidate_id
-                }
-                handleSelectCandidate={handleSelectCandidate}
-                handleShortlist={handleShortlist}
-                handleViewReport={handleViewReport}
-              />
-            ))}
-          </>
-        )}
+          {/* Loading, Error, or Empty State */}
+          {isFetching && <StatusMessage type="loading" />}
+          {!!error && !isFetching && (
+            <StatusMessage type="error" error={error} />
+          )}
+          {!isFetching && !error && currentCandidates.length === 0 && (
+            <StatusMessage type="empty" />
+          )}
 
-        {/* Pagination */}
+          {/* Candidate Cards */}
+          {!isFetching && !error && currentCandidates.length > 0 && (
+            <>
+              {currentCandidates.map((candidate: InterviewCandidate) => {
+                return (
+                  <CandidateCard
+                    key={candidate._id}
+                    candidate={candidate}
+                    isSelected={selectedCandidates.includes(candidate._id)}
+                    isShortlisting={
+                      isShortlisting &&
+                      shortlistingCandidateId === candidate.candidate_id
+                    }
+                    handleSelectCandidate={handleSelectCandidate}
+                    handleShortlist={handleShortlist}
+                    handleViewReport={handleViewReport}
+                  />
+                );
+              })}
+            </>
+          )}
+        </div>
+
+        {/* Pagination - fixed at the bottom */}
         {!isFetching && !error && filteredCandidates.length > 0 && (
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            rowsPerPage={rowsPerPage}
-            goToPage={goToPage}
-            handleRowsPerPageChange={handleRowsPerPageChange}
-          />
+          <div className="sticky bottom-0 ">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              rowsPerPage={rowsPerPage}
+              onPageChange={goToPage}
+              onRowsPerPageChange={handleRowsPerPageChange}
+            />
+          </div>
         )}
       </div>
     </div>
