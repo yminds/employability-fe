@@ -34,7 +34,7 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
   setSortBy,
 }) => {
   return (
-    <div className="flex flex-wrap gap-2 p-4">
+    <div className="flex flex-wrap gap-2">
       {/* Search */}
       <div className="relative w-[200px]">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#68696b] w-4 h-4" />

@@ -15,25 +15,29 @@ interface CandidateListHeaderProps {
 const CandidateListHeader: React.FC<CandidateListHeaderProps> = ({
   selectAll,
   selectedCandidatesCount,
-  totalCandidatesCount,
   onSelectAllCurrentPage,
-  onSelectAllCandidates,
   onSendInterviewInvite,
 }) => {
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-[#fafafa]">
+    <div className="flex items-center justify-between px-5 py-3 bg-[#F0F3F7]">
       <div className="flex items-center">
         <div className="flex items-center mr-4">
           <Checkbox
             id="select-all"
             checked={selectAll}
             onCheckedChange={(checked) => onSelectAllCurrentPage(!!checked)}
-            className="mr-2 h-5 w-5
+            className="mr-2 h-4 w-4
               data-[state=checked]:bg-[#001630] 
               data-[state=checked]:border-[#001630]
-              data-[state=checked]:text-white"
+              data-[state=checked]:text-white
+              data-[state=unchecked]:bg-white
+                data-[state=unchecked]:border-2
+              data-[state=unchecked]:border-[#68696B]"
           />
-          <label htmlFor="select-all" className="text-sm font-normal text-[#68696B]">
+          <label
+            htmlFor="select-all"
+            className="text-sm font-normal text-[#68696B]"
+          >
             Select All
           </label>
         </div>

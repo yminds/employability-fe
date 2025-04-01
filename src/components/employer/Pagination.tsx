@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Select,
@@ -11,62 +11,66 @@ import {
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  rowsPerPage: number;
-  totalItems: number;
-  startIndex: number;
-  endIndex: number;
   onPageChange: (page: number) => void;
-  onRowsPerPageChange: (rowsPerPage: number) => void;
+  rowsPerPage: number;
+  onRowsPerPageChange: (rows: number) => void;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
-  rowsPerPage,
-  totalItems,
-  startIndex,
-  endIndex,
   onPageChange,
+  rowsPerPage,
   onRowsPerPageChange,
 }) => {
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      // Show all pages
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first
-      pages.push(1);
-
-      let startPage = Math.max(2, currentPage - 1);
-      let endPage = Math.min(totalPages - 1, currentPage + 1);
-
-      // Show ... if needed
-      if (startPage > 2) pages.push(null);
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-
-      if (endPage < totalPages - 1) pages.push(null);
-
-      // Always show last
-      pages.push(totalPages);
+    // If we have 5 or fewer pages, show all pages
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    return pages;
+    // For more pages, show a specific pattern like in the image
+    const result = [];
+
+    // Always show first page
+    result.push(1);
+
+    // If current page is not 1 and not 2, add ellipsis or page 2
+    if (currentPage > 2) {
+      if (currentPage > 3) {
+        result.push(null); // ellipsis
+      } else {
+        result.push(2);
+      }
+    }
+
+    // Add current page if it's not 1 and not the last page
+    if (currentPage !== 1 && currentPage !== totalPages) {
+      result.push(currentPage);
+    }
+
+    // If current page is not the last page and not the second-to-last page, add ellipsis or second-to-last page
+    if (currentPage < totalPages - 1) {
+      if (currentPage < totalPages - 2) {
+        result.push(null); // ellipsis
+      } else {
+        result.push(totalPages - 1);
+      }
+    }
+
+    // Always show last page if we have more than 1 page
+    if (totalPages > 1) {
+      result.push(totalPages);
+    }
+
+    return result;
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-t border-[#d6d7d9]">
+    <div className="flex items-center justify-between bg-[#FAFAFA] px-6 py-4 border-t rounded-b-lg border-[#dfe3e8]">
       <div className="flex items-center gap-2">
         <button
-          className="p-1 rounded border border-[#d6d7d9] disabled:opacity-50"
+          className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -75,14 +79,16 @@ const Pagination: React.FC<PaginationProps> = ({
 
         {getPageNumbers().map((page, index) =>
           page === null ? (
-            <span key={`ellipsis-${index}`}>...</span>
+            <span key={`ellipsis-${index}`} className="px-2">
+              ...
+            </span>
           ) : (
             <button
               key={`page-${page}`}
-              className={`w-8 h-8 flex items-center justify-center rounded ${
+              className={`min-w-[36px] h-9 flex items-center justify-center rounded ${
                 currentPage === page
-                  ? "bg-[#001630] text-white"
-                  : "hover:bg-[#f0f3f7]"
+                  ? "border border-[#dfe3e8] bg-white"
+                  : "hover:bg-[#fafafa]"
               }`}
               onClick={() => onPageChange(page)}
             >
@@ -92,7 +98,7 @@ const Pagination: React.FC<PaginationProps> = ({
         )}
 
         <button
-          className="p-1 rounded border border-[#d6d7d9] disabled:opacity-50"
+          className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
@@ -101,17 +107,12 @@ const Pagination: React.FC<PaginationProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-sm text-[#909091]">
-          Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems}
-        </span>
-        <span className="text-sm text-[#909091] ml-4">
-          Rows per page
-        </span>
+        <span className="text-sm text-gray-600">Rows per page</span>
         <Select
           value={rowsPerPage.toString()}
-          onValueChange={(value) => onRowsPerPageChange(parseInt(value))}
+          onValueChange={(value) => onRowsPerPageChange(Number.parseInt(value))}
         >
-          <SelectTrigger className="w-16 h-8 border-[#d6d7d9]">
+          <SelectTrigger className="w-[72px] h-9 border-[#dfe3e8]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
