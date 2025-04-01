@@ -17,7 +17,7 @@ import FullInterview from "../../assets/employer/FullInterview.svg";
 
 // Import components
 import SuccessModal from "./SuccessModal";
-import SkillSelection from "./skillSelection"; // Import updated component
+import SkillSelection from "./SkillSelection"; 
 
 // Define interfaces
 interface ProgressData {
