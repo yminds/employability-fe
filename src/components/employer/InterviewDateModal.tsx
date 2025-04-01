@@ -1,5 +1,4 @@
-"use client";
-
+import type React from "react";
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
+  DrawerFooter,
 } from "@/components/ui/drawer";
 import { DialogDescription } from "@radix-ui/react-dialog";
 
@@ -44,6 +44,8 @@ export function InterviewDateModal({
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth());
   });
+
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   // Reset the calendar when modal opens
   useEffect(() => {
@@ -141,6 +143,52 @@ export function InterviewDateModal({
     if (selectedDate) {
       onConfirm(selectedDate);
     }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+
+    const currentY = e.targetTouches[0].clientY;
+    const deltaY = currentY - touchStart;
+
+    if (deltaY > 0) {
+      const drawerContent = e.currentTarget.closest(
+        ".drawer-content"
+      ) as HTMLElement;
+      if (drawerContent) {
+        drawerContent.style.transform = `translateY(${deltaY}px)`;
+        drawerContent.style.transition = "none"; // Remove transition during drag
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+
+    const currentY = e.changedTouches[0].clientY;
+    const deltaY = currentY - touchStart;
+    const drawerContent = e.currentTarget.closest(
+      ".drawer-content"
+    ) as HTMLElement;
+
+    if (drawerContent) {
+      drawerContent.style.transition = "transform 0.3s ease-out";
+
+      if (deltaY > 300) {
+        drawerContent.style.transform = `translateY(100%)`;
+        setTimeout(() => {
+          onClose();
+        }, 300);
+      } else {
+        drawerContent.style.transform = "translateY(0)";
+      }
+    }
+
+    setTouchStart(null);
   };
 
   const renderCalendar = () => {
@@ -242,40 +290,32 @@ export function InterviewDateModal({
         <div className="grid grid-cols-7 gap-1">{renderCalendar()}</div>
       </div>
 
-      {deadlineDate && (
-        <div className="mt-4 text-[#fd5964] text-[14px] font-normal leading-5 tracking-[0.21px]">
-          *You must submit before{" "}
-          {deadlineDate.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </div>
-      )}
-
       <div className="bg-[#dbf7e7] rounded-lg p-4 mt-6">
         <p className="text-[#414447] text-[14px] font-normal leading-6 tracking-[0.21px]">
           Tip: Early submissions give an advantage over other candidates
         </p>
       </div>
-
-      <div className="flex justify-between mt-6 gap-4">
-        <Button
-          variant="outline"
-          onClick={onClose}
-          className="flex-1 border-[#d6d7d9] text-[#202326]"
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={handleConfirm}
-          disabled={!selectedDate}
-          className="flex-1 bg-[#001630] hover:bg-[#001630]/90 text-white"
-        >
-          Confirm Date
-        </Button>
-      </div>
     </>
+  );
+
+  // Action buttons for desktop dialog
+  const actionButtons = (
+    <div className="flex justify-between mt-6 gap-4">
+      <Button
+        variant="outline"
+        onClick={onClose}
+        className="flex-1 border-[#d6d7d9] text-[#202326]"
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={handleConfirm}
+        disabled={!selectedDate}
+        className="flex-1 bg-[#001630] hover:bg-[#001630]/90 text-white"
+      >
+        Confirm Date
+      </Button>
+    </div>
   );
 
   // Render either Dialog or Drawer based on screen size
@@ -284,12 +324,16 @@ export function InterviewDateModal({
       <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DrawerContent
           side="bottom"
-          className="px-8 pb-8 pt-5 max-h-[90vh] w-full"
+          className="drawer-content px-8 pt-5 max-h-[90%] w-full overflow-auto pb-24"
           showCloseButton={false}
         >
-
           {/* Drawer handle/indicator */}
-          <div className="absolute top-2 left-0 right-0 flex justify-center mt-4">
+          <div
+            className="absolute top-0 left-0 right-0 flex justify-center p-5"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div className="w-12 h-1.5 rounded-full bg-[#e2e2e2]"></div>
           </div>
 
@@ -301,7 +345,27 @@ export function InterviewDateModal({
               *This helps your employer know when to expect your submission
             </p>
           </DrawerHeader>
+
           {calendarContent}
+
+          <DrawerFooter className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-[#eceef0] mt-0">
+            <div className="flex flex-row gap-4 w-full">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="flex-1 border-[#d6d7d9] text-[#202326]"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={!selectedDate}
+                className="flex-1 bg-[#001630] hover:bg-[#001630]/90 text-white"
+              >
+                Confirm Date
+              </Button>
+            </div>
+          </DrawerFooter>
         </DrawerContent>
       </Drawer>
     );
@@ -321,7 +385,10 @@ export function InterviewDateModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6">{calendarContent}</div>
+        <div className="p-6">
+          {calendarContent}
+          {actionButtons}
+        </div>
       </DialogContent>
     </Dialog>
   );

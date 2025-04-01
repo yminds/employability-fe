@@ -362,6 +362,7 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         url: `/api/v1/employerInterviewInvitation/${inviteId}/check-status`,
         method: "GET",
       }),
+      providesTags: ["InterviewStatus"],
     }),
 
     // Submit a response to an invite (public endpoint)
@@ -371,6 +372,7 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: { action, commited_due_date },
       }),
+      invalidatesTags: ["InterviewStatus"],
     }),
     
     // Get invites for a specific user
