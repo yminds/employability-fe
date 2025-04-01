@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
-import { Check, Clock, FileText, X, AlertCircle, Info } from "lucide-react";
+import { Check, Clock, FileText, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { detectMobileDevice } from "@/utils/deviceDetection";
 import eLogo from "@/assets/branding/eLogo.svg";
 import { InterviewDateModal } from "./InterviewDateModal";
@@ -578,7 +577,11 @@ export default function JobInvitation() {
         <h3 className="text-h2 text-[#202326] mb-6">Job Description</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
-          {Description}
+          {Description && (
+            <div className="text-[#414447] text-body2 whitespace-pre-line">
+              {Description}
+            </div>
+          )}
         </div>
       </div>
       {userCheckInitiated && (
