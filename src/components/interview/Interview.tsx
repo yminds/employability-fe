@@ -71,7 +71,7 @@ const Interview: React.FC<{
   concepts: any[];
   stopScreenSharing: () => void;
   skillLevel: "1" | "2" | "3";
-  type: "Skill" | "Mock" | "Project" | "Job";
+  type: "Skill" | "Mock" | "Project" | "Full" | "Screening";
   jobDescription: JobDescription;
   isResume: boolean;
   projectId: string;
@@ -357,18 +357,18 @@ const Interview: React.FC<{
         question: question.question,
         skill_name: interviewTopic,
         concepts:
-          type === "Mock" || type === "Job"
+          type === "Mock" || type === "Full"
             ? Array.isArray(Fundamentals)
               ? Fundamentals
               : typeof Fundamentals === "string"
                 ? Fundamentals.split(",").map((c: string) => c.trim())
                 : []
-            : concepts.slice(0,3),
+            : concepts,
         interview_id: interviewDetails.data._id,
         level: user?.experience_level || "entry",
         type: type,
         jobDescription: jobDescription,
-        userName: user?.name,
+        userName: user?.firstName,
         projectId: projectId,
         userExperience: userExperience,
         skills_required: skills_required,

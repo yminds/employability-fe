@@ -67,7 +67,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
     if (taskData.interview_type.status === 'incomplete') {
       const interviewId = await createInterview({
         title: `${jobDescription.title}`,
-        type: "Job",
+        type: "Full",
       });
 
       updateInterviewId({
@@ -80,7 +80,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       navigate(`/interview/${interviewId}`, {
         state: {
           title: `${jobDescription.title}`,
-          type: 'Job',
+          type: 'Full',
           jobDescription: jobDescription,
           Fundamentals: conceptNamesCSV?.data
         },
@@ -165,7 +165,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
   const handleViewFullReport = (type: 'interview' | 'skill', itemId: string) => {
     console.log(type,itemId)
     if (type === 'interview') {
-      navigate(`/skill/report/Job/${taskData.interview_type.interview_id}`, {
+      navigate(`/skill/report/Full/${taskData.interview_type.interview_id}`, {
         state: { best_interview: itemId },
       });
     } else if (type === 'skill') {

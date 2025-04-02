@@ -37,7 +37,6 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
   const userGoal = useSelector((state: RootState) => state.auth.user?.goals[0]._id);
   const user_id = useSelector((state: RootState) => state.auth.user?._id);
 
-
   const [userSkills, setUserSkills] = useState<Skill[] | undefined>()
   console.log("userSkills", userSkills)
 
