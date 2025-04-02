@@ -34,6 +34,8 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
     completed: 0
   };
 
+  const totalAccepted = stats.accepted + stats.completed
+
   return (
     <Card className="w-full max-w-md bg-white rounded-xl">
       <div className="flex flex-row items-center gap-3 p-5 ">
@@ -56,7 +58,7 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
               Invites Sent
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? "..." : stats.invitesSent}
+              {isLoading ? 0 : stats.invitesSent}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -64,7 +66,7 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
               Accepted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? "..." : stats.accepted}
+              {isLoading ? 0 : totalAccepted}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -72,7 +74,7 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
               Not Accepted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? "..." : stats.notAccepted}
+              {isLoading ? 0 : stats.notAccepted}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -80,7 +82,7 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
               Submitted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? "..." : stats.completed}
+              {isLoading ? 0 : stats.completed}
             </span>
           </div>
         </div>
