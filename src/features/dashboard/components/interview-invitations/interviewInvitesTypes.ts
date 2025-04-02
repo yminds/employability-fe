@@ -5,17 +5,18 @@ export interface InviteItemProps {
   isProcessing: boolean;
   isSelected: boolean;
   onInviteClick: (invite: InterviewInvite) => void;
-  onAccept: (id: string, e: React.MouseEvent) => void;
-  onDecline: (id: string, e: React.MouseEvent) => void;
+  onAccept: (id: string) => void;
+  onDecline: (id: string) => void;
   showSidebar: boolean;
   isTaskCompleted: boolean | undefined;
+  isDetailsView: boolean;
 }
 
 export interface ActionButtonsProps {
   invite: InterviewInvite;
   isProcessing: boolean;
-  onAccept: (id: string, e: React.MouseEvent) => void;
-  onDecline: (id: string, e: React.MouseEvent) => void;
+  onAccept: (id: string) => void;
+  onDecline: (id: string) => void;
   onInviteClick: (invite: InterviewInvite) => void;
 }
 

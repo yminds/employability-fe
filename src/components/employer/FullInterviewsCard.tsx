@@ -33,6 +33,8 @@ const typedData = data as unknown as InterviewStatsResponse;
     completed: 0
   };
 
+  const totalAccepted = stats.accepted + stats.completed
+
   console.log("stats",stats);
 
   return (
@@ -53,7 +55,7 @@ const typedData = data as unknown as InterviewStatsResponse;
               Invites Sent
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? "..." : stats.invitesSent}
+              {isLoading ? 0 : stats.invitesSent}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -61,7 +63,7 @@ const typedData = data as unknown as InterviewStatsResponse;
               Accepted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? "..." : stats.accepted}
+              {isLoading ? 0 : totalAccepted}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -69,7 +71,7 @@ const typedData = data as unknown as InterviewStatsResponse;
               Not Accepted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? "..." : stats.notAccepted}
+              {isLoading ? 0 : stats.notAccepted}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -77,7 +79,7 @@ const typedData = data as unknown as InterviewStatsResponse;
               Submitted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? "..." : stats.completed}
+              {isLoading ? 0 : stats.completed}
             </span>
           </div>
         </div>

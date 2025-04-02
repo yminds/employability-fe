@@ -159,7 +159,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
             </div>
 
             {/* Right side of card */}
-            <div className="flex flex-col items-end justify-center h-full">
+            <div className="flex flex-col mt-2 items-end justify-center h-full">
               {/* Status text on the top right */}
               {candidate.status === "accepted" && (
                 <div className="text-right mb-2">
@@ -167,7 +167,9 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                     Invite Accepted
                   </p>
                   <p className="text-sm text-[#68696b]">
-                    Submission Expected on 3rd April
+                    {candidate?.submission_expected_date !== null
+                      ? `Submission Expected on ${candidate.submission_expected_date?.toString()}`
+                      : `Submission Date is not Added by the candidate`}
                   </p>
                 </div>
               )}
