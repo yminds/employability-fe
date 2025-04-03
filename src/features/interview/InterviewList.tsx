@@ -25,7 +25,7 @@ interface Interview {
     title: string;
     type: string;
     createdAt: string;
-    thread_id:string
+    thread_id: string;
   };
   final_rating: number;
   s3_recording_url: string[];
@@ -73,10 +73,18 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId, invites }) => {
       let filtered = interviewDetails.data.reports;
 
       if (selectedType !== "all") {
-        filtered = filtered.filter(
-          (report: Interview) =>
-            report.interview_id.type.toLowerCase() === selectedType
-        );
+        if (selectedType === "job") {
+          filtered = filtered.filter((report: Interview) =>
+            ["job", "full", "screening"].includes(
+              report.interview_id.type.toLowerCase()
+            )
+          );
+        } else {
+          filtered = filtered.filter(
+            (report: Interview) =>
+              report.interview_id.type.toLowerCase() === selectedType
+          );
+        }
       }
 
       // Apply search filter
@@ -93,26 +101,34 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId, invites }) => {
         );
       }
 
-      // Group by title
+      // Group interviews by title
       const grouped: GroupedInterviews = {};
 
       filtered.forEach((report: Interview) => {
         const title = report.interview_id.title;
+        const isJobInterview = ["job", "full", "screening"].includes(
+          report.interview_id.type.toLowerCase()
+        );
 
-        if (!grouped[title]) {
-          grouped[title] = {
+        if (isJobInterview) {
+          const uniqueKey = `${title}-${report._id}`;
+          grouped[uniqueKey] = {
             best: report,
             history: [],
           };
         } else {
-          // If this report has a higher rating than the current best, make it the best
-          if (report.final_rating > grouped[title].best.final_rating) {
-            // Move the previous best to history
-            grouped[title].history.push(grouped[title].best);
-            grouped[title].best = report;
+          if (!grouped[title]) {
+            grouped[title] = {
+              best: report,
+              history: [],
+            };
           } else {
-            // Otherwise add to history
-            grouped[title].history.push(report);
+            if (report.final_rating > grouped[title].best.final_rating) {
+              grouped[title].history.push(grouped[title].best);
+              grouped[title].best = report;
+            } else {
+              grouped[title].history.push(report);
+            }
           }
         }
       });
@@ -126,7 +142,29 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId, invites }) => {
         );
       });
 
-      setGroupedInterviews(grouped);
+      // Convert grouped object to array for sorting
+      const groupedArray = Object.entries(grouped).map(([key, value]) => ({
+        key,
+        ...value,
+      }));
+
+      // Sort the array by date (newest first)
+      groupedArray.sort(
+        (a, b) =>
+          new Date(b.best.interview_id.createdAt).getTime() -
+          new Date(a.best.interview_id.createdAt).getTime()
+      );
+
+      // Convert back to object
+      const sortedGrouped: GroupedInterviews = {};
+      groupedArray.forEach((item) => {
+        sortedGrouped[item.key] = {
+          best: item.best,
+          history: item.history,
+        };
+      });
+
+      setGroupedInterviews(sortedGrouped);
     }
   }, [searchQuery, selectedType, interviewDetails]);
 
@@ -136,14 +174,14 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId, invites }) => {
       label: string;
       count?: number;
     }
-    
+
     const types: TypeItem[] = [
       { id: "all", label: "All" },
       { id: "job", label: "Jobs" },
       { id: "skill", label: "Skills" },
       { id: "project", label: "Projects" },
       { id: "mock", label: "Mock" },
-      { id: "invites", label: "Invites" }
+      { id: "invites", label: "Invites" },
     ];
 
     return (
@@ -234,9 +272,9 @@ const InterviewList: React.FC<InterviewListProps> = ({ goalId, invites }) => {
           {selectedType === "invites" ? (
             // Show invitations
             invites && invites.length > 0 ? (
-              <InterviewInvitationsList 
-                invites={invites} 
-                userId={userId} 
+              <InterviewInvitationsList
+                invites={invites}
+                userId={userId}
                 isDashboard={false}
                 hideHeader={true}
               />
