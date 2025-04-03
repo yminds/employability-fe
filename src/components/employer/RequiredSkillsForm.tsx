@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import type React from "react";
+import { useState, useEffect, useRef, createRef } from "react";
 import { useGetEmployerSkillSuggestionsMutation } from "@/api/employerJobsApiSlice";
 import { useGetMultipleSkillsQuery } from "@/api/skillsPoolApiSlice";
 import { useDebounce } from "use-debounce";
@@ -91,6 +92,16 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   const [reasonings, setReasonings] = useState<Record<string, string>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Create refs for each skill cell
+  const skillRefs = useRef<React.RefObject<HTMLDivElement>[]>([]);
+
+  // Update refs when skills change
+  useEffect(() => {
+    skillRefs.current = selectedSkills.map(
+      (_, i) => skillRefs.current[i] || createRef<HTMLDivElement>()
+    );
+  }, [selectedSkills]);
+
   // To track if we're currently fetching
   const [isFetching, setIsFetching] = useState(false);
 
@@ -157,6 +168,16 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Helper function to check if a skill is already selected
+  const isSkillAlreadySelected = (skillId: string): boolean => {
+    return selectedSkills.some(
+      (selectedSkill, idx) =>
+        selectedSkillIndex !== null &&
+        idx !== selectedSkillIndex &&
+        selectedSkill.skill._id === skillId
+    );
+  };
 
   const fetchAISkillRecommendations = async () => {
     try {
@@ -226,12 +247,22 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
     };
 
     setSelectedSkills([...selectedSkills, newSkill]);
-    // Open dropdown for the newly added skill
-    setSelectedSkillIndex(selectedSkills.length);
-    setIsDropdownOpen(true);
+
+    // Use setTimeout to ensure the new skill is rendered before opening the dropdown
+    setTimeout(() => {
+      setSelectedSkillIndex(selectedSkills.length);
+      setIsDropdownOpen(true);
+      setSearchTerm("");
+    }, 0);
   };
 
   const handleSkillSelect = (index: number, skill: Skill) => {
+    // If the skill is already selected, don't do anything
+    if (isSkillAlreadySelected(skill._id)) {
+      return;
+    }
+
+    // If the skill doesn't exist, proceed with adding it
     const newSkills = [...selectedSkills];
     newSkills[index] = { ...newSkills[index], skill };
     setSelectedSkills(newSkills);
@@ -284,15 +315,28 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   const renderSkillDropdown = () => {
     if (!isDropdownOpen || selectedSkillIndex === null) return null;
 
+    // Get the reference to the selected skill cell
+    const selectedRef = skillRefs.current[selectedSkillIndex];
+
+    // Determine positioning style based on whether we have a valid reference
+    let positionStyle = { width: "300px", top: "auto", left: "0px" };
+
+    // If we have a valid reference and it's connected to the DOM, use its position
+    if (selectedRef && selectedRef.current) {
+      positionStyle = {
+        width: "300px",
+        top: `${
+          selectedRef.current.offsetTop + selectedRef.current.offsetHeight
+        }px`,
+        left: `${selectedRef.current.offsetLeft}px`,
+      };
+    }
+
     return (
       <div
         ref={dropdownRef}
-        className="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto"
-        style={{
-          top: `${40 * (selectedSkillIndex + 1)}px`,
-          left: 0,
-          width: "100%",
-        }}
+        className="absolute z-50 mt-2 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto"
+        style={positionStyle}
       >
         <div className="p-2 border-b border-gray-200">
           <input
@@ -318,18 +362,37 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                   Error loading skills
                 </div>
               ) : searchResults?.data?.length ? (
-                searchResults.data.map((skill: Skill) => (
-                  <div
-                    key={skill._id}
-                    onClick={() => handleSkillSelect(selectedSkillIndex, skill)}
-                    className="p-3 hover:bg-gray-100 cursor-pointer flex items-center"
-                  >
-                    {skill.icon && (
-                      <img src={skill.icon} alt="" className="w-5 h-5 mr-2" />
-                    )}
-                    <span>{skill.name}</span>
-                  </div>
-                ))
+                searchResults.data.map((skill: Skill) => {
+                  const isAlreadySelected = isSkillAlreadySelected(skill._id);
+                  return (
+                    <div
+                      key={skill._id}
+                      onClick={() =>
+                        !isAlreadySelected &&
+                        handleSkillSelect(selectedSkillIndex, skill)
+                      }
+                      className={`p-3 flex items-center ${
+                        isAlreadySelected
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "hover:bg-gray-100 cursor-pointer"
+                      }`}
+                    >
+                      {skill.icon && (
+                        <img
+                          src={skill.icon || "/placeholder.svg"}
+                          alt=""
+                          className="w-5 h-5 mr-2"
+                        />
+                      )}
+                      <span>{skill.name}</span>
+                      {isAlreadySelected && (
+                        <span className="ml-auto text-xs text-gray-500">
+                          Already added
+                        </span>
+                      )}
+                    </div>
+                  );
+                })
               ) : (
                 <div className="p-3 text-center text-gray-500 text-body2">
                   No skills found matching "{debouncedSearchTerm}"
@@ -337,17 +400,19 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
               )}
 
               {/* Option to add custom skill */}
-              <div
-                onClick={() =>
-                  handleSkillSelect(selectedSkillIndex, {
-                    _id: `custom_${Date.now()}`,
-                    name: debouncedSearchTerm,
-                  })
-                }
-                className="p-3 border-t border-gray-200 hover:bg-gray-100 cursor-pointer text-blue-600 text-body2"
-              >
-                + Add custom skill "{debouncedSearchTerm}"
-              </div>
+              {!isSkillAlreadySelected(`custom_${debouncedSearchTerm}`) && (
+                <div
+                  onClick={() =>
+                    handleSkillSelect(selectedSkillIndex, {
+                      _id: `custom_${Date.now()}`,
+                      name: debouncedSearchTerm,
+                    })
+                  }
+                  className="p-3 border-t border-gray-200 hover:bg-gray-100 cursor-pointer text-blue-600 text-body2"
+                >
+                  + Add custom skill "{debouncedSearchTerm}"
+                </div>
+              )}
             </>
           ) : (
             // Show AI recommended skills when there's no search term
@@ -366,31 +431,41 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                   Loading AI recommended skills...
                 </div>
               ) : recommendedSkills.length > 0 ? (
-                recommendedSkills.map((rec) => (
-                  <div
-                    key={rec.skill._id}
-                    onClick={() =>
-                      handleSkillSelect(selectedSkillIndex, rec.skill)
-                    }
-                    className="p-3 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
-                  >
-                    <div className="flex items-center">
-                      {rec.skill.icon && (
-                        <img
-                          src={rec.skill.icon}
-                          alt=""
-                          className="w-6 h-6 mr-2"
-                        />
-                      )}
-                      <span className="text-body2">{rec.skill.name}</span>
-                    </div>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full border text-body2`}
+                recommendedSkills.map((rec) => {
+                  const isAlreadySelected = isSkillAlreadySelected(
+                    rec.skill._id
+                  );
+                  return (
+                    <div
+                      key={rec.skill._id}
+                      onClick={() =>
+                        !isAlreadySelected &&
+                        handleSkillSelect(selectedSkillIndex, rec.skill)
+                      }
+                      className={`p-3 flex items-center ${
+                        isAlreadySelected
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "hover:bg-gray-100 cursor-pointer"
+                      }`}
                     >
-                      {rec.importance}
-                    </span>
-                  </div>
-                ))
+                      <div className="flex items-center">
+                        {rec.skill.icon && (
+                          <img
+                            src={rec.skill.icon || "/placeholder.svg"}
+                            alt=""
+                            className="w-6 h-6 mr-2"
+                          />
+                        )}
+                        <span className="text-body2">{rec.skill.name}</span>
+                      </div>
+                      {isAlreadySelected && (
+                        <span className="ml-auto text-xs text-gray-500">
+                          Already added
+                        </span>
+                      )}
+                    </div>
+                  );
+                })
               ) : (
                 <div className="p-3 text-center text-gray-500 font-dm-sans">
                   No AI recommendations available
@@ -449,7 +524,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
         {selectedSkills.map((skillItem, index) => (
           <div key={index} className="flex items-center gap-4 mb-4">
             {/* Combined skill selector with logo and name */}
-            <div className="w-[450px]">
+            <div className="w-[300px]" ref={skillRefs.current[index]}>
               <div
                 className="flex items-center p-4 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-gray-300"
                 onClick={() => handleOpenSkillDropdown(index)}
@@ -457,7 +532,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
                 <div className="flex items-center flex-grow">
                   {skillItem.skill.icon ? (
                     <img
-                      src={skillItem.skill.icon}
+                      src={skillItem.skill.icon || "/placeholder.svg"}
                       alt=""
                       className="w-6 h-6 mr-3"
                     />
@@ -488,7 +563,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
             </div>
 
             {/* Importance selector */}
-            <div className="w-[450px]">
+            <div className="w-[300px]">
               <div className="relative">
                 <select
                   value={skillItem.importance}
@@ -555,8 +630,6 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
           </div>
         ))}
 
-        {renderSkillDropdown()}
-
         {/* Add Skill button */}
         <button
           type="button"
@@ -568,6 +641,8 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
             Add Skill
           </span>
         </button>
+
+        {renderSkillDropdown()}
       </div>
     </div>
   );

@@ -10,18 +10,21 @@ import {
 import { currentStatusSVG } from "../../features/profile/svg/currentStatusSVG";
 import verified from "../../assets/skills/verified.svg";
 import CandidateProfileModal from "./CandidatePublicProfile";
+import Canidates from "@/pages/Canidates";
 
 interface Candidate {
   user_id: string;
   username: string;
   profile_image?: string;
   name: string;
+  goal: string;
   current_status?: string;
   experience_level?: string;
   email: string;
   averageRating?: number;
   verifiedSkillCount?: number;
   matchedSkillCount?: number;
+  address?: string;
   location: {
     country: string;
     state: string;
@@ -47,6 +50,8 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
   const handleCandidateClick = () => {
     setIsProfileModalOpen(true);
   };
+
+  console.log("CanidatesFromMatching", candidate);
 
   // Determine if the score is based entirely on verified ratings or includes self ratings
   const hasVerifiedSkills =
@@ -104,14 +109,28 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
             </div>
             <div className="flex flex-col">
               {/* Display user goals if available */}
-              {candidate.userGoals && candidate.userGoals.length > 0 && (
-                <p className="text-sm text-[#68696b]">
-                  {candidate.userGoals[0]}
-                </p>
-              )}
+              <>
+                {candidate.current_status === "From Resume" ? (
+                  <p className="text-sm text-[#68696b]">{candidate.goal}</p>
+                ) : (
+                  candidate.userGoals &&
+                  candidate.userGoals.length > 0 && (
+                    <p className="text-sm text-[#68696b]">
+                      {candidate.userGoals[0]}
+                    </p>
+                  )
+                )}
+              </>
 
-              {candidate.location?.city && candidate.location?.state && (
-                <p className="text-sm text-[#68696b]">{`${candidate.location.city}, ${candidate.location.state}`}</p>
+              {candidate.current_status === "From Resume" ? (
+                <p className="text-sm text-[#68696b]">{candidate.address}</p>
+              ) : (
+                candidate.location?.city &&
+                candidate.location?.state && (
+                  <p className="text-sm text-[#68696b]">
+                    {`${candidate.location.city}, ${candidate.location.state}`}
+                  </p>
+                )
               )}
             </div>
           </div>
@@ -123,45 +142,49 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger onClick={(e) => e.stopPropagation()}>
-                    <div className="text-center">
-                      {hasVerifiedSkills ? (
-                        <>
-                          <div className="flex items-center justify-center">
-                            <span className="text-m font-medium">
-                              {typeof candidate.averageRating === "number"
-                                ? candidate.averageRating === 10
-                                  ? "10"
-                                  : candidate.averageRating.toFixed(1)
-                                : "0.0"}
-                            </span>
-                            <span className="text-sm text-[#909091]">/10</span>
-                            <img
-                              src={verified || "/placeholder.svg"}
-                              alt="verified"
-                              className="w-4 h-4 ml-1"
-                            />
-                          </div>
-                          <div className="flex items-center justify-center">
-                            <span className="text-xs text-[#414447]">
-                              Employability score
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center justify-center">
-                            <span className="text-sm text-[#909091]">
-                              No verified ratings
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-center">
-                            <span className="text-xs text-[#414447]">
-                              Skills not assessed
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    {candidate.current_status !== "From Resume" && (
+                      <div className="text-center">
+                        {hasVerifiedSkills ? (
+                          <>
+                            <div className="flex items-center justify-center">
+                              <span className="text-m font-medium">
+                                {typeof candidate.averageRating === "number"
+                                  ? candidate.averageRating === 10
+                                    ? "10"
+                                    : candidate.averageRating.toFixed(1)
+                                  : "0.0"}
+                              </span>
+                              <span className="text-sm text-[#909091]">
+                                /10
+                              </span>
+                              <img
+                                src={verified || "/placeholder.svg"}
+                                alt="verified"
+                                className="w-4 h-4 ml-1"
+                              />
+                            </div>
+                            <div className="flex items-center justify-center">
+                              <span className="text-xs text-[#414447]">
+                                Employability score
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex items-center justify-center">
+                              <span className="text-sm text-[#909091]">
+                                No verified ratings
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-center">
+                              <span className="text-xs text-[#414447]">
+                                Skills not assessed
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-xs">
@@ -187,7 +210,7 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
         </div>
       </div>
 
-      {/* Profile Modal */}
+     
       <CandidateProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
