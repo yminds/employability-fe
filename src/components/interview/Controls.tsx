@@ -31,7 +31,7 @@ const Recording: React.FC = () => {
       <img src={micUrl} className="w-12 h-12" />
       {/* <div className="flex  gap-2 w-full"> */}
         <p className="text-center font-ubuntu   font-medium text-base text-slate-900">
-         After Answering press 'Done Answeing'
+        Recording
         </p>
       {/* </div> */}
     </div>

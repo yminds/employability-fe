@@ -479,7 +479,6 @@ export const getSubmissionBadge = (candidate: InterviewCandidate) => {
     };
   }
 
-  // If candidate has a report, they've submitted
   if (candidate.has_report) {
     return {
       bgColor: "bg-[#d1f3d9]",

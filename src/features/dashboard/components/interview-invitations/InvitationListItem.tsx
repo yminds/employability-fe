@@ -124,7 +124,6 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
     }
   };
 
-
   useEffect(() => {
     if (userGoal && user_id) {
       fetchSkills(user_id, userGoal)
@@ -197,12 +196,14 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                       Submit after completing all steps.
                     </div>
                     <div
-                      className={`flex items-center w-full text-buton text-white font-dm-sans text-sm font-medium leading-5 tracking-wide rounded-md ${isDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-button hover:bg-[#062549]'
-                        }`}
+                      className={`flex items-center w-full text-buton text-white font-dm-sans text-sm font-medium leading-5 tracking-wide rounded-md ${
+                        isDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-button hover:bg-[#062549]'
+                      }`}
                     >
                       <button
-                        className={`px-4 py-2 w-full rounded-md ${isCompleted ? 'bg-gray-300 cursor-not-allowed' : ''
-                          }`}
+                        className={`px-4 py-2 w-full rounded-md ${
+                          isCompleted ? 'bg-gray-300 cursor-not-allowed' : ''
+                        }`}
                         onClick={handleSubmitInterview}
                         disabled={isCompleted || isDisabled || isLoading}
                       >
@@ -286,10 +287,11 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                       {formatDate(inviteData.application_deadline)} |{" "}
                       {getDaysRemaining(inviteData.application_deadline) > 0 && (
                         <span
-                          className={`text-body2 font-medium ${getDaysRemaining(inviteData.application_deadline) <= 1
-                            ? 'text-[#FF3B30]'
-                            : 'text-grey-6'
-                            }`}
+                          className={`text-body2 font-medium ${
+                            getDaysRemaining(inviteData.application_deadline) <= 1
+                              ? 'text-[#FF3B30]'
+                              : 'text-grey-6'
+                          }`}
                         >
                           {getDaysRemaining(inviteData.application_deadline)} days left
                         </span>
@@ -301,10 +303,6 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
 
               {/* Right side button or dropdown (normal view) */}
               <div>
-                {/* If 'pending', we already show accept/decline above.
-                    If normal view + completed => show dropdown arrow
-                    Otherwise show "Submit Interview" button, or hide in detail if accepted, etc.
-                 */}
                 {isPending ? (
                   isDetailsView ? (
                     <button
@@ -335,12 +333,14 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                     </div>
                   ) : (
                     <div
-                      className={`flex items-center w-full text-buton text-white font-dm-sans text-sm font-medium leading-5 tracking-wide rounded-md ${isDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-button hover:bg-[#062549]'
-                        }`}
+                      className={`flex items-center w-full text-buton text-white font-dm-sans text-sm font-medium leading-5 tracking-wide rounded-md ${
+                        isDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-button hover:bg-[#062549]'
+                      }`}
                     >
                       <button
-                        className={`px-4 py-2 rounded-md ${isCompleted ? 'bg-gray-300 cursor-not-allowed' : ''
-                          }`}
+                        className={`px-4 py-2 rounded-md ${
+                          isCompleted ? 'bg-gray-300 cursor-not-allowed' : ''
+                        }`}
                         onClick={handleSubmitInterview}
                         disabled={isCompleted || isDisabled || isLoading}
                       >
@@ -373,7 +373,39 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
             )}
           </div>
 
-          {inviteData.status?.toLowerCase() !== 'pending' &&
+          {/* 
+            -----------
+            TASK TABLE
+            -----------
+            
+            1) Always show for isDetailsView
+            2) Keep the original logic for normal view 
+          */}
+
+          {isDetailsView ? (
+            // Always show the table in the detailed view
+            <>
+              <div className="h-[1px] w-full bg-[#0000001A] my-4" />
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-body2 font-medium text-grey-6">
+                    Complete these steps to submit
+                  </p>
+                </div>
+                <div>
+                  <TaskTable
+                    task={inviteData.task}
+                    jobDescription={inviteData.job}
+                    inviteId={inviteData._id}
+                    user_id={user_id}
+                    userGoal={userGoal}
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            // NORMAL VIEW: KEEP EXISTING CONDITIONAL RENDER
+            inviteData.status?.toLowerCase() !== 'pending' &&
             inviteData.task !== undefined &&
             !(
               inviteData.status?.toLowerCase() === 'completed' &&
@@ -381,8 +413,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
               !isDetailsView
             ) && (
               <>
-                <div className={`${!isDetailsView ? 'h-[1px] w-full bg-[#0000001A] my-4' : ''}`}></div>
-
+                <div className="h-[1px] w-full bg-[#0000001A] my-4"></div>
                 <div>
                   <div className="flex items-center justify-between">
                     <p className="text-body2 font-medium text-grey-6">
@@ -400,7 +431,8 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                   </div>
                 </div>
               </>
-            )}
+            )
+          )}
         </div>
       </div>
     </div>
