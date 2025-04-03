@@ -52,6 +52,7 @@ export type User = {
   portfolio: string;
   parsedResume: any;
   resume_s3_url: string;
+  firstName: string;
 };
 
 // Optional: Define separate interfaces for nested objects if needed

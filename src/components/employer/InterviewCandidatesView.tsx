@@ -348,7 +348,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
         {/* Candidates list - scrollable content */}
         <div className="flex-grow overflow-y-auto scrollbar-hide">
           {/* Select All Header - sticky within the scrollable area */}
-          <div className="sticky top-0 z-10 ">
+          <div className="sticky top-0">
             <SelectAllHeader
               selectedCandidates={selectedCandidates}
               currentCandidates={currentCandidates}

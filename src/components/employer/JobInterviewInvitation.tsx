@@ -237,7 +237,7 @@ export default function JobInvitation() {
       const response = await respondToInvite({
         inviteId: inviteId || "",
         action: "accept",
-        commited_due_date: selectedDate.toISOString(),
+        submission_expected_date: selectedDate.toISOString(),
       }).unwrap();
 
       if (response.success && inviteStatusData?.data?.candidateInfo) {
