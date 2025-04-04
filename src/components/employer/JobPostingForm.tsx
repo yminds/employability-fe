@@ -430,7 +430,9 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
             <div className="flex items-center gap-1 text-base text-[#8f9091] font-normal">
               <span>Jobs</span>
               <span className="mx-1">/</span>
-              <span className="text-[#030609]">Create Job</span>
+              <span className="text-[#030609]">
+                {initialData?.isEditMode ? "Edit Job" : "Create Job"}
+              </span>
             </div>
           </div>
 
@@ -444,7 +446,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                   <div className="bg-white p-8 shadow-sm z-10">
                     <div className="flex flex-col gap-3">
                       <h1 className="text-[24px] font-medium font-ubuntu leading-[38.4px] tracking-[-0.36px] text-[#414447]">
-                        Create Job
+                        {initialData?.isEditMode ? "Edit Job" : "Create Job"}
                       </h1>
                       <TabNavigation />
                     </div>

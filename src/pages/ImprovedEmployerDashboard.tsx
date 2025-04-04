@@ -1,11 +1,5 @@
-import React from 'react';
-import {
-  Briefcase,
-  TrendingUp,
-  Users,
-  UserCheck,
-  Award
-} from 'lucide-react';
+import React from "react";
+import { Briefcase, TrendingUp, Users, UserCheck, Award } from "lucide-react";
 
 interface DashboardStats {
   activeJobs: number;
@@ -22,18 +16,18 @@ interface DashboardOverviewProps {
   stats: DashboardStats;
 }
 
-const StatCard = ({ 
-  title, 
-  value, 
-  subValue, 
-  icon: Icon, 
-  iconColor, 
-  trend = null 
-}: { 
-  title: string; 
-  value: number | string; 
-  subValue?: string; 
-  icon: React.ElementType; 
+const StatCard = ({
+  title,
+  value,
+  subValue,
+  icon: Icon,
+  iconColor,
+  trend = null,
+}: {
+  title: string;
+  value: number | string;
+  subValue?: string;
+  icon: React.ElementType;
   iconColor: string;
   trend?: { value: number; isPositive: boolean } | null;
 }) => (
@@ -46,9 +40,19 @@ const StatCard = ({
           {subValue && <p className="ml-2 text-sm text-gray-500">{subValue}</p>}
         </div>
         {trend && (
-          <div className={`mt-1 flex items-center text-sm ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-            <TrendingUp className={`w-3 h-3 ${trend.isPositive ? '' : 'transform rotate-180'} mr-1`} />
-            <span>{trend.value}% {trend.isPositive ? 'increase' : 'decrease'}</span>
+          <div
+            className={`mt-1 flex items-center text-sm ${
+              trend.isPositive ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            <TrendingUp
+              className={`w-3 h-3 ${
+                trend.isPositive ? "" : "transform rotate-180"
+              } mr-1`}
+            />
+            <span>
+              {trend.value}% {trend.isPositive ? "increase" : "decrease"}
+            </span>
           </div>
         )}
       </div>
@@ -61,7 +65,7 @@ const StatCard = ({
 
 const DashboardOverview: React.FC<DashboardOverviewProps> = ({ stats }) => {
   return (
-    <div className="flex flex-row space-x-4 mb-8 overflow-x-auto pb-2">
+    <div className="flex flex-row space-x-4 mb-8 overflow-x-auto pb-2 font-dm-sans">
       <StatCard
         title="Active Jobs"
         value={stats.activeJobs}
@@ -69,7 +73,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ stats }) => {
         icon={Briefcase}
         iconColor="bg-blue-600"
       />
-      
+
       <StatCard
         title="Total Applications"
         value={stats.totalApplications}
@@ -78,7 +82,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ stats }) => {
         iconColor="bg-purple-600"
         trend={{ value: 12, isPositive: true }}
       />
-      
+
       <StatCard
         title="Shortlisted Candidates"
         value={stats.totalShortlisted}
@@ -86,7 +90,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ stats }) => {
         icon={UserCheck}
         iconColor="bg-amber-600"
       />
-      
+
       <StatCard
         title="Hired"
         value={stats.totalHired}
