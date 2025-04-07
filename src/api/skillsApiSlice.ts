@@ -48,7 +48,7 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
           weak: number;
         };
       },
-      { userId: string|undefined; goalId: string }
+      { userId: string | undefined; goalId: string }
     >({
       query: ({ userId, goalId }) => ({
         url: `/api/v1/skills/userSkills/summary/${userId}`,
@@ -72,13 +72,13 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
     createUserSkills: builder.mutation<
       any,
       {
-        user_id: string;
+        user_id: string | undefined;
         skills: {
           skill_pool_id: string;
           self_rating: number | null;
           level: string;
         }[];
-        goal_id: string;
+        goal_id: string | undefined;
       }
     >({
       query: ({ user_id, skills, goal_id }) => ({
@@ -110,14 +110,14 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
         },
       }),
     }),
-    
+
     // Update the self_rating of a specific skill
     updateSelfRating: builder.mutation<
       {
         message: string;
         data: Skill;
       },
-      { userId: string|undefined; skillId: string; selfRating: number }
+      { userId: string | undefined; skillId: string; selfRating: number }
     >({
       query: ({ userId, skillId, selfRating }) => ({
         url: `/api/v1/skills/userSkills/updateSelfRating/${skillId}`, // Adjust to match your backend endpoint
@@ -125,10 +125,35 @@ export const skillsApiSlice = apiSlice.injectEndpoints({
         body: {
           userId: userId,
           selfRating: selfRating,
-          skillId:skillId
+          skillId: skillId
         },
       }),
     }),
+
+    // Add this inside `endpoints: (builder) => ({ ... })`
+    getUserSkillId: builder.mutation<
+      {
+        data: {
+          skill_id: string;
+        };
+        message: string;
+        success: boolean;
+      },
+      {
+        user_id: string | undefined;
+        skill_pool_id: string;
+      }
+    >({
+      query: ({ user_id, skill_pool_id }) => ({
+        url: `/api/v1/skills/getUserSkillId`, // adjust if needed
+        method: "POST",
+        body: {
+          user_id,
+          skill_pool_id,
+        },
+      }),
+    }),
+
   }),
 });
 
@@ -139,5 +164,6 @@ export const {
   useGetUserSkillDetailsQuery,
   useCreateUserSkillsMutation,
   useRemoveGoalFromSkillMutation,
-  useUpdateSelfRatingMutation
+  useUpdateSelfRatingMutation,
+  useGetUserSkillIdMutation
 } = skillsApiSlice;

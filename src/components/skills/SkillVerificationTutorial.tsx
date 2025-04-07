@@ -7,6 +7,7 @@ import step4 from "@/assets/skills/step4.png";
 import step5 from "@/assets/skills/step5.png";
 import verifyStep1 from "@/assets/skills/verifyStep1.png";
 import verifyStep2 from "@/assets/skills/verifyStep2.png";
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface SkillVerificationTutorialProps {
   onClose: () => void;
@@ -127,7 +128,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold text-[#001630] mb-4">{slides[currentSlide].title}</h2>
+          <h2 className="text-h1 font-dm-sans font-bold text-grey-7 mb-3">{slides[currentSlide].title}</h2>
 
           {/* Description */}
           <p className="text-gray-600 mb-6">{slides[currentSlide].description}</p>
@@ -145,13 +146,17 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
           {/* Bottom Controls */}
           <div className="flex items-center justify-between">
             <label className="flex items-center text-[#001630] text-sm font-medium gap-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={dontShowAgain}
-                onChange={(e) => setDontShowAgain(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                onCheckedChange={(checked) => setDontShowAgain(!!checked)}
+                className=" h-4 w-4
+                data-[state=unchecked]:border-[#000006] 
+                data-[state=checked]:bg-[#001630] 
+                data-[state=checked]:border-[#001630]
+                data-[state=checked]:text-white"
+                onClick={(e) => e.stopPropagation()} // Prevent triggering the parent div's click
               />
-              <span>Don't show again</span>
+              <span className=" text-button">Don't show again</span>
             </label>
 
             <div className="flex space-x-2">

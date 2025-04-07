@@ -259,6 +259,8 @@ interface GetMatchingCandidatesParams {
     job_id?: string;
     skills_required?: string[];
     importance_level?: string;
+    source?: string;
+    sortBy?: string;
   }
 
 interface GetSkillSuggestionsParams{
@@ -281,7 +283,6 @@ export interface AIRecommendedSkill {
 // API Slice for Jobs
 export const employerJobsApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
-        // Create job posting
         createJobPosting: builder.mutation<JobResponse, CreateJobPayload>({
             query: (data) => ({
                 url: "/api/v1/employerJobs/jobs",
@@ -290,7 +291,6 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
-        // Update job
         updateJob: builder.mutation<JobResponse, { id: string; data: UpdateJobPayload }>({
             query: ({ id, data }) => ({
                 url: `/api/v1/employerJobs/jobs/${id}`,
@@ -299,7 +299,6 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
-        // Delete job
         deleteJob: builder.mutation<{ success: boolean; message: string }, string>({
             query: (id) => ({
                 url: `/api/v1/employerJobs/jobs/${id}`,
@@ -307,7 +306,6 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
-        // Get company jobs
         getCompanyJobs: builder.query<JobsListResponse, { company_id: string;}>({
             query: ({ company_id}) => ({
                 url: `/api/v1/employerJobs/company/${company_id}/jobs`,
@@ -315,7 +313,6 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
-        // Get employer jobs
         getEmployerJobs: builder.query<JobsListResponse, { employer_id: string;}>({
             query: ({ employer_id}) => ({
                 url: `/api/v1/employerJobs/employer/${employer_id}/jobs`,
@@ -323,7 +320,6 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
-        // Get manageable jobs for an employer
         getManageableJobs: builder.query<JobsListResponse, { employer_id: string;}>({
             query: ({ employer_id}) => ({
                 url: `/api/v1/employerJobs/employer/${employer_id}/manageable-jobs`,
@@ -331,7 +327,7 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
-        // Search jobs
+
         searchJobs: builder.query<JobsListResponse, SearchJobsParams>({
             query: (params) => ({
                 url: `/api/v1/employerJobs/jobs/search`,
@@ -340,7 +336,6 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             })
         }),
 
-        // Get company candidates
         getCompanyCandidates: builder.query<CandidatesResponse, { company_id: string | undefined; job_id?: string | undefined }>({
             query: ({ company_id, job_id }) => ({
                 url: `/api/v1/employerJobs/company/${company_id}`,
@@ -349,13 +344,18 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
-        // Get matching candidates
         getMatchingCandidates: builder.query<MatchedCandidatesResponse, GetMatchingCandidatesParams>({
             query: (params) => {
               // Create query params
               const queryParams = new URLSearchParams();
               if (params.job_id) {
                 queryParams.append('job_id', params.job_id);
+              }
+              if (params.source && params.source !== 'all') {
+                queryParams.append('source', params.source);
+              }
+              if (params.sortBy) {
+                queryParams.append('sortBy', params.sortBy);
               }
               
               return {
@@ -365,7 +365,6 @@ export const employerJobsApiSlice = apiSlice.injectEndpoints({
             },
           }),
 
-        // Get job details
         getJobDetails: builder.query<JobResponse, string>({
             query: (id) => ({
                 url: `/api/v1/employerJobs/jobs/${id}`,

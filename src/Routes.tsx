@@ -63,6 +63,7 @@ const EmployerNotFound = lazy(
 );
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
 const InterviewsPage = lazy(() => import("./pages/InterviewsPage.tsx"));
+const EmployerInterviewInvitaion = lazy(() => import("./pages/EmployerInterviewInvitation.tsx"));
 
 interface RouteConfig {
   route: string;
@@ -156,6 +157,10 @@ export const routes: RouteConfig[] = [
   {
     route: "/invitation/:inviteId",
     component: <InterviewInvitationHandler />,
+  },
+  {
+    route: "/invitations/:inviteId",
+    component: <EmployerInterviewInvitaion />
   },
   // {
   //   route:"/employer/",

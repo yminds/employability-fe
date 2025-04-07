@@ -26,8 +26,8 @@ const InterviewSetupNew: React.FC = () => {
   const online = useOnline();
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
-  // New state to track if the user has the required camera and mic permissions
   const [hasPermissions, setHasPermissions] = useState(false);
+  const online = useOnline();
 
   const {
     title,
@@ -59,12 +59,9 @@ const InterviewSetupNew: React.FC = () => {
 
   const [showMultipleScreenWarning, setShowMultipleScreenWarning] = useState(false);
 
-  // Function to request camera and microphone permissions.
   const requestPermissions = async () => {
     try {
-      // Check if the browser supports mediaDevices.getUserMedia
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        // Request both video and audio permissions.
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
@@ -73,21 +70,9 @@ const InterviewSetupNew: React.FC = () => {
         setHasPermissions(true);
         setShowPermissionNote(false);
 
-        // Reload the page automatically after permissions are granted.
-        // Some browsers support window.location.reload(true) (force reload)
-        // but since true is deprecated, we use a fallback to ensure compatibility.
-        if (typeof window.location.reload === "function") {
-          // Try to force a reload from the server, if supported.
-          try {
-            window.location.reload(); // Most modern browsers
-          } catch (e) {
-            // Fallback if an error occurs (shouldn't normally happen)
-            window.location.href = window.location.href;
-          }
-        } else {
-          // Fallback for very old browsers
-          window.location.href = window.location.href;
-        }
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       } else {
         throw new Error("getUserMedia not supported in this browser.");
       }
@@ -98,8 +83,6 @@ const InterviewSetupNew: React.FC = () => {
     }
   };
 
-  // Check camera and microphone permissions by verifying if device labels are available.
-  // Device labels are only populated when permission has been granted.
   useEffect(() => {
     navigator.mediaDevices
       .enumerateDevices()
@@ -120,7 +103,6 @@ const InterviewSetupNew: React.FC = () => {
       });
   }, []);
 
-  // Monitor screens every 30 seconds
   useEffect(() => {
     const monitorScreens = async () => {
       if ("getScreenDetails" in window) {
@@ -135,9 +117,8 @@ const InterviewSetupNew: React.FC = () => {
             }
           };
 
-          updateScreenCount(); // Initial check
-
-          screenDetails.addEventListener("screenschange", updateScreenCount);
+          updateScreenCount();
+          screenDetails.addEventListener('screenschange', updateScreenCount);
         } catch (error) {
           console.error("Screen monitoring failed:", error);
         }
@@ -145,13 +126,10 @@ const InterviewSetupNew: React.FC = () => {
     };
 
     monitorScreens();
-    const intervalId = setInterval(monitorScreens, 5000); // Check every 30 seconds
-
-    // Cleanup interval on component unmount
+    const intervalId = setInterval(monitorScreens, 5000);
     return () => clearInterval(intervalId);
   }, []);
 
-  // Fetch the fundamentals for the interview
   useEffect(() => {
     const sync = async () => {
       if (type === "Skill") {
@@ -161,7 +139,6 @@ const InterviewSetupNew: React.FC = () => {
             level,
           }).unwrap();
           console.log("fundemental", fundamentalsResponse);
-
           setFundamentals(fundamentalsResponse.data[0]?.concepts || []);
         } catch (error) {
           console.error("Error fetching fundamentals:", error);
@@ -171,18 +148,13 @@ const InterviewSetupNew: React.FC = () => {
     sync();
   }, [fetchFundamental, skillPoolId, level, type]);
 
-  // Only show the Interview component if the user has required permissions,
-  // the fundamentals have loaded, and the interview is started.
-  const canShowInterview = isInterviewStarted && (fundamentals.length > 0 || type != "Skill") && hasPermissions;
-
-  // if user connection gone redirct to home
-  console.log("online", online);
+  const canShowInterview = isInterviewStarted && (fundamentals.length > 0 || type !== "Skill") && hasPermissions;
 
   useEffect(() => {
     if (!online) {
       console.log("Connection lost, redirecting...");
       setTimeout(() => {
-        window.location.replace("/"); // Redirect to home page after 500ms
+        window.location.replace("/");
       }, 500);
     }
   }, [online]);
@@ -220,7 +192,7 @@ const InterviewSetupNew: React.FC = () => {
 
   return (
     <>
-      {/* Permission Note Modal */}
+      {/* Permission Modal */}
       {showPermissionNote && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="relative bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
@@ -229,7 +201,7 @@ const InterviewSetupNew: React.FC = () => {
               onClick={() => setShowPermissionNote(false)}
               aria-label="Close"
             >
-              <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
                 <path
                   d="M6 18L18 6M6 6l12 12"
                   stroke="currentColor"
@@ -246,7 +218,9 @@ const InterviewSetupNew: React.FC = () => {
                 Please click the button below to grant access. If you've previously denied permissions, you may need to
                 adjust your browser settings.
               </p>
-              <p>After providing the permissions, Reload the window to apply changed.</p>
+              <p className="text-red-600 font-medium">
+                If you deny access, the interview cannot proceed. Please allow access to your camera and microphone.
+              </p>
             </div>
             <button className="text-button bg-button text-white px-4 py-2 rounded" onClick={requestPermissions}>
               Request Permissions
@@ -255,7 +229,23 @@ const InterviewSetupNew: React.FC = () => {
         </div>
       )}
 
-      {/* Main Content */}
+      {/* Retry Permission Block Message */}
+      {!hasPermissions && !showPermissionNote && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-6 rounded shadow-lg text-center max-w-md">
+            <h2 className="text-xl font-bold mb-4 text-red-600">Permissions Blocked</h2>
+            <p className="mb-3">
+              Access to your camera and microphone is required to start the interview.
+            </p>
+            <p className="text-sm text-gray-500 mb-5">
+              You've blocked access to the camera, microphone, or have multiple screens connected. Please enable camera and microphone access, and disconnect extra screens from your browser or system settings to continue with the interview.
+            </p>
+
+          </div>
+        </div>
+      )}
+
+      {/* Setup / Interview Screen */}
       {!canShowInterview ? (
         <div className="flex items-center h-screen w-[70%] mx-auto sm:w-[95%]">
           <main className="py-4 w-full">
@@ -292,13 +282,11 @@ const InterviewSetupNew: React.FC = () => {
                     Proceed to Interview
                   </button>
 
-                  <div>
-                    {showMultipleScreenWarning && (
-                      <div className="text-red-500 text-sm">
-                        *Multiple screens detected. Please use a single screen to proceed.
-                      </div>
-                    )}
-                  </div>
+                  {showMultipleScreenWarning && (
+                    <div className="text-red-500 text-sm">
+                      *Multiple screens detected. Please use a single screen to proceed.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

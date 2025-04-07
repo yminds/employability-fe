@@ -71,6 +71,9 @@ const InterviewInvitationHandler: React.FC = () => {
     skip: !inviteId,
     refetchOnMountOrArgChange: true
   });
+
+  console.log("inviteStatusData", inviteStatusData);
+  
   
   const {
     data: jobDetailsData,
@@ -147,9 +150,7 @@ const InterviewInvitationHandler: React.FC = () => {
       setUserExists(false);
       
       const candidateEmail = 
-        inviteStatusData?.data?.candidateInfo?.email || 
-        inviteStatusData?.data?.candidate?.email ||
-        inviteStatusData?.data?.email;
+        inviteStatusData?.data?.candidateInfo?.email
       
       if (candidateEmail) {
         setUserCheckInitiated(true);
@@ -364,8 +365,7 @@ const InterviewInvitationHandler: React.FC = () => {
   if (action === 'accept' && !processingComplete) {
     const interviewType = inviteStatusData?.data?.interviewType === 'full' ? 'Full Interview' : 'Screening Interview';
     const candidateName = 
-      inviteStatusData?.data?.candidateInfo?.name || 
-      inviteStatusData?.data?.candidate?.name || 
+      inviteStatusData?.data?.candidateInfo?.name ||
       "candidate";
     
     // Format deadline

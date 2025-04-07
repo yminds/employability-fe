@@ -1,6 +1,6 @@
 import React from "react";
-import waitingGif from "@/assets/interview/waiting.gif";
-import speakingGif from "@/assets/interview/speaking.gif";
+import waitingGif from "@/assets/interview/Waitinggif.gif";
+import speakingGif from "@/assets/interview/AISpeaking.gif";
 import listeningGif from "@/assets/interview/listening.gif";
 import logoIconWithGradient from "@/assets/branding/logo_icon_with_gradient.svg?url";
 

@@ -5,17 +5,18 @@ export interface InviteItemProps {
   isProcessing: boolean;
   isSelected: boolean;
   onInviteClick: (invite: InterviewInvite) => void;
-  onAccept: (id: string, e: React.MouseEvent) => void;
-  onDecline: (id: string, e: React.MouseEvent) => void;
+  onAccept: (id: string) => void;
+  onDecline: (id: string) => void;
   showSidebar: boolean;
-  isTaskCompleted: boolean;
+  isTaskCompleted: boolean | undefined;
+  isDetailsView: boolean;
 }
 
 export interface ActionButtonsProps {
   invite: InterviewInvite;
   isProcessing: boolean;
-  onAccept: (id: string, e: React.MouseEvent) => void;
-  onDecline: (id: string, e: React.MouseEvent) => void;
+  onAccept: (id: string) => void;
+  onDecline: (id: string) => void;
   onInviteClick: (invite: InterviewInvite) => void;
 }
 
@@ -28,7 +29,7 @@ export interface DetailSidebarProps {
   handleDecline: (id: string) => Promise<boolean>;
   setSelectedInvite: React.Dispatch<React.SetStateAction<InterviewInvite | null>>;
   setLocalModifiedInvites: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  isTaskCompleted: boolean;
+  isTaskCompleted: boolean | undefined;
 }
 
 export interface InterviewListProps {

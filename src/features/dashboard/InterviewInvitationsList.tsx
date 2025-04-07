@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import 'react-loading-skeleton/dist/skeleton.css';
 import { useInterviewInvites, InterviewInvite } from '@/hooks/useInterviewInvites';
@@ -22,6 +22,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   hideHeader = false
 }) => {
   const navigate = useNavigate();
+  const location = useLocation(); // To track location changes
   const [selectedInvite, setSelectedInvite] = useState<InterviewInvite | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
   // Add local state to track modified invites
@@ -33,7 +34,8 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
     isLoading: hookIsLoading,
     processingIds,
     handleAccept,
-    handleDecline
+    handleDecline,
+    refetch,
   } = useInterviewInvites(userId);
 
   // Use external invites if provided, otherwise use the ones from the hook
@@ -53,15 +55,22 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
     });
   }, [invites, localModifiedInvites]);
 
-  const isTaskCompleted = processedInvites.every((invite: InterviewInvite) => invite.task?.interview_type?.status === 'completed' && invite.task?.skills?.every((skill: any) => skill.status === 'completed'));
-  console.log("isTaskCompleted:", isTaskCompleted);
+  const isInterviewTypeCompleted = (invite: InterviewInvite | null) => {
+    return invite?.task?.interview_type?.status === 'completed';
+  };
+
+  const isSkillsCompleted = (invite: InterviewInvite | null) => {
+    return invite?.task?.skills?.every((skill: any) => skill.status === 'completed');
+  };
+
+  const isTaskCompleted = (invite: InterviewInvite | null) => {
+    return isInterviewTypeCompleted(invite) && isSkillsCompleted(invite);
+  };
 
   const displayedInterviews = isDashboard ? processedInvites.slice(0, 3) : processedInvites;
   const totalInterviews = processedInvites.length;
 
-  const onInviteAccept = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-
+  const onInviteAccept = async (id: string) => {
     // Immediately update local UI state
     setLocalModifiedInvites(prev => ({
       ...prev,
@@ -91,9 +100,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
     }
   };
 
-  const onInviteDecline = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-
+  const onInviteDecline = async (id: string) => {
     // Immediately update local UI state
     setLocalModifiedInvites(prev => ({
       ...prev,
@@ -142,6 +149,13 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
     }
   }, [invites, localModifiedInvites]);
 
+  useEffect(() => {
+    if (location.pathname === '/'){
+      refetch();
+      console.log("Refetched")
+    } 
+  }, [location, refetch]);
+
   const handleInviteClick = (invite: InterviewInvite) => {
     console.log("Clicked invite:", invite);
     setSelectedInvite(invite);
@@ -171,7 +185,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {displayedInterviews.map((invite: InterviewInvite) => {
                 const isProcessing = processingIds.includes(invite._id);
                 const isSelected = selectedInvite && selectedInvite._id === invite._id;
@@ -186,7 +200,8 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
                     onAccept={onInviteAccept}
                     onDecline={onInviteDecline}
                     showSidebar={showSidebar}
-                    isTaskCompleted={isTaskCompleted}
+                    isTaskCompleted={isTaskCompleted(invite)}
+                    isDetailsView={false}
                   />
                 );
               })}
@@ -236,7 +251,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
         handleDecline={handleDecline}
         setSelectedInvite={setSelectedInvite}
         setLocalModifiedInvites={setLocalModifiedInvites}
-        isTaskCompleted={isTaskCompleted}
+        isTaskCompleted={isTaskCompleted(selectedInvite)}
       />
 
       {/* Overlay when sidebar is open */}
