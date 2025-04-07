@@ -3,8 +3,9 @@ import Dropdown from "@/components/ui/custom-dropdown";
 import { useMicrophoneCheck } from "@/hooks/useMicrophoneCheck";
 
 // Images
-import check_circle from '@/assets/screen-setup/check_circle.svg'
-import mic from '@/assets/screen-setup/mic.svg'
+import check_circle from "@/assets/screen-setup/check_circle.svg";
+import unCheck_circle from "@/assets/screen-setup/unCheck_circle.png";
+import mic from "@/assets/screen-setup/mic.svg";
 
 interface MicCheckProps {
   onMicQualityChange: (isMicSelected: boolean, isMicTested: boolean) => void;
@@ -22,21 +23,31 @@ const MicCheck: React.FC<MicCheckProps> = ({ onMicQualityChange }) => {
     handleMicChange,
     handleSpeakClick,
   } = useMicrophoneCheck(onMicQualityChange);
-  
 
   return (
-    <div className={`bg-[#FAFAFA] flex flex-col gap-1 justify-around p-3 rounded-xl h-[35vh] ${isMicSelected && qualityTested ? "border-[#10B754] border-2" : "border border-[#DBDBDB]"}`}>
+    <div
+      className={`bg-[#FAFAFA] flex flex-col gap-1 justify-around p-4 rounded-xl h-[35vh] ${
+        isMicSelected && qualityTested ? "border-[#10B754] border-2" : "border border-[#DBDBDB]"
+      }`}
+    >
       <div className="flex justify-between items-center">
-        <div className="text-[#333] text-xl font-medium flex items-center gap-5">
+        <div className="text-[#333] text-[18px] font-medium flex items-center gap-5">
           <span className="flex sm:w-[1vw] md:w-12 w-12 h-12 p-3 justify-center items-center bg-white border border-[#ddd] rounded-full">
             <img className="sm:w-[1vw] sm:h-[3vh] md:w-6 h-5" src={mic} alt="Mic" />
           </span>
-          <span>Mic Check</span>
+          <span >Mic Check</span>
         </div>
-        {isMicSelected && qualityTested && (
+
+        {isMicSelected && qualityTested ? (
+          <div className="flex  gap-1 relative p-1 pr-3 border border-green-500 rounded-2xl items-center bg-[#DBFFEA]">
+              <input type="checkbox" checked readOnly className="w-6 h-6 appearance-none" />
+              <img className="h-6 w-6 absolute" src={check_circle} alt="UnCheck" />
+              <p className="font-ubuntu text-green-600 text-sm">Checked</p>
+          </div>
+        ) : (
           <div className="flex items-center gap-2 relative">
             <input type="checkbox" checked readOnly className="w-6 h-6 appearance-none" />
-            <img className="h-6 w-6 absolute" src={check_circle} alt="Check" />
+            <img className="h-6 w-8 absolute" src={unCheck_circle} alt="UnCheck" />
           </div>
         )}
       </div>
@@ -54,12 +65,15 @@ const MicCheck: React.FC<MicCheckProps> = ({ onMicQualityChange }) => {
         <div className="text-[#666] text-sm">Level Input</div>
         <div className="flex w-[100%] justify-between">
           {dots.map((isActive, i) => (
-            <span key={i} className={`w-[0.7vw] h-[4vh] rounded-[.5rem] ${isSpeaking && isActive ? "bg-button" : "bg-gray-200"}`} />
+            <span
+              key={i}
+              className={`w-[0.7vw] h-[4vh] rounded-[.5rem] ${isSpeaking && isActive ? "bg-green-600" : "bg-gray-200"}`}
+            />
           ))}
         </div>
 
         <button
-          className={` h-[3vh] w-[10vw] rounded text-[12px]  ${qualityTested ? "bg-gray-800" : "bg-button"} text-white`}
+          className={` h-[3vh] w-[10vw] rounded text-[12px]  ${qualityTested ? "bg-green-600" : "bg-green-600"} text-white`}
           onClick={handleSpeakClick}
           disabled={!isMicSelected || isMicTested}
         >

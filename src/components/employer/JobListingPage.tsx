@@ -486,17 +486,17 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           </div>
 
           {/* Right section */}
-          <div className="w-[350px] mt-8 space-y-3.5 sticky top-5 h-fit">
+          <div className="mt-8 space-y-3.5 sticky top-5 h-fit">
             {isLoading ? (
               <>
                 <CardSkeleton />
                 <CardSkeleton />
               </>
             ) : (
-              <>
+              <div className="w-[260px] space-y-3.5">
                 <FullInterviewsCard jobId={job_id} />
                 <ScreeningInterviewsCard jobId={job_id} />
-              </>
+              </div>
             )}
           </div>
         </div>

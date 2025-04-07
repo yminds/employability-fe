@@ -65,7 +65,7 @@ const JobDetailsCard = ({ jobDetails, onViewDetails }: JobDetailsCardProps) => {
           {/* Job details */}
           <div className="flex flex-col justify-center gap-2">
             <div className="flex items-center gap-3">
-              <h2 className="text-[#414447] text-[20px] font-medium font-ubuntu leading-8 tracking-[-0.3px]">
+              <h2 className="text-[#414447] text-[18px] font-medium font-ubuntu leading-8 tracking-[-0.3px]">
                 {jobDetails.title || "Job Title"}
               </h2>
               {jobDetails.experience_level && (

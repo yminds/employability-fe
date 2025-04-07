@@ -4,9 +4,7 @@ import type { RootState } from "@/store/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  useGetEmployerJobsQuery,
-} from "../api/employerJobsApiSlice";
+import { useGetEmployerJobsQuery } from "../api/employerJobsApiSlice";
 import { Briefcase, Users, Clock, Inbox, Building } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import emojiWavingImg from "@/assets/dashboard/emoji_waving.svg";
@@ -69,7 +67,9 @@ const ImprovedEmployerDashboard: React.FC = () => {
   });
   const navigate = useNavigate();
 
-  const employer = useSelector((state: RootState) => state.employerAuth.employer);
+  const employer = useSelector(
+    (state: RootState) => state.employerAuth.employer
+  );
   const token = useSelector((state: RootState) => state.employerAuth.token);
 
   // Query for jobs with proper error handling and loading states
@@ -148,7 +148,6 @@ const ImprovedEmployerDashboard: React.FC = () => {
 
   const isContentLoading = isLoading || isFetching;
 
-
   const hasCompany = employer?.company || false;
 
   return (
@@ -164,7 +163,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
                   <img src={emojiWavingImg} alt="Emoji" className="w-5" />
                 </span>
               </h1>
-              <p className="text-gray-500 mt-1">
+              <p className="text-body2 text-gray-500 mt-1">
                 Manage your job postings and candidates
               </p>
             </div>
@@ -183,7 +182,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
                 <Button
                   variant="outline"
                   onClick={() => navigate("/employer/company/create")}
-                  className="bg-white"
+                  className="bg-white text-[16px] font-normal leading-6"
                 >
                   <Building className="h-4 w-4 mr-2" />
                   Create Company
@@ -192,7 +191,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
 
               <Button
                 onClick={() => navigate("/employer/jobs/create")}
-                className="bg-[#001630] text-white hover:bg-[#062549]"
+                className="bg-[#001630] text-white text-[16px] font-normal leading-6 hover:bg-[#062549]"
               >
                 <Briefcase className="h-4 w-4 mr-2" />
                 Post New Job
@@ -209,7 +208,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
 
           {/* Main Content */}
           <Tabs defaultValue="jobs" className="space-y-6">
-            <TabsList className="bg-white">
+            <TabsList className="bg-white text-body2">
               <TabsTrigger
                 value="jobs"
                 className="data-[state=active]:bg-blue-50"
@@ -250,18 +249,18 @@ const ImprovedEmployerDashboard: React.FC = () => {
                     <Card className="text-center py-20">
                       <CardContent>
                         <Briefcase className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">
-                          No jobs posted yet
-                        </h3>
-                        <p className="text-gray-500 mb-6">
+                        <h3 className="text-h1 mb-2">No jobs posted yet</h3>
+                        <p className="text-gray-500 text-sub-header mb-6">
                           Create your first job posting to start hiring talent
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                           {/* Show Create Company button if employer doesn't have a company */}
                           {!hasCompany && (
                             <Button
-                              onClick={() => navigate("/employer/company/create")}
-                              className="bg-[#001630] text-white hover:bg-[#062549]"
+                              onClick={() =>
+                                navigate("/employer/company/create")
+                              }
+                              className="bg-[#001630] text-[16px] font-dm-sans text-white  hover:bg-[#062549]"
                             >
                               <Building className="h-4 w-4 mr-2" />
                               Create Company First
@@ -269,7 +268,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
                           )}
                           <Button
                             onClick={() => navigate("/employer/jobs/create")}
-                            className="bg-[#001630] text-white hover:bg-[#062549]"
+                            className="bg-[#001630] text-[16px] font-dm-sans text-white  hover:bg-[#062549]"
                           >
                             <Briefcase className="h-4 w-4 mr-2" />
                             Post Your First Job

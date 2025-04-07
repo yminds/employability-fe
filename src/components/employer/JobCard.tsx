@@ -190,21 +190,21 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
   };
   
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200 bg-white rounded-lg">
       <CardContent className="p-0">
         <div className="p-5">
           <div className="flex justify-between items-start">
             <div>
               <div className="flex items-center">
-                <h3 className="text-lg font-semibold">{job.title}</h3>
+                <h3 className="text-h2 font-semibold">{job.title}</h3>
                 <Badge 
-                  className={`ml-2 ${jobUtils.getStatusColor(job.status)}`}
+                  className={`ml-2 text-sm font-dm-sans ${jobUtils.getStatusColor(job.status)}`}
                   variant="outline"
                 >
                   {job.status}
                 </Badge>
               </div>
-              <div className="flex items-center mt-1 text-sm text-gray-500">
+              <div className="flex items-center mt-1 text-sm text-body2 text-gray-500">
                 <Building className="h-4 w-4 mr-1" />
                 <span>{job.location}</span>
                 <span className="mx-2">•</span>
@@ -224,7 +224,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
                 )}
               </div>
             </div>
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col items-end font-dm-sans">
               <span className="text-xs text-gray-500">
                 {postedDate ? jobUtils.getTimeAgo(postedDate) : 'Recently posted'}
               </span>
@@ -244,18 +244,18 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
           <div className="mt-3">
             <div className="flex flex-wrap gap-2 mb-3">
               {skillsToDisplay.slice(0, 4).map((skill, index) => (
-                <Badge key={index} variant="secondary" className="font-normal">
+                <Badge key={index} variant="outline" className="text-body2 bg-[#ECECEC]">
                   {skill}
                 </Badge>
               ))}
               {skillsToDisplay.length > 4 && (
-                <Badge variant="outline" className="font-normal">
+                <Badge variant="outline" className="text-body2 bg-[#ECECEC]">
                   +{skillsToDisplay.length - 4} more
                 </Badge>
               )}
             </div>
             
-            <p className="text-sm text-gray-600 line-clamp-2">
+            <p className="text-body2 text-gray-600 line-clamp-2">
               {job.description}
             </p>
           </div>
@@ -279,7 +279,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
             </div>
           </div>
         </div>
-        <div className="px-5 py-3 bg-gray-50 flex justify-end">
+        <div className="px-5 py-3 bg-gray-50 flex justify-end font-dm-sans">
           <Button variant="outline" onClick={() => onSelect(job)}>
             View Details
             <ChevronRight className="ml-1 h-4 w-4" />

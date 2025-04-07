@@ -67,8 +67,12 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
     if (taskData.interview_type.status === 'incomplete') {
       const interviewId = await createInterview({
         title: `${jobDescription.title}`,
-        type: "Full",
+        type: `${taskData.interview_type.type === "full" ? 'Full' : 'Screening'}`,
       });
+      console.log("handleStartInterview Passing the updateInterviewId")
+      console.log("inviteId",inviteId)
+      console.log("interviewId",interviewId)
+      console.log("type",taskData.interview_type.type)
 
       updateInterviewId({
         inviteId: inviteId,
@@ -80,7 +84,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       navigate(`/interview/${interviewId}`, {
         state: {
           title: `${jobDescription.title}`,
-          type: 'Full',
+          type: `${taskData.interview_type.type === "full" ? 'Full' : 'Screening'}`,
           jobDescription: jobDescription,
           Fundamentals: conceptNamesCSV?.data
         },
@@ -130,7 +134,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
             skills: [
               {
                 skill_pool_id: skillId,
-                self_rating: null,
+                self_rating: 0,
                 level: "1", // or skillToVerify.level if available
               },
             ],

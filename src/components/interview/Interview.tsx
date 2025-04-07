@@ -15,7 +15,7 @@ import { useGetInterviewbyIdQuery } from "@/api/interviewApiSlice";
 import { useTTS } from "@/hooks/useTTS";
 import { useSTT } from "@/hooks/useSTT";
 import CodeSnippetQuestion from "./CodeSnippetQuestion";
-import { Timer } from "lucide-react";
+import { Disc, Disc2, Timer } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import toggleBrowserFullscreen from "../skills/fullscreen";
@@ -78,6 +78,7 @@ const Interview: React.FC<{
   userExperience: string | undefined;
   Fundamentals: string | string[];
   skills_required: string | string[];
+  interviewIcon?: string;
 }> = ({
   interviewTopic,
   concepts,
@@ -90,6 +91,7 @@ const Interview: React.FC<{
   userExperience,
   Fundamentals,
   skills_required,
+  interviewIcon,
 }) => {
     // console.log("in interviews jobDescription", jobDescription);
     const [showScreenWarning, setShowScreenWarning] = useState(false);
@@ -447,10 +449,10 @@ const Interview: React.FC<{
         )}
         <div className={`w-full h-[${isDsaRoundStarted ? "80vh" : "100vh"}] pt-12 `}>
           <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-            <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} />
+            <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} interviewIcon={interviewIcon}  />
             {/* check dsa round started or not */}
 
-            {isInterviewEnded ? (
+              {isInterviewEnded ? (
               <div className="text-center text-gray-500  font-ubuntu">
                 <p>Thank you for your time. We will get back to you soon.</p>
                 <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackBtn}>
@@ -458,10 +460,10 @@ const Interview: React.FC<{
                 </button>
               </div>
             ) : isDsaRoundStarted ? (
-              <div className=" h-[70vh] mx-auto">
-                <Example question={dsaQuestion} handleDsaQuestionSubmit={handleDsaQuestionSubmit} />
-              </div>
-            ) : (
+                <div className=" h-[70vh] mx-auto">
+                  <Example question={dsaQuestion} handleDsaQuestionSubmit={handleDsaQuestionSubmit} />
+                </div>
+              ) : (
               <LayoutBuilder
                 isUserAnswering={isUserAnswering}
                 handleDoneAnswering={handleDoneAnswering}
@@ -476,7 +478,6 @@ const Interview: React.FC<{
           </div>
         </div>
       </>
-
     );
   };
 
@@ -502,6 +503,8 @@ const LayoutBuilder = ({
   concepts,
 }: LayoutBuilderProps) => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [InterviewTime, setInterviewTime] = useState<number>(0);
+  const [formattedTime, setFormattedTime] = useState<string>("00:00");
 
   // console.log("all conepts", concepts);
 
@@ -519,7 +522,25 @@ const LayoutBuilder = ({
   // In the component:
   const progression = calculateProgress(concepts);
 
-  // console.log("progression", progression);
+  console.log("progression", progression);
+
+  // settign a interview timer
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setInterviewTime((prevTime) => {
+        const newTime = prevTime + 1;
+        const minutes = Math.floor(newTime / 60);
+        const seconds = newTime % 60;
+        const formattedMinutes = String(minutes).padStart(2, "0");
+        const formattedSeconds = String(seconds).padStart(2, "0");
+        setFormattedTime(`${formattedMinutes}:${formattedSeconds}`);
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return layoutType === 1 ? (
     <div className="w-full flex gap-8 max-h-screen">
@@ -538,15 +559,19 @@ const LayoutBuilder = ({
       </div>
     </div>
   ) : (
-    <div className="w-full flex flex-col gap-8 max-h-[calc(100vh-100px)]  ">
-      <div className="info-container   flex gap-2 items-center justify-center w-full  ">
-        <div className="progression-wrapper h-2 w-full bg-white rounded-md">
+    <div className="w-full flex flex-col gap-4  max-h-[calc(100vh-100px)]  ">
+      <div className="info-container   flex flex-col gap-2 justify-center w-full    ">
+        <div className="progression-wrapper h-2 w-full bg-[rgba(16,183,84,0.20);] rounded-md">
           <div
             className="progressbar h-full bg-green-500 rounded-md transition-all duration-300 ease-in-out"
             style={{ width: `${progression}%` }}
           ></div>
         </div>
-        <Timer className="text-green-500" />
+        {/* <Timer className="text-green-500" /> */}
+        <div className="timer flex gap-2 items-center  ">
+          <Disc className="w-5 h-5 text-red-500" />
+          <p className="text-[16px] font-semibold">{formattedTime} </p>
+        </div>
       </div>
 
       <div className="main-container w-full flex gap-8">
@@ -558,7 +583,7 @@ const LayoutBuilder = ({
             <Conversation layoutType={2} messages={messages} />
           )}
         </div>
-        <div className="w-[55%] flex flex-col gap-1 ">
+        <div className="w-[55%] flex flex-col gap-3">
           <WebCam />
           {isUserAnswering ? (
             <Controls doneAnswering={handleDoneAnswering} />

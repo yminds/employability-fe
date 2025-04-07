@@ -144,6 +144,12 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
       case "Mock":
         path = `/skill/report/Mock/${id}`;
         break;
+      case "Full":
+        path = `/skill/report/Full/${id}`;
+        break;
+      case "Screening":
+        path = `/skill/report/Screening/${id}`;
+        break;
       case "Project":
         path = `/skill/report/Project/${id}`;
         break;
@@ -170,6 +176,12 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
         break;
       case "Mock":
         path = `/skill/report/Mock/${interviewId}`;
+        break;
+      case "Full":
+        path = `/skill/report/Full/${id}`;
+        break;
+      case "Screening":
+        path = `/skill/report/Screening/${id}`;
         break;
       case "Project":
         path = `/skill/report/Project/${interviewId}`;
@@ -308,7 +320,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
                   </span>
                 </div>
               )}
-              {interviewType !== "Job" && (
+              {!["Full", "Screening", "Job"].includes(interviewType) && (
                 <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                   <PopoverTrigger asChild>
                     <button className="p-1">

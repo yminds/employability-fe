@@ -39,7 +39,9 @@ import arrow from "@/assets/skills/arrow.svg"; // If you have a back arrow image
 const EmployerJobsPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const employer = useSelector((state: RootState) => state.employerAuth.employer);
+  const employer = useSelector(
+    (state: RootState) => state.employerAuth.employer
+  );
   const token = useSelector((state: RootState) => state.employerAuth.token);
 
   useEffect(() => {
@@ -91,7 +93,7 @@ const EmployerJobsPage: React.FC = () => {
 
   // If you want an edit button in the listing
   const handleEditJob = (job: IJob) => {
-    navigate("/employer/dashboard", { state: { editJobId: job._id } });
+    navigate(`/employer/jobs/edit/${job._id}`);
   };
 
   const handleBackClick = () => {
@@ -110,7 +112,7 @@ const EmployerJobsPage: React.FC = () => {
             <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
           </button>
           <h1 className="text-black font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.025rem]">
-         Jobs
+            Jobs
           </h1>
         </section>
 
@@ -122,7 +124,11 @@ const EmployerJobsPage: React.FC = () => {
               {/* LEFT COLUMN (Filters) */}
               <div className="w-[300px] hidden lg:block">
                 <div className="sticky top-0 bg-[#F5F5F5]">
-                  <JobFilters filters={filters} setFilters={setFilters} onReset={resetFilters} />
+                  <JobFilters
+                    filters={filters}
+                    setFilters={setFilters}
+                    onReset={resetFilters}
+                  />
                 </div>
               </div>
 
@@ -130,7 +136,11 @@ const EmployerJobsPage: React.FC = () => {
               <div className="flex-1 overflow-y-auto scrollbar-hide">
                 {/* If you want to also show filters on mobile, you can show them inline above or below */}
                 <div className="lg:hidden mb-4">
-                  <JobFilters filters={filters} setFilters={setFilters} onReset={resetFilters} />
+                  <JobFilters
+                    filters={filters}
+                    setFilters={setFilters}
+                    onReset={resetFilters}
+                  />
                 </div>
 
                 {isContentLoading && (
@@ -143,7 +153,7 @@ const EmployerJobsPage: React.FC = () => {
 
                 {!isContentLoading && (
                   <>
-                    {(!filteredJobs || filteredJobs.length === 0) ? (
+                    {!filteredJobs || filteredJobs.length === 0 ? (
                       <Card className="text-center py-20">
                         <CardContent>
                           <h3 className="text-xl font-semibold mb-2">
@@ -152,7 +162,9 @@ const EmployerJobsPage: React.FC = () => {
                           <p className="text-gray-500 mb-6">
                             Create your first job posting to start hiring talent
                           </p>
-                          <Button onClick={() => navigate("/employer/dashboard")}>
+                          <Button
+                            onClick={() => navigate("/employer/dashboard")}
+                          >
                             Post Your First Job
                           </Button>
                         </CardContent>
