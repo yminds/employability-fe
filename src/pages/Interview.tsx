@@ -23,7 +23,7 @@ const InterviewSetupNew: React.FC = () => {
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
     const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 
-  const online = useOnline();
+
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
   const [hasPermissions, setHasPermissions] = useState(false);
