@@ -210,12 +210,15 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
         </div>
       </div>
 
-     
-      <CandidateProfileModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-        username={candidate.username}
-      />
+      
+
+      {candidate.current_status !== "From Resume" && (
+        <CandidateProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          username={candidate.username}
+        />
+      )}
     </>
   );
 };
