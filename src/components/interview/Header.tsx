@@ -13,10 +13,11 @@ const Header: React.FC<HeaderProbs> = ({ SkillName, type, skillLevel, interviewI
   return (
     <div className="flex  justify-between items-center h-[40px]">
       <div className="interviewIcon flex gap-6 items-center">
-        <div className="h-16 w-16 flex items-center justify-center rounded-full border border-gray-200">
-
-        <img src={interviewIcon} alt="" className="w-[90%] h-[90%] " />
-        </div>
+        {type === "Skill" && (
+          <div className="h-16 w-16 flex items-center justify-center rounded-full border border-gray-200">
+            <img src={interviewIcon} alt="" className="w-[70%] h-[70%] " />
+          </div>
+        )}
         <div className="">
           <p className="text-base font-normal leading-3 text-[#68696B]">{type} interview</p>
           <p className="text-[20px] font-medium leading-8 ">

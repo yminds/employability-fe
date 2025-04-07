@@ -21,8 +21,7 @@ const InterviewSetupNew: React.FC = () => {
   const [fundamentals, setFundamentals] = useState<any[]>([]);
   const [screenCount, setScreenCount] = useState<number>(0);
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
-    const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
-
+  const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
 
   // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
@@ -171,6 +170,8 @@ const InterviewSetupNew: React.FC = () => {
     const handleCloseTutorial = () => {
       setIsGuideOpen(false);
     };
+
+    
   
     useEffect(() => {
       // Check if the user has disabled the tutorial

@@ -449,7 +449,7 @@ const Interview: React.FC<{
         )}
         <div className={`w-full h-[${isDsaRoundStarted ? "80vh" : "100vh"}] pt-12 `}>
           <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-            <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} />
+            <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} interviewIcon={interviewIcon}  />
             {/* check dsa round started or not */}
 
               {isInterviewEnded ? (
