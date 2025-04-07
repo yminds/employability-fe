@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { Check, Clock, FileText, X, AlertCircle } from "lucide-react";
@@ -41,6 +39,9 @@ export default function JobInvitation() {
   } = useCheckInviteStatusQuery(inviteId || "", {
     skip: !inviteId,
   });
+
+  console.log("inviteStatusData",inviteStatusData);
+  
 
   const jobId = inviteStatusData?.data?.jobDetails;
 
@@ -101,10 +102,11 @@ export default function JobInvitation() {
   useEffect(() => {
     if (!userCheckInitiated && inviteStatusData?.data) {
       const candidateEmail = inviteStatusData?.data?.candidateInfo?.email;
-      if (candidateEmail) {
+      console.log("candidateEmail",candidateEmail)
+      if (candidateEmail && inviteId) {
         setUserCheckInitiated(true);
 
-        checkUserExists({ email: candidateEmail })
+        checkUserExists({ email: candidateEmail , inviteId:inviteId })
           .unwrap()
           .then((response) => {
             setUserExists(!!response.userId);
@@ -116,7 +118,7 @@ export default function JobInvitation() {
           });
       }
     }
-  }, [inviteStatusData, checkUserExists, userCheckInitiated]);
+  }, [inviteStatusData, checkUserExists, userCheckInitiated,inviteId]);
 
   // Handle action from URL parameter
   useEffect(() => {
@@ -285,9 +287,9 @@ export default function JobInvitation() {
     }
     if (userExists) {
       window.location.href =
-        "https://employability.ai/login?redirect=dashboard";
+        "https://employability.ai/login";
     } else {
-      window.location.href = "https://employability.ai/signup";
+      window.location.href = `https://employability.ai/signup?inviteId=${inviteId}`;
     }
   };
 
