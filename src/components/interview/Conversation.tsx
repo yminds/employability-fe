@@ -75,12 +75,12 @@ const Conversation: React.FC<{
           )
         )}
          <div ref={scrollRef} />
-      </div>
-
-      {/* Bottom Gradient Overlay */}
-      {layoutType === 1 && (
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
-      )}
+      </div>
+       
+      {/* Bottom Gradient Overlay */}
+      {/* {layoutType === 1 && ( */}
+      {/* )} */}
     </div>
   );
 };
@@ -102,7 +102,7 @@ const Message: React.FC<{
             message.role !== "User" ? "text-[#08A358]" : "text-[#228BBF]"
           } font-ubuntu font-medium text-sm`}
         >
-          {message.role === 'USER' ? `${userName}`: 'AI'}
+          {message.role === 'USER' ? `${userName}`: 'AI Interviewer'}
         </span>
         <p className="text-left font-ubuntu text-base text-slate-900">
           {message.message}

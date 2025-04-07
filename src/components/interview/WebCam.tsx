@@ -10,15 +10,15 @@ const WebCam: React.FC = () => {
 
   
   return (
-    <div className="relative w-full max-w-full h-[45vh]">
+    <div className="relative w-full max-w-full h-[50%]">
       <Webcam
         audio={false}
-        height={900}
+        height="auto"
         screenshotFormat="image/jpeg"
         width={1280}
         videoConstraints={{
           width: 1280,
-          height: 850,
+          // height: 850,
           facingMode: "user",
         }}
         className="w-full h-full rounded-xl object-cover transform -scale-x-100"

@@ -5,6 +5,7 @@ import { useCameraCheck } from "@/hooks/useCameraCheck";
 import camera from '@/assets/screen-setup/camera.svg'
 import check_circle from '@/assets/screen-setup/check_circle.svg'
 import person from '@/assets/screen-setup/person-skeleton.svg'
+import unCheck_circle from "@/assets/screen-setup/unCheck_circle.png";
 
 interface CameraCheckProps {
   onCameraChange: (isCameraSelected: boolean) => void;
@@ -62,24 +63,20 @@ const CameraCheck: React.FC<CameraCheckProps> = ({
               alt="Camera Icon"
             />
           </span>
-          <span className="text-[#333] text-xl not-italic font-medium leading-[normal]">
+          <span className="text-[#333] text-[18px] not-italic font-medium leading-[normal]">
             Camera Check
           </span>
         </div>
-        {isCameraSelected && (
+        {isCameraSelected ? (
+          <div className="flex  gap-1 relative p-1 pr-3 border border-green-500 rounded-2xl items-center bg-[#DBFFEA]">
+              <input type="checkbox" checked readOnly className="w-6 h-6 appearance-none" />
+              <img className="h-6 w-6 absolute" src={check_circle} alt="UnCheck" />
+              <p className="font-ubuntu text-green-600 text-sm">Checked</p>
+          </div>
+        ) : (
           <div className="flex items-center gap-2 relative">
-            <input
-              type="checkbox"
-              checked
-              readOnly
-              id="camera-check"
-              className="w-6 h-6 appearance-none"
-            />
-            <img
-              className="h-6 w-6 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-sm"
-              src={check_circle}
-              alt="Checked"
-            />
+            <input type="checkbox" checked readOnly className="w-6 h-6 appearance-none" />
+            <img className="h-6 w-8 absolute" src={unCheck_circle} alt="UnCheck" />
           </div>
         )}
       </div>

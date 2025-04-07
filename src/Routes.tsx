@@ -209,10 +209,10 @@ export const routes: RouteConfig[] = [
     route: "/projects",
     component: <ProjectsPage />,
   },
-  {
-    route: "/example",
-    component: <Example />,
-  },
+  // {
+  //   route: "/example",
+  //   component: <Example />,
+  // },
   {
     route: "/project-listing",
     component: <ProjectListing />,

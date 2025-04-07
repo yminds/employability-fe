@@ -199,14 +199,19 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
     // Start the interview after closing the tutorial
     navigate(`/interview/${interviewId}`, {
-      state: { title: skill, skillId, skillPoolId, level, type: "Skill" },
+      state: { title: skill, skillId, skillPoolId, level, type: "Skill" , interviewIcon: skillImg},
     });
   };
 
   const handleResumeInterView = () => {
-    navigate(`/interview/${latest_interview_status?.interview_id}`, {
-      state: { title: skill, skillPoolId, level, type: "Skill", isResume: true },
-    });
+    if(dontShowAgain){
+
+      navigate(`/interview/${latest_interview_status?.interview_id}`, {
+        state: { title: skill, skillPoolId, level, type: "Skill", isResume: true },
+      });
+    }else{
+      setShowTutorial(true);
+    }
   };
   return (
     <>
