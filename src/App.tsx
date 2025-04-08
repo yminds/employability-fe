@@ -1,6 +1,5 @@
 // # Packages
 import React from "react";
-import { HelmetProvider  } from "react-helmet-async";
 
 // # CSS / Images
 import "./App.css";
@@ -14,13 +13,11 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const App: React.FC = () => {
   return (
-    <HelmetProvider>
-      <GoogleOAuthProvider clientId={process.env.VITE_GOOGLE_CLIENT_ID || " "}>
-        <MainLayout>
-          <AppRoutes />
-        </MainLayout>
-      </GoogleOAuthProvider>
-    </HelmetProvider>
+    <GoogleOAuthProvider clientId={process.env.VITE_GOOGLE_CLIENT_ID || " "}>
+      <MainLayout>
+        <AppRoutes />
+      </MainLayout>
+    </GoogleOAuthProvider>
   );
 };
 

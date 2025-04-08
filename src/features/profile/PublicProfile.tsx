@@ -121,44 +121,33 @@ const PublicProfile: React.FC = () => {
       {/* Add Helmet for dynamic meta tags */}
       <Helmet>
         <title key="title">{profileName} | EmployAbility.AI</title>
+        <meta name="description" content={profileBio} />
 
-        {/* Open Graph meta tags */}
+        {/* Open Graph / Facebook meta tags */}
         <meta
-          key="og:title"
           property="og:title"
           content={`${profileName} | EmployAbility.AI`}
         />
+        <meta property="og:description" content={profileBio} />
         <meta
-          key="og:description"
-          property="og:description"
-          content={profileBio}
+          property="og:image"
+          content={profile?.profilePicture || profileImage}
         />
-        <meta key="og:image" property="og:image" content={profileImage} />
-        <meta key="og:url" property="og:url" content={profileUrl} />
-        <meta key="og:type" property="og:type" content="profile" />
-        <meta
-          key="site_name"
-          property="og:site_name"
-          content="EmployAbility.AI"
-        />
+        <meta property="og:url" content={profileUrl} />
+        <meta property="og:type" content="profile" />
+        <meta property="og:site_name" content="EmployAbility.AI" />
 
         {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
         <meta
-          key="twitter:card"
-          name="twitter:card"
-          content="summary_large_image"
-        />
-        <meta
-          key="twitter:title"
           name="twitter:title"
           content={`${profileName} | EmployAbility.AI`}
         />
+        <meta name="twitter:description" content={profileBio} />
         <meta
-          key="twitter:description"
-          name="twitter:description"
-          content={profileBio}
+          name="twitter:image"
+          content={profile?.profilePicture || profileImage}
         />
-        <meta key="twitter:image" name="twitter:image" content={profileImage} />
       </Helmet>
 
       <div className="lg:hidden xl:hidden 2xl:hidden">
