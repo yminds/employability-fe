@@ -79,15 +79,17 @@ const TryThingsSection: React.FC = () => {
     useGetUserDetailsQuery(userId || "", {
       refetchOnMountOrArgChange: true,
     });
-  console.log("data:", userDetails?.data);
+  // Get candidate data directly from user object if it exists
+  const candidateData = userDetails?.data?.candidate_id;
+
   const [updateUser] = useUpdateUserMutation();
 
   const goalId = goalsData?.data?.[0]?._id || "";
 
   // Check if resume upload is complete
   const isUploadResumeComplete = (user: any) => {
-    return  !!user?.parsedResume;
-  }
+    return !!user?.parsedResume;
+  };
 
   // Check if bio is complete
   const isBioComplete = (user: any) => {
@@ -133,9 +135,45 @@ const TryThingsSection: React.FC = () => {
     return Array.isArray(user?.certificates) && user.certificates.length > 0;
   };
 
-  // Check if parsed resume has data for a section
+  // Check if parsed resume or candidate data has data for a section
   const hasParsedResumeData = (section: string) => {
-    const parsedResume = userDetails?.data?.parsedResume;
+    const user = userDetails?.data;
+
+    // If candidate_id exists, use candidate data instead of parsedResume
+    if (candidateData) {
+      const candidate = candidateData;
+
+      switch (section) {
+        case "basicInfo":
+          return !!(
+            candidate.name ||
+            (candidate.contact &&
+              (candidate.contact.email || candidate.contact.phone)) ||
+            candidate.role ||
+            candidate.experience_level
+          );
+        case "experience":
+          return (
+            Array.isArray(candidate.experience) &&
+            candidate.experience.length > 0
+          );
+        case "education":
+          return (
+            Array.isArray(candidate.education) && candidate.education.length > 0
+          );
+        case "certification":
+          // Check if candidate has certifications or projects that can be used as certifications
+          return (
+            (Array.isArray(candidate.awards) && candidate.awards.length > 0) ||
+            (Array.isArray(candidate.projects) && candidate.projects.length > 0)
+          );
+        default:
+          return false;
+      }
+    }
+
+    // If no candidate_id, use parsedResume as before
+    const parsedResume = user?.parsedResume;
     if (!parsedResume) return false;
 
     switch (section) {
@@ -179,7 +217,7 @@ const TryThingsSection: React.FC = () => {
 
   // Helper function to check if a section is complete
   const isComplete = (section: string) => {
-    const user = userDetails.data;
+    const user = userDetails?.data;
     switch (section) {
       case "basicInfo":
         return isBasicInfoComplete(user);
@@ -199,8 +237,8 @@ const TryThingsSection: React.FC = () => {
     if (userDetails) {
       const user = userDetails.data;
       let progress = 0;
-      const totalSections = user?.has_resume === false ? 6 : 7
-      const sectionWeight = 100 / totalSections
+      const totalSections = user?.has_resume === false ? 6 : 7;
+      const sectionWeight = 100 / totalSections;
 
       if (isUploadResumeComplete(user)) {
         progress += sectionWeight;
@@ -408,7 +446,7 @@ const TryThingsSection: React.FC = () => {
       defaultCards.push({
         image: AddPictureimg,
         alt: "Certification",
-        description: "Spotlight your professional acheivements.",
+        description: "Spotlight your professional achievements.",
         buttonText: getButtonText("certification", "Add Certification"),
         route: "/add-certification",
         isOptional: true,
@@ -417,7 +455,9 @@ const TryThingsSection: React.FC = () => {
     }
 
     // Only add resume card if user hasn't uploaded a resume and hasn't indicated they don't have one
+    // Skip this if candidate_id exists since we already have their data
     if (
+      !candidateData &&
       user.has_resume !== false &&
       (!user.parsedResume || Object.keys(user.parsedResume).length === 0)
     ) {
@@ -577,7 +617,6 @@ const TryThingsSection: React.FC = () => {
       )}
 
       {/* Upload Modal */}
-
       {showUploadModal && (
         <UnifiedUploadModal
           isOpen={showUploadModal}

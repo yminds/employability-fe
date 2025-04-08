@@ -1,6 +1,10 @@
 import { useState, useEffect, type FormEvent } from "react";
-import { useLoginMutation, useRegisterUserMutation } from "@/api/authApiSlice";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useCandidateInviteQuery,
+  useLoginMutation,
+  useRegisterUserMutation,
+} from "@/api/authApiSlice";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import User from "@/assets/sign-up/user.png";
 import Mail from "@/assets/sign-up/mail.png";
 import Password from "@/assets/sign-up/password.png";
@@ -24,6 +28,10 @@ interface SignupData {
 const SignupForm = () => {
   const navigate = useNavigate();
   const { role: urlRole } = useParams();
+  const location = useLocation();
+
+  const queryParams = new URLSearchParams(location.search);
+  const inviteId = queryParams.get("inviteId");
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -36,6 +44,30 @@ const SignupForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Check invite validity if inviteId exists
+  const { data: inviteData } = useCandidateInviteQuery(
+    { inviteId: inviteId || "" },
+    { skip: !inviteId }
+  );
+
+  useEffect(() => {
+    if (inviteData?.success) {
+      const { candidate } = inviteData;
+      if (candidate.name) {
+        const nameParts = candidate.name.split(" ");
+        if (nameParts.length >= 2) {
+          setFirstName(nameParts[0]);
+          setLastName(nameParts.slice(1).join(" "));
+        } else {
+          setFirstName(candidate.name);
+        }
+      }
+      if (candidate.contact && candidate.contact.email) {
+        setEmail(candidate.contact.email);
+      }
+    }
+  }, [inviteData]);
 
   const handleCustomSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,6 +86,7 @@ const SignupForm = () => {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       role: urlRole,
+      ...(inviteId && { invite_id: inviteId }),
     };
     try {
       const result = await signup(signupData);
@@ -63,7 +96,7 @@ const SignupForm = () => {
         const loginResponse = await login({ email, password });
 
         if (loginResponse.data) {
-          navigate("/setexperience"); // Navigate after successful login
+          navigate("/setexperience");
         }
       } else {
         if (
@@ -135,7 +168,7 @@ const SignupForm = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  
+
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
@@ -163,36 +196,45 @@ const SignupForm = () => {
       <div className="flex flex-col justify-center flex-1 items-center p-6 md:p-12">
         <div className="w-full max-w-md bg-white rounded-lg p-8">
           {/* Back Button */}
-          <div className="flex items-center gap-2 mb-6">
-            <button
-              onClick={() => navigate("/login")}
-              className="d-block hover:text-green-600 text-black text-sm flex items-center"
-            >
-              <img
-                className="w-4 h-4 mr-2"
-                src={arrow || "/placeholder.svg"}
-                alt="Back Arrow"
-              />{" "}
-              <span>Back</span>
-            </button>
-          </div>
+          {!inviteId && (
+            <div className="flex items-center gap-2 mb-6">
+              <button
+                onClick={() => navigate("/login")}
+                className="d-block hover:text-green-600 text-black text-sm flex items-center"
+              >
+                <img
+                  className="w-4 h-4 mr-2"
+                  src={arrow || "/placeholder.svg"}
+                  alt="Back Arrow"
+                />{" "}
+                <span>Back</span>
+              </button>
+            </div>
+          )}
+
           {/* Header */}
 
           <form className="space-y-4" onSubmit={handleCustomSignup}>
-            <div className="h-[84px] flex flex-col justify-around mx-auto">
+            <div
+              className={`flex flex-col justify-around mx-auto ${
+                inviteId ? "h-[60px]" : "h-[84px]"
+              }`}
+            >
               <h1 className="text-2xl font-bold text-gray-900">
                 Create Your Account
               </h1>
-              <p className="text-sm text-gray-500">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => navigate("/login")}
-                  className="text-green-600 underline hover:text-green-800"
-                >
-                  Log in
-                </button>
-              </p>
+              {!inviteId && (
+                <p className="text-sm text-gray-500">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="text-green-600 underline hover:text-green-800"
+                  >
+                    Log in
+                  </button>
+                </p>
+              )}
             </div>
 
             {error && (
@@ -326,7 +368,10 @@ const SignupForm = () => {
             </Button>
           </form>
           {/* Social Login */}
-          <SocialLogin onSocialLogin={handleSocialLogin} />
+          <SocialLogin
+            onSocialLogin={handleSocialLogin}
+            inviteId={inviteId || undefined}
+          />
         </div>
       </div>
     </section>

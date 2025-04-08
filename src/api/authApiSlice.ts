@@ -5,6 +5,7 @@ interface RegisterUserPayload {
   password: string;
   firstName: string;
   lastName: string;
+  invite_id?: string;
 }
 
 interface SocialAuthPayload {
@@ -21,16 +22,16 @@ interface AuthResponse {
 }
 
 interface UpdateFirstTimeUserPayload {
-  user_id: string; 
+  user_id: string;
   phone_number?: string;
-  experience_level?: "" | "entry" | "mid" | "senior"; 
+  experience_level?: "" | "entry" | "mid" | "senior";
 }
 
 interface User {
   id: string;
   name: string;
   email: string;
-  [key: string]: any; 
+  [key: string]: any;
 }
 
 // New interfaces for phone verification
@@ -73,14 +74,20 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: credentials,
       }),
     }),
-    updateFirstTimeUser: builder.mutation<AuthResponse, UpdateFirstTimeUserPayload>({
+    updateFirstTimeUser: builder.mutation<
+      AuthResponse,
+      UpdateFirstTimeUserPayload
+    >({
       query: ({ user_id, ...data }) => ({
         url: `/api/v1/user/update-first-time/${user_id}`,
         method: "PUT",
         body: data,
       }),
     }),
-    verifyPhone: builder.mutation<PhoneVerificationResponse, VerifyPhonePayload>({
+    verifyPhone: builder.mutation<
+      PhoneVerificationResponse,
+      VerifyPhonePayload
+    >({
       query: (data) => ({
         url: "/api/v1/phone/verify-phone",
         method: "POST",
@@ -101,6 +108,12 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    candidateInvite: builder.query({
+      query: ({ inviteId }) => ({
+        url: `/api/v1/user/invite/${inviteId}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -111,5 +124,6 @@ export const {
   useUpdateFirstTimeUserMutation,
   useVerifyPhoneMutation,
   useVerifyOTPMutation,
-  useResendOTPMutation
+  useResendOTPMutation,
+  useCandidateInviteQuery,
 } = authApiSlice;
