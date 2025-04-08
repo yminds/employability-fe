@@ -1,5 +1,6 @@
 import type React from "react";
 import { useParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import {
   useGetPublicProfileQuery,
   useGetPublicProfileViewCountMutation,
@@ -36,6 +37,14 @@ const PublicProfile: React.FC = () => {
   const handleEdit = () => {
     console.log("");
   };
+
+  const profileFirstName = profile?.firstName || "User";
+  const profileName = profile?.name || "User Profile";
+  const profileBio =
+    profile?.bio ||
+    `Check out ${profileFirstName}'s profile on EmployAbility.AI. Discover their skills, experience, and achievements.`;
+  const profileImage = "https://employability.ai/employabilityLogo.jpg";
+  const profileUrl = `https://employability.ai/profile/${username}`;
 
   if (isLoading) return <ProfileSkeleton />;
 
@@ -109,6 +118,31 @@ const PublicProfile: React.FC = () => {
 
   return (
     <div className="w-full max-w-screen-xl mx-auto p-4">
+      {/* Add Helmet for dynamic meta tags */}
+      <Helmet>
+        <title>{profileName} | EmployAbility.AI</title>
+
+        {/* Open Graph meta tags */}
+        <meta
+          property="og:title"
+          content={`${profileName} | EmployAbility.AI`}
+        />
+        <meta property="og:description" content={profileBio} />
+        <meta property="og:image" content={profileImage} />
+        <meta property="og:url" content={profileUrl} />
+        <meta property="og:type" content="profile" />
+        <meta property="og:site_name" content="EmployAbility.AI" />
+
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={`${profileName} | EmployAbility.AI`}
+        />
+        <meta name="twitter:description" content={profileBio} />
+        <meta name="twitter:image" content={profileImage} />
+      </Helmet>
+
       <div className="lg:hidden xl:hidden 2xl:hidden">
         <div className="flex gap-2 mb-3.5">
           <img
