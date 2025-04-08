@@ -1,6 +1,6 @@
 import type React from "react";
 import { useParams } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 import {
   useGetPublicProfileQuery,
   useGetPublicProfileViewCountMutation,
@@ -120,7 +120,19 @@ const PublicProfile: React.FC = () => {
     <div className="w-full max-w-screen-xl mx-auto p-4">
       {/* Add Helmet for dynamic meta tags */}
       <Helmet>
-        <title key="title">{profileName} | EmployAbility.AI</title>
+        <meta property="og:title" content="" />
+        <meta property="og:description" content="" />
+        <meta property="og:image" content="" />
+        <meta property="og:url" content="" />
+        <meta property="og:type" content="" />
+        <meta property="og:site_name" content="" />
+        <meta name="twitter:card" content="" />
+        <meta name="twitter:title" content="" />
+        <meta name="twitter:description" content="" />
+        <meta name="twitter:image" content="" />
+
+        {/* Then add new meta tags */}
+        <title>{profileName} | EmployAbility.AI</title>
         <meta name="description" content={profileBio} />
 
         {/* Open Graph / Facebook meta tags */}
@@ -129,10 +141,7 @@ const PublicProfile: React.FC = () => {
           content={`${profileName} | EmployAbility.AI`}
         />
         <meta property="og:description" content={profileBio} />
-        <meta
-          property="og:image"
-          content={profile?.profilePicture || profileImage}
-        />
+        <meta property="og:image" content={profileImage} />
         <meta property="og:url" content={profileUrl} />
         <meta property="og:type" content="profile" />
         <meta property="og:site_name" content="EmployAbility.AI" />
@@ -144,10 +153,7 @@ const PublicProfile: React.FC = () => {
           content={`${profileName} | EmployAbility.AI`}
         />
         <meta name="twitter:description" content={profileBio} />
-        <meta
-          name="twitter:image"
-          content={profile?.profilePicture || profileImage}
-        />
+        <meta name="twitter:image" content={profileImage} />
       </Helmet>
 
       <div className="lg:hidden xl:hidden 2xl:hidden">
