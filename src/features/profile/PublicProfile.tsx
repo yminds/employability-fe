@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import ProfileSkeleton from "./publicProfileSkeleton/profile-skeleton";
 import FeaturedInterviewSection from "./FeaturedInterviewSection";
 import LogoIcon from "../../assets/sidebar/logo.svg";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -36,6 +37,22 @@ const PublicProfile: React.FC = () => {
   const handleEdit = () => {
     console.log("");
   };
+
+  const profileFirstName = profile?.firstName || "User";
+  const profileName = profile?.name || "User Profile";
+  const profileBio =
+    profile?.bio ||
+    `Check out ${profileFirstName}'s profile on EmployAbility.AI. Discover their skills, experience, and achievements.`;
+  const profileImage = "https://employability.ai/employabilityLogo.jpg";
+  const profileUrl = `https://employability.ai/profile/${username}`;
+
+  useMetaTags({
+    title: `${profileName} | EmployAbility.AI`,
+    description: profileBio,
+    image: profileImage,
+    url: profileUrl,
+    type: "profile",
+  });
 
   if (isLoading) return <ProfileSkeleton />;
 

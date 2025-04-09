@@ -78,6 +78,10 @@ const Interview: React.FC<{
   userExperience: string | undefined;
   Fundamentals: string | string[];
   skills_required: string | string[];
+  comanyDetails: {
+    name : string;
+    location:any
+  }
   interviewIcon?: string;
 }> = ({
   interviewTopic,
@@ -91,6 +95,7 @@ const Interview: React.FC<{
   userExperience,
   Fundamentals,
   skills_required,
+  comanyDetails,
   interviewIcon,
 }) => {
     // console.log("in interviews jobDescription", jobDescription);
@@ -374,6 +379,7 @@ const Interview: React.FC<{
         projectId: projectId,
         userExperience: userExperience,
         skills_required: skills_required,
+        companyDetails: comanyDetails,
       }).unwrap();
 
       // console.log("response", response);

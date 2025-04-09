@@ -535,7 +535,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                         >
                           {isLoading
                             ? "Saving..."
-                            : initialData
+                            : initialData?.isEditMode
                             ? "Update Job"
                             : "Post Job"}
                         </Button>
