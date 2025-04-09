@@ -1,5 +1,5 @@
 // components/InterviewFilters.tsx
-import React, { useState } from "react";
+import React from "react";
 import { Search } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,6 @@ import {
   SubmissionStatus,
   SortOption,
 } from "../InterviewCandidatesView";
-import { FilterModal, type FilterValues } from "./FilterModal";
 import Filter from "@/assets/employer/filter.svg";
 import { Button } from "@/components/ui/button";
 
@@ -28,6 +27,7 @@ interface InterviewFiltersProps {
   setSubmissionStatus: (value: SubmissionStatus) => void;
   sortBy: SortOption;
   setSortBy: (value: SortOption) => void;
+  onOpenFilterModal: () => void;
 }
 
 export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
@@ -39,12 +39,8 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
   setSubmissionStatus,
   sortBy,
   setSortBy,
+  onOpenFilterModal,
 }) => {
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-
-  const handleApplyFilters = (filters: FilterValues) => {
-    console.log("Applied filters:", filters);
-  };
   return (
     <>
       <div className="flex flex-wrap gap-2">
@@ -148,7 +144,7 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
         {/* Filter Button */}
         <Button
           className="flex items-center justify-center border px-3.5 py-2 rounded-md bg-white hover:bg-[#f0f3f7] transition-colors"
-          onClick={() => setIsFilterModalOpen(true)}
+          onClick={onOpenFilterModal}
         >
           <img
             src={Filter || "/placeholder.svg"}
@@ -176,7 +172,7 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="recent_submissions">
-                Recent Submissionss
+                Recent Submissions
               </SelectItem>
               <SelectItem value="past_submissions">Past Submissions</SelectItem>
               <SelectItem value="rating_high_to_low">
@@ -189,12 +185,6 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
           </Select>
         </div>
       </div>
-      {/* Filter Modal */}
-      <FilterModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        onApply={handleApplyFilters}
-      />
     </>
   );
 };

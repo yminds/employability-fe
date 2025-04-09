@@ -1,6 +1,6 @@
 // components/CandidateCard.tsx
 import React from "react";
-import { MoreVertical } from "lucide-react";
+import { Book, Bookmark, MoreVertical } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +44,9 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
 
   // Get time since last update
   const timeSinceUpdate = getTimeSinceUpdate(candidate);
+
+  console.log("timeSinceUpdate",timeSinceUpdate);
+  
 
   // Check if we should show report and shortlist options
   const showReportAndShortlist = canShowReportAndShortlist(candidate);
@@ -188,7 +191,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                     className={`text-sm font-medium ${submissionBadge.textColor}`}
                   >
                     {submissionBadge.text}
-                    {candidate.has_report &&
+                    {candidate.has_report && candidate.status === 'completed' &&
                       timeSinceUpdate &&
                       ` ${timeSinceUpdate}`}
                   </span>
@@ -306,7 +309,10 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                           Shortlisting...
                         </span>
                       ) : (
-                        <>Shortlist</>
+                        <>
+                        <Bookmark/>
+                        Shortlist
+                        </>
                       )}
                     </Button>
                   )}
