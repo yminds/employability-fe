@@ -13,12 +13,16 @@ interface FilterPanelProps {
   isOpen: boolean;
   onReset: () => void;
   onApply: () => void;
+  selectedSource: string;
+  onSourceChange: (source: string) => void;
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
   isOpen,
   onReset,
   onApply,
+  selectedSource,
+  onSourceChange,
 }) => {
   if (!isOpen) return null;
 
@@ -26,7 +30,10 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     <div className="bg-white rounded-lg border border-[#d6d7d9] p-4 mb-4 text-body2">
       <div>
         <label className="text-sm font-medium block mb-2">Select sources</label>
-        <Select defaultValue="all">
+        <Select 
+          value={selectedSource}
+          onValueChange={(value) => onSourceChange(value)}
+        >
           <SelectTrigger className="border-[#d6d7d9] bg-white">
             <SelectValue placeholder="All Candidates" />
           </SelectTrigger>
