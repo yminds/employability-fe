@@ -320,7 +320,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
                   </span>
                 </div>
               )}
-              {interviewType !== "Job" && (
+              {!["Full", "Screening", "Job"].includes(interviewType) && (
                 <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                   <PopoverTrigger asChild>
                     <button className="p-1">

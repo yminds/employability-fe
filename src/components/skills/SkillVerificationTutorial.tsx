@@ -1,19 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X } from "lucide-react";
-import step1 from "@/assets/skills/step1.png"
-import step2 from "@/assets/skills/step2.png"
-import step3 from "@/assets/skills/step3.png"
-import step4 from "@/assets/skills/step4.png"
+import step1 from "@/assets/skills/step1.png";
+import step2 from "@/assets/skills/step2.png";
+import step3 from "@/assets/skills/step3.png";
+import step4 from "@/assets/skills/step4.png";
+import step5 from "@/assets/skills/step5.png";
+import verifyStep1 from "@/assets/skills/verifyStep1.png";
+import verifyStep2 from "@/assets/skills/verifyStep2.png";
 import { Checkbox } from "@/components/ui/checkbox"
-
-interface SlideItem {
-  image: string;
-  title: string;
-  description: string;
-  step: string;
-  listItems?: string[];
-  footer?: string;
-}
 
 interface SkillVerificationTutorialProps {
   onClose: () => void;
@@ -33,76 +27,56 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
   const [currentSlide, setCurrentSlide] = useState(0);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  const slides: SlideItem[] = component === "SkillsCard" ? [
-    {
-      image: `${step1}`,
-      title: "Check Your Setup",
-      description: "Before starting, make sure to",
-      step: `${currentSlide + 1}`,
-      listItems: [
-        "Ensure your microphone is working",
-        "Check that your camera is functioning properly"
-      ]
-    },
-    {
-      image: `${step2}`,
-      title: "Enable Screen sharing",
-      description: "Before starting, make sure to",
-      step: `${currentSlide + 1}`,
-      listItems: [
-        "Ensure your share Entire Screen",
-        "Make sure to Enable audio sharing as well."
-      ]
-    },
-    {
-      image: `${step3}`,
-      title: "Interview Process",
-      description: "Answering Questions in Interview",
-      step: `${currentSlide + 1}`,
-      listItems: [
-        "Employability AI will ask questions",
-        "Respond to the AI Agent's questions. Press 'Done Answering' to move to the next one."
-      ]
-    },
-    {
-      image: `${step4}`,
-      title: "Play Fair, Perform Your Best: Follow the Rules",
-      description: "Before starting, please review these rules to ensure fairness and integrity.",
-      step: `${currentSlide + 1}`,
-      listItems: [
-        "Do not use multiple screens or external resources to answer questions.",
-        "Be honest in your responses—as we automatically detect suspicious activity.",
-        "Your interview results will be reviewed by the employer, including your recorded video."
-      ],
-      footer: "*Any attempts to cheat or bypass these rules will result in Permanent Suspension from the platform."
-    }
-  ] : [
-    {
-      image: `${step2}`,
-      title: "Enable Screen sharing",
-      description: "Before starting, make sure to",
-      step: "",
-      listItems: [
-        "Ensure your share Entire Screen",
-        "Make sure to Enable audio sharing as well."
-      ]
-    }
-  ];
+  const slides =
+    component === "SkillsCard"
+      ? [
+          {
+            image: `${verifyStep1}`,
+            title: "Get Ready to Verify Your Skill",
+            description: "To help you showcase your abilities, we’ll run an interview to test your React Skill.",
+            step: `${currentSlide + 1}`,
+          },
+          {
+            image: `${verifyStep2}`,
+            title: "Get Your Skill Report!",
+            description:
+              "Once the interview is complete, you’ll receive a detailed report on your skills. You can share it with employers to showcase your abilities.",
+            step: `${currentSlide + 1}`,
+          },
+          // {
+          //   image: `${step3}`,
+          //   title: "Proceed to Interview",
+          //   description: "Once you've checked your setup, click on 'Proceed to Interview' to begin the skill interview.",
+          //   step: `${currentSlide + 1}`
+          // },
+          // {
+          //   image: `${step4}`,
+          //   title: "Interview Process",
+          //   description: "During the interview, respond to the AI Agent's questions. Press 'Done Answering' to move to the next one.",
+          //   step: `${currentSlide + 1}`
+          // }
+        ]
+      : [
+          {
+            image: `${step2}`,
+            title: "Enable Screen Sharing",
+            description:
+              "While sharing as 'Entire Screen' or 'Application Window', make sure to enable audio sharing as well.",
+            step: `${currentSlide + 2}`,
+          },
+        ];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dialogRef.current &&
-        !dialogRef.current.contains(event.target as Node)
-      ) {
+      if (dialogRef.current && !dialogRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
 
@@ -122,58 +96,51 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
-      <div
-        ref={dialogRef}
-        className="bg-white rounded-2xl shadow-lg w-full max-w-[958px] relative flex flex-col"
-      >
+      <div ref={dialogRef} className="bg-white rounded-2xl shadow-lg w-full max-w-[958px] flex flex-col relative">
         {/* Image at the top */}
         <div className="w-full">
           <img
             src={slides[currentSlide].image}
             alt={`Step ${currentSlide + 1}`}
-            className="w-full object-cover rounded-t-2xl"
+            className="w-full object-cover rounded-t-2xl min-h-[400px] max-h-[520px]"
           />
         </div>
 
         {/* Content below the image */}
-        <div className="p-8 pt-6">
-          <button
-            onClick={onClose}
-            className="absolute top-[35px] right-8 text-gray-500 hover:text-gray-700 z-10"
-          >
+        <div className="p-9 pt-6 ">
+          <button onClick={onClose} className="absolute top-[25px] right-[4.6%] text-gray-500 hover:text-gray-700 z-10">
             <X size={24} />
           </button>
 
           {/* Step Indicator */}
-          {slides[currentSlide].step !== "" && (
-            <div className=" flex-col items-center justify-start text-sm text-gray-600 mb-2 space-y-7 ">
-              <div className="flex items-center justify-start gap-1">
-                {slides.map((_, index) => (
-                  <div key={index} className={` h-1 p-1 rounded-full ${index === currentSlide ? 'bg-grey-8 w-8' : 'bg-gray-300 w-4'}`} />
-                ))}
-              </div>
-              <div className="text-sm text-gray-600 mb-2">Step {slides[currentSlide].step} of {slides.length}</div>
+          <div className=" flex-col items-center justify-start text-sm text-gray-600 mb-2 space-y-2 ">
+            <div className="flex items-center justify-start gap-1">
+              {slides.map((_, index) => (
+                <div
+                  key={index}
+                  className={` h-1 p-1 rounded-full ${index === currentSlide ? "bg-grey-8 w-8" : "bg-gray-300 w-4"}`}
+                />
+              ))}
             </div>
-          )}
+            <div className="text-sm text-gray-600 mb-2">
+              Step {slides[currentSlide].step} of {slides.length}
+            </div>
+          </div>
 
           {/* Title */}
           <h2 className="text-h1 font-dm-sans font-bold text-grey-7 mb-3">{slides[currentSlide].title}</h2>
 
           {/* Description */}
-          <p className="text-gray-700 font-dm-sans text-lg normal-case font-normal leading-6 tracking-[0.27px] mb-4">{slides[currentSlide].description}</p>
-
-          {/* List Items */}
-          {slides[currentSlide].listItems && (
-            <ul className="list-disc pl-5 mb-4 text-grey-9 font-dm-sans text-lg normal-case font-medium leading-6 tracking-[0.27px]">
-              {slides[currentSlide].listItems?.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          )}
-
-          {/* Footer */}
-          {slides[currentSlide].footer && (
-            <p className="text-[#B17002] font-dm-sans text-lg normal-case font-normal leading-6 tracking-[0.27px] mb-4">{slides[currentSlide].footer}</p>
+          <p className="text-gray-600 mb-6">{slides[currentSlide].description}</p>
+          {currentSlide === 0 && (
+            <>
+              <p className="text-gray-600 mb-6">Here’s what you’ll do during the skill interview</p>
+              <ul className="list-disc list-inside text-[#040609] mb-6  ">
+                <li>Answer questions on the skill</li>
+                <li>Work through code snippets</li>
+                <li>Complete a coding exercise</li>
+              </ul>
+            </>
           )}
 
           {/* Bottom Controls */}
@@ -194,10 +161,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
 
             <div className="flex space-x-2">
               {currentSlide > 0 && (
-                <button
-                  onClick={handlePrev}
-                  className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
-                >
+                <button onClick={handlePrev} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded">
                   Previous
                 </button>
               )}
@@ -205,7 +169,7 @@ const SkillVerificationTutorial: React.FC<SkillVerificationTutorialProps> = ({
                 onClick={handleNext}
                 className="px-4 py-2 text-sm bg-[#062549] text-white rounded hover:bg-[#0A3B6C]"
               >
-                {currentSlide < slides.length - 1 ? 'Continue' : 'Start Interview'}
+                {currentSlide < slides.length - 1 ? "Continue" : "Start Interview"}
               </button>
             </div>
           </div>

@@ -38,7 +38,7 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           onChange={handleSearchChange}
         />
       </div>
-      <div className="w-64">
+      <div className="w-[280px]">
         <Select value={selectedSource} onValueChange={handleSourceChange}>
           <SelectTrigger className="border-[#d6d7d9] bg-white h-12">
             <div className="flex items-center gap-2">

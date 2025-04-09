@@ -1,5 +1,6 @@
 import type React from "react";
 import { useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   useGetPublicProfileQuery,
   useGetPublicProfileViewCountMutation,
@@ -36,6 +37,14 @@ const PublicProfile: React.FC = () => {
   const handleEdit = () => {
     console.log("");
   };
+
+  const profileFirstName = profile?.firstName || "User";
+  const profileName = profile?.name || "User Profile";
+  const profileBio =
+    profile?.bio ||
+    `Check out ${profileFirstName}'s profile on EmployAbility.AI. Discover their skills, experience, and achievements.`;
+  const profileImage = "https://employability.ai/employabilityLogo.jpg";
+  const profileUrl = `https://employability.ai/profile/${username}`;
 
   if (isLoading) return <ProfileSkeleton />;
 
@@ -109,6 +118,58 @@ const PublicProfile: React.FC = () => {
 
   return (
     <div className="w-full max-w-screen-xl mx-auto p-4">
+      {/* Add Helmet for dynamic meta tags */}
+      <Helmet>
+        <title>{profileName}</title>
+        <meta name="description" content={profileBio} />
+
+        {/* Open Graph / Facebook meta tags */}
+        <meta
+          property="og:title"
+          content={`${profileName} | EmployAbility.AI`}
+          data-react-helmet="true"
+        />
+        <meta
+          property="og:description"
+          content={profileBio}
+          data-react-helmet="true"
+        />
+        <meta
+          property="og:image"
+          content={profileImage}
+          data-react-helmet="true"
+        />
+        <meta property="og:url" content={profileUrl} data-react-helmet="true" />
+        <meta property="og:type" content="profile" data-react-helmet="true" />
+        <meta
+          property="og:site_name"
+          content="EmployAbility.AI"
+          data-react-helmet="true"
+        />
+
+        {/* Twitter Card tags */}
+        <meta
+          name="twitter:card"
+          content="summary_large_image"
+          data-react-helmet="true"
+        />
+        <meta
+          name="twitter:title"
+          content={`${profileName} | EmployAbility.AI`}
+          data-react-helmet="true"
+        />
+        <meta
+          name="twitter:description"
+          content={profileBio}
+          data-react-helmet="true"
+        />
+        <meta
+          name="twitter:image"
+          content={profileImage}
+          data-react-helmet="true"
+        />
+      </Helmet>
+
       <div className="lg:hidden xl:hidden 2xl:hidden">
         <div className="flex gap-2 mb-3.5">
           <img

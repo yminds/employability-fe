@@ -49,7 +49,7 @@ export default function EditBioModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[579px] p-0 rounded-lg bg-[#FFFFFF]">
-        <div className="flex flex-col justify-center items-start gap-10 p-[42px]">
+        <div className="flex flex-col justify-center items-start gap-7 p-[42px]">
           <DialogHeader className="flex flex-col items-start gap-1 flex-1 self-stretch w-full p-0">
             <div className="flex flex-col items-start gap-1 w-full">
               <DialogTitle className="text-[#000000] text-sub-header">

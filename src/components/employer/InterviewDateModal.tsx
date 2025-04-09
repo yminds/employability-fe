@@ -277,9 +277,9 @@ export function InterviewDateModal({
         </div>
 
         <div className="grid grid-cols-7 gap-1 mb-2">
-          {daysOfWeek.map((day) => (
+          {daysOfWeek.map((day,index) => (
             <div
-              key={day}
+              key={`day-${index}`}
               className="h-10 w-10 flex items-center justify-center text-[#68696b] text-sm"
             >
               {day}

@@ -1,6 +1,6 @@
 // components/InterviewFilters.tsx
 import React, { useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import {
@@ -49,7 +49,7 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
     <>
       <div className="flex flex-wrap gap-2">
         {/* Search */}
-        <div className="relative w-[200px]">
+        <div className="relative w-[180px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#68696b] w-4 h-4" />
           <input
             type="text"
@@ -68,7 +68,7 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
         >
           {/* Full Interview Option */}
           <div
-            className={`flex items-center space-x-2 px-4 py-2 border rounded-md ${
+            className={`flex items-center gap-2 px-3 py-2 border rounded-md ${
               interviewType === "full" ? "bg-[#f0f3f7]" : "bg-white"
             }`}
           >
@@ -95,7 +95,7 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
 
           {/* Screening Option */}
           <div
-            className={`flex items-center space-x-2 px-4 py-2 border rounded-md ${
+            className={`flex items-center gap-2 px-3 py-2 border rounded-md ${
               interviewType === "screening" ? "bg-[#f0f3f7]" : "bg-white"
             }`}
           >
@@ -131,7 +131,7 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
             setSubmissionStatus(value as SubmissionStatus)
           }
         >
-          <SelectTrigger className="w-[180px] border rounded-md bg-white">
+          <SelectTrigger className="w-[150px] border rounded-md bg-white">
             <SelectValue placeholder="Submission Status">
               {submissionStatus === "all" && "All Candidates"}
               {submissionStatus === "submitted" && "Submitted"}
@@ -159,22 +159,24 @@ export const InterviewFilters: React.FC<InterviewFiltersProps> = ({
 
         {/* Sort by dropdown */}
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm text-[#68696b]">Sort by :</span>
           <Select
             value={sortBy}
             onValueChange={(value) => setSortBy(value as SortOption)}
           >
-            <SelectTrigger className="w-[200px] border rounded-md bg-white">
-              <SelectValue placeholder="Sort by">
-                {sortBy === "rating_high_to_low" && "Rating (High to Low)"}
-                {sortBy === "rating_low_to_high" && "Rating (Low to High)"}
-                {sortBy === "recent_submissions" && "Recent Submissions"}
-                {sortBy === "past_submissions" && "Past Submissions"}
-              </SelectValue>
+            <SelectTrigger className="w-[240px] border rounded-md bg-white">
+              <div className="flex gap-1">
+                <span className="text-sm text-[#68696b]">Sort by :</span>
+                <SelectValue placeholder="Sort by">
+                  {sortBy === "rating_high_to_low" && "Rating (High to Low)"}
+                  {sortBy === "rating_low_to_high" && "Rating (Low to High)"}
+                  {sortBy === "recent_submissions" && "Recent Submissions"}
+                  {sortBy === "past_submissions" && "Past Submissions"}
+                </SelectValue>
+              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="recent_submissions">
-                Recent Submissions
+                Recent Submissionss
               </SelectItem>
               <SelectItem value="past_submissions">Past Submissions</SelectItem>
               <SelectItem value="rating_high_to_low">

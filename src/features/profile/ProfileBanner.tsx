@@ -127,7 +127,7 @@ const ProfileBanner = ({
         backgroundPosition: "center",
       }}
     >
-      <div className="max-w-5xl mx-auto p-8">
+      <div className="mx-auto p-8">
         <div className="flex flex-col gap-8">
           {/* Profile Header */}
           <div className="flex items-center justify-between ">

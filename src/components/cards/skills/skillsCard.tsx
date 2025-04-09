@@ -125,7 +125,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
         : "bg-[#FFF2DB] text-[#D48A0C]";
     }
   };
- 
+
   const skillsLevelObj = { 1: "Basic", 2: "Intermediate", 3: "Advanced" };
 
   const handleViewReport = () => {
@@ -157,7 +157,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
       // Start the interview directly if tutorial is disabled
       navigate(`/interview/${interviewId}`, {
-        state: { title: skill, skillId, skillPoolId, level, type: "Skill" },
+        state: { title: skill, skillId, skillPoolId, level, type: "Skill", interviewIcon: skillImg },
       });
     } else {
       // Show the tutorial, interview will start after confirmation
@@ -199,14 +199,18 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
     // Start the interview after closing the tutorial
     navigate(`/interview/${interviewId}`, {
-      state: { title: skill, skillId, skillPoolId, level, type: "Skill" },
+      state: { title: skill, skillId, skillPoolId, level, type: "Skill", interviewIcon: skillImg },
     });
   };
 
   const handleResumeInterView = () => {
-    navigate(`/interview/${latest_interview_status?.interview_id}`, {
-      state: { title: skill, skillPoolId, level, type: "Skill", isResume: true },
-    });
+    if (dontShowAgain) {
+      navigate(`/interview/${latest_interview_status?.interview_id}`, {
+        state: { title: skill, skillPoolId, level, type: "Skill", isResume: true, interviewIcon: skillImg },
+      });
+    } else {
+      setShowTutorial(true);
+    }
   };
   return (
     <>

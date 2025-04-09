@@ -22,6 +22,7 @@ import ScreeningInterviewsCard from "./ScreeningInterviewsCard";
 import MatchingCandidatesCard from "./MatchingCandidatesCard";
 
 import { useGetInterviewCandidatesQuery } from "../../api/InterviewInvitation";
+import ShortlistedCandidatesView from "./ShortListedCandidatesView";
 
 interface JobListingPageProps {
   job_id: string;
@@ -402,10 +403,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
       );
     } else if (selectedTab === "shortlistedCandidates") {
       return (
-        <div className="mt-8 p-12 bg-white rounded-lg border border-[#d6d7d9] text-center">
-          <p className="text-[#68696b]">
-            Shortlisted Candidates view is coming soon
-          </p>
+        <div className="mt-8">
+          <ShortlistedCandidatesView jobId={job_id} />
         </div>
       );
     } else if (selectedTab === "sentInvitations") {
@@ -427,16 +426,16 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           {/* Breadcrumb skeleton */}
           <div className="h-6 bg-gray-200 rounded w-1/3 mb-6 animate-pulse"></div>
 
-          {/* Job details skeleton */}
+          
           <JobDetailsSkeleton />
 
           <div className="flex gap-6">
             <div className="flex-1 space-y-8">
-              {/* Main content skeleton */}
+              
               <CandidateListSkeleton />
             </div>
 
-            {/* Right section skeleton */}
+            
             <div className="w-[350px] mt-8 space-y-3.5 sticky top-5 h-fit">
               <CardSkeleton />
               <CardSkeleton />
@@ -487,17 +486,17 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           </div>
 
           {/* Right section */}
-          <div className="w-[350px] mt-8 space-y-3.5 sticky top-5 h-fit">
+          <div className="mt-8 space-y-3.5 sticky top-5 h-fit">
             {isLoading ? (
               <>
                 <CardSkeleton />
                 <CardSkeleton />
               </>
             ) : (
-              <>
+              <div className="w-[260px] space-y-3.5">
                 <FullInterviewsCard jobId={job_id} />
                 <ScreeningInterviewsCard jobId={job_id} />
-              </>
+              </div>
             )}
           </div>
         </div>

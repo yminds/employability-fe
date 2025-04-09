@@ -265,6 +265,7 @@ interface ShortlistCandidateParams {
 
 export interface UserExistsRequest {
   email: string;
+  inviteId:string;
 }
 
 export interface UserExistsResponse {
@@ -442,6 +443,16 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    getShortlistedCandiates:builder.query({
+      query:({jobId,sortBy = 'recent'})=>({
+        url:`/api/v1/employerInterviewInvitation/jobs/${jobId}/shortlisted-candidates`,
+        method:"GET",
+        params: { sortBy }
+      }),
+      transformResponse:(response)=>{
+        return response;
+      }
+    })
   }),
   overrideExisting: false,
 });
@@ -464,4 +475,5 @@ export const {
   useGetInterviewStatsQuery,
   useShortlistCandidateMutation,
   useSendInvitationResponseMailMutation,
+  useGetShortlistedCandiatesQuery
 } = interviewApiSlice;

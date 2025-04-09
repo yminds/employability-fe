@@ -9,6 +9,9 @@ import { projectConcepts } from "@/utils/projects/projectConcpets";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import useOnline from "@/hooks/useOnline";
+import { toast } from "sonner";
+import { Info } from "lucide-react";
+import InterviewGuide from "@/components/interview/InterviewGuide";
 
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
@@ -16,14 +19,29 @@ const InterviewSetupNew: React.FC = () => {
   const userExperience = useSelector((state: RootState) => state.auth.user?.experience_level);
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
+  const [screenCount, setScreenCount] = useState<number>(0);
+  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  const [dontShowAgain, setDontShowAgain] = useState<boolean>(false);
+
+  // State to control showing the permission note modal
   const [showPermissionNote, setShowPermissionNote] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<"notEnabled" | "permanentlyBlocked">("notEnabled");
   const [hasPermissions, setHasPermissions] = useState(false);
   const [permissionRequestAttempts, setPermissionRequestAttempts] = useState(0);
   const online = useOnline();
 
-  const { title, skillPoolId, level, type, jobDescription, isResume, Fundamentals = "", projectId, skills_required, comanyDetails } =
-    location.state || {};
+  const {
+    title,
+    skillPoolId,
+    level,
+    type,
+    jobDescription,
+    isResume,
+    Fundamentals = "",
+    projectId,
+    skills_required, comanyDetails,
+    interviewIcon
+  } = location.state || {};
 
   const {
     isInterviewStarted,
@@ -116,7 +134,7 @@ const InterviewSetupNew: React.FC = () => {
 
   useEffect(() => {
     const monitorScreens = async () => {
-      if ('getScreenDetails' in window) {
+      if ("getScreenDetails" in window) {
         try {
           const screenDetails = await (window as any).getScreenDetails();
           const updateScreenCount = () => {
@@ -169,6 +187,37 @@ const InterviewSetupNew: React.FC = () => {
       }, 500);
     }
   }, [online]);
+
+    useEffect(() => {
+      const hasSeenInterviewGuide = localStorage.getItem("hasSeenInterviewGuide");
+      if (hasSeenInterviewGuide === "true") {
+        setIsGuideOpen(false);
+      }else{
+        setIsGuideOpen(true);
+      }
+    }, []);
+  
+    const handleCloseTutorial = () => {
+      setIsGuideOpen(false);
+    };
+
+    
+  
+    useEffect(() => {
+      // Check if the user has disabled the tutorial
+      const hasSeenInterviewGuide = localStorage.getItem("hasSeenInterviewGuide");
+      if (hasSeenInterviewGuide  === "true") {
+        setDontShowAgain(true);
+      }
+    }, []);
+    const handleConfirmInterviewGuide = async () => {
+      console.log("handleConfirmInterviewGuide");
+      
+      if (dontShowAgain) {
+        localStorage.setItem("hasSeenInterviewGuide", "true");
+      }
+      setIsGuideOpen(false);
+    };
 
   if (!online) return <div>You are offline</div>;
 
@@ -249,8 +298,16 @@ const InterviewSetupNew: React.FC = () => {
           <main className="py-4 w-full">
             <div className="flex flex-row items-center justify-between mb-6">
               <div>
-                <div className="text-black text-[32px] font-bold font-ubuntu">Check Your Setup</div>
-                <p className="text-base font-normal text-[#00000099]">
+                <div className="flex items-center gap-4 ">
+                  <p className="text-[#1A1A1A] text-[24px] font-medium font-ubuntu ">Check Your Setup</p>
+                  <p
+                    className="font-[400px] text-[14px] underline text-[#909091] flex gap-1 items-center cursor-pointer mt-2"
+                    onClick={() => setIsGuideOpen(true)}
+                  >
+                    <Info size={16} /> Guide me
+                  </p>
+                </div>
+                <p className="text-[16px] font-normal text-[#00000099]">
                   Before you proceed to the interview, make sure your setup is working properly.
                 </p>
               </div>
@@ -258,8 +315,11 @@ const InterviewSetupNew: React.FC = () => {
               <div>
                 <div className="flex flex-col justify-end items-end gap-2">
                   <button
-                    className={`bg-button ${isProceedButtonEnabled && !showMultipleScreenWarning ? "hover:bg-[#062549]" : "cursor-not-allowed opacity-50"
-                      } text-white rounded-[4px] font-normal text-[14px] w-72 py-2 leading-5`}
+                    className={`bg-button ${
+                      isProceedButtonEnabled && !showMultipleScreenWarning
+                        ? "hover:bg-[#062549]"
+                        : "cursor-not-allowed opacity-50"
+                    } text-white rounded-[4px] font-normal text-[14px] w-72 py-2 leading-5`}
                     onClick={() => {
                       setIsInterviewStarted(true);
                       toggleBrowserFullscreen();
@@ -277,6 +337,18 @@ const InterviewSetupNew: React.FC = () => {
                 </div>
               </div>
             </div>
+            {isGuideOpen && (
+              <InterviewGuide
+                onClose={() => {
+                  setIsGuideOpen(false);
+                  handleConfirmInterviewGuide();
+                }}
+                onConfirm={handleConfirmInterviewGuide}
+                dontShowAgain={dontShowAgain}
+                setDontShowAgain={setDontShowAgain}
+                component={"InterviewSetup"}
+              />
+            )}
             <CheckSetup
               isScreenSharing={isScreenSharing}
               screenStream={screenStream}
@@ -302,9 +374,10 @@ const InterviewSetupNew: React.FC = () => {
           isResume={isResume}
           projectId={projectId}
           userExperience={userExperience}
-          Fundamentals={Fundamentals ? Fundamentals.split(',').map((concept: string) => concept.trim()) : []}
+          Fundamentals={Fundamentals ? Fundamentals.split(",").map((concept: string) => concept.trim()) : []}
           skills_required={skills_required || []}
           comanyDetails={comanyDetails}
+          interviewIcon={interviewIcon || ""}
         />
       )}
     </>
