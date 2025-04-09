@@ -5,7 +5,7 @@ import { useGetFundamentalNamesAsCsvMutation } from '@/api/interviewInvitesApiSl
 import { useUpdateInterviewIdMutation } from '@/api/interviewInvitesApiSlice';
 import { useGetUserSkillIdMutation, useCreateUserSkillsMutation } from '@/api/skillsApiSlice';
 
-const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id:string | undefined, userGoal:string | undefined }> = ({ task, jobDescription, inviteId, user_id, userGoal }) => {
+const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id:string | undefined, userGoal:string | undefined, companyDetails:any }> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails }) => {
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
   const [getFundamentalNamesAsCsv, { data: conceptNamesCSV }] = useGetFundamentalNamesAsCsvMutation();
@@ -86,7 +86,8 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
           title: `${jobDescription.title}`,
           type: `${taskData.interview_type.type === "full" ? 'Full' : 'Screening'}`,
           jobDescription: jobDescription,
-          Fundamentals: conceptNamesCSV?.data
+          Fundamentals: conceptNamesCSV?.data,
+          comanyDetails: companyDetails,
         },
       });
 

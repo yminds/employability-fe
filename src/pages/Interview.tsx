@@ -17,10 +17,12 @@ const InterviewSetupNew: React.FC = () => {
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
   const [showPermissionNote, setShowPermissionNote] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState<"notEnabled" | "permanentlyBlocked">("notEnabled");
   const [hasPermissions, setHasPermissions] = useState(false);
+  const [permissionRequestAttempts, setPermissionRequestAttempts] = useState(0);
   const online = useOnline();
 
-  const { title, skillPoolId, level, type, jobDescription, isResume, Fundamentals = "", projectId, skills_required } =
+  const { title, skillPoolId, level, type, jobDescription, isResume, Fundamentals = "", projectId, skills_required, comanyDetails } =
     location.state || {};
 
   const {
@@ -42,6 +44,8 @@ const InterviewSetupNew: React.FC = () => {
 
   const requestPermissions = async () => {
     try {
+      setPermissionRequestAttempts(prev => prev + 1);
+      
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
@@ -60,8 +64,17 @@ const InterviewSetupNew: React.FC = () => {
     } catch (error) {
       console.error("Error requesting media devices:", error);
       setHasPermissions(false);
-      setShowPermissionNote(true);
+      
+      // If we've tried more than once, assume it's permanently blocked
+      if (permissionRequestAttempts >= 1) {
+        setPermissionStatus("permanentlyBlocked");
+      }
     }
+  };
+
+  const openBrowserSettings = () => {
+    // This just provides instructions as we can't directly open browser settings
+    alert("Please open your browser settings to enable camera and microphone permissions for this website. After changing the settings, refresh the page.");
   };
 
   useEffect(() => {
@@ -70,19 +83,36 @@ const InterviewSetupNew: React.FC = () => {
       .then((devices) => {
         const hasCamera = devices.some((device) => device.kind === "videoinput" && device.label !== "");
         const hasMic = devices.some((device) => device.kind === "audioinput" && device.label !== "");
+        
         if (hasCamera && hasMic) {
           setHasPermissions(true);
         } else {
           setHasPermissions(false);
           setShowPermissionNote(true);
+          
+          // Check if devices exist but don't have labels (likely means they're blocked)
+          const cameraExists = devices.some(device => device.kind === "videoinput");
+          const micExists = devices.some(device => device.kind === "audioinput");
+          
+          if ((cameraExists && !hasCamera) || (micExists && !hasMic)) {
+            // If we've already tried requesting permissions, mark as permanently blocked
+            if (permissionRequestAttempts > 0) {
+              setPermissionStatus("permanentlyBlocked");
+            }
+          }
         }
       })
       .catch((err) => {
         console.error("Error checking devices:", err);
         setHasPermissions(false);
         setShowPermissionNote(true);
+        
+        // If we get a permissions error, consider it permanently blocked
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+          setPermissionStatus("permanentlyBlocked");
+        }
       });
-  }, []);
+  }, [permissionRequestAttempts]);
 
   useEffect(() => {
     const monitorScreens = async () => {
@@ -144,7 +174,7 @@ const InterviewSetupNew: React.FC = () => {
 
   return (
     <>
-      {/* Permission Modal */}
+      {/* Unified Permission Modal */}
       {showPermissionNote && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="relative bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
@@ -166,33 +196,49 @@ const InterviewSetupNew: React.FC = () => {
             <h2 className="text-2xl font-bold mb-6 text-h2">Permissions Required</h2>
             <div className="text-body space-y-3 mb-4">
               <p>This interview requires access to your camera and microphone.</p>
-              <p>
-                Please click the button below to grant access. If you've previously denied permissions, you may need to
-                adjust your browser settings.
-              </p>
-              <p className="text-red-600 font-medium">
-                If you deny access, the interview cannot proceed. Please allow access to your camera and microphone.
-              </p>
+              
+              {permissionStatus === "permanentlyBlocked" ? (
+                <>
+                  <p className="text-red-600 font-medium">
+                    Your browser has blocked access to the camera and microphone.
+                  </p>
+                  <p>
+                    You'll need to manually enable camera and microphone permissions in your browser settings:
+                  </p>
+                  <ol className="list-decimal ml-5 space-y-1 text-sm">
+                    <li>Open your browser settings</li>
+                    <li>Navigate to Site Settings or Privacy & Security</li>
+                    <li>Find Camera and Microphone permissions</li>
+                    <li>Allow access for this website</li>
+                    <li>Refresh this page after changing settings</li>
+                  </ol>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Please click the button below to grant access to your camera and microphone.
+                  </p>
+                  <p className="text-red-600 font-medium">
+                    If you deny access, the interview cannot proceed.
+                  </p>
+                </>
+              )}
             </div>
-            <button className="text-button bg-button text-white px-4 py-2 rounded" onClick={requestPermissions}>
-              Request Permissions
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Retry Permission Block Message */}
-      {!hasPermissions && !showPermissionNote && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white p-6 rounded shadow-lg text-center max-w-md">
-            <h2 className="text-xl font-bold mb-4 text-red-600">Permissions Blocked</h2>
-            <p className="mb-3">
-              Access to your camera and microphone is required to start the interview.
-            </p>
-            <p className="text-sm text-gray-500 mb-5">
-              You've blocked access to the camera, microphone, or have multiple screens connected. Please enable camera and microphone access, and disconnect extra screens from your browser or system settings to continue with the interview.
-            </p>
-
+            {permissionStatus === "permanentlyBlocked" ? (
+              <button 
+                className="text-button bg-button text-white px-4 py-2 rounded w-full" 
+                onClick={() => window.location.reload()}
+              >
+                Refresh Page After Changing Settings
+              </button>
+            ) : (
+              <button 
+                className="text-button bg-button text-white px-4 py-2 rounded w-full" 
+                onClick={requestPermissions}
+              >
+                Request Permissions
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -258,6 +304,7 @@ const InterviewSetupNew: React.FC = () => {
           userExperience={userExperience}
           Fundamentals={Fundamentals ? Fundamentals.split(',').map((concept: string) => concept.trim()) : []}
           skills_required={skills_required || []}
+          comanyDetails={comanyDetails}
         />
       )}
     </>
