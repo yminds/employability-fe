@@ -13,6 +13,8 @@ import { CandidateCard } from "../employer/interviews/CandidateCard";
 import { StatusMessage } from "../employer/interviews/StatusMessageComponent";
 import { SelectAllHeader } from "../employer/interviews/SelectAllHeader";
 import Pagination from "./Pagination";
+import CandidatesSkeletonLoader from "./CandidateCardSkeleton";
+import { FilterModal, type FilterValues } from "../employer/interviews/FilterModal";
 
 // Types
 export type InterviewType = "full" | "screening" | "all";
@@ -49,6 +51,16 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   const [localCandidates, setLocalCandidates] = useState<InterviewCandidate[]>(
     []
   );
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  
+  // Advanced filter states
+  const [advancedFilters, setAdvancedFilters] = useState<FilterValues>({
+    interviewType: "full",
+    submissionType: "submitted",
+    interviewScore: 0,
+    locations: [],
+    workExperience: 0
+  });
 
   // Toast notification
   const { toast } = useToast();
@@ -60,19 +72,26 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     isFetching,
     error,
     refetch,
-  } = useGetInterviewCandidatesQuery({
-    jobId,
-    interviewType: interviewType === "all" ? undefined : interviewType,
-    status:
-      submissionStatus === "all"
-        ? undefined
-        : (submissionStatus as "pending" | "completed" | "all"),
-    sortBy: getSortQueryParam(sortBy) as
-      | "name"
-      | "recent"
-      | "oldest"
-      | undefined,
-  });
+  } = useGetInterviewCandidatesQuery(
+    {
+      jobId,
+      interviewType: interviewType === "all" ? undefined : interviewType,
+      filterStatus: submissionStatus === "all" 
+        ? "all"
+        : submissionStatus === "submitted" 
+          ? "completed_with_report" 
+          : "accepted_and_incomplete",
+      sortBy: getSortQueryParam(sortBy) as
+        | "name"
+        | "recent"
+        | "oldest"
+        | undefined,
+      interviewScore: advancedFilters.interviewScore,
+      workExperience: advancedFilters.workExperience, 
+      locations: advancedFilters.locations.map(loc => loc.name).join(','), // Format locations for API
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   // Get interview stats
   const { data: statsResponse, isLoading: statsLoading } =
@@ -87,6 +106,15 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       setLocalCandidates(candidatesResponse.data);
     }
   }, [candidatesResponse]);
+
+  // Handle applying advanced filters
+  const handleApplyFilters = (filters: FilterValues) => {
+    setAdvancedFilters(filters);
+    // When applying filters, we should also update our main filters to stay consistent
+    setInterviewType(filters.interviewType);
+    setSubmissionStatus(filters.submissionType === "submitted" ? "submitted" : "not_submitted");
+    setCurrentPage(1); // Reset to first page when applying new filters
+  };
 
   // Convert frontend sort options to API query parameters
   function getSortQueryParam(sortOption: SortOption): string {
@@ -158,6 +186,34 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     return sortedCandidates;
   };
 
+  // Additional client-side filtering for interview score and work experience
+  const clientSideFilterCandidates = (candidatesToFilter: InterviewCandidate[]) => {
+    let filtered = candidatesToFilter;
+    
+    // Apply score filter if needed
+    if (advancedFilters.interviewScore > 0) {
+      filtered = filtered.filter(candidate => {
+        // Don't apply score filter to "accepted" candidates (they don't have scores yet)
+        if (candidate.status === "accepted") {
+          return true;
+        }
+        
+        const rating = getEffectiveRating(candidate) || 0;
+        return rating >= advancedFilters.interviewScore;
+      });
+    }
+    
+
+    if (advancedFilters.workExperience > 0) {
+      filtered = filtered.filter(candidate => {
+        const experience = candidate.total_experience || 0;
+        return experience >= advancedFilters.workExperience;
+      });
+    }
+    
+    return filtered;
+  };
+
   // Filter candidates by search term and submission status
   const filteredCandidates = candidates.filter(
     (candidate: InterviewCandidate) => {
@@ -167,16 +223,14 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
         const nameMatch = candidate.candidate_name
           .toLowerCase()
           .includes(searchLower);
-        const locationMatch =
-          candidate.candidate_location &&
-          candidate.candidate_location.toLowerCase().includes(searchLower);
-
-        if (!nameMatch && !locationMatch) {
+        
+        if (!nameMatch) {
           return false;
         }
       }
 
-      // Filter out pending candidates - only show accepted or completed
+      // Filter out candidates that are not accepted or completed
+      // This ensures we show both accepted invitations and completed interviews
       if (candidate.status !== "accepted" && candidate.status !== "completed") {
         return false;
       }
@@ -190,29 +244,36 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
 
       // Apply submission status filter
       if (submissionStatus === "submitted") {
+        // Show completed candidates with reports
         return (
           candidate.status === "completed" && candidate.has_report === true
         );
       } else if (submissionStatus === "not_submitted") {
-        return !(
-          candidate.status === "completed" && candidate.has_report === true
+        // Show both accepted candidates and completed candidates without reports
+        return (
+          candidate.status === "accepted" || 
+          (candidate.status === "completed" && candidate.has_report !== true)
         );
       }
+      // For "all" submission status, show all accepted and completed candidates
 
       return true;
     }
   );
 
+  // Apply client-side filtering for interview score and work experience
+  const finalFilteredCandidates = clientSideFilterCandidates(filteredCandidates);
+
   useEffect(() => {
-    const newCount = filteredCandidates.length;
+    const newCount = finalFilteredCandidates.length;
 
     if (newCount !== initialCount) {
       onCandidateCountChange(newCount);
     }
-  }, [filteredCandidates.length, onCandidateCountChange, initialCount]);
+  }, [finalFilteredCandidates.length, onCandidateCountChange, initialCount]);
 
   // Sort the filtered candidates
-  const sortedFilteredCandidates = sortCandidates(filteredCandidates);
+  const sortedFilteredCandidates = sortCandidates(finalFilteredCandidates);
 
   // Pagination
   const totalPages = Math.ceil(sortedFilteredCandidates.length / rowsPerPage);
@@ -341,6 +402,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
           setSubmissionStatus={setSubmissionStatus}
           sortBy={sortBy}
           setSortBy={setSortBy}
+          onOpenFilterModal={() => setIsFilterModalOpen(true)}
         />
       </div>
 
@@ -357,7 +419,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
           </div>
 
           {/* Loading, Error, or Empty State */}
-          {isFetching && <StatusMessage type="loading" />}
+          {isFetching && <CandidatesSkeletonLoader count={rowsPerPage} />}
           {!!error && !isFetching && (
             <StatusMessage type="error" error={error} />
           )}
@@ -401,6 +463,14 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Filter Modal */}
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onApply={handleApplyFilters}
+        initialValues={advancedFilters}
+      />
     </div>
   );
 };
@@ -449,7 +519,6 @@ export const formatDaysRemaining = (dateString?: string) => {
   const targetDate = new Date(dateString);
   const now = new Date();
 
-  // Set times to midnight for accurate day calculation
   targetDate.setHours(0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
 
@@ -479,7 +548,7 @@ export const getSubmissionBadge = (candidate: InterviewCandidate) => {
     };
   }
 
-  if (candidate.has_report) {
+  if (candidate.status === "completed" && candidate.has_report) {
     return {
       bgColor: "bg-[#d1f3d9]",
       textColor: "text-[#10b754]",

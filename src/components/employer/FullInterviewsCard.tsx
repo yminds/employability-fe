@@ -35,6 +35,8 @@ const typedData = data as unknown as InterviewStatsResponse;
 
   const totalAccepted = stats.accepted + stats.completed
 
+  const totalNotAccepted = stats.invitesSent - totalAccepted
+
   console.log("stats",stats);
 
   return (
@@ -71,7 +73,7 @@ const typedData = data as unknown as InterviewStatsResponse;
               Not Accepted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? 0 : stats.notAccepted}
+              {isLoading ? 0 : totalNotAccepted}
             </span>
           </div>
           <div className="flex justify-between items-center">

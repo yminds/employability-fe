@@ -36,6 +36,8 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
 
   const totalAccepted = stats.accepted + stats.completed
 
+  const totalNotAccepted = stats.invitesSent - totalAccepted
+
   return (
     <Card className="w-full max-w-md bg-white rounded-xl">
       <div className="flex flex-row items-center gap-3 p-5 ">
@@ -74,7 +76,7 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
               Not Accepted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? 0 : stats.notAccepted}
+              {isLoading ? 0 : totalNotAccepted}
             </span>
           </div>
           <div className="flex justify-between items-center">
