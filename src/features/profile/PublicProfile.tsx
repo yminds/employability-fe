@@ -120,40 +120,54 @@ const PublicProfile: React.FC = () => {
     <div className="w-full max-w-screen-xl mx-auto p-4">
       {/* Add Helmet for dynamic meta tags */}
       <Helmet>
-        <meta property="og:title" content="" />
-        <meta property="og:description" content="" />
-        <meta property="og:image" content="" />
-        <meta property="og:url" content="" />
-        <meta property="og:type" content="" />
-        <meta property="og:site_name" content="" />
-        <meta name="twitter:card" content="" />
-        <meta name="twitter:title" content="" />
-        <meta name="twitter:description" content="" />
-        <meta name="twitter:image" content="" />
-
-        {/* Then add new meta tags */}
-        <title>{profileName} | EmployAbility.AI</title>
+        <title>{profileName}</title>
         <meta name="description" content={profileBio} />
 
         {/* Open Graph / Facebook meta tags */}
         <meta
           property="og:title"
           content={`${profileName} | EmployAbility.AI`}
+          data-react-helmet="true"
         />
-        <meta property="og:description" content={profileBio} />
-        <meta property="og:image" content={profileImage} />
-        <meta property="og:url" content={profileUrl} />
-        <meta property="og:type" content="profile" />
-        <meta property="og:site_name" content="EmployAbility.AI" />
+        <meta
+          property="og:description"
+          content={profileBio}
+          data-react-helmet="true"
+        />
+        <meta
+          property="og:image"
+          content={profileImage}
+          data-react-helmet="true"
+        />
+        <meta property="og:url" content={profileUrl} data-react-helmet="true" />
+        <meta property="og:type" content="profile" data-react-helmet="true" />
+        <meta
+          property="og:site_name"
+          content="EmployAbility.AI"
+          data-react-helmet="true"
+        />
 
         {/* Twitter Card tags */}
-        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:card"
+          content="summary_large_image"
+          data-react-helmet="true"
+        />
         <meta
           name="twitter:title"
           content={`${profileName} | EmployAbility.AI`}
+          data-react-helmet="true"
         />
-        <meta name="twitter:description" content={profileBio} />
-        <meta name="twitter:image" content={profileImage} />
+        <meta
+          name="twitter:description"
+          content={profileBio}
+          data-react-helmet="true"
+        />
+        <meta
+          name="twitter:image"
+          content={profileImage}
+          data-react-helmet="true"
+        />
       </Helmet>
 
       <div className="lg:hidden xl:hidden 2xl:hidden">

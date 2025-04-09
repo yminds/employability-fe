@@ -4,7 +4,6 @@ import App from "./App";
 import { store } from "./store/store";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom"; // Import BrowserRouter
-import { HelmetProvider } from "react-helmet-async";
 
 const rootElement = document.getElementById("root");
 
@@ -16,9 +15,7 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <Provider store={store}>
     <BrowserRouter>
-      <HelmetProvider>
-        <App />
-      </HelmetProvider>
+      <App />
     </BrowserRouter>
   </Provider>
 );
