@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+	<ellipse cx="200" cy="150" rx="120" ry="90" fill="#e1f2ea" />
+	<g transform="translate(100, 120) rotate(-15)">
+		<path d="M0,0 L15,80 L35,75 L20,-5 Z" fill="#d9d9d9" stroke="#68696b" strokeWidth="1.5" />
+		<ellipse cx="25" cy="90" rx="10" ry="7" fill="#d9d9d9" stroke="#68696b" strokeWidth="1.5" />
+	</g>
+	<g transform="translate(265, 120) rotate(15)">
+		<path d="M0,0 L15,80 L35,75 L20,-5 Z" fill="#d9d9d9" stroke="#68696b" strokeWidth="1.5" />
+		<ellipse cx="25" cy="90" rx="10" ry="7" fill="#d9d9d9" stroke="#68696b" strokeWidth="1.5" />
+	</g>
+	<circle cx="200" cy="150" r="50" fill="#ffffff" stroke="#68696b" strokeWidth="1.5" />
+	<g>
+		<circle cx="180" cy="140" r="5" fill="#68696b" />
+		<circle cx="220" cy="140" r="5" fill="#68696b" />
+		<path d="M175,170 Q200,155 225,170" fill="none" stroke="#68696b" strokeWidth="3" strokeLinecap="round" />
+	</g>
+	<g transform="translate(150, 230)">
+		<path d="M0,0 L60,0 L55,10 L5,10 Z" fill="#d9d9d9" stroke="#68696b" strokeWidth="1" />
+		<rect x="25" y="10" width="10" height="30" fill="#d9d9d9" stroke="#68696b" strokeWidth="1" />
+	</g>
+	<g transform="translate(230, 230)">
+		<path d="M0,5 L10,0 L20,5 L20,15 L10,20 L0,15 Z" fill="#d9d9d9" stroke="#68696b" strokeWidth="1" />
+		<rect x="5" y="15" width="10" height="20" fill="#d9d9d9" stroke="#68696b" strokeWidth="1" />
+	</g>
+</svg>

@@ -1,6 +1,6 @@
-"use client";
-
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import ErrorBoundaryIllustration from "@/assets/error/ErrorBoundary.svg";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -24,40 +24,70 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
-    // Update state so the next render will show the fallback UI
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // You can log the error to an error reporting service
     console.error("Error caught by ErrorBoundary:", error, errorInfo);
     this.setState({ errorInfo });
   }
 
+  handleGoBack = (): void => {
+    window.history.back();
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
+
+  handleGoHome = (): void => {
+    window.location.href = "/";
+  };
+
   render(): ReactNode {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return (
         this.props.fallback || (
-          <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-              <h2 className="text-2xl font-bold text-red-600 mb-4">
-                Something went wrong
-              </h2>
-              <p className="text-gray-700 mb-4">
-                We're sorry, but an error occurred while rendering this page.
+          <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-white">
+            <div className="max-w-md text-center">
+              {/* Error SVG illustration */}
+              <img
+                src={ErrorBoundaryIllustration || "/placeholder.svg"}
+                alt="Error"
+                className="mx-auto mb-8 w-[400px] h-auto"
+              />
+
+              <h1 className="text-xl font-medium text-[#202326] mb-2">
+                Uh Oh... We've encountered a technical glitch in the system.
+              </h1>
+
+              <p className="text-[#68696b] mb-4">
+                But don't worry, our engineers are already working on fixing it!
               </p>
-              <div className="bg-gray-100 p-4 rounded-md mb-4 overflow-auto max-h-40">
-                <p className="font-mono text-sm text-gray-800">
-                  {this.state.error?.toString()}
-                </p>
+
+              {/* Error details */}
+              {this.state.error && (
+                <div className="bg-[#e1f2ea] p-4 rounded-md mb-6 overflow-auto max-h-40 text-left">
+                  <p className="font-mono text-sm text-[#001630]">
+                    {this.state.error.toString()}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  onClick={this.handleGoBack}
+                  className="px-6 py-2 text-[#001630] bg-white border border-[#001630] hover:bg-[#e1f2ea]"
+                >
+                  Go Back
+                </Button>
+
+                <Button
+                  onClick={this.handleGoHome}
+                  className="px-6 py-2 text-[#001630] bg-white border border-[#001630] hover:bg-[#e1f2ea]"
+                >
+                  Take me Home
+                </Button>
               </div>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
-              >
-                Reload Page
-              </button>
             </div>
           </div>
         )
