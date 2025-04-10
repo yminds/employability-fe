@@ -142,6 +142,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
         console.log(
           "Job description changed significantly, will fetch new skills recommendations"
         );
+        setSelectedSkills([]);
         setShouldFetchSkills(true);
       }
     }
