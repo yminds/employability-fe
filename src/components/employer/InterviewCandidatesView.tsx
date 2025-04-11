@@ -107,6 +107,42 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
     }
   }, [candidatesResponse]);
 
+  useEffect(() => {
+    if (candidatesResponse) {
+      setLocalCandidates(candidatesResponse.data);
+    }
+  }, [candidatesResponse]);
+  
+  // Add the new useEffect here
+  useEffect(() => {
+    if (statsResponse?.data) {
+      console.log("Stats data received, checking interview counts");
+      const stats = (statsResponse.data as any).stats;
+      
+      const fullInterviewCount = 
+        (stats.fullInterviews?.accepted || 0) + 
+        (stats.fullInterviews?.submitted || 0);
+      
+     
+      const screeningInterviewCount = 
+        (stats.screeningInterviews?.accepted || 0) + 
+        (stats.screeningInterviews?.submitted || 0);
+      
+      console.log(`Full interviews: ${fullInterviewCount}, Screening interviews: ${screeningInterviewCount}`);
+      
+      if (fullInterviewCount === 0 && screeningInterviewCount > 0) {
+        console.log("Switching default view to screening interviews");
+        
+        setInterviewType("screening");
+        
+        setAdvancedFilters(prev => ({
+          ...prev,
+          interviewType: "screening"
+        }));
+      }
+    }
+  }, [statsResponse?.data]);
+
   // Handle applying advanced filters
   const handleApplyFilters = (filters: FilterValues) => {
     setAdvancedFilters(filters);

@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, X } from "lucide-react";
 import File from "@/assets/job-posting/file.svg";
 
 interface ResumeUploadModalProps {
@@ -59,6 +59,19 @@ export default function ResumeUploadModal({
     }
   };
 
+  const handleRemoveFile = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the file input click
+    setFile(null);
+  };
+
+  // Format file size to KB or MB
+  const formatFileSize = (size: number): string => {
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} KB`;
+    }
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-[600px] p-6 gap-0 rounded-lg">
@@ -68,36 +81,84 @@ export default function ResumeUploadModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div
-          className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center cursor-pointer mb-6 ${
-            isDragging ? "border-green-500 bg-green-50" : "border-gray-300"
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <div className="w-16 h-16 mb-4 relative">
-            <img src={File} alt="File" />
-            <div className="absolute bottom-2 right-3 bg-green-500 rounded-full w-6 h-6 flex items-center justify-center">
-              <ArrowUp className="text-white w-3 h-3" />
+        {!file ? (
+          // Drag and drop area when no file is selected
+          <div
+            className={`border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center cursor-pointer mb-6 ${
+              isDragging ? "border-green-500 bg-green-50" : "border-gray-300"
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="w-16 h-16 mb-4 relative">
+              <img src={File} alt="File" />
+              <div className="absolute bottom-2 right-3 bg-green-500 rounded-full w-6 h-6 flex items-center justify-center">
+                <ArrowUp className="text-white w-3 h-3" />
+              </div>
+            </div>
+
+            <p className="text-gray-700 text-body2 text-sm mb-2">
+              drag and drop as a pdf or
+            </p>
+            <button className="text-green-500 text-body2 text-sm font-medium underline">
+              select from files
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept=".pdf"
+              onChange={handleFileChange}
+            />
+          </div>
+        ) : (
+          // Display selected file details
+          <div className="border-2 rounded-lg p-6 mb-6">
+            <div className="flex items-center">
+              <div className="w-12 h-16 flex-shrink-0 bg-gray-100 rounded-sm flex items-center justify-center mr-4">
+                <span className="text-xs text-gray-500">PDF</span>
+              </div>
+              
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-800 truncate">
+                  {file.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {formatFileSize(file.size)}
+                </p>
+              </div>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-gray-700 p-1"
+                onClick={handleRemoveFile}
+              >
+                <X size={18} />
+              </Button>
+            </div>
+            
+            <div className="mt-4 flex justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-500 border-green-500 hover:bg-green-50"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Choose a different file
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept=".pdf"
+                onChange={handleFileChange}
+              />
             </div>
           </div>
-
-          <p className="text-gray-700 text-body2 text-sm mb-2">
-            drag and drop as a pdf or
-          </p>
-          <button className="text-green-500 text-body2 text-sm font-medium underline">
-            select from files
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept=".pdf"
-            onChange={handleFileChange}
-          />
-        </div>
+        )}
 
         <div className="flex justify-end">
           <Button

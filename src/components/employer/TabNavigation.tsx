@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect} from "react";
 
 interface TabNavigationProps {
   selectedTab: string;
@@ -33,6 +33,11 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
         ...tabsData.filter(tab => tab.id !== "interviews")
       ]
     : tabsData;
+
+    useEffect(() => {
+      console.log("TabNavigation - interviewCount:", interviewCount);
+      console.log("TabNavigation - selectedTab:", selectedTab);
+    }, [interviewCount, selectedTab]);
 
   return (
     <div className="border-b border-[#d6d7d9] pt-8">
