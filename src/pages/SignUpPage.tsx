@@ -17,6 +17,8 @@ import man from "@/assets/sign-up/man.png";
 import grid from "@/assets/sign-up/grid.svg";
 import arrow from "@/assets/skills/arrow.svg";
 import { Button } from "@/components/ui/button";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 interface SignupData {
   email: string;
   password: string;
@@ -26,6 +28,8 @@ interface SignupData {
 }
 
 const SignupForm = () => {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
   const { role: urlRole } = useParams();
   const location = useLocation();
@@ -50,6 +54,17 @@ const SignupForm = () => {
     { inviteId: inviteId || "" },
     { skip: !inviteId }
   );
+
+  useEffect(() => {
+    if (token) {
+      setIsLoading(false);
+      if (user && user.experience_level === "") {
+        navigate("/setexperience");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [token, user, navigate]);
 
   useEffect(() => {
     if (inviteData?.success) {
