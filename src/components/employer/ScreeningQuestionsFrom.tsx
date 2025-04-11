@@ -387,7 +387,7 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
                     })
                   }
                 >
-                  <SelectTrigger className="border border-gray-300 rounded-md">
+                  <SelectTrigger className="border border-gray-300 rounded-md h-9 w-full focus:ring-0 focus:ring-offset-0 focus:outline-none focus:border-gray-300">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -399,11 +399,23 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
               {customQuestion.type === "yes_no" && (
                 <div className="w-1/2">
                   <Label className="text-sm mb-1 block">Ideal answer:</Label>
-                  <Input
-                    value="Yes"
-                    disabled
-                    className="border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
-                  />
+                  <Select
+                    value={customQuestion.ideal_answer || "Yes"}
+                    onValueChange={(value) =>
+                      setCustomQuestion({
+                        ...customQuestion,
+                        ideal_answer: value,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="border border-gray-300 rounded-md h-9 w-full focus:ring-0 focus:ring-offset-0 focus:outline-none focus:border-gray-300">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
               {customQuestion.type === "numeric" && (
@@ -420,14 +432,14 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
                         ideal_answer: e.target.value,
                       })
                     }
-                    className="border border-gray-300 rounded-md"
+                    className="border border-gray-300 rounded-md h-9 w-full"
                     min="0"
                   />
                 </div>
               )}
             </div>
 
-            {customQuestion.type === "numeric" && (
+            {/* {customQuestion.type === "numeric" && (
               <div className="mb-4">
                 <Label className="text-sm mb-1 block">
                   Field Name (e.g. Skill, Industry, Job Function):
@@ -444,7 +456,7 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
                   placeholder="Skill or Job Function"
                 />
               </div>
-            )}
+            )} */}
 
             <div className="flex justify-between items-center">
               <div className="flex items-center">
@@ -559,9 +571,27 @@ const ScreeningQuestionsForm: React.FC<ScreeningQuestionsFormProps> = ({
                     </div>
                   )}
                   {question.type === "multiple_choice" && question.options && (
-                    <div>
-                      <span className="font-medium">Ideal answer:</span>{" "}
-                      {question.ideal_answer || "Conversational"}
+                    <div className="flex items-center">
+                      <span className="font-medium mr-1">Ideal answer:</span>
+                      <Select
+                        value={question.ideal_answer || "Conversational"}
+                        onValueChange={(value) => {
+                          const updated = [...screeningQuestions];
+                          updated[index].ideal_answer = value;
+                          setScreeningQuestions(updated);
+                        }}
+                      >
+                        <SelectTrigger className="ml-1 w-40 h-8 text-sm p-1 border border-gray-300 rounded-md">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {question.options.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
                 </div>

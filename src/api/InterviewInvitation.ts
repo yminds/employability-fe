@@ -1,7 +1,7 @@
 import { apiSlice } from "./apiSlice";
 import { Job } from "./employerJobsApiSlice";
 
-// Interface definitions
+
 export interface Candidate {
   _id: string;
   user_id: string;
