@@ -257,7 +257,7 @@ interface GetInterviewCandidatesParams {
   interviewType?: "full" | "screening" | "all";
   status?: "completed" | "pending" | "all";
   sortBy?: "recent" | "oldest" | "name" | "rating_desc" | "rating_asc";
-  filterStatus: string;
+  filterStatus: string[] | string;
   interviewScore: number;
   workExperience?: number;
   locations?: string;

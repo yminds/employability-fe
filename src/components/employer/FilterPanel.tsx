@@ -1,4 +1,3 @@
-// FilterPanel.tsx
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,11 +30,16 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
       <div>
         <label className="text-sm font-medium block mb-2">Select sources</label>
         <Select 
-          value={selectedSource}
+          value={selectedSource} 
           onValueChange={(value) => onSourceChange(value)}
         >
           <SelectTrigger className="border-[#d6d7d9] bg-white">
-            <SelectValue placeholder="All Candidates" />
+            <SelectValue placeholder="All Candidates">
+              {selectedSource === "all" && "All Candidates"}
+              {selectedSource === "employability" && "Employability Pool"}
+              {selectedSource === "uploaded" && "All Uploaded Resumes"}
+              {selectedSource === "job" && "Resumes For this Job"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Candidates</SelectItem>
