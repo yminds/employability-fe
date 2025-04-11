@@ -24,12 +24,12 @@ export default function ApplicationModal({
   companyName,
   jobId,
 }: ApplicationModalProps) {
+
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleResumeUpload = (file: File) => {
     console.log("Resume uploaded:", file.name);
-    // Handle the resume upload logic here
   };
 
   const handleSignupClick = () => {
@@ -38,7 +38,7 @@ export default function ApplicationModal({
       localStorage.setItem("employability_job_id", jobId);
     }
     const encodedCallback = encodeURIComponent(callbackUrl);
-    navigate(`/jobs`);
+    navigate(`/`);
     onClose();
   };
   return (
