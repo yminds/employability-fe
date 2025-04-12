@@ -38,7 +38,7 @@ interface Project {
   score?: number;
   lastCompletedStep?: number;
   goal_id?: string;
-  latest_interview_status: {
+  latest_interview_status?: {
     interview_id: string;
     isCompleted: boolean;
   };
@@ -164,7 +164,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   console.log("project", project);
 
   const handleViewProject = () => {
-    if (!project.latest_interview_status.interview_id) {
+    if (!project.latest_interview_status?.interview_id) {
       return;
     }
     if (!project.latest_interview_status.isCompleted) {
@@ -273,7 +273,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               <div className="flex flex-col items-center md:w-full sm:w-full">
                 {project.status === "Verified" && (
                   <div className="flex items-baseline">
-                    <span className="text-xl font-medium">{project?.score}</span>
+                    <span className="text-xl font-medium">{project?.score?.toFixed(1)}</span>
                     <span className="text-[#909091] text-xl font-medium">/10</span>
                   </div>
                 )}

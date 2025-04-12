@@ -202,7 +202,7 @@ const ProfileBanner = ({
               {hasGoalData ? (
                 <>
                   <h2 className="text-[#414447] text-h2">
-                    {user.goals?.[0]?.name}
+                    {user.goals?.[0]?.name} - {user.experience_level.capitalize()} Level
                   </h2>
                   <div className="flex items-center gap-2 rounded-lg">
                     <div className="flex items-baseline gap-1">
@@ -222,7 +222,7 @@ const ProfileBanner = ({
                     />
                   </div>
                   <span className="text-body2 text-[#414447]">
-                    Employability score
+                    EmployAbility score
                   </span>
                 </>
               ) : (

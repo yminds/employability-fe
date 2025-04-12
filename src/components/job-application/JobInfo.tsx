@@ -3,14 +3,16 @@ import Level from "@/assets/job-posting/level.svg";
 import Location from "@/assets/job-posting/location.svg";
 import WorkPlaceType from "@/assets/job-posting/workPlaceType.svg";
 import JobType from "@/assets/job-posting/jobType.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ApplicationModal from "./ApplicationModal";
+import { useGetUserSkillsMutation } from "@/api/skillsApiSlice";
+import StepperModal from "./JobStepperModal/StepperModal";
 
 interface JobInfoProps {
   jobDetails: any;
+  user: any;
 }
 
-// Helper function to format job type
 const formatJobType = (jobType: string): string => {
   if (!jobType) return "Job Type";
   const formattedType = jobType.replace(/-/g, " ");
@@ -19,7 +21,6 @@ const formatJobType = (jobType: string): string => {
   );
 };
 
-// Helper function to format workplace type
 const formatWorkplaceType = (workplaceType: string): string => {
   if (!workplaceType) return "Workplace Type";
   if (workplaceType === "on-site") {
@@ -29,8 +30,17 @@ const formatWorkplaceType = (workplaceType: string): string => {
     workplaceType.charAt(0).toUpperCase() + workplaceType.slice(1).toLowerCase()
   );
 };
+interface Skill {
+  _id: string;
+  name: string;
+}
 
-export default function JobInfo({ jobDetails }: JobInfoProps) {
+export default function JobInfo({ jobDetails, user }: JobInfoProps) {
+  const userId = user?._id;
+  const goalId = user?.goals?.[0]?._id;
+
+  const [userSkills, setUserSkills] = useState<Skill[]>([]);
+  const [getUserSkills] = useGetUserSkillsMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Job details
@@ -46,6 +56,35 @@ export default function JobInfo({ jobDetails }: JobInfoProps) {
 
   const formattedJobType = formatJobType(job_type);
   const formattedWorkPlaceType = formatWorkplaceType(work_place_type);
+
+  // Fetch user skills when component mounts
+  useEffect(() => {
+    const fetchUserSkills = async () => {
+      if (userId && goalId) {
+        try {
+          const response = await getUserSkills({
+            userId,
+            goalId,
+          }).unwrap();
+
+          setUserSkills(
+            response.data.all.map((skill: any) => ({
+              _id: skill.skill_pool_id._id,
+              name: skill.skill_pool_id.name,
+            }))
+          );
+        } catch (error) {
+          console.error("Failed to fetch user skills:", error);
+        }
+      }
+    };
+
+    fetchUserSkills();
+  }, [userId, goalId, getUserSkills]);
+
+  const isSkillMatch = (jobSkill: any) => {
+    return userSkills.some((userSkill) => userSkill._id === jobSkill.skill);
+  };
 
   return (
     <>
@@ -103,23 +142,45 @@ export default function JobInfo({ jobDetails }: JobInfoProps) {
             Skills required
           </h3>
           <div className="flex flex-wrap gap-2">
-            {skills.map((skill: any, index: number) => (
-              <div
-                key={index}
-                className="bg-[#E7EFEB] text-[#03963F] px-3 py-1.5 rounded-[33px] text-sm"
-              >
-                {skill.name}
-              </div>
-            ))}
+            {skills.map((skill: any, index: number) => {
+              const shouldCompareSkills = userId && goalId;
+              const matched = shouldCompareSkills ? isSkillMatch(skill) : true;
+
+              return (
+                <div
+                  key={index}
+                  className={`px-3 py-1.5 rounded-[33px] text-sm ${
+                    shouldCompareSkills
+                      ? matched
+                        ? "bg-[#E7EFEB] text-[#03963F]"
+                        : "bg-[#FEECEC] text-[#E53E3E]"
+                      : "bg-[#E7EFEB] text-[#03963F]"
+                  }`}
+                >
+                  {skill.name}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
-      <ApplicationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        companyName={company_name}
-        jobId={jobDetails?._id}
-      />
+      {userId ? (
+        <StepperModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          companyName={company_name}
+          jobId={jobDetails?._id}
+          jobDetails={jobDetails}
+          user={user}
+        />
+      ) : (
+        <ApplicationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          companyName={company_name}
+          jobId={jobDetails?._id}
+        />
+      )}
     </>
   );
 }

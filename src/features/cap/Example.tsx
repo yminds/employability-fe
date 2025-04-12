@@ -90,7 +90,7 @@ const Example = ({ question, handleDsaQuestionSubmit }: CodeAssessmentPanelProps
  ## Example 1:
 Input: ${question?.testCases[0]?.input} \n
 Output: ${question?.testCases[0]?.expectedOutput} \n
-Explanation: The answer is "abc", with the length of 3.
+Explanation: ${question?.testCases[0]?.description}.
             `,
             code: question?.code,
             functionName: question?.functionName,

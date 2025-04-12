@@ -25,7 +25,7 @@ import LogoutConfirmationModal from "@/components/modal/LogoutConfirmationModal"
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
 
 const Sidebar: React.FC = () => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State to control menu visibility on small screens
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 

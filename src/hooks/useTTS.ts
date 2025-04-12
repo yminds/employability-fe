@@ -6,7 +6,7 @@ interface UseTTSOptions {
 }
 
 export const useTTS = (options: UseTTSOptions = {}) => {
-  const [tts] = useTtsMutation();
+  const [tts ,{isLoading:isTtsPending}] = useTtsMutation();
   const [frequencyData, setFrequencyData] = useState<number>(0);
   const frequencyDataRef = useRef<number>(0);
   
@@ -163,6 +163,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
   return {
     frequencyData,
     handleIncomingData,
-    reset
+    reset,
+    isTtsPending,
   };
 };

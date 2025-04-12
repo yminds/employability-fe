@@ -4,8 +4,13 @@ import CompanyInfo from "./CompanyInfo";
 import JobDescription from "./JobDescription";
 import JobHeader from "./JobHeader";
 import JobInfo from "./JobInfo";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export default function JobPostDetails() {
+  const user = useSelector((state: RootState) => state.auth?.user);
+  console.log("user", user);
+
   const { jobId } = useParams<{ jobId: string }>();
 
   const {
@@ -57,11 +62,11 @@ export default function JobPostDetails() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
-      <JobHeader />
+      {!user && <JobHeader />}
       <main className="mx-auto px-4 py-6 max-w-7xl">
         <div className="grid grid-cols-10 gap-8">
           <div className="col-span-7">
-            <JobInfo jobDetails={jobDetails} />
+            <JobInfo jobDetails={jobDetails} user={user} />
             <JobDescription description={jobDetails.description} />
           </div>
           <div className="col-span-3">

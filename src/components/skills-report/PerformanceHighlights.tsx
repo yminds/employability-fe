@@ -9,8 +9,8 @@ interface PerformanceRating {
     highlights: PerformanceRating[];
     isGeneratingPDF?: boolean;
   }
-const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights, isGeneratingPDF }) => {
-  const getRatingLabel = (rating: number): string => {
+
+ export  const getRatingLabel = (rating: number): string => {
     switch (rating) {
       case 5:
         return 'Excellent';
@@ -27,7 +27,7 @@ const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights, isGenera
     }
   };
 
-  const getRatingStyles = (rating: number): string => {
+  export const getRatingStyles = (rating: number): string => {
     switch (rating) {
       case 5:
         return 'bg-green-100 text-green-600';
@@ -43,6 +43,9 @@ const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights, isGenera
         return 'bg-gray-100 text-gray-600';
     }
   };
+
+const PerformanceHighlights: React.FC<HighlightsProps> = ({ highlights, isGeneratingPDF }) => {
+
 
   return (
     <Card className="w-full bg-white rounded-lg">

@@ -4,8 +4,10 @@ import { useCreateInterview } from '../../../../hooks/useCreateInterview';
 import { useGetFundamentalNamesAsCsvMutation } from '@/api/interviewInvitesApiSlice';
 import { useUpdateInterviewIdMutation } from '@/api/interviewInvitesApiSlice';
 import { useGetUserSkillIdMutation, useCreateUserSkillsMutation } from '@/api/skillsApiSlice';
+import { toast } from 'sonner';
 
 const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id:string | undefined, userGoal:string | undefined, companyDetails:any }> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails }) => {
+
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
   const [getFundamentalNamesAsCsv, { data: conceptNamesCSV }] = useGetFundamentalNamesAsCsvMutation();
@@ -168,28 +170,29 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
 
   // View Full Report Handler
   const handleViewFullReport = (type: 'interview' | 'skill', itemId: string) => {
-    console.log(type,itemId)
+    let reportUrl: string;
+  
+    // Step 1: Determine the report URL based on the type (interview or skill)
     if (type === 'interview') {
-      navigate(`/skill/report/Full/${taskData.interview_type.interview_id}`, {
-        state: { best_interview: itemId },
-      });
-    } else if (type === 'skill') {
-      // Find specific skill report
-      const skillReport = taskData.skills.find((skill: any) => skill.id === itemId);
-      handleVerifySkillReport(itemId)
-      if (skillReport) {
-        // Potential future implementation for skill report navigation
-        console.log('Viewing skill report:', skillReport.name);
-      }
+      reportUrl = `/report/Full/${inviteId}/aman7479/${itemId}`; // Example for interview report URL
+    } else {
+      reportUrl = `/skills-report/aman7479/${itemId}`; // Example for skill report URL
     }
+  
+    // Step 3: Open the report URL in a new tab after a short delay
+    setTimeout(() => {
+      const newTab = window.open(reportUrl, "_blank", "noopener,noreferrer");
+  
+      // Optional: Focus on the new tab if it doesn't open automatically
+      if (newTab) {
+        newTab.focus();
+      }
+    }, 100); // Adjust delay if necessary
   };
-
   // Verify Skill Report Handler
   const handleVerifySkillReport = (interviewId: string) => {
-    console.log("skillId",interviewId)
-    navigate(`/skill/report/${interviewId}`, {
-      state: { best_interview: interviewId },
-    });
+    console.log("skillId", interviewId);
+    window.open(`/skill/report/${interviewId}`, '_blank', `best_interview=${interviewId}`);
   };
 
   return (

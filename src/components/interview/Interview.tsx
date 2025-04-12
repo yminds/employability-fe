@@ -24,14 +24,15 @@ import useScreenShot from "@/hooks/useScreenShot";
 import { useUpdateThumbnailMutation } from "@/api/reportApiSlice";
 import Example from "@/features/cap/Example";
 import { flushSync } from "react-dom";
+import { pl } from "date-fns/locale";
 
 // Constants and Types
 const SOCKET_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
     : window.location.hostname === "dev.employability.ai"
-      ? "wss://dev.employability.ai"
-      : "wss://employability.ai";
+    ? "wss://dev.employability.ai"
+    : "wss://employability.ai";
 
 interface CodeSnippetType {
   code: string;
@@ -98,254 +99,252 @@ const Interview: React.FC<{
   comanyDetails,
   interviewIcon,
 }) => {
-    // console.log("in interviews jobDescription", jobDescription);
-    const [showScreenWarning, setShowScreenWarning] = useState(false);
-    const { id: interviewId } = useParams<{ id: string }>();
-    const [interviewStream] = useInterviewStreamMutation();
-    const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
-    const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
-    const [updateThumbnail] = useUpdateThumbnailMutation();
-    const [isDsaRoundStarted, setIsDsaRoundStarted] = useState(false);
-    const [isDsaRoundActive, setIsDsaRoundActive] = useState(false);
-    const [dsaQuestion, setDsaQuestion] = useState<any>(null);
-    const { captureScreenshot, screenshot } = useScreenShot();
-    // Queries and Speech Hooks
-    const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
-    const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(interviewId as string, {
-      skip: !interviewId,
-    });
+  // console.log("in interviews jobDescription", jobDescription);
+  const [showScreenWarning, setShowScreenWarning] = useState(false);
+  const { id: interviewId } = useParams<{ id: string }>();
+  const [interviewStream] = useInterviewStreamMutation();
+  const [interviewState, setInterviewState] = useState<InterviewState>("WAITING");
+  const [allConcepts, setAllConcepts] = useState<any[]>(concepts.map((concept) => ({ ...concept, status: "pending" })));
+  const [updateThumbnail] = useUpdateThumbnailMutation();
+  const [isDsaRoundStarted, setIsDsaRoundStarted] = useState(false);
+  const [isDsaRoundActive, setIsDsaRoundActive] = useState(false);
+  const [dsaQuestion, setDsaQuestion] = useState<any>(null);
+  const { captureScreenshot, screenshot } = useScreenShot();
+  // Queries and Speech Hooks
+  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
+  const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(interviewId as string, {
+    skip: !interviewId,
+  });
 
-    const user = useSelector((state: RootState) => state.auth.user);
+  const user = useSelector((state: RootState) => state.auth.user);
 
-    // State
-    const [isUserAnswering, setIsUserAnswering] = useState(false);
-    const [messages, setMessages] = useState<IMessage[]>([]);
-    const [question, setQuestion] = useState<QuestionState>(initialState);
+  // State
+  const [isUserAnswering, setIsUserAnswering] = useState(false);
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [question, setQuestion] = useState<QuestionState>(initialState);
 
-    const [isInitialized, setIsInitialized] = useState(false);
-    const [layoutType, setLayoutType] = useState<1 | 2>(1);
-    const [isInterviewEnded, setIsInterviewEnded] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [layoutType, setLayoutType] = useState<1 | 2>(1);
+  const [isInterviewEnded, setIsInterviewEnded] = useState(false);
+  const [isProcessingInterviewEnds, setIsProcessingInterviewEnds] = useState(false);
+  const isComponentMounted = useRef(true);
 
-    const isComponentMounted = useRef(true);
+  // TTS Setup
+  const { frequencyData, handleIncomingData, isTtsPending } = useTTS({
+    onPlaybackComplete: () => {
+      setInterviewState("LISTENING"); // Move to LISTENING state when TTS finishes
+      setTimeout(() => {
+        setIsUserAnswering(true);
+        startRecording();
+      }, 50);
+    },
+  });
 
-    // TTS Setup
-    const { frequencyData, handleIncomingData } = useTTS({
-      onPlaybackComplete: () => {
-        setInterviewState("LISTENING"); // Move to LISTENING state when TTS finishes
-        setTimeout(() => {
-          setIsUserAnswering(true);
-          startRecording();
-        }, 50);
-      },
-    });
-
-    useEffect(() => {
-      const monitorScreens = async () => {
-        if ('getScreenDetails' in window) {
-          try {
-            const screenDetails = await (window as any).getScreenDetails();
-            const updateScreenCount = () => {
-              const screens = screenDetails.screens.length;
-              if (screens > 1) {
-                setShowScreenWarning(true);
-              }
-            };
-
-            updateScreenCount(); // Initial check
-
-            screenDetails.addEventListener('screenschange', updateScreenCount);
-          } catch (error) {
-            console.error("Screen monitoring failed:", error);
-          }
-        }
-      };
-
-      monitorScreens();
-    }, []);
-
-    // Socket Connection
-    useEffect(() => {
-      if (!isInterviewLoaded || !interviewDetails?.data?._id) return;
-
-      const newSocket = io(SOCKET_URL, {
-        transports: ["websocket", "polling"],
-      });
-      const handleConnect = async () => {
-        // console.log("entred handleConnect from handleConnect");
-        if (!isInitialized) {
-          // console.log("Connected handleConnect isInitialized");
-
-          // taking screenshot for candidate
-          setTimeout(async () => {
-            const response = await captureScreenshot();
-            updateThumbnail({ thubmnail_url: response as string, interview_id: interviewDetails.data._id });
-          }, 1000 * 30);
-
-          setIsInitialized(true);
-          const initialGreeting = "Hello, before starting the interview, introduce yourself?";
-          const resumeMessage = "Hello, sorry for the interruption. We can continue from where we left off.";
-          if (isResume) {
-            addMessage(resumeMessage);
-            return;
-          }
-          addMessage(initialGreeting);
-        }
-      };
-
-      const handleAIResponse = (data: string) => {
-        // console.log("[enetred to ai response]", question);
-
-        // if (data === "") {
-        //   // creating a fallback for empty response
-        //   addMessage("Sorry, I didn't get that. Can you please repeat the question?");
-        //   return;
-        // }
-
-        setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
-
-        handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
-      };
-
-      const handleShiftLayout = (data: string) => {
-        setLayoutType(data === "1" ? 1 : 2);
-        setQuestion((prev) => ({
-          ...prev,
-          isCodeSnippetMode: false,
-        }));
-      };
-
-      const handleGenerateQuestion = (question: string, concept: string) => {
-        // console.log(question);
-        setQuestion({
-          question,
-          codeSnippet: null,
-          isCodeSnippetMode: false,
-          concept,
-        });
-      };
-
-      const handleGenerateCodeSnippet = (codeSnippetData: CodeSnippetType, concept: string) => {
-        // console.log("Generate Code Snippet", codeSnippetData, concept);
-        setQuestion((prev) => ({
-          ...prev,
-          codeSnippet: codeSnippetData,
-          isCodeSnippetMode: true,
-          concept,
-        }));
-      };
-
-      const handleGenerateDsaQuestion = (question: any) => {
-        // console.log("[DSA Question]", question);
-        // making sure the state is updated synchronously
-        flushSync(() => {
-          setDsaQuestion(question);
-        });
-        setIsDsaRoundStarted(true);
-        setIsDsaRoundActive(true);
-      };
-      const handleEndInterview = () => {
-        setTimeout(() => {
-          setIsInterviewEnded(true);
-        }, 5000);
-        stopScreenSharing();
-      };
-
-      const handleConceptValidation = (concepts: any) => {
-        setAllConcepts((prev) => {
-          const updatedConcepts = prev.map((concept) => {
-            if (concepts?.ratedConcepts?.includes(concept?.name)) {
-              // console.log("Concept entred", { ...concept, status: "completed" });
-
-              return { ...concept, status: "completed" };
+  useEffect(() => {
+    const monitorScreens = async () => {
+      if ('getScreenDetails' in window) {
+        try {
+          const screenDetails = await (window as any).getScreenDetails();
+          const updateScreenCount = () => {
+            const screens = screenDetails.screens.length;
+            if (screens > 1) {
+              setShowScreenWarning(true);
             }
-            // console.log("concept", concept);
+          };
 
-            return concept;
-          });
-          return updatedConcepts;
-        });
-      };
+          updateScreenCount(); // Initial check
 
-      // Socket event listeners
-      newSocket.on("connect", handleConnect);
-      newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
-      newSocket.on(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
-      newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
-      newSocket.on(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
-      newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
-      newSocket.on(`conceptValidation${interviewDetails.data._id}`, handleConceptValidation);
-      newSocket.on(`generateDsaQuestion${interviewDetails.data._id}`, handleGenerateDsaQuestion);
-
-      return () => {
-        isComponentMounted.current = false;
-        newSocket.off("connect", handleConnect);
-        newSocket.off(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
-        newSocket.off(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
-        newSocket.off(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
-        newSocket.off(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
-
-        newSocket.disconnect();
-      };
-    }, [isInterviewLoaded, interviewDetails]);
-
-    // Speech-to-Text handling
-    useEffect(() => {
-      // if dsaround started then return
-      if (isDsaRoundActive) return;
-
-      if (isSttSuccess && sttResponse) {
-        const { text } = sttResponse.transcription;
-        handleMessage(text, "USER");
-        addMessage(text);
-      }
-
-      if (sttError) {
-        console.error("Speech-to-text error:", sttError);
-      }
-    }, [isSttSuccess, sttResponse, sttError]);
-
-    const handleDoneAnswering = () => {
-      if (isUserAnswering) {
-        stopRecording();
-        setIsUserAnswering(false);
-        setInterviewState("WAITING"); // Back to WAITING before AI processes the response
+          screenDetails.addEventListener('screenschange', updateScreenCount);
+        } catch (error) {
+          console.error("Screen monitoring failed:", error);
+        }
       }
     };
 
-    const handleMessage = (message: string, role: "USER" | "AI") => {
-      setMessages((prevMessages) => {
-        if (role === "AI") {
-          if (prevMessages.length === 0) {
-            return [{ id: 1, message, role }];
-          }
+    monitorScreens();
+  }, []);
 
-          const lastMessage = prevMessages[prevMessages.length - 1];
-          if (lastMessage.role === "AI") {
-            return [...prevMessages.slice(0, -1), { ...lastMessage, message: `${lastMessage.message} ${message}` }];
-          }
+  // Socket Connection
+  useEffect(() => {
+    if (!isInterviewLoaded || !interviewDetails?.data?._id) return;
+
+    const newSocket = io(SOCKET_URL, {
+      transports: ["websocket", "polling"],
+    });
+    const handleConnect = async () => {
+      // console.log("entred handleConnect from handleConnect");
+      if (!isInitialized) {
+        // console.log("Connected handleConnect isInitialized");
+
+        // taking screenshot for candidate
+        setTimeout(async () => {
+          const response = await captureScreenshot();
+          updateThumbnail({ thubmnail_url: response as string, interview_id: interviewDetails.data._id });
+        }, 1000 * 30);
+
+        setIsInitialized(true);
+        const initialGreeting = "Hello, before starting the interview, introduce yourself ?  ";
+        const resumeMessage = "Hello, sorry for the interruption. We can continue from where we left off.";
+        if (isResume) {
+          addMessage(resumeMessage);
+          return;
         }
+        addMessage(initialGreeting);
+      }
+    };
+    
+    const handleAIResponse = (data: string) => {
+      // console.log("[enetred to ai response]", question);
 
-        return [
-          ...prevMessages,
-          {
-            id: prevMessages.length + 1,
-            message,
-            role,
-          },
-        ];
+      setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
+
+      handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
+    };
+
+    const handleShiftLayout = (data: string) => {
+      setLayoutType(data === "1" ? 1 : 2);
+      setQuestion((prev) => ({
+        ...prev,
+        isCodeSnippetMode: false,
+      }));
+    };
+
+    const handleGenerateQuestion = (question: string, concept: string) => {
+      // console.log(question);
+      setQuestion({
+        question,
+        codeSnippet: null,
+        isCodeSnippetMode: false,
+        concept,
       });
     };
 
-    const addMessage = async (prompt: string) => {
-      // console.log("🔥 addMessage called with prompt:", prompt);
+    const handleGenerateCodeSnippet = (codeSnippetData: CodeSnippetType, concept: string) => {
+      // console.log("Generate Code Snippet", codeSnippetData, concept);
+      setQuestion((prev) => ({
+        ...prev,
+        codeSnippet: codeSnippetData,
+        isCodeSnippetMode: true,
+        concept,
+      }));
+    };
 
-      if (!interviewDetails?.data?._id) {
-        console.error("⚠️ Interview details not available, skipping API call.");
-        return;
+    const handleGenerateDsaQuestion = (question: any) => {
+      // making sure the state is updated synchronously
+      flushSync(() => {
+        setDsaQuestion(question);
+      });
+      setIsDsaRoundStarted(true);
+      setIsDsaRoundActive(true);
+    };
+
+    const handleEndInterview = () => {
+      setIsProcessingInterviewEnds(true);
+      setTimeout(() => {
+        setIsInterviewEnded(true);
+      }, 5000);
+      setTimeout(() => {
+        setIsProcessingInterviewEnds(false);
+      }, 1000 * 15);
+      stopScreenSharing();
+    };
+
+    const handleConceptValidation = (concepts: any) => {
+      setAllConcepts((prev) => {
+        const updatedConcepts = prev.map((concept) => {
+          if (concepts?.ratedConcepts?.includes(concept?.name)) {
+            // console.log("Concept entred", { ...concept, status: "completed" });
+
+            return { ...concept, status: "completed" };
+          }
+          // console.log("concept", concept);
+
+          return concept;
+        });
+        return updatedConcepts;
+      });
+    };
+
+    // Socket event listeners
+    newSocket.on("connect", handleConnect);
+    newSocket.on(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
+    newSocket.on(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
+    newSocket.on(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
+    newSocket.on(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
+    newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
+    newSocket.on(`conceptValidation${interviewDetails.data._id}`, handleConceptValidation);
+    newSocket.on(`generateDsaQuestion${interviewDetails.data._id}`, handleGenerateDsaQuestion);
+
+    return () => {
+      isComponentMounted.current = false;
+      newSocket.off("connect", handleConnect);
+      newSocket.off(`aiResponse${interviewDetails.data._id}`, handleAIResponse);
+      newSocket.off(`shiftLayout${interviewDetails.data._id}`, handleShiftLayout);
+      newSocket.off(`generateQuestion${interviewDetails.data._id}`, handleGenerateQuestion);
+      newSocket.off(`generateCodeSnippet${interviewDetails.data._id}`, handleGenerateCodeSnippet);
+
+      newSocket.disconnect();
+    };
+  }, [isInterviewLoaded, interviewDetails]);
+   
+  // Speech-to-Text handling
+  useEffect(() => {
+    
+    if (isDsaRoundActive) return;
+
+    if (isSttSuccess && sttResponse) {
+      const { text } = sttResponse.transcription;
+      handleMessage(text, "USER");
+      addMessage(text);
+    }
+
+    if (sttError) {
+      console.error("Speech-to-text error:", sttError);
+    }
+  }, [isSttSuccess, sttResponse, sttError]);
+
+  const handleDoneAnswering = () => {
+    if (isUserAnswering) {
+      stopRecording();
+      setIsUserAnswering(false);
+      setInterviewState("WAITING"); // Back to WAITING before AI processes the response
+    }
+  };
+
+  const handleMessage = (message: string, role: "USER" | "AI") => {
+    setMessages((prevMessages) => {
+      if (role === "AI") {
+        if (prevMessages.length === 0) {
+          return [{ id: 1, message, role }];
+        }
+
+        const lastMessage = prevMessages[prevMessages.length - 1];
+        if (lastMessage.role === "AI") {
+          return [...prevMessages.slice(0, -1), { ...lastMessage, message: `${lastMessage.message} ${message}` }];
+        }
       }
 
-      // Move to "WAITING" state when sending a new question
-      setInterviewState("WAITING");
+      return [
+        ...prevMessages,
+        {
+          id: prevMessages.length + 1,
+          message,
+          role,
+        },
+      ];
+    });
+  };
+
+  const addMessage = async (prompt: string) => {
+    // console.log("🔥 addMessage called with prompt:", prompt);
+
+    if (!interviewDetails?.data?._id) {
+      console.error("⚠️ Interview details not available, skipping API call.");
+      return;
+    }
+
+    // Move to "WAITING" state when sending a new question
+    setInterviewState("WAITING");
 
       const response = await interviewStream({
         prompt,
@@ -379,113 +378,118 @@ const Interview: React.FC<{
         projectId: projectId,
         userExperience: userExperience,
         skills_required: skills_required,
-        companyDetails: comanyDetails,
       }).unwrap();
 
-      // console.log("response", response);
+    // console.log("response", response);
 
-      setAllConcepts((prev) => {
-        const updatedConcepts = prev.map((concept) => {
-          if (response?.event?.ratedConcepts?.includes(concept?.name)) {
-            return { ...concept, status: "completed" };
-          }
+    setAllConcepts((prev) => {
+      const updatedConcepts = prev.map((concept) => {
+        if (response?.event?.ratedConcepts?.includes(concept?.name)) {
+          return { ...concept, status: "completed" };
+        }
 
-          return concept;
-        });
-        return updatedConcepts;
+        return concept;
       });
-    };
+      return updatedConcepts;
+    });
+  };
 
-    const navigate = useNavigate();
-    const handleBackBtn = () => {
-      stopScreenSharing();
-      toggleBrowserFullscreen();
-      navigate(-1);
-    };
+  const navigate = useNavigate();
+  const handleBackBtn = () => {
+    stopScreenSharing();
+    toggleBrowserFullscreen();
+    navigate(-1);
+  };
 
-    const handleDsaQuestionSubmit = ({ code, testCases }: IDsaQuestionResponse) => {
-      // console.log("DSA Question Submitted", code);
+  const handleDsaQuestionSubmit = ({ code, testCases }: IDsaQuestionResponse) => {
+    // console.log("DSA Question Submitted", code);
 
-      const response = `
+    const response = `
     user submitted code: ${code} \n
     test cases: ${JSON.stringify(testCases)}
     `;
-      addMessage(response);
-      handleDoneAnswering();
+    addMessage(response);
+    handleDoneAnswering();
 
-      setIsDsaRoundStarted(false);
+    setIsDsaRoundStarted(false);
 
-      setTimeout(() => {
-        setIsDsaRoundActive(false);
-      }, 5000);
-    };
+    setTimeout(() => {
+      setIsDsaRoundActive(false);
+    }, 1000 * 10);
+  };
 
-    const getLatestMessages = (allMessages: IMessage[]) => {
-      const latestAI = [...allMessages].reverse().find((m) => m.role === "AI");
-      const latestUser = [...allMessages].reverse().find((m) => m.role === "USER");
+  const getLatestMessages = (allMessages: IMessage[]) => {
+    const latestAI = [...allMessages].reverse().find((m) => m.role === "AI");
+    const latestUser = [...allMessages].reverse().find((m) => m.role === "USER");
 
-      // Preserve order: oldest first
-      const latest = [latestUser, latestAI].filter(Boolean).sort((a, b) => (a!.id - b!.id));
-      return latest as IMessage[];
-    };
+    // Preserve order: oldest first
+    const latest = [latestUser, latestAI].filter(Boolean).sort((a, b) => a!.id - b!.id);
+    return latest as IMessage[];
+  };
 
-
-    return (
-      <>
-        {showScreenWarning && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="relative bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-              <h2 className="text-2xl font-bold mb-6 text-h2 text-red-600">Second Screen Detected</h2>
-              <div className="text-body space-y-3 mb-4">
-                <p>We detected an additional screen connected during the interview.</p>
-                <p>Please disconnect it to continue. You will be redirected to the setup screen.</p>
-              </div>
-              <button
-                className="text-button bg-button text-white px-4 py-2 rounded"
-                onClick={() => {
-                  stopScreenSharing();
-                  toggleBrowserFullscreen();
-                  navigate(-1); // go back to previous screen (Check Setup)
-                }}
-              >
-                Return to Setup
-              </button>
+  return (
+    <>
+      {showScreenWarning && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="relative bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h2 className="text-2xl font-bold mb-6 text-h2 text-red-600">Second Screen Detected</h2>
+            <div className="text-body space-y-3 mb-4">
+              <p>We detected an additional screen connected during the interview.</p>
+              <p>Please disconnect it to continue. You will be redirected to the setup screen.</p>
             </div>
+            <button
+              className="text-button bg-button text-white px-4 py-2 rounded"
+              onClick={() => {
+                stopScreenSharing();
+                toggleBrowserFullscreen();
+                navigate(-1); // go back to previous screen (Check Setup)
+              }}
+            >
+              Return to Setup
+            </button>
           </div>
-        )}
-        <div className={`w-full h-[${isDsaRoundStarted ? "80vh" : "100vh"}] pt-12 `}>
-          <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
-            <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} interviewIcon={interviewIcon}  />
-            {/* check dsa round started or not */}
+        </div>
+      )}
+      <div className={`w-full h-[${isDsaRoundStarted ? "80vh" : "100vh"}] pt-12 `}>
+        <div className="flex flex-col max-w-[80%] mx-auto gap-y-12">
+          <Header SkillName={interviewTopic} type={type} skillLevel={skillLevel} interviewIcon={interviewIcon} />
+          {/* check dsa round started or not */}
 
-              {isInterviewEnded ? (
-              <div className="text-center text-gray-500  font-ubuntu">
-                <p>Thank you for your time. We will get back to you soon.</p>
+          {isInterviewEnded ? (
+            <div className="text-center text-gray-500  font-ubuntu">
+              <p>Thank you for your time. We will get back to you soon.</p>
+              {isProcessingInterviewEnds ? (
+                <>
+                  <p className="text-center">Processing Interviews....</p>
+                </>
+              ) : (
                 <button className=" text-button bg-button text-white m-2 p-2 rounded-md" onClick={handleBackBtn}>
                   Back
                 </button>
-              </div>
-            ) : isDsaRoundStarted ? (
-                <div className=" h-[70vh] mx-auto">
-                  <Example question={dsaQuestion} handleDsaQuestionSubmit={handleDsaQuestionSubmit} />
-                </div>
-              ) : (
-              <LayoutBuilder
-                isUserAnswering={isUserAnswering}
-                handleDoneAnswering={handleDoneAnswering}
-                question={question}
-                frequencyData={frequencyData}
-                messages={getLatestMessages(messages)}
-                layoutType={2}
-                interviewState={interviewState}
-                concepts={allConcepts}
-              />
-            )}
-          </div>
+              )}
+            </div>
+          ) : isDsaRoundStarted ? (
+            <div className=" h-[70vh] mx-auto">
+              <Example question={dsaQuestion} handleDsaQuestionSubmit={handleDsaQuestionSubmit} />
+            </div>
+          ) : (
+            <LayoutBuilder
+              isUserAnswering={isUserAnswering}
+              handleDoneAnswering={handleDoneAnswering}
+              question={question}
+              frequencyData={frequencyData}
+              messages={getLatestMessages(messages)}
+              layoutType={2}
+              interviewState={interviewState}
+              concepts={allConcepts}
+              interviewId={interviewDetails?.data?._id}
+            />
+          )}
         </div>
-      </>
-    );
-  };
+      </div>
+    </>
+  );
+};
 
 interface LayoutBuilderProps {
   isUserAnswering: boolean;
@@ -496,6 +500,7 @@ interface LayoutBuilderProps {
   layoutType: 1 | 2;
   interviewState: InterviewState;
   concepts: any[];
+  interviewId: string;
 }
 
 const LayoutBuilder = ({
@@ -507,10 +512,19 @@ const LayoutBuilder = ({
   layoutType,
   interviewState,
   concepts,
+  interviewId,
 }: LayoutBuilderProps) => {
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const [InterviewTime, setInterviewTime] = useState<number>(0);
-  const [formattedTime, setFormattedTime] = useState<string>("00:00");
+
+  const savedTime = localStorage.getItem(`interviewTime_${interviewId}`);
+  const initialTime = savedTime ? parseInt(savedTime, 10) : 0;
+  const [InterviewTime, setInterviewTime] = useState<number>(initialTime);
+  const initialMinutes = Math.floor(initialTime / 60);
+  const initialSeconds = initialTime % 60;
+  const initialFormattedTime = `${String(initialMinutes).padStart(2, "0")}:${String(initialSeconds).padStart(2, "0")}`;
+  const [formattedTime, setFormattedTime] = useState<string>(initialFormattedTime);
+
+  console.log("interviewId", interviewId);
 
   // console.log("all conepts", concepts);
 
@@ -541,17 +555,18 @@ const LayoutBuilder = ({
         const formattedMinutes = String(minutes).padStart(2, "0");
         const formattedSeconds = String(seconds).padStart(2, "0");
         setFormattedTime(`${formattedMinutes}:${formattedSeconds}`);
+        localStorage.setItem(`interviewTime_${interviewId}`, newTime.toString());
         return newTime;
       });
     }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [interviewId]);
 
   return layoutType === 1 ? (
     <div className="w-full flex gap-8 max-h-screen">
       <div className="w-[60%] flex flex-col gap-8">
-
         <WebCam />
         {isUserAnswering ? (
           <Controls doneAnswering={handleDoneAnswering} />
