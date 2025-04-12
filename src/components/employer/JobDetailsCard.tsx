@@ -1,27 +1,87 @@
-"use client";
-import { Edit, PenIcon } from "lucide-react";
+import { useState, useRef, useEffect } from "react"
+import { MoreVertical, Copy, Edit, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 // API response shape - adjust field names based on your actual API
 interface JobDetailsData {
-  _id?: string;
-  title?: string;
+  _id?: string
+  title?: string
   company?: {
-    _id?: string;
-    name?: string;
-  };
-  location?: string;
-  job_type?: string;
-  work_place_type?: string;
-  experience_level?: string;
+    _id?: string
+    name?: string
+  }
+  location?: string
+  job_type?: string
+  work_place_type?: string
+  experience_level?: string
   // Any other fields from your API
 }
 
 interface JobDetailsCardProps {
-  jobDetails?: JobDetailsData;
-  onViewDetails: () => void;
+  jobDetails?: JobDetailsData
+  onViewDetails: () => void
+  onDelete?: () => void // Added delete handler prop
 }
 
-const JobDetailsCard = ({ jobDetails, onViewDetails }: JobDetailsCardProps) => {
+// Update the JobDetailsCard component to use a portal for the dropdown
+const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardProps) => {
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  // Update dropdown position when button is clicked
+  useEffect(() => {
+    if (showDropdown && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8, // 8px gap
+        left: rect.right - 204, // Align right edge of dropdown with right edge of button
+      })
+    }
+  }, [showDropdown])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // Handle copy job link
+  const handleCopyLink = () => {
+    if (jobDetails?._id) {
+      const link = `https://employability.ai/job-post/${jobDetails._id}`
+      navigator.clipboard.writeText(link)
+      toast.success("Job link copied to clipboard")
+      setShowDropdown(false)
+    }
+  }
+
+  // Handle edit details
+  const handleEditDetails = () => {
+    onViewDetails()
+    setShowDropdown(false)
+  }
+
+  // Handle delete
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete()
+    }
+    setShowDropdown(false)
+  }
+
   // If job details aren't loaded yet, show a loading state
   if (!jobDetails) {
     return (
@@ -40,7 +100,7 @@ const JobDetailsCard = ({ jobDetails, onViewDetails }: JobDetailsCardProps) => {
           <div className="w-9 h-9 bg-[#eceef0] rounded-full animate-pulse"></div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -93,15 +153,64 @@ const JobDetailsCard = ({ jobDetails, onViewDetails }: JobDetailsCardProps) => {
           </div>
         </div>
 
-        <button
-          className="text-[#10b754] bg-[#ebfff3] p-2 rounded-full transition-colors"
-          onClick={onViewDetails}
-        >
-          <PenIcon className="w-5 h-5" />
-        </button>
+        {/* More options button with dropdown */}
+        <div className="relative">
+          <button
+            ref={buttonRef}
+            className="text-[#414447] bg-[#eceef0] p-2 rounded-full transition-colors hover:bg-[#e0e2e4]"
+            onClick={() => setShowDropdown(!showDropdown)}
+          >
+            <MoreVertical className="w-5 h-5" />
+          </button>
+
+          {/* Dropdown menu - now positioned fixed and with a high z-index */}
+          {showDropdown && (
+            <div
+              ref={dropdownRef}
+              className="fixed w-[204px] p-3 bg-white rounded-[5px] shadow-[0px_10px_16px_-2px_rgba(149,151,153,0.16)] inline-flex flex-col justify-center items-start gap-2 z-[9999]"
+              style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+              }}
+            >
+              {/* Copy Job link */}
+              <button
+                className="self-stretch p-2 inline-flex justify-start items-center gap-2 hover:bg-[#f5f5f5] w-full rounded"
+                onClick={handleCopyLink}
+              >
+                <Copy className="w-[15.50px] h-[18.50px] text-[#1c1b1f]" />
+                <span className="text-[#414347] text-base font-normal font-['DM_Sans'] leading-normal tracking-tight">
+                  Copy Job link
+                </span>
+              </button>
+
+              {/* Edit Details */}
+              <button
+                className="self-stretch p-2 inline-flex justify-start items-center gap-2 hover:bg-[#f5f5f5] w-full rounded"
+                onClick={handleEditDetails}
+              >
+                <Edit className="w-5 h-[21.10px] text-[#1c1b1f]" />
+                <span className="text-[#414347] text-base font-normal font-['DM_Sans'] leading-normal tracking-tight">
+                  Edit Details
+                </span>
+              </button>
+
+              {/* Delete */}
+              <button
+                className="self-stretch p-2 inline-flex justify-start items-center gap-2 hover:bg-[#f5f5f5] w-full rounded"
+                onClick={handleDelete}
+              >
+                <Trash2 className="w-[15px] h-[16.88px] text-[#fd5964]" />
+                <span className="text-[#fd5964] text-base font-normal font-['DM_Sans'] leading-normal tracking-tight">
+                  Delete
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default JobDetailsCard;
+export default JobDetailsCard

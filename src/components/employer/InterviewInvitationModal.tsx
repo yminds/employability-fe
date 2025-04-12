@@ -60,6 +60,7 @@ interface InterviewModalProps {
   selectedCandidatesCount: number;
   selectedCandidates?: Candidate[];
   jobId: string;
+  onSuccess?:()=>void;
 }
 
 export default function InterviewModal({
@@ -68,6 +69,7 @@ export default function InterviewModal({
   selectedCandidatesCount,
   selectedCandidates = [],
   jobId,
+  onSuccess
 }: InterviewModalProps) {
   // State variables
   const [selectedOption, setSelectedOption] = useState<"full" | "screening">(
@@ -195,12 +197,16 @@ export default function InterviewModal({
           if (total > 0 && completed > 0) {
             const message =
               completed === total
-                ? `All ${completed} interview invitations were sent successfully!`
+                ? ` ${completed} interview invitations were sent successfully!`
                 : `${completed} out of ${total} interview invitations were sent successfully.`;
 
             setSuccessMessage(message);
             setShowSuccessModal(true);
-            setBatchId(null); // Hide the progress bar immediately
+            setBatchId(null); 
+
+            if (onSuccess && data.total > 0 && data.completed > 0) {
+              onSuccess();
+            }
           }
           break;
 
@@ -328,7 +334,11 @@ export default function InterviewModal({
   // Handle success modal close
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-    onClose(); // Close the interview modal as well
+    onClose();
+    
+    if(onSuccess){
+      onSuccess();
+    }
   };
 
   // Update days when date changes

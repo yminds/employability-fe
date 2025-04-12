@@ -1,6 +1,5 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -8,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import RichTextEditor from "../../utils/employer/RichTextEditor"; 
 
 interface BasicInfoFormProps {
   formData: {
@@ -140,15 +140,17 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
         </Select>
       </div>
 
-      {/* Description */}
-      <Textarea
-        value={formData.description}
-        onChange={(e) => handleFormDataChange("description", e.target.value)}
-        placeholder="Job Description"
-        rows={20}
-        className="resize-none text-body2"
-        required
-      />
+      {/* Description - Now using RichTextEditor */}
+      <div>
+        <label htmlFor="description" className="block mb-2 text-body2 font-medium text-gray-700">
+          Job Description
+        </label>
+        <RichTextEditor
+          value={formData.description}
+          onChange={(html) => handleFormDataChange("description", html)}
+          placeholder="Write a detailed job description..."
+        />
+      </div>
     </div>
   );
 };

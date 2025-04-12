@@ -120,7 +120,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 		return count > 0 ? (totalScore / count).toFixed(1) : "N/A";
 	};
 
-	const overallScore = calculateOverallScore();
+	const overallScore = reportData.reportType === "Full" ? calculateOverallScore(): reportData.final_rating?.toFixed(1) || "N/A";
 	const sharePopupRef = React.useRef<HTMLDivElement>(null);
 
 	// Get rating text based on score

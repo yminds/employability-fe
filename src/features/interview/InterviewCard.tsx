@@ -151,7 +151,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
         path = `/skill/report/Screening/${id}`;
         break;
       case "Project":
-        path = `/skill/report/Project/${id}`;
+        path = `/project/report/${id}`;
         break;
       default:
         path = `/skill/report/${id}`;

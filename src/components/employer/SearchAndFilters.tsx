@@ -1,4 +1,3 @@
-// SearchAndFilters.tsx
 import React from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,14 @@ interface SearchAndFiltersProps {
   handleSourceChange?: (source: string) => void;
   sortBy?: string;
   handleSortByChange?: (sortBy: string) => void;
+  sourceCounts?: {
+    employability: number;
+    uploaded: number;
+    job: number;
+    applicants: number;
+    all?: number;
+  };
+  isLoadingCandidates?: boolean; 
 }
 
 const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
@@ -26,7 +33,23 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
   handleSourceChange = () => {},
   sortBy = "matching",
   handleSortByChange = () => {},
+  sourceCounts = { employability: 0, uploaded: 0, job: 0, applicants: 0 },
+  isLoadingCandidates = false
 }) => {
+  // Map source values to display texts (without counts)
+  const getSourceDisplay = (source: string) => {
+    switch(source) {
+      case "all": return "All Candidates";
+      case "employability": return "Employability Pool";
+      case "uploaded": return "All Uploaded Resumes";
+      case "job": return "Resumes For this Job";
+      case "applicants": return "Job Applicants";
+      default: return source;
+    }
+  };
+
+
+  
   return (
     <div className="flex gap-4 mb-5 text-body2">
       <div className="relative flex-1">
@@ -39,18 +62,19 @@ const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
         />
       </div>
       <div className="w-[280px]">
-        <Select value={selectedSource} onValueChange={handleSourceChange}>
+        <Select value={selectedSource} onValueChange={handleSourceChange} disabled={isLoadingCandidates}>
           <SelectTrigger className="border-[#d6d7d9] bg-white h-12">
             <div className="flex items-center gap-2">
               <span className="text-[#909091]">Source :</span>
-              <SelectValue placeholder="All Candidates" />
+              <SelectValue>{getSourceDisplay(selectedSource)}</SelectValue>
             </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Candidates</SelectItem>
-            <SelectItem value="employability">Employability Pool</SelectItem>
-            <SelectItem value="uploaded">All Uploaded Resumes</SelectItem>
-            <SelectItem value="job">Resumes For this Job</SelectItem>
+            <SelectItem value="employability">Employability Pool ({sourceCounts.employability})</SelectItem>
+            <SelectItem value="uploaded">All Uploaded Resumes ({sourceCounts.uploaded})</SelectItem>
+            <SelectItem value="job">Resumes For this Job ({sourceCounts.job})</SelectItem>
+            <SelectItem value="applicants">Job Applicants ({sourceCounts.applicants})</SelectItem>
           </SelectContent>
         </Select>
       </div>

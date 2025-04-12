@@ -7,6 +7,7 @@ import { RootState } from "@/store/store";
 import ReportContent from "@/components/skills-report/SkillsReportContainer";
 import Skeleton from "react-loading-skeleton";
 import { useGetPublicProfileQuery } from "@/api/userPublicApiSlice";
+import UpdatedMockReportContainer from "@/components/mock-report/updatedReport";
 
 interface Performance {
   criteria: string;
@@ -209,6 +210,8 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   : profile.skills?.find((skillItem: any) => skillItem.best_interview === interviewId)
   // const { name: skillName, icon: skillIcon } = skill?.skill_pool_id;
   // console.log({ name: skillName, icon: skillIcon })
+  // const { name: skillName, icon: skillIcon } = skill?.skill_pool_id;
+  // console.log({ name: skillName, icon: skillIcon })
 
   console.log(skill)
 
@@ -218,22 +221,25 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     navigate(-1);
   };
 
+  const professionalExperience = profile?.experience ;
+
   return (
-    <ReportContent
-      reportData={reportData}
-      userName={profile?.name || username || ""} // Use username from URL if profile name is not available
-      handleBackToSkillsPage={handleBackToSkillsPage}
-      goal_name={goal_name}
-      skill_icon={"skillIcon"}
-      userImg={userImg || profile.profile_image}
-      sharedReport={isSharedReport}
-      skillId={skill?.skill_pool_id._id}
-      userSkillId={skill?._id}
-      level={level}
-      skill={skill}
-      publicProfileName={profile?.username || username || ""} // Use username from URL if profile username is not available
-      isPublic={isPublic}
-    />
+    // <ReportContent
+    //   reportData={reportData}
+    //   userName={profile?.name || username || ""} // Use username from URL if profile name is not available
+    //   handleBackToSkillsPage={handleBackToSkillsPage}
+    //   goal_name={goal_name}
+    //   skill_icon={""}
+    //   userImg={userImg || profile.profile_image}
+    //   sharedReport={isSharedReport}
+    //   skillId={skill?.skill_pool_id._id}
+    //   userSkillId={skill?._id}
+    //   level={level}
+    //   skill={skill}
+    //   publicProfileName={profile?.username || username || ""} // Use username from URL if profile username is not available
+    //   isPublic={isPublic}
+    // />
+    <UpdatedMockReportContainer reportData={reportData} isSharedReport={false} professionalExperience={professionalExperience} inviteId={"inviteId"} publicProfileName={profile?.username || ""} />
   );
 };
 

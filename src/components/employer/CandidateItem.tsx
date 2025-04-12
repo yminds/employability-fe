@@ -31,7 +31,10 @@ interface Candidate {
     city: string;
   };
   matchPercentage: number;
-  userGoals?: string[]; // Added userGoals field
+  userGoals?: string[];
+  invite?: {
+    sent_at: string;
+  } | null;
 }
 
 interface CandidateItemProps {
@@ -39,6 +42,23 @@ interface CandidateItemProps {
   isChecked: boolean;
   onCheckChange: (userId: string, checked: boolean) => void;
 }
+
+// Function to format invite date to a human-readable format
+const formatInviteDate = (sentAt: string): string => {
+  const sentDate = new Date(sentAt);
+  const now = new Date();
+  
+  // Reset hours to compare just the dates
+  const sentDay = new Date(sentDate).setHours(0, 0, 0, 0);
+  const today = new Date(now).setHours(0, 0, 0, 0);
+  
+  const diffTime = today - sentDay;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return `${diffDays} Days ago`;
+};
 
 const CandidateItem: React.FC<CandidateItemProps> = ({
   candidate,
@@ -60,6 +80,9 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
     candidate.matchedSkillCount &&
     candidate.verifiedSkillCount !== undefined &&
     candidate.matchedSkillCount > candidate.verifiedSkillCount;
+
+  // Determine invitation status
+  const hasInvite = candidate.invite && candidate.invite.sent_at;
 
   return (
     <>
@@ -106,6 +129,20 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
           <div className="flex-1">
             <div className="flex items-center">
               <h3 className="font-medium text-[#0c0f12]">{candidate.name}</h3>
+              
+              {/* Invite Status Badge
+              {hasInvite && (
+                <div className="">
+                  <TooltipProvider>
+                    <Tooltip>
+                      
+                      <TooltipContent>
+                        <p>Invite Sent {formatInviteDate(candidate?.invite.sent_at)}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )} */}
             </div>
             <div className="flex flex-col">
               {/* Display user goals if available */}
@@ -122,16 +159,25 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
                 )}
               </>
 
-              {candidate.current_status === "From Resume" ? (
-                <p className="text-sm text-[#68696b]">{candidate.address}</p>
-              ) : (
-                candidate.location?.city &&
-                candidate.location?.state && (
-                  <p className="text-sm text-[#68696b]">
-                    {`${candidate.location.city}, ${candidate.location.state}`}
-                  </p>
-                )
-              )}
+              <div className="flex-col items-center">
+                {candidate.current_status === "From Resume" ? (
+                  <p className="text-sm text-[#68696b]">{candidate.address}</p>
+                ) : (
+                  candidate.location?.city &&
+                  candidate.location?.state && (
+                    <p className="text-sm text-[#68696b]">
+                      {`${candidate.location.city}, ${candidate.location.state}`}
+                    </p>
+                  )
+                )}
+                
+                {/* Invite Sent Date */}
+                {hasInvite && (
+                  <span className="text-xs text-[#68696b] mt-1">
+                     Invite Sent {formatInviteDate((candidate?.invite as any).sent_at)}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -209,8 +255,6 @@ const CandidateItem: React.FC<CandidateItemProps> = ({
           </div>
         </div>
       </div>
-
-      
 
       {candidate.current_status !== "From Resume" && (
         <CandidateProfileModal
