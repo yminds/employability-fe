@@ -1,5 +1,6 @@
 import React from 'react';
 import { ExperienceItem } from '@/pages/MockReportPage';
+import softSkills from "@/assets/reports/softSkills.png"
 
 interface ProfessionalExperienceProps {
   experiences: ExperienceItem[];
@@ -67,27 +68,25 @@ const ProfessionalExperience: React.FC<ProfessionalExperienceProps> = ({
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center">
           <span className="text-green-500 mr-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 6H16V4C16 2.89 15.11 2 14 2H10C8.89 2 8 2.89 8 4V6H4C2.89 6 2 6.89 2 8V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V8C22 6.89 21.11 6 20 6ZM10 4H14V6H10V4ZM20 19H4V8H20V19Z" fill="currentColor"/>
-            </svg>
+          <img src={softSkills} alt="" className=" p-1 object-contain border rounded-full" />
           </span>
-          <h2 className="text-lg font-semibold">Professional experience</h2>
+          <h2 className="text-sub-header font-bold text-gray-800 font-dm-sans">Professional experience</h2>
         </div>
         <div className="flex items-center">
-          <span className="mr-4 font-bold">{totalExperience.toFixed(1)} years</span>
-          <span className="text-green-500 font-semibold">{matchPercentage}% Match</span>
+          <span className=" text-sub-header  text-grey-8">{totalExperience.toFixed(1)} years</span>
+          {/* <span className="text-green-500 font-semibold">{matchPercentage}% Match</span> */}
         </div>
       </div>
       
       {/* "Previous Experience" section */}
-      <div className="mb-6">
-        <h3 className="text-gray-500 mb-4">Previous Experience</h3>
+      <div className=" bg-[#F5F5F5] p-5">
+        <h3 className="text-gray-500 mb-4 text-body2">Previous Experience</h3>
         
         {experiences.map((exp, index) => (
-          <div key={index} className="flex justify-between py-4 border-b border-gray-100">
+          <div key={index} className="flex justify-between py-4 border-b border-gray-100 bg-white p-[13px] rounded-lg">
             <div className="flex">
               <div className="w-12 h-12 mr-4 flex-shrink-0">
-                <div className="bg-yellow-400 w-full h-full flex items-center justify-center text-xs font-bold text-black">
+                <div className="bg-[#F5F5F5] w-full h-full flex items-center justify-center text-xs font-bold text-black rounded-full">
                   {getCompanyInitials(exp.company)}
                 </div>
               </div>
@@ -110,7 +109,7 @@ const ProfessionalExperience: React.FC<ProfessionalExperienceProps> = ({
           </div>
         ))}
         
-        <button className="text-blue-600 mt-4 font-medium">View All</button>
+        {/* <button className="text-button text-center">View All</button> */}
       </div>
       
       {/* "Relevant Experience" section */}

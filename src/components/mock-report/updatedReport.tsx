@@ -67,7 +67,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 	const [reportTitle, setTitle] = useState("")
 	console.log("report professionalExperience", professionalExperience);
 	const navigate = useNavigate();
-	const isEmployerReport = true;
+	const isEmployerReport = window.location.pathname.includes("employer");
 
 	// Determine whether to use employer_summary or summary
 	const summary = isEmployerReport

@@ -266,6 +266,10 @@ export const routes: RouteConfig[] = [
     component: <MockReportPage isSharedReport={true} />,
   },
   {
+    route: "/report/employer/:id/:id/:id/:id",
+    component: <MockReportPage isSharedReport={true} />,
+  },
+  {
     route: "/skill-report/:id/:id/:id",
     component: <MockReportPage isSharedReport={true} />,
   },
