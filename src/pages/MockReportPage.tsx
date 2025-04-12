@@ -9,6 +9,7 @@ import Skeleton from "react-loading-skeleton";
 import { useGetPublicProfileQuery } from "@/api/userPublicApiSlice";
 import { mockInterviews } from "@/features/dashboard/InterviewsInvites";
 import { useGetAllPreDefinedGoalsQuery } from "@/api/predefinedGoalsApiSlice";
+import UpdatedMockReportContainer from "@/components/mock-report/updatedReport";
 
 interface Performance {
     criteria: string;
@@ -59,6 +60,7 @@ interface Report {
   final_rating: number;
   s3_recording_url: [string];
   reportType:string
+  createdAt:string;
 }
 
 interface PredefinedGoal {
@@ -80,11 +82,22 @@ interface User {
   profile_image?: string;
   name?: string;
 }
+export interface ExperienceItem {
+  title: string;
+  company: string;
+  location: string;
+  currently_working: boolean;
+  end_date: string;
+  start_date: string;
+  description: string;
+  employment_type: string;
+}
 
 interface UserProfile {
   name: string;
   username: string;
   profile_image: string;
+  experience: ExperienceItem[];
 }
 
 const LoadingState = () => (
@@ -170,15 +183,18 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const getInterviewIdFromUrl = () => {
     const pathParts = location.pathname.split("/");
     // URL format: /skills-report/username/interviewId
-    const username = pathParts[pathParts.length - 3]; // e.g. "someUser"
+    const inviteId = pathParts[pathParts.length - 3 ];
+    const username = pathParts[pathParts.length - 2]; // e.g. "someUser"
     const interviewId = pathParts[pathParts.length - 1]; // e.g. "abc123"
     console.log({
       username,
       interviewId,
+      inviteId
     });
     return {
       username,
       interviewId,
+      inviteId
     };
   };
 
@@ -187,7 +203,7 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     return authState.auth.user?.username || "";
   });
 
-  const { username, interviewId } = getInterviewIdFromUrl();
+  const { username, interviewId, inviteId } = getInterviewIdFromUrl();
 
   const profileUsername = isSharedReport ? username : loggedInUsername;
 
@@ -260,21 +276,24 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const handleBackToSkillsPage = () => {
     navigate(-1);
   };
-console.log("thread_id",thread_id);
+
+  const professionalExperience = profile?.experience ;
+  console.log("Experience", professionalExperience)
 
 
   return (
-    <MockReportContent
-      reportData={reportData}
-      userName={profile?.name || ""}
-      handleBackToSkillsPage={handleBackToSkillsPage}
-      userImg={userImg || profile.profile_image}
-      sharedReport={isSharedReport}
-      publicProfileName={profile?.username || ""}
-      isPublic={isPublic}
-      jobDetails={matchedItem ?? {}}
-      thread_id={thread_id}
-    />
+    // <MockReportContent
+    //   reportData={reportData}
+    //   userName={profile?.name || ""}
+    //   handleBackToSkillsPage={handleBackToSkillsPage}
+    //   userImg={userImg || profile.profile_image}
+    //   sharedReport={isSharedReport}
+    //   publicProfileName={profile?.username || ""}
+    //   isPublic={isPublic}
+    //   jobDetails={matchedItem ?? {}}
+    //   thread_id={thread_id}
+    // />
+    <UpdatedMockReportContainer reportData={reportData} isSharedReport={false} professionalExperience={professionalExperience} inviteId={inviteId} publicProfileName={profile?.username || ""} />
   );
 };
 

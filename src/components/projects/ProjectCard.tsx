@@ -38,7 +38,7 @@ interface Project {
   score?: number;
   lastCompletedStep?: number;
   goal_id?: string;
-  latest_interview_status: {
+  latest_interview_status?: {
     interview_id: string;
     isCompleted: boolean;
   };

@@ -113,12 +113,12 @@ interface MockReportContentProps {
   jobDetails: JobDetails;
 }
 
-const getShareUrl = (publicProfileName: string) => {
+ export const getShareUrl = (publicProfileName: string) => {
   if (typeof window === "undefined") return "";
   const currentPath = window.location.pathname;
   const interviewId = currentPath.split("/").pop();
   const baseUrl = window.location.origin;
-  const url = new URL(`${baseUrl}/skill-report/${publicProfileName}/Project/${interviewId}`);
+  const url = new URL(`${baseUrl}/report/${publicProfileName}//${interviewId}`);
   return url.toString();
 };
 
@@ -857,11 +857,6 @@ const MockReportContent: React.FC<MockReportContentProps> = ({
           ) : (
             <NewInterviewPlayer url={reportData.s3_recording_url[0]} />
           )}
-          {/* <NewInterviewPlayer
-            url={
-              "https://employability-user-profile.s3.us-east-1.amazonaws.com/interview/videos/67cbcea0b1bd605d0874fb4b-1741436001672-webm"
-            }
-          /> */}
         </div>
       </section>
     );
