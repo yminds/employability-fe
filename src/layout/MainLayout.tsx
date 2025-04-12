@@ -54,8 +54,8 @@ const employerRoutes = [
   "/employer/jobs/edit/:jobId",
 ];
 
-const freeRoutes = ["/profile", "/job-post", "/signup", "/login"];
-const allfreeRoutes = [...freeRoutes, ...employerRoutes];
+// const freeRoutes = ["/profile", "/job-post", "/signup", "/login", "/invitation/:inviteId", "/invitations"];
+const allfreeRoutes = [...noSidebarRoutes, ...employerRoutes];
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
