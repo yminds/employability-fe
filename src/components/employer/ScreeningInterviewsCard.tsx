@@ -1,12 +1,13 @@
 import { Card } from "@/components/ui/card";
 import ScreeningInterviews from "@/assets/employer/screeningInterviews.svg";
 import { useGetInterviewStatsQuery } from "../../api/InterviewInvitation";
+import { useEffect } from "react";
 
 interface ScreeningInterviewsCardProps {
   jobId: string;
+  onRefetchAvailable?: (refetch: () => void) => void; // Add this prop
 }
 
-// Extending the expected type structure to include 'stats'
 interface InterviewStatsResponse {
   data: {
     stats: {
@@ -16,17 +17,22 @@ interface InterviewStatsResponse {
         notAccepted: number;
         completed: number;
       }
-    }
+    } 
   }
 }
 
-export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCardProps) {
-  const { data, isLoading, error } = useGetInterviewStatsQuery(jobId);
+export default function ScreeningInterviewsCard({ jobId, onRefetchAvailable }: ScreeningInterviewsCardProps) {
+  const { data, isLoading, error, refetch } = useGetInterviewStatsQuery(jobId);
   
-  // Type assertion to match the actual structure
+  // Make refetch available to parent component
+  useEffect(() => {
+    if (onRefetchAvailable) {
+      onRefetchAvailable(refetch);
+    }
+  }, [refetch, onRefetchAvailable]);
+  
   const typedData = data as unknown as InterviewStatsResponse;
   
-  // Get the stats or provide default values while loading/error
   const stats = typedData?.data?.stats?.screeningInterviews || {
     invitesSent: 0,
     accepted: 0,
@@ -34,12 +40,11 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
     completed: 0
   };
 
-  const totalAccepted = stats.accepted + stats.completed
-
-  const totalNotAccepted = stats.invitesSent - totalAccepted
+  const totalAccepted = stats.accepted + stats.completed;
 
   return (
     <Card className="w-full max-w-md bg-white rounded-xl">
+      {/* Rest of component remains the same */}
       <div className="flex flex-row items-center gap-3 p-5 ">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E4DEFD]">
           <img
@@ -76,7 +81,7 @@ export default function ScreeningInterviewsCard({ jobId }: ScreeningInterviewsCa
               Not Accepted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? 0 : totalNotAccepted}
+              {isLoading ? 0 : stats.notAccepted}
             </span>
           </div>
           <div className="flex justify-between items-center">

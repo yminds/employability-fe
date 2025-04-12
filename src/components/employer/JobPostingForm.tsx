@@ -116,6 +116,38 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
     !initialData?.isEditMode || initialData?.skills_required?.length === 0
   );
   const lastJobDescriptionRef = useRef(formData.description);
+  
+  // Track if we're coming back to skills step from a later step
+  const [comingBackToSkills, setComingBackToSkills] = useState(false);
+  const previousStepRef = useRef(activeStep);
+
+  // Effect to detect step changes
+  useEffect(() => {
+    // If we're moving to the skills step and were previously at a later step
+    if (activeStep === "skills" && 
+       (previousStepRef.current === "screening" || previousStepRef.current === "preview")) {
+      setComingBackToSkills(true);
+    } else {
+      setComingBackToSkills(false);
+    }
+    
+    previousStepRef.current = activeStep;
+  }, [activeStep]);
+
+  // Effect to check if we need to refetch skills when coming back to skills step
+  useEffect(() => {
+    if (comingBackToSkills) {
+      const currentDescription = formData.description.trim();
+      const lastDescription = lastJobDescriptionRef.current.trim();
+      
+      // Check for significant changes in JD
+      if (currentDescription !== lastDescription) {
+        console.log("JD changed after navigation back, refetching skills...");
+        setSelectedSkills([]);
+        setShouldFetchSkills(true);
+      }
+    }
+  }, [comingBackToSkills, formData.description]);
 
   const handleFormDataChange = (updatedData: any) => {
     if (
@@ -127,14 +159,9 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
       const newDescription = updatedData.description.trim();
 
       // If description is significantly different, fetch new skills
-      if (
-        newDescription !== oldDescription &&
-        (oldDescription.length === 0 ||
-          Math.abs(newDescription.length - oldDescription.length) > 50 ||
-          !newDescription.includes(oldDescription.substring(0, 100)))
-      ) {
+      if (newDescription !== oldDescription) {
         console.log(
-          "Job description changed significantly, will fetch new skills recommendations"
+          "Job description changed, will fetch new skills recommendations"
         );
         setSelectedSkills([]);
         setShouldFetchSkills(true);
@@ -549,19 +576,6 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
                     companyLogo={initialData.company_logo}
                     location={formData.location}
                   />
-                  {/* <JobPreviewSidebar
-                    jobTitle={formData.title}
-                    companyName={formData.company_name}
-                    companyLogo={initialData.company_logo}
-                    location={formData.location}
-                    jobType={formData.job_type}
-                    workplaceType={formData.work_place_type}
-                    description={formData.description}
-                    skills={selectedSkills}
-                    screeningQuestions={screeningQuestions}
-                    expanded={previewExpanded}
-                    onPreviewClick={handleTogglePreview}
-                  /> */}
                 </div>
               </div>
             </div>

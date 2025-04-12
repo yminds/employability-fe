@@ -312,22 +312,44 @@ export default function ResumeUploadModal({
   }, [files, jobId, employerId, companyId]);
 
   const handleContinue = () => {
-    // Update the session storage to mark processing in background
-    if (uploadId) {
-      const currentState: UploadState = JSON.parse(
-        sessionStorage.getItem("resumeUploadState") || "{}"
-      );
-      const updatedState = { 
-        ...currentState, 
-        processingInBackground: true 
-      };
-      sessionStorage.setItem("resumeUploadState", JSON.stringify(updatedState));
-      setProcessingInBackground(true);
+   
+    const isProcessingComplete = uploadProgress?.isParsingDone === true;
+    
+    if (isProcessingComplete) {
+   
+      sessionStorage.removeItem("resumeUploadState");
+      setProcessingInBackground(false);
+      
+      if (onContinue) {
+      
+        onContinue('job');
+      }
+    } else if (uploading) {
+ 
+      if (uploadId) {
+        const currentState: UploadState = JSON.parse(
+          sessionStorage.getItem("resumeUploadState") || "{}"
+        );
+        const updatedState = { 
+          ...currentState, 
+          processingInBackground: true 
+        };
+        sessionStorage.setItem("resumeUploadState", JSON.stringify(updatedState));
+        setProcessingInBackground(true);
+      }
+      
+      if (onContinue) {
+ 
+        onContinue('job');
+      }
+    } else {
+      
+      sessionStorage.removeItem("resumeUploadState");
+      if (onContinue) {
+        onContinue('job');
+      }
     }
     
-    if (onContinue) {
-      onContinue('job'); // Set filter to "Resumes For this Job"
-    }
     setIsOpen(false);
   };
 
@@ -504,18 +526,20 @@ export default function ResumeUploadModal({
         </div>
 
         <div className="flex justify-end p-4">
-          {uploading ? (
+          {uploading || uploadProgress?.isParsingDone ? (
             <div className="flex gap-2">
               {/* Upload progress button (disabled) */}
-              <Button 
-                className="bg-gray-200 text-gray-600 px-6 py-2 rounded-md font-medium"
-                disabled={true}
-              >
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </Button>
+              {uploading && !uploadProgress?.isParsingDone && (
+                <Button 
+                  className="bg-gray-200 text-gray-600 px-6 py-2 rounded-md font-medium"
+                  disabled={true}
+                >
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </Button>
+              )}
               
-              {/* Continue button (enabled even during processing) */}
+              {/* Continue button (enabled during and after processing) */}
               <Button 
                 className="bg-[#001630] hover:bg-[#001630]/90 text-white px-6 py-2 rounded-md font-medium"
                 onClick={handleContinue}

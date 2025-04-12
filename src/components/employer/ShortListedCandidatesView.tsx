@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useGetShortlistedCandiatesQuery } from "@/api/InterviewInvitation";
-import { Search } from "lucide-react";
+import { Search, Bookmark, AlertCircle, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Pagination from "./Pagination";
+import verified from "@/assets/skills/verified.svg";
+import Submitted from "@/assets/employer/Submitted.svg";
+import NotSubmitted from "@/assets/employer/NotSubmitted.svg";
 
 // Types
 interface ShortlistedCandidate {
   _id: string;
   job_id: string;
   candidate_id: string;
+  status: string;
+  interview_id?: string;
+  type_interview_id?: string;
   user_id: {
     _id: string;
     firstName: string;
@@ -22,21 +33,47 @@ interface ShortlistedCandidate {
       state: string;
       city: string;
     };
+    goals?: { _id: string; title: string }[];
+    skills?: { _id: string; name: string }[];
+    experience_level?: string;
+    current_status?: string;
   };
   shortlist: boolean;
-  status: string;
+  task?: {
+    interview_type: {
+      type: string;
+      status: string;
+      interview_id: string;
+    };
+  };
+  has_report: boolean;
+  report_id?: string;
+  final_rating?: number;
+  report_updated_at?: string;
+  type_report_id?: string;
+  type_final_rating?: number;
+  type_report_updated_at?: string;
+  effective_report_id?: string;
+  effective_final_rating?: number;
+  effective_report_updated_at?: string;
+  effective_interview_id?: string;
+  total_experience?: number;
+  raw_report?: any;
+  raw_type_report?: any;
 }
 
 interface ShortlistedCandidatesResponse {
   data: ShortlistedCandidate[];
   status: number;
   message: string;
+  count: number;
 }
 
-type SortOption = "recent" | "name_asc" | "name_desc";
+type SortOption = "recent" | "name_asc" | "name_desc" | "rating_high" | "rating_low";
 
 interface ShortlistedCandidateViewProps {
   jobId: string;
+  onRefetchAvailable?: (refetch: () => void) => void;
 }
 
 const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jobId }) => {
@@ -57,14 +94,19 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
     jobId,
     sortBy: sortBy
   }) as {
-    data:ShortlistedCandidatesResponse | undefined;
-    isLoading:boolean;
-    isFetching:boolean;
-    error:any;
-    refetch:()=> void;
+    data: ShortlistedCandidatesResponse | undefined;
+    isLoading: boolean;
+    isFetching: boolean;
+    error: any;
+    refetch: () => void;
   }
+  
 
   const candidates = shortlistedCandidatesResponse?.data || [];
+  
+  useEffect(()=>{
+    refetch()
+  },[refetch])
 
   // Filter candidates based on search term
   const filteredCandidates = candidates.filter((candidate: ShortlistedCandidate) => {
@@ -81,7 +123,12 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
       (candidate.user_id.address.country && candidate.user_id.address.country.toLowerCase().includes(searchLower))
     );
     
-    return nameMatch || locationMatch;
+    // Check if skills match
+    const skillsMatch = candidate.user_id.skills && candidate.user_id.skills.some(
+      skill => skill.name.toLowerCase().includes(searchLower)
+    );
+    
+    return nameMatch || locationMatch || skillsMatch;
   });
 
   // Pagination
@@ -92,8 +139,40 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
 
   // Handlers
   const handleViewProfile = (username: string) => {
+    window.open(`/profile/${username}`, '_blank');
+  };
+
+  const handleViewReport = (candidate: ShortlistedCandidate) => {
+    // Prioritize type_report_id as requested
+    if (candidate.type_report_id) {
+      window.open(`/reports/${candidate.type_report_id}`, '_blank');
+      return;
+    }
     
-    window.open(`/profile/${username}`,'_blank')
+    // If no type report ID, try effective_report_id
+    if (candidate.effective_report_id) {
+      window.open(`/reports/${candidate.effective_report_id}`, '_blank');
+      return;
+    }
+    
+    // Finally, fall back to the main report ID
+    if (candidate.report_id) {
+      window.open(`/reports/${candidate.report_id}`, '_blank');
+      return;
+    }
+    
+    // If we have a raw report with ID, use that
+    if (candidate.raw_type_report?._id) {
+      window.open(`/reports/${candidate.raw_type_report._id}`, '_blank');
+      return;
+    }
+    
+    if (candidate.raw_report?._id) {
+      window.open(`/reports/${candidate.raw_report._id}`, '_blank');
+      return;
+    }
+    
+    console.error("No report ID found for candidate:", candidate);
   };
 
   const handleRowsPerPageChange = (value: number) => {
@@ -125,6 +204,80 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
     const nameParts = name.split(" ");
     if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
     return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`.toUpperCase();
+  };
+
+  const getEffectiveRating = (candidate: ShortlistedCandidate) => {
+    // First check type_final_rating since we're prioritizing it
+    if (candidate.type_final_rating !== undefined && candidate.type_final_rating !== null) {
+      return candidate.type_final_rating;
+    }
+    
+    // Then check the effective_final_rating which is the next preference
+    if (candidate.effective_final_rating !== undefined && candidate.effective_final_rating !== null) {
+      return candidate.effective_final_rating;
+    }
+    
+    // If we have raw report data, check there
+    if (candidate.raw_type_report?.final_rating) {
+      return candidate.raw_type_report.final_rating;
+    }
+    
+    if (candidate.raw_report?.final_rating) {
+      return candidate.raw_report.final_rating;
+    }
+    
+    // Fall back to the other fields
+    if (candidate.final_rating !== undefined && candidate.final_rating !== null) {
+      return candidate.final_rating;
+    }
+    
+    return 0;
+  };
+
+  const formatRelativeTime = (dateString?: string) => {
+    if (!dateString) return "";
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) return "today";
+    if (diffInDays === 1) return "yesterday";
+    return `${diffInDays} days ago`;
+  };
+
+  const getSubmissionBadge = (candidate: ShortlistedCandidate) => {
+    if (candidate.has_report) {
+      return {
+        bgColor: "bg-[#d1f3d9]",
+        textColor: "text-[#10b754]",
+        icon: "check",
+        text: "Submitted",
+      };
+    }
+    return {
+      bgColor: "bg-[#eceef0]",
+      textColor: "text-[#414447]",
+      icon: "x",
+      iconBg: "bg-[#414447]",
+      text: "Not Submitted",
+    };
+  };
+
+  const getTimeSinceUpdate = (candidate: ShortlistedCandidate) => {
+    // Prioritize type_report_updated_at since we're focusing on type reports
+    if (candidate.type_report_updated_at) {
+      return formatRelativeTime(candidate.type_report_updated_at);
+    }
+    
+    // Use the most recent update time from any available field as fallback
+    const updateDate =
+      candidate.effective_report_updated_at ||
+      candidate.report_updated_at 
+
+    if (!updateDate) return null;
+
+    return formatRelativeTime(updateDate);
   };
 
   // UI Components
@@ -164,6 +317,24 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
     return null;
   };
 
+  // Render badge icon based on type
+  const renderBadgeIcon = (badgeType: string) => {
+    if (badgeType === "check") {
+      return (
+        <div className="w-4 h-4 mr-2 flex items-center justify-center rounded-full">
+          <img src={Submitted} alt="Submitted" />
+        </div>
+      );
+    } else if (badgeType === "x") {
+      return (
+        <div className="w-4 h-4 mr-2 flex items-center justify-center rounded-full">
+          <img src={NotSubmitted} alt="Not Submitted" />
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="flex flex-col bg-white rounded-lg overflow-hidden h-full p-6">
       {/* Filters in a single row */}
@@ -193,6 +364,8 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
               <option value="recent">Most Recent</option>
               <option value="name_asc">Name (A-Z)</option>
               <option value="name_desc">Name (Z-A)</option>
+              <option value="rating_high">Rating (High to Low)</option>
+              <option value="rating_low">Rating (Low to High)</option>
             </select>
           </div>
         </div>
@@ -208,60 +381,125 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
 
           {/* Candidate Cards */}
           {!isFetching && !error && currentCandidates.length > 0 && (
-            <div className="p-4">
-              {currentCandidates.map((candidate: ShortlistedCandidate) => (
-                <div 
-                  key={candidate._id} 
-                  className="bg-white p-4 mb-3 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-[#eaeaea]"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+            <div>
+              {currentCandidates.map((candidate: ShortlistedCandidate) => {
+                const rating = getEffectiveRating(candidate);
+                const hasReport = candidate.has_report && (candidate.type_report_id || candidate.effective_report_id || candidate.report_id);
+                
+                return (
+                  <div 
+                    key={candidate._id} 
+                    className="bg-white p-5 border-b border-[#d6d7d9]"
+                  >
+                    <div className="flex items-start space-x-4">
                       {/* Profile Image */}
-                      {candidate.user_id.profile_image ? (
-                        <div className="w-12 h-12 rounded-full overflow-hidden border">
-                          <img
-                            src={candidate.user_id.profile_image}
-                            alt={candidate.user_id.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className="w-12 h-12 rounded-full overflow-hidden border flex items-center justify-center"
-                          style={{ backgroundColor: "#6c757d" }}
-                        >
-                          <span className="text-white text-base font-medium">
-                            {getInitials(candidate.user_id.name)}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {/* Name and Location */}
-                      <div className="overflow-hidden">
-                        <h3 className="font-medium text-[#0c0f12] text-base truncate">
-                          {candidate.user_id.name}
-                        </h3>
-                        
-                        {candidate.user_id.address && (
-                          <p className="text-sm text-[#68696b] truncate">
-                            {formatLocation(candidate.user_id.address)}
-                          </p>
+                      <div className="relative">
+                        {candidate.user_id.profile_image ? (
+                          <div className="w-14 h-14 rounded-full overflow-hidden border">
+                            <img
+                              src={candidate.user_id.profile_image}
+                              alt={candidate.user_id.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className="w-14 h-14 rounded-full overflow-hidden border flex items-center justify-center"
+                            style={{ backgroundColor: "#6c757d" }}
+                          >
+                            <span className="text-white text-xl font-medium">
+                              {getInitials(candidate.user_id.name)}
+                            </span>
+                          </div>
                         )}
                       </div>
-                    </div>
+                      
+                      {/* Candidate Info */}
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            {/* Name and Location */}
+                            <h3 className="font-medium text-[#0c0f12] text-base">
+                              {candidate.user_id.name}
+                            </h3>
+                            
+                            {candidate.user_id.address && (
+                              <p className="text-sm text-[#68696b]">
+                                {formatLocation(candidate.user_id.address)}
+                              </p>
+                            )}
 
-                    {/* View Profile Button - positioned at the right end */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="px-3 py-0 h-8 text-sm bg-[#DFE7F2] text-[#001630] border-[#f0f3f7] hover:bg-[#f0f3f7] hover:text-[#001630]"
-                      onClick={() => handleViewProfile(candidate.user_id.username)}
-                    >
-                      View Profile
-                    </Button>
+                        
+                          </div>
+
+                          {/* Right side with rating and buttons */}
+                          <div className="flex flex mt-2 items-end justify-center h-full">
+                            {/* Interview Rating - Show for candidates with reports */}
+                            {hasReport && (
+                              <div className="text-center mr-8">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-lg font-bold text-[#0c0f12]">
+                                    {rating > 0 ? rating.toFixed(1) : 0}
+                                  </span>
+                                  <span className="text-sm text-[#68696b]">/10</span>
+                                  {rating > 0 && (
+                                    <div className="w-5 h-5 ml-1">
+                                      <img src={verified} alt="verified.png" />
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="text-xs text-[#68696b]">Interview score</p>
+                              </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 mt-2">
+                              {/* View Report button - Show only if report exists */}
+                              {hasReport && (
+                                <Button
+                                  variant="outline"
+                                  className="h-8 px-3 py-1 text-sm bg-[#DFE7F2] underline text-[#001630] border-[#f0f3f7] hover:bg-[#f0f3f7] hover:text-[#001630]"
+                                  onClick={() => handleViewReport(candidate)}
+                                >
+                                  View Report
+                                </Button>
+                              )}
+
+                              {/* View Profile Button */}
+                              <Button
+                                variant="outline"
+                                className="h-8 px-3 py-1 text-sm bg-[#DFE7F2] text-[#001630] border-[#f0f3f7] hover:bg-[#f0f3f7] hover:text-[#001630]"
+                                onClick={() => handleViewProfile(candidate.user_id.username)}
+                              >
+                                View Profile
+                              </Button>
+
+                              {/* More options dropdown */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-[#68696b]"
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem>Send Message</DropdownMenuItem>
+                                  <DropdownMenuItem className="text-red-500">
+                                    Remove from Shortlist
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

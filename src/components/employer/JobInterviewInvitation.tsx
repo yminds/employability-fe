@@ -16,6 +16,55 @@ import {
 import { useGetJobDetailsQuery } from "@/api/employerJobsApiSlice";
 import { SwitchToDesktopModal } from "./SwitchToDesktopModal";
 
+// Add styles for rich text content
+const richTextStyles = `
+  .job-description-content ul, .job-description-content ol {
+    list-style-position: outside;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+  }
+  
+  .job-description-content ul {
+    list-style-type: disc;
+  }
+  
+  .job-description-content ol {
+    list-style-type: decimal;
+  }
+  
+  .job-description-content li {
+    margin: 0.25rem 0;
+    padding-left: 0.5rem;
+    display: list-item;
+  }
+  
+  .job-description-content li p {
+    margin: 0;
+    display: inline;
+  }
+  
+  .job-description-content table {
+    border-collapse: collapse;
+    margin: 1rem 0;
+    width: 100%;
+  }
+  
+  .job-description-content table td, 
+  .job-description-content table th {
+    border: 1px solid #d1d5db;
+    padding: 0.5rem;
+  }
+  
+  .job-description-content table th {
+    background-color: #f3f4f6;
+    font-weight: 500;
+  }
+  
+  .job-description-content p {
+    margin: 1rem 0;
+  }
+`;
+
 export default function JobInvitation() {
   const { inviteId } = useParams<{ inviteId: string }>();
   const [searchParams] = useSearchParams();
@@ -295,6 +344,11 @@ export default function JobInvitation() {
     }
   };
 
+  // Function to determine if text contains HTML
+  const isHTML = (text: string) => {
+    return /<\/?[a-z][\s\S]*>/i.test(text);
+  };
+
   // Loading state
   if (
     statusLoading ||
@@ -365,6 +419,9 @@ export default function JobInvitation() {
   // Main UI for pending invitation
   return (
     <div className="max-w-4xl mx-auto p-8 sm:p-6 bg-[#ffffff]">
+      {/* Add the styles for rich text content */}
+      <style dangerouslySetInnerHTML={{ __html: richTextStyles }} />
+      
       {/* Header with logo and job title */}
       <div className="flex items-center mb-8">
         <div className="flex items-center font-ubuntu text-[22px] font-bold leading-normal">
@@ -590,24 +647,22 @@ export default function JobInvitation() {
 
         <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
           {Description && (
-            <div className="text-[#414447] text-body2 whitespace-pre-line">
-              {Description}
-            </div>
+            <>
+              {isHTML(Description) ? (
+                <div 
+                  className="text-[#414447] text-body2 job-description-content prose prose-sm sm:prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: Description }}
+                />
+              ) : (
+                <div className="text-[#414447] text-body2 whitespace-pre-line">
+                  {Description}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
-      {/* {userCheckInitiated && (
-        <div className="mb-8">
-          <h3 className="text-h2 text-[#202326] mb-2">Account Status</h3>
-          <p className="text-[#68696b] text-[14px] font-normal leading-6 tracking-[0.21px] mb-4">
-            {userExists === null
-              ? "Checking your account status..."
-              : userExists
-              ? "You already have an account. You'll be redirected to login after accepting."
-              : "You'll need to create an account after accepting this invitation."}
-          </p>
-        </div>
-      )} */}
+      
       {/* Fixed bottom buttons for small screens */}
       {!processingComplete ? (
         <div className="hidden sm:flex fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#eceef0] gap-3 justify-between z-10">
