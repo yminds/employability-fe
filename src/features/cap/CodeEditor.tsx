@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import Editor from "@monaco-editor/react";
 import OutputConsole, { OutputItem } from "./OutputConsole";
 import TestCaseConsole from "./TestCaseConsole";
@@ -13,6 +13,10 @@ import { IDsaQuestionResponse } from "@/components/interview/Interview";
 
 type SupportedLanguage = "javascript" | "python";
 
+interface CodeEditorRef {
+  submitUserCode: () => void;
+}
+
 interface CodeEditorProps {
   placeholder: string;
   language: SupportedLanguage;
@@ -21,6 +25,7 @@ interface CodeEditorProps {
   setSelectedLanguage: (language: SupportedLanguage) => void;
   functionName: string;
   handleDsaQuestionSubmit: (code: IDsaQuestionResponse) => void;
+  ref?: React.Ref<CodeEditorRef>;
 }
 
 const executeJavaScript = (code: string, functionName: string, testCases: any[]): OutputItem[] => {
@@ -124,148 +129,157 @@ print("Result:", result)`;
 };
 // ... existing code ...
 
-const CodeEditor: React.FC<CodeEditorProps> = ({
-  placeholder,
-  language,
-  onSubmit,
-  testCases,
-  setSelectedLanguage,
-  functionName,
-  handleDsaQuestionSubmit,
-}) => {
-  const [code, setCode] = useState<string>(placeholder);
-  const [output, setOutput] = useState<OutputItem[]>([]);
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [testsExecuted, setTestsExecuted] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [testResults, setTestResults] = useState<any[]>([]);
+const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
+  ({ placeholder, language, onSubmit, testCases, setSelectedLanguage, functionName, handleDsaQuestionSubmit }, ref) => {
+    const [code, setCode] = useState<string>(placeholder);
+    const [output, setOutput] = useState<OutputItem[]>([]);
+    const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+    const [testsExecuted, setTestsExecuted] = useState<boolean>(false);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [testResults, setTestResults] = useState<any[]>([]);
 
-  // Update code when placeholder changes (when language changes)
-  useEffect(() => {
-    setCode(placeholder);
-  }, [placeholder]);
+    // Update code when placeholder changes (when language changes)
+    useEffect(() => {
+      setCode(placeholder);
+    }, [placeholder]);
 
-  const handleEditorChange = (value: string | undefined) => {
-    if (value !== undefined) {
-      setCode(value);
-    }
-  };
+    const handleEditorChange = (value: string | undefined) => {
+      if (value !== undefined) {
+        setCode(value);
+      }
+    };
 
-  const handleRun = async () => {
-    setTestsExecuted(false);
-    setIsSubmitted(false); // Reset to show OutputConsole
+    const handleRun = async () => {
+      setTestsExecuted(false);
+      setIsSubmitted(false); // Reset to show OutputConsole
 
-    let executionOutput: OutputItem[] = [];
-    switch (language?.toLocaleLowerCase()) {
-      case "javascript":
-        executionOutput = executeJavaScript(code, functionName, testCases);
-        break;
-      case "python":
-        executionOutput = await executePython(code, functionName, testCases);
-        break;
-      default:
-        executionOutput = [{ type: "error", content: "Unsupported language." }];
-    }
+      let executionOutput: OutputItem[] = [];
+      switch (language?.toLocaleLowerCase()) {
+        case "javascript":
+          executionOutput = executeJavaScript(code, functionName, testCases);
+          break;
+        case "python":
+          executionOutput = await executePython(code, functionName, testCases);
+          break;
+        default:
+          executionOutput = [{ type: "error", content: "Unsupported language." }];
+      }
 
-    setOutput(executionOutput);
-  };
+      setOutput(executionOutput);
+    };
 
-  const handleSubmit = () => {
-    if (!testsExecuted) {
-      setIsSubmitted(true);
-      setTestsExecuted(true);
-    } else {
-      setIsModalOpen(true);
-      onSubmit(code);
-      setIsSubmitted(false);
-    }
-  };
+    const handleSubmit = () => {
+      if (!testsExecuted) {
+        setIsSubmitted(true);
+        setTestsExecuted(true);
+      } else {
+        setIsModalOpen(true);
+        onSubmit(code);
+        setIsSubmitted(false);
+      }
+    };
 
-  return (
-    <div className="flex flex-col gap-4 h-full">
-      <div className="w-full h-[80%] rounded-lg">
-        <div className="bg-[#11df7c] px-3.5 py-2.5 rounded-t-lg flex flex-row items-center justify-between">
-          <div className="flex items-center gap-1">
-            <span className="text-[#05733E] text-base font-normal leading-[17px]">Language :</span>
-            <span className="text-[#0D0D0D] text-base font-medium leading-6">
-              <DropdownMenu>
-                <DropdownMenuTrigger>{language}</DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setSelectedLanguage("javascript")}>JavaScript</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedLanguage("python")}>Python</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </span>
-          </div>
-          <div className="flex gap-3">
-            <button onClick={handleRun} className="text-[#05733E] text-sm font-medium hover:text-[#0D0D0D]">
-              Run
-            </button>
-            <button onClick={handleSubmit} className="text-[#05733E] text-sm font-medium hover:text-[#0D0D0D]">
-              {testsExecuted ? "Submit" : "Test"}
-            </button>
-          </div>
-        </div>
-        <div className="h-[calc(100%-48px)] border border-black/10 rounded-b-lg overflow-hidden">
-          <Editor
-            height="100%"
-            defaultLanguage={language === "javascript" ? "javascript" : "python"}
-            value={code}
-            onChange={handleEditorChange}
-            theme="vs-dark"
-            options={{
-              minimap: { enabled: false },
-              fontSize: 14,
-              wordWrap: "on",
-              automaticLayout: true,
-              padding: { top: 16, bottom: 16 },
-              folding: false,
-              matchBrackets: "never",
-              renderValidationDecorations: "off",
-            }}
-          />
-        </div>
-      </div>
-      <div className="h-[20%] flex flex-col gap-4">
-        {isSubmitted ? (
-          <div>
-            <div className="flex justify-end mb-2">
-              <button
-                onClick={() => setIsSubmitted(false)}
-                className="text-[#05733E] text-sm font-medium hover:text-[#0D0D0D]"
-              >
-                Back to Console
+    const submitUserCode = () => {
+      handleDsaQuestionSubmit({
+        code,
+        testCases: testResults,
+      });
+    };
+  
+
+    
+    useImperativeHandle(ref, () => {
+      return {
+        submitUserCode,
+      };
+    });
+    
+    return (
+      <div className="flex flex-col gap-4 h-full">
+        <div className="w-full h-[80%] rounded-lg">
+          <div className="bg-[#11df7c] px-3.5 py-2.5 rounded-t-lg flex flex-row items-center justify-between">
+            <div className="flex items-center gap-1">
+              <span className="text-[#05733E] text-base font-normal leading-[17px]">Language :</span>
+              <span className="text-[#0D0D0D] text-base font-medium leading-6">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>{language}</DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setSelectedLanguage("javascript")}>JavaScript</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedLanguage("python")}>Python</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleRun} className="text-[#05733E] text-sm font-medium hover:text-[#0D0D0D]">
+                Run
+              </button>
+              <button onClick={handleSubmit} className="text-[#05733E] text-sm font-medium hover:text-[#0D0D0D]">
+                {testsExecuted ? "Submit" : "Test"}
               </button>
             </div>
-            <TestCaseConsole
-              testCases={testCases}
-              code={code}
-              language={language?.toLowerCase()}
-              functionName={functionName}
-              setTestResults={setTestResults}
+          </div>
+          <div className="h-[calc(100%-48px)] border border-black/10 rounded-b-lg overflow-hidden">
+            <Editor
+              height="100%"
+              defaultLanguage={language === "javascript" ? "javascript" : "python"}
+              value={code}
+              onChange={handleEditorChange}
+              theme="vs-dark"
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                wordWrap: "on",
+                automaticLayout: true,
+                padding: { top: 16, bottom: 16 },
+                folding: false,
+                matchBrackets: "never",
+                renderValidationDecorations: "off",
+              }}
             />
           </div>
-        ) : (
-          <OutputConsole output={output} />
+        </div>
+        <div className="h-[20%] flex flex-col gap-4">
+          {isSubmitted ? (
+            <div>
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={() => setIsSubmitted(false)}
+                  className="text-[#05733E] text-sm font-medium hover:text-[#0D0D0D]"
+                >
+                  Back to Console
+                </button>
+              </div>
+              <TestCaseConsole
+                testCases={testCases}
+                code={code}
+                language={language?.toLowerCase()}
+                functionName={functionName}
+                setTestResults={setTestResults}
+              />
+            </div>
+          ) : (
+            <OutputConsole output={output} />
+          )}
+        </div>
+        {isModalOpen && (
+          <>
+            <SubmitModal
+              onClose={() => setIsModalOpen(false)}
+              onRefresh={async () => setIsModalOpen(false)}
+              onSubmit={() => {
+                setIsModalOpen(false);
+                handleDsaQuestionSubmit({
+                  code,
+                  testCases: testResults,
+                });
+              }}
+            />
+          </>
         )}
       </div>
-      {isModalOpen && (
-        <>
-          <SubmitModal
-            onClose={() => setIsModalOpen(false)}
-            onRefresh={async () => setIsModalOpen(false)}
-            onSubmit={() => {
-              setIsModalOpen(false);
-              handleDsaQuestionSubmit({
-                code,
-                testCases: testResults,
-              });
-            }}
-          />
-        </>
-      )}
-    </div>
-  );
-};
+    );
+  }
+);
 
 export default CodeEditor;

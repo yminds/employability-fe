@@ -37,7 +37,7 @@ const executePythonTestCase = async (code: string, input: string,functionName:st
   const trimmedCode = code.trim();
 
   // Create the code to execute without extra indentation
-  const codeToExecute = `${trimmedCode}
+  const codeToExecute = `${trimmedCode}           
 
 result = ${functionName}(${input})
 print(result)`;  // Just print the result without "Result:" prefix
@@ -101,6 +101,11 @@ const parseOutput = (output: string, language: string): any => {
 
 // Helper function to compare results
 const compareResults = (actual: any, expected: any): boolean => {
+
+  if(typeof actual === "object" && actual !== null && typeof expected === "object" && expected !== null){
+    return JSON.stringify(actual) === JSON.stringify(expected);
+  }
+  
   if (Array.isArray(actual) && Array.isArray(expected)) {
     return actual.length === expected.length && 
            actual.every((val, idx) => val === expected[idx]);
@@ -121,30 +126,37 @@ const TestCaseConsole: React.FC<TestCaseConsoleProps> = ({ testCases, code, lang
       const testResults = await Promise.all(
         testCases.map(async (testCase) => {
           let actualOutput;
-          
-          if (language === "python") {
-            actualOutput = await executePythonTestCase(code, testCase.input,functionName);
-          } else {
-            actualOutput = executeTestCase(code, testCase.input,functionName);
+          try {
+            if (language === "python") {
+              actualOutput = await executePythonTestCase(code, testCase.input,functionName);
+            } else {
+              actualOutput = executeTestCase(code, testCase.input,functionName);
+            }
+            console.log("actualOutput",actualOutput);
+            console.log("expectedOutput",testCase.expectedOutput);
+             
+            const expectedOutputValue = JSON.parse(testCase.expectedOutput);
+            const parsedActualOutput = parseOutput(actualOutput, language);
+            
+            const passed = compareResults(parsedActualOutput, expectedOutputValue);
+            
+            return {
+              passed,
+              description: testCase.description,
+              input: testCase.input,
+              expectedOutput: testCase.expectedOutput,
+              actualOutput: JSON.stringify(parsedActualOutput),
+            };
+          } catch (error) {
+             console.log('error during run test',error);
+             
           }
-          
-          const expectedOutputValue = JSON.parse(testCase.expectedOutput);
-          const parsedActualOutput = parseOutput(actualOutput, language);
-          
-          const passed = compareResults(parsedActualOutput, expectedOutputValue);
-          
-          return {
-            passed,
-            description: testCase.description,
-            input: testCase.input,
-            expectedOutput: testCase.expectedOutput,
-            actualOutput: JSON.stringify(parsedActualOutput),
-          };
+       
         })
       );
       
-      setResults(testResults);
-      setTestResults(testResults);
+      setResults(testResults.filter((result): result is TestResult => result !== undefined));
+      setTestResults(testResults.filter((result): result is TestResult => result !== undefined));
       setLoading(false);
     };
     

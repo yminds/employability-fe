@@ -273,7 +273,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               <div className="flex flex-col items-center md:w-full sm:w-full">
                 {project.status === "Verified" && (
                   <div className="flex items-baseline">
-                    <span className="text-xl font-medium">{project?.score}</span>
+                    <span className="text-xl font-medium">{project?.score?.toFixed(1)}</span>
                     <span className="text-[#909091] text-xl font-medium">/10</span>
                   </div>
                 )}
