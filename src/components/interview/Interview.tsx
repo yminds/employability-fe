@@ -183,7 +183,7 @@ const Interview: React.FC<{
         }, 1000 * 30);
 
         setIsInitialized(true);
-        const initialGreeting = "Hello, before starting the interview, introduce yourself?";
+        const initialGreeting = "Hello, before starting the interview, introduce yourself ?  ";
         const resumeMessage = "Hello, sorry for the interruption. We can continue from where we left off.";
         if (isResume) {
           addMessage(resumeMessage);

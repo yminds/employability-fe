@@ -249,6 +249,7 @@ export const routes: RouteConfig[] = [
     route: "/skill/report/:id",
     component: <ReportPage isSharedReport={false} />,
   },
+
   {
     route: "/skills-report/:id/:id",
     component: <ReportPage isSharedReport={true} />,
