@@ -78,7 +78,7 @@ const JobPostingPage = lazy(() => import("./pages/JobPostingPage.tsx"));
 
 interface RouteConfig {
   route: string;
-  parameterized?: boolean;
+  parameterized?: boolean;  
   component: React.ReactNode;
   roles?: Role[];
   childrens?: RouteConfig[];
@@ -247,6 +247,10 @@ export const routes: RouteConfig[] = [
   },
   {
     route: "/skill/report/:id",
+    component: <ReportPage isSharedReport={false} />,
+  },
+  {
+    route: "/project/report/:id",
     component: <ReportPage isSharedReport={false} />,
   },
 
