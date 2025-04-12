@@ -1,7 +1,7 @@
 import { apiSlice } from "./apiSlice";
 import { Job } from "./employerJobsApiSlice";
 
-// Interface definitions
+
 export interface Candidate {
   _id: string;
   user_id: string;
@@ -22,11 +22,11 @@ export interface InterviewInvite {
   status: "pending" | "accepted" | "completed" | "declined" | "expired";
   sent_at: string;
   updated_at: string;
-  interview_id?: string; // Updated to match the schema
+  interview_id?: string; 
   shortlist: boolean;
 }
 
-// New interface for interview candidates
+
 export interface InterviewCandidate {
   _id: string;
   candidate_id: string;
@@ -42,6 +42,7 @@ export interface InterviewCandidate {
   final_rating?: number;
   report_updated_at?: string;
   type_report_id?: string;
+  total_experience?:number;
   type_final_rating?: number;
   type_report_updated_at?: string;
   effective_report_id?: string;
@@ -255,7 +256,11 @@ interface GetInterviewCandidatesParams {
   jobId: string;
   interviewType?: "full" | "screening" | "all";
   status?: "completed" | "pending" | "all";
-  sortBy?: "recent" | "oldest" | "name";
+  sortBy?: "recent" | "oldest" | "name" | "rating_desc" | "rating_asc";
+  filterStatus: string[] | string;
+  interviewScore: number;
+  workExperience?: number;
+  locations?: string;
 }
 
 interface ShortlistCandidateParams {
@@ -265,6 +270,7 @@ interface ShortlistCandidateParams {
 
 export interface UserExistsRequest {
   email: string;
+  inviteId:string;
 }
 
 export interface UserExistsResponse {
@@ -442,6 +448,16 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    getShortlistedCandiates:builder.query({
+      query:({jobId,sortBy = 'recent'})=>({
+        url:`/api/v1/employerInterviewInvitation/jobs/${jobId}/shortlisted-candidates`,
+        method:"GET",
+        params: { sortBy }
+      }),
+      transformResponse:(response)=>{
+        return response;
+      }
+    })
   }),
   overrideExisting: false,
 });
@@ -464,4 +480,5 @@ export const {
   useGetInterviewStatsQuery,
   useShortlistCandidateMutation,
   useSendInvitationResponseMailMutation,
+  useGetShortlistedCandiatesQuery
 } = interviewApiSlice;

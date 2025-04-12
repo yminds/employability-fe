@@ -365,6 +365,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                 <TaskTable
                   task={inviteData.task}
                   jobDescription={inviteData.job}
+                  companyDetails={inviteData.company}
                   inviteId={inviteData._id}
                   user_id={user_id}
                   userGoal={userGoal}
@@ -396,6 +397,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                   <TaskTable
                     task={inviteData.task}
                     jobDescription={inviteData.job}
+                    companyDetails={inviteData.company}
                     inviteId={inviteData._id}
                     user_id={user_id}
                     userGoal={userGoal}
@@ -424,6 +426,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                     <TaskTable
                       task={inviteData.task}
                       jobDescription={inviteData.job}
+                      companyDetails={inviteData.company}
                       inviteId={inviteData._id}
                       user_id={user_id}
                       userGoal={userGoal}

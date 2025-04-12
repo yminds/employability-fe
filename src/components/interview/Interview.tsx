@@ -79,6 +79,10 @@ const Interview: React.FC<{
   userExperience: string | undefined;
   Fundamentals: string | string[];
   skills_required: string | string[];
+  comanyDetails: {
+    name : string;
+    location:any
+  }
   interviewIcon?: string;
 }> = ({
   interviewTopic,
@@ -92,6 +96,7 @@ const Interview: React.FC<{
   userExperience,
   Fundamentals,
   skills_required,
+  comanyDetails,
   interviewIcon,
 }) => {
   // console.log("in interviews jobDescription", jobDescription);
@@ -341,39 +346,39 @@ const Interview: React.FC<{
     // Move to "WAITING" state when sending a new question
     setInterviewState("WAITING");
 
-    const response = await interviewStream({
-      prompt,
-      // model: "deepseek-chat",
-      // provider: "deepseek",
-      model: "gpt-4o",
-      provider: "openai",
-      // model: "gemini-2.0-flash-exp",
-      // provider: "google",
-      _id: interviewDetails.data._id,
-      thread_id: interviewDetails.data.thread_id,
-      user_id: interviewDetails.data.user_id,
-      user_skill_id: interviewDetails.data.user_skill_id,
-      skill_id: interviewDetails.data.skill_id,
-      code_snippet: question.codeSnippet?.code || "",
-      question: question.question,
-      skill_name: interviewTopic,
-      concepts:
-        type === "Mock" || type === "Full"
-          ? Array.isArray(Fundamentals)
-            ? Fundamentals
-            : typeof Fundamentals === "string"
-            ? Fundamentals.split(",").map((c: string) => c.trim())
-            : []
-          : concepts,
-      interview_id: interviewDetails.data._id,
-      level: user?.experience_level || "entry",
-      type: type,
-      jobDescription: jobDescription,
-      userName: user?.firstName,
-      projectId: projectId,
-      userExperience: userExperience,
-      skills_required: skills_required,
-    }).unwrap();
+      const response = await interviewStream({
+        prompt,
+        // model: "deepseek-chat",
+        // provider: "deepseek",
+        model: "gpt-4o",
+        provider: "openai",
+        // model: "gemini-2.0-flash-exp",
+        // provider: "google",
+        _id: interviewDetails.data._id,
+        thread_id: interviewDetails.data.thread_id,
+        user_id: interviewDetails.data.user_id,
+        user_skill_id: interviewDetails.data.user_skill_id,
+        skill_id: interviewDetails.data.skill_id,
+        code_snippet: question.codeSnippet?.code || "",
+        question: question.question,
+        skill_name: interviewTopic,
+        concepts:
+          type === "Mock" || type === "Full"
+            ? Array.isArray(Fundamentals)
+              ? Fundamentals
+              : typeof Fundamentals === "string"
+                ? Fundamentals.split(",").map((c: string) => c.trim())
+                : []
+            : concepts,
+        interview_id: interviewDetails.data._id,
+        level: user?.experience_level || "entry",
+        type: type,
+        jobDescription: jobDescription,
+        userName: user?.firstName,
+        projectId: projectId,
+        userExperience: userExperience,
+        skills_required: skills_required,
+      }).unwrap();
 
     // console.log("response", response);
 

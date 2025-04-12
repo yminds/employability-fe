@@ -1,5 +1,5 @@
 import type React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   useGetPublicProfileQuery,
   useGetPublicProfileViewCountMutation,
@@ -15,10 +15,18 @@ import { useEffect } from "react";
 import ProfileSkeleton from "./publicProfileSkeleton/profile-skeleton";
 import FeaturedInterviewSection from "./FeaturedInterviewSection";
 import LogoIcon from "../../assets/sidebar/logo.svg";
+import { Button } from "@/components/ui/button";
+import UserNotFoundSVG from "@/assets/error/UserNotFound.svg";
+// import { useMetaTags } from "@/hooks/useMetaTags";
 
 const PublicProfile: React.FC = () => {
+  const navigate = useNavigate();
   const { username } = useParams<{ username: string }>();
-  const { data: profile, isLoading } = useGetPublicProfileQuery({ username });
+  const {
+    data: profile,
+    isLoading,
+    isSuccess,
+  } = useGetPublicProfileQuery({ username });
 
   const completedProjects =
     profile?.projects.filter(
@@ -37,7 +45,72 @@ const PublicProfile: React.FC = () => {
     console.log("");
   };
 
+  // const profileFirstName = profile?.firstName || "User";
+  // const profileName = profile?.name || "User Profile";
+  // const profileBio =
+  //   profile?.bio ||
+  //   `Check out ${profileFirstName}'s profile on EmployAbility.AI. Discover their skills, experience, and achievements.`;
+  // const profileImage = "https://employability.ai/employabilityLogo.jpg";
+  // const profileUrl = `https://employability.ai/profile/${username}`;
+
+  // useMetaTags({
+  //   title: `${profileName} | EmployAbility.AI`,
+  //   description: profileBio,
+  //   image: profileImage,
+  //   url: profileUrl,
+  //   type: "profile",
+  // });
+
   if (isLoading) return <ProfileSkeleton />;
+
+  // User not found
+  if (!isSuccess || !profile) {
+    return (
+      <div className="w-full mx-auto">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+          <div className="max-w-md text-center">
+            {/* Logo */}
+            <div className="flex gap-2 mb-6 justify-center">
+              <img
+                src={LogoIcon || "/placeholder.svg"}
+                alt=""
+                className="w-[29px] h-[26px]"
+              />
+              <div className="text-[#001630] font-ubuntu text-[16px] font-bold">
+                <span>Employ</span>
+                <span className="text-[#0AD472]">Ability.AI</span>
+              </div>
+            </div>
+
+            {/* Error SVG illustration */}
+            <img
+              src={UserNotFoundSVG || "/placeholder.svg"}
+              alt="User Not Found"
+              className="mx-auto mb-8 w-[400px] h-auto"
+            />
+
+            {/* Simple, friendly error message */}
+            <h1 className="text-xl font-medium text-[#202326] mb-2">
+              Whoops! This user is not who you were looking for
+            </h1>
+
+            <p className="text-[#68696b] mb-8">
+              We couldn't find "{username}". But thanks for helping us test our
+              error page! Try your luck by going back home.
+            </p>
+
+            {/* Button - using the same style as 404 page */}
+            <Button
+              onClick={() => navigate("/")}
+              className="px-6 py-2 text-[#001630] bg-white border border-[#001630] hover:bg-[#e1f2ea]"
+            >
+              Take me Home
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Render the right section components
   const renderRightSectionComponents = () => (

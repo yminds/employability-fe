@@ -11,6 +11,7 @@ import DisabledAccountModal from "@/components/modal/DisabledAccountModal";
 import { cleanRecordingReference } from "@/store/slices/recorderSlice";
 import { useDispatch } from "react-redux";
 import useInterviewSetup from "@/hooks/useInterviewSetup";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -35,7 +36,7 @@ const noSidebarRoutes = [
   "/privacy-policy",
   "/employer/company/create",
   "/invitation/:inviteId",
-  "/invitations"
+  "/invitations",
 ];
 
 const employerRoutes = [
@@ -61,7 +62,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const experience_level = user?.experience_level;
   const account_status = user?.account_status;
   const dispatch = useDispatch();
-  
+
   const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 
   useEffect(() => {
@@ -100,21 +101,32 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     });
 
     // Check for employer routes
-    const isEmployerPath = employerRoutes.some((route) => currentPath === route || currentPath.startsWith(route + "/"));
+    const isEmployerPath = employerRoutes.some(
+      (route) => currentPath === route || currentPath.startsWith(route + "/")
+    );
 
     return isMatchedRoute || isEmployerPath;
   };
 
   const shouldShowBanner = (): boolean | null => {
     // Show banner if user is logged in, email is not verified, and we're on a route that shows the sidebar
-    return shouldDisplaySidebar() && Boolean(user) && isEmailVerified === false && !isEmployerRoute();
+    return (
+      shouldDisplaySidebar() &&
+      Boolean(user) &&
+      isEmailVerified === false &&
+      !isEmployerRoute()
+    );
   };
 
   const renderAppropriateLayout = () => {
     if (!shouldDisplaySidebar()) {
       return (
         <div className="flex-1 bg-gray-100">
-          {isDisabledModalOpen ? <DisabledAccountModal isOpen={isDisabledModalOpen} /> : children}
+          {isDisabledModalOpen ? (
+            <DisabledAccountModal isOpen={isDisabledModalOpen} />
+          ) : (
+            <ErrorBoundary>{children}</ErrorBoundary>
+          )}
         </div>
       );
     }
@@ -131,7 +143,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </div>
         )}
         <div className="flex-1 bg-gray-100">
-          {isDisabledModalOpen ? <DisabledAccountModal isOpen={isDisabledModalOpen} /> : children}
+          {isDisabledModalOpen ? (
+            <DisabledAccountModal isOpen={isDisabledModalOpen} />
+          ) : (
+            <ErrorBoundary>{children}</ErrorBoundary>
+          )}
         </div>
       </div>
     );

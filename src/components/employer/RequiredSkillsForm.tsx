@@ -117,6 +117,13 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   const [getSkillSuggestions, { isLoading }] =
     useGetEmployerSkillSuggestionsMutation();
 
+
+    useEffect(() => {
+      if (shouldFetchRecommendations) {
+        setRecommendedSkills([]);
+      }
+    }, [shouldFetchRecommendations]);
+
   // This is the key part: Only fetch when the parent component tells us to
   useEffect(() => {
     // Only fetch if the flag is true and we're not already fetching
@@ -144,7 +151,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
           setIsFetching(false);
         });
     }
-  }, [shouldFetchRecommendations, jobDescription]);
+  }, [shouldFetchRecommendations, jobDescription,isFetching,onRecommendationsFetched]);
 
   // Populate initial skills from AI recommendations
   useEffect(() => {

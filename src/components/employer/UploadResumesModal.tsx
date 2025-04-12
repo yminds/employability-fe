@@ -1,7 +1,5 @@
-"use client"
-
 import { useState, useEffect, useRef, useCallback } from "react"
-import { X, FileText, Loader2, Clock, Upload, AlertCircle } from "lucide-react"
+import { X, FileText, Loader2, Clock, Upload, AlertCircle, CheckCircle, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
@@ -66,6 +64,7 @@ interface UploadState {
   isUploading: boolean;
   startTime: number;
   uploadId?: string;
+  processingInBackground?: boolean;
 }
 
 interface WorkerMessage {
@@ -81,6 +80,7 @@ type ResumeUploadModalProps = {
   companyId?: string;
   onResumesProcessed?: (resumes: ProcessedResume[]) => void;
   onSelectCandidates?: (candidateIds: string[]) => void;
+  onContinue?: (sourceFilter: string) => void;
 }
 
 export default function ResumeUploadModal({ 
@@ -90,7 +90,8 @@ export default function ResumeUploadModal({
   employerId, 
   companyId,
   onResumesProcessed,
-  onSelectCandidates 
+  onSelectCandidates,
+  onContinue
 }: ResumeUploadModalProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [files, setFiles] = useState<File[]>([])
@@ -100,6 +101,7 @@ export default function ResumeUploadModal({
   const [error, setError] = useState<string | null>(null)
   const [startTime, setStartTime] = useState<number | null>(null)
   const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([])
+  const [processingInBackground, setProcessingInBackground] = useState<boolean>(false)
   
   // Create a ref for the web worker to persist across renders
   const workerRef = useRef<Worker | null>(null)
@@ -125,7 +127,11 @@ export default function ResumeUploadModal({
                 const currentState: UploadState = JSON.parse(
                   sessionStorage.getItem("resumeUploadState") || "{}"
                 );
-                const updatedState = { ...currentState, uploadId: data.uploadId };
+                const updatedState = { 
+                  ...currentState, 
+                  uploadId: data.uploadId,
+                  processingInBackground: true
+                };
                 sessionStorage.setItem("resumeUploadState", JSON.stringify(updatedState));
                 setUploadId(data.uploadId);
                 break;
@@ -134,6 +140,7 @@ export default function ResumeUploadModal({
                 if (data.isParsingDone) {
                   setUploading(false);
                   setStartTime(null);
+                  setProcessingInBackground(false);
                   sessionStorage.removeItem("resumeUploadState");
                   toast.success(`Successfully processed ${data.completed} resumes`);
                   fetchProcessedResumes();
@@ -149,6 +156,7 @@ export default function ResumeUploadModal({
                 setError(data.error);
                 setUploading(false);
                 setStartTime(null);
+                setProcessingInBackground(false);
                 sessionStorage.removeItem("resumeUploadState");
                 toast.error(data.error || "Failed to upload and process resumes");
                 break;
@@ -163,8 +171,11 @@ export default function ResumeUploadModal({
       }
     }
     return () => {
+      // Only terminate worker if not processing in background
       const savedUploadState = sessionStorage.getItem("resumeUploadState");
-      if (!savedUploadState && workerRef.current) {
+      const parsedState = savedUploadState ? JSON.parse(savedUploadState) : {};
+      
+      if (!parsedState.processingInBackground && workerRef.current) {
         workerRef.current.terminate();
         workerRef.current = null;
       }
@@ -183,6 +194,8 @@ export default function ResumeUploadModal({
           setUploading(true);
           setUploadId(parsedState.uploadId);
           setStartTime(parsedState.startTime);
+          setProcessingInBackground(!!parsedState.processingInBackground);
+          
           workerRef.current.postMessage({
             type: "FETCH_PROGRESS",
             data: {
@@ -274,11 +287,14 @@ export default function ResumeUploadModal({
     setUploading(true);
     setError(null);
     setStartTime(uploadStartTime);
+    setProcessingInBackground(false);
+    
     const uploadState: UploadState = {
       isUploading: true,
       startTime: uploadStartTime,
     };
     sessionStorage.setItem("resumeUploadState", JSON.stringify(uploadState));
+    
     if (workerRef.current) {
       workerRef.current.postMessage({
         type: "UPLOAD_RESUMES",
@@ -295,6 +311,26 @@ export default function ResumeUploadModal({
     setFiles([]);
   }, [files, jobId, employerId, companyId]);
 
+  const handleContinue = () => {
+    // Update the session storage to mark processing in background
+    if (uploadId) {
+      const currentState: UploadState = JSON.parse(
+        sessionStorage.getItem("resumeUploadState") || "{}"
+      );
+      const updatedState = { 
+        ...currentState, 
+        processingInBackground: true 
+      };
+      sessionStorage.setItem("resumeUploadState", JSON.stringify(updatedState));
+      setProcessingInBackground(true);
+    }
+    
+    if (onContinue) {
+      onContinue('job'); // Set filter to "Resumes For this Job"
+    }
+    setIsOpen(false);
+  };
+
   if (!isOpen) return null
 
   return (
@@ -304,9 +340,15 @@ export default function ResumeUploadModal({
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-[#000000]">Upload Resumes</h2>
             <button 
-              onClick={() => setIsOpen(false)} 
+              onClick={() => {
+                if (uploading) {
+                  // If still uploading, mark as processing in background
+                  handleContinue();
+                } else {
+                  setIsOpen(false);
+                }
+              }} 
               className="text-[#000000] hover:text-[#68696b] transition-colors"
-              disabled={uploading}
             >
               <X size={24} />
               <span className="sr-only">Close</span>
@@ -315,7 +357,8 @@ export default function ResumeUploadModal({
 
           <div
             className={`border-2 border-dashed rounded-lg p-10 mb-6 flex flex-col items-center justify-center cursor-pointer
-              ${isDragging ? "border-[#1fd167] bg-[#f0f5f3]" : "border-[#d9d9d9]"}`}
+              ${isDragging ? "border-[#1fd167] bg-[#f0f5f3]" : "border-[#d9d9d9]"}
+              ${uploading ? "opacity-50 pointer-events-none" : ""}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -391,21 +434,27 @@ export default function ResumeUploadModal({
             <div className="bg-[#f0f5f3] rounded-lg p-4 mb-6">
               <div className="flex items-center">
                 <div className="w-12 h-12 mr-4">
-                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="48" height="48" rx="4" fill="#f44336" />
-                    <path
-                      d="M14 24V32C14 33.1046 14.8954 34 16 34H32C33.1046 34 34 33.1046 34 32V24"
-                      stroke="white"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M24 28V14M24 14L20 18M24 14L28 18"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  {uploadProgress?.isParsingDone ? (
+                    <div className="bg-[#1fd167] rounded-full p-3">
+                      <CheckCircle className="h-6 w-6 text-white" />
+                    </div>
+                  ) : (
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="48" height="48" rx="4" fill="#f44336" />
+                      <path
+                        d="M14 24V32C14 33.1046 14.8954 34 16 34H32C33.1046 34 34 33.1046 34 32V24"
+                        stroke="white"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M24 28V14M24 14L20 18M24 14L28 18"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
@@ -415,7 +464,9 @@ export default function ResumeUploadModal({
                           {uploadProgress.completed}<span className="text-[#909091] font-normal">/{uploadProgress.total}</span>
                         </p>
                       )}
-                      <p className="text-[#909091]">Uploaded</p>
+                      <p className="text-[#909091]">
+                        {uploadProgress?.isParsingDone ? "Processing complete" : "Processing"}
+                      </p>
                     </div>
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 mr-1 text-gray-500" />
@@ -441,28 +492,47 @@ export default function ResumeUploadModal({
                   )}
                 </div>
               </div>
+              
+              {/* Information about background processing */}
+              {processingInBackground && (
+                <div className="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                  <p>Processing will continue in the background. You'll see the processed resumes in the candidates list.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
 
         <div className="flex justify-end p-4">
-          <Button 
-            className="bg-[#001630] hover:bg-[#001630]/90 text-white px-8 py-2 rounded-md font-medium"
-            onClick={handleUpload}
-            disabled={uploading || files.length === 0}
-          >
-            {uploading ? (
-              <>
+          {uploading ? (
+            <div className="flex gap-2">
+              {/* Upload progress button (disabled) */}
+              <Button 
+                className="bg-gray-200 text-gray-600 px-6 py-2 rounded-md font-medium"
+                disabled={true}
+              >
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Processing...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload and Process
-              </>
-            )}
-          </Button>
+              </Button>
+              
+              {/* Continue button (enabled even during processing) */}
+              <Button 
+                className="bg-[#001630] hover:bg-[#001630]/90 text-white px-6 py-2 rounded-md font-medium"
+                onClick={handleContinue}
+              >
+                Continue <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              className="bg-[#001630] hover:bg-[#001630]/90 text-white px-8 py-2 rounded-md font-medium"
+              onClick={handleUpload}
+              disabled={files.length === 0}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Upload and Process
+            </Button>
+          )}
         </div>
       </div>
     </div>

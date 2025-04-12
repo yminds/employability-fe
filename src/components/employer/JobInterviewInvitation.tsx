@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
 import { Check, Clock, FileText, X, AlertCircle } from "lucide-react";
@@ -41,6 +39,8 @@ export default function JobInvitation() {
   } = useCheckInviteStatusQuery(inviteId || "", {
     skip: !inviteId,
   });
+
+  console.log("inviteStatusData", inviteStatusData);
 
   const jobId = inviteStatusData?.data?.jobDetails;
 
@@ -92,6 +92,10 @@ export default function JobInvitation() {
   const companyName =
     typeof jobDetailsData?.data.company === "object" &&
     jobDetailsData?.data.company?.name;
+  const companyLogo =
+    typeof jobDetailsData?.data.company === "object"
+      ? jobDetailsData?.data.company?.logo
+      : null;
   const location = jobDetailsData?.data.location;
   const workType = jobDetailsData?.data.work_place_type;
   const level = jobDetailsData?.data.experience_level;
@@ -101,10 +105,11 @@ export default function JobInvitation() {
   useEffect(() => {
     if (!userCheckInitiated && inviteStatusData?.data) {
       const candidateEmail = inviteStatusData?.data?.candidateInfo?.email;
-      if (candidateEmail) {
+      console.log("candidateEmail", candidateEmail);
+      if (candidateEmail && inviteId) {
         setUserCheckInitiated(true);
 
-        checkUserExists({ email: candidateEmail })
+        checkUserExists({ email: candidateEmail, inviteId: inviteId })
           .unwrap()
           .then((response) => {
             setUserExists(!!response.userId);
@@ -116,7 +121,7 @@ export default function JobInvitation() {
           });
       }
     }
-  }, [inviteStatusData, checkUserExists, userCheckInitiated]);
+  }, [inviteStatusData, checkUserExists, userCheckInitiated, inviteId]);
 
   // Handle action from URL parameter
   useEffect(() => {
@@ -284,10 +289,9 @@ export default function JobInvitation() {
       return;
     }
     if (userExists) {
-      window.location.href =
-        "https://employability.ai/login?redirect=dashboard";
+      window.location.href = "https://employability.ai/login";
     } else {
-      window.location.href = "https://employability.ai/signup";
+      window.location.href = `https://employability.ai/signup?inviteId=${inviteId}`;
     }
   };
 
@@ -405,9 +409,17 @@ export default function JobInvitation() {
       <div className="flex items-start justify-between mb-6">
         <div className="flex gap-4">
           <div className="w-16 h-16 bg-[#ddf8e8] rounded-full flex items-center justify-center">
-            <FileText className="w-8 h-8 text-[#03963f]" />
+            {companyLogo ? (
+              <img
+                src={companyLogo || "/placeholder.svg"}
+                alt={`${companyName || "Company"} logo`}
+                className="w-full h-full object-cover border border-[#ECEEF0] rounded-full"
+              />
+            ) : (
+              <FileText className="w-8 h-8 text-[#03963f]" />
+            )}
           </div>
-          <div>
+          <div className="flex flex-col justify-center">
             <div className="flex items-center gap-2">
               <h2 className="text-sub-header text-[#414447]">
                 {jobDetailsData?.data.title}
@@ -439,13 +451,13 @@ export default function JobInvitation() {
               onClick={handleAcceptInvite}
             >
               <Check className="w-4 h-4" />{" "}
-              {dateSelected ? "Continue" : "Accept Invite"}
+              {dateSelected ? "Confirm" : "Accept Invite"}
             </Button>
           )}
         </div>
       </div>
       {/* Divider */}
-      <div className="border-t border-[#eceef0] my-10 sm:my-7"></div>
+      <div className="border-t border-[#eceef0] my-6"></div>
 
       {/* Commited Submission Date */}
       {selectedDate && (
@@ -573,7 +585,7 @@ export default function JobInvitation() {
       {/* Divider */}
       <div className="border-t border-[#eceef0] my-6"></div>
       {/* Job Description */}
-      <div className="mb-8">
+      <div>
         <h3 className="text-h2 text-[#202326] mb-6">Job Description</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
@@ -584,7 +596,7 @@ export default function JobInvitation() {
           )}
         </div>
       </div>
-      {userCheckInitiated && (
+      {/* {userCheckInitiated && (
         <div className="mb-8">
           <h3 className="text-h2 text-[#202326] mb-2">Account Status</h3>
           <p className="text-[#68696b] text-[14px] font-normal leading-6 tracking-[0.21px] mb-4">
@@ -595,7 +607,7 @@ export default function JobInvitation() {
               : "You'll need to create an account after accepting this invitation."}
           </p>
         </div>
-      )}
+      )} */}
       {/* Fixed bottom buttons for small screens */}
       {!processingComplete ? (
         <div className="hidden sm:flex fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#eceef0] gap-3 justify-between z-10">
@@ -615,7 +627,7 @@ export default function JobInvitation() {
               onClick={handleAcceptInvite}
             >
               <Check className="w-4 h-4" />{" "}
-              {dateSelected ? "Continue" : "Accept Invite"}
+              {dateSelected ? "Confirm" : "Accept Invite"}
             </Button>
           )}
         </div>

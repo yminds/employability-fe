@@ -53,6 +53,7 @@ export type User = {
   parsedResume: any;
   resume_s3_url: string;
   firstName: string;
+  candidate_id: string;
 };
 
 // Optional: Define separate interfaces for nested objects if needed

@@ -12,9 +12,13 @@ import GithubIcon from "@/assets/sign-up/GithubIcon.svg";
 
 interface SocialLoginProps {
   onSocialLogin: (provider: "google" | "linkedin" | "github") => void;
+  inviteId?: string;
 }
 
-const SocialLogin: React.FC<SocialLoginProps> = ({ onSocialLogin }) => {
+const SocialLogin: React.FC<SocialLoginProps> = ({
+  onSocialLogin,
+  inviteId = undefined,
+}) => {
   const [socialAuth, { isSuccess }] = useSocialAuthMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -28,6 +32,7 @@ const SocialLogin: React.FC<SocialLoginProps> = ({ onSocialLogin }) => {
       const result = await socialAuth({
         provider: provider as "google" | "linkedin" | "github",
         token: response.access_token || response.code,
+        ...(inviteId && { invite_id: inviteId }),
       }).unwrap();
 
       dispatch(

@@ -1,6 +1,6 @@
 // components/CandidateCard.tsx
 import React from "react";
-import { MoreVertical } from "lucide-react";
+import { Book, Bookmark, MoreVertical } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +45,9 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   // Get time since last update
   const timeSinceUpdate = getTimeSinceUpdate(candidate);
 
+  console.log("timeSinceUpdate",timeSinceUpdate);
+  
+
   // Check if we should show report and shortlist options
   const showReportAndShortlist = canShowReportAndShortlist(candidate);
 
@@ -52,6 +55,44 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   const finalRating = getCandidateFinalRating(candidate);
 
   console.log("candidate", candidate);
+
+  function getOrdinalSuffix(day:any) {
+    if (day > 3 && day < 21) return "th";
+    switch (day % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  }
+
+  function formatDateWithOrdinal(dateString:any) {
+    const date = new Date(dateString);
+
+    const day = date.getDate();
+
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const month = months[date.getMonth()];
+
+    return `${day}${getOrdinalSuffix(day)} of ${month}`;
+  }
 
   // Format candidate location from object to string
   const formattedLocation = React.useMemo(() => {
@@ -150,7 +191,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                     className={`text-sm font-medium ${submissionBadge.textColor}`}
                   >
                     {submissionBadge.text}
-                    {candidate.has_report &&
+                    {candidate.has_report && candidate.status === 'completed' &&
                       timeSinceUpdate &&
                       ` ${timeSinceUpdate}`}
                   </span>
@@ -168,7 +209,9 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                   </p>
                   <p className="text-sm text-[#68696b]">
                     {candidate?.submission_expected_date !== null
-                      ? `Submission Expected on ${candidate.submission_expected_date?.toString()}`
+                      ? `Submission Expected on ${formatDateWithOrdinal(
+                          candidate.submission_expected_date
+                        )}`
                       : `Submission Date is not Added by the candidate`}
                   </p>
                 </div>
@@ -266,7 +309,10 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
                           Shortlisting...
                         </span>
                       ) : (
-                        <>Shortlist</>
+                        <>
+                        <Bookmark/>
+                        Shortlist
+                        </>
                       )}
                     </Button>
                   )}

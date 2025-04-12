@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
 import { X, CalendarIcon, CheckCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 
@@ -17,7 +19,7 @@ import FullInterview from "../../assets/employer/FullInterview.svg";
 
 // Import components
 import SuccessModal from "./SuccessModal";
-import SkillSelection from "./SkillSelection"; 
+import SkillSelection from "./SkillSelection";
 
 // Define interfaces
 interface ProgressData {
@@ -68,7 +70,9 @@ export default function InterviewModal({
   jobId,
 }: InterviewModalProps) {
   // State variables
-  const [selectedOption, setSelectedOption] = useState<"full" | "screening">("full");
+  const [selectedOption, setSelectedOption] = useState<"full" | "screening">(
+    "full"
+  );
   const [isVisible, setIsVisible] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -83,10 +87,11 @@ export default function InterviewModal({
   const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
   const [showSkillsSection, setShowSkillsSection] = useState(false);
-  
+  const [daysFromNow, setDaysFromNow] = useState<number>(7); // Default to 7 days
+
   // API base URL
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-  
+
   // Web Worker reference
   const workerRef = useRef<Worker | null>(null);
 
@@ -99,24 +104,28 @@ export default function InterviewModal({
 
   // Update skills section visibility when interview type changes
   useEffect(() => {
-    setShowSkillsSection(selectedOption === "full" && !!jobDetails?.skills_required?.length);
+    setShowSkillsSection(
+      selectedOption === "full" && !!jobDetails?.skills_required?.length
+    );
   }, [selectedOption, jobDetails]);
 
   // Fetch job details
   const fetchJobDetails = async () => {
     if (!jobId) return;
-    
+
     setIsLoadingJob(true);
     try {
-      const response = await fetch(`${apiBaseUrl}/api/v1/employerJobs/jobs/${jobId}`);
+      const response = await fetch(
+        `${apiBaseUrl}/api/v1/employerJobs/jobs/${jobId}`
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch job details');
+        throw new Error("Failed to fetch job details");
       }
-      
+
       const data = await response.json();
       if (data.success && data.data) {
         setJobDetails(data.data);
-        
+
         // Auto-select "Very Important" skills
         const importantSkills = data.data.skills_required.filter(
           (skill: Skill) => skill.importance === "Very Important"
@@ -124,8 +133,8 @@ export default function InterviewModal({
         setSelectedSkills(importantSkills);
       }
     } catch (error) {
-      console.error('Error fetching job details:', error);
-      toast.error('Failed to load job skills');
+      console.error("Error fetching job details:", error);
+      toast.error("Failed to load job skills");
     } finally {
       setIsLoadingJob(false);
     }
@@ -135,14 +144,17 @@ export default function InterviewModal({
   useEffect(() => {
     // Create the worker only if it doesn't exist yet
     if (!workerRef.current && window.Worker) {
-      workerRef.current = new Worker(new URL('../../workers/invitationWorker.ts', import.meta.url), { 
-        type: 'module' 
-      });
-      
+      workerRef.current = new Worker(
+        new URL("../../workers/invitationWorker.ts", import.meta.url),
+        {
+          type: "module",
+        }
+      );
+
       // Set up message handler for worker communication
-      workerRef.current.addEventListener('message', handleWorkerMessage);
+      workerRef.current.addEventListener("message", handleWorkerMessage);
     }
-    
+
     // Cleanup worker on component unmount
     return () => {
       if (workerRef.current) {
@@ -153,52 +165,57 @@ export default function InterviewModal({
   }, []);
 
   // Handle messages from worker
-  const handleWorkerMessage = useCallback((event: MessageEvent) => {
-    const { type, data } = event.data;
-    
-    switch (type) {
-      case "INTERVIEW_WORKER_READY":
-        console.log("Interview worker is ready");
-        break;
-        
-      case "BATCH_CREATED":
-        setBatchId(data.batchId);
-        toast.info(`Sending ${selectedCandidatesCount} interview invitations...`);
-        break;
-        
-      case "INVITATION_PROGRESS":
-        setProgress(data);
-        break;
-        
-      case "INVITATION_COMPLETE":
-        setIsSending(false);
-        
-        const total = data.total || 0;
-        const completed = data.completed || 0;
-        
-        // Show success modal and clear batch ID to hide progress UI
-        if (total > 0 && completed > 0) {
-          const message =
-            completed === total
-              ? `All ${completed} interview invitations were sent successfully!`
-              : `${completed} out of ${total} interview invitations were sent successfully.`;
-          
-          setSuccessMessage(message);
-          setShowSuccessModal(true);
-          setBatchId(null); // Hide the progress bar immediately
-        }
-        break;
-        
-      case "INTERVIEW_ERROR":
-        setError(data.error);
-        setIsSending(false);
-        toast.error(data.error);
-        break;
-        
-      default:
-        console.warn(`Unknown message type from worker: ${type}`);
-    }
-  }, [selectedCandidatesCount]);
+  const handleWorkerMessage = useCallback(
+    (event: MessageEvent) => {
+      const { type, data } = event.data;
+
+      switch (type) {
+        case "INTERVIEW_WORKER_READY":
+          console.log("Interview worker is ready");
+          break;
+
+        case "BATCH_CREATED":
+          setBatchId(data.batchId);
+          toast.info(
+            `Sending ${selectedCandidatesCount} interview invitations...`
+          );
+          break;
+
+        case "INVITATION_PROGRESS":
+          setProgress(data);
+          break;
+
+        case "INVITATION_COMPLETE":
+          setIsSending(false);
+
+          const total = data.total || 0;
+          const completed = data.completed || 0;
+
+          // Show success modal and clear batch ID to hide progress UI
+          if (total > 0 && completed > 0) {
+            const message =
+              completed === total
+                ? `All ${completed} interview invitations were sent successfully!`
+                : `${completed} out of ${total} interview invitations were sent successfully.`;
+
+            setSuccessMessage(message);
+            setShowSuccessModal(true);
+            setBatchId(null); // Hide the progress bar immediately
+          }
+          break;
+
+        case "INTERVIEW_ERROR":
+          setError(data.error);
+          setIsSending(false);
+          toast.error(data.error);
+          break;
+
+        default:
+          console.warn(`Unknown message type from worker: ${type}`);
+      }
+    },
+    [selectedCandidatesCount]
+  );
 
   // Resume polling if batchId exists when component mounts
   useEffect(() => {
@@ -207,8 +224,8 @@ export default function InterviewModal({
         type: "START_INVITATION_PROGRESS",
         data: {
           batchId,
-          apiBaseUrl
-        }
+          apiBaseUrl,
+        },
       });
     }
   }, [batchId, apiBaseUrl, isOpen]);
@@ -235,7 +252,13 @@ export default function InterviewModal({
 
   // Handle send invites
   const handleSendInvites = useCallback(() => {
-    if (!date || selectedCandidatesCount === 0 || isSending || !workerRef.current) return;
+    if (
+      !date ||
+      selectedCandidatesCount === 0 ||
+      isSending ||
+      !workerRef.current
+    )
+      return;
 
     setIsSending(true);
     setError(null);
@@ -246,12 +269,13 @@ export default function InterviewModal({
     );
 
     // Prepare skills array for API
-    const skills_array = selectedOption === "full" && selectedSkills.length > 0 ? 
-      selectedSkills.map(skill => ({
-        _id: skill.skill._id,
-        name: skill.name
-      })) : 
-      undefined;
+    const skills_array =
+      selectedOption === "full" && selectedSkills.length > 0
+        ? selectedSkills.map((skill) => ({
+            _id: skill.skill._id,
+            name: skill.name,
+          }))
+        : undefined;
 
     try {
       // Send message to worker to start invitation process
@@ -263,13 +287,16 @@ export default function InterviewModal({
           interviewType: selectedOption,
           applicationDeadline: date.toISOString(),
           skills_array,
-          apiBaseUrl
-        }
+          apiBaseUrl,
+        },
       });
     } catch (err) {
       // This try/catch is mostly for handling any errors that might
       // occur when posting the message to the worker
-      const errorMsg = err instanceof Error ? err.message : 'Failed to start interview invitation process';
+      const errorMsg =
+        err instanceof Error
+          ? err.message
+          : "Failed to start interview invitation process";
       setError(errorMsg);
       setIsSending(false);
       toast.error(errorMsg);
@@ -282,7 +309,7 @@ export default function InterviewModal({
     selectedOption,
     selectedCandidates,
     selectedSkills,
-    apiBaseUrl
+    apiBaseUrl,
   ]);
 
   // Calculate progress percentage
@@ -303,6 +330,22 @@ export default function InterviewModal({
     setShowSuccessModal(false);
     onClose(); // Close the interview modal as well
   };
+
+  // Update days when date changes
+  useEffect(() => {
+    if (date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate calculation
+      const selectedDate = new Date(date);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      // Calculate difference in days
+      const diffTime = selectedDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      setDaysFromNow(diffDays);
+    }
+  }, [date]);
 
   if (!isOpen) return null;
 
@@ -424,7 +467,7 @@ export default function InterviewModal({
                       >
                         {candidate?.profile_image ? (
                           <img
-                            src={candidate.profile_image}
+                            src={candidate.profile_image || "/placeholder.svg"}
                             alt={candidate.name || `Candidate ${index + 1}`}
                             className="object-cover w-full h-full"
                           />
@@ -506,7 +549,7 @@ export default function InterviewModal({
 
                         <div className="flex transition-transform duration-200 hover:scale-105">
                           <img
-                            src={FullInterview}
+                            src={FullInterview || "/placeholder.svg"}
                             alt="Full Interview"
                             className="object-contain h-[200px] max-h-full"
                             style={{ maxWidth: "none" }}
@@ -556,7 +599,7 @@ export default function InterviewModal({
 
                         <div className="relative flex transition-transform duration-200 hover:scale-105">
                           <img
-                            src={screening}
+                            src={screening || "/placeholder.svg"}
                             alt="Screening"
                             className="object-contain h-[200px] max-h-full"
                           />
@@ -573,7 +616,8 @@ export default function InterviewModal({
                           <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                           <span>Loading job skills...</span>
                         </div>
-                      ) : jobDetails?.skills_required && jobDetails.skills_required.length > 0 ? (
+                      ) : jobDetails?.skills_required &&
+                        jobDetails.skills_required.length > 0 ? (
                         <SkillSelection
                           availableSkills={jobDetails.skills_required}
                           selectedSkills={selectedSkills}
@@ -593,32 +637,57 @@ export default function InterviewModal({
                   {/* Expiry date */}
                   <div className="space-y-3">
                     <h3 className="text-base font-normal text-[#000000]">
-                      Set a due date to submit
+                      Set a due date or days from today
                     </h3>
-                    <div className="relative">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button className="w-60 px-4 py-3 border border-[#e6e6e6] rounded-lg text-left flex items-center justify-between text-[#4c4c4c]">
-                            {date ? format(date, "PPP") : "Select Expiry Date"}
-                            <CalendarIcon className="ml-2 h-4 w-4" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={setDate}
-                            initialFocus
-                            disabled={(date) => date < new Date()}
-                            className="rounded-md border"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <p className="mt-2 text-xs text-[#666666]">
-                        Candidates will receive an email with a link to complete
-                        this interview by this date.
-                      </p>
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <button className="w-60 px-4 py-3 border border-[#e6e6e6] rounded-lg text-left flex items-center justify-between text-[#4c4c4c]">
+                              {date
+                                ? format(date, "PPP")
+                                : "Select Expiry Date"}
+                              <CalendarIcon className="ml-2 h-4 w-4" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={setDate}
+                              initialFocus
+                              disabled={(date) => date < new Date()}
+                              className="rounded-md border"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      {/* Days selector */}
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          min="1"
+                          max="90"
+                          value={daysFromNow}
+                          className="w-20 px-3 py-2 border border-[#e6e6e6] rounded-lg text-[#4c4c4c]"
+                          onChange={(e) => {
+                            const days = Number.parseInt(e.target.value, 10);
+                            if (!isNaN(days) && days > 0) {
+                              setDaysFromNow(days);
+                              const newDate = new Date();
+                              newDate.setDate(newDate.getDate() + days);
+                              setDate(newDate);
+                            }
+                          }}
+                        />
+                        <span className="text-[#4c4c4c]">days</span>
+                      </div>
                     </div>
+                    <p className="mt-2 text-xs text-[#666666]">
+                      Candidates will receive an email with a link to complete
+                      this interview by this date.
+                    </p>
                   </div>
                 </>
               )}
