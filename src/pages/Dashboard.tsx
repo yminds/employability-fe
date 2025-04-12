@@ -116,6 +116,8 @@ const Dashboard: React.FC<Props> = () => {
   const [completedProfileSections, setCompletedProfileSections] = useState(0);
   const navigate = useNavigate();
 
+
+  const mainContentRef = React.useRef<HTMLDivElement>(null);
   const user = useSelector((state: RootState) => state.auth.user);
   // const token = useSelector((state:RootState)=>state.auth.token);
   const user_id = user ? user._id : "";
@@ -304,6 +306,7 @@ const Dashboard: React.FC<Props> = () => {
     return Array.isArray(user?.certificates) && user.certificates.length > 0;
   };
 
+  
   return (
     <main className="h-screen w-full overflow-hidden font-ubuntu">
       <div className="h-full flex flex-col bg-[#F5F5F5]">
@@ -330,7 +333,8 @@ const Dashboard: React.FC<Props> = () => {
                   {/* Left Column */}
                   <div className="col-span-3 min-h-0 flex flex-col">
                     <div className="overflow-y-auto pr-4 scrollbar-hide">
-                      <div className="flex flex-col gap-6">
+                      <div className="flex flex-col gap-6"
+                      ref={mainContentRef}>
                         {/* Interview List - Moved to top */}
                         {isContentLoading ? (
                           <SkillListSkeleton />

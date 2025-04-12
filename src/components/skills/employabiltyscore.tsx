@@ -62,7 +62,7 @@ const EmployabilityScore: React.FC<EmployabilityScoreProps> = ({
 
   const totalVerifiedRating = skillsData
     ? skillsData?.data?.mandatory
-        .map((skill: Skill) => skill.verified_rating)
+        .map((skill: any) => skill.verified_rating)
         .reduce((acc: number, rating: number) => acc + rating, 0)
     : 0;
 

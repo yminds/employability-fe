@@ -12,6 +12,13 @@ interface ScreeningQuestion {
   customFieldValue?: string;
 }
 
+interface FormattedAnswer {
+  question_id: string;
+  question: string;
+  question_type: string;
+  answer: string;
+}
+
 interface ApplicationQuestionsStepProps {
   screeningQuestions: ScreeningQuestion[];
   applicationData: Record<string, string>;
@@ -36,6 +43,7 @@ export default function ApplicationQuestionsStep({
   }, [applicationData, validationAttempted]);
 
   const handleInputChange = (questionId: string, value: string) => {
+    // Update the flat structure for internal component use
     updateApplicationData({ ...applicationData, [questionId]: value });
 
     // Clear error for this question if it's been answered
@@ -63,22 +71,54 @@ export default function ApplicationQuestionsStep({
     return Object.keys(errors).length === 0;
   };
 
+  // Format the application data into the desired structure
+  const getFormattedApplicationData = (): FormattedAnswer[] => {
+    return Object.entries(applicationData).map(([questionId, answer]) => {
+      const question = screeningQuestions.find((q) => q._id === questionId);
+      return {
+        question_id: questionId,
+        question: question?.question || "",
+        question_type: question?.type || "",
+        answer,
+      };
+    });
+  };
+
   // Public method to validate all questions (called from parent component)
   const validateAllQuestions = () => {
     setValidationAttempted(true);
-    return validateMandatoryQuestions();
+    const isValid = validateMandatoryQuestions();
+
+    // If valid, transform the data structure before submitting
+    if (isValid) {
+      // Store the formatted data in a global variable that can be accessed by the parent
+      if (typeof window !== "undefined") {
+        // @ts-ignore
+        window.formattedApplicationData = getFormattedApplicationData();
+      }
+    }
+
+    return isValid;
   };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       // @ts-ignore - Adding a custom property to the component
       window.validateApplicationQuestions = validateAllQuestions;
+
+      // Also expose the formatted data getter
+      // @ts-ignore
+      window.getFormattedApplicationData = getFormattedApplicationData;
     }
 
     return () => {
       if (typeof window !== "undefined") {
         // @ts-ignore - Cleanup
         delete window.validateApplicationQuestions;
+        // @ts-ignore
+        delete window.getFormattedApplicationData;
+        // @ts-ignore
+        delete window.formattedApplicationData;
       }
     };
   }, [applicationData]);

@@ -38,7 +38,7 @@ interface Project {
   score?: number;
   lastCompletedStep?: number;
   goal_id?: string;
-  latest_interview_status: {
+  latest_interview_status?: {
     interview_id: string;
     isCompleted: boolean;
   };
@@ -164,7 +164,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   console.log("project", project);
 
   const handleViewProject = () => {
-    if (!project.latest_interview_status.interview_id) {
+    if (!project.latest_interview_status?.interview_id) {
       return;
     }
     if (!project.latest_interview_status.isCompleted) {

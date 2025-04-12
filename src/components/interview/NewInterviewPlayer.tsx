@@ -319,7 +319,7 @@ const NewInterViewPlayer = ({ url, skipTime = 10 }: SimplePlayerProps) => {
         />
         {/* Subtle overlay for the entire video player */}
         <div
-          className="absolute inset-0 pointer-events-none z-5 rounded-lg"
+          className="absolute inset-0 pointer-events-none z-[2] rounded-lg"
           style={{
             background:
               "linear-gradient(0deg, rgba(0, 0, 0, 0.025) 0%, rgba(0, 0, 0, 0.025) 100%)",
@@ -329,7 +329,7 @@ const NewInterViewPlayer = ({ url, skipTime = 10 }: SimplePlayerProps) => {
 
       {/* Loading overlay */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 z-20">
+        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 z-[2] ">
           <div className="flex flex-col items-center gap-2">
             <Loader className="w-8 h-8 text-green-500 animate-spin" />
             <span className="text-white text-sm">
@@ -341,7 +341,7 @@ const NewInterViewPlayer = ({ url, skipTime = 10 }: SimplePlayerProps) => {
 
       {/* Clickable area for play/pause */}
       <div
-        className="absolute inset-0 z-10 cursor-pointer"
+        className="absolute inset-0 z-[2] cursor-pointer"
         onClick={togglePlay}
         onDoubleClick={toggleFullscreen}
       >
@@ -350,7 +350,7 @@ const NewInterViewPlayer = ({ url, skipTime = 10 }: SimplePlayerProps) => {
 
       {/* Control bar with gradient background */}
       <div
-        className={`absolute bottom-0 left-0 right-0 z-20 transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 z-[2]  transition-opacity duration-300 ${
           isHovering || !isPlaying ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -364,7 +364,7 @@ const NewInterViewPlayer = ({ url, skipTime = 10 }: SimplePlayerProps) => {
         ></div>
 
         {/* Seek Bar */}
-        <div className="w-full mb-2 relative z-10 px-5 md:px-3 pt-1.5 md:pt-3">
+        <div className="w-full mb-2 relative z-[2] px-5 md:px-3 pt-1.5 md:pt-3">
           <input
             type="range"
             className="w-full h-1 appearance-none cursor-pointer"
@@ -389,7 +389,7 @@ const NewInterViewPlayer = ({ url, skipTime = 10 }: SimplePlayerProps) => {
         </div>
 
         {/* Controls now below the progress bar */}
-        <div className="flex items-center justify-between relative z-10 px-5 md:px-3 pb-5 md:pb-3">
+        <div className="flex items-center justify-between relative z-[2]  px-5 md:px-3 pb-5 md:pb-3">
           <div className="flex items-center gap-3">
             {/* Play/Pause Button */}
             <button

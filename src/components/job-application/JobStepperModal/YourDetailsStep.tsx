@@ -1,4 +1,3 @@
-"use client";
 import type React from "react";
 import { ActivelySeekingJobsSVG } from "../SVG/ActivelySeekingJobsSVG";
 import PdfFile from "@/assets/job-posting/pdfFile.svg";
@@ -21,10 +20,7 @@ interface UserData {
 
 interface YourDetailsStepProps {
   userData: UserData;
-  onUpdateResume?: (resumeData: {
-    name: string;
-    url: string;
-  }) => void;
+  onUpdateResume?: (resumeData: { name: string; url: string }) => void;
 }
 
 export default function YourDetailsStep({
@@ -64,11 +60,7 @@ export default function YourDetailsStep({
           : "No resume uploaded"),
       url: userData.resume_s3_url || "",
     });
-  }, [
-    userData.resumeName,
-    userData.resume_s3_url,
-    userData.name,
-  ]);
+  }, [userData.resumeName, userData.resume_s3_url, userData.name]);
 
   // Update parent component when resume changes
   useEffect(() => {

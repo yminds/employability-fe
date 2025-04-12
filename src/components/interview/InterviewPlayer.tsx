@@ -346,7 +346,7 @@ const InterviewPlayer = ({ urls }: InterviewPlayerProps) => {
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-black/50 rounded-sm p-4 sm:p-2 z-50">
+      <div className="absolute bottom-0 left-0 right-0 bg-black/50 rounded-sm p-4 sm:p-2 z-[2]">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setIsPlaying(!isPlaying)}

@@ -40,7 +40,7 @@ export default function JobInfo({ jobDetails, user }: JobInfoProps) {
   const goalId = user?.goals?.[0]?._id;
 
   const [userSkills, setUserSkills] = useState<Skill[]>([]);
-  const [getUserSkills, { isLoading }] = useGetUserSkillsMutation();
+  const [getUserSkills] = useGetUserSkillsMutation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Job details
