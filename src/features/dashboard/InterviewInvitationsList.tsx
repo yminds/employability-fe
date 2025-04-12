@@ -11,6 +11,7 @@ import {
   EmptyState,
   InterviewListProps
 } from './components/interview-invitations';
+import { ChevronDown } from 'lucide-react';
 
 const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   isDashboard = false,
@@ -216,25 +217,10 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
             <div className="w-full flex justify-center mt-4">
               <button
                 onClick={() => navigate("/interviews")}
-                className="flex items-center gap-1 text-button font-medium hover:underline"
+                className="flex items-center gap-1 text-[#001630] text-sm font-medium "
               >
                 View all
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M8 3.33334L8 12.6667"
-                    stroke="#001630"
-                    strokeWidth="1.33333"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M12.6667 8L8.00004 12.6667L3.33337 8"
-                    stroke="#001630"
-                    strokeWidth="1.33333"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <ChevronDown className="h-4 w-4 ml-1" />
               </button>
             </div>
           )}

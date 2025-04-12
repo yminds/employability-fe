@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ActionButtonsProps } from './interviewInvitesTypes';
-import { capitalizeString, getStatusColor } from './utils';
+import { getStatusColor } from './utils';
 import { Check } from 'lucide-react';
 import { X } from 'lucide-react';
 
@@ -20,7 +20,10 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       <div className="flex gap-2">
         <Button
           className="bg-white hover:bg-[#0000001A] font-dm-sans text-sm font-medium leading-5 tracking-[0.21px] border border-button "
-          onClick={(e) => onDecline(invite._id, e)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDecline(invite._id); 
+          }}
           disabled={isBeingProcessed}
         >
           <div className="flex items-center gap-2 px-5 py-3">
@@ -36,7 +39,10 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         </Button>
         <Button
           className="bg-button hover:bg-[#062549] text-white py-2 px-4 rounded-md transition-colors"
-          onClick={(e) => onAccept(invite._id, e)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAccept(invite._id); 
+          }}
           disabled={isBeingProcessed}
         >
           <div className="flex items-center gap-2 text-white font-dm-sans text-sm font-medium leading-5 tracking-[0.21px] px-5 py-3">

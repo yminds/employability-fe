@@ -457,7 +457,17 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
       transformResponse:(response)=>{
         return response;
       }
-    })
+    }),
+    getCompanyAndJobDetails: builder.query({
+      query: (inviteId: string) => ({
+        url: `/api/v1/employerInterviewInvitation/invite/getCompanyDetails/${inviteId}`, // Assuming you have an endpoint for this
+        method: 'GET',
+      }),
+      transformResponse: (response: any) => {
+        // You can manipulate or normalize the data here if needed
+        return response;
+      },
+    }),
   }),
   overrideExisting: false,
 });
@@ -480,5 +490,6 @@ export const {
   useGetInterviewStatsQuery,
   useShortlistCandidateMutation,
   useSendInvitationResponseMailMutation,
-  useGetShortlistedCandiatesQuery
+  useGetShortlistedCandiatesQuery,
+  useGetCompanyAndJobDetailsQuery,
 } = interviewApiSlice;

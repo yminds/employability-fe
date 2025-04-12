@@ -100,32 +100,53 @@ const InterviewGuide: React.FC<SkillVerificationTutorialProps> = ({
     };
   }, [onClose]);
 
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Then modify your handleNext and handlePrev functions:
+
   const handleNext = () => {
-    if (currentSlide < slides.length - 1) {
-      setCurrentSlide((prev) => prev + 1);
-    } else {
-      onConfirm();
-    }
+    setIsTransitioning(true);
+    setTimeout(() => {
+      if (currentSlide < slides.length - 1) {
+        setCurrentSlide((prev) => prev + 1);
+      } else {
+        onConfirm();
+      }
+      setIsTransitioning(false);
+    }, 300);
   };
 
   const handlePrev = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide((prev) => prev - 1);
-    }
+    setIsTransitioning(true);
+    setTimeout(() => {
+      if (currentSlide > 0) {
+        setCurrentSlide((prev) => prev - 1);
+      }
+      setIsTransitioning(false);
+    }, 300);
   };
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999] transition-all duration-300">
       <div ref={dialogRef} className="bg-white rounded-2xl shadow-lg w-full max-w-[958px] relative flex flex-col">
         {/* Image at the top */}
         <div className="w-full">
           {currentSlide === 1 ? (
-            <video src={slides[currentSlide].image} autoPlay loop muted className="w-full  rounded-t-2xl max-h-[520px] object-cover transition-all duration-200" />
+            <video
+              src={slides[currentSlide].image}
+              autoPlay
+              loop
+              muted
+              className={`w-full rounded-t-2xl max-h-[520px] object-cover transition-opacity duration-500 ease-in-out ${
+                isTransitioning ? "opacity-0" : "opacity-100"
+              }`}
+            />
           ) : (
             <img
               src={slides[currentSlide].image}
               alt={`Step ${currentSlide + 1}`}
-              className="w-full object-cover rounded-t-2xl transition-all duration-200"
+              className={`w-full object-cover rounded-t-2xl transition-opacity duration-500 ease-in-out ${
+                isTransitioning ? "opacity-0" : "opacity-100"
+              }`}
             />
           )}
         </div>

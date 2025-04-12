@@ -306,7 +306,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
           <div className="flex w-[30%] flex-col items-center font-ubuntu">
             {status === "Verified" && (
               <p className="font-ubuntu text-xl font-medium leading-[22px]">
-                {verified_rating}
+                {verified_rating?.toFixed(1)}
                 <span className="text-[#909091]">/10</span>
               </p>
             )}

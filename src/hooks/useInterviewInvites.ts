@@ -8,6 +8,10 @@ import { useSelector } from 'react-redux';
 // Define interface for interview invite
 
 export interface InterviewInvite {
+  rejected: any;
+  shortlist: any;
+  updatedAt: string;
+  submission_date: any;
   _id: string;
   job?: {
     title?: string;
