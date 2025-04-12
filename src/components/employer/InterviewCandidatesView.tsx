@@ -359,6 +359,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
         jobId,
         candidateId,
       }).unwrap();
+      
 
       // Show success notification
       if (toast) {
@@ -400,7 +401,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       candidate.effective_report_id ||
       candidate.type_report_id ||
       candidate.report_id;
-
+  
     if (!reportId) {
       toast({
         title: "Error",
@@ -409,7 +410,16 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       });
       return;
     }
-    window.location.href = `/reports/${reportId}`;
+  
+    const interviewType = candidate.task?.interview_type?.type || "Full";
+    
+
+    const formattedType = interviewType.charAt(0).toUpperCase() + interviewType.slice(1);
+    
+    const reportUrl = `/employer/report/${formattedType}/${reportId}/${candidate?.username}/${candidate.task?.interview_type?.interview_id}`;
+    
+
+    window.open(reportUrl, '_blank');
   };
 
   // Handle page change

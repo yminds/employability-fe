@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -6,12 +7,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import ResumeUploadModal from "./ResumeUploadModal";
 import axios from "axios";
-import { Check } from "lucide-react";
+import { Check, PencilIcon } from "lucide-react";
 import { useGetJobByIdQuery } from "../../api/employabilityJobApiSlice";
-import { useUploadCandidateResumeMutation, useUpdateCandidateMutation } from "../../api/screeningResponseApiSlice";
-import { useCreateScreeningResponseMutation } from "../../api/screeningResponseApiSlice"
+import {
+  useUploadCandidateResumeMutation,
+  useUpdateCandidateMutation,
+} from "../../api/screeningResponseApiSlice";
+import { useCreateScreeningResponseMutation } from "../../api/screeningResponseApiSlice";
+import ResumeUploadSVG from "@/assets/job-posting/ResumeUploadSVG.svg";
+import { PhoneInput } from "../cards/phoneInput/PhoneInput";
+import PdfFile from "@/assets/job-posting/pdfFile.svg";
+import NameImage from "@/assets/job-posting/nameImage.svg";
+import Email from "@/assets/job-posting/mail.svg";
 
 interface ApplicationModalProps {
   isOpen: boolean;
@@ -57,17 +65,17 @@ export default function ApplicationModal({
   companyId,
   jobId,
 }: ApplicationModalProps) {
-  // States for the stepper and application process
   const [currentStep, setCurrentStep] = useState<StepperStep>("details");
-  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedResume, setUploadedResume] = useState<File | null>(null);
   const [resumeUploaded, setResumeUploaded] = useState(false);
+  const [intialStep, setIntialStep] = useState(false);
   const [fileUrl, setFileUrl] = useState("");
   const [s3Key, setS3Key] = useState("");
   const [showFields, setShowFields] = useState(false);
   const [uploadStage, setUploadStage] = useState("s3"); // 's3' or 'candidate'
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Candidate details
   const [candidateDetails, setCandidateDetails] = useState<CandidateDetails>({
@@ -79,18 +87,31 @@ export default function ApplicationModal({
   });
 
   // Screening questions
-  const [screeningQuestions, setScreeningQuestions] = useState<ScreeningQuestion[]>([]);
-  const [questionResponses, setQuestionResponses] = useState<QuestionResponse[]>([]);
+  const [screeningQuestions, setScreeningQuestions] = useState<
+    ScreeningQuestion[]
+  >([]);
+  const [questionResponses, setQuestionResponses] = useState<
+    QuestionResponse[]
+  >([]);
 
   // Error handling
   const [error, setError] = useState("");
   const [candidateId, setCandidateId] = useState<string>("");
+  const [contactErrors, setContactErrors] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
 
   // RTK Query hooks
-  const { data: jobData, isLoading: isJobLoading, error: jobError } = useGetJobByIdQuery(jobId, {
-    skip: !isOpen || !jobId
+  const {
+    data: jobData,
+    isLoading: isJobLoading,
+    error: jobError,
+  } = useGetJobByIdQuery(jobId, {
+    skip: !isOpen || !jobId,
   });
-  
+
   const [uploadCandidateResume] = useUploadCandidateResumeMutation();
   const [updateCandidate] = useUpdateCandidateMutation();
   const [createScreeningResponse] = useCreateScreeningResponseMutation();
@@ -100,7 +121,6 @@ export default function ApplicationModal({
     if (jobData?.success && jobData?.data.screening_questions) {
       setScreeningQuestions(jobData.data.screening_questions);
 
-      // Initialize responses array with no default selections
       const initialResponses = jobData.data.screening_questions.map(
         (q: ScreeningQuestion, index: number) => ({
           question_id: index.toString(),
@@ -114,7 +134,6 @@ export default function ApplicationModal({
     }
   }, [jobData]);
 
-  // Handle job loading error
   useEffect(() => {
     if (jobError) {
       console.error("Error fetching job details:", jobError);
@@ -122,27 +141,33 @@ export default function ApplicationModal({
     }
   }, [jobError]);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      await handleResumeUpload(file);
+    }
+  };
+
   const handleResumeUpload = async (file: File) => {
+    setIntialStep(true);
     setUploadedResume(file);
     setUploadingResume(true);
     setUploadProgress(0);
     setShowFields(false);
-    setError(""); // Clear any previous errors
+    setError("");
     setUploadStage("s3");
 
     try {
-      // Step 1: Upload to S3 (keeping axios for progress tracking)
       const formData = new FormData();
       formData.append("files", file);
       formData.append("userId", "user_" + Date.now());
       formData.append("folder", "resumes");
 
       const s3UploadResponse = await axios.post(
-        "http://localhost:3000/api/v1/s3/upload",
+        `${process.env.VITE_API_BASE_URL}/api/v1/s3/upload`,
         formData,
         {
           onUploadProgress: (progressEvent) => {
-            // Calculate progress for S3 upload phase (0-45%)
             const percentCompleted = Math.round(
               (progressEvent.loaded * 45) / (progressEvent.total || 100)
             );
@@ -155,23 +180,19 @@ export default function ApplicationModal({
         const uploadedFileData = s3UploadResponse.data.data[0];
         setFileUrl(uploadedFileData.fileUrl);
         setS3Key(uploadedFileData.key);
-
-        // Update stage to candidate upload after S3 upload is complete
         setUploadStage("candidate");
 
-        // Step 2: Process the resume using RTK Query mutation
         const candidateFormData = new FormData();
         candidateFormData.append("fileUrl", uploadedFileData.fileUrl);
         candidateFormData.append("job_id", jobId);
         candidateFormData.append("resume", file);
 
-        // Set progress to indicate we're starting the candidate upload
         setUploadProgress(45);
 
-        // Use the RTK Query mutation
-        const candidateResponse = await uploadCandidateResume(candidateFormData).unwrap();
-        
-        // Set progress to 90% when we get a response
+        const candidateResponse = await uploadCandidateResume(
+          candidateFormData
+        ).unwrap();
+
         setUploadProgress(90);
 
         if (
@@ -181,6 +202,13 @@ export default function ApplicationModal({
           candidateResponse.data.candidate._id
         ) {
           const candidate = candidateResponse.data.candidate;
+          let phone_number = candidate.contact?.phone;
+          if (
+            candidate.contact?.phone &&
+            !candidate.contact?.phone.startsWith("+91")
+          ) {
+            phone_number = "+91" + candidate.contact?.phone;
+          }
           setCandidateId(candidate._id);
 
           // Update candidate details from parsed resume
@@ -189,7 +217,7 @@ export default function ApplicationModal({
             name: candidate.name || "",
             contact: {
               email: candidate.contact?.email || "",
-              phone: candidate.contact?.phone || "",
+              phone: phone_number || "",
             },
             resume_s3_url: uploadedFileData.fileUrl,
             originalName: file.name,
@@ -216,16 +244,28 @@ export default function ApplicationModal({
   const handleDetailsChange = (field: string, value: string) => {
     if (field === "name") {
       setCandidateDetails((prev) => ({ ...prev, name: value }));
+      if (value) {
+        setContactErrors((prev) => ({ ...prev, name: "" }));
+        setError("");
+      }
     } else if (field === "email") {
       setCandidateDetails((prev) => ({
         ...prev,
         contact: { ...prev.contact, email: value },
       }));
+      if (value) {
+        setContactErrors((prev) => ({ ...prev, email: "" }));
+        setError("");
+      }
     } else if (field === "phone") {
       setCandidateDetails((prev) => ({
         ...prev,
         contact: { ...prev.contact, phone: value },
       }));
+      if (value) {
+        setContactErrors((prev) => ({ ...prev, phone: "" }));
+        setError("");
+      }
     }
   };
 
@@ -235,12 +275,34 @@ export default function ApplicationModal({
       updated[index] = { ...updated[index], answer };
       return updated;
     });
+
+    // Clear error when user answers a question
+    setError("");
   };
 
   const handleNext = () => {
     if (currentStep === "details") {
       if (!resumeUploaded) {
         setError("Please upload your resume before proceeding.");
+        return;
+      }
+
+      // Validate contact information fields
+      const newContactErrors = {
+        name: candidateDetails.name ? "" : "Name is required",
+        email: candidateDetails.contact.email ? "" : "Email is required",
+        phone: candidateDetails.contact.phone ? "" : "Phone number is required",
+      };
+
+      setContactErrors(newContactErrors);
+
+      // Check if any errors exist
+      if (
+        newContactErrors.name ||
+        newContactErrors.email ||
+        newContactErrors.phone
+      ) {
+        setError("Please fill in all required contact information.");
         return;
       }
 
@@ -251,17 +313,42 @@ export default function ApplicationModal({
         setCurrentStep("questions");
       }
     } else if (currentStep === "questions") {
-      // Validate all mandatory questions are answered
-      const unansweredMandatory = questionResponses.some(
-        (response, index) =>
-          screeningQuestions[index]?.is_mandatory &&
-          (response.answer === null || 
-           response.answer === "" ||
-           (Array.isArray(response.answer) && response.answer.length === 0))
-      );
+      // Check each mandatory question individually
+      const unansweredMandatoryQuestions = screeningQuestions
+        .map((question, index) => {
+          const response = questionResponses[index];
+          if (
+            question.is_mandatory &&
+            (response.answer === null ||
+              response.answer === "" ||
+              (Array.isArray(response.answer) && response.answer.length === 0))
+          ) {
+            return index;
+          }
+          return -1;
+        })
+        .filter((index) => index !== -1);
 
-      if (unansweredMandatory) {
-        setError("Please answer all mandatory questions before proceeding.");
+      if (unansweredMandatoryQuestions.length > 0) {
+        setError(
+          `Please answer the required question${
+            unansweredMandatoryQuestions.length > 1 ? "s" : ""
+          }.`
+        );
+
+        // Add visual indicators to unanswered mandatory questions
+        const questionElements = document.querySelectorAll(
+          ".question-container"
+        );
+        unansweredMandatoryQuestions.forEach((index) => {
+          if (questionElements[index]) {
+            questionElements[index].scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        });
+
         return;
       }
 
@@ -283,30 +370,74 @@ export default function ApplicationModal({
 
   const handleSubmit = async () => {
     try {
+      const newContactErrors = {
+        name: candidateDetails.name ? "" : "Name is required",
+        email: candidateDetails.contact.email ? "" : "Email is required",
+        phone: candidateDetails.contact.phone ? "" : "Phone number is required",
+      };
+
+      setContactErrors(newContactErrors);
+
+      if (
+        newContactErrors.name ||
+        newContactErrors.email ||
+        newContactErrors.phone
+      ) {
+        setError("Please fill in all required contact information.");
+        setCurrentStep("details");
+        return;
+      }
+
       if (candidateId) {
-        // Update candidate details using RTK Query
         await updateCandidate({
           candidateId: candidateId,
           candidateData: {
             name: candidateDetails.name,
             contact: candidateDetails.contact,
-          }
+          },
         }).unwrap();
       }
 
-      // Save screening responses (only if there are questions)
       if (screeningQuestions.length > 0) {
-        // Validate mandatory fields are filled
-        const unansweredMandatory = questionResponses.some(
-          (response, index) =>
-            screeningQuestions[index]?.is_mandatory &&
-            (response.answer === null ||
-             response.answer === "" ||
-             (Array.isArray(response.answer) && response.answer.length === 0))
-        );
+        const unansweredMandatoryQuestions = screeningQuestions
+          .map((question, index) => {
+            const response = questionResponses[index];
+            if (
+              question.is_mandatory &&
+              (response.answer === null ||
+                response.answer === "" ||
+                (Array.isArray(response.answer) &&
+                  response.answer.length === 0))
+            ) {
+              return index;
+            }
+            return -1;
+          })
+          .filter((index) => index !== -1);
 
-        if (unansweredMandatory) {
-          setError("Please answer all mandatory questions before submitting.");
+        if (unansweredMandatoryQuestions.length > 0) {
+          setError(
+            `Please answer the required question${
+              unansweredMandatoryQuestions.length > 1 ? "s" : ""
+            }.`
+          );
+
+          setCurrentStep("questions");
+
+          setTimeout(() => {
+            const questionElements = document.querySelectorAll(
+              ".question-container"
+            );
+            unansweredMandatoryQuestions.forEach((index) => {
+              if (questionElements[index]) {
+                questionElements[index].scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }
+            });
+          }, 100);
+
           return;
         }
 
@@ -339,6 +470,7 @@ export default function ApplicationModal({
       setUploadProgress(0);
       setUploadedResume(null);
       setResumeUploaded(false);
+      setIntialStep(false);
       setFileUrl("");
       setS3Key("");
       setShowFields(false);
@@ -354,18 +486,23 @@ export default function ApplicationModal({
       setQuestionResponses([]);
       setError("");
       setCandidateId("");
+      setContactErrors({
+        name: "",
+        email: "",
+        phone: "",
+      });
 
       // Close the modal
       onClose();
     } catch (error) {
       console.error("Error submitting application:", error);
-      
+
       // Handle error
       let errorMessage = "Failed to submit application. Please try again.";
       if (error instanceof Error) {
         errorMessage = `Failed to submit application: ${error.message}`;
       }
-      
+
       setError(errorMessage);
     }
   };
@@ -384,23 +521,38 @@ export default function ApplicationModal({
     }
   };
 
-  return (
-    <>
-      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="max-w-3xl p-6 gap-0">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-h2 text-left text-black">
-              Apply For {companyName}
-            </DialogTitle>
-          </DialogHeader>
+  // Format file size to KB or MB
+  const formatFileSize = (size: number): string => {
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} KB`;
+    }
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
-          {/* Stepper Header - Modified to hide questions step when there are no screening questions */}
+  const handleSignupAndApply = () => {
+    const currentUrl = window.location.href;
+    window.location.href = `/signup?job_application=${encodeURIComponent(
+      currentUrl
+    )}`;
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-3xl p-8 gap-0 rounded-lg">
+        <DialogHeader className="mb-6">
+          <DialogTitle className="text-h2 text-left text-black">
+            Apply For {companyName}
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Stepper Header - Modified to hide questions step when there are no screening questions */}
+        {intialStep && (
           <div className="mb-8">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-10">
               {/* Details Step */}
               <div className="flex items-center">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  className={`h-5 w-5 rounded-full flex items-center justify-center text-[11px] ${
                     currentStep === "details" ||
                     currentStep === "questions" ||
                     currentStep === "review"
@@ -411,56 +563,47 @@ export default function ApplicationModal({
                   {currentStep === "details" ||
                   currentStep === "questions" ||
                   currentStep === "review" ? (
-                    <Check size={16} />
+                    <Check className="h-3 w-3" />
                   ) : (
                     "1"
                   )}
                 </div>
                 <span
-                  className={`ml-2 ${
+                  className={`ml-2 text-sm text-body2 ${
                     currentStep === "details"
-                      ? "font-semibold text-green-500"
-                      : ""
+                      ? "text-[#10B754] font-medium"
+                      : currentStep === "questions" || currentStep === "review"
+                      ? "text-[#10B754] font-medium"
+                      : "text-gray-500"
                   }`}
                 >
                   Your Details
                 </span>
               </div>
 
-              {/* First Divider - Only show if there are screening questions */}
-              {hasScreeningQuestions && (
-                <div className="h-1 w-16 bg-gray-200 mx-2">
-                  <div
-                    className={`h-full ${
-                      currentStep === "questions" || currentStep === "review"
-                        ? "bg-green-500"
-                        : "bg-gray-200"
-                    }`}
-                  ></div>
-                </div>
-              )}
-
               {/* Questions Step - Only show if there are screening questions */}
               {hasScreeningQuestions && (
                 <div className="flex items-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    className={`h-5 w-5 rounded-full flex items-center justify-center text-[11px] ${
                       currentStep === "questions" || currentStep === "review"
                         ? "bg-green-500 text-white"
                         : "bg-gray-200"
                     }`}
                   >
                     {currentStep === "questions" || currentStep === "review" ? (
-                      <Check size={16} />
+                      <Check className="h-3 w-3" />
                     ) : (
                       "2"
                     )}
                   </div>
                   <span
-                    className={`ml-2 ${
+                    className={`ml-2 text-sm text-body2 ${
                       currentStep === "questions"
-                        ? "font-semibold text-green-500"
-                        : ""
+                        ? "text-[#10B754] font-medium"
+                        : currentStep === "review"
+                        ? "text-[#10B754] font-medium"
+                        : "text-gray-500"
                     }`}
                   >
                     Application Questions
@@ -468,30 +611,17 @@ export default function ApplicationModal({
                 </div>
               )}
 
-              {/* Second Divider - Adjust width based on whether questions step is shown */}
-              <div
-                className={`h-1 ${
-                  hasScreeningQuestions ? "w-16" : "w-32"
-                } bg-gray-200 mx-2`}
-              >
-                <div
-                  className={`h-full ${
-                    currentStep === "review" ? "bg-green-500" : "bg-gray-200"
-                  }`}
-                ></div>
-              </div>
-
               {/* Review Step - Always show but adjust the step number */}
               <div className="flex items-center">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  className={`h-5 w-5 rounded-full flex items-center justify-center text-[11px] ${
                     currentStep === "review"
                       ? "bg-green-500 text-white"
                       : "bg-gray-200"
                   }`}
                 >
                   {currentStep === "review" ? (
-                    <Check size={16} />
+                    <Check className="h-3 w-3" />
                   ) : hasScreeningQuestions ? (
                     "3"
                   ) : (
@@ -499,311 +629,470 @@ export default function ApplicationModal({
                   )}
                 </div>
                 <span
-                  className={`ml-2 ${
+                  className={`ml-2 text-sm text-body2 ${
                     currentStep === "review"
-                      ? "font-semibold text-green-500"
-                      : ""
+                      ? "text-[#10B754] font-medium"
+                      : "text-gray-500"
                   }`}
                 >
                   Review & Submit
                 </span>
               </div>
             </div>
+            <div className="border-t mt-8"></div>
           </div>
+        )}
 
-          {/* Content based on current step */}
-          <div className="mb-8">
-            {/* Your Details Step */}
-            {currentStep === "details" && (
-              <div>
-                {/* Resume Upload Section */}
-                {!resumeUploaded ? (
-                  <div className="mb-6">
-                    <Button
-                      onClick={() => setIsResumeModalOpen(true)}
-                      className="bg-green-500 hover:bg-green-600 text-white"
-                    >
-                      Upload Resume
-                    </Button>
-                  </div>
-                ) : null}
+        {/* Content based on current step */}
+        <div className="mb-8">
+          {/* Your Details Step */}
+          {currentStep === "details" && (
+            <div>
+              {/* Resume Upload Section */}
+              {!intialStep ? (
+                <div className="w-full">
+                  {/* Main Resume Upload Card */}
+                  <div className="w-full overflow-hidden bg-gradient-to-r from-[#FCFCFC] to-[#DED8FB] border rounded-lg">
+                    <div className="flex">
+                      <div className="flex-1 p-7">
+                        <h2 className="text-[20px] font-ubuntu font-medium leading-8 tracking-[-0.2px] text-[#1c1b1f] mb-2">
+                          Resume
+                        </h2>
+                        <p className="text-body2">
+                          Upload your updated resume to apply
+                        </p>
 
-                {/* Resume Upload Progress - Enhanced to show both stages */}
-                {uploadingResume && (
-                  <div className="mb-6">
-                    <div className="flex items-center mb-2">
-                      <div className="w-12 h-16 text-red-500 mr-3">
-                        <div className="text-xs text-gray-500 flex items-center justify-center bg-gray-100 rounded-sm w-full h-full">
-                          PDF
-                        </div>
+                        <Button
+                          className="mt-8 border border-[#000000] bg-white text-[#000000] text-button hover:bg-gray-50 px-8 py-2 h-auto"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Upload Resume & Apply
+                        </Button>
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          className="hidden"
+                          accept=".pdf"
+                          onChange={handleFileChange}
+                        />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium">
-                            {uploadedResume?.name}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {uploadProgress}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{ width: `${uploadProgress}%` }}
-                          ></div>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {getUploadStageMessage()}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Resume Uploaded */}
-                {resumeUploaded && (
-                  <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-12 h-16 text-red-500 mr-3">
-                          <div className="text-xs text-gray-500 flex items-center justify-center bg-gray-100 rounded-sm w-full h-full">
-                            PDF
+                      <div className="flex items-center justify-center">
+                        <div className="h-full relative">
+                          <div className="absolute right-[-20px] top-3 h-[240px] w-[240px]">
+                            <img
+                              src={ResumeUploadSVG || "/placeholder.svg"}
+                              alt="Resume upload illustration"
+                              className="object-contain w-full h-full"
+                            />
                           </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {candidateDetails.originalName}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Uploaded successfully
-                          </p>
-                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        className="text-blue-500 hover:text-blue-700"
-                        onClick={() => setIsResumeModalOpen(true)}
-                      >
-                        Change Resume
-                      </Button>
                     </div>
                   </div>
-                )}
 
-                {/* Candidate Details Form - Only show fields after both uploads complete */}
-                {showFields && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        value={candidateDetails.name}
-                        onChange={(e) =>
-                          handleDetailsChange("name", e.target.value)
-                        }
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        value={candidateDetails.contact.email}
-                        onChange={(e) =>
-                          handleDetailsChange("email", e.target.value)
-                        }
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone
-                      </label>
-                      <input
-                        type="tel"
-                        value={candidateDetails.contact.phone}
-                        onChange={(e) =>
-                          handleDetailsChange("phone", e.target.value)
-                        }
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                      />
-                    </div>
+                  {/* Divider with "Or" text - outside the card */}
+                  <div className="flex items-center my-7">
+                    <div className="flex-1 h-px bg-[#909091] bg-opacity-30"></div>
+                    <span className="px-4 text-[#666666]">Or</span>
+                    <div className="flex-1 h-px bg-[#909091] bg-opacity-30"></div>
                   </div>
-                )}
-              </div>
-            )}
 
-            {/* Application Questions Step - Show all questions at once */}
-            {currentStep === "questions" && hasScreeningQuestions && (
-              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
-                <h3 className="text-lg font-medium mb-4">
-                  Application Questions
-                </h3>
-                
-                {/* List all questions */}
-                {screeningQuestions.map((question, index) => (
-                  <div key={index} className="mb-8 pb-6 border-b border-gray-200 last:border-0">
-                    <p className="text-lg font-medium mb-4">
-                      {question.is_mandatory && (
-                        <span className="text-red-500 mr-1">*</span>
-                      )}
-                      {question.question}
-                    </p>
-
-                    {question.type === "yes_no" && (
-                      <div className="space-x-4">
-                        <label className="inline-flex items-center">
-                          <input
-                            type="radio"
-                            className="form-radio"
-                            checked={
-                              questionResponses[index]?.answer === "yes"
-                            }
-                            onChange={() =>
-                              handleQuestionResponse(index, "yes")
-                            }
-                          />
-                          <span className="ml-2">Yes</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                          <input
-                            type="radio"
-                            className="form-radio"
-                            checked={
-                              questionResponses[index]?.answer === "no"
-                            }
-                            onChange={() =>
-                              handleQuestionResponse(index, "no")
-                            }
-                          />
-                          <span className="ml-2">No</span>
-                        </label>
-                      </div>
-                    )}
-
-                    {question.type === "multiple_choice" && (
-                      <div className="space-y-2">
-                        {question.options?.map(
-                          (option, optIdx) => (
-                            <label
-                              key={optIdx}
-                              className="block mb-2"
-                            >
-                              <input
-                                type="radio"
-                                className="form-radio"
-                                checked={
-                                  questionResponses[index]?.answer === option
-                                }
-                                onChange={() =>
-                                  handleQuestionResponse(
-                                    index,
-                                    option
-                                  )
-                                }
-                              />
-                              <span className="ml-2">{option}</span>
-                            </label>
-                          )
-                        )}
-                      </div>
-                    )}
-
-                    {question.type === "text" && (
-                      <textarea
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        rows={4}
-                        value={
-                          (questionResponses[index]?.answer as string) || ""
-                        }
-                        onChange={(e) =>
-                          handleQuestionResponse(
-                            index,
-                            e.target.value
-                          )
-                        }
-                      />
-                    )}
-
-                    {question.type === "numeric" && (
-                      <input
-                        type="number"
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        value={
-                          (questionResponses[index]?.answer as number) || ""
-                        }
-                        onChange={(e) =>
-                          handleQuestionResponse(
-                            index,
-                            e.target.value ? parseInt(e.target.value, 10) : null
-                          )
-                        }
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Review & Submit Step */}
-            {currentStep === "review" && (
-              <div>
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-4">Your Details</h3>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Name</p>
-                        <p className="font-medium">{candidateDetails.name}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Email</p>
-                        <p className="font-medium">
-                          {candidateDetails.contact.email}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Phone</p>
-                        <p className="font-medium">
-                          {candidateDetails.contact.phone}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <p className="text-sm text-gray-500">Resume</p>
-                      <p className="font-medium">
-                        {candidateDetails.originalName}
-                      </p>
-                    </div>
+                  {/* Apply with Employability section - outside the card */}
+                  <div className="text-center">
+                    <h3 className="text-[14px] font-medium leading-5 tracking-[0.21px] text-[#001630] mb-4">
+                      Apply with Employability
+                    </h3>
                     <Button
-                      variant="ghost"
-                      className="mt-2 text-blue-500 hover:text-blue-700"
-                      onClick={() => setCurrentStep("details")}
+                      variant="outline"
+                      className="w-full max-w-xs border border-[#000000] bg-white text-[#000000] text-button hover:bg-gray-50 py-3 h-auto"
+                      onClick={handleSignupAndApply}
                     >
-                      Edit
+                      Sign In
                     </Button>
                   </div>
                 </div>
+              ) : null}
 
-                {hasScreeningQuestions && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-medium mb-4">
+              {/* Resume Upload Progress - Enhanced to show both stages */}
+              {uploadingResume && (
+                <div className="mb-6 bg-[#F2F3F5] p-4 rounded-lg">
+                  <div className="flex items-center mb-2 gap-3">
+                    <div className="bg-white p-2 rounded">
+                      <img
+                        src={PdfFile || "/placeholder.svg"}
+                        alt="Pdf"
+                        className="w-5 h-5"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-body2 text-gray-800">
+                          {uploadedResume?.name}
+                        </span>
+                        <span className="text-sm text-body2 text-gray-500">
+                          {uploadProgress}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-green-500 h-2 rounded-full"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {getUploadStageMessage()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Resume Uploaded */}
+              {resumeUploaded && !uploadingResume && (
+                <div className="mb-6 p-4 bg-[#F2F3F5] rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white p-2 rounded">
+                        <img
+                          src={PdfFile || "/placeholder.svg"}
+                          alt="Pdf"
+                          className="w-5 h-5"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm text-body2 text-gray-800">
+                          {candidateDetails.originalName}
+                        </p>
+                        {candidateDetails.resume_s3_url && (
+                          <a
+                            href={candidateDetails.resume_s3_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-[#10B754] hover:underline"
+                          >
+                            View Resume
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-[#001630] cursor-pointer hover:underline text-xs"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Change Resume
+                    </Button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept=".pdf"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Candidate Details Form - Only show fields after both uploads complete */}
+              {showFields && (
+                <div className="space-y-7">
+                  <h3 className="text-body2 mb-4">Contact Info</h3>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <img
+                        src={NameImage || "/placeholder.svg"}
+                        alt="Name"
+                        className="w-5 h-5"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={candidateDetails.name}
+                      onChange={(e) =>
+                        handleDetailsChange("name", e.target.value)
+                      }
+                      placeholder="Full Name"
+                      className={`w-full p-2 pl-10 border text-body2 text-sm ${
+                        contactErrors.name
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      } rounded-md`}
+                    />
+                    {contactErrors.name && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {contactErrors.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <img
+                        src={Email || "/placeholder.svg"}
+                        alt="Email"
+                        className="w-5 h-5"
+                      />
+                    </div>
+                    <input
+                      type="email"
+                      value={candidateDetails.contact.email}
+                      onChange={(e) =>
+                        handleDetailsChange("email", e.target.value)
+                      }
+                      placeholder="Email Address"
+                      className={`w-full p-2 pl-10 border text-body2 text-sm ${
+                        contactErrors.email
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      } rounded-md`}
+                    />
+                    {contactErrors.email && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {contactErrors.email}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <PhoneInput
+                      value={candidateDetails.contact.phone}
+                      onChange={(value) =>
+                        handleDetailsChange("phone", value as string)
+                      }
+                      className={`w-full text-body2 text-sm ${
+                        contactErrors.phone
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                    {contactErrors.phone && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {contactErrors.phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Application Questions Step - Show all questions at once */}
+          {currentStep === "questions" && hasScreeningQuestions && (
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+              {/* List all questions */}
+              {screeningQuestions.map((question, index) => (
+                <div
+                  key={index}
+                  className={`mb-8 question-container ${
+                    question.is_mandatory &&
+                    (questionResponses[index]?.answer === null ||
+                      questionResponses[index]?.answer === "" ||
+                      (Array.isArray(questionResponses[index]?.answer) &&
+                        questionResponses[index]?.answer.length === 0))
+                  }`}
+                >
+                  <p className="text-body2 text-[#202326] mb-4">
+                    {question.is_mandatory && (
+                      <span className="text-red-500">*</span>
+                    )}
+                    {question.question}
+                  </p>
+
+                  {question.type === "yes_no" && (
+                    <div className="space-x-4 text-body2">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="radio"
+                          className="form-radio h-5 w-5"
+                          checked={questionResponses[index]?.answer === "yes"}
+                          onChange={() => handleQuestionResponse(index, "yes")}
+                        />
+                        <span className="ml-2">Yes</span>
+                      </label>
+                      <label className="inline-flex items-center">
+                        <input
+                          type="radio"
+                          className="form-radio h-5 w-5"
+                          checked={questionResponses[index]?.answer === "no"}
+                          onChange={() => handleQuestionResponse(index, "no")}
+                        />
+                        <span className="ml-2">No</span>
+                      </label>
+                    </div>
+                  )}
+
+                  {question.type === "multiple_choice" && (
+                    <div className="space-y-2">
+                      {question.options?.map((option, optIdx) => (
+                        <label key={optIdx} className="block mb-2">
+                          <input
+                            type="radio"
+                            className="form-radio"
+                            checked={
+                              questionResponses[index]?.answer === option
+                            }
+                            onChange={() =>
+                              handleQuestionResponse(index, option)
+                            }
+                          />
+                          <span className="ml-2">{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  {question.type === "text" && (
+                    <textarea
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      rows={4}
+                      value={(questionResponses[index]?.answer as string) || ""}
+                      onChange={(e) =>
+                        handleQuestionResponse(index, e.target.value)
+                      }
+                    />
+                  )}
+
+                  {question.type === "numeric" && (
+                    <input
+                      type="number"
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      value={(questionResponses[index]?.answer as number) || ""}
+                      onChange={(e) =>
+                        handleQuestionResponse(
+                          index,
+                          e.target.value
+                            ? Number.parseInt(e.target.value, 10)
+                            : null
+                        )
+                      }
+                    />
+                  )}
+                  {question.is_mandatory &&
+                    (questionResponses[index]?.answer === null ||
+                      questionResponses[index]?.answer === "" ||
+                      (Array.isArray(questionResponses[index]?.answer) &&
+                        questionResponses[index]?.answer.length === 0)) &&
+                    error && (
+                      <p className="text-red-500 text-sm mt-2">
+                        This question is required
+                      </p>
+                    )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Review & Submit Step */}
+          {currentStep === "review" && (
+            <div className="max-h-[60vh] overflow-y-auto">
+              <div className="mb-6">
+                <div className="flex justify-between text-center">
+                  <h3 className="text-body2 mb-4 text-black">Your Details</h3>
+                  <Button
+                    variant="ghost"
+                    className="text-[#10B754] hover:bg-transparent"
+                    onClick={() => setCurrentStep("details")}
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="bg-[#F2F3F5] p-4 rounded-lg flex justify-between">
+                  <div className="flex gap-10">
+                    <div>
+                      <p className="text-body2 text-sm text-[#68696B]">Name</p>
+                      <p className="text-body2 text-[#414447]">
+                        {candidateDetails.name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-body2 text-sm text-[#68696B]">Email</p>
+                      <p className="text-body2 text-[#414447]">
+                        {candidateDetails.contact.email}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-body2 text-sm text-[#68696B]">Phone</p>
+                      <p className="text-body2 text-[#414447]">
+                        {candidateDetails.contact.phone}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Resume Section - Now separated */}
+              <div className="mb-6">
+                <div className="flex justify-between">
+                  <h3 className="text-body2 mb-4 text-black">Resume</h3>
+                  <Button
+                    variant="ghost"
+                    className="text-[#10B754] hover:bg-transparent"
+                    onClick={() => setCurrentStep("details")}
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="bg-[#F2F3F5] p-4 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white p-1 rounded">
+                      <img
+                        src={PdfFile || "/placeholder.svg"}
+                        alt="Pdf"
+                        className="w-5 h-5"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-body2">
+                        {candidateDetails.originalName}
+                      </p>
+                      {candidateDetails.resume_s3_url && (
+                        <a
+                          href={candidateDetails.resume_s3_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#10B754] hover:underline"
+                        >
+                          View Resume
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {hasScreeningQuestions && (
+                <div>
+                  <div className="flex justify-between">
+                    <h3 className="text-body2 mb-4 text-black">
                       Application Questions
                     </h3>
-                    <div className="bg-gray-50 p-4 rounded-lg max-h-[40vh] overflow-y-auto">
-                      {questionResponses.map((response, index) => (
+                    <Button
+                      variant="ghost"
+                      className="text-[#10B754] hover:bg-transparent"
+                      onClick={() => setCurrentStep("questions")}
+                    >
+                      <PencilIcon className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="bg-[#F2F3F5] p-6 rounded-lg">
+                    {questionResponses.map((response, index) => {
+                      const isMandatory =
+                        screeningQuestions[index]?.is_mandatory;
+
+                      return (
                         <div
                           key={index}
-                          className="mb-4 pb-4 border-b border-gray-200 last:border-0 last:mb-0 last:pb-0"
+                          className={
+                            index < questionResponses.length - 1 ? "mb-7" : ""
+                          }
                         >
-                          <p className="font-medium mb-1">
+                          <p className="text-sm text-[#68696B]">
+                            {isMandatory && (
+                              <span className="text-red-500">*</span>
+                            )}
                             {response.question}
                           </p>
-                          <p className="text-gray-700">
+                          <p className="text-body2 text-sm text-[#414447] pt-2">
                             {response.question_type === "yes_no"
                               ? response.answer === "yes"
                                 ? "Yes"
@@ -818,26 +1107,18 @@ export default function ApplicationModal({
                               : "No response"}
                           </p>
                         </div>
-                      ))}
-                      <Button
-                        variant="ghost"
-                        className="mt-2 text-blue-500 hover:text-blue-700"
-                        onClick={() => setCurrentStep("questions")}
-                      >
-                        Edit
-                      </Button>
-                    </div>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
-            {/* Error Message */}
-            {error && <div className="text-red-500 mb-4">{error}</div>}
-          </div>
-
-          {/* Footer Buttons */}
-          <div className="flex justify-between">
+        {/* Footer Buttons */}
+        {intialStep && (
+          <div className="flex justify-end gap-4 pt-6 border-t">
             {currentStep !== "details" ? (
               <Button variant="outline" onClick={handleBack}>
                 Back
@@ -863,15 +1144,8 @@ export default function ApplicationModal({
               </Button>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Resume Upload Modal */}
-      <ResumeUploadModal
-        isOpen={isResumeModalOpen}
-        onClose={() => setIsResumeModalOpen(false)}
-        onUpload={handleResumeUpload}
-      />
-    </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

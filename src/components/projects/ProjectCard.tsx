@@ -170,7 +170,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     if (!project.latest_interview_status.isCompleted) {
       return toast.error("Interview is not completed yet");
     }
-    navigate(`/skill/report/Project/${project.latest_interview_status.interview_id}`, {
+    navigate(`/project/report/${project.latest_interview_status.interview_id}`, {
       state: {
         best_interview: project.latest_interview_status.interview_id,
         fromInterviewCard: true,

@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import FullInterviews from "@/assets/employer/fullInterviews.svg";
 import { useGetInterviewStatsQuery } from "../../api/InterviewInvitation";
 
 interface FullInterviewsCardProps {
   jobId: string;
+  onRefetchAvailable?: (refetch: () => void) => void; // Add this prop
 }
 
 interface InterviewStatsResponse {
@@ -19,12 +21,17 @@ interface InterviewStatsResponse {
   }
 }
 
+export default function FullInterviewsCard({ jobId, onRefetchAvailable }: FullInterviewsCardProps) {
+  const { data, isLoading, error, refetch } = useGetInterviewStatsQuery(jobId);
+  
+  // Make refetch available to parent component
+  useEffect(() => {
+    if (onRefetchAvailable) {
+      onRefetchAvailable(refetch);
+    }
+  }, [refetch, onRefetchAvailable]);
 
-export default function FullInterviewsCard({ jobId }: FullInterviewsCardProps) {
-  const { data, isLoading, error } = useGetInterviewStatsQuery(jobId);
-  console.log("data",data);
-
-const typedData = data as unknown as InterviewStatsResponse;
+  const typedData = data as unknown as InterviewStatsResponse;
 
   const stats = typedData?.data?.stats?.fullInterviews || {
     invitesSent: 0,
@@ -33,14 +40,12 @@ const typedData = data as unknown as InterviewStatsResponse;
     completed: 0
   };
 
-  const totalAccepted = stats.accepted + stats.completed
+  const totalAccepted = stats.accepted + stats.completed;
 
-  const totalNotAccepted = stats.invitesSent - totalAccepted
-
-  console.log("stats",stats);
 
   return (
     <Card className="w-full max-w-md bg-white rounded-xl">
+      {/* Rest of component remains the same */}
       <div className="flex flex-row items-center gap-3 p-5 ">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#d2e9ff]">
           <img src={FullInterviews} alt="FullInterviews" className="w-5 h-5" />
@@ -73,7 +78,7 @@ const typedData = data as unknown as InterviewStatsResponse;
               Not Accepted
             </span>
             <span className="text-[#0c0f12] text-body2 font-semibold">
-              {isLoading ? 0 : totalNotAccepted}
+              {isLoading ? 0 : stats.notAccepted}
             </span>
           </div>
           <div className="flex justify-between items-center">

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { useNavigate } from "react-router-dom";
+import type { RootState } from "@/store/store";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useLoginMutation } from "@/api/authApiSlice";
 import { Button } from "@/components/elements/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,9 +24,13 @@ const Login: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const navigate = useNavigate();
+  const location = useLocation();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const queryParams = new URLSearchParams(location.search);
+  const jobApplication = queryParams.get("job_application");
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -69,9 +74,32 @@ const Login: React.FC = () => {
     if (isSuccess || token) {
       setIsLoading(false);
       if (user && user.experience_level === "") {
-        navigate("/setexperience");
+        navigate(
+          jobApplication
+            ? `/setexperience?job_application=${encodeURIComponent(
+                jobApplication
+              )}`
+            : "/setexperience"
+        );
       } else {
-        navigate("/");
+        if (jobApplication) {
+          try {
+            if (user && user?.goals?.length > 0) {
+              const jobUrl = new URL(decodeURIComponent(jobApplication));
+              const path = jobUrl.pathname + jobUrl.search + jobUrl.hash;
+              navigate(path);
+            } else {
+              navigate(
+                `/?job_application=${encodeURIComponent(jobApplication)}`
+              );
+            }
+          } catch (error) {
+            console.error("Invalid URL:", error);
+            navigate("/");
+          }
+        } else {
+          navigate("/");
+        }
       }
     }
   }, [isSuccess, token, user, navigate]);
@@ -100,7 +128,11 @@ const Login: React.FC = () => {
         <div className="w-full max-w-md bg-white rounded-lg p-8">
           {/* Back Button */}
           <div className="items-center gap-2 mb-6 hidden">
-            <img className="w-4 h-4" src={arrow} alt="Back Arrow" />
+            <img
+              className="w-4 h-4"
+              src={arrow || "/placeholder.svg"}
+              alt="Back Arrow"
+            />
             <button
               onClick={() => navigate("/")}
               className="text-sm text-black hover:text-green-600"
@@ -119,7 +151,15 @@ const Login: React.FC = () => {
                 New to EmployAbility.AI?{" "}
                 <button
                   type="button"
-                  onClick={() => navigate("/signup")}
+                  onClick={() =>
+                    navigate(
+                      jobApplication
+                        ? `/signup?job_application=${encodeURIComponent(
+                            jobApplication
+                          )}`
+                        : "/signup"
+                    )
+                  }
                   className="text-green-600 underline hover:text-green-800"
                 >
                   Sign up
@@ -151,7 +191,7 @@ const Login: React.FC = () => {
                 required
               />
               <img
-                src={Mail}
+                src={Mail || "/placeholder.svg"}
                 alt="Email Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />
@@ -170,7 +210,7 @@ const Login: React.FC = () => {
                 required
               />
               <img
-                src={Password}
+                src={Password || "/placeholder.svg"}
                 alt="Password Icon"
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
               />

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect,useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import type { RootState } from "@/store/store";
@@ -79,6 +79,7 @@ const CreateJobPage: React.FC = () => {
   const employer = useSelector(
     (state: RootState) => state.employerAuth.employer
   );
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
   const [createJob, { isLoading: isCreating }] = useCreateJobPostingMutation();
 
   // Check if employer data is available
@@ -88,6 +89,9 @@ const CreateJobPage: React.FC = () => {
         description: "Please log in to continue.",
       });
       navigate("/employer/login");
+    }
+    else if(!employer.company){
+      setShowCompanyModal(true)
     }
   }, [employer, navigate]);
 
@@ -192,6 +196,10 @@ const CreateJobPage: React.FC = () => {
     navigate("/employer/jobs");
   };
 
+  const handleCreateCompany = () => {
+    navigate("/employer/company/create");
+  };
+
   // Show loading state while checking employer data
   if (!employer) {
     return (
@@ -204,6 +212,35 @@ const CreateJobPage: React.FC = () => {
     );
   }
 
+
+  const CompanyModal = () => {
+    if (!showCompanyModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full">
+          <h2 className="text-2xl font-bold mb-4">Create Company Profile</h2>
+          <p className="mb-6">
+            You need to create a company profile before posting a job. This helps candidates learn about your organization.
+          </p>
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={() => navigate("/employer/jobs")}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateCompany}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Create Company Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
   // Get company logo if available
   let companyLogo = "";
   if (typeof employer.company === "object" && employer.company?.logo) {
@@ -217,6 +254,15 @@ const CreateJobPage: React.FC = () => {
     typeof employer?.company === "object" && employer?.company?.name
       ? employer?.company?.name
       : "Your Company";
+
+    
+      if (!employer.company) {
+        return (
+          <div className="min-h-screen bg-[#F5F5F5]">
+            <CompanyModal />
+          </div>
+        );
+      }
 
   return (
     <JobPostingPage

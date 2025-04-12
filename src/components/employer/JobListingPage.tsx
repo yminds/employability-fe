@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
@@ -84,6 +84,46 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
   const [interviewCount, setInterviewCount] = useState(0);
 
+  const fullInterviewsRefetchRef = useRef<(() => void) | null>(null);
+  const screeningInterviewsRefetchRef = useRef<(() => void) | null>(null);
+
+  const handleFullInterviewsRefetch = useCallback((refetch: () => void) => {
+    fullInterviewsRefetchRef.current = refetch;
+  }, []);
+
+  const handleScreeningInterviewsRefetch = useCallback(
+    (refetch: () => void) => {
+      screeningInterviewsRefetchRef.current = refetch;
+    },
+    []
+  );
+
+  const refreshInterviewStats = useCallback(() => {
+    // Refresh both cards
+    if (fullInterviewsRefetchRef.current) {
+      fullInterviewsRefetchRef.current();
+    }
+    if (screeningInterviewsRefetchRef.current) {
+      screeningInterviewsRefetchRef.current();
+    }
+
+    setSelectedCandidates([]);
+    setSelectAll(false);
+
+    if (interviewCandidatesResponse) {
+      const { refetch: refetchInterviewCandidates } =
+        useGetInterviewCandidatesQuery(
+          {
+            jobId: job_id,
+            filterStatus: [],
+            interviewScore: 0,
+          },
+          { skip: !job_id }
+        );
+      refetchInterviewCandidates();
+    }
+  }, [job_id]);
+
   // Other state variables
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -93,11 +133,21 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
-  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([]);
+  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>(
+    []
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSource, setSelectedSource] = useState("all");
   const [sortBy, setSortBy] = useState("matching");
-  
+  const [sourceCountsCache, setSourceCountsCache] = useState<{
+    employability: number;
+    uploaded: number;
+    job: number;
+    applicants: number;
+    all?: number;
+  }>({ employability: 0, uploaded: 0, job: 0, applicants: 0 });
+  const [isLoadingCandidates, setIsLoadingCandidates] = useState(false);
+
   // Background processing state
   const [isBackgroundProcessing, setIsBackgroundProcessing] = useState(false);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -119,11 +169,11 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     isLoading,
     error,
     refetch: refetchCandidates,
-    isSuccess:isCandidateSuccess
-  } = useGetMatchingCandidatesQuery({ 
-    job_id, 
-    source: selectedSource, 
-    sortBy 
+    isSuccess: isCandidateSuccess,
+  } = useGetMatchingCandidatesQuery({
+    job_id,
+    source: selectedSource,
+    sortBy,
   });
 
   const {
@@ -133,13 +183,37 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   } = useGetInterviewCandidatesQuery(
     {
       jobId: job_id,
-      filterStatus:[],
-      interviewScore:0
+      filterStatus: [],
+      interviewScore: 0,
     },
     {
       skip: !job_id,
     }
   );
+
+  const calculateSourceCounts = () => {
+    if (!matchingCandidatesResponse?.data) {
+      return { employability: 0, uploaded: 0, job: 0, applicants: 0 };
+    }
+
+    const allCandidates = matchingCandidatesResponse.data;
+
+    const counts = {
+      employability: allCandidates.filter(
+        (candidate: any) => candidate.source === "employability"
+      ).length,
+      uploaded: allCandidates.filter(
+        (candidate: any) => candidate.source === "uploaded"
+      ).length,
+      job: allCandidates.filter((candidate: any) => candidate.source === "job")
+        .length,
+      applicants: allCandidates.filter(
+        (candidate: any) => candidate.source === "applicants"
+      ).length,
+    };
+
+    return counts;
+  };
 
 
 
@@ -160,6 +234,53 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     }
   }, []);
 
+  // Cache source counts when we get "all" data or update specific source count
+useEffect(() => {
+  if (!matchingCandidatesResponse?.data) return;
+  
+  if (selectedSource === "all") {
+    // When we have "all" data, update the complete cache
+    const allCandidates = matchingCandidatesResponse.data;
+    
+    setSourceCountsCache({
+      employability: allCandidates.filter((candidate: any) => 
+        candidate.source === "employability").length,
+      uploaded: allCandidates.filter((candidate: any) => 
+        candidate.source === "uploaded").length,
+      job: allCandidates.filter((candidate: any) => 
+        candidate.source === "job").length,
+      applicants: allCandidates.filter((candidate: any) => 
+        candidate.source === "applicants").length,
+      all: allCandidates.length
+    });
+  } else {
+    // When a specific filter is active, update just that count
+    const filteredCount = matchingCandidatesResponse.data.length;
+    
+    setSourceCountsCache(prev => ({
+      ...prev,
+      [selectedSource]: filteredCount
+    }));
+  }
+}, [matchingCandidatesResponse?.data, selectedSource]);
+
+
+const sourceCounts = useMemo(() => {
+  
+  if (!matchingCandidatesResponse?.data) {
+    return sourceCountsCache;
+  }
+
+  if (selectedSource === "all") {
+    return calculateSourceCounts();
+  }
+  
+  return {
+    ...sourceCountsCache,
+    [selectedSource]: matchingCandidatesResponse.data.length
+  };
+}, [matchingCandidatesResponse?.data, selectedSource, sourceCountsCache]);
+
   // useEffect(() => {
   //   if(isCandidateSuccess){
   //     checkForBackgroundProcessing();
@@ -175,14 +296,12 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   //   };
   // }, [isCandidateSuccess, checkForBackgroundProcessing]);
 
-  
-
   // Start polling for updates when background processing is active
   const startPolling = useCallback(() => {
     // Reset polling counter
     pollingCountRef.current = 0;
     previousCompletedCountRef.current = null;
-    
+
     // Clear any existing interval
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
@@ -192,7 +311,6 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     // Set up a new polling interval
     const interval = setInterval(() => {
       pollingCountRef.current += 1;
-      
 
       if (pollingCountRef.current > maxPollingAttempts) {
         console.log("Max polling attempts reached. Stopping polling.");
@@ -200,34 +318,32 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
         return;
       }
 
-      if(isCandidateSuccess){
-        refetchCandidates().then(response => {
+      if (isCandidateSuccess) {
+        refetchCandidates().then((response) => {
           const currentData = response.data?.data || [];
           const currentJobResumes = currentData.filter(
             (candidate: any) => candidate.source === "job"
           ).length;
-  
-  
+
           if (previousCompletedCountRef.current === null) {
             previousCompletedCountRef.current = currentJobResumes;
             return;
           }
-  
-  
+
           if (currentJobResumes === previousCompletedCountRef.current) {
-         
             if (pollingCountRef.current % 3 === 0) {
-              console.log("Resume count stable for 15 seconds. Processing likely complete.");
+              console.log(
+                "Resume count stable for 15 seconds. Processing likely complete."
+              );
               stopPolling();
               return;
             }
           } else {
-  
             previousCompletedCountRef.current = currentJobResumes;
-  
+
             pollingCountRef.current = 0;
           }
-        }); 
+        });
       }
 
       // Also check if the processing flag has been cleared
@@ -251,33 +367,35 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     }, 5000); // Poll every 5 seconds
 
     pollingIntervalRef.current = interval;
-  }, [refetchCandidates,isCandidateSuccess]);
-
-  // Stop polling for updates
-  const stopPolling = useCallback((isUnmounting = false) => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
-    setIsBackgroundProcessing(false);
-    
-    // Remove the upload state from session storage to prevent restarting polling
-    sessionStorage.removeItem("resumeUploadState");
-    
-    // Only refetch if not unmounting and the query has been initialized
-    if (!isUnmounting && isCandidateSuccess) {
-      refetchCandidates();
-    }
-    
-    console.log("Polling stopped");
   }, [refetchCandidates, isCandidateSuccess]);
 
+  // Stop polling for updates
+  const stopPolling = useCallback(
+    (isUnmounting = false) => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      setIsBackgroundProcessing(false);
+
+      // Remove the upload state from session storage to prevent restarting polling
+      sessionStorage.removeItem("resumeUploadState");
+
+      // Only refetch if not unmounting and the query has been initialized
+      if (!isUnmounting && isCandidateSuccess) {
+        refetchCandidates();
+      }
+
+      console.log("Polling stopped");
+    },
+    [refetchCandidates, isCandidateSuccess]
+  );
 
   useEffect(() => {
-    if(isCandidateSuccess){
+    if (isCandidateSuccess) {
       checkForBackgroundProcessing();
     }
-    
+
     // Cleanup polling interval when component unmounts
     return () => {
       stopPolling(true); // Pass true to indicate unmounting
@@ -418,8 +536,21 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   };
 
   const handleSourceChange = (source: string) => {
+    if (source === selectedSource) return;
+    
+    setIsLoadingCandidates(true);
     setSelectedSource(source);
     setCurrentPage(1);
+    
+
+    if (isCandidateSuccess) {
+      refetchCandidates().finally(() => {
+        setIsLoadingCandidates(false);
+      });
+    } else {
+
+      setTimeout(() => setIsLoadingCandidates(false), 500);
+    }
   };
 
   const handleSortByChange = (sortBy: string) => {
@@ -434,6 +565,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
 
   const handleCloseInterviewModal = () => {
     setIsInterviewModalOpen(false);
+    setSelectedCandidates([]);
+    setSelectAll(false);
   };
 
   const handleOpenResumeModal = () => {
@@ -444,28 +577,45 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const handleModalContinue = (sourceFilter: string) => {
     // Switch to inviteCandidates tab
     setSelectedTab("inviteCandidates");
-    
-    // Set the source filter to show only resumes for this job
+
     setSelectedSource(sourceFilter);
-    
-    // Close the modal
+
     setIsModalOpen(false);
-    
-    if(isCandidateSuccess){
+
+    if (isCandidateSuccess) {
       refetchCandidates();
     }
-    
-    // Start polling for updates
-    setIsBackgroundProcessing(true);
-    startPolling();
+
+    const savedState = sessionStorage.getItem("resumeUploadState");
+    if (savedState) {
+      try {
+        const parsedState = JSON.parse(savedState);
+
+        if (parsedState.processingInBackground === true) {
+          setIsBackgroundProcessing(true);
+          startPolling();
+        } else {
+          setIsBackgroundProcessing(false);
+          stopPolling();
+        }
+      } catch (e) {
+        console.error("Failed to parse saved upload state");
+        sessionStorage.removeItem("resumeUploadState");
+        setIsBackgroundProcessing(false);
+      }
+    } else {
+      // No saved state means no background processing
+      setIsBackgroundProcessing(false);
+      stopPolling();
+    }
   };
 
   const handleResumesProcessed = (resumes: ProcessedResume[]) => {
     setProcessedResumes(resumes);
-    if(isCandidateSuccess){
+    if (isCandidateSuccess) {
       refetchCandidates();
     }
-    
+
     // If background processing was active, stop polling
     if (isBackgroundProcessing) {
       stopPolling();
@@ -531,7 +681,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
             <div className="bg-blue-50 p-3 rounded-lg flex items-center mb-4">
               <Loader2 className="h-5 w-5 text-blue-500 mr-2 animate-spin" />
               <p className="text-blue-700 text-sm">
-                Resumes are still being processed in the background. The candidate list will update automatically.
+                Resumes are still being processed in the background. The
+                candidate list will update automatically.
               </p>
             </div>
           )}
@@ -544,6 +695,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
               handleSourceChange={handleSourceChange}
               sortBy={sortBy}
               handleSortByChange={handleSortByChange}
+              sourceCounts={sourceCounts}
+              isLoadingCandidates={isLoadingCandidates}
             />
 
             <FilterPanel
@@ -552,10 +705,12 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
               onApply={handleFilterApply}
               selectedSource={selectedSource}
               onSourceChange={handleSourceChange}
+              sourceCounts={sourceCounts}
+              isLoadingCandidates={isLoadingCandidates}
             />
 
             <div className="h-[calc(100vh-235px)]">
-              {isLoading ? (
+              {isLoading || isLoadingCandidates ? (
                 <CandidateListSkeleton />
               ) : (
                 <CandidateList
@@ -623,16 +778,13 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           {/* Breadcrumb skeleton */}
           <div className="h-6 bg-gray-200 rounded w-1/3 mb-6 animate-pulse"></div>
 
-          
           <JobDetailsSkeleton />
 
           <div className="flex gap-6">
             <div className="flex-1 space-y-8">
-              
               <CandidateListSkeleton />
             </div>
 
-            
             <div className="w-[350px] mt-8 space-y-3.5 sticky top-5 h-fit">
               <CardSkeleton />
               <CardSkeleton />
@@ -664,7 +816,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
               : undefined
           }
           onViewDetails={() => {
-            navigate(`/employer/jobs/${job_id}/details`);
+            navigate(`/employer/jobs/edit/${job_id}`);
           }}
         />
 
@@ -691,8 +843,14 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
               </>
             ) : (
               <div className="w-[260px] space-y-3.5">
-                <FullInterviewsCard jobId={job_id} />
-                <ScreeningInterviewsCard jobId={job_id} />
+                <FullInterviewsCard
+                  jobId={job_id}
+                  onRefetchAvailable={handleFullInterviewsRefetch}
+                />
+                <ScreeningInterviewsCard
+                  jobId={job_id}
+                  onRefetchAvailable={handleScreeningInterviewsRefetch}
+                />
               </div>
             )}
           </div>
@@ -721,6 +879,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
         selectedCandidatesCount={selectedCandidates.length}
         selectedCandidates={getSelectedCandidateDetails()}
         jobId={job_id}
+        onSuccess={refreshInterviewStats}
       />
     </div>
   );

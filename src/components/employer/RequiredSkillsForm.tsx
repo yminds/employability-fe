@@ -91,6 +91,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   >([]);
   const [reasonings, setReasonings] = useState<Record<string, string>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const lastProcessedJDRef = useRef<string>("");
 
   // Create refs for each skill cell
   const skillRefs = useRef<React.RefObject<HTMLDivElement>[]>([]);
@@ -117,41 +118,67 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   const [getSkillSuggestions, { isLoading }] =
     useGetEmployerSkillSuggestionsMutation();
 
-
-    useEffect(() => {
-      if (shouldFetchRecommendations) {
-        setRecommendedSkills([]);
-      }
-    }, [shouldFetchRecommendations]);
-
-  // This is the key part: Only fetch when the parent component tells us to
+  // Clear recommended skills when shouldFetchRecommendations changes
   useEffect(() => {
-    // Only fetch if the flag is true and we're not already fetching
-    if (
-      shouldFetchRecommendations &&
-      !isFetching &&
-      jobDescription &&
-      jobDescription.trim() !== ""
-    ) {
-      console.log(
-        "Fetching skill recommendations based on parent's instruction"
-      );
-      setIsFetching(true);
-
-      fetchAISkillRecommendations()
-        .then(() => {
-          // Let the parent know we're done
-          if (onRecommendationsFetched) {
-            onRecommendationsFetched();
-          }
-          setIsFetching(false);
-        })
-        .catch((error) => {
-          console.error("Error fetching skill recommendations:", error);
-          setIsFetching(false);
-        });
+    if (shouldFetchRecommendations) {
+      setRecommendedSkills([]);
     }
-  }, [shouldFetchRecommendations, jobDescription,isFetching,onRecommendationsFetched]);
+  }, [shouldFetchRecommendations]);
+
+  // This is the key part: Fetch skill recommendations when needed
+  useEffect(() => {
+    const fetchSkillsIfNeeded = async () => {
+      // Only fetch if:
+      // 1. The flag is true
+      // 2. We're not already fetching
+      // 3. We have a job description
+      // 4. Either we've never processed this JD before OR the JD has changed significantly
+      if (
+        shouldFetchRecommendations &&
+        !isFetching && 
+        jobDescription &&
+        jobDescription.trim() !== ""
+      ) {
+        const currentJD = jobDescription.trim();
+        const lastJD = lastProcessedJDRef.current.trim();
+        
+        // Check if the JD has changed significantly
+        const hasSignificantChanges = 
+          currentJD !== lastJD &&
+          (lastJD.length === 0 ||
+           Math.abs(currentJD.length - lastJD.length) > 50 ||
+           !currentJD.includes(lastJD.substring(0, Math.min(100, lastJD.length))));
+        
+        if (lastJD.length === 0 || hasSignificantChanges) {
+          console.log("Fetching skill recommendations for new/changed job description");
+          setIsFetching(true);
+
+          try {
+            await fetchAISkillRecommendations();
+            
+            // Store the JD we just processed
+            lastProcessedJDRef.current = currentJD;
+            
+            // Let the parent know we're done
+            if (onRecommendationsFetched) {
+              onRecommendationsFetched();
+            }
+          } catch (error) {
+            console.error("Error fetching skill recommendations:", error);
+          } finally {
+            setIsFetching(false);
+          }
+        } else if (onRecommendationsFetched) {
+          // If JD hasn't changed significantly but parent is still requesting fetch,
+          // just notify them we're done (no need to refetch)
+          console.log("Job description hasn't changed significantly, skipping refetch");
+          onRecommendationsFetched();
+        }
+      }
+    };
+
+    fetchSkillsIfNeeded();
+  }, [shouldFetchRecommendations, jobDescription, isFetching, onRecommendationsFetched]);
 
   // Populate initial skills from AI recommendations
   useEffect(() => {

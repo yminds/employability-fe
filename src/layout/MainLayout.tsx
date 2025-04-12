@@ -12,6 +12,7 @@ import { cleanRecordingReference } from "@/store/slices/recorderSlice";
 import { useDispatch } from "react-redux";
 import useInterviewSetup from "@/hooks/useInterviewSetup";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import { current } from "@reduxjs/toolkit";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -53,6 +54,8 @@ const employerRoutes = [
   "/employer/jobs/edit/:jobId",
 ];
 
+const freeRoutes = ["/profile", "/job-post", "/signup", "/login"];
+const allfreeRoutes = [...freeRoutes, ...employerRoutes];
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -63,13 +66,36 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const account_status = user?.account_status;
   const dispatch = useDispatch();
 
+  const queryParams = new URLSearchParams(location.search);
+  const jobApplication = queryParams.get("job_application");
+
   const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 
   useEffect(() => {
     if (user && !experience_level) {
-      navigate("/setexperience");
+      navigate(
+        jobApplication
+          ? `/setexperience?job_application=${encodeURIComponent(
+              jobApplication
+            )}`
+          : "/setexperience"
+      );
     }
   }, [user, experience_level]);
+
+  const checkIsFreeRoute = (freeRoutes: string[]) => {
+    const currrentPath = window.location.pathname;
+    const response = freeRoutes.some((path: string) => {
+      if (currrentPath.includes(path)) return true;
+    });
+    return response;
+  };
+  useEffect(() => {
+    if (checkIsFreeRoute(allfreeRoutes)) return;
+    if (!user) {
+      navigate("/");
+    }
+  }, [user]);
 
   useEffect(() => {
     setIsDisabledModalOpen(account_status === "disabled");
@@ -82,6 +108,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const shouldDisplaySidebar = (): boolean => {
     const currentPath = location.pathname;
+
+    if (currentPath === "/job-post" || currentPath.startsWith("/job-post/")) {
+      return Boolean(user);
+    }
 
     const isNoHeaderRoute = noSidebarRoutes.some((route) => {
       return currentPath === route || currentPath.startsWith(route + "/");
