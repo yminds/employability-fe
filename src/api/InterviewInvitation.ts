@@ -38,6 +38,7 @@ export interface InterviewCandidate {
   shortlist: boolean;
   interview_id?: string;
   has_report: boolean;
+  username:string;
   report_id?: string;
   final_rating?: number;
   report_updated_at?: string;

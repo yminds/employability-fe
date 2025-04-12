@@ -45,12 +45,12 @@ interface JobPreviewSidebarProps {
 }
 
 const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
-  jobTitle = "Full Stack Developer",
-  companyName = "Acme Inc.",
-  location = "Bangalore, India",
-  jobType = "full-time",
-  workplaceType = "on-site",
-  experienceLevel = "mid-level",
+  jobTitle = "",
+  companyName = "",
+  location = "",
+  jobType = "",
+  workplaceType = "",
+  experienceLevel = "",
   description = "",
   skills = [],
   screeningQuestions = [],
@@ -270,7 +270,10 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
             </div>
             <div className="px-6 pb-6">
               {description ? (
-                <p className="text-body2 text-[#414447]">{description}</p>
+                <div 
+                  className="text-body2 text-[#414447] prose prose-sm sm:prose max-w-none job-description-preview"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                />
               ) : (
                 <p className="text-body2 text-[#68696b]">
                   No description provided
@@ -397,6 +400,58 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
           )}
         </div>
       )}
+
+      
+      <style jsx global>{`
+        /* Fixed list styles to ensure bullet points appear to the left of text */
+        .job-description-preview ul, 
+        .job-description-preview ol {
+          list-style-position: outside;
+          padding-left: 1.5rem;
+          margin: 1rem 0;
+        }
+        
+        .job-description-preview ul {
+          list-style-type: disc;
+        }
+        
+        .job-description-preview ol {
+          list-style-type: decimal;
+        }
+        
+        .job-description-preview li {
+          margin: 0.25rem 0;
+          padding-left: 0.5rem;
+          display: list-item;
+        }
+        
+        .job-description-preview li p {
+          margin: 0;
+          display: inline;
+        }
+        
+        /* Basic table styles */
+        .job-description-preview table {
+          border-collapse: collapse;
+          margin: 1rem 0;
+          width: 100%;
+        }
+        
+        .job-description-preview table td, 
+        .job-description-preview table th {
+          border: 1px solid #d1d5db;
+          padding: 0.5rem;
+        }
+        
+        .job-description-preview table th {
+          background-color: #f3f4f6;
+          font-weight: 500;
+        }
+        
+        .job-description-preview p {
+          margin: 1rem 0;
+        }
+      `}</style>
     </div>
   );
 };
