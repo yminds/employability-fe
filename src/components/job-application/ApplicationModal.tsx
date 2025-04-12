@@ -202,6 +202,13 @@ export default function ApplicationModal({
           candidateResponse.data.candidate._id
         ) {
           const candidate = candidateResponse.data.candidate;
+          let phone_number = candidate.contact?.phone;
+          if (
+            candidate.contact?.phone &&
+            !candidate.contact?.phone.startsWith("+91")
+          ) {
+            phone_number = "+91" + candidate.contact?.phone;
+          }
           setCandidateId(candidate._id);
 
           // Update candidate details from parsed resume
@@ -210,7 +217,7 @@ export default function ApplicationModal({
             name: candidate.name || "",
             contact: {
               email: candidate.contact?.email || "",
-              phone: candidate.contact?.phone || "",
+              phone: phone_number || "",
             },
             resume_s3_url: uploadedFileData.fileUrl,
             originalName: file.name,
@@ -522,6 +529,13 @@ export default function ApplicationModal({
     return `${(size / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const handleSignupAndApply = () => {
+    const currentUrl = window.location.href;
+    window.location.href = `/signup?job_application=${encodeURIComponent(
+      currentUrl
+    )}`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl p-8 gap-0 rounded-lg">
@@ -691,6 +705,7 @@ export default function ApplicationModal({
                     <Button
                       variant="outline"
                       className="w-full max-w-xs border border-[#000000] bg-white text-[#000000] text-button hover:bg-gray-50 py-3 h-auto"
+                      onClick={handleSignupAndApply}
                     >
                       Sign In
                     </Button>

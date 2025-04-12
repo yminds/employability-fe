@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 
@@ -11,12 +11,32 @@ const ProtectedOnboardingRoute: React.FC<ProtectedOnboardingRouteProps> = ({
   children,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const user = useSelector((state: RootState) => state.auth.user);
   const isPhoneVerified = user?.experience_level !== "";
 
+  const queryParams = new URLSearchParams(location.search);
+  const jobApplication = queryParams.get("job_application");
+
   useEffect(() => {
     if (user && isPhoneVerified) {
-      navigate("/");
+      if (jobApplication) {
+        try {
+          if (user && user?.goals?.length > 0) {
+            const jobUrl = new URL(decodeURIComponent(jobApplication));
+            const path = jobUrl.pathname + jobUrl.search + jobUrl.hash;
+            navigate(path);
+          } else {
+            navigate(`/?job_application=${encodeURIComponent(jobApplication)}`);
+          }
+        } catch (error) {
+          console.error("Invalid URL:", error);
+          navigate("/");
+        }
+      } else {
+        navigate("/");
+      }
     }
   }, [user, navigate]);
 

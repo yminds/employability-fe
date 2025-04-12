@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+"use client";
+
+import type React from "react";
+import { useState } from "react";
 import logo from "@/assets/branding/logo.svg";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import LevelOption from "@/components/setgoals/levels";
 import seniorLevelImg from "@/assets/set-goal/seniorLevel.png";
 import midLevelImg from "@/assets/set-goal/midLevel.png";
@@ -12,43 +15,52 @@ import grid from "@/assets/sign-up/grid.svg";
 import { useUpdateFirstTimeUserMutation } from "@/api/authApiSlice";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/features/authentication/authSlice";
-import { RootState } from "@/store/store";
- 
+import type { RootState } from "@/store/store";
+
 const ExperienceLevel: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
- 
+
   const [selectedLevel, setSelectedLevel] = useState<
     "" | "entry" | "mid" | "senior"
   >("");
   const [updateFirstTimeUser] = useUpdateFirstTimeUserMutation();
- 
+
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
- 
+
+  // Get job_application from URL if it exists
+  const queryParams = new URLSearchParams(location.search);
+  const jobApplication = queryParams.get("job_application");
+
   const handleSelection = async (level: "entry" | "mid" | "senior") => {
     setSelectedLevel(level);
     try {
-      // navigate("/addphone", { state: { experienceLevel: level } });
       const result = await updateFirstTimeUser({
         user_id: user?._id || "",
         experience_level: level || "",
       }).unwrap();
- 
+
       dispatch(
         setCredentials({
           user: result.user_info,
           accessToken: token,
         })
       );
+
       if (result) {
-        navigate("/");
+        if (jobApplication) {
+          navigate(`/?job_application=${encodeURIComponent(jobApplication)}`);
+        } else {
+          navigate("/");
+        }
       }
     } catch (error) {
       console.error("Failed to store experience level:", error);
     }
   };
- 
+
   return (
     <ProtectedOnboardingRoute>
       <main className="h-screen w-screen bg-white flex">
@@ -68,7 +80,7 @@ const ExperienceLevel: React.FC = () => {
             <img src={logo || "/placeholder.svg"} alt="Logo" />
           </div>
         </div>
- 
+
         {/* Right Section */}
         <div className="flex flex-col items-center flex-1 justify-center max-w-[846px]">
           <div className="rounded-lg w-full max-w-[500px]">
@@ -115,5 +127,5 @@ const ExperienceLevel: React.FC = () => {
     </ProtectedOnboardingRoute>
   );
 };
- 
+
 export default ExperienceLevel;
