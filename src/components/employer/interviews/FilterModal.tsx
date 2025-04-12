@@ -1,39 +1,65 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect } from "react"
-import { X, MapPin } from "lucide-react"
+import { MapPin, X } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
+import { InterviewType } from "../InterviewCandidatesView"
+
+interface FilterModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onApply: (filters: FilterValues) => void
+  initialValues?: FilterValues
+}
 
 interface Location {
   id: string
   name: string
 }
 
-interface FilterModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onApply: (filters: FilterValues) => void
-}
-
 export interface FilterValues {
-  interviewType: "full" | "screening"
+  interviewType: InterviewType
   submissionType: "submitted" | "not_submitted"
   interviewScore: number
   locations: Location[]
   workExperience: number
 }
 
-export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApply }) => {
-  const [interviewType, setInterviewType] = useState<"full" | "screening">("full")
-  const [submissionType, setSubmissionType] = useState<"submitted" | "not_submitted">("submitted")
-  const [interviewScore, setInterviewScore] = useState<number>(7)
-  const [workExperience, setWorkExperience] = useState<number>(10)
+export const FilterModal: React.FC<FilterModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onApply,
+  initialValues
+}) => {
+  const [interviewType, setInterviewType] = useState<InterviewType>(
+    initialValues?.interviewType || "full"
+  )
+  const [submissionType, setSubmissionType] = useState<"submitted" | "not_submitted">(
+    initialValues?.submissionType || "submitted"
+  )
+  const [interviewScore, setInterviewScore] = useState<number>(
+    initialValues?.interviewScore || 0
+  )
+  const [workExperience, setWorkExperience] = useState<number>(
+    initialValues?.workExperience || 0
+  )
   const [locationInput, setLocationInput] = useState<string>("")
-  const [selectedLocations, setSelectedLocations] = useState<Location[]>([{ id: "1", name: "Bangalore Urban" }])
+  const [selectedLocations, setSelectedLocations] = useState<Location[]>(
+    initialValues?.locations || [{ id: "1", name: "Bangalore Urban" }]
+  )
+
+  // Update local state when initialValues change
+  useEffect(() => {
+    if (initialValues) {
+      setInterviewType(initialValues.interviewType)
+      setSubmissionType(initialValues.submissionType)
+      setInterviewScore(initialValues.interviewScore)
+      setWorkExperience(initialValues.workExperience)
+      setSelectedLocations(initialValues.locations)
+    }
+  }, [initialValues])
 
   // Animation states
   const [mounted, setMounted] = useState(false)
@@ -100,6 +126,33 @@ export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApp
     setSelectedLocations(selectedLocations.filter((loc) => loc.id !== locationId))
   }
 
+  const handleAddLocation = (locationName: string) => {
+    if (!locationName.trim()) return;
+    
+    // Check if location already exists
+    if (selectedLocations.some(loc => loc.name.toLowerCase() === locationName.toLowerCase())) {
+      return;
+    }
+    
+    // Add new location
+    const newLocation = {
+      id: `custom-${Date.now()}`,
+      name: locationName.trim()
+    };
+    
+    setSelectedLocations([...selectedLocations, newLocation]);
+    setLocationInput("");
+  }
+
+  const handleSelectPredefinedLocation = (location: Location) => {
+    // Check if location is already selected
+    if (selectedLocations.some(loc => loc.id === location.id)) {
+      return;
+    }
+    
+    setSelectedLocations([...selectedLocations, location]);
+  }
+
   const handleApply = () => {
     onApply({
       interviewType,
@@ -144,7 +197,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApp
             <h3 className="text-base font-medium text-[#6a6a6a]">Interview Type</h3>
             <RadioGroup
               value={interviewType}
-              onValueChange={(value) => setInterviewType(value as "full" | "screening")}
+              onValueChange={(value) => setInterviewType(value as InterviewType)}
               className="flex gap-4"
             >
               <div
@@ -213,8 +266,8 @@ export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApp
             </div>
           </div>
 
-          {/* Locations */}
-          <div className="space-y-4">
+           {/* Locations */}
+           <div className="space-y-4">
             <h3 className="text-base font-medium text-[#6a6a6a]">Locations</h3>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6a6a6a] w-4 h-4" />
@@ -224,6 +277,12 @@ export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApp
                 className="w-full pl-10 pr-3 py-3 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#32a6f9]"
                 value={locationInput}
                 onChange={(e) => setLocationInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAddLocation(locationInput);
+                    e.preventDefault();
+                  }
+                }}
               />
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -238,15 +297,21 @@ export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApp
                   </button>
                 </div>
               ))}
-              {predefinedLocations.map((location) => (
-                <div key={location.id} className="px-3 py-2 bg-white border border-[#d9d9d9] rounded-md">
+              {predefinedLocations
+                .filter(loc => !selectedLocations.some(selected => selected.id === loc.id))
+                .map((location) => (
+                <div 
+                  key={location.id} 
+                  className="px-3 py-2 bg-white border border-[#d9d9d9] rounded-md cursor-pointer hover:border-[#32a6f9]"
+                  onClick={() => handleSelectPredefinedLocation(location)}
+                >
                   <span>{location.name}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Work Experience */}
+           {/* Work Experience */}
           <div className="space-y-4">
             <h3 className="text-base font-medium text-[#6a6a6a]">Work Experience</h3>
             <div className="pt-4">
@@ -280,4 +345,3 @@ export const FilterModal: React.FC<FilterModalProps> = ({ isOpen, onClose, onApp
     </div>
   )
 }
-

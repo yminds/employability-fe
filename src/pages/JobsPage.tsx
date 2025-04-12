@@ -280,7 +280,7 @@ const JobPage: React.FC = () => {
           closeModal={() => {
             setIsDetailsModalOpen(false);
           }}
-          goals={goalData}
+          goals={goals}
           goalId={selectedGoal}
         />
       ) : (

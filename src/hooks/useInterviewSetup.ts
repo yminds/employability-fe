@@ -165,14 +165,7 @@ const useInterviewSetup = () => {
         ...screenStream.getVideoTracks(),
         ...destination.stream.getAudioTracks(),
       ]);
-      // setGlobalReference({
-      //   screenStream,
-      //   micStream,
-      //   audioContext,
-      //   destination,
-      //   micSource,
-      //   systemAudioSource,
-      // });
+   
       globalReference.current = {
         screenStream,
         micStream,

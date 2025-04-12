@@ -27,6 +27,12 @@ interface ShortlistedCandidate {
   status: string;
 }
 
+interface ShortlistedCandidatesResponse {
+  data: ShortlistedCandidate[];
+  status: number;
+  message: string;
+}
+
 type SortOption = "recent" | "name_asc" | "name_desc";
 
 interface ShortlistedCandidateViewProps {
@@ -50,7 +56,13 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
   } = useGetShortlistedCandiatesQuery({
     jobId,
     sortBy: sortBy
-  });
+  }) as {
+    data:ShortlistedCandidatesResponse | undefined;
+    isLoading:boolean;
+    isFetching:boolean;
+    error:any;
+    refetch:()=> void;
+  }
 
   const candidates = shortlistedCandidatesResponse?.data || [];
 

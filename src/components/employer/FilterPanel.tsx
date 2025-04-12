@@ -1,4 +1,3 @@
-// FilterPanel.tsx
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,12 +12,16 @@ interface FilterPanelProps {
   isOpen: boolean;
   onReset: () => void;
   onApply: () => void;
+  selectedSource: string;
+  onSourceChange: (source: string) => void;
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
   isOpen,
   onReset,
   onApply,
+  selectedSource,
+  onSourceChange,
 }) => {
   if (!isOpen) return null;
 
@@ -26,9 +29,17 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     <div className="bg-white rounded-lg border border-[#d6d7d9] p-4 mb-4 text-body2">
       <div>
         <label className="text-sm font-medium block mb-2">Select sources</label>
-        <Select defaultValue="all">
+        <Select 
+          value={selectedSource} 
+          onValueChange={(value) => onSourceChange(value)}
+        >
           <SelectTrigger className="border-[#d6d7d9] bg-white">
-            <SelectValue placeholder="All Candidates" />
+            <SelectValue placeholder="All Candidates">
+              {selectedSource === "all" && "All Candidates"}
+              {selectedSource === "employability" && "Employability Pool"}
+              {selectedSource === "uploaded" && "All Uploaded Resumes"}
+              {selectedSource === "job" && "Resumes For this Job"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Candidates</SelectItem>

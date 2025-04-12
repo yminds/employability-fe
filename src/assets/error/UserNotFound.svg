@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <!-- Background circle -->
+  <ellipse cx="200" cy="150" rx="120" ry="90" fill="#e1f2ea" />
+  
+  <!-- Left "4" replaced with "U" -->
+  <g transform="translate(130, 150)">
+    <path d="M-20,-50 L20,-50 L20,0 L-20,50 L-20,-50" fill="none" stroke="#68696b" strokeWidth="1.5" />
+    <path d="M-20,0 L20,0" fill="none" stroke="#68696b" strokeWidth="1.5" />
+  </g>
+  
+  <!-- Sad face in the middle (same as 404 page) -->
+  <g transform="translate(200, 150)">
+    <circle cx="0" cy="0" r="40" fill="white" stroke="#68696b" strokeWidth="1.5" />
+    <g>
+      <!-- Eyes -->
+      <circle cx="-15" cy="-10" r="3" fill="#68696b" />
+      <circle cx="15" cy="-10" r="3" fill="#68696b" />
+      
+      <!-- Sad mouth (same as 404 page) -->
+      <path d="M-15,20 Q0,10 15,20" fill="none" stroke="#68696b" strokeWidth="1.5" />
+    </g>
+  </g>
+  
+  <!-- Right "4" replaced with "?" -->
+  <g transform="translate(270, 150)">
+    <path d="M-20,-50 C-20,-50 20,-50 20,-50 C20,-50 20,0 20,0 C20,0 0,0 0,0 C0,0 0,20 0,20" fill="none" stroke="#68696b" strokeWidth="1.5" />
+    <circle cx="0" cy="35" r="3" fill="#68696b" />
+  </g>
+  
+  <!-- Tools at bottom (same as 404 page) -->
+  <g transform="translate(150, 230)">
+    <path d="M0,0 L60,0 L55,10 L5,10 Z" fill="#d9d9d9" stroke="#68696b" strokeWidth="1" />
+    <rect x="25" y="10" width="10" height="30" fill="#d9d9d9" stroke="#68696b" strokeWidth="1" />
+  </g>
+  
+  <g transform="translate(230, 230)">
+    <path d="M0,5 L10,0 L20,5 L20,15 L10,20 L0,15 Z" fill="#d9d9d9" stroke="#68696b" strokeWidth="1" />
+    <rect x="5" y="15" width="10" height="20" fill="#d9d9d9" stroke="#68696b" strokeWidth="1" />
+  </g>
+</svg>

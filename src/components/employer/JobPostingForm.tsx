@@ -112,18 +112,12 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
   // Preview state
   const [previewExpanded, setPreviewExpanded] = useState(false);
 
-  // Track if we should fetch skill recommendations
-  // If we're in edit mode and have skills already, don't fetch on first load
   const [shouldFetchSkills, setShouldFetchSkills] = useState(
     !initialData?.isEditMode || initialData?.skills_required?.length === 0
   );
-
-  // Remember the last job description we used to fetch skills
   const lastJobDescriptionRef = useRef(formData.description);
 
-  // Handle form data change - track when job description changes
   const handleFormDataChange = (updatedData: any) => {
-    // If the description changes, set the flag to fetch skills
     if (
       "description" in updatedData &&
       updatedData.description !== formData.description
@@ -142,6 +136,7 @@ const JobPostingPage: React.FC<JobPostingPageProps> = ({
         console.log(
           "Job description changed significantly, will fetch new skills recommendations"
         );
+        setSelectedSkills([]);
         setShouldFetchSkills(true);
       }
     }

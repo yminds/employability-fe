@@ -9,15 +9,25 @@ import useScrollToTop from "./hooks/useScrollTop.ts";
 import type { Role } from "./models/Role";
 
 // Components
-const NotFound = lazy(() => import("@/components/app/NotFound"))
-const ProtectedRoute = lazy(() => import("./features/authentication/ProtectedRoute.tsx"))
-const JobDetailsPage = lazy(() => import("./components/employer/JobDetailsDialog.tsx"))
-const CompanyForm = lazy(() => import("./components/employer/CompanyForm.tsx"))
-const CreateJobPage = lazy(() => import("./pages/CreateJobPage.tsx"))
-const EmployerJobsPage = lazy(() => import("./pages/EmployerJobsPage.tsx"))
-const EmployerCandidatesPage = lazy(() => import("./pages/EmployerCandidatesPages.tsx"))
-const JobListingPage = lazy(() => import("./components/employer/JobListingPage.tsx"))
-const JobListingContainer = lazy(() => import("./components/employer/JobListingContainer.tsx"))
+const NotFound = lazy(() => import("@/components/app/NotFound"));
+const ProtectedRoute = lazy(
+  () => import("./features/authentication/ProtectedRoute.tsx")
+);
+const JobDetailsPage = lazy(
+  () => import("./components/employer/JobDetailsDialog.tsx")
+);
+const CompanyForm = lazy(() => import("./components/employer/CompanyForm.tsx"));
+const CreateJobPage = lazy(() => import("./pages/CreateJobPage.tsx"));
+const EmployerJobsPage = lazy(() => import("./pages/EmployerJobsPage.tsx"));
+const EmployerCandidatesPage = lazy(
+  () => import("./pages/EmployerCandidatesPages.tsx")
+);
+const JobListingPage = lazy(
+  () => import("./components/employer/JobListingPage.tsx")
+);
+const JobListingContainer = lazy(
+  () => import("./components/employer/JobListingContainer.tsx")
+);
 import EditJobPage from "./pages/EditJobPage.tsx";
 import InterviewInvitationHandler from "./components/employer/InterviewInvitationHandler.tsx";
 
@@ -48,9 +58,7 @@ const Candidate = lazy(() => import("./pages/Candidate.tsx"));
 const UserPublicProfilePage = lazy(
   () => import("./pages/UserPublicProfilePage.tsx")
 );
-const MockInterviewsPage = lazy(
-  () => import("./pages/MockInterviews.tsx")
-);
+const MockInterviewsPage = lazy(() => import("./pages/MockInterviews.tsx"));
 
 const MockReportPage = lazy(() => import("./pages/MockReportPage.tsx"));
 const ReportPage = lazy(() => import("./pages/SkillsReportPage.tsx"));
@@ -63,7 +71,10 @@ const EmployerNotFound = lazy(
 );
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
 const InterviewsPage = lazy(() => import("./pages/InterviewsPage.tsx"));
-const EmployerInterviewInvitaion = lazy(() => import("./pages/EmployerInterviewInvitation.tsx"));
+const EmployerInterviewInvitaion = lazy(
+  () => import("./pages/EmployerInterviewInvitation.tsx")
+);
+const JobPostingPage = lazy(() => import("./pages/JobPostingPage.tsx"));
 
 interface RouteConfig {
   route: string;
@@ -131,28 +142,28 @@ export const routes: RouteConfig[] = [
     component: <EmployerDashboard />,
   },
   {
-    route:"/employer/jobs",
-    component:<EmployerJobsPage/>
+    route: "/employer/jobs",
+    component: <EmployerJobsPage />,
   },
   {
-    route:"/employer/candidates",
-    component:<EmployerCandidatesPage/>
+    route: "/employer/candidates",
+    component: <EmployerCandidatesPage />,
   },
   {
-    route:"/employer/jobs/:jobId",
-    component:<JobListingContainer/>
+    route: "/employer/jobs/:jobId",
+    component: <JobListingContainer />,
   },
   {
-    route:"/employer/jobs/edit/:jobId",
-    component:<EditJobPage/>
+    route: "/employer/jobs/edit/:jobId",
+    component: <EditJobPage />,
   },
   {
-    route:"/employer/company/create",
-    component:<CompanyForm/>
+    route: "/employer/company/create",
+    component: <CompanyForm />,
   },
   {
-    route:"/employer/jobs/create",
-    component:<CreateJobPage/>
+    route: "/employer/jobs/create",
+    component: <CreateJobPage />,
   },
   {
     route: "/invitation/:inviteId",
@@ -160,7 +171,7 @@ export const routes: RouteConfig[] = [
   },
   {
     route: "/invitations/:inviteId",
-    component: <EmployerInterviewInvitaion />
+    component: <EmployerInterviewInvitaion />,
   },
   // {
   //   route:"/employer/",
@@ -257,7 +268,11 @@ export const routes: RouteConfig[] = [
   {
     route: "/skill-report/:id/:id/:id",
     component: <MockReportPage isSharedReport={true} />,
-  },   
+  },
+  {
+    route: "/job-post/:jobId",
+    component: <JobPostingPage />,
+  },
 ];
 
 const renderRoutes = (routesArray: RouteConfig[]) => {

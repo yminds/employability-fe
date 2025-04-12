@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 import {
   useGetMatchingCandidatesQuery,
@@ -28,7 +29,7 @@ interface JobListingPageProps {
   job_id: string;
 }
 
-// Skeleton components for different parts of the page
+// Skeleton components - remain the same...
 const JobDetailsSkeleton = () => (
   <div className="bg-white rounded-lg p-6 mb-6 animate-pulse">
     <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -92,12 +93,17 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
-  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>(
-    []
-  );
+  const [processedResumes, setProcessedResumes] = useState<ProcessedResume[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSource, setSelectedSource] = useState("all");
   const [sortBy, setSortBy] = useState("matching");
+  
+  // Background processing state
+  const [isBackgroundProcessing, setIsBackgroundProcessing] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingCountRef = useRef(0);
+  const maxPollingAttempts = 30; // 5 seconds x 30 = 150 seconds (2.5 minutes) max polling time
+  const previousCompletedCountRef = useRef<number | null>(null);
 
   const handleCandidateCountChange = (count: number) => {
     setInterviewCount(count);
@@ -113,7 +119,12 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     isLoading,
     error,
     refetch: refetchCandidates,
-  } = useGetMatchingCandidatesQuery({ job_id, source: selectedSource, sortBy });
+    isSuccess:isCandidateSuccess
+  } = useGetMatchingCandidatesQuery({ 
+    job_id, 
+    source: selectedSource, 
+    sortBy 
+  });
 
   const {
     data: interviewCandidatesResponse,
@@ -122,11 +133,156 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   } = useGetInterviewCandidatesQuery(
     {
       jobId: job_id,
+      filterStatus:[],
+      interviewScore:0
     },
     {
       skip: !job_id,
     }
   );
+
+
+
+  // Function to check if there's background processing happening
+  const checkForBackgroundProcessing = useCallback(() => {
+    const savedState = sessionStorage.getItem("resumeUploadState");
+    if (savedState && isCandidateSuccess) {
+      try {
+        const parsedState = JSON.parse(savedState);
+        if (parsedState.processingInBackground) {
+          setIsBackgroundProcessing(true);
+          startPolling();
+        }
+      } catch (e) {
+        console.error("Failed to parse saved upload state");
+        sessionStorage.removeItem("resumeUploadState");
+      }
+    }
+  }, []);
+
+  // useEffect(() => {
+  //   if(isCandidateSuccess){
+  //     checkForBackgroundProcessing();
+  //   }
+  //   // Cleanup polling interval when component unmounts
+  //   return () => {
+  //     if (pollingIntervalRef.current) {
+  //       clearInterval(pollingIntervalRef.current);
+  //       pollingIntervalRef.current = null;
+  //     }
+  //     setIsBackgroundProcessing(false);
+  //     // DO NOT call refetchCandidates() during cleanup!
+  //   };
+  // }, [isCandidateSuccess, checkForBackgroundProcessing]);
+
+  
+
+  // Start polling for updates when background processing is active
+  const startPolling = useCallback(() => {
+    // Reset polling counter
+    pollingCountRef.current = 0;
+    previousCompletedCountRef.current = null;
+    
+    // Clear any existing interval
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+
+    // Set up a new polling interval
+    const interval = setInterval(() => {
+      pollingCountRef.current += 1;
+      
+
+      if (pollingCountRef.current > maxPollingAttempts) {
+        console.log("Max polling attempts reached. Stopping polling.");
+        stopPolling();
+        return;
+      }
+
+      if(isCandidateSuccess){
+        refetchCandidates().then(response => {
+          const currentData = response.data?.data || [];
+          const currentJobResumes = currentData.filter(
+            (candidate: any) => candidate.source === "job"
+          ).length;
+  
+  
+          if (previousCompletedCountRef.current === null) {
+            previousCompletedCountRef.current = currentJobResumes;
+            return;
+          }
+  
+  
+          if (currentJobResumes === previousCompletedCountRef.current) {
+         
+            if (pollingCountRef.current % 3 === 0) {
+              console.log("Resume count stable for 15 seconds. Processing likely complete.");
+              stopPolling();
+              return;
+            }
+          } else {
+  
+            previousCompletedCountRef.current = currentJobResumes;
+  
+            pollingCountRef.current = 0;
+          }
+        }); 
+      }
+
+      // Also check if the processing flag has been cleared
+      const savedState = sessionStorage.getItem("resumeUploadState");
+      if (!savedState) {
+        console.log("Upload state removed. Stopping polling.");
+        stopPolling();
+        return;
+      }
+
+      try {
+        const parsedState = JSON.parse(savedState);
+        if (!parsedState.processingInBackground) {
+          console.log("Processing no longer in background. Stopping polling.");
+          stopPolling();
+        }
+      } catch (e) {
+        console.error("Failed to parse saved upload state");
+        stopPolling();
+      }
+    }, 5000); // Poll every 5 seconds
+
+    pollingIntervalRef.current = interval;
+  }, [refetchCandidates,isCandidateSuccess]);
+
+  // Stop polling for updates
+  const stopPolling = useCallback((isUnmounting = false) => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    setIsBackgroundProcessing(false);
+    
+    // Remove the upload state from session storage to prevent restarting polling
+    sessionStorage.removeItem("resumeUploadState");
+    
+    // Only refetch if not unmounting and the query has been initialized
+    if (!isUnmounting && isCandidateSuccess) {
+      refetchCandidates();
+    }
+    
+    console.log("Polling stopped");
+  }, [refetchCandidates, isCandidateSuccess]);
+
+
+  useEffect(() => {
+    if(isCandidateSuccess){
+      checkForBackgroundProcessing();
+    }
+    
+    // Cleanup polling interval when component unmounts
+    return () => {
+      stopPolling(true); // Pass true to indicate unmounting
+    };
+  }, [isCandidateSuccess, checkForBackgroundProcessing, stopPolling]);
 
   // Calculate interview count and determine initial tab when data is available
   useEffect(() => {
@@ -208,7 +364,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     setSelectAll(allSelected);
   }, [currentCandidates, selectedCandidates]);
 
-  // Other handlers (simplified for brevity)
+  // Other handlers remain the same...
   const handleSelectAllCurrentPage = (checked: boolean) => {
     if (checked) {
       const currentIds = currentCandidates.map(
@@ -284,9 +440,36 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     setIsModalOpen(true);
   };
 
+  // Handler for the Continue button in ResumeUploadModal
+  const handleModalContinue = (sourceFilter: string) => {
+    // Switch to inviteCandidates tab
+    setSelectedTab("inviteCandidates");
+    
+    // Set the source filter to show only resumes for this job
+    setSelectedSource(sourceFilter);
+    
+    // Close the modal
+    setIsModalOpen(false);
+    
+    if(isCandidateSuccess){
+      refetchCandidates();
+    }
+    
+    // Start polling for updates
+    setIsBackgroundProcessing(true);
+    startPolling();
+  };
+
   const handleResumesProcessed = (resumes: ProcessedResume[]) => {
     setProcessedResumes(resumes);
-    refetchCandidates();
+    if(isCandidateSuccess){
+      refetchCandidates();
+    }
+    
+    // If background processing was active, stop polling
+    if (isBackgroundProcessing) {
+      stopPolling();
+    }
   };
 
   const handleSelectCandidates = (candidateIds: string[]) => {
@@ -297,7 +480,9 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   };
 
   const handleFilterReset = () => {
-    console.log("Resetting filters");
+    setSelectedSource("all");
+    setSearchTerm("");
+    setSortBy("matching");
   };
 
   const handleFilterApply = () => {
@@ -341,6 +526,16 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
             )}
           </div>
 
+          {/* Background processing notification */}
+          {isBackgroundProcessing && selectedSource === "job" && (
+            <div className="bg-blue-50 p-3 rounded-lg flex items-center mb-4">
+              <Loader2 className="h-5 w-5 text-blue-500 mr-2 animate-spin" />
+              <p className="text-blue-700 text-sm">
+                Resumes are still being processed in the background. The candidate list will update automatically.
+              </p>
+            </div>
+          )}
+
           <div className="sticky top-[50px] z-10 bg-white p-6 rounded-[12px]">
             <SearchAndFilters
               searchTerm={searchTerm}
@@ -355,6 +550,8 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
               isOpen={filterOpen}
               onReset={handleFilterReset}
               onApply={handleFilterApply}
+              selectedSource={selectedSource}
+              onSourceChange={handleSourceChange}
             />
 
             <div className="h-[calc(100vh-235px)]">
@@ -514,6 +711,7 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
           companyId={typeof companyId === "string" ? companyId : companyId?._id}
           onResumesProcessed={handleResumesProcessed}
           onSelectCandidates={handleSelectCandidates}
+          onContinue={handleModalContinue}
         />
       )}
 
