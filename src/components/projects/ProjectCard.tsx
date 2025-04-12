@@ -134,7 +134,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const getActionConfig = (status: ProjectStatus) => {
     const configs = {
       Verified: "Improve score",
-      "In-review": "view status",
+      "In-review": "View status",
       Unverified: "Verify Project",
       Incomplete: "Complete Project",
     };
@@ -196,7 +196,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full md:items-start sm:items-start">
+        <div className="flex items-center justify-between gap-3 flex-1 md:flex-col sm:flex-col md:gap-4 sm:gap-4 md:w-full sm:w-full md:items-start sm:items-start  ">
           <div className="flex flex-col gap-4 md:w-full sm:w-full">
             <div className="flex justify-between items-center w-full">
               <h2 className="text-[#1f2226] text-sub-header">{project.name}</h2>
@@ -292,7 +292,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               </Button>
 
               <Button
-                className="border-[#68696B] text-[#68696B] text-body2 justify-center md:w-full sm:w-full"
+                className="border-[#68696B] min-w-40 text-[#68696B] text-body2 justify-center md:w-full sm:w-full"
                 variant="outline"
                 onClick={
                   project.status === "Incomplete"
