@@ -2,6 +2,13 @@ import { PencilIcon } from "lucide-react";
 import { ActivelySeekingJobsSVG } from "../SVG/ActivelySeekingJobsSVG";
 import PdfFile from "@/assets/job-posting/pdfFile.svg";
 
+interface FormattedAnswer {
+  question_id: string;
+  question: string;
+  question_type: string;
+  answer: string;
+}
+
 interface ReviewSubmitStepProps {
   userData: {
     name: string;
@@ -14,7 +21,7 @@ interface ReviewSubmitStepProps {
     profileImage?: string;
     resume_s3_url?: string;
   };
-  applicationData: Record<string, string>;
+  applicationData: Record<string, string> | FormattedAnswer[];
   screeningQuestions: Array<{
     _id: string;
     question: string;
@@ -44,6 +51,18 @@ export default function ReviewSubmitStep({
     (userData.resume_s3_url
       ? createUserFriendlyResumeName(userData.name)
       : "No resume uploaded");
+
+  const getAnswerForQuestion = (questionId: string): string => {
+    if (Array.isArray(applicationData)) {
+      const questionData = applicationData.find(
+        (item) => item.question_id === questionId
+      );
+      return questionData?.answer || "Not answered";
+    }
+    else {
+      return applicationData[questionId] || "Not answered";
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -135,38 +154,40 @@ export default function ReviewSubmitStep({
         </div>
       </div>
 
-      {/* Application Questions Section */}
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-body2">Application Questions</h3>
-        </div>
+      {/* Application Questions Section - Only show if there are questions */}
+      {screeningQuestions && screeningQuestions.length > 0 && (
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-body2">Application Questions</h3>
+          </div>
 
-        <div className="bg-[#F2F3F5] p-6 rounded-lg relative">
-          {/* Edit Button */}
-          <button
-            className="absolute top-4 right-4 text-[#10B754] hover:bg-gray-100 p-1 rounded-full"
-            aria-label="Edit application questions"
-            onClick={() => onEditSection("questions")}
-          >
-            <PencilIcon className="w-4 h-4" />
-          </button>
-          <div className="space-y-4">
-            {screeningQuestions.map((question) => (
-              <div key={question._id}>
-                <p className="text-sm text-[#68696B]">
-                  {question.is_mandatory && (
-                    <span className="text-red-500">*</span>
-                  )}
-                  {question.question}
-                </p>
-                <p className="text-body2 text-sm text-[#414447] pt-2">
-                  {applicationData[question._id] || "Not answered"}
-                </p>
-              </div>
-            ))}
+          <div className="bg-[#F2F3F5] p-6 rounded-lg relative">
+            {/* Edit Button */}
+            <button
+              className="absolute top-4 right-4 text-[#10B754] hover:bg-gray-100 p-1 rounded-full"
+              aria-label="Edit application questions"
+              onClick={() => onEditSection("questions")}
+            >
+              <PencilIcon className="w-4 h-4" />
+            </button>
+            <div className="space-y-4">
+              {screeningQuestions.map((question) => (
+                <div key={question._id}>
+                  <p className="text-sm text-[#68696B]">
+                    {question.is_mandatory && (
+                      <span className="text-red-500">*</span>
+                    )}
+                    {question.question}
+                  </p>
+                  <p className="text-body2 text-sm text-[#414447] pt-2">
+                    {getAnswerForQuestion(question._id)}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

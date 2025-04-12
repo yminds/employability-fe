@@ -9,6 +9,15 @@ import {
   useGetStatesQuery,
 } from "@/api/locationApiSlice";
 import CompleteProfileModal from "@/components/modal/CompleteProfileModal";
+import { useCreateScreeningResponseMutation } from "@/api/screeningResponseApiSlice";
+import { useSaveJobToUserMutation } from "@/api/employabilityJobApiSlice";
+
+interface FormattedAnswer {
+  question_id: string;
+  question: string;
+  question_type: string;
+  answer: string;
+}
 
 interface StepperModalProps {
   isOpen: boolean;
@@ -29,6 +38,9 @@ export default function StepperModal({
 }: StepperModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [applicationData, setApplicationData] = useState({});
+  const [formattedApplicationData, setFormattedApplicationData] = useState<
+    FormattedAnswer[]
+  >([]);
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [previousStep, setPreviousStep] = useState<number | null>(null);
   const [resumeData, setResumeData] = useState({
@@ -37,6 +49,9 @@ export default function StepperModal({
   });
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [createScreeningResponse] = useCreateScreeningResponseMutation();
+  const [saveJob] = useSaveJobToUserMutation();
+
   const goalId = user?.goals?.[0]?._id || "";
 
   const ScreeningQuestions = jobDetails.screening_questions;
@@ -69,15 +84,31 @@ export default function StepperModal({
   };
 
   const handleNext = () => {
-    if (currentStep === 2) {
+    if (
+      currentStep === 2 &&
+      ScreeningQuestions &&
+      ScreeningQuestions.length > 0
+    ) {
       // @ts-ignore - Access the validation method exposed by ApplicationQuestionsStep
       const isValid = window.validateApplicationQuestions?.();
       if (!isValid) {
         return;
       }
+
+      // Get the formatted application data
+      // @ts-ignore
+      if (window.formattedApplicationData) {
+        // @ts-ignore
+        setFormattedApplicationData(window.formattedApplicationData);
+      }
     }
 
-    if (currentStep < 3) {
+    if (
+      currentStep === 1 &&
+      (!ScreeningQuestions || ScreeningQuestions.length === 0)
+    ) {
+      setCurrentStep(3);
+    } else if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -87,17 +118,26 @@ export default function StepperModal({
       setCurrentStep(3);
       setEditingSection(null);
       setPreviousStep(null);
+    } else if (
+      currentStep === 3 &&
+      (!ScreeningQuestions || ScreeningQuestions.length === 0)
+    ) {
+      setCurrentStep(1);
     } else if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Submitting application", {
-      userDetails,
-      applicationData,
-      jobId,
-    });
+  const handleSubmit = async () => {
+    const screeningData = {
+      user_id: userDetails.userId,
+      job_id: jobId,
+      responses: formattedApplicationData,
+      status: "completed",
+      completed_at: new Date().toISOString(),
+    };
+    await createScreeningResponse(screeningData).unwrap();
+    await saveJob({ userId: userDetails.userId, jobId: jobId }).unwrap();
     onClose();
   };
 
@@ -125,6 +165,11 @@ export default function StepperModal({
   const getNextButtonText = () => {
     if (currentStep === 3) return "Submit Application";
     if (previousStep === 3) return "Save Changes";
+    if (
+      currentStep === 1 &&
+      (!ScreeningQuestions || ScreeningQuestions.length === 0)
+    )
+      return "Review Application";
     return "Next";
   };
 
@@ -138,7 +183,7 @@ export default function StepperModal({
 
           {/* Stepper Header */}
           <div className="px-8 pt-4 pb-8">
-            <div className="flex items-center">
+            <div className="flex items-center gap-10">
               <div className="flex items-center">
                 <div
                   className={`rounded-full h-5 w-5 flex items-center justify-center text-[11px] ${
@@ -157,37 +202,49 @@ export default function StepperModal({
                   Your Details
                 </span>
               </div>
-              <div className="flex-grow mx-2 h-[1px] bg-gray-200"></div>
+
+              {ScreeningQuestions && ScreeningQuestions.length > 0 && (
+                <div className="flex items-center">
+                  <div
+                    className={`rounded-full h-5 w-5 flex items-center justify-center text-[11px] ${
+                      currentStep >= 2
+                        ? "bg-[#10B754] text-white"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    {currentStep > 2 ? <Check className="h-3 w-3" /> : 2}
+                  </div>
+                  <span
+                    className={`ml-2 text-sm text-body2 ${
+                      currentStep >= 2
+                        ? "text-[#10B754] font-medium"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    Application Questions
+                  </span>
+                </div>
+              )}
+
               <div className="flex items-center">
                 <div
                   className={`rounded-full h-5 w-5 flex items-center justify-center text-[11px] ${
-                    currentStep >= 2 ? "bg-[#10B754] text-white" : "bg-gray-200"
+                    currentStep >=
+                    (ScreeningQuestions && ScreeningQuestions.length > 0
+                      ? 3
+                      : 2)
+                      ? "bg-[#10B754] text-white"
+                      : "bg-gray-200"
                   }`}
                 >
-                  {currentStep > 2 ? <Check className="h-3 w-3" /> : 2}
+                  {ScreeningQuestions && ScreeningQuestions.length > 0 ? 3 : 2}
                 </div>
                 <span
                   className={`ml-2 text-sm text-body2 ${
-                    currentStep >= 2
-                      ? "text-[#10B754] font-medium"
-                      : "text-gray-500"
-                  }`}
-                >
-                  Application Questions
-                </span>
-              </div>
-              <div className="flex-grow mx-2 h-[1px] bg-gray-200"></div>
-              <div className="flex items-center">
-                <div
-                  className={`rounded-full h-5 w-5 flex items-center justify-center text-[11px] ${
-                    currentStep >= 3 ? "bg-[#10B754] text-white" : "bg-gray-200"
-                  }`}
-                >
-                  3
-                </div>
-                <span
-                  className={`ml-2 text-sm text-body2 ${
-                    currentStep >= 3
+                    currentStep >=
+                    (ScreeningQuestions && ScreeningQuestions.length > 0
+                      ? 3
+                      : 2)
                       ? "text-[#10B754] font-medium"
                       : "text-gray-500"
                   }`}
@@ -208,18 +265,24 @@ export default function StepperModal({
               onUpdateResume={handleResumeUpdate}
             />
           )}
-          {currentStep === 2 && (
-            <ApplicationQuestionsStep
-              screeningQuestions={ScreeningQuestions}
-              applicationData={applicationData}
-              updateApplicationData={updateApplicationData}
-            />
-          )}
+          {currentStep === 2 &&
+            ScreeningQuestions &&
+            ScreeningQuestions.length > 0 && (
+              <ApplicationQuestionsStep
+                screeningQuestions={ScreeningQuestions}
+                applicationData={applicationData}
+                updateApplicationData={updateApplicationData}
+              />
+            )}
           {currentStep === 3 && (
             <ReviewSubmitStep
               userData={userDetails}
-              applicationData={applicationData}
-              screeningQuestions={ScreeningQuestions}
+              applicationData={
+                formattedApplicationData.length > 0
+                  ? formattedApplicationData
+                  : applicationData
+              }
+              screeningQuestions={ScreeningQuestions || []}
               onEditSection={handleEditSection}
             />
           )}

@@ -60,6 +60,7 @@ const InputComponent = React.forwardRef<
       "placeholder:text-gray-400",
       className
     )}
+    placeholder="Enter phone number"
     {...props}
     ref={ref}
   />
