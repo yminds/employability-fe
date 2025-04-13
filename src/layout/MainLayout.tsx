@@ -64,27 +64,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const queryParams = new URLSearchParams(location.search);
   let jobApplication = queryParams.get("job_application");
 
-  const stateParam = queryParams.get("state");
   const currentPath = location.pathname;
-
   if (
-    !jobApplication &&
-    stateParam &&
-    (currentPath === "/auth/github/callback" ||
-      currentPath === "/auth/linkedin/callback")
+    currentPath === "/auth/github/callback" ||
+    currentPath === "/auth/linkedin/callback"
   ) {
-    try {
-      const stateObj = JSON.parse(atob(stateParam));
-      jobApplication = stateObj.job_application || null;
-      console.log("Job Application from state:", jobApplication);
-
-      if (jobApplication) {
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set("job_application", jobApplication);
-        window.history.replaceState({}, "", newUrl.toString());
+    const stateParam = queryParams.get("state");
+    if (stateParam) {
+      try {
+        const stateObj = JSON.parse(atob(stateParam));
+        if (stateObj.job_application) {
+          jobApplication = stateObj.job_application;
+          console.log("Job Application from state:", jobApplication);
+        }
+      } catch (error) {
+        console.error("Error parsing state parameter:", error);
       }
-    } catch (error) {
-      console.error("Error parsing state parameter:", error);
     }
   }
 

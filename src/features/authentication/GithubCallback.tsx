@@ -17,6 +17,21 @@ const GitHubCallback: React.FC = () => {
       const code = urlParams.get("code");
       const state = urlParams.get("state");
       const error = urlParams.get("error");
+      const stateParam = urlParams.get("state");
+
+      let jobApplication = null;
+      let stateType = null;
+      if (stateParam) {
+        try {
+          const stateObj = JSON.parse(atob(stateParam));
+          jobApplication = stateObj.job_application || null;
+          stateType = stateObj.type || null;
+          console.log("Job Application from state:", jobApplication);
+          console.log("State type:", stateType);
+        } catch (error) {
+          console.error("Error parsing state parameter:", error);
+        }
+      }
 
       console.log("GitHub Callback Params:", {
         code: code ? "present" : "absent",
@@ -37,7 +52,6 @@ const GitHubCallback: React.FC = () => {
         }).unwrap();
 
         console.log("GitHub Auth Result:", result);
-        
 
         dispatch(
           setCredentials({
@@ -45,9 +59,28 @@ const GitHubCallback: React.FC = () => {
             accessToken: result.token,
           })
         );
-        if (result.user_info.experience_level === "") {
-          navigate("/setexperience");
-        } else if (state === "github_signup") {
+        if (jobApplication) {
+          try {
+            if (result.user_info && result.user_info?.goals?.length > 0) {
+              const jobUrl = new URL(decodeURIComponent(jobApplication));
+              const path = jobUrl.pathname + jobUrl.search + jobUrl.hash;
+              navigate(path);
+            } else if (result.user_info.experience_level === "") {
+              navigate(
+                `/setexperience?job_application=${encodeURIComponent(
+                  jobApplication
+                )}`
+              );
+            } else {
+              navigate(
+                `/?job_application=${encodeURIComponent(jobApplication)}`
+              );
+            }
+          } catch (error) {
+            console.error("Invalid URL:", error);
+            navigate("/");
+          }
+        } else if (stateType === "github_signup") {
           navigate("/login");
         } else {
           navigate("/");

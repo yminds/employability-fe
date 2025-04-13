@@ -15,6 +15,18 @@ const LinkedInCallback: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
 
+    const stateParam = urlParams.get("state");
+    let jobApplication = null;
+    if (stateParam) {
+      try {
+        const stateObj = JSON.parse(atob(stateParam));
+        jobApplication = stateObj.job_application || null;
+        console.log("Job Application from state:", jobApplication);
+      } catch (error) {
+        console.error("Error parsing state parameter:", error);
+      }
+    }
+    
     if (!code) {
       console.log("GitHub Auth Error");
       navigate("/login");
@@ -38,8 +50,21 @@ const LinkedInCallback: React.FC = () => {
               accessToken: result.token,
             })
           );
-          if (result.user_info.experience_level === "") {
-            navigate("/setexperience");
+          if (jobApplication) {
+            try {
+              if (result.user_info && result.user_info?.goals?.length > 0) {
+                const jobUrl = new URL(decodeURIComponent(jobApplication));
+                const path = jobUrl.pathname + jobUrl.search + jobUrl.hash;
+                navigate(path);
+              } else {
+                navigate(
+                  `/?job_application=${encodeURIComponent(jobApplication)}`
+                );
+              }
+            } catch (error) {
+              console.error("Invalid URL:", error);
+              navigate("/");
+            }
           } else {
             navigate("/");
           }
