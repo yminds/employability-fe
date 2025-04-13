@@ -68,7 +68,24 @@ const SignupForm = () => {
             : "/setexperience"
         );
       } else {
-        navigate("/");
+        if (jobApplication) {
+          try {
+            if (user && user?.goals?.length > 0) {
+              const jobUrl = new URL(decodeURIComponent(jobApplication));
+              const path = jobUrl.pathname + jobUrl.search + jobUrl.hash;
+              navigate(path);
+            } else {
+              navigate(
+                `/?job_application=${encodeURIComponent(jobApplication)}`
+              );
+            }
+          } catch (error) {
+            console.error("Invalid URL:", error);
+            navigate("/");
+          }
+        } else {
+          navigate("/");
+        }
       }
     }
   }, [token, user, navigate]);

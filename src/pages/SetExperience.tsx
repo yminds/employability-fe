@@ -1,9 +1,6 @@
-"use client";
-
 import type React from "react";
 import { useState } from "react";
 import logo from "@/assets/branding/logo.svg";
-import { useNavigate, useLocation } from "react-router-dom";
 import LevelOption from "@/components/setgoals/levels";
 import seniorLevelImg from "@/assets/set-goal/seniorLevel.png";
 import midLevelImg from "@/assets/set-goal/midLevel.png";
@@ -26,13 +23,7 @@ const ExperienceLevel: React.FC = () => {
   >("");
   const [updateFirstTimeUser] = useUpdateFirstTimeUserMutation();
 
-  const navigate = useNavigate();
-  const location = useLocation();
   const dispatch = useDispatch();
-
-  // Get job_application from URL if it exists
-  const queryParams = new URLSearchParams(location.search);
-  const jobApplication = queryParams.get("job_application");
 
   const handleSelection = async (level: "entry" | "mid" | "senior") => {
     setSelectedLevel(level);
@@ -48,14 +39,6 @@ const ExperienceLevel: React.FC = () => {
           accessToken: token,
         })
       );
-
-      if (result) {
-        if (jobApplication) {
-          navigate(`/?job_application=${encodeURIComponent(jobApplication)}`);
-        } else {
-          navigate("/");
-        }
-      }
     } catch (error) {
       console.error("Failed to store experience level:", error);
     }

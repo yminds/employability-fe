@@ -16,10 +16,9 @@ interface SocialLoginProps {
 }
 
 const SocialLogin: React.FC<SocialLoginProps> = ({
-  onSocialLogin,
   inviteId = undefined,
 }) => {
-  const [socialAuth, { isSuccess }] = useSocialAuthMutation();
+  const [socialAuth] = useSocialAuthMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,11 +43,11 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
 
       console.log("Social Auth Result:", result);
 
-      if (result.user_info.experience_level === "") {
-        navigate("/setexperience");
-      } else {
-        navigate("/");
-      }
+      // if (result.user_info.experience_level === "") {
+      //   navigate("/setexperience");
+      // } else {
+      //   navigate("/");
+      // }
     } catch (err) {
       console.error(`Failed to login with ${provider}`, err);
     } finally {
