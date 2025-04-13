@@ -432,6 +432,7 @@ const SignupForm = () => {
           <SocialLogin
             onSocialLogin={handleSocialLogin}
             inviteId={inviteId || undefined}
+            jobApplication={jobApplication}
           />
         </div>
       </div>

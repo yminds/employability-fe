@@ -62,7 +62,31 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const account_status = user?.account_status;
 
   const queryParams = new URLSearchParams(location.search);
-  const jobApplication = queryParams.get("job_application");
+  let jobApplication = queryParams.get("job_application");
+
+  const stateParam = queryParams.get("state");
+  const currentPath = location.pathname;
+
+  if (
+    !jobApplication &&
+    stateParam &&
+    (currentPath === "/auth/github/callback" ||
+      currentPath === "/auth/linkedin/callback")
+  ) {
+    try {
+      const stateObj = JSON.parse(atob(stateParam));
+      jobApplication = stateObj.job_application || null;
+      console.log("Job Application from state:", jobApplication);
+
+      if (jobApplication) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set("job_application", jobApplication);
+        window.history.replaceState({}, "", newUrl.toString());
+      }
+    } catch (error) {
+      console.error("Error parsing state parameter:", error);
+    }
+  }
 
   const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 

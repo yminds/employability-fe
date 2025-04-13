@@ -13,10 +13,12 @@ import GithubIcon from "@/assets/sign-up/GithubIcon.svg";
 interface SocialLoginProps {
   onSocialLogin: (provider: "google" | "linkedin" | "github") => void;
   inviteId?: string;
+  jobApplication?: string | null;
 }
 
 const SocialLogin: React.FC<SocialLoginProps> = ({
   inviteId = undefined,
+  jobApplication = null,
 }) => {
   const [socialAuth] = useSocialAuthMutation();
   const dispatch = useDispatch();
@@ -65,13 +67,19 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
 
   const loginWithLinkedIn = () => {
     const clientId = process.env.VITE_LINKEDIN_CLIENT_ID;
-    const redirectUri = `${window.location.origin}/auth/linkedin/callback`; // Use dynamic origin
-    const state = crypto.randomUUID(); // Use a secure random state
-    const scope = "openid profile email"; // Update scopes
+    const redirectUri = `${window.location.origin}/auth/linkedin/callback`;
+    let stateObj: { random: string; job_application?: string } = {
+      random: crypto.randomUUID(),
+    };
+    if (jobApplication) {
+      stateObj = { ...stateObj, job_application: jobApplication };
+    }
+    const state = btoa(JSON.stringify(stateObj));
+    const scope = "openid profile email";
 
     const linkedinUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
       redirectUri
-    )}&state=${state}&scope=${encodeURIComponent(scope)}`;
+    )}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
 
     window.location.href = linkedinUrl;
   };
@@ -80,12 +88,17 @@ const SocialLogin: React.FC<SocialLoginProps> = ({
     setIsLoading("github");
     const clientID = process.env.VITE_GITHUB_CLIENT_ID;
     const redirectURI = `${window.location.origin}/auth/github/callback`;
-    const state =
-      location.pathname === "/signup" ? "github_signup" : "github_login";
+    let stateObj: { type: string; job_application?: string } = {
+      type: location.pathname === "/signup" ? "github_signup" : "github_login",
+    };
+    if (jobApplication) {
+      stateObj = { ...stateObj, job_application: jobApplication };
+    }
+    const state = btoa(JSON.stringify(stateObj));
 
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${encodeURIComponent(
       redirectURI
-    )}&scope=user:email&state=${state}`;
+    )}&scope=user:email&state=${encodeURIComponent(state)}`;
   };
 
   return (
