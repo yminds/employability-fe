@@ -29,7 +29,11 @@ interface InterviewQuestion {
 interface JobPreviewSidebarProps {
   jobTitle: string;
   companyName: string;
-  location: string;
+  location: {
+    city:string,
+    state:string,
+    country:string
+  };
   jobType: string;
   workplaceType: string;
   experienceLevel?: string;
@@ -47,7 +51,11 @@ interface JobPreviewSidebarProps {
 const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
   jobTitle = "",
   companyName = "",
-  location = "",
+  location = {
+    city:"",
+    state:"",
+    country:""
+  },
   jobType = "",
   workplaceType = "",
   experienceLevel = "",
@@ -216,7 +224,9 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
                 Location
               </div>
               <div className="text-[#414447] text-body2 font-medium">
-                {location}
+                {typeof location === 'object' ? 
+                  `${location.city || ''}, ${location.state || ''}, ${location.country || ''}`.replace(/^, |, $/g, '')
+                  : location}
               </div>
             </div>
             <div className="space-y-1">
@@ -401,8 +411,8 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
         </div>
       )}
 
-      
-      <style jsx global>{`
+      {/* Fixed styles for job description preview */}
+      <style dangerouslySetInnerHTML={{ __html: `
         /* Fixed list styles to ensure bullet points appear to the left of text */
         .job-description-preview ul, 
         .job-description-preview ol {
@@ -451,7 +461,7 @@ const JobPreviewSidebar: React.FC<JobPreviewSidebarProps> = ({
         .job-description-preview p {
           margin: 1rem 0;
         }
-      `}</style>
+      `}} />
     </div>
   );
 };

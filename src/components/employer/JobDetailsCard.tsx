@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { MoreVertical, Copy, Edit, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
-// API response shape - adjust field names based on your actual API
+// Updated interface to handle the new location structure
 interface JobDetailsData {
   _id?: string
   title?: string
@@ -10,7 +10,7 @@ interface JobDetailsData {
     _id?: string
     name?: string
   }
-  location?: string
+  location?: string | { city: string; state: string; country: string }
   job_type?: string
   work_place_type?: string
   experience_level?: string
@@ -20,8 +20,24 @@ interface JobDetailsData {
 interface JobDetailsCardProps {
   jobDetails?: JobDetailsData
   onViewDetails: () => void
-  onDelete?: () => void // Added delete handler prop
+  onDelete?: () => void
 }
+
+// Helper function to format location
+const formatLocation = (location?: string | { city: string; state: string; country: string }): string => {
+  if (!location) return "";
+  
+  if (typeof location === "string") {
+    return location;
+  }
+  
+  if (typeof location === "object") {
+    const { city, state, country } = location;
+    return `${city || ''}${city ? ', ' : ''}${state || ''}${state ? ', ' : ''}${country || ''}`.replace(/^, |, $/g, '');
+  }
+  
+  return "";
+};
 
 // Update the JobDetailsCard component to use a portal for the dropdown
 const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardProps) => {
@@ -82,6 +98,9 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
     setShowDropdown(false)
   }
 
+  // Format the location for display
+  const formattedLocation = formatLocation(jobDetails?.location);
+
   // If job details aren't loaded yet, show a loading state
   if (!jobDetails) {
     return (
@@ -137,10 +156,10 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
 
             <div className="flex items-center text-[#68696b] text-body2">
               <span>{jobDetails.company?.name || "Company Name"}</span>
-              {jobDetails.location && (
+              {formattedLocation && (
                 <>
                   <span className="mx-2">|</span>
-                  <span>{jobDetails.location}</span>
+                  <span>{formattedLocation}</span>
                 </>
               )}
               {jobDetails.work_place_type && (

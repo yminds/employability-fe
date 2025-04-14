@@ -37,6 +37,7 @@ const noSidebarRoutes = [
   "/employer/company/create",
   "/invitation/:inviteId",
   "/invitations",
+  "/employer/email-verification"
 ];
 
 const employerRoutes = [
@@ -51,6 +52,7 @@ const employerRoutes = [
   "/employer/jobs/:jobId",
   "/employer/company/create",
   "/employer/jobs/edit/:jobId",
+  "/employer/email-verification"
 ];
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

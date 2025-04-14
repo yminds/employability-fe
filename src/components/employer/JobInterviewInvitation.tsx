@@ -65,6 +65,24 @@ const richTextStyles = `
   }
 `;
 
+// Helper function to format location object to string
+const formatLocation = (location: any): string => {
+  if (!location) return "Remote";
+  
+  if (typeof location === "string") return location;
+  
+  if (typeof location === "object") {
+    const parts = [];
+    if (location.city) parts.push(location.city);
+    if (location.state) parts.push(location.state);
+    if (location.country) parts.push(location.country);
+    
+    return parts.length > 0 ? parts.join(", ") : "Remote";
+  }
+  
+  return "Remote";
+};
+
 export default function JobInvitation() {
   const { inviteId } = useParams<{ inviteId: string }>();
   const [searchParams] = useSearchParams();
@@ -145,7 +163,9 @@ export default function JobInvitation() {
     typeof jobDetailsData?.data.company === "object"
       ? jobDetailsData?.data.company?.logo
       : null;
-  const location = jobDetailsData?.data.location;
+  
+  // Use the formatLocation helper function instead of directly using the location object
+  const locationFormatted = formatLocation(jobDetailsData?.data.location);
   const workType = jobDetailsData?.data.work_place_type;
   const level = jobDetailsData?.data.experience_level;
   const Description = jobDetailsData?.data.description;
@@ -486,7 +506,7 @@ export default function JobInvitation() {
               </span>
             </div>
             <p className="text-[#68696b] text-[14px] font-normal leading-5 tracking-[0.07px] mt-1">
-              {companyName} | {location} | {workType}
+              {companyName} | {locationFormatted} | {workType}
             </p>
           </div>
         </div>
@@ -595,7 +615,7 @@ export default function JobInvitation() {
 
         <div className="py-3">
           {/* Main interview type */}
-          {inviteStatusData?.data?.task?.interview_type.type && (
+          {inviteStatusData?.data?.task?.interview_type?.type && (
             <div className="grid grid-cols-2 md:grid-cols-2 gap-6 px-5 py-2">
               <p className="text-[#414447] text-[16px] font-medium leading-6 tracking-[0.08px]">
                 {inviteStatusData.data.task.interview_type.type
@@ -622,8 +642,8 @@ export default function JobInvitation() {
           </div>
 
           {/* Skills assessment */}
-          {inviteStatusData?.data?.task.skills &&
-            inviteStatusData.data.task.skills.map((skill: any, index: any) => (
+          {inviteStatusData?.data?.task?.skills &&
+            inviteStatusData.data.task.skills.map((skill: any, index: number) => (
               <div
                 key={skill._id || index}
                 className="grid grid-cols-2 md:grid-cols-2 gap-6 px-5 py-2"
