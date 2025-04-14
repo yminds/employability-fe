@@ -8,9 +8,6 @@ import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
 import EmployerSidebar from "@/features/sidebar/EmployerSidebar";
 import DisabledAccountModal from "@/components/modal/DisabledAccountModal";
-import { cleanRecordingReference } from "@/store/slices/recorderSlice";
-import { useDispatch } from "react-redux";
-import useInterviewSetup from "@/hooks/useInterviewSetup";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 
 interface MainLayoutProps {
@@ -38,6 +35,7 @@ const noSidebarRoutes = [
   "/invitation/:inviteId",
   "/invitations",
   "/employer/email-verification"
+  "/job-post",
 ];
 
 const employerRoutes = [
@@ -55,23 +53,65 @@ const employerRoutes = [
   "/employer/email-verification"
 ];
 
+// const freeRoutes = [ "/job-post"];
+const allfreeRoutes = [...noSidebarRoutes, ...employerRoutes];
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const isEmailVerified = user?.is_email_verified;
-  const isPhoneVerified = user?.is_phone_verified;
   const experience_level = user?.experience_level;
   const account_status = user?.account_status;
-  const dispatch = useDispatch();
+
+  const queryParams = new URLSearchParams(location.search);
+  let jobApplication = queryParams.get("job_application");
+
+  const currentPath = location.pathname;
+  if (
+    currentPath === "/auth/github/callback" ||
+    currentPath === "/auth/linkedin/callback"
+  ) {
+    const stateParam = queryParams.get("state");
+    if (stateParam) {
+      try {
+        const stateObj = JSON.parse(atob(stateParam));
+        if (stateObj.job_application) {
+          jobApplication = stateObj.job_application;
+          console.log("Job Application from state:", jobApplication);
+        }
+      } catch (error) {
+        console.error("Error parsing state parameter:", error);
+      }
+    }
+  }
 
   const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 
   useEffect(() => {
     if (user && !experience_level) {
-      navigate("/setexperience");
+      navigate(
+        jobApplication
+          ? `/setexperience?job_application=${encodeURIComponent(
+              jobApplication
+            )}`
+          : "/setexperience"
+      );
     }
   }, [user, experience_level]);
+
+  const checkIsFreeRoute = (freeRoutes: string[]) => {
+    const currrentPath = window.location.pathname;
+    const response = freeRoutes.some((path: string) => {
+      if (currrentPath.includes(path)) return true;
+    });
+    return response;
+  };
+  useEffect(() => {
+    if (checkIsFreeRoute(allfreeRoutes)) return;
+    if (!user) {
+      navigate("/");
+    }
+  }, [user]);
 
   useEffect(() => {
     setIsDisabledModalOpen(account_status === "disabled");
@@ -84,6 +124,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const shouldDisplaySidebar = (): boolean => {
     const currentPath = location.pathname;
+
+    if (currentPath === "/job-post" || currentPath.startsWith("/job-post/")) {
+      return Boolean(user);
+    }
 
     const isNoHeaderRoute = noSidebarRoutes.some((route) => {
       return currentPath === route || currentPath.startsWith(route + "/");

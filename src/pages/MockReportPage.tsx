@@ -186,11 +186,6 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     const inviteId = pathParts[pathParts.length - 3 ];
     const username = pathParts[pathParts.length - 2]; // e.g. "someUser"
     const interviewId = pathParts[pathParts.length - 1]; // e.g. "abc123"
-    console.log({
-      username,
-      interviewId,
-      inviteId
-    });
     return {
       username,
       interviewId,
@@ -280,7 +275,6 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   const professionalExperience = profile?.experience ;
   console.log("Experience", professionalExperience)
 
-
   return (
     // <MockReportContent
     //   reportData={reportData}
@@ -293,7 +287,7 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     //   jobDetails={matchedItem ?? {}}
     //   thread_id={thread_id}
     // />
-    <UpdatedMockReportContainer reportData={reportData} isSharedReport={false} professionalExperience={professionalExperience} inviteId={inviteId} publicProfileName={profile?.username || ""} />
+    <UpdatedMockReportContainer reportData={reportData} isSharedReport={false} professionalExperience={professionalExperience} inviteId={inviteId} publicProfileName={profile?.username || ""} profile={profile} />
   );
 };
 

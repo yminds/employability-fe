@@ -316,6 +316,7 @@ export default function JobInvitation() {
 
       if (response.success && inviteStatusData?.data?.candidateInfo) {
         await sendInvitationResponseMail({
+          isUserExist: userExists ?? false,
           inviteId: inviteId || "",
           candidateEmail: inviteStatusData.data.candidateInfo.email,
           candidateName: inviteStatusData.data.candidateInfo.name,

@@ -18,7 +18,7 @@ import grid from "@/assets/sign-up/grid.svg";
 import arrow from "@/assets/skills/arrow.svg";
 import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import type { RootState } from "@/store/store";
 interface SignupData {
   email: string;
   password: string;
@@ -36,6 +36,7 @@ const SignupForm = () => {
 
   const queryParams = new URLSearchParams(location.search);
   const inviteId = queryParams.get("inviteId");
+  const jobApplication = queryParams.get("job_application");
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -59,9 +60,32 @@ const SignupForm = () => {
     if (token) {
       setIsLoading(false);
       if (user && user.experience_level === "") {
-        navigate("/setexperience");
+        navigate(
+          jobApplication
+            ? `/setexperience?job_application=${encodeURIComponent(
+                jobApplication
+              )}`
+            : "/setexperience"
+        );
       } else {
-        navigate("/");
+        if (jobApplication) {
+          try {
+            if (user && user?.goals?.length > 0) {
+              const jobUrl = new URL(decodeURIComponent(jobApplication));
+              const path = jobUrl.pathname + jobUrl.search + jobUrl.hash;
+              navigate(path);
+            } else {
+              navigate(
+                `/?job_application=${encodeURIComponent(jobApplication)}`
+              );
+            }
+          } catch (error) {
+            console.error("Invalid URL:", error);
+            navigate("/");
+          }
+        } else {
+          navigate("/");
+        }
       }
     }
   }, [token, user, navigate]);
@@ -111,7 +135,13 @@ const SignupForm = () => {
         const loginResponse = await login({ email, password });
 
         if (loginResponse.data) {
-          navigate("/setexperience");
+          navigate(
+            jobApplication
+              ? `/setexperience?job_application=${encodeURIComponent(
+                  jobApplication
+                )}`
+              : "/setexperience"
+          );
         }
       } else {
         if (
@@ -214,7 +244,15 @@ const SignupForm = () => {
           {!inviteId && (
             <div className="flex items-center gap-2 mb-6">
               <button
-                onClick={() => navigate("/login")}
+                onClick={() =>
+                  navigate(
+                    jobApplication
+                      ? `/login?job_application=${encodeURIComponent(
+                          jobApplication
+                        )}`
+                      : "/login"
+                  )
+                }
                 className="d-block hover:text-green-600 text-black text-sm flex items-center"
               >
                 <img
@@ -243,7 +281,15 @@ const SignupForm = () => {
                   Already have an account?{" "}
                   <button
                     type="button"
-                    onClick={() => navigate("/login")}
+                    onClick={() =>
+                      navigate(
+                        jobApplication
+                          ? `/login?job_application=${encodeURIComponent(
+                              jobApplication
+                            )}`
+                          : "/login"
+                      )
+                    }
                     className="text-green-600 underline hover:text-green-800"
                   >
                     Log in
@@ -386,6 +432,7 @@ const SignupForm = () => {
           <SocialLogin
             onSocialLogin={handleSocialLogin}
             inviteId={inviteId || undefined}
+            jobApplication={jobApplication}
           />
         </div>
       </div>

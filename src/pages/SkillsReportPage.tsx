@@ -19,6 +19,8 @@ interface Summary {
   strengths: string[];
   improvements: string[];
   performance_highlights: Performance[];
+  technicalSkills?:any[]
+
 }
 
 interface Report {
@@ -89,10 +91,7 @@ const LoadingState = () => (
       </h3>
       <div className="space-y-3">
         {[1, 2, 3, 4, 5].map((item) => (
-          <div
-            key={item}
-            className="flex justify-between items-center p-3 border rounded-lg"
-          >
+          <div key={item} className="flex justify-between items-center p-3 border rounded-lg">
             <Skeleton width={120} />
             <Skeleton width={80} height={24} className="rounded-full" />
           </div>
@@ -122,7 +121,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     console.log({
       username,
       interviewId,
-    })
+    });
     return {
       username,
       interviewId,
@@ -130,10 +129,8 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   };
 
   // Logged-in username from Redux
-  const loggedInUsername = useSelector(
-    (state: any) => state.auth.user?.username
-  );
-  console.log("loggedInUsername",loggedInUsername)
+  const loggedInUsername = useSelector((state: any) => state.auth.user?.username);
+  console.log("loggedInUsername", loggedInUsername);
 
   // Parse username & interviewId from URL (for shared):
   const { username, interviewId } = getInterviewIdFromUrl();
@@ -154,15 +151,10 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     : location.state?.best_interview; // from React Router state
 
   // For non-shared reports, goal name and skill icon can come via state.
-  const goal_name =
-    isSharedReport && profile?.goals?.length
-      ? profile.goals[0].name
-      : location.state?.goal_name || "";
+  const goal_name = isSharedReport && profile?.goals?.length ? profile.goals[0].name : location.state?.goal_name || "";
 
   // Get user profile image from Redux.
-  const userImg = useSelector(
-    (state: RootState) => state.auth?.user?.profile_image
-  ) ;
+  const userImg = useSelector((state: RootState) => state.auth?.user?.profile_image);
 
   // State to store report data.
   const [reportData, setReportData] = useState<Report | null>(null);
@@ -189,31 +181,27 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   }
 
   // Handle error states.
-  if (reportError ) {
-    return (
-      <div className="text-red-500 text-center mt-10">
-        Error fetching report data.
-      </div>
-    );
+  if (reportError) {
+    return <div className="text-red-500 text-center mt-10">Error fetching report data.</div>;
   }
 
   // If we've finished loading but don't have the data, show a loading skeleton or error
   if (!profile || !reportData) {
     return <LoadingState />;
   }
-  console.log("interview",interviewId)
-  console.log("profile",profile.skills)
+  console.log("interview", interviewId);
+  console.log("profile", profile.skills);
   // Attempt to pull skill info from the user's profile
 
   const skill = location.state?.fromInterviewCard
-  ? profile.skills?.find(() => true)
-  : profile.skills?.find((skillItem: any) => skillItem.best_interview === interviewId)
+    ? profile.skills?.find(() => true)
+    : profile.skills?.find((skillItem: any) => skillItem.best_interview === interviewId);
   // const { name: skillName, icon: skillIcon } = skill?.skill_pool_id;
   // console.log({ name: skillName, icon: skillIcon })
   // const { name: skillName, icon: skillIcon } = skill?.skill_pool_id;
   // console.log({ name: skillName, icon: skillIcon })
 
-  console.log(skill)
+  console.log(skill);
 
   const level = skill?.level || "";
 
@@ -221,25 +209,37 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     navigate(-1);
   };
 
-  const professionalExperience = profile?.experience ;
+  const professionalExperience = profile?.experience;
 
   return (
-    // <ReportContent
-    //   reportData={reportData}
-    //   userName={profile?.name || username || ""} // Use username from URL if profile name is not available
-    //   handleBackToSkillsPage={handleBackToSkillsPage}
-    //   goal_name={goal_name}
-    //   skill_icon={""}
-    //   userImg={userImg || profile.profile_image}
-    //   sharedReport={isSharedReport}
-    //   skillId={skill?.skill_pool_id._id}
-    //   userSkillId={skill?._id}
-    //   level={level}
-    //   skill={skill}
-    //   publicProfileName={profile?.username || username || ""} // Use username from URL if profile username is not available
-    //   isPublic={isPublic}
-    // />
-    <UpdatedMockReportContainer reportData={reportData} isSharedReport={false} professionalExperience={professionalExperience} inviteId={"inviteId"} publicProfileName={profile?.username || ""} />
+    <>
+      {reportData?.summary.technicalSkills ? (
+        <ReportContent
+          reportData={reportData}
+          userName={profile?.name || username || ""} // Use username from URL if profile name is not available
+          handleBackToSkillsPage={handleBackToSkillsPage}
+          goal_name={goal_name}
+          skill_icon={""}
+          userImg={userImg || profile.profile_image}
+          sharedReport={isSharedReport}
+          skillId={skill?.skill_pool_id._id}
+          userSkillId={skill?._id}
+          level={level}
+          skill={skill}
+          publicProfileName={profile?.username || username || ""} // Use username from URL if profile username is not available
+          isPublic={isPublic}
+        />
+      ) : (
+        <UpdatedMockReportContainer
+          reportData={reportData}
+          isSharedReport={false}
+          professionalExperience={professionalExperience}
+          inviteId={"inviteId"}
+          publicProfileName={profile?.username || ""}
+          profile={profile}
+        />
+      )}
+    </>
   );
 };
 
