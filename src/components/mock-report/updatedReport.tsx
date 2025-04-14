@@ -78,7 +78,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   const [reportTitle, setTitle] = useState("")
   console.log("report professionalExperience", professionalExperience);
   const navigate = useNavigate();
-  const isEmployerReport = true; // window.location.pathname.includes("employer");
+  const isEmployerReport = window.location.pathname.includes("employer"); // window.location.pathname.includes("employer");
 
   // Determine whether to use employer_summary or summary
   const summary = isEmployerReport
@@ -268,7 +268,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
     }
   }, [companyAndJobDetails]
   )
-  
+
   return (
     <main className=" flex w-full h-screen justify-center sm:overflow-y-auto sm:flex-col">
       <div className=" flex-col justify-center bg-[#F5F5F5] w-[95%] max-w-[1800px] h-full sm:p-0">
