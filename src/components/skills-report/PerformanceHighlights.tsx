@@ -15,32 +15,32 @@ interface PerformanceRating {
       case 5:
         return 'Excellent';
       case 4:
-        return 'Strong';
-      case 3:
         return 'Good';
+      case 3:
+        return 'Average';
       case 2:
         return 'Weak';
       case 1:
-        return 'Needs Improvement';
+        return 'Poor';
       default:
-        return 'N/A';
+        return 'Poor';
     }
   };
 
   export const getRatingStyles = (rating: number): string => {
     switch (rating) {
       case 5:
-        return 'bg-green-100 text-green-600';
+        return 'bg-[#DBFFEA80] text-[#03963F]';
       case 4:
-        return 'bg-blue-100 text-blue-600';
+        return 'bg-[#FFF2DB80] text-[#F0A422]';
       case 3:
-        return 'bg-yellow-100 text-yellow-600';
+        return 'bg-[#F08F641F] text-[#F08F64]';
       case 2:
-        return 'bg-red-100 text-red-500';
+        return 'bg-[#FFE5E780] text-[#CF0C19]';
       case 1:
-        return 'bg-orange-100 text-orange-600';
+        return 'bg-[#FFE5E780] text-[#CF0C19]';
       default:
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-[#FFE5E780] text-[#CF0C19]';
     }
   };
 

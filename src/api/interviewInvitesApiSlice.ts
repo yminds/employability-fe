@@ -41,6 +41,12 @@ export const interviewInvitesApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['InterviewInvites'],
     }),
+    shortlist: builder.mutation({
+      query: (inviteId) => ({
+        url: `/api/v1/employerInterviewInvitation/shortlist/${inviteId}`,
+        method: "PATCH",
+      }),
+    }),
   }),
 });
 
@@ -49,5 +55,6 @@ export const {
   useRespondToInviteMutation,
   useGetInviteDetailsQuery,
   useGetFundamentalNamesAsCsvMutation,
-  useUpdateInterviewIdMutation
+  useUpdateInterviewIdMutation,
+  useShortlistMutation
 } = interviewInvitesApiSlice; 
