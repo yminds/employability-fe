@@ -34,7 +34,7 @@ const noSidebarRoutes = [
   "/employer/company/create",
   "/invitation/:inviteId",
   "/invitations",
-  "/employer/email-verification"
+  "/employer/email-verification",
   "/job-post",
 ];
 
