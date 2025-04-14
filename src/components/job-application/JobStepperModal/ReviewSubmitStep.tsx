@@ -1,6 +1,7 @@
 import { PencilIcon } from "lucide-react";
 import { ActivelySeekingJobsSVG } from "../SVG/ActivelySeekingJobsSVG";
 import PdfFile from "@/assets/job-posting/pdfFile.svg";
+import { Button } from "@/components/ui/button";
 
 interface FormattedAnswer {
   question_id: string;
@@ -20,6 +21,7 @@ interface ReviewSubmitStepProps {
     resumeName?: string;
     profileImage?: string;
     resume_s3_url?: string;
+    currentStatus?: string;
   };
   applicationData: Record<string, string> | FormattedAnswer[];
   screeningQuestions: Array<{
@@ -58,39 +60,46 @@ export default function ReviewSubmitStep({
         (item) => item.question_id === questionId
       );
       return questionData?.answer || "Not answered";
-    }
-    else {
+    } else {
       return applicationData[questionId] || "Not answered";
     }
   };
 
+  const isActivelySeekingJobs =
+    userData.currentStatus === "Actively seeking jobs";
+
   return (
     <div className="space-y-8">
       <div>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-3">
           <h3 className="text-body2">Your Details</h3>
-        </div>
-
-        <div className="bg-[#F2F3F5] p-4 rounded-lg relative">
-          {/* Edit Button */}
-          <button
-            className="absolute top-4 right-4 text-[#10B754] hover:bg-gray-100 p-1 rounded-full"
+          <Button
+            variant="ghost"
+            className="text-[#10B754] hover:bg-transparent"
             aria-label="Edit profile"
             onClick={() => onEditSection("details")}
           >
             <PencilIcon className="w-4 h-4" />
-          </button>
+          </Button>
+        </div>
 
+        <div className="bg-[#F2F3F5] p-4 rounded-lg">
           {/* User Profile */}
           <div className="flex items-center gap-6">
             <div className="relative">
               <div className="relative w-[95px] h-[95px] rounded-full overflow-hidden">
-                <img
-                  src={userData.profileImage || "/placeholder.svg"}
-                  alt={userData.name}
-                  className="w-full h-full object-cover"
-                />
-                {ActivelySeekingJobsSVG}
+                {userData.profileImage ? (
+                  <img
+                    src={userData.profileImage || "/placeholder.svg"}
+                    alt={userData.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-[#E5E7EB] text-[#374151] text-[32px] font-semibold">
+                    {userData.name ? userData.name.charAt(0).toUpperCase() : ""}
+                  </div>
+                )}
+                {isActivelySeekingJobs && ActivelySeekingJobsSVG}
               </div>
             </div>
             <div>
@@ -113,7 +122,11 @@ export default function ReviewSubmitStep({
             </div>
             <div>
               <p className="text-body2 text-sm text-[#68696B]">Phone Number</p>
-              <p className="text-body2 text-[#414447]">{userData.phone}</p>
+              {userData.phone ? (
+                <p className="text-body2 text-[#414447]">{userData.phone}</p>
+              ) : (
+                <p className="text-body2 text-[#414447]">Not Provided</p>
+              )}
             </div>
           </div>
         </div>
@@ -121,7 +134,17 @@ export default function ReviewSubmitStep({
 
       {/* Resume Section */}
       <div>
-        <h3 className="text-body2 mb-4">Resume</h3>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-body2">Resume</h3>
+          <Button
+            variant="ghost"
+            className="text-[#10B754] hover:bg-transparent"
+            onClick={() => onEditSection("resume")}
+          >
+            <PencilIcon className="h-4 w-4" />
+          </Button>
+        </div>
+
         <div className="bg-[#F2F3F5] p-4 rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="bg-white p-1 rounded">
@@ -145,31 +168,25 @@ export default function ReviewSubmitStep({
               )}
             </div>
           </div>
-          <button
-            className="text-[#10B754]"
-            onClick={() => onEditSection("resume")}
-          >
-            <PencilIcon className="h-4 w-4" />
-          </button>
         </div>
       </div>
 
       {/* Application Questions Section - Only show if there are questions */}
       {screeningQuestions && screeningQuestions.length > 0 && (
         <div>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-3">
             <h3 className="text-body2">Application Questions</h3>
-          </div>
-
-          <div className="bg-[#F2F3F5] p-6 rounded-lg relative">
-            {/* Edit Button */}
-            <button
-              className="absolute top-4 right-4 text-[#10B754] hover:bg-gray-100 p-1 rounded-full"
+            <Button
+              variant="ghost"
+              className=" text-[#10B754] hover:bg-transparent"
               aria-label="Edit application questions"
               onClick={() => onEditSection("questions")}
             >
               <PencilIcon className="w-4 h-4" />
-            </button>
+            </Button>
+          </div>
+
+          <div className="bg-[#F2F3F5] p-6 rounded-lg relative">
             <div className="space-y-4">
               {screeningQuestions.map((question) => (
                 <div key={question._id}>

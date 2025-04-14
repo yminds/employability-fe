@@ -60,10 +60,9 @@ const TableSection: React.FC<{
 );
 
 const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({ reportData, isSharedReport = true, professionalExperience, inviteId, publicProfileName }) => {
-	console.log("reportdata", reportData.createdAt)
 	const {
 		data: companyAndJobDetails,
-} = useGetCompanyAndJobDetailsQuery(inviteId);
+	} = useGetCompanyAndJobDetailsQuery(inviteId);
 	const [reportTitle, setTitle] = useState("")
 	console.log("report professionalExperience", professionalExperience);
 	const navigate = useNavigate();
@@ -178,22 +177,22 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
-		  if (sharePopupRef.current && !sharePopupRef.current.contains(event.target as Node)) {
-			setShowSharePopup(false);
-		  }
+			if (sharePopupRef.current && !sharePopupRef.current.contains(event.target as Node)) {
+				setShowSharePopup(false);
+			}
 		}
-	  
+
 		if (showSharePopup) {
-		  document.addEventListener("mousedown", handleClickOutside);
+			document.addEventListener("mousedown", handleClickOutside);
 		} else {
-		  document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener("mousedown", handleClickOutside);
 		}
-	  
+
 		return () => {
-		  document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener("mousedown", handleClickOutside);
 		};
-	  }, [showSharePopup]);
-	  
+	}, [showSharePopup]);
+
 
 	const handleBackBtn = () => {
 		navigate("/");
@@ -226,7 +225,22 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 	};
 
 	const shareUrl = getShareUrl(publicProfileName, inviteId);
-	
+
+	const formatJobType = (jobType : string) => {
+    switch(jobType) {
+      case "full-time":
+        return "Full Time";
+      case "part-time":
+        return "Part Time";
+      case "contract":
+        return "Contract";
+      case "internship":
+        return "Internship";
+      default:
+        return jobType;
+    }
+  }
+
 	useEffect(() => {
 		console.log("companyAndJobDetails", companyAndJobDetails);
 		if (companyAndJobDetails) {
@@ -235,7 +249,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 				setTitle(job.title);
 			}
 		}
-	},[companyAndJobDetails]
+	}, [companyAndJobDetails]
 	)
 	return (
 		<main className=" flex w-full h-screen justify-center sm:overflow-y-auto sm:flex-col">
@@ -263,7 +277,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 						</div>
 
 						{/* Share Button and Popup */}
-						{true && (
+						{false && (
 							<div className="flex gap-4 relative">
 								<button
 									className="flex gap-2 items-center px-4 py-2 rounded-md text-grey-7 hover:bg-gray-100 relative"
@@ -333,13 +347,47 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 						<div className="space-y-4">
 							{companyAndJobDetails && (
 								<section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-								<JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} />
-							</section>
+									<JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} />
+								</section>
 							)}
 							{/* 1. Performance Highlights */}
 							<section id="highlights" className="rounded-lg p-8 shadow-sm bg-white ">
-								<div className="bg-white w-full">
-									<h2 className="text-sub-header font-bold mb-6 text-gray-800 font-dm-sans">Performance Highlights</h2>
+								<div className="bg-white w-full space-y-4">
+
+									{(isEmployerReport && companyAndJobDetails) ? (
+										<div className=" flex justify-between items-center">
+											<div>
+												<h2 className=" text-h2">{
+													companyAndJobDetails.job.title && (
+														<span className="text-h2">{companyAndJobDetails.job.title}</span>
+													)}</h2>
+												<p className="text-body2 text-grey-6">
+													{formatJobType("contract")} • Onsite 
+												</p>
+											</div>
+											<div className="flex items-center gap-3">
+												<div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
+													{/* Circular Progress Bar */}
+													<CircularProgress
+														progress={overallScore ? Number(overallScore) * 10 : 0}
+														size={60}
+														strokeWidth={6}
+														showText={false}
+													/>
+													<img className="absolute w-8 h-8" src={logo} alt="short logo" />
+												</div>
+												<div>
+													<p className="text-2xl font-bold text-gray-900">
+														{overallScore || "N/A"}
+														<span className="text-[20px] font-medium leading-[26px] text-[#00000099]">/10</span>
+													</p>
+													<p className=" font-dm-sans text-[14px] normal-case font-normal leading-5 tracking-[0.07px] text-gray-500">{reportData.reportType} Interview Score</p>
+												</div>
+											</div>
+										</div>
+									) : (
+										<h2 className="text-sub-header font-bold mb-6 text-gray-800 font-dm-sans">Performance Highlights</h2>
+									)}
 									<div
 										className="flex flex-col md:flex-row items-start md:items-center rounded-lg mb-6 min-h-[230px]"
 										style={{
@@ -350,29 +398,31 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 									>
 										<div className="flex items-center max-h-full p-8">
 											<div className="flex h-full min-w-1/2 flex-[2] justify-center items-center">
-												<img src={reportData.reportType === "Full" ? jobIllustration : reportData.reportType === "Screening" ? screeningIllustration : mockIllustration } alt="Illustration" />
+												<img src={reportData.reportType === "Full" ? jobIllustration : reportData.reportType === "Screening" ? screeningIllustration : mockIllustration} alt="Illustration" />
 											</div>
 
 											<div className="flex-col flex-[8] justify-center items-start text-left max-w-full">
-												<div className="flex items-center gap-3">
-													<div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
-														{/* Circular Progress Bar */}
-														<CircularProgress
-															progress={overallScore ? Number(overallScore) * 10 : 0}
-															size={60}
-															strokeWidth={6}
-															showText={false}
-														/>
-														<img className="absolute w-8 h-8" src={logo} alt="short logo" />
+												{!isEmployerReport && (
+													<div className="flex items-center gap-3">
+														<div className="relative w-[60px] h-[60px] flex items-center justify-center border rounded-full">
+															{/* Circular Progress Bar */}
+															<CircularProgress
+																progress={overallScore ? Number(overallScore) * 10 : 0}
+																size={60}
+																strokeWidth={6}
+																showText={false}
+															/>
+															<img className="absolute w-8 h-8" src={logo} alt="short logo" />
+														</div>
+														<div>
+															<p className="text-2xl font-bold text-gray-900">
+																{overallScore || "N/A"}
+																<span className="text-[20px] font-medium leading-[26px] text-[#00000099]">/10</span>
+															</p>
+															<p className=" font-dm-sans text-[14px] normal-case font-normal leading-5 tracking-[0.07px] text-gray-500">{reportData.reportType} Interview Score</p>
+														</div>
 													</div>
-													<div>
-														<p className="text-2xl font-bold text-gray-900">
-															{overallScore || "N/A"}
-															<span className="text-[20px] font-medium leading-[26px] text-[#00000099]">/10</span>
-														</p>
-														<p className=" font-dm-sans text-[14px] normal-case font-normal leading-5 tracking-[0.07px] text-gray-500">Mock Interview Score</p>
-													</div>
-												</div>
+												)}
 												<div className=" h-9 flex items-center justify-between w-full">
 													<div className="mt-[14px]">
 														<span

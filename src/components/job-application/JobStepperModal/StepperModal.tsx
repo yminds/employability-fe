@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -47,6 +49,7 @@ export default function StepperModal({
     name: user?.resumeName || "",
     url: user?.resume_s3_url || "",
   });
+  const [resumeValidationError, setResumeValidationError] = useState(false);
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [createScreeningResponse] = useCreateScreeningResponseMutation();
@@ -69,7 +72,11 @@ export default function StepperModal({
       : null;
   const city = user.address?.city;
 
-  const locationString = [city, state?.name, country?.name].join(", ");
+  const locationParts = [city, state?.name, country?.name].filter(
+    (part) => part
+  );
+  const locationString =
+    locationParts.length > 0 ? locationParts.join(", ") : "";
 
   const userDetails = {
     name: user.name,
@@ -81,10 +88,24 @@ export default function StepperModal({
     resume_s3_url: resumeData.url || user?.resume_s3_url,
     profileImage: user?.profile_image,
     userId: user._id,
+    currentStatus: user?.current_status,
   };
 
   const handleNext = () => {
-    if (
+    if (currentStep === 1) {
+      // Check if resume is required and exists
+      if (!resumeData.url) {
+        // Set validation error in YourDetailsStep instead of alert
+        setResumeValidationError(true);
+        return;
+      }
+
+      if (!ScreeningQuestions || ScreeningQuestions.length === 0) {
+        setCurrentStep(3);
+      } else {
+        setCurrentStep(currentStep + 1);
+      }
+    } else if (
       currentStep === 2 &&
       ScreeningQuestions &&
       ScreeningQuestions.length > 0
@@ -101,14 +122,6 @@ export default function StepperModal({
         // @ts-ignore
         setFormattedApplicationData(window.formattedApplicationData);
       }
-    }
-
-    if (
-      currentStep === 1 &&
-      (!ScreeningQuestions || ScreeningQuestions.length === 0)
-    ) {
-      setCurrentStep(3);
-    } else if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -129,6 +142,7 @@ export default function StepperModal({
   };
 
   const handleSubmit = async () => {
+    const resume_url = resumeData.url || user?.resume_s3_url || "";
     const screeningData = {
       user_id: userDetails.userId,
       job_id: jobId,
@@ -137,7 +151,7 @@ export default function StepperModal({
       completed_at: new Date().toISOString(),
     };
     await createScreeningResponse(screeningData).unwrap();
-    await saveJob({ userId: userDetails.userId, jobId: jobId }).unwrap();
+    await saveJob({ userId: userDetails.userId, jobId, resume_url }).unwrap();
     onClose();
   };
 
@@ -263,6 +277,8 @@ export default function StepperModal({
             <YourDetailsStep
               userData={userDetails}
               onUpdateResume={handleResumeUpdate}
+              validationError={resumeValidationError}
+              clearValidationError={() => setResumeValidationError(false)}
             />
           )}
           {currentStep === 2 &&

@@ -18,10 +18,10 @@ export const employabilityJobApiSlice = apiSlice.injectEndpoints({
     }),
 
     saveJobToUser: builder.mutation({
-      query: ({ userId, jobId }) => ({
+      query: ({ userId, jobId, resume_url }) => ({
         url: `/api/v1/employability-jobs/jobs/save_job/${userId}`,
         method: "POST",
-        body: { jobId },
+        body: { jobId, resume_url },
       }),
     }),
   }),

@@ -10,7 +10,7 @@ import PredefinedGoalOverview from "./PredefinedGoalOverview";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import BackImg from "@/assets/dashboard/back.svg";
 import BannerSkillsIcons from "@/components/setgoals/BannerSkillsIcon";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { updateUserProfile } from "@/features/authentication/authSlice";
 
 interface Goal {
@@ -114,6 +114,10 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({
   const [createGoal] = useAddUserGoalMutation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+
+  const queryParams = new URLSearchParams(location.search);
+  const jobApplication = queryParams.get("job_application");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,7 +132,7 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({
     };
     setIsSaving(true);
     try {
-      const response = await createGoal(goalData).unwrap(); 
+      const response = await createGoal(goalData).unwrap();
       const newGoal = {
         _id: response.data._id,
         name: response.data.name,
@@ -143,7 +147,18 @@ const PredefinedGoalDialog: React.FC<GoalFormDialogProps> = ({
       setIsOpen(false);
       setJourneyDialog(false);
       onGoalUpdate(true);
-      navigate("/");
+      if (jobApplication) {
+        try {
+          const jobUrl = new URL(decodeURIComponent(jobApplication));
+          const path = jobUrl.pathname + jobUrl.search + jobUrl.hash;
+          navigate(path);
+        } catch (error) {
+          console.error("Invalid URL:", error);
+          navigate("/");
+        }
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       console.error("Failed to save goal:", err);
     }

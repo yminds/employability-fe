@@ -204,7 +204,7 @@ const ProjectInsights: React.FC<ProjectInsightsProps> = ({
         <div>
         
           <img
-            className="w-[50px] h-[50px] rounded-full"
+            className="w-[50px] h-[50px] rounded-full object-cover "
             src={user?.profile_image || ProfileAvatar}
             alt="user"
           />
