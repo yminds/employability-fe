@@ -40,7 +40,7 @@ export interface IJob {
   job_type: "full-time" | "part-time" | "contract" | "internship";
   work_place_type: "remote" | "hybrid" | "on-site";
   experience_level: "entry" | "mid" | "senior";
-  location: string;
+  location: string | { city: string; state: string; country: string };
   
   skills_required: (ISkill | ISkillRequired | string)[];
   screening_questions?: Array<{
@@ -161,6 +161,19 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
     return 'Unknown Skill';
   };
   
+  const formatLocation = (location: string | { city: string; state: string; country: string }): string => {
+    if (typeof location === 'string') {
+      return location;
+    }
+    
+    if (location && typeof location === 'object') {
+      const { city, state, country } = location;
+      return `${city || ''}, ${state || ''}, ${country || ''}`.replace(/^, |, $/g, '');
+    }
+    
+    return '';
+  };
+
   // Transform skills_required to an array of skill names for display
   const getSkillsForDisplay = (): string[] => {
     if (!job.skills_required || !Array.isArray(job.skills_required)) {
@@ -206,7 +219,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
               </div>
               <div className="flex items-center mt-1 text-sm text-body2 text-gray-500">
                 <Building className="h-4 w-4 mr-1" />
-                <span>{job.location}</span>
+                <span>{formatLocation(job.location)}</span>
                 <span className="mx-2">•</span>
                 <Briefcase className="h-4 w-4 mr-1" />
                 <span>{jobUtils.formatJobType(jobType)}</span>

@@ -34,6 +34,7 @@ const noSidebarRoutes = [
   "/employer/company/create",
   "/invitation/:inviteId",
   "/invitations",
+  "/employer/email-verification",
   "/job-post",
 ];
 
@@ -49,6 +50,7 @@ const employerRoutes = [
   "/employer/jobs/:jobId",
   "/employer/company/create",
   "/employer/jobs/edit/:jobId",
+  "/employer/email-verification"
 ];
 
 // const freeRoutes = [ "/job-post"];

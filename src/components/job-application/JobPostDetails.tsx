@@ -25,6 +25,8 @@ export default function JobPostDetails() {
 
   const jobDetails = job?.data;
 
+  console.log("jobDetails",jobDetails)
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">

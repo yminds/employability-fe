@@ -9,10 +9,17 @@ import {
 } from "@/components/ui/select";
 import RichTextEditor from "../../utils/employer/RichTextEditor"; 
 
+// Updated interface to match the actual location structure
+interface LocationType {
+  city: string;
+  state: string;
+  country: string;
+}
+
 interface BasicInfoFormProps {
   formData: {
     title: string;
-    location: string;
+    location: LocationType | string; // Accept both object and string
     job_type: string;
     work_place_type: string;
     experience_level: string;
@@ -58,10 +65,29 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
     formData.experience_level
   );
 
+  // Format location string for display in the input field
+  const formatLocation = (location: LocationType | string) => {
+    if (typeof location === 'string') {
+      return location;
+    }
+    
+    if (location && typeof location === 'object') {
+      const { city, state, country } = location;
+      return `${city || ''}, ${state || ''}, ${country || ''}`.replace(/^, |, $/g, '');
+    }
+    
+    return '';
+  };
+
   const handleFormDataChange = (field: string, value: string) => {
     // If it's the experience_level field, map the value to backend format before updating the formData
     if (field === "experience_level") {
       value = mapExperienceLevelForBackend(value);
+    }
+
+    // Don't update location field since it's disabled
+    if (field === "location") {
+      return;
     }
 
     onChange({ ...formData, [field]: value });
@@ -79,10 +105,11 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
           required
         />
         <Input
-          value={formData.location}
-          onChange={(e) => handleFormDataChange("location", e.target.value)}
+          value={formatLocation(formData.location)}
+          onChange={(e) => {/* No-op since field is disabled */}}
           placeholder="Location (e.g., New York, USA)"
-          className="flex-1 h-[50px] text-body2"
+          className="flex-1 h-[50px] text-body2 bg-gray-100"
+          disabled={true}
           required
         />
       </div>

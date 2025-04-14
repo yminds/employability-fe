@@ -30,6 +30,8 @@ const JobListingContainer = lazy(
 );
 import EditJobPage from "./pages/EditJobPage.tsx";
 import InterviewInvitationHandler from "./components/employer/InterviewInvitationHandler.tsx";
+import PhoneVerification from "./components/employer/EmployerEmailVerification.tsx.tsx";
+import EmployerEmailVerification from "./components/employer/EmployerEmailVerification.tsx.tsx";
 
 // Lazy load route components
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -156,6 +158,10 @@ export const routes: RouteConfig[] = [
   {
     route: "/employer/jobs/edit/:jobId",
     component: <EditJobPage />,
+  },
+  {
+    route:"/employer/email-verification",
+    component:<EmployerEmailVerification/>
   },
   {
     route: "/employer/company/create",

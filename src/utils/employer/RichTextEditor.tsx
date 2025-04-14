@@ -1,10 +1,12 @@
-import React from 'react';
-import { useEditor, EditorContent, Editor } from '@tiptap/react';
+import React, { useState } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
+import Underline from '@tiptap/extension-underline';
+import Link from '@tiptap/extension-link';
 
 // Custom extension to add Tailwind classes to tables
 const CustomTableExtension = Table.extend({
@@ -42,6 +44,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
   placeholder = 'Job Description'
 }) => {
+  // URL input state
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -59,6 +65,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           HTMLAttributes: {
             class: 'pl-1 my-1',
           },
+        },
+      }),
+      Underline, // Add underline extension
+      Link.configure({
+        openOnClick: true, // Links will be clickable in the editor
+        linkOnPaste: true, // Automatically create links when pasting URLs
+        HTMLAttributes: {
+          class: 'text-blue-600 underline cursor-pointer', // Styling for links
+          rel: 'noopener noreferrer nofollow', // Add safe rel attributes
+          target: '_blank', // Open links in new tab
         },
       }),
       CustomTableExtension.configure({
@@ -82,6 +98,40 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   if (!editor) {
     return null;
   }
+
+  // Function to handle link insertion
+  const handleInsertLink = () => {
+    if (!linkUrl) {
+      setShowLinkInput(false);
+      return;
+    }
+
+    // Check if URL has protocol, if not add it
+    let finalUrl = linkUrl;
+    if (!/^https?:\/\//i.test(finalUrl)) {
+      finalUrl = 'https://' + finalUrl;
+    }
+
+    // Insert the link URL as a proper link
+    editor
+      .chain()
+      .focus()
+      .setLink({ href: finalUrl })
+      .run();
+    
+    // If there was no selection, insert the URL as link text as well
+    if (editor.state.selection.empty) {
+      editor
+        .chain()
+        .focus()
+        .insertContent(`<a href="${finalUrl}" target="_blank" rel="noopener noreferrer nofollow">${linkUrl}</a>`)
+        .run();
+    }
+    
+    // Reset and close dialog
+    setLinkUrl('');
+    setShowLinkInput(false);
+  };
 
   return (
     <div className="border border-gray-200 rounded-md overflow-hidden">
@@ -109,6 +159,32 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             <line x1="19" y1="4" x2="10" y2="4"></line>
             <line x1="14" y1="20" x2="5" y2="20"></line>
             <line x1="15" y1="4" x2="9" y2="20"></line>
+          </svg>
+        </button>
+        
+        {/* Underline button */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('underline') ? 'bg-gray-200' : ''}`}
+          title="Underline"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path>
+            <line x1="4" y1="21" x2="20" y2="21"></line>
+          </svg>
+        </button>
+        
+        {/* Link button */}
+        <button
+          type="button"
+          onClick={() => setShowLinkInput(true)}
+          className="p-2 rounded hover:bg-gray-200"
+          title="Insert Link"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
         </button>
         
@@ -244,8 +320,49 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         placeholder={placeholder}
       />
       
-      {/* Tailwind Typography Plugin Styles with fixes for lists */}
-      <style jsx global>{`
+      {/* Simple Link Input Dialog */}
+      {showLinkInput && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <h3 className="text-lg font-medium mb-4">Insert Link</h3>
+            
+            {/* Link URL Input */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                URL
+              </label>
+              <input
+                type="text"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                className="border border-gray-300 rounded-md p-2 w-full"
+                placeholder="https://example.com"
+              />
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowLinkInput(false)}
+                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleInsertLink}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Insert
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Fixed global styles for the editor */}
+      <style dangerouslySetInnerHTML={{ __html: `
         /* Fixed list styles to ensure bullet points appear to the left of text */
         .ProseMirror ul, .ProseMirror ol {
           list-style-position: outside;
@@ -272,6 +389,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           display: inline;
         }
         
+        /* Style for pasted links */
+        .ProseMirror a {
+          color: #2563eb;
+          word-break: break-all;
+        }
+        
         /* Basic table styles that complement the Tailwind classes */
         .ProseMirror table {
           border-collapse: collapse;
@@ -288,7 +411,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           background-color: #f3f4f6;
           font-weight: 500;
         }
-      `}</style>
+      `}} />
     </div>
   );
 };

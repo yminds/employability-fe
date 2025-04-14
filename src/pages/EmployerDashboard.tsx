@@ -117,7 +117,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!employer || !token) {
+    if (!employer || !token || !employer.is_email_verified) {
       navigate("/employer/login");
     }
   }, [employer, token, navigate]);
@@ -147,8 +147,10 @@ const ImprovedEmployerDashboard: React.FC = () => {
       : [];
 
   const isContentLoading = isLoading || isFetching;
-
-  const hasCompany = employer?.company || false;
+  const hasCompany = employer?.company;
+  console.log("employer",employer);
+  
+  console.log("hasCompany",hasCompany)
 
   return (
     <main className="h-screen w-full overflow-hidden font-ubuntu">
