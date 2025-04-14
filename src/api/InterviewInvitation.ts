@@ -282,6 +282,7 @@ export interface UserExistsResponse {
 }
 
 interface SendInvitationResponseMailPayload {
+  isUserExist: boolean;
   inviteId: string;
   candidateEmail: string;
   candidateName?: string;

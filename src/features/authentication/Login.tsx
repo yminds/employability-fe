@@ -250,7 +250,10 @@ const Login: React.FC = () => {
             </Button>
           </form>
           {/* Social Login */}
-          <SocialLogin onSocialLogin={handleSocialLogin} />
+          <SocialLogin
+            onSocialLogin={handleSocialLogin}
+            jobApplication={jobApplication}
+          />
         </div>
       </div>
     </div>

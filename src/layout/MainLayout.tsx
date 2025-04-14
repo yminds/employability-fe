@@ -8,11 +8,7 @@ import type { RootState } from "@/store/store";
 import EmailVerification from "@/components/signup/EmailVerification";
 import EmployerSidebar from "@/features/sidebar/EmployerSidebar";
 import DisabledAccountModal from "@/components/modal/DisabledAccountModal";
-import { cleanRecordingReference } from "@/store/slices/recorderSlice";
-import { useDispatch } from "react-redux";
-import useInterviewSetup from "@/hooks/useInterviewSetup";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
-import { current } from "@reduxjs/toolkit";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -38,6 +34,7 @@ const noSidebarRoutes = [
   "/employer/company/create",
   "/invitation/:inviteId",
   "/invitations",
+  "/job-post",
 ];
 
 const employerRoutes = [
@@ -54,20 +51,37 @@ const employerRoutes = [
   "/employer/jobs/edit/:jobId",
 ];
 
-const freeRoutes = ["/profile", "/job-post", "/signup", "/login"];
-const allfreeRoutes = [...freeRoutes, ...employerRoutes];
+// const freeRoutes = [ "/job-post"];
+const allfreeRoutes = [...noSidebarRoutes, ...employerRoutes];
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const isEmailVerified = user?.is_email_verified;
-  const isPhoneVerified = user?.is_phone_verified;
   const experience_level = user?.experience_level;
   const account_status = user?.account_status;
-  const dispatch = useDispatch();
 
   const queryParams = new URLSearchParams(location.search);
-  const jobApplication = queryParams.get("job_application");
+  let jobApplication = queryParams.get("job_application");
+
+  const currentPath = location.pathname;
+  if (
+    currentPath === "/auth/github/callback" ||
+    currentPath === "/auth/linkedin/callback"
+  ) {
+    const stateParam = queryParams.get("state");
+    if (stateParam) {
+      try {
+        const stateObj = JSON.parse(atob(stateParam));
+        if (stateObj.job_application) {
+          jobApplication = stateObj.job_application;
+          console.log("Job Application from state:", jobApplication);
+        }
+      } catch (error) {
+        console.error("Error parsing state parameter:", error);
+      }
+    }
+  }
 
   const [isDisabledModalOpen, setIsDisabledModalOpen] = useState(false);
 
