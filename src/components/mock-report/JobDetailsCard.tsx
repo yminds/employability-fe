@@ -9,7 +9,6 @@ import { useShortlistMutation } from '@/api/interviewInvitesApiSlice';
 const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean, profile: any, inviteId: string }> = ({ jobDetails, takenAT, isEmployer, profile, inviteId }) => {
 	const [shortlistCandidate, { isLoading, isSuccess, isError, error }] = useShortlistMutation();
 
-
 	const { job } = jobDetails;
 	const company = job?.company;
 

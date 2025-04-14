@@ -47,8 +47,8 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
   console.log("invite", invite)
   const navigate = useNavigate();
   const [showCompletedDropdown, setShowCompletedDropdown] = useState(false);
-  const userGoal = useSelector((state: RootState) => state.auth.user?.goals[0]._id);
-  const user_id = useSelector((state: RootState) => state.auth.user?._id);
+  const userGoal = useSelector((state: RootState) => state?.auth.user?.goals[0]._id);
+  const user_id = useSelector((state: RootState) => state?.auth.user?._id);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deadlineDate, setDeadlineDate] = useState<Date | null>(null);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
@@ -201,12 +201,12 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
           candidateEmail: inviteStatusData.data.candidateInfo.email,
           candidateName: inviteStatusData.data.candidateInfo.name,
           jobTitle: inviteData.job?.title || '',
-          companyName:
-            typeof inviteData.company === "object"
-              ? inviteData.company?.name
-              : "",
+          companyName: typeof inviteData.company === "object"
+            ? inviteData.company?.name
+            : "",
           status: "accepted",
           submissionDate: date.toISOString(),
+          isUserExist: false
         });
       }
   
@@ -256,7 +256,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                   </span>
                 </div>
                 <p className="text-body2 text-grey-5">
-                  {capitalizeString(inviteData.company?.name)} | {inviteData.job?.location} |{" "}
+                  {capitalizeString(inviteData.company?.name)} | {typeof inviteData.job?.location === 'object' ? inviteData.job?.location?.country : inviteData.job?.location} |{" "}
                   {capitalizeString(inviteData.job?.work_place_type)}
                 </p>
               </div>

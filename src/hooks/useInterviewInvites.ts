@@ -5,6 +5,7 @@ import {
   useRespondToInviteMutation, 
 } from '@/api/interviewInvitesApiSlice';
 import { useSelector } from 'react-redux';
+import camera from '@/assets/screen-setup/camera.svg';
 // Define interface for interview invite
 
 export interface InterviewInvite {
@@ -17,7 +18,11 @@ export interface InterviewInvite {
     title?: string;
     company?: string;
     description?: string;
-    location?: string;
+    location?: {
+      city : string;
+      state: string;
+      country: string;
+    };
     job_type?: string;
     work_place_type?: string;
     experience_level?: string;
