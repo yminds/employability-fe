@@ -8,9 +8,9 @@ export interface Company {
     industry?: string;
     organization_size?: string; // Changed to match backend
     tagline?: string;
-    location?: string; // Changed to simple string to match backend
+    location?: string; 
     logo?: string;
-    logoKey?: string; // For tracking S3 key
+    logoKey?: string; 
     employers?: string[];
     createdAt?: string;
     updatedAt?: string;
@@ -20,7 +20,7 @@ export interface Employer {
     _id: string;
     employerName: string;
     email: string;
-    company?: Company; // Changed from company_id to company
+    company?: Company; 
     role: "admin" | "member";
     profile_image?: string;
     contact?: {
@@ -95,6 +95,39 @@ interface UpdateProfilePayload {
     };
 }
 
+// Email verification interfaces
+interface CheckTokenResponse {
+    success: boolean;
+    hasActiveToken: boolean;
+}
+
+interface BasicResponse {
+    success: boolean;
+    message: string;
+}
+
+interface SendOTPPayload {
+    email: string;
+}
+
+interface VerifyOTPPayload {
+    email: string;
+    otp: string;
+}
+
+interface UpdateEmailPayload {
+    email: string;
+}
+
+interface UpdateEmailResponse {
+    success: boolean;
+    message: string;
+    data: {
+        email: string;
+        is_email_verified: boolean;
+    };
+}
+
 // API Slice
 export const employerApiSlice = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -144,6 +177,47 @@ export const employerApiSlice = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['Employer']
         }),
+
+        // Email verification endpoints
+        checkToken: builder.query<CheckTokenResponse, string>({
+            query: (employerId) => ({
+                url: `/api/v1/employer/${employerId}/check-token`,
+                method: "GET",
+            }),
+        }),
+
+        clearToken: builder.mutation<BasicResponse, string>({
+            query: (employerId) => ({
+                url: `/api/v1/employer/${employerId}/clear-token`,
+                method: "DELETE",
+            }),
+        }),
+
+        sendVerificationOTP: builder.mutation<BasicResponse, SendOTPPayload>({
+            query: (data) => ({
+                url: `/api/v1/employer/send-verification-otp`,
+                method: "POST",
+                body: data
+            }),
+        }),
+
+        verifyOTP: builder.mutation<BasicResponse, VerifyOTPPayload>({
+            query: (data) => ({
+                url: `/api/v1/employer/verify-otp`,
+                method: "POST",
+                body: data
+            }),
+            invalidatesTags: ['Employer']
+        }),
+
+        updateEmployerEmail: builder.mutation<UpdateEmailResponse, { employer_id: string; data: UpdateEmailPayload }>({
+            query: ({ employer_id, data }) => ({
+                url: `/api/v1/employer/${employer_id}/update-email`,
+                method: "PATCH",
+                body: data
+            }),
+            invalidatesTags: ['Employer']
+        }),
     }),
     overrideExisting: false
 });
@@ -154,5 +228,10 @@ export const {
     useEmployerLoginMutation,
     useGetEmployerDetailsQuery,
     useUpdateEmployerProfileMutation,
-    useCreateCompanyMutation
+    useCreateCompanyMutation,
+    useCheckTokenQuery,
+    useClearTokenMutation,
+    useSendVerificationOTPMutation,
+    useVerifyOTPMutation,
+    useUpdateEmployerEmailMutation
 } = employerApiSlice;

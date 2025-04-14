@@ -56,6 +56,8 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 			{!isEmployer ?
 				<div className="flex items-center justify-between bg-white shadow-sm rounded-lg p-4 w-full border border-gray-200">
 					{/* Left Section: Logo + Job Info */}
+			
+
 					<div className="flex items-center space-x-4">
 						{/* Company Logo */}
 						<div className="w-10 h-10 flex items-center justify-center bg-white rounded-full">

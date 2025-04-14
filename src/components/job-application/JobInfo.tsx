@@ -30,6 +30,27 @@ const formatWorkplaceType = (workplaceType: string): string => {
     workplaceType.charAt(0).toUpperCase() + workplaceType.slice(1).toLowerCase()
   );
 };
+
+// Helper function to format location
+const formatLocation = (location: any): string => {
+  if (!location) return "Location";
+  
+  if (typeof location === "string") {
+    return location;
+  }
+  
+  if (typeof location === "object") {
+    const { city, state, country } = location;
+    const parts = [];
+    if (city) parts.push(city);
+    if (state) parts.push(state);
+    if (country) parts.push(country);
+    return parts.join(', ');
+  }
+  
+  return "Location";
+};
+
 interface Skill {
   _id: string;
   name: string;
@@ -56,6 +77,7 @@ export default function JobInfo({ jobDetails, user }: JobInfoProps) {
 
   const formattedJobType = formatJobType(job_type);
   const formattedWorkPlaceType = formatWorkplaceType(work_place_type);
+  const formattedLocation = formatLocation(location);
 
   // Fetch user skills when component mounts
   useEffect(() => {
@@ -119,7 +141,7 @@ export default function JobInfo({ jobDetails, user }: JobInfoProps) {
           <div className="bg-gray-100 px-3 py-1.5 rounded-md flex items-center gap-1.5">
             <img src={Location} alt="Location" className="w-4 h-4" />
             <span className="text-[14px] leading-6 tracking-[0.07px] text-gray-600">
-              {location}
+              {formattedLocation}
             </span>
           </div>
           <div className="bg-gray-100 px-3 py-1.5 rounded-md flex items-center gap-1.5">

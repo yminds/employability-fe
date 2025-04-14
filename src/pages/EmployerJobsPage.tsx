@@ -1,4 +1,4 @@
-// src/pages/employer/EmployerJobsPage.tsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -36,6 +36,60 @@ const JobCardSkeleton = () => (
 
 import arrow from "@/assets/skills/arrow.svg"; // If you have a back arrow image, adjust import path
 
+// Helper function to format location for display (can be moved to jobUtils)
+const formatLocation = (location: string | { city: string; state: string; country: string }): string => {
+  if (typeof location === 'string') {
+    return location;
+  }
+  
+  if (location && typeof location === 'object') {
+    const { city, state, country } = location;
+    return `${city || ''}, ${state || ''}, ${country || ''}`.replace(/^, |, $/g, '');
+  }
+  
+  return '';
+};
+
+// Extend jobUtils to handle location objects in filtering
+const extendedJobUtils = {
+  ...jobUtils,
+  filterJobs: (jobs: IJob[], filters: any) => {
+    return jobs.filter((job) => {
+      // Type filter
+      if (filters.type !== "all" && job.job_type !== filters.type) {
+        return false;
+      }
+
+      // Experience level filter
+      if (
+        filters.experience_level !== "all" &&
+        job.experience_level !== filters.experience_level
+      ) {
+        return false;
+      }
+
+      // Status filter
+      if (filters.status !== "all" && job.status !== filters.status) {
+        return false;
+      }
+
+      // Search filter - include location in the search
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        const formattedLocation = formatLocation(job.location).toLowerCase();
+        
+        return (
+          job.title.toLowerCase().includes(searchTerm) ||
+          formattedLocation.includes(searchTerm) ||
+          (job.description && job.description.toLowerCase().includes(searchTerm))
+        );
+      }
+
+      return true;
+    });
+  }
+};
+
 const EmployerJobsPage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -72,8 +126,10 @@ const EmployerJobsPage: React.FC = () => {
   );
 
   const isContentLoading = isLoading || isFetching;
+  
+  // Use extended jobUtils to handle location objects
   const filteredJobs = jobsData?.data?.length
-    ? jobUtils.filterJobs(jobsData.data, filters)
+    ? extendedJobUtils.filterJobs((jobsData as any).data, filters)
     : [];
 
   // Reset filters

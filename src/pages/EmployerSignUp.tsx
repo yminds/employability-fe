@@ -10,7 +10,6 @@ import { setEmployerCredentials } from "@/features/authentication/employerAuthSl
 
 import logo from "@/assets/branding/logo.svg";
 import arrow from "@/assets/skills/arrow.svg";
-import employerSignuplogo from "@/assets/employer/employerSignup1.svg";
 import employerLoginSvg from "@/assets/employer/employerLoginSvg.svg";
 
 import User from "@/assets/sign-up/user.png";
@@ -64,25 +63,28 @@ export const EmployerSignup = () => {
       if (signupResponse.success) {
         const employerData: any = signupResponse.data;
 
-        dispatch(
-          setEmployerCredentials({
-            employer_info: {
-              _id: employerData._id,
-              employerName: employerData.employerName,
-              email: employerData.email,
-              role: employerData.role,
-              is_email_verified: employerData.is_email_verified,
-              account_status: employerData.account_status,
-              createdAt: employerData.createdAt,
-              updatedAt: employerData.updatedAt,
-              // Company may be set if a matching company was found
-              company_id: employerData.company || null,
-            },
-            token: employerData.token,
-            // Company info if found during signup
-            company: employerData.companyInfo || null,
-          })
-        );
+        // // Store only the minimum required information in Redux
+        // // We'll store the full credentials only after email verification
+        // dispatch(
+        //   setEmployerCredentials({
+        //     employer_info: {
+        //       _id: employerData._id,
+        //       employerName: employerData.employerName,
+        //       email: employerData.email,
+        //       role: employerData.role,
+        //       is_email_verified: false, // Always false at signup
+        //       account_status: employerData.account_status,
+        //       createdAt: employerData.createdAt,
+        //       updatedAt: employerData.updatedAt,
+        //       company_id: employerData.company || null,
+        //     },
+        //     token: employerData.token, // Store the token for verification requests
+        //     company: employerData.companyInfo || null,
+        //   })
+        // );
+
+        // Store the signup response in sessionStorage to retrieve after verification
+        sessionStorage.setItem('employerSignupData', JSON.stringify(employerData));
 
         // Reset form
         setFormData({
@@ -92,7 +94,9 @@ export const EmployerSignup = () => {
           password: "",
           confirmPassword: "",
         });
-        navigate("/employer");
+        
+        // Redirect to email verification page
+        navigate("/employer/email-verification");
       }
     } catch (err: any) {
       console.error("Signup error:", err);

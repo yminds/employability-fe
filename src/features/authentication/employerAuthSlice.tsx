@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { string } from "zod";
 
 interface ProfileCompletionStatus {
   basic: "pending" | "updated";
@@ -172,9 +173,14 @@ const employerAuthSlice = createSlice({
     updateEmailVerification: (state) => {
       if (state.employer) {
         state.employer.is_email_verified = true;
-        state.profileCompletionStatus.basic = "updated";
       }
     },
+
+    updateEmployerEmail:(state,action:PayloadAction<{email:string}>) =>{
+      if(state.employer){
+        state.employer.email = action.payload.email;
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -304,6 +310,7 @@ export const {
   updateCompanyDetails,
   updateCompanyLogo,
   updateEmailVerification,
+  updateEmployerEmail
 } = employerAuthSlice.actions;
 
 export default employerAuthSlice.reducer;

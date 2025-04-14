@@ -419,10 +419,10 @@ const sourceCounts = useMemo(() => {
       count = filteredCandidates.length;
     }
 
-    // Set interview count
+
     setInterviewCount(count);
 
-    // Determine initial tab based on count
+
     const initialTab = count > 0 ? "interviews" : "inviteCandidates";
     setSelectedTab(initialTab);
 

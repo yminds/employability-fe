@@ -3,7 +3,11 @@ import { MapPin } from "lucide-react";
 interface JobCardHeaderProps {
   jobTitle: string;
   companyName: string;
-  location: string;
+  location: {
+    city:string,
+    state:string,
+    country:string
+  };
   companyLogo?: string;
 }
 
@@ -47,7 +51,7 @@ export default function JobCreateSidebar({
         <p className="text-[#414447] text-body2">{companyName}</p>
         <div className="flex items-center gap-1 mt-1">
           <MapPin className="w-5 h-5 text-[#a6c4b3]" />
-          <span className="text-[#909091] text-body2">{location}</span>
+          <span className="text-[#909091] text-body2">{`${location.city},${location.state},${location.country}`}</span>
         </div>
       </div>
     </div>

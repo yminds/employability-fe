@@ -42,7 +42,7 @@ const EmployerLogin = () => {
   const token = useSelector((state: RootState) => state.employerAuth.token);
 
   useEffect(() => {
-    if (employer && token) {
+    if (employer && token && employer.is_email_verified) {
       navigate("/employer");
     } else {
       navigate("/employer/login");
@@ -74,8 +74,6 @@ const EmployerLogin = () => {
               role: employerData.role,
               is_email_verified: employerData.is_email_verified,
               account_status: employerData.account_status,
-              posted_jobs: employerData.posted_jobs || [],
-              active_jobs: employerData.active_jobs || [],
               createdAt: employerData.createdAt,
               updatedAt: employerData.updatedAt,
               company_id: employerData?.company?._id,
