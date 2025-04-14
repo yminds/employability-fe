@@ -287,7 +287,7 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     //   jobDetails={matchedItem ?? {}}
     //   thread_id={thread_id}
     // />
-    <UpdatedMockReportContainer reportData={reportData} isSharedReport={false} professionalExperience={professionalExperience} inviteId={inviteId} publicProfileName={profile?.username || ""} />
+    <UpdatedMockReportContainer reportData={reportData} isSharedReport={false} professionalExperience={professionalExperience} inviteId={inviteId} publicProfileName={profile?.username || ""} profile={profile} />
   );
 };
 

@@ -236,6 +236,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
           professionalExperience={professionalExperience}
           inviteId={"inviteId"}
           publicProfileName={profile?.username || ""}
+          profile={profile}
         />
       )}
     </>
