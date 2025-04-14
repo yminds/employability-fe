@@ -26,7 +26,7 @@ interface UpdatedMockReportContainerProps {
   isSharedReport: boolean;
   professionalExperience: ExperienceItem[];
   publicProfileName: string;
-  profile : any;
+  profile: any;
 }
 
 export const TableSection: React.FC<{
@@ -364,7 +364,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
             <div>
               {companyAndJobDetails && (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-                  <JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} isEmployer={isEmployerReport} profile={profile} inviteId={inviteId}/>
+                  <JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} isEmployer={isEmployerReport} profile={profile} inviteId={inviteId} />
                 </section>
               )}
             </div>
@@ -372,26 +372,26 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
             <div className="space-y-4">
               {/* 1. Performance Highlights */}
               <section id="highlights" className="rounded-lg p-8 shadow-sm bg-white ">
-              {companyAndJobDetails && (
-                <PerformanceHighlights
-                backgroundImage={mockBackground}
-                overallScore={overallScore}
-                logo={logo}
-                reportData={reportData}
-                summary={summary}
-                isEmployerReport={isEmployerReport}
-                jobIllustration={jobIllustration}
-                screeningIllustration={screeningIllustration}
-                mockIllustration={mockIllustration}
-                getPerformanceRatingStyle={getPerformanceRatingStyle}
-                getRatingText={getRatingText}
-                formatJobType={formatJobType}
-                formatWorkplaceType={formatWorkplaceType}
-                getRatingStyles={getRatingStyles}
-                getRatingLabel={getRatingLabel}
-                companyDetails={companyAndJobDetails}
-              />
-              )}
+                {companyAndJobDetails && (
+                  <PerformanceHighlights
+                    backgroundImage={mockBackground}
+                    overallScore={overallScore}
+                    logo={logo}
+                    reportData={reportData}
+                    summary={summary}
+                    isEmployerReport={isEmployerReport}
+                    jobIllustration={jobIllustration}
+                    screeningIllustration={screeningIllustration}
+                    mockIllustration={mockIllustration}
+                    getPerformanceRatingStyle={getPerformanceRatingStyle}
+                    getRatingText={getRatingText}
+                    formatJobType={formatJobType}
+                    formatWorkplaceType={formatWorkplaceType}
+                    getRatingStyles={getRatingStyles}
+                    getRatingLabel={getRatingLabel}
+                    companyDetails={companyAndJobDetails}
+                  />
+                )}
 
 
               </section>
