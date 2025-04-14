@@ -7,7 +7,7 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string }> = ({ jobDetails, t
 
     const { job } = jobDetails;
     const company = job?.company;
-
+  
     return (
         <div className="flex items-center justify-between bg-white shadow-sm rounded-lg p-4 w-full border border-gray-200">
             {/* Left Section: Logo + Job Info */}
