@@ -362,7 +362,7 @@ const Interview: React.FC<{
         code_snippet: question.codeSnippet?.code || "",
         question: question.question,
         skill_name: interviewTopic,
-        concepts:
+        concepts: 
           type === "Mock" || type === "Full"
             ? Array.isArray(Fundamentals)
               ? Fundamentals
@@ -514,17 +514,25 @@ const LayoutBuilder = ({
   concepts,
   interviewId,
 }: LayoutBuilderProps) => {
+ 
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
-
-  const savedTime = localStorage.getItem(`interviewTime_${interviewId}`);
-  const initialTime = savedTime ? parseInt(savedTime, 10) : 0;
-  const [InterviewTime, setInterviewTime] = useState<number>(initialTime);
-  const initialMinutes = Math.floor(initialTime / 60);
-  const initialSeconds = initialTime % 60;
-  const initialFormattedTime = `${String(initialMinutes).padStart(2, "0")}:${String(initialSeconds).padStart(2, "0")}`;
-  const [formattedTime, setFormattedTime] = useState<string>(initialFormattedTime);
-
-  console.log("interviewId", interviewId);
+  const [InterviewTime, setInterviewTime] = useState<number>(0);
+  const [formattedTime, setFormattedTime] = useState<string>("00:00");
+  
+  // Load saved time only when interviewId becomes available
+  useEffect(() => {
+    if (interviewId) {
+      const savedTime = localStorage.getItem(`interviewTime_${interviewId}`);
+      if (savedTime && !isNaN(parseInt(savedTime, 10))) {
+        const time = parseInt(savedTime, 10);
+        setInterviewTime(time);
+        
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        setFormattedTime(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
+      }
+    }
+  }, [interviewId]);;
 
   // console.log("all conepts", concepts);
 
@@ -539,7 +547,6 @@ const LayoutBuilder = ({
     return Math.round((completedCount / concepts.length) * 1000) / 10;
   };
 
-  // In the component:
   const progression = calculateProgress(concepts);
 
   console.log("progression", progression);
