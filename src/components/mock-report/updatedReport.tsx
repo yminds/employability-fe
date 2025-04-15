@@ -37,7 +37,7 @@ export const TableSection: React.FC<{
   <div className="w-full pt-4">
     <div className="border rounded-xl overflow-hidden shadow-sm">
       <table className="w-full border-collapse">
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 sm:hidden">
           <tr>
             <th className="p-3 font-dm-sans text-[14px] font-medium leading-[20px] tracking-[0.21px] text-gray-600 text-left border-b w-[20%]">
               Criteria
@@ -50,13 +50,23 @@ export const TableSection: React.FC<{
             </th>
           </tr>
         </thead>
-        <tbody>
+        <thead className="bg-gray-50 hidden sm:block">
+          <tr>
+            <th className="p-3 font-dm-sans text-[14px] font-medium leading-[20px] tracking-[0.21px] text-gray-600 text-left border-b w-[20%]">
+              Criteria
+            </th>
+            {/* <th className="p-3 font-dm-sans text-[14px] font-medium leading-[20px] tracking-[0.21px] text-gray-600 text-left border-b w-[75%]">
+              Remarks
+            </th> */}
+          </tr>
+        </thead>
+        <tbody className=" sm:hidden">
           {rows.map((row, idx) => (
             <tr key={idx} className="hover:bg-gray-50">
               <td className="p-3 border-b text-body2 text-grey-6">{row.criteria}</td>
               <td className="p-3 border-b text-sm text-gray-600">
                 <span
-                  className={`py-1 px-4 rounded-full  font-dm-sans text-base font-normal leading-6 tracking-[0.08px] ${getRatingStyles(
+                  className={`py-1 px-4 rounded-full font-dm-sans text-base font-normal leading-6 tracking-[0.08px] ${getRatingStyles(
                     Number(row.rating)
                   )}`}
                 >
@@ -67,10 +77,26 @@ export const TableSection: React.FC<{
             </tr>
           ))}
         </tbody>
+
       </table>
+
+      {/* For smaller devices */}
+      <div className=" hidden sm:block">
+        {rows.map((row, idx) => (
+          <div key={idx} className="border-b p-4 hover:bg-gray-50 space-y-2">
+            <div className=" flex items-center justify-between">
+              <div className="text-body2 text-grey-6 ">{row.criteria}</div>
+              <div className={`py-1 px-4 rounded-full text-base font-normal leading-6 tracking-[0.08px] max-w-fit ${getRatingStyles(Number(row.rating))}`}>
+                {getRatingLabel(Number(row.rating))}
+              </div></div>
+            <div className="text-sm text-gray-600 mt-2">{row.remarks}</div>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 );
+
 
 const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   reportData,
@@ -160,7 +186,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
     { id: "problem-solving", title: "Problem Solving", hidden: !summary.problemSolvingSkillsDetails },
     { id: "soft-skills", title: "Soft Skills", hidden: !summary.softskills },
     { id: "screening-qst", title: "Screening Questions", hidden: !summary.screening_questions },
-    { id: "conceptual-breakdown", title: "Conceptual Breakdown", hidden : !summary.conceptualBreakdown },
+    { id: "conceptual-breakdown", title: "Conceptual Breakdown", hidden: !summary.conceptualBreakdown },
     // { id: "cheat-analysis", title: "Cheat Analysis" },
   ].filter((section) => !section.hidden);
 
@@ -309,7 +335,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
           style={{ zIndex: 10 }}
         >
           <header className=" flex justify-between w-full ">
-            <div className="max-w-[70%] px-4 flex flex-col gap-2">
+            <div className="max-w-[70%] sm:max-w-[100%]  px-4 flex flex-col gap-2">
               <h1 className="text-title text-grey-7 font-bold flex gap-4 items-center">
                 {!isSharedReport && (
                   <button
@@ -370,9 +396,9 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
           </header>
         </div>
         {/* Main Content Section */}
-        <div className="flex bg-[#f5f5f5] h-[90vh] max-w-[1800px] justify-center overflow-y-auto p-2 mt-6">
+        <div className="flex bg-[#f5f5f5] h-[90vh] max-w-[1800px] justify-center overflow-y-auto p-2 mt-6 sm:flex-col sm:p-1 ">
           {/* Left Navigation Panel */}
-          <div className=" flex max-w-[260px] rounded-lg  h-fit overflow-y-auto">
+          <div className=" flex max-w-[260px] rounded-lg w-full  h-fit overflow-y-auto sm:hidden">
             <nav className=" bg-white w-full p-6">
               <h2 className="text-sub-header font-semibold mb-4">Content</h2>
               <ul className=" list-none space-y-2">
@@ -392,22 +418,22 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
           </div>
 
           {/* Right Content Panel */}
-          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar space-y-6">
+          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar ">
             <div>
               {companyAndJobDetails ? (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
                   <JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} isEmployer={isEmployerReport} profile={profile} inviteId={inviteId} />
                 </section>
-              ):(
+              ) : (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-                  Hello
+                  {/* Hello */}
                 </section>
               )}
             </div>
 
             <div className="space-y-4">
               {/* 1. Performance Highlights */}
-              <section id="highlights" className="rounded-lg p-8 shadow-sm bg-white ">
+              <section id="highlights" className="rounded-lg p-8 shadow-sm bg-white sm:p-4">
                 {(companyAndJobDetails || reportData.reportType === "Skill" || reportData.reportType === "Project") && (
                   <PerformanceHighlights
                     backgroundImage={mockBackground}
@@ -432,10 +458,10 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 
               {/* 2. Interview Recording */}
               {videoUrl && (
-                <section id="video" className="bg-white rounded-lg overflow-hidden p-8">
-                  <h2 className="text-xl font-semibold ">Video Assessment</h2>
+                <section id="video" className="bg-white rounded-lg overflow-hidden p-8 sm:p-4">
+                  <h2 className="text-sub-header font-bold text-gray-800 font-dm-sans">Video Assessment</h2>
                   <div className=" relative mt-6 ">
-                    <div className="continer-player w-full h-[70vh] relative">
+                    <div className="continer-player w-full h-[70vh] sm:h-[30vh] relative">
                       {reportData?.s3_recording_url.length > 1 ? (
                         <InterviewPlayer urls={reportData.s3_recording_url} />
                       ) : (
@@ -518,7 +544,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 
               {/* 8. Cheat Analysis */}
               {isEmployerReport && (
-                <section id="professional-exp" className="rounded-lg p-8 shadow-sm bg-white">
+                <section id="professional-exp" className="rounded-lg p-8 shadow-sm bg-white sm:p-4">
                   <ProfessionalExperience experiences={professionalExperience} />
                 </section>
               )}

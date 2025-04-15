@@ -30,6 +30,7 @@ import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
 import EditProfileImageModal from "@/components/modal/EditProfileImageModal";
 import VerfiedIcon from "../../assets/skills/verified.svg";
 import UnverifiedIcon from "../../assets/skills/unverifies.svg";
+import { capitalizeString } from '../dashboard/components/interview-invitations/utils';
 
 interface ProfileBannerProps {
   user: any;
@@ -197,6 +198,7 @@ const ProfileBanner = ({
             <div className="flex flex-col items-start justify-end gap-2 ">
               {hasGoalData ? (
                 <>
+                  <div className="flex p-[2px] px-3 justify-center items-center gap-2 rounded-full border border-[#2EE578] bg-green-100"><span className=" text-[#10B754]">{capitalizeString(user.experience_level)}</span></div>
                   <h2 className="text-[#414447] text-h2">
                     {user.goals?.[0]?.name}
                   </h2>

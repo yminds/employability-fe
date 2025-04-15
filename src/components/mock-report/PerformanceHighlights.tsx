@@ -42,8 +42,6 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
   getRatingText,
   formatJobType,
   formatWorkplaceType,
-  getRatingStyles,
-  getRatingLabel,
   companyDetails
 }) => {
   const [showInfoDialog, setShowInfoDialog] = useState(false);
@@ -97,7 +95,7 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
           }}
         >
           <div className="flex items-center max-h-full p-8">
-            <div className="flex h-full min-w-1/2 flex-[2] justify-center items-center">
+            <div className="flex h-full min-w-1/2 flex-[2] justify-center items-center sm:hidden">
               <img
                 src={
                   reportData.reportType === 'Full'
