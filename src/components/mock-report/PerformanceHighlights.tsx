@@ -47,7 +47,7 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   console.log("Company details", companyDetails)
   return (
-    <section id="highlights" className="rounded-lg shadow-sm bg-white">
+    <section id="highlights" className="rounded-lg bg-white">
       <div className="bg-white w-full space-y-4">
         {(isEmployerReport && reportData) ? (
           <div className="flex justify-between items-center">
