@@ -387,13 +387,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
             <div>
               {companyAndJobDetails && (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-                  <JobCard
-                    jobDetails={companyAndJobDetails}
-                    takenAT={reportData.createdAt}
-                    isEmployer={isEmployerReport}
-                    profile={profile}
-                    inviteId={inviteId}
-                  />
+                  <JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} isEmployer={isEmployerReport} profile={profile} inviteId={inviteId} />
                 </section>
               ) }
             </div>
