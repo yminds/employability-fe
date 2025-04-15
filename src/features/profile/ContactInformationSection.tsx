@@ -11,14 +11,12 @@ import {
 import ProfileURL from "@/assets/profile/profileURL.svg";
 import Phone from "@/assets/profile/phone.svg";
 import Mail from "@/assets/profile/mail.svg";
-import { useUpdateUserMutation } from "@/api/userApiSlice";
 import { PhoneEditDialog } from "@/components/modal/PhoneNumberEditModal";
 
 interface ContactInformationProps {
   profileUrl: string;
   phoneNumber: string;
   email: string;
-  initialPrivacy?: boolean;
   userId: string;
 }
 
@@ -26,13 +24,9 @@ export default function ContactInformationSection({
   profileUrl,
   phoneNumber,
   email,
-  initialPrivacy,
   userId,
 }: ContactInformationProps) {
-  const [updateUser] = useUpdateUserMutation();
-
   const [isCopied, setIsCopied] = useState(false);
-  const [isPublic, setIsPublic] = useState(initialPrivacy);
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
   const [currentPhoneNumber, setCurrentPhoneNumber] = useState(phoneNumber);
 
@@ -49,25 +43,6 @@ export default function ContactInformationSection({
     }
   };
 
-  const togglePrivacy = async () => {
-    try {
-      const newPrivacyState = !isPublic;
-      await updateUser({
-        userId,
-        data: {
-          is_contact_info_public: newPrivacyState,
-        },
-      }).unwrap();
-      setIsPublic(newPrivacyState);
-      toast.success(
-        `Contact information is now ${newPrivacyState ? "public" : "private"}`
-      );
-    } catch (error) {
-      toast.error("Failed to update privacy settings");
-      console.error("Error updating privacy settings:", error);
-    }
-  };
-
   const handlePhoneNumberUpdated = (newPhoneNumber: string) => {
     setCurrentPhoneNumber(newPhoneNumber);
   };
@@ -76,37 +51,10 @@ export default function ContactInformationSection({
     <>
       <Card className="w-full bg-white p-0 rounded-lg">
         <CardContent className="p-8 space-y-8">
-          <div className="flex justify-between items-center">
-            <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">
-              Contact Information
-            </h2>
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-2">
-                {isPublic ? (
-                  <EyeIcon className="h-4 w-4 text-gray-500" />
-                ) : (
-                  <EyeOffIcon className="h-4 w-4 text-gray-500" />
-                )}
-                <span className="text-sm text-[#909091]">
-                  {isPublic ? "Public" : "Private"}
-                </span>
-              </div>
-              {/* Custom toggle switch */}
-              <button
-                onClick={togglePrivacy}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white ${
-                  isPublic ? "bg-[#10B754]" : "bg-[#001630]"
-                }`}
-              >
-                <span className="sr-only">Toggle privacy</span>
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    isPublic ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
+          <h2 className="text-[#000000] font-ubuntu text-base font-medium leading-[22px]">
+            Contact Information
+          </h2>
+          {/* </div> */}
           <div className="space-y-3 w-full">
             {/* Profile URL */}
             <div className="flex items-start space-x-4 pb-4 border-b border-[#E5E7EB]">
