@@ -39,8 +39,9 @@ const InterviewSetupNew: React.FC = () => {
     isResume,
     Fundamentals = "",
     projectId,
-    skills_required, comanyDetails,
-    interviewIcon
+    skills_required,
+    comanyDetails,
+    interviewIcon,
   } = location.state || {};
 
   const {
@@ -56,14 +57,15 @@ const InterviewSetupNew: React.FC = () => {
     handleScaleChange,
     cameraScale,
     isProceedButtonEnabled,
+    startRecording,
   } = useInterviewSetup();
 
   const [showMultipleScreenWarning, setShowMultipleScreenWarning] = useState(false);
 
   const requestPermissions = async () => {
     try {
-      setPermissionRequestAttempts(prev => prev + 1);
-      
+      setPermissionRequestAttempts((prev) => prev + 1);
+
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
@@ -82,7 +84,7 @@ const InterviewSetupNew: React.FC = () => {
     } catch (error) {
       console.error("Error requesting media devices:", error);
       setHasPermissions(false);
-      
+
       // If we've tried more than once, assume it's permanently blocked
       if (permissionRequestAttempts >= 1) {
         setPermissionStatus("permanentlyBlocked");
@@ -92,7 +94,9 @@ const InterviewSetupNew: React.FC = () => {
 
   const openBrowserSettings = () => {
     // This just provides instructions as we can't directly open browser settings
-    alert("Please open your browser settings to enable camera and microphone permissions for this website. After changing the settings, refresh the page.");
+    alert(
+      "Please open your browser settings to enable camera and microphone permissions for this website. After changing the settings, refresh the page."
+    );
   };
 
   useEffect(() => {
@@ -101,17 +105,17 @@ const InterviewSetupNew: React.FC = () => {
       .then((devices) => {
         const hasCamera = devices.some((device) => device.kind === "videoinput" && device.label !== "");
         const hasMic = devices.some((device) => device.kind === "audioinput" && device.label !== "");
-        
+
         if (hasCamera && hasMic) {
           setHasPermissions(true);
         } else {
           setHasPermissions(false);
           setShowPermissionNote(true);
-          
+
           // Check if devices exist but don't have labels (likely means they're blocked)
-          const cameraExists = devices.some(device => device.kind === "videoinput");
-          const micExists = devices.some(device => device.kind === "audioinput");
-          
+          const cameraExists = devices.some((device) => device.kind === "videoinput");
+          const micExists = devices.some((device) => device.kind === "audioinput");
+
           if ((cameraExists && !hasCamera) || (micExists && !hasMic)) {
             // If we've already tried requesting permissions, mark as permanently blocked
             if (permissionRequestAttempts > 0) {
@@ -124,7 +128,7 @@ const InterviewSetupNew: React.FC = () => {
         console.error("Error checking devices:", err);
         setHasPermissions(false);
         setShowPermissionNote(true);
-        
+
         // If we get a permissions error, consider it permanently blocked
         if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
           setPermissionStatus("permanentlyBlocked");
@@ -147,7 +151,7 @@ const InterviewSetupNew: React.FC = () => {
           };
 
           updateScreenCount();
-          screenDetails.addEventListener('screenschange', updateScreenCount);
+          screenDetails.addEventListener("screenschange", updateScreenCount);
         } catch (error) {
           console.error("Screen monitoring failed:", error);
         }
@@ -188,36 +192,34 @@ const InterviewSetupNew: React.FC = () => {
     }
   }, [online]);
 
-    useEffect(() => {
-      const hasSeenInterviewGuide = localStorage.getItem("hasSeenInterviewGuide");
-      if (hasSeenInterviewGuide === "true") {
-        setIsGuideOpen(false);
-      }else{
-        setIsGuideOpen(true);
-      }
-    }, []);
-  
-    const handleCloseTutorial = () => {
+  useEffect(() => {
+    const hasSeenInterviewGuide = localStorage.getItem("hasSeenInterviewGuide");
+    if (hasSeenInterviewGuide === "true") {
       setIsGuideOpen(false);
-    };
+    } else {
+      setIsGuideOpen(true);
+    }
+  }, []);
 
-    
-  
-    useEffect(() => {
-      // Check if the user has disabled the tutorial
-      const hasSeenInterviewGuide = localStorage.getItem("hasSeenInterviewGuide");
-      if (hasSeenInterviewGuide  === "true") {
-        setDontShowAgain(true);
-      }
-    }, []);
-    const handleConfirmInterviewGuide = async () => {
-      console.log("handleConfirmInterviewGuide");
-      
-      if (dontShowAgain) {
-        localStorage.setItem("hasSeenInterviewGuide", "true");
-      }
-      setIsGuideOpen(false);
-    };
+  const handleCloseTutorial = () => {
+    setIsGuideOpen(false);
+  };
+
+  useEffect(() => {
+    // Check if the user has disabled the tutorial
+    const hasSeenInterviewGuide = localStorage.getItem("hasSeenInterviewGuide");
+    if (hasSeenInterviewGuide === "true") {
+      setDontShowAgain(true);
+    }
+  }, []);
+  const handleConfirmInterviewGuide = async () => {
+    console.log("handleConfirmInterviewGuide");
+
+    if (dontShowAgain) {
+      localStorage.setItem("hasSeenInterviewGuide", "true");
+    }
+    setIsGuideOpen(false);
+  };
 
   if (!online) return <div>You are offline</div>;
 
@@ -245,15 +247,13 @@ const InterviewSetupNew: React.FC = () => {
             <h2 className="text-2xl font-bold mb-6 text-h2">Permissions Required</h2>
             <div className="text-body space-y-3 mb-4">
               <p>This interview requires access to your camera and microphone.</p>
-              
+
               {permissionStatus === "permanentlyBlocked" ? (
                 <>
                   <p className="text-red-600 font-medium">
                     Your browser has blocked access to the camera and microphone.
                   </p>
-                  <p>
-                    You'll need to manually enable camera and microphone permissions in your browser settings:
-                  </p>
+                  <p>You'll need to manually enable camera and microphone permissions in your browser settings:</p>
                   <ol className="list-decimal ml-5 space-y-1 text-sm">
                     <li>Open your browser settings</li>
                     <li>Navigate to Site Settings or Privacy & Security</li>
@@ -264,25 +264,21 @@ const InterviewSetupNew: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <p>
-                    Please click the button below to grant access to your camera and microphone.
-                  </p>
-                  <p className="text-red-600 font-medium">
-                    If you deny access, the interview cannot proceed.
-                  </p>
+                  <p>Please click the button below to grant access to your camera and microphone.</p>
+                  <p className="text-red-600 font-medium">If you deny access, the interview cannot proceed.</p>
                 </>
               )}
             </div>
             {permissionStatus === "permanentlyBlocked" ? (
-              <button 
-                className="text-button bg-button text-white px-4 py-2 rounded w-full" 
+              <button
+                className="text-button bg-button text-white px-4 py-2 rounded w-full"
                 onClick={() => window.location.reload()}
               >
                 Refresh Page After Changing Settings
               </button>
             ) : (
-              <button 
-                className="text-button bg-button text-white px-4 py-2 rounded w-full" 
+              <button
+                className="text-button bg-button text-white px-4 py-2 rounded w-full"
                 onClick={requestPermissions}
               >
                 Request Permissions
@@ -323,6 +319,9 @@ const InterviewSetupNew: React.FC = () => {
                     onClick={() => {
                       setIsInterviewStarted(true);
                       toggleBrowserFullscreen();
+                      setTimeout(() => {
+                        startRecording();
+                      }, 500);
                     }}
                     disabled={showMultipleScreenWarning || !isProceedButtonEnabled}
                   >
