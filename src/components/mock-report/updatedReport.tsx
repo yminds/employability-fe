@@ -157,12 +157,10 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
     { id: "tech-proficiency", title: "Technical Skills" },
     { id: "skill-proficiency", title: "Skill Proficiency" },
     { id: "professional-exp", title: "Professional experience", hidden: !isEmployerReport },
-    { id: "problem-solving", title: "Problem Solving", hidden: !summary.problemSolvingSkills },
+    { id: "problem-solving", title: "Problem Solving", hidden: !summary.problemSolvingSkillsDetails },
     { id: "soft-skills", title: "Soft Skills", hidden: !summary.softskills },
     { id: "screening-qst", title: "Screening Questions", hidden: !summary.screening_questions },
-    // { id: "concept-ratings", title: "Concept Ratings" },
-    // { id: "specific-questions", title: "Specific Questions" },
-    // { id: "conceptual-breakdown", title: "Conceptual Breakdown" },
+    { id: "conceptual-breakdown", title: "Conceptual Breakdown", hidden : !summary.conceptualBreakdown },
     // { id: "cheat-analysis", title: "Cheat Analysis" },
   ].filter((section) => !section.hidden);
 
@@ -178,21 +176,33 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   // Update active section based on scroll position
   useEffect(() => {
     const handleScroll = () => {
+      let sectionInView = null;
+
       for (const section of sections) {
         const element = document.getElementById(section.id);
         if (element) {
           const rect = element.getBoundingClientRect();
+
+          // Check if the section is in the viewport (considering some margin from top)
           if (rect.top <= 100 && rect.bottom >= 100) {
-            setActiveSection(section.id);
+            sectionInView = section.id;
             break;
           }
         }
       }
+
+      // Only update if the section in view has changed
+      if (sectionInView && sectionInView !== activeSection) {
+        setActiveSection(sectionInView);
+      }
     };
 
+    // Attach the scroll event listener
     window.addEventListener("scroll", handleScroll);
+
+    // Cleanup the event listener
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [sections]);
+  }, [sections, activeSection]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -272,21 +282,21 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
         setTitle(job.title);
       }
     } else {
-		console.log("reportData.reportType312", reportData.reportType);
+      console.log("reportData.reportType312", reportData.reportType);
 
-        let title = "";
-        switch (reportData.reportType) {
-          case "Skill":
-            title = "Skill";
-            break;
-          case "Project":
-            title = "Project";
-            break;
-          case "Mock":
-            title = "Mock";
-        }
-        setTitle(title);
+      let title = "";
+      switch (reportData.reportType) {
+        case "Skill":
+          title = "Skill";
+          break;
+        case "Project":
+          title = "Project";
+          break;
+        case "Mock":
+          title = "Mock";
       }
+      setTitle(title);
+    }
   }, [companyAndJobDetails]);
 
 
@@ -370,9 +380,8 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
                   <li key={section.id}>
                     <button
                       onClick={() => scrollToSection(section.id)}
-                      className={`w-full text-left px-4 py-3 rounded-md hover:bg-gray-100 transition flex items-center h-9 ${
-                        activeSection === section.id ? "bg-gray-200 text-gray-700 font-medium" : "text-gray-700"
-                      }`}
+                      className={`w-full text-left px-4 py-3 rounded-md hover:bg-gray-100 transition flex items-center h-9 ${activeSection === section.id ? "bg-gray-200 text-gray-700 font-medium" : "text-gray-700"
+                        }`}
                     >
                       {section.title}
                     </button>
@@ -385,11 +394,15 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
           {/* Right Content Panel */}
           <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar space-y-6">
             <div>
-              {companyAndJobDetails && (
+              {companyAndJobDetails ? (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
                   <JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} isEmployer={isEmployerReport} profile={profile} inviteId={inviteId} />
                 </section>
-              ) }
+              ):(
+                <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
+                  Hello
+                </section>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -479,7 +492,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
               {summary.soft_skills && (
                 <Section
                   id="soft-skills"
-                  title="Conceptual Breakdown"
+                  title="Soft Skills"
                   imageSrc={softSkills}
                   data={summary.soft_skills.map((item: any) => ({
                     criteria: item.concept,
@@ -489,7 +502,21 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
                 />
               )}
 
-              {/* 7. Cheat Analysis */}
+              {/* 7. Conceptual Breakdown */}
+              {summary.conceptualBreakdown && (
+                <Section
+                  id="conceptual-breakdown"
+                  title="Conceptual Breakdown"
+                  imageSrc={softSkills}
+                  data={summary.conceptualBreakdown.concepts.map((item: any) => ({
+                    criteria: item.criteria,
+                    rating: item.rating,
+                    remarks: item.remarks,
+                  }))}
+                />
+              )}
+
+              {/* 8. Cheat Analysis */}
               {isEmployerReport && (
                 <section id="professional-exp" className="rounded-lg p-8 shadow-sm bg-white">
                   <ProfessionalExperience experiences={professionalExperience} />
