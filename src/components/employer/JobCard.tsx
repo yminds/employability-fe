@@ -71,7 +71,7 @@ export interface IJob {
     rejected?: ICandidate[];
     hired?: ICandidate[];
   };
-  views?: number;
+  job_views?: number;
   applications?: number;
 
   // Legacy fields for backward compatibility
@@ -132,6 +132,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
   const shortlistedCount = job.candidates?.shortlisted?.length || 0;
   const rejectedCount = job.candidates?.rejected?.length || 0;
   const hiredCount = job.candidates?.hired?.length || 0;
+  const jobViews = job.job_views || 0;
 
   // Enhanced function to get the skill name from different skill formats
   const getSkillName = (skillItem: any): string => {
@@ -292,6 +293,12 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
                 <span className="text-[#909091] text-body2">Applied</span>
                 <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
                   {appliedCount}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[#909091] text-body2">Job Views</span>
+                <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
+                  {jobViews}
                 </span>
               </div>
               <div className="flex flex-col">

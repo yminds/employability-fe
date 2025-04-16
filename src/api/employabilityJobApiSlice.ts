@@ -24,6 +24,13 @@ export const employabilityJobApiSlice = apiSlice.injectEndpoints({
         body: { jobId, resume_url },
       }),
     }),
+    getPublicJobViewCount: builder.mutation({
+      query: ({ jobId }) => ({
+        url: `/api/v1/employability-jobs/jobs/job-view-count`,
+        method: "POST",
+        body: { jobId },
+      }),
+    }),
   }),
 });
 
@@ -31,4 +38,5 @@ export const {
   useGetAllCandidateJobsMutation,
   useGetJobByIdQuery,
   useSaveJobToUserMutation,
+  useGetPublicJobViewCountMutation,
 } = employabilityJobApiSlice;
