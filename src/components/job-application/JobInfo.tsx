@@ -73,7 +73,7 @@ export default function JobInfo({ jobDetails, user }: JobInfoProps) {
   const skills = jobDetails?.skills_required || [];
 
   // Company details
-  const company_name = jobDetails?.company.name;
+  const company_name = jobDetails?.company?.name;
 
   const formattedJobType = formatJobType(job_type);
   const formattedWorkPlaceType = formatWorkplaceType(work_place_type);
