@@ -305,7 +305,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 
   function formatWorkplaceType(type: "remote" | "hybrid" | "on-site"): string {
     if (type === "on-site") return "Onsite";
-    return type.charAt(0).toUpperCase() + type.slice(1);
+    return type?.charAt(0)?.toUpperCase() + type?.slice(1);
   }
 
   useEffect(() => {
@@ -447,7 +447,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
             <div className="space-y-2">
               {/* 1. Performance Highlights */}
               <section id="highlights" className="rounded-lg p-8 shadow-sm bg-white sm:p-4">
-                {(companyAndJobDetails || reportData.reportType === "Skill" || reportData.reportType === "Project") && (
+                {/* {(companyAndJobDetails || reportData.reportType === "Skill" || reportData.reportType === "Project") && ( */}
                   <PerformanceHighlights
                     backgroundImage={mockBackground}
                     overallScore={overallScore}
@@ -466,7 +466,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
                     getRatingLabel={getRatingLabel}
                     companyDetails={companyAndJobDetails}
                   />
-                )}
+                {/* )} */}
               </section>
 
               {/* 2. Interview Recording */}
