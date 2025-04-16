@@ -1,11 +1,15 @@
 import { useParams } from "react-router-dom";
-import { useGetJobByIdQuery } from "@/api/employabilityJobApiSlice";
+import {
+  useGetJobByIdQuery,
+  useGetPublicJobViewCountMutation,
+} from "@/api/employabilityJobApiSlice";
 import CompanyInfo from "./CompanyInfo";
 import JobDescription from "./JobDescription";
 import JobHeader from "./JobHeader";
 import JobInfo from "./JobInfo";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { useEffect } from "react";
 
 export default function JobPostDetails() {
   const user = useSelector((state: RootState) => state.auth?.user);
@@ -23,9 +27,17 @@ export default function JobPostDetails() {
     skip: !jobId,
   });
 
+  const [incrementViewCount] = useGetPublicJobViewCountMutation();
+
+  useEffect(() => {
+    if (job && jobId) {
+      incrementViewCount({ jobId });
+    }
+  }, [job, jobId, incrementViewCount]);
+
   const jobDetails = job?.data;
 
-  console.log("jobDetails",jobDetails)
+  console.log("jobDetails", jobDetails);
 
   if (isLoading) {
     return (

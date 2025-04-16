@@ -4,8 +4,6 @@ import { useState } from "react";
 import {
   CheckIcon,
   CopyIcon,
-  EyeIcon,
-  EyeOffIcon,
   PencilIcon,
 } from "lucide-react";
 import ProfileURL from "@/assets/profile/profileURL.svg";

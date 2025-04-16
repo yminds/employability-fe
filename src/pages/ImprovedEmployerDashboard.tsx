@@ -48,9 +48,7 @@ const StatCard: React.FC<StatCardProps> = ({
         />
       </div>
       <div>
-        <h3 className="text-[16px] font-normal leading-6 tracking-[-0.048px] text-[#414447]">
-          {title}
-        </h3>
+        <h3 className="text-body2 text-[#414447]">{title}</h3>
         <div className="mt-1 flex items-baseline">
           <p className="text-[24px] font-semibold leading-6 tracking-[-0.072px] text-[#202326]">
             {value}
@@ -68,7 +66,7 @@ const StatCard: React.FC<StatCardProps> = ({
 
 const DashboardOverview: React.FC<DashboardOverviewProps> = ({ stats }) => {
   return (
-    <div className="flex flex-row space-x-4 mb-8 overflow-x-auto pb-2 font-dm-sans">
+    <div className="flex flex-row space-x-4 mb-8 overflow-x-auto font-dm-sans">
       <StatCard
         title="Active Jobs"
         value={stats.activeJobs}
