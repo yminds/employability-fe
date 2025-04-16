@@ -1,15 +1,17 @@
+"use client";
 
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useGetEmployerJobsQuery } from "@/api/employerJobsApiSlice";
 import JobFilters from "@/components/employer/JobFilter";
-import JobCard, { IJob } from "@/components/employer/JobCard";
+import JobCard, { type IJob } from "@/components/employer/JobCard";
 import { jobUtils } from "@/utils/jobUtils";
+import NoPostSVG from "@/assets/employer-dashboard/NoPostSVG.svg";
 
 // Skeleton placeholders
 const JobCardSkeleton = () => (
@@ -37,17 +39,22 @@ const JobCardSkeleton = () => (
 import arrow from "@/assets/skills/arrow.svg"; // If you have a back arrow image, adjust import path
 
 // Helper function to format location for display (can be moved to jobUtils)
-const formatLocation = (location: string | { city: string; state: string; country: string }): string => {
-  if (typeof location === 'string') {
+const formatLocation = (
+  location: string | { city: string; state: string; country: string }
+): string => {
+  if (typeof location === "string") {
     return location;
   }
-  
-  if (location && typeof location === 'object') {
+
+  if (location && typeof location === "object") {
     const { city, state, country } = location;
-    return `${city || ''}, ${state || ''}, ${country || ''}`.replace(/^, |, $/g, '');
+    return `${city || ""}, ${state || ""}, ${country || ""}`.replace(
+      /^, |, $/g,
+      ""
+    );
   }
-  
-  return '';
+
+  return "";
 };
 
 // Extend jobUtils to handle location objects in filtering
@@ -77,21 +84,23 @@ const extendedJobUtils = {
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase();
         const formattedLocation = formatLocation(job.location).toLowerCase();
-        
+
         return (
           job.title.toLowerCase().includes(searchTerm) ||
           formattedLocation.includes(searchTerm) ||
-          (job.description && job.description.toLowerCase().includes(searchTerm))
+          (job.description &&
+            job.description.toLowerCase().includes(searchTerm))
         );
       }
 
       return true;
     });
-  }
+  },
 };
 
 const EmployerJobsPage: React.FC = () => {
   const navigate = useNavigate();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const employer = useSelector(
     (state: RootState) => state.employerAuth.employer
@@ -126,7 +135,7 @@ const EmployerJobsPage: React.FC = () => {
   );
 
   const isContentLoading = isLoading || isFetching;
-  
+
   // Use extended jobUtils to handle location objects
   const filteredJobs = jobsData?.data?.length
     ? extendedJobUtils.filterJobs((jobsData as any).data, filters)
@@ -157,7 +166,7 @@ const EmployerJobsPage: React.FC = () => {
   };
 
   return (
-    <div className="w-[95%] h-screen overflow-hidden max-w-[1800px] p-5 bg-[#F5F5F5] mx-auto">
+    <div className="w-full h-screen overflow-hidden max-w-[1800px] p-[35px] bg-[#F5F5F5] mx-auto">
       <div className="w-full max-w-screen-xl flex flex-col gap-6">
         {/* HEADER SECTION */}
         <section className="flex items-center space-x-2 gap-3">
@@ -165,7 +174,11 @@ const EmployerJobsPage: React.FC = () => {
             onClick={handleBackClick}
             className="w-[30px] h-[30px] bg-white border-2 rounded-full flex justify-center items-center"
           >
-            <img className="w-[10px] h-[10px]" src={arrow} alt="Back" />
+            <img
+              className="w-[10px] h-[10px]"
+              src={arrow || "/placeholder.svg"}
+              alt="Back"
+            />
           </button>
           <h1 className="text-black font-ubuntu text-[20px] font-medium leading-[26px] tracking-[-0.025rem]">
             Jobs
@@ -173,13 +186,13 @@ const EmployerJobsPage: React.FC = () => {
         </section>
 
         {/* MAIN CONTENT SECTION */}
-        <section className="w-full h-[calc(100vh-2rem)]">
+        <section className="w-full h-[calc(100vh-130px)]">
           <div className="h-full flex justify-center">
-            {/* If you want a two-column layout, you can do it here */}
-            <div className="w-full flex gap-6">
-              {/* LEFT COLUMN (Filters) */}
-              <div className="w-[300px] hidden lg:block">
-                <div className="sticky top-0 bg-[#F5F5F5]">
+            {/* Two-column layout */}
+            <div className="w-full flex gap-6 h-full">
+              {/* LEFT COLUMN (Filters) - Fixed position */}
+              <div className="w-[300px] hidden lg:block h-full">
+                <div className="sticky top-0 bg-[#F5F5F5] h-full overflow-y-auto pr-2">
                   <JobFilters
                     filters={filters}
                     setFilters={setFilters}
@@ -188,9 +201,9 @@ const EmployerJobsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* RIGHT COLUMN (Job Listing) */}
-              <div className="flex-1 overflow-y-auto scrollbar-hide">
-                {/* If you want to also show filters on mobile, you can show them inline above or below */}
+              {/* RIGHT COLUMN (Job Listing) - Scrollable */}
+              <div className="flex-1 flex flex-col h-full">
+                {/* Mobile filters */}
                 <div className="lg:hidden mb-4">
                   <JobFilters
                     filters={filters}
@@ -199,46 +212,69 @@ const EmployerJobsPage: React.FC = () => {
                   />
                 </div>
 
-                {isContentLoading && (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <JobCardSkeleton key={i} />
-                    ))}
-                  </div>
-                )}
+                {/* Scrollable job cards container */}
+                <div
+                  ref={contentRef}
+                  className="flex-1 overflow-y-auto pr-2 pb-4 scrollbar-hide"
+                >
+                  {isContentLoading && (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <JobCardSkeleton key={i} />
+                      ))}
+                    </div>
+                  )}
 
-                {!isContentLoading && (
-                  <>
-                    {!filteredJobs || filteredJobs.length === 0 ? (
-                      <Card className="text-center py-20">
-                        <CardContent>
-                          <h3 className="text-xl font-semibold mb-2">
-                            No jobs posted yet
-                          </h3>
-                          <p className="text-gray-500 mb-6">
-                            Create your first job posting to start hiring talent
-                          </p>
-                          <Button
-                            onClick={() => navigate("/employer/dashboard")}
-                          >
-                            Post Your First Job
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-6">
-                        {filteredJobs.map((job: IJob) => (
-                          <JobCard
-                            key={job._id}
-                            job={job}
-                            onSelect={handleSelectJob}
-                            onEdit={handleEditJob}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
+                  {!isContentLoading && (
+                    <>
+                      {!filteredJobs || filteredJobs.length === 0 ? (
+                        <Card className="text-center py-16 bg-white shadow-sm rounded-lg">
+                          <CardContent>
+                            <div className="flex justify-center mb-4">
+                              <div className="w-16 h-16">
+                                <img
+                                  src={NoPostSVG || "/placeholder.svg"}
+                                  alt="No Post"
+                                />
+                              </div>
+                            </div>
+                            {jobsData?.data?.length === 0 ? (
+                              <>
+                                <p className="text-body2 text-[#414447] mb-1">
+                                  Create your first job posting to start hiring
+                                  talent.
+                                </p>
+                                <button
+                                  onClick={() =>
+                                    navigate("/employer/jobs/create")
+                                  }
+                                  className="hover:bg-transparent text-[#414447] text-body2 underline"
+                                >
+                                  Post Job
+                                </button>
+                              </>
+                            ) : (
+                              <p className="text-body2 text-[#414447] mb-1">
+                                No jobs match your current filter criteria.
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-6">
+                          {filteredJobs.map((job: IJob) => (
+                            <JobCard
+                              key={job._id}
+                              job={job}
+                              onSelect={handleSelectJob}
+                              onEdit={handleEditJob}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>

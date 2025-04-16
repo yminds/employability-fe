@@ -301,27 +301,29 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
                   {jobViews}
                 </span>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[#909091] text-body2">Shortlisted</span>
-                <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
-                  {shortlistedCount}
-                </span>
-              </div>
-              <div className="flex flex-col">
+              {/* <div className="flex flex-col">
                 <span className="text-[#909091] text-body2">Rejected</span>
                 <div>
                   <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
                     {rejectedCount}
                   </span>
-                  <span className="text-xs font-dm-sans text-[#414447] ml-1">
-                    25% of 120 invites
-                  </span>
                 </div>
-              </div>
+              </div> */}
               <div className="flex flex-col">
-                <span className="text-[#909091] text-body2">Hired</span>
+                <span className="text-[#909091] text-body2">
+                  Accepted Interviews
+                </span>
                 <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
                   {hiredCount}
+                </span>
+                <span className="text-xs font-dm-sans text-[#414447] ml-1">
+                  25% of 120 invites
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[#909091] text-body2">Shortlisted</span>
+                <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
+                  {shortlistedCount}
                 </span>
               </div>
             </div>

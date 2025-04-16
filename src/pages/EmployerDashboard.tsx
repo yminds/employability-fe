@@ -255,7 +255,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {hasCompany && (
+              {!hasCompany && (
                 <div
                   className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full cursor-pointer overflow-hidden"
                   onClick={() => navigate("/employer/company/create")}
