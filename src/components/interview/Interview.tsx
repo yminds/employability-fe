@@ -369,7 +369,7 @@ const Interview: React.FC<{
               : typeof Fundamentals === "string"
                 ? Fundamentals.split(",").map((c: string) => c.trim())
                 : []
-            : concepts,
+            : concepts?.slice(0,1),
         interview_id: interviewDetails.data._id,
         level: user?.experience_level || "entry",
         type: type,

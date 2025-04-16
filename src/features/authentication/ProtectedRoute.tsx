@@ -14,13 +14,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const token = useSelector((state: any) => state.auth?.token);
   const role = useSelector((state: RootState) => state.auth?.role?.name);
-  return token ? (
-    <>
-      {/* {allowedRoles && !allowedRoles.includes(role) ? ( */}
-      {false ? <Navigate to="/not-authorized" replace /> : <>{children}</>}
-    </>
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  // return token ? (
+  //   <>
+  //     {/* {allowedRoles && !allowedRoles.includes(role) ? ( */}
+  //     {false ? <Navigate to="/not-authorized" replace /> : <>{children}</>}
+  //   </>
+  // ) : (
+  //   <>{!user ? <Navigate to="/" replace /> : <Navigate to="/login" replace />}</>
+  // );
+  return user ? (
+    <>{children}</>
   ) : (
-    <Navigate to="/login" replace />
+    <>
+      <>{!user ? <Navigate to="/" replace /> : <Navigate to="/login" replace />}</>
+    </>
   );
 };
 

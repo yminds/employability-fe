@@ -130,7 +130,13 @@ const SkillCard: React.FC<SkillCardProps> = ({
 
   const handleViewReport = () => {
     navigate(`/skill/report/${bestInterview}`, {
-      state: { best_interview: bestInterview, goal_name: goalName, skillIcon: skillImg, skillId: skillId },
+      state: {
+        best_interview: bestInterview,
+        goal_name: goalName,
+        skillIcon: skillImg,
+        skillId: skillId,
+        skillName: skill,
+      },
     });
   };
 

@@ -325,7 +325,6 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
     }
   }, [companyAndJobDetails]);
 
-
   return (
     <main className=" flex w-full h-screen justify-center sm:overflow-y-auto sm:flex-col">
       <div className=" flex-col justify-center bg-[#F5F5F5] w-[95%] max-w-[1800px] h-full sm:p-0">
@@ -418,20 +417,26 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
           </div>
 
           {/* Right Content Panel */}
-          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar ">
+          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar space-y-2">
             <div>
               {companyAndJobDetails ? (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-                  <JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} isEmployer={isEmployerReport} profile={profile} inviteId={inviteId} />
+                  <JobCard
+                    jobDetails={companyAndJobDetails}
+                    takenAT={reportData.createdAt}
+                    isEmployer={isEmployerReport}
+                    profile={profile}
+                    inviteId={inviteId}
+                  />
                 </section>
               ) : (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-                  {/* Hello */}
+                  <InterviewDetails takenAt={reportData.createdAt} interviewType={reportData.reportType} />
                 </section>
-              )}
+              ) }
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2">
               {/* 1. Performance Highlights */}
               <section id="highlights" className="rounded-lg p-8 shadow-sm bg-white sm:p-4">
                 {(companyAndJobDetails || reportData.reportType === "Skill" || reportData.reportType === "Project") && (
