@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import defaultImg from "@/assets/employer-company/DefaultCompanyLogo.svg"
 import { useGetCountriesQuery, useGetStatesQuery } from '@/api/locationApiSlice';
@@ -11,6 +10,11 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 	const [shortlistCandidate] = useShortlistMutation();
 	const [shortlist, setShortlist] = useState<boolean | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
+
+	// Early return if jobDetails is undefined or null
+	if (!jobDetails) {
+		return null;
+	}
 
 	const { job } = jobDetails;
 	const company = job?.company;
@@ -53,11 +57,9 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 
 	return (
 		<>
-			{!isEmployer ?
+			{(!isEmployer && jobDetails !== undefined) ? 
 				<div className="flex items-center justify-between bg-white shadow-sm rounded-lg p-4 w-full border border-gray-200">
 					{/* Left Section: Logo + Job Info */}
-			
-
 					<div className="flex items-center space-x-4">
 						{/* Company Logo */}
 						<div className="w-10 h-10 flex items-center justify-center bg-white rounded-full">
@@ -78,7 +80,7 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 						</div>
 					</div>
 				</div>
-				:
+				: 
 				<div className="flex items-center justify-between bg-white shadow-sm rounded-lg p-4 w-full border border-gray-200">
 					{/* Left Section: Logo + Job Info */}
 					<div className="flex items-center space-x-4">
@@ -125,7 +127,8 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 									: "Shortlist candidate"}
 						</button>
 					</div>
-				</div>}
+				</div>
+			}
 		</>
 	);
 };

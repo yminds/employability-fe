@@ -443,6 +443,7 @@ const sourceCounts = useMemo(() => {
   const filteredCandidates = allCandidates.filter((candidate) => {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
+    
     return (
       candidate.name.toLowerCase().includes(searchLower) ||
       (candidate.email &&
