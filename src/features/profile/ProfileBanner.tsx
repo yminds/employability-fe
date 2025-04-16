@@ -25,12 +25,12 @@ import EditBio from "@/assets/profile/editbio.svg";
 import Share from "@/assets/profile/share.svg";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
-import EmailComposerModal from "@/components/modal/EmailComposerModal";
 import ContactInfoModal from "@/components/modal/ContactInfoModal";
 import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
 import EditProfileImageModal from "@/components/modal/EditProfileImageModal";
 import VerfiedIcon from "../../assets/skills/verified.svg";
 import UnverifiedIcon from "../../assets/skills/unverifies.svg";
+import { capitalizeString } from '../dashboard/components/interview-invitations/utils';
 
 interface ProfileBannerProps {
   user: any;
@@ -71,7 +71,6 @@ const ProfileBanner = ({
   const [isEditBioOpen, setIsEditBioOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isContactInfoModalOpen, setIsContactInfoModalOpen] = useState(false);
   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
     useState(false);
@@ -109,10 +108,8 @@ const ProfileBanner = ({
   const handleContact = () => {
     if (!employer) {
       setIsLoginRequiredModalOpen(true);
-    } else if (user.is_contact_info_public) {
-      setIsContactInfoModalOpen(true);
     } else {
-      setIsEmailModalOpen(true);
+      setIsContactInfoModalOpen(true);
     }
   };
 
@@ -201,8 +198,9 @@ const ProfileBanner = ({
             <div className="flex flex-col items-start justify-end gap-2 ">
               {hasGoalData ? (
                 <>
+                  <div className="flex p-[2px] px-3 justify-center items-center gap-2 rounded-full border border-[#2EE578] bg-green-100"><span className=" text-[#10B754]">{capitalizeString(user.experience_level)}</span></div>
                   <h2 className="text-[#414447] text-h2">
-                    {user.goals?.[0]?.name} 
+                    {user.goals?.[0]?.name}
                   </h2>
                   <div className="flex items-center gap-2 rounded-lg">
                     <div className="flex items-baseline gap-1">
@@ -331,15 +329,6 @@ const ProfileBanner = ({
         <GoalDialog
           isOpen={isGoalModalOpen}
           onClose={() => setIsGoalModalOpen(false)}
-        />
-      )}
-      {isPublic && (
-        <EmailComposerModal
-          isOpen={isEmailModalOpen}
-          onClose={() => setIsEmailModalOpen(false)}
-          recipientEmail={contactInfo?.data?.email || ""}
-          recipientName={user?.name || ""}
-          employer={employer}
         />
       )}
       {/* Contact Info Modal */}

@@ -40,7 +40,6 @@ export type User = {
   email_verification_token?: string;
   email_verification_token_expiry?: Date;
   account_status?: "active" | "disabled";
-  is_contact_info_public?: boolean;
   gender: string;
   resume: Resume[];
   profile_image?: string;

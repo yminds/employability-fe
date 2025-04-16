@@ -13,6 +13,7 @@ import UnverifiedIcon from "../../assets/skills/unverifies.svg";
 import Background from "../../assets/dashboard/Background.svg";
 import { useNavigate } from "react-router-dom";
 import ProfileAvatar from "@/assets/profile/ProfileAvatar.svg";
+import { capitalizeString } from "./components/interview-invitations/utils";
 
 interface CompleteActivityProps {
   displayScore?: boolean;
@@ -83,6 +84,8 @@ const CompleteActivityCard: React.FC<CompleteActivityProps> = ({
       <Separator className="bg-[#d9d9d9] relative z-10" />
 
       {/* Role and Score Section */}
+      <div className="flex p-[2px] px-3 justify-center items-center gap-2 rounded-full border max-w-fit border-[#2EE578] bg-green-100"><span className=" text-[#10B754]">{capitalizeString(user?.experience_level)}</span></div>
+      
       <div className="space-y-3 relative z-10">
         <h4 className="text-h2 text-[#040609]">
           {goalName || "Full Stack Developer"}

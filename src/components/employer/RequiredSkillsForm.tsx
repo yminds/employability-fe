@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 interface Skill {
   _id: string;
@@ -24,7 +25,6 @@ type ImportanceLevel = "Very Important" | "Important" | "Good-To-Have";
 interface SkillRecommendation {
   skill: Skill;
   importance: ImportanceLevel;
-  reasoning: string;
 }
 
 // Define the API response structure
@@ -74,7 +74,7 @@ const sortSkillsByImportance = (skills: SkillRecommendation[]) => {
 const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   selectedSkills,
   setSelectedSkills,
-  maxMustHaveSkills = 6,
+  maxMustHaveSkills = 4,
   jobTitle,
   jobDescription,
   shouldFetchRecommendations = false,
@@ -89,7 +89,6 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   const [recommendedSkills, setRecommendedSkills] = useState<
     SkillRecommendation[]
   >([]);
-  const [reasonings, setReasonings] = useState<Record<string, string>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const lastProcessedJDRef = useRef<string>("");
 
@@ -252,12 +251,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
         const sortedSkills = sortSkillsByImportance(skillsData);
         setRecommendedSkills(sortedSkills);
 
-        // Create a mapping of skill IDs to their reasoning
-        const reasoningMap: Record<string, string> = {};
-        skillsData.forEach((item: SkillRecommendation) => {
-          reasoningMap[item.skill._id] = item.reasoning;
-        });
-        setReasonings(reasoningMap);
+        
       }
     } catch (error) {
       console.error("Error fetching AI skill recommendations:", error);
@@ -312,9 +306,9 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
       (s, idx) => idx !== index && s.importance === "Very Important"
     ).length;
 
-    // If changing to Must-Have and already at limit, don't allow
+ 
     if (importance === "Very Important" && mustHaveCount >= maxMustHaveSkills) {
-      alert(`You can only have ${maxMustHaveSkills} Very Important skills.`);
+      toast.error(`You can only have ${maxMustHaveSkills} Very Important skills.`);
       return;
     }
 
@@ -631,26 +625,6 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
 
             {/* Actions section */}
             <div className="flex items-center">
-              {/* Reasoning tooltip */}
-              {reasonings[skillItem.skill._id] && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="text-gray-500 hover:text-blue-500 focus:outline-none p-1 mr-2"
-                        aria-label="Skill reasoning"
-                      >
-                        <Info size={18} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs p-2">
-                      <p>{reasonings[skillItem.skill._id]}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-
               {/* Remove skill button */}
               <button
                 type="button"

@@ -25,7 +25,6 @@ import Share from "@/assets/profile/share.svg";
 import { toast } from "sonner";
 import GoalDialog from "@/components/skills/setGoalDialog";
 import { useSelector } from "react-redux";
-import EmailComposerModal from "@/components/modal/EmailComposerModal";
 import ContactInfoModal from "@/components/modal/ContactInfoModal";
 import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
 import EditProfileImageModal from "@/components/modal/EditProfileImageModal";
@@ -79,7 +78,6 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
   const [isEditBioOpen, setIsEditBioOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isContactInfoModalOpen, setIsContactInfoModalOpen] = useState(false);
   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
     useState(false);
@@ -112,10 +110,8 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
   const handleContact = () => {
     if (!employer) {
       setIsLoginRequiredModalOpen(true);
-    } else if (user.is_contact_info_public) {
-      setIsContactInfoModalOpen(true);
     } else {
-      setIsEmailModalOpen(true);
+      setIsContactInfoModalOpen(true);
     }
   };
 
@@ -295,14 +291,6 @@ const ProfileBannerMobile: React.FC<ProfileBannerMobileProps> = ({
         <GoalDialog
           isOpen={isGoalModalOpen}
           onClose={() => setIsGoalModalOpen(false)}
-        />
-      )}
-      {isPublic && (
-        <EmailComposerModal
-          isOpen={isEmailModalOpen}
-          onClose={() => setIsEmailModalOpen(false)}
-          recipientEmail={contactInfo?.data?.email || ""}
-          recipientName={user?.name || ""}
         />
       )}
       {/* Contact Info Modal */}
