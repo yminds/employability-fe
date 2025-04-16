@@ -272,23 +272,22 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
         setTitle(job.title);
       }
     } else {
-		console.log("reportData.reportType312", reportData.reportType);
+      console.log("reportData.reportType312", reportData.reportType);
 
-        let title = "";
-        switch (reportData.reportType) {
-          case "Skill":
-            title = "Skill";
-            break;
-          case "Project":
-            title = "Project";
-            break;
-          case "Mock":
-            title = "Mock";
-        }
-        setTitle(title);
+      let title = "";
+      switch (reportData.reportType) {
+        case "Skill":
+          title = "Skill";
+          break;
+        case "Project":
+          title = "Project";
+          break;
+        case "Mock":
+          title = "Mock";
       }
+      setTitle(title);
+    }
   }, [companyAndJobDetails]);
-
 
   return (
     <main className=" flex w-full h-screen justify-center sm:overflow-y-auto sm:flex-col">
@@ -383,16 +382,26 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
           </div>
 
           {/* Right Content Panel */}
-          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar space-y-6">
+          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar space-y-2">
             <div>
-              {companyAndJobDetails && (
+              {companyAndJobDetails ? (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-                  <JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} isEmployer={isEmployerReport} profile={profile} inviteId={inviteId} />
+                  <JobCard
+                    jobDetails={companyAndJobDetails}
+                    takenAT={reportData.createdAt}
+                    isEmployer={isEmployerReport}
+                    profile={profile}
+                    inviteId={inviteId}
+                  />
                 </section>
-              ) }
+              ) : (
+                <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
+                  <InterviewDetails takenAt={reportData.createdAt} interviewType={reportData.reportType} />
+                </section>
+              )}
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2">
               {/* 1. Performance Highlights */}
               <section id="highlights" className="rounded-lg p-8 shadow-sm bg-white ">
                 {(companyAndJobDetails || reportData.reportType === "Skill" || reportData.reportType === "Project") && (

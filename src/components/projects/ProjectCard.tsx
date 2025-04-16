@@ -175,6 +175,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         best_interview: project.latest_interview_status.interview_id,
         fromInterviewCard: true,
         thread_id: "",
+        projectName: project.name,
       },
     });
   };
