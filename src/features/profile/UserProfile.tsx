@@ -89,7 +89,6 @@ const UserProfile: React.FC = () => {
         profileUrl={profileUrl}
         phoneNumber={user?.phone_number}
         email={user.email}
-        initialPrivacy={user.is_contact_info_public}
         userId={user._id}
       />
     </>

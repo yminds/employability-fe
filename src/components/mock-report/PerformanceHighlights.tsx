@@ -42,14 +42,12 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
   getRatingText,
   formatJobType,
   formatWorkplaceType,
-  getRatingStyles,
-  getRatingLabel,
   companyDetails
 }) => {
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   console.log("Company details", companyDetails)
   return (
-    <section id="highlights" className="rounded-lg shadow-sm bg-white">
+    <section id="highlights" className="rounded-lg bg-white">
       <div className="bg-white w-full space-y-4">
         {(isEmployerReport && reportData) ? (
           <div className="flex justify-between items-center">
@@ -97,7 +95,7 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
           }}
         >
           <div className="flex items-center max-h-full p-8">
-            <div className="flex h-full min-w-1/2 flex-[2] justify-center items-center">
+            <div className="flex h-full min-w-1/2 flex-[2] justify-center items-center sm:hidden">
               <img
                 src={
                   reportData.reportType === 'Full'

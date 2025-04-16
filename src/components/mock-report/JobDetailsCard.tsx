@@ -1,13 +1,20 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import defaultImg from "@/assets/employer-company/DefaultCompanyLogo.svg"
 import { useGetCountriesQuery, useGetStatesQuery } from '@/api/locationApiSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from "@/store/store";
-import { useShortlistMutation } from '@/api/interviewInvitesApiSlice';
+import { useShortlistMutation, useGetShortlistStatusQuery } from '@/api/interviewInvitesApiSlice';
 
 const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean, profile: any, inviteId: string }> = ({ jobDetails, takenAT, isEmployer, profile, inviteId }) => {
-	const [shortlistCandidate, { isLoading, isSuccess, isError, error }] = useShortlistMutation();
+	const { data, error: shortListError, isLoading: shortListStatus } = useGetShortlistStatusQuery(inviteId);
+	const [shortlistCandidate] = useShortlistMutation();
+	const [shortlist, setShortlist] = useState<boolean | null>(null);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+
+	// Early return if jobDetails is undefined or null
+	if (!jobDetails) {
+		return null;
+	}
 
 	const { job } = jobDetails;
 	const company = job?.company;
@@ -29,16 +36,28 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 
 
 	const handleShortlist = async () => {
+		setIsLoading(true);
 		try {
+			// Call your shortlist mutation API here
 			await shortlistCandidate(inviteId).unwrap();
-			console.log("Candidate shortlisted successfully!");
+			setShortlist(true); // Update the shortlist state to true after success
 		} catch (err) {
 			console.error("Error shortlisting candidate:", err);
+		} finally {
+			setIsLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		if (data) {
+			console.log('data', data)
+			setShortlist(data.shortlist); // Set the shortlist value from API response
+		}
+	}, [data]);
+
 	return (
 		<>
-			{!isEmployer ?
+			{(!isEmployer && jobDetails !== undefined) ? 
 				<div className="flex items-center justify-between bg-white shadow-sm rounded-lg p-4 w-full border border-gray-200">
 					{/* Left Section: Logo + Job Info */}
 					<div className="flex items-center space-x-4">
@@ -61,7 +80,7 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 						</div>
 					</div>
 				</div>
-				:
+				: 
 				<div className="flex items-center justify-between bg-white shadow-sm rounded-lg p-4 w-full border border-gray-200">
 					{/* Left Section: Logo + Job Info */}
 					<div className="flex items-center space-x-4">
@@ -95,16 +114,21 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 						</a>
 						<button
 							onClick={handleShortlist}
-							disabled={isLoading}
-							className={`px-4 py-2 rounded text-sm font-medium transition ${isLoading
-									? "bg-gray-400 cursor-not-allowed text-white"
+							disabled={isLoading || (shortlist ?? false)} 
+							className={`px-4 py-2 rounded text-sm font-medium transition ${isLoading || shortlist
+									? "bg-[#E0E0E0] cursor-not-allowed text-white" // Lighter background when disabled
 									: "bg-[#001738] text-white hover:bg-[#001738cc]"
 								}`}
 						>
-							{isLoading ? "Shortlisting..." : "Shortlist candidate"}
+							{isLoading
+								? "Shortlisting..."
+								: shortlist
+									? "Shortlisted" // Show "Shortlisted" text if the candidate is already shortlisted
+									: "Shortlist candidate"}
 						</button>
 					</div>
-				</div>}
+				</div>
+			}
 		</>
 	);
 };

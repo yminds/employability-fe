@@ -130,20 +130,14 @@ const useInterviewSetup = () => {
         video: true,
         audio: true,
       });
-
-      // Check if system audio is enabled (i.e. if there are audio tracks)
+  
+      // Check if system audio is enabled
       if (screenStream.getAudioTracks().length === 0) {
         screenStream.getTracks().forEach((track) => track.stop());
         alert("Please enable system audio when sharing your screen (share the entire window with audio enabled).");
         return;
       }
-
-      if (screenStream.getAudioTracks().length === 0) {
-        screenStream.getTracks().forEach((track) => track.stop());
-        alert("Please enable system audio when sharing your screen (share the entire window with audio enabled).");
-        return;
-      }
-
+  
       const micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -151,16 +145,16 @@ const useInterviewSetup = () => {
           autoGainControl: true,
         },
       });
-
+  
       const audioContext = new AudioContext();
       const destination = audioContext.createMediaStreamDestination();
-
+  
       const micSource = audioContext.createMediaStreamSource(micStream);
       micSource.connect(destination);
-
+  
       const systemAudioSource = audioContext.createMediaStreamSource(new MediaStream(screenStream.getAudioTracks()));
       systemAudioSource.connect(destination);
-
+  
       const combinedStream = new MediaStream([
         ...screenStream.getVideoTracks(),
         ...destination.stream.getAudioTracks(),
@@ -173,56 +167,68 @@ const useInterviewSetup = () => {
         destination,
         micSource,
         systemAudioSource,
+        combinedStream // Store the combined stream for later use
       };
+      
       dispatch(
         setRecordingReference({ screenStream, micStream, audioContext, destination, micSource, systemAudioSource })
       );
-
+  
       setScreenStream(combinedStream);
       setIsScreenSharing(true);
-
-      const startRecording = () => {
-        const recorder = new MediaRecorder(combinedStream, {
-          mimeType: "video/webm; codecs=vp8,opus",
-        });
-
-        recorder.ondataavailable = async (event) => {
-          if (event.data.size > 0) {
-            recordedChunksRef.current.push(event.data);
-
-            // If we're stopping or this is a regular chunk, upload it
-            if (isStoppingRef.current || recordedChunksRef.current.length >= 1) {
-              const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
-              await uploadFileToS3(updateReportRecording, blob, interviewId, chunkNumberRef.current);
-
-              chunkNumberRef.current++;
-              recordedChunksRef.current = [];
-            }
-          }
-        };
-
-        recorder.onstop = () => {
-          if (!isStoppingRef.current) {
-            setTimeout(startRecording, 500);
-          }
-        };
-
-        recorder.start();
-        recorderRef.current = recorder;
-
-        // Stop recording after 3 minutes
-        setTimeout(() => {
-          if (recorder && recorder.state !== "inactive") {
-            recorder.stop();
-          }
-        }, 30000);
-      };
-
-      startRecording();
+      
+      // Notice we no longer start recording here
+  
     } catch (error) {
       console.error("Error capturing screen and microphone:", error);
     }
   };
+  
+  // New function to start recording separately
+  const startRecording = () => {
+    if (!globalReference.current || !globalReference.current.combinedStream) {
+      console.error("No stream available. Please share screen first.");
+      return;
+    }
+    
+    const { combinedStream } = globalReference.current;
+    
+    const recorder = new MediaRecorder(combinedStream, {
+      mimeType: "video/webm; codecs=vp8,opus",
+    });
+  
+    recorder.ondataavailable = async (event) => {
+      if (event.data.size > 0) {
+        recordedChunksRef.current.push(event.data);
+  
+        // If we're stopping or this is a regular chunk, upload it
+        if (isStoppingRef.current || recordedChunksRef.current.length >= 1) {
+          const blob = new Blob(recordedChunksRef.current, { type: "video/webm" });
+          await uploadFileToS3(updateReportRecording, blob, interviewId, chunkNumberRef.current);
+  
+          chunkNumberRef.current++;
+          recordedChunksRef.current = [];
+        }
+      }
+    };
+  
+    recorder.onstop = () => {
+      if (!isStoppingRef.current) {
+        setTimeout(startRecording, 500);
+      }
+    };
+  
+    recorder.start();
+    recorderRef.current = recorder;
+  
+    // Stop recording after 30 seconds (30000ms)
+    setTimeout(() => {
+      if (recorder && recorder.state !== "inactive") {
+        recorder.stop();
+      }
+    }, 30000);
+  };
+  
 
   const stopScreenSharing = async () => {
     try {
@@ -346,6 +352,7 @@ const useInterviewSetup = () => {
     isCameraSelected,
     cameraScale,
     isProceedButtonEnabled,
+    startRecording,
   };
 };
 

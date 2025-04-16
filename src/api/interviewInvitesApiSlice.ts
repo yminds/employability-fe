@@ -47,6 +47,12 @@ export const interviewInvitesApiSlice = apiSlice.injectEndpoints({
         method: "PATCH",
       }),
     }),
+    getShortlistStatus: builder.query({
+      query: (inviteId) => ({
+        url: `/api/v1/employerInterviewInvitation/shortlist/status/${inviteId}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -56,5 +62,6 @@ export const {
   useGetInviteDetailsQuery,
   useGetFundamentalNamesAsCsvMutation,
   useUpdateInterviewIdMutation,
-  useShortlistMutation
+  useShortlistMutation,
+  useGetShortlistStatusQuery,
 } = interviewInvitesApiSlice; 

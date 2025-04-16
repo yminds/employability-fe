@@ -390,7 +390,7 @@ const NewInterViewPlayer = ({ url, skipTime = 10 }: SimplePlayerProps) => {
 
         {/* Controls now below the progress bar */}
         <div className="flex items-center justify-between relative z-[2]  px-5 md:px-3 pb-5 md:pb-3">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 sm:gap-1">
             {/* Play/Pause Button */}
             <button
               onClick={togglePlay}
