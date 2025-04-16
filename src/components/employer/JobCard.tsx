@@ -1,11 +1,16 @@
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Briefcase, Building, ChevronRight, Users } from 'lucide-react';
+import type React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ChevronRight, MoreVertical } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 // Import utility functions
-import { jobUtils } from '@/utils/jobUtils';
+import { jobUtils } from "@/utils/jobUtils";
 
 interface ISkill {
   _id: string;
@@ -14,9 +19,8 @@ interface ISkill {
   importance?: "Very Important" | "Important" | "Good-To-Have";
 }
 
-
 interface ISkillRequired {
-  skill: string; 
+  skill: string;
   importance: "Very Important" | "Important" | "Good-To-Have";
 }
 
@@ -30,18 +34,17 @@ interface ICandidate {
   education?: string;
 }
 
-  
 export interface IJob {
   _id: string;
   title: string;
   description: string;
   company?: any;
-  employer?: any; 
+  employer?: any;
   job_type: "full-time" | "part-time" | "contract" | "internship";
   work_place_type: "remote" | "hybrid" | "on-site";
   experience_level: "entry" | "mid" | "senior";
   location: string | { city: string; state: string; country: string };
-  
+
   skills_required: (ISkill | ISkillRequired | string)[];
   screening_questions?: Array<{
     question: string;
@@ -61,7 +64,7 @@ export interface IJob {
   status: "active" | "closed";
   created_at?: Date | string;
   updated_at?: Date | string;
-  
+
   candidates?: {
     applied?: ICandidate[];
     shortlisted?: ICandidate[];
@@ -70,7 +73,7 @@ export interface IJob {
   };
   views?: number;
   applications?: number;
-  
+
   // Legacy fields for backward compatibility
   createdAt?: string;
   posted_date?: string;
@@ -112,66 +115,78 @@ const Eye = ({ className }: { className?: string }) => {
 
 const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
   // Determine job type (using updated fields with fallbacks for backward compatibility)
-  const jobType = job.job_type || job.type || job.work_type || 'full-time';
-  
+  const jobType = job.job_type || job.type || job.work_type || "full-time";
+
   // Use appropriate date field, with fallbacks and type checking
-  const postedDate = typeof job.created_at === 'string' ? job.created_at : 
-                    typeof job.posted_date === 'string' ? job.posted_date : 
-                    typeof job.createdAt === 'string' ? job.createdAt : '';
-  
+  const postedDate =
+    typeof job.created_at === "string"
+      ? job.created_at
+      : typeof job.posted_date === "string"
+      ? job.posted_date
+      : typeof job.createdAt === "string"
+      ? job.createdAt
+      : "";
+
   // Safely get counts with defaults
   const appliedCount = job.candidates?.applied?.length || 0;
   const shortlistedCount = job.candidates?.shortlisted?.length || 0;
   const rejectedCount = job.candidates?.rejected?.length || 0;
   const hiredCount = job.candidates?.hired?.length || 0;
-  
+
   // Enhanced function to get the skill name from different skill formats
   const getSkillName = (skillItem: any): string => {
     // String case - direct string representing a skill name or ID
-    if (typeof skillItem === 'string') {
+    if (typeof skillItem === "string") {
       return skillItem;
-    } 
-    
+    }
+
     // Object case - could be a direct skill object or a skill with importance
-    if (skillItem && typeof skillItem === 'object') {
+    if (skillItem && typeof skillItem === "object") {
       // Direct skill object format like in form data (JobPostingPage sends this)
       if (skillItem.name) {
         return skillItem.name;
       }
-      
+
       // Backend model format with skill reference and importance
       if (skillItem.skill) {
         // If skill is a string (most likely an ID)
-        if (typeof skillItem.skill === 'string') {
+        if (typeof skillItem.skill === "string") {
           return skillItem.skill;
         }
         // If skill is an object with name or _id
-        if (typeof skillItem.skill === 'object') {
-          return skillItem.skill.name || skillItem.skill._id || 'Unknown Skill';
+        if (typeof skillItem.skill === "object") {
+          return skillItem.skill.name || skillItem.skill._id || "Unknown Skill";
         }
       }
-      
+
       // Try getting _id directly if it exists
       if (skillItem._id) {
-        return typeof skillItem._id === 'string' ? skillItem._id : String(skillItem._id);
+        return typeof skillItem._id === "string"
+          ? skillItem._id
+          : String(skillItem._id);
       }
     }
-    
+
     // Fallback
-    return 'Unknown Skill';
+    return "Unknown Skill";
   };
-  
-  const formatLocation = (location: string | { city: string; state: string; country: string }): string => {
-    if (typeof location === 'string') {
+
+  const formatLocation = (
+    location: string | { city: string; state: string; country: string }
+  ): string => {
+    if (typeof location === "string") {
       return location;
     }
-    
-    if (location && typeof location === 'object') {
+
+    if (location && typeof location === "object") {
       const { city, state, country } = location;
-      return `${city || ''}, ${state || ''}, ${country || ''}`.replace(/^, |, $/g, '');
+      return `${city || ""}, ${state || ""}, ${country || ""}`.replace(
+        /^, |, $/g,
+        ""
+      );
     }
-    
-    return '';
+
+    return "";
   };
 
   // Transform skills_required to an array of skill names for display
@@ -179,129 +194,148 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
     if (!job.skills_required || !Array.isArray(job.skills_required)) {
       return [];
     }
-    
+
     return job.skills_required.map(getSkillName);
   };
-  
+
   const skillsToDisplay = getSkillsForDisplay();
-  
+
   // Format experience level for display
-  const formatExperienceLevel = (level: string = ''): string => {
+  const formatExperienceLevel = (level = ""): string => {
     const mapping: Record<string, string> = {
-      'entry': 'Entry Level',
-      'mid': 'Mid Level',
-      'senior': 'Senior Level',
+      entry: "Entry Level",
+      mid: "Mid Level",
+      senior: "Senior Level",
       // Legacy mappings for backward compatibility
-      'intermediate': 'Mid Level',
-      'executive': 'Senior Level',
-      'entry-level': 'Entry Level',
-      'mid-level': 'Mid Level',
-      'senior-level': 'Senior Level'
+      intermediate: "Mid Level",
+      executive: "Senior Level",
+      "entry-level": "Entry Level",
+      "mid-level": "Mid Level",
+      "senior-level": "Senior Level",
     };
-    
+
     return mapping[level.toLowerCase()] || level;
   };
-  
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200 bg-white rounded-lg">
       <CardContent className="p-0">
-        <div className="p-5">
+        <div className="p-7">
           <div className="flex justify-between items-start">
             <div>
               <div className="flex items-center">
-                <h3 className="text-h2 font-semibold">{job.title}</h3>
-                <Badge 
-                  className={`ml-2 text-sm font-dm-sans ${jobUtils.getStatusColor(job.status)}`}
+                <h3 className="text-h2 text-[#414447]">{job.title}</h3>
+                <Badge
+                  className={`ml-2 text-sm font-dm-sans ${jobUtils.getStatusColor(
+                    job.status
+                  )}`}
                   variant="outline"
                 >
                   {job.status}
                 </Badge>
               </div>
-              <div className="flex items-center mt-1 text-sm text-body2 text-gray-500">
-                <Building className="h-4 w-4 mr-1" />
+              <div className="flex items-center mt-1 text-sm text-body2 text-[#68696B]">
+                <span>
+                  {job.company?.name || job.employer?.name || "Finopsly"}
+                </span>
+                <span className="mx-2">|</span>
                 <span>{formatLocation(job.location)}</span>
-                <span className="mx-2">•</span>
-                <Briefcase className="h-4 w-4 mr-1" />
-                <span>{jobUtils.formatJobType(jobType)}</span>
-                {job.work_place_type && (
-                  <>
-                    <span className="mx-2">•</span>
-                    <span>{job.work_place_type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                  </>
-                )}
-                {job.experience_level && (
-                  <>
-                    <span className="mx-2">•</span>
-                    <span>{formatExperienceLevel(job.experience_level)}</span>
-                  </>
-                )}
+                <span className="mx-2">|</span>
+                <span>
+                  {job.work_place_type
+                    ? job.work_place_type
+                        .replace("-", " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())
+                    : "On-site"}
+                </span>
               </div>
             </div>
             <div className="flex flex-col items-end font-dm-sans">
-              <span className="text-xs text-gray-500">
-                {postedDate ? jobUtils.getTimeAgo(postedDate) : 'Recently posted'}
-              </span>
-              <div className="mt-1 flex items-center">
-                <div className="flex items-center text-sm text-gray-500 mr-4">
-                  <Users className="h-4 w-4 mr-1" />
-                  <span>{job.applications || 0} applicants</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <Eye className="h-4 w-4 mr-1" />
-                  <span>{job.views || 0} views</span>
-                </div>
+              <div className="flex gap-6 items-center">
+                <span className="text-xs text-[#68696B] font-normal leading-4 tracking-[0.24px] font-dm-sans">
+                  {postedDate
+                    ? jobUtils.getTimeAgo(postedDate)
+                    : "Recently posted"}
+                </span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="ml-1" aria-label="More options">
+                      <MoreVertical className="h-5 w-5 text-gray-500" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-24 p-0"
+                    side="bottom"
+                    align="end"
+                  >
+                    <div className="py-1">
+                      <button
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center"
+                        onClick={() => onEdit && onEdit(job)}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
-          
-          <div className="mt-3">
-            <div className="flex flex-wrap gap-2 mb-3">
-              {skillsToDisplay.slice(0, 4).map((skill, index) => (
-                <Badge key={index} variant="outline" className="text-body2 bg-[#ECECEC]">
-                  {skill}
-                </Badge>
-              ))}
-              {skillsToDisplay.length > 4 && (
-                <Badge variant="outline" className="text-body2 bg-[#ECECEC]">
-                  +{skillsToDisplay.length - 4} more
-                </Badge>
-              )}
+
+          {/* Divider line */}
+          <div className="border-t border-gray-100 mt-6"></div>
+
+          <div className="flex flex-row justify-between">
+            {/* Stats section */}
+            <div className="flex flex-row gap-[80px] mt-6">
+              <div className="flex flex-col">
+                <span className="text-[#909091] text-body2">Applied</span>
+                <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
+                  {appliedCount}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[#909091] text-body2">Shortlisted</span>
+                <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
+                  {shortlistedCount}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[#909091] text-body2">Rejected</span>
+                <div>
+                  <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
+                    {rejectedCount}
+                  </span>
+                  <span className="text-xs font-dm-sans text-[#414447] ml-1">
+                    25% of 120 invites
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[#909091] text-body2">Hired</span>
+                <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
+                  {hiredCount}
+                </span>
+              </div>
             </div>
-            
-            <p className="text-body2 text-gray-600 line-clamp-2">
-              {job.description}
-            </p>
+
+            {/* View details */}
+            <div className="flex items-end font-dm-sans">
+              <Button variant="outline" onClick={() => onSelect(job)}>
+                View Details
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+              {/* {onEdit && (
+                <Button
+                  variant="outline"
+                  className="ml-2"
+                  onClick={() => onEdit(job)}
+                >
+                  Edit
+                </Button>
+              )} */}
+            </div>
           </div>
-          
-          <div className="mt-4 grid grid-cols-4 gap-3">
-            <div className="bg-blue-50 rounded-md p-2 text-center">
-              <p className="text-lg font-semibold text-blue-700">{appliedCount}</p>
-              <p className="text-xs text-blue-800">Applied</p>
-            </div>
-            <div className="bg-purple-50 rounded-md p-2 text-center">
-              <p className="text-lg font-semibold text-purple-700">{shortlistedCount}</p>
-              <p className="text-xs text-purple-800">Shortlisted</p>
-            </div>
-            <div className="bg-red-50 rounded-md p-2 text-center">
-              <p className="text-lg font-semibold text-red-700">{rejectedCount}</p>
-              <p className="text-xs text-red-800">Rejected</p>
-            </div>
-            <div className="bg-green-50 rounded-md p-2 text-center">
-              <p className="text-lg font-semibold text-green-700">{hiredCount}</p>
-              <p className="text-xs text-green-800">Hired</p>
-            </div>
-          </div>
-        </div>
-        <div className="px-5 py-3 bg-gray-50 flex justify-end font-dm-sans">
-          <Button variant="outline" onClick={() => onSelect(job)}>
-            View Details
-            <ChevronRight className="ml-1 h-4 w-4" />
-          </Button>
-          {onEdit && (
-            <Button variant="outline" className="ml-2" onClick={() => onEdit(job)}>
-              Edit
-            </Button>
-          )}
         </div>
       </CardContent>
     </Card>

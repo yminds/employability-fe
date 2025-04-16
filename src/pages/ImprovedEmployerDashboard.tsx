@@ -1,5 +1,8 @@
-import React from "react";
-import { Briefcase, TrendingUp, Users, UserCheck, Award } from "lucide-react";
+import type React from "react";
+import ActiveJobSVG from "@/assets/employer-dashboard/ActiveJobSVG.svg";
+import JobApplicationSVG from "@/assets/employer-dashboard/JobApplication.svg";
+import ShortlistedInterviewSVG from "@/assets/employer-dashboard/ShortlistedInterview.svg";
+import AcceptedInterviewSVG from "@/assets/employer-dashboard/AcceptedInterview.svg";
 
 interface DashboardStats {
   activeJobs: number;
@@ -16,48 +19,48 @@ interface DashboardOverviewProps {
   stats: DashboardStats;
 }
 
-const StatCard = ({
-  title,
-  value,
-  subValue,
-  icon: Icon,
-  iconColor,
-  trend = null,
-}: {
+interface StatCardProps {
   title: string;
   value: number | string;
   subValue?: string;
-  icon: React.ElementType;
+  iconSrc: string;
+  iconAlt: string;
   iconColor: string;
-  trend?: { value: number; isPositive: boolean } | null;
+}
+
+const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  subValue,
+  iconSrc,
+  iconAlt,
+  iconColor,
 }) => (
   <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 flex-1">
-    <div className="flex justify-between items-start">
-      <div>
-        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-        <div className="mt-1 flex items-baseline">
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
-          {subValue && <p className="ml-2 text-sm text-gray-500">{subValue}</p>}
-        </div>
-        {trend && (
-          <div
-            className={`mt-1 flex items-center text-sm ${
-              trend.isPositive ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            <TrendingUp
-              className={`w-3 h-3 ${
-                trend.isPositive ? "" : "transform rotate-180"
-              } mr-1`}
-            />
-            <span>
-              {trend.value}% {trend.isPositive ? "increase" : "decrease"}
-            </span>
-          </div>
-        )}
+    <div className="flex gap-5 items-center">
+      <div
+        className={`w-10 h-10 rounded-full ${iconColor} flex items-center justify-center`}
+      >
+        <img
+          src={iconSrc || "/placeholder.svg"}
+          alt={iconAlt}
+          className="w-5 h-5"
+        />
       </div>
-      <div className={`p-2 rounded-md ${iconColor}`}>
-        <Icon className="w-5 h-5 text-white" />
+      <div>
+        <h3 className="text-[16px] font-normal leading-6 tracking-[-0.048px] text-[#414447]">
+          {title}
+        </h3>
+        <div className="mt-1 flex items-baseline">
+          <p className="text-[24px] font-semibold leading-6 tracking-[-0.072px] text-[#202326]">
+            {value}
+          </p>
+          {subValue && (
+            <p className="ml-2 text[14px] font-normal leading-6 tracking-[-0.042px] text-[#909091]">
+              {subValue}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   </div>
@@ -70,33 +73,36 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ stats }) => {
         title="Active Jobs"
         value={stats.activeJobs}
         subValue={`+${stats.newJobsThisWeek} this week`}
-        icon={Briefcase}
-        iconColor="bg-blue-600"
+        iconSrc={ActiveJobSVG}
+        iconAlt="Active Jobs"
+        iconColor="bg-[#D2DEFF]"
       />
 
       <StatCard
         title="Total Applications"
         value={stats.totalApplications}
         subValue={`+${stats.newApplicationsThisWeek} new`}
-        icon={Users}
-        iconColor="bg-purple-600"
-        trend={{ value: 12, isPositive: true }}
-      />
-
-      <StatCard
-        title="Shortlisted Candidates"
-        value={stats.totalShortlisted}
-        subValue={`${stats.shortlistedPercentage}% of applicants`}
-        icon={UserCheck}
-        iconColor="bg-amber-600"
+        iconSrc={JobApplicationSVG}
+        iconAlt="Total Applications"
+        iconColor="bg-[#FFF2DB]"
       />
 
       <StatCard
         title="Hired"
         value={stats.totalHired}
         subValue={`${stats.hiredPercentage}% conversion`}
-        icon={Award}
-        iconColor="bg-green-600"
+        iconSrc={AcceptedInterviewSVG}
+        iconAlt="Hired"
+        iconColor="bg-[#D2E9FF]"
+      />
+
+      <StatCard
+        title="Shortlisted Candidates"
+        value={stats.totalShortlisted}
+        subValue={`${stats.shortlistedPercentage}% of applicants`}
+        iconSrc={ShortlistedInterviewSVG}
+        iconAlt="Shortlisted Candidates"
+        iconColor="bg-[#DBFFEA]"
       />
     </div>
   );

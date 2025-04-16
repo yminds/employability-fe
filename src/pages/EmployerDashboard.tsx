@@ -5,9 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetEmployerJobsQuery } from "../api/employerJobsApiSlice";
-import { Briefcase, Users, Clock, Inbox, Building } from "lucide-react";
+import {
+  Briefcase,
+  Users,
+  Clock,
+  Inbox,
+  Building,
+  ChevronRight,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import emojiWavingImg from "@/assets/dashboard/emoji_waving.svg";
+
+// Import SVGs
+import PostJobSVG from "@/assets/employer-dashboard/PostJobSVG.svg";
+import SetCompanyProfileSVG from "@/assets/employer-dashboard/SetCompanyProfileSVG.svg";
+import UploadResumesSVG from "@/assets/employer-dashboard/UploadResumesSVG.svg";
 
 // Import our components
 import DashboardOverview from "./ImprovedEmployerDashboard";
@@ -88,6 +100,8 @@ const ImprovedEmployerDashboard: React.FC = () => {
     }
   );
 
+  console.log("jobsData", jobsData);
+
   // Dashboard statistics with safe access patterns
   const dashboardStats = {
     activeJobs:
@@ -148,9 +162,9 @@ const ImprovedEmployerDashboard: React.FC = () => {
 
   const isContentLoading = isLoading || isFetching;
   const hasCompany = employer?.company;
-  console.log("employer",employer);
-  
-  console.log("hasCompany",hasCompany)
+  console.log("employer", employer);
+
+  console.log("hasCompany", hasCompany);
 
   return (
     <main className="h-screen w-full overflow-hidden font-ubuntu">
@@ -169,35 +183,110 @@ const ImprovedEmployerDashboard: React.FC = () => {
                 Manage your job postings and candidates
               </p>
             </div>
-            <div className="flex space-x-3">
-              {/* <Button
-                variant="outline"
-                className="bg-white"
-                onClick={() => navigate("/employer/candidates")}
-              >
-                <Users className="h-4 w-4 mr-2" />
-                All Candidates
-              </Button> */}
-
-              {/* Show Create Company button if employer doesn't have a company */}
-              {!hasCompany && (
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/employer/company/create")}
-                  className="bg-white text-[16px] font-normal leading-6"
-                >
-                  <Building className="h-4 w-4 mr-2" />
-                  Create Company
-                </Button>
-              )}
-
-              <Button
+            <div className="flex flex-row gap-6 w-full py-6">
+              <div
+                className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full cursor-pointer overflow-hidden"
                 onClick={() => navigate("/employer/jobs/create")}
-                className="bg-[#001630] text-white text-[16px] font-normal leading-6 hover:bg-[#062549]"
               >
-                <Briefcase className="h-4 w-4 mr-2" />
-                Post New Job
-              </Button>
+                <div className="flex items-center px-6 py-4 h-full">
+                  <div className="flex-shrink-0 w-24 h-24 mr-6 relative">
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        background:
+                          "radial-gradient(circle, rgba(219,234,254,1) 30%, rgba(255,255,255,1) 80%)",
+                      }}
+                    >
+                      <img
+                        src={PostJobSVG || "/placeholder.svg"}
+                        alt="Post Job"
+                        className="w-28 h-28 object-contain"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col flex-grow">
+                    <h3 className="text-[#414447] text-xl font-medium">
+                      Post a New Job
+                    </h3>
+                    <p className="text-[#909091] text-sm mt-1">
+                      Lorem Ipsum Confetti
+                    </p>
+                  </div>
+                  <div className="ml-auto">
+                    <div className="flex items-center justify-center w-10 h-10 bg-[#f0f0f0] rounded-lg">
+                      <ChevronRight className="h-5 w-5 text-[#414447]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full cursor-pointer overflow-hidden"
+                onClick={() => navigate("/employer/resumes")}
+              >
+                <div className="flex items-center px-6 py-4 h-full">
+                  <div
+                    className="flex-shrink-0 w-24 h-24 mr-6 relative"
+                    style={{
+                      background:
+                        "radial-gradient(circle, rgba(233,213,255,1) 30%, rgba(255,255,255,1) 80%)",
+                    }}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src={UploadResumesSVG || "/placeholder.svg"}
+                        alt="Upload Resumes"
+                        className="w-28 h-28 object-contain"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col flex-grow">
+                    <h3 className="text-[#414447] text-xl font-medium">
+                      Upload Resumes
+                    </h3>
+                    <p className="text-[#909091] text-sm mt-1">
+                      Lorem Ipsum Confetti
+                    </p>
+                  </div>
+                  <div className="ml-auto">
+                    <div className="flex items-center justify-center w-10 h-10 bg-[#f0f0f0] rounded-lg">
+                      <ChevronRight className="h-5 w-5 text-[#414447]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {hasCompany && (
+                <div
+                  className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full cursor-pointer overflow-hidden"
+                  onClick={() => navigate("/employer/company/create")}
+                >
+                  <div className="flex items-center px-6 h-full">
+                    <div className="flex-shrink-0 w-24 h-24 mr-6 relative">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <img
+                          src={SetCompanyProfileSVG || "/placeholder.svg"}
+                          alt="Set Company Profile"
+                          className="w-28 h-28 object-cover"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col flex-grow">
+                      <h3 className="text-[#414447] text-xl font-medium">
+                        Set Company Profile
+                      </h3>
+                      <p className="text-[#909091] text-sm mt-1">
+                        Lorem Ipsum Confetti
+                      </p>
+                    </div>
+                    <div className="ml-auto">
+                      <div className="flex items-center justify-center w-10 h-10 bg-[#f0f0f0] rounded-lg">
+                        <ChevronRight className="h-5 w-5 text-[#414447]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </header>
 
