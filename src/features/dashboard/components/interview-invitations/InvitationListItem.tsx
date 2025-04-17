@@ -509,16 +509,18 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
               </div>
             )}
 
-            <InterviewDateModal
-              isOpen={isModalOpen}
-              onClose={handleCloseModal}
-              onConfirm={(date: Date) => {
-                setSelectedDate(date);
-                handleConfirmAccept(date);
-              }}
-              deadlineDate={deadlineDate}
-              isMobileDevice={isMobileDevice}
-            />
+            <div className="relative">
+              <InterviewDateModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onConfirm={(date: Date) => {
+                  setSelectedDate(date);
+                  handleConfirmAccept(date);
+                }}
+                deadlineDate={deadlineDate}
+                isMobileDevice={isMobileDevice}
+              />
+            </div>
 
           </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useGetCompanyAndJobDetailsQuery } from "@/api/InterviewInvitation";
 import logo from "@/assets/skills/e-Logo.svg";
 import screeningIllustration from "@/assets/reports/ScreeningIllustration.png";
@@ -55,12 +55,9 @@ export const TableSection: React.FC<{
             <th className="p-3 font-dm-sans text-[14px] font-medium leading-[20px] tracking-[0.21px] text-gray-600 text-left border-b w-[20%]">
               Criteria
             </th>
-            {/* <th className="p-3 font-dm-sans text-[14px] font-medium leading-[20px] tracking-[0.21px] text-gray-600 text-left border-b w-[75%]">
-              Remarks
-            </th> */}
           </tr>
         </thead>
-        <tbody className=" sm:hidden">
+        <tbody className="sm:hidden">
           {rows.map((row, idx) => (
             <tr key={idx} className="hover:bg-gray-50">
               <td className="p-3 border-b text-body2 text-grey-6">{row.criteria}</td>
@@ -77,18 +74,18 @@ export const TableSection: React.FC<{
             </tr>
           ))}
         </tbody>
-
       </table>
 
       {/* For smaller devices */}
-      <div className=" hidden sm:block">
+      <div className="hidden sm:block">
         {rows.map((row, idx) => (
           <div key={idx} className="border-b p-4 hover:bg-gray-50 space-y-2">
-            <div className=" flex items-center justify-between">
-              <div className="text-body2 text-grey-6 ">{row.criteria}</div>
+            <div className="flex items-center justify-between">
+              <div className="text-body2 text-grey-6">{row.criteria}</div>
               <div className={`py-1 px-4 rounded-full text-base font-normal leading-6 tracking-[0.08px] max-w-fit ${getRatingStyles(Number(row.rating))}`}>
                 {getRatingLabel(Number(row.rating))}
-              </div></div>
+              </div>
+            </div>
             <div className="text-sm text-gray-600 mt-2">{row.remarks}</div>
           </div>
         ))}
@@ -96,7 +93,6 @@ export const TableSection: React.FC<{
     </div>
   </div>
 );
-
 
 const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   reportData,
@@ -106,29 +102,27 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   publicProfileName,
   profile,
 }) => {
-  console.log(['inviteId', inviteId]);
-  const { data: companyAndJobDetails } = useGetCompanyAndJobDetailsQuery(inviteId,{
+  const { data: companyAndJobDetails } = useGetCompanyAndJobDetailsQuery(inviteId, {
     skip: !inviteId,
     refetchOnMountOrArgChange: true,
   });
-  console.log("companyAndJobDetails", companyAndJobDetails);
-  
+
   const [reportTitle, setTitle] = useState("");
-  console.log("report professionalExperience", professionalExperience);
   const navigate = useNavigate();
-  const isEmployerReport = window.location.pathname.includes("employer"); // window.location.pathname.includes("employer");
+  const isEmployerReport = window.location.pathname.includes("employer");
 
   // Determine whether to use employer_summary or summary
   const summary = isEmployerReport ? reportData.employer_summary || {} : reportData.summary || {};
-  console.log("summary", reportData);
-  
 
   const videoUrl = reportData.s3_recording_url?.[0];
   const [showSharePopup, setShowSharePopup] = useState(false);
   const [copyText, setCopyText] = useState("Copy");
-  console.log("reportData", reportData.s3_recording_url);
   const [activeSection, setActiveSection] = useState("highlights");
-
+  
+  const sharePopupRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  
   // Calculate overall score based on available ratings
   const calculateOverallScore = () => {
     let totalScore = 0;
@@ -170,10 +164,9 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   };
 
   const overallScore =
-    reportData.reportType === "Full"
+    (reportData.reportType === "Full" || reportData.reportType === "Screening")
       ? 2 * Number(calculateOverallScore())
       : reportData.final_rating?.toFixed(1) || "N/A";
-  const sharePopupRef = React.useRef<HTMLDivElement>(null);
 
   // Get rating text based on score
   const getRatingText = (score: number | string) => {
@@ -195,10 +188,9 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
     { id: "soft-skills", title: "Soft Skills", hidden: !summary.softskills },
     { id: "screening-qst", title: "Screening Questions", hidden: !summary.screening_questions },
     { id: "conceptual-breakdown", title: "Conceptual Breakdown", hidden: !summary.conceptualBreakdown },
-    // { id: "cheat-analysis", title: "Cheat Analysis" },
   ].filter((section) => !section.hidden);
 
-  // Scroll to the selected section but give some gap for the sticky header
+  // Scroll to the selected section
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -207,36 +199,47 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
     }
   };
 
-  // Update active section based on scroll position
+  // Set up Intersection Observer for sections
   useEffect(() => {
-    const handleScroll = () => {
-      let sectionInView = null;
+    // Create a container for observers
+    const observers: { element: HTMLElement; observer: IntersectionObserver; }[] = [];
+    
+    // Options for the observer
+    const options = {
+      root: null, // use the viewport
+      rootMargin: "-100px 0px -60% 0px", // bias toward elements at top
+      threshold: 0 // trigger as soon as even 1px is visible
+    };
 
-      for (const section of sections) {
-        const element = document.getElementById(section.id);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-
-          // Check if the section is in the viewport (considering some margin from top)
-          if (rect.top <= 100 && rect.bottom >= 100) {
-            sectionInView = section.id;
-            break;
-          }
-        }
-      }
-
-      // Only update if the section in view has changed
-      if (sectionInView && sectionInView !== activeSection) {
-        setActiveSection(sectionInView);
+    // Callback for the observer
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      // Find the first section that's intersecting
+      const visibleEntry = entries.find(entry => entry.isIntersecting);
+      
+      if (visibleEntry) {
+        setActiveSection(visibleEntry.target.id);
       }
     };
 
-    // Attach the scroll event listener
-    window.addEventListener("scroll", handleScroll);
+    // Create observer
+    const observer = new IntersectionObserver(observerCallback, options);
+    
+    // Observe all section elements
+    sections.forEach(section => {
+      const element = document.getElementById(section.id);
+      if (element) {
+        observer.observe(element);
+        observers.push({ element, observer });
+      }
+    });
 
-    // Cleanup the event listener
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [sections, activeSection]);
+    // Cleanup function
+    return () => {
+      observers.forEach(({ element, observer }) => {
+        observer.unobserve(element);
+      });
+    };
+  }, [sections]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -309,15 +312,12 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   }
 
   useEffect(() => {
-    console.log("companyAndJobDetails", companyAndJobDetails);
     if (companyAndJobDetails) {
       const { job } = companyAndJobDetails;
       if (job) {
         setTitle(job.title);
       }
     } else {
-      console.log("reportData.reportType312", reportData.reportType);
-
       let title = "";
       switch (reportData.reportType) {
         case "Skill":
@@ -328,21 +328,24 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
           break;
         case "Mock":
           title = "Mock";
+          break;
+        default:
+          title = "";
       }
       setTitle(title);
     }
-  }, [companyAndJobDetails]);
+  }, [companyAndJobDetails, reportData.reportType]);
 
   return (
-    <main className=" flex w-full h-screen justify-center sm:overflow-y-auto sm:flex-col">
-      <div className=" flex-col justify-center bg-[#F5F5F5] w-[95%] max-w-[1800px] h-full sm:p-0">
+    <main className="flex w-full h-screen justify-center sm:overflow-y-auto sm:flex-col">
+      <div className="flex-col justify-center bg-[#F5F5F5] w-[95%] max-w-[1800px] h-full sm:p-0">
         {/* Header Section */}
         <div
           className="sticky top-0 left-0 p-6 h-9 bg-[#F5F5F5] sm:min-w-[200px] sm:relative max-w-[1800px]"
           style={{ zIndex: 10 }}
         >
-          <header className=" flex justify-between w-full ">
-            <div className="max-w-[70%] sm:max-w-[100%]  px-4 flex flex-col gap-2">
+          <header className="flex justify-between w-full">
+            <div className="max-w-[70%] sm:max-w-[100%] px-4 flex flex-col gap-2">
               <h1 className="text-title text-grey-7 font-bold flex gap-4 items-center">
                 {!isSharedReport && (
                   <button
@@ -402,19 +405,22 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
             )}
           </header>
         </div>
+        
         {/* Main Content Section */}
-        <div className="flex bg-[#f5f5f5] h-[90vh] max-w-[1800px] justify-center overflow-y-auto p-2 mt-6 sm:flex-col sm:p-1 ">
+        <div className="flex bg-[#f5f5f5] h-[90vh] max-w-[1800px] justify-center overflow-y-auto p-2 mt-6 sm:flex-col sm:p-1">
           {/* Left Navigation Panel */}
-          <div className=" flex max-w-[260px] rounded-lg w-full  h-fit overflow-y-auto sm:hidden">
-            <nav className=" bg-white w-full p-6">
+          <div className="flex max-w-[260px] rounded-lg w-full h-fit overflow-y-auto sm:hidden" ref={navRef}>
+            <nav className="bg-white w-full p-6 sticky top-4">
               <h2 className="text-sub-header font-semibold mb-4">Content</h2>
-              <ul className=" list-none space-y-2">
+              <ul className="list-none space-y-2">
                 {sections.map((section) => (
-                  <li key={section.id}>
+                  <li key={section.id} id={`nav-${section.id}`}>
                     <button
                       onClick={() => scrollToSection(section.id)}
-                      className={`w-full text-left px-4 py-3 rounded-md hover:bg-gray-100 transition flex items-center h-9 ${activeSection === section.id ? "bg-gray-200 text-gray-700 font-medium" : "text-gray-700"
-                        }`}
+                      className={`w-full text-left px-4 py-3 rounded-md transition flex items-center h-9 text-body2 truncate
+                        ${activeSection === section.id
+                          ? "bg-[#00183D1A] bg-opacity-10"
+                          : "text-[#001630] hover:bg-gray-100"}`}
                     >
                       {section.title}
                     </button>
@@ -424,11 +430,11 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
             </nav>
           </div>
 
-          {/* Right Content Panel */}
-          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar space-y-2">
+          {/* Right Content Panel - Container for all sections to be observed */}
+          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar space-y-2" ref={contentRef}>
             <div>
               {companyAndJobDetails ? (
-                <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
+                <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5]">
                   <JobCard
                     jobDetails={companyAndJobDetails}
                     takenAT={reportData.createdAt}
@@ -438,42 +444,40 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
                   />
                 </section>
               ) : (
-                <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
+                <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5]">
                   <InterviewDetails takenAt={reportData.createdAt} interviewType={reportData.reportType} />
                 </section>
-              ) }
+              )}
             </div>
 
             <div className="space-y-2">
               {/* 1. Performance Highlights */}
               <section id="highlights" className="rounded-lg p-8 shadow-sm bg-white sm:p-4">
-                {/* {(companyAndJobDetails || reportData.reportType === "Skill" || reportData.reportType === "Project") && ( */}
-                  <PerformanceHighlights
-                    backgroundImage={mockBackground}
-                    overallScore={overallScore}
-                    logo={logo}
-                    reportData={reportData}
-                    summary={summary}
-                    isEmployerReport={isEmployerReport}
-                    jobIllustration={jobIllustration}
-                    screeningIllustration={screeningIllustration}
-                    mockIllustration={mockIllustration}
-                    getPerformanceRatingStyle={getPerformanceRatingStyle}
-                    getRatingText={getRatingText}
-                    formatJobType={formatJobType}
-                    formatWorkplaceType={formatWorkplaceType}
-                    getRatingStyles={getRatingStyles}
-                    getRatingLabel={getRatingLabel}
-                    companyDetails={companyAndJobDetails}
-                  />
-                {/* )} */}
+                <PerformanceHighlights
+                  backgroundImage={mockBackground}
+                  overallScore={overallScore}
+                  logo={logo}
+                  reportData={reportData}
+                  summary={summary}
+                  isEmployerReport={isEmployerReport}
+                  jobIllustration={jobIllustration}
+                  screeningIllustration={screeningIllustration}
+                  mockIllustration={mockIllustration}
+                  getPerformanceRatingStyle={getPerformanceRatingStyle}
+                  getRatingText={getRatingText}
+                  formatJobType={formatJobType}
+                  formatWorkplaceType={formatWorkplaceType}
+                  getRatingStyles={getRatingStyles}
+                  getRatingLabel={getRatingLabel}
+                  companyDetails={companyAndJobDetails}
+                />
               </section>
 
               {/* 2. Interview Recording */}
               {videoUrl && (
                 <section id="video" className="bg-white rounded-lg overflow-hidden p-8 sm:p-4">
                   <h2 className="text-sub-header font-bold text-gray-800 font-dm-sans">Video Assessment</h2>
-                  <div className=" relative mt-6 ">
+                  <div className="relative mt-6">
                     <div className="continer-player w-full h-[70vh] sm:h-[30vh] relative">
                       {reportData?.s3_recording_url.length > 1 ? (
                         <InterviewPlayer urls={reportData.s3_recording_url} />
@@ -527,7 +531,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
                 />
               )}
 
-              {/* 6. Conceptual Breakdown */}
+              {/* 6. Soft Skills */}
               {summary.soft_skills && (
                 <Section
                   id="soft-skills"
@@ -555,7 +559,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
                 />
               )}
 
-              {/* 8. Cheat Analysis */}
+              {/* 8. Professional Experience */}
               {isEmployerReport && (
                 <section id="professional-exp" className="rounded-lg p-8 shadow-sm bg-white sm:p-4">
                   <ProfessionalExperience experiences={professionalExperience} />
