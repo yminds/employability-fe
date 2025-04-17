@@ -397,27 +397,24 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   // Handle view report
   const handleViewReport = (candidate: InterviewCandidate) => {
     // Get the appropriate report ID
-    const reportId =
-      candidate.effective_report_id ||
-      candidate.type_report_id ||
-      candidate.report_id;
-  
-    if (!reportId) {
+    const inviteId = candidate._id
+ 
+    console.log("inviteId",inviteId)
+ 
+    if (!inviteId) {
       toast({
         title: "Error",
-        description: "Report not found",
+        description: "Invite not found",
         variant: "destructive",
       });
       return;
     }
-  
+ 
     const interviewType = candidate.task?.interview_type?.type || "Full";
-    
-
+ 
     const formattedType = interviewType.charAt(0).toUpperCase() + interviewType.slice(1);
-    
-    const reportUrl = `/employer/report/${formattedType}/${reportId}/${candidate?.username}/${candidate.task?.interview_type?.interview_id}`;
-    
+   
+    const reportUrl = `/employer/report/${formattedType}/${inviteId}/${candidate?.username}/${candidate.task?.interview_type?.interview_id}`
 
     window.open(reportUrl, '_blank');
   };
