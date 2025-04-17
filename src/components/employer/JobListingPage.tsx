@@ -21,6 +21,7 @@ import InterviewCandidatesView from "./InterviewCandidatesView";
 import FullInterviewsCard from "./FullInterviewsCard";
 import ScreeningInterviewsCard from "./ScreeningInterviewsCard";
 import MatchingCandidatesCard from "./MatchingCandidatesCard";
+import SuccessModal from "./SuccessModal";
 
 import { useGetInterviewCandidatesQuery } from "../../api/InterviewInvitation";
 import ShortlistedCandidatesView from "./ShortListedCandidatesView";
@@ -83,6 +84,10 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
   // Tab state
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
   const [interviewCount, setInterviewCount] = useState(0);
+
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const fullInterviewsRefetchRef = useRef<(() => void) | null>(null);
   const screeningInterviewsRefetchRef = useRef<(() => void) | null>(null);
@@ -215,8 +220,6 @@ export default function JobListingPage({ job_id }: JobListingPageProps) {
     return counts;
   };
 
-
-
   // Function to check if there's background processing happening
   const checkForBackgroundProcessing = useCallback(() => {
     const savedState = sessionStorage.getItem("resumeUploadState");
@@ -280,21 +283,6 @@ const sourceCounts = useMemo(() => {
     [selectedSource]: matchingCandidatesResponse.data.length
   };
 }, [matchingCandidatesResponse?.data, selectedSource, sourceCountsCache]);
-
-  // useEffect(() => {
-  //   if(isCandidateSuccess){
-  //     checkForBackgroundProcessing();
-  //   }
-  //   // Cleanup polling interval when component unmounts
-  //   return () => {
-  //     if (pollingIntervalRef.current) {
-  //       clearInterval(pollingIntervalRef.current);
-  //       pollingIntervalRef.current = null;
-  //     }
-  //     setIsBackgroundProcessing(false);
-  //     // DO NOT call refetchCandidates() during cleanup!
-  //   };
-  // }, [isCandidateSuccess, checkForBackgroundProcessing]);
 
   // Start polling for updates when background processing is active
   const startPolling = useCallback(() => {
@@ -564,10 +552,26 @@ const sourceCounts = useMemo(() => {
     setIsInterviewModalOpen(true);
   };
 
-  const handleCloseInterviewModal = () => {
+  // Updated to receive success message from interview modal
+  const handleCloseInterviewModal = (successMessage?: string) => {
     setIsInterviewModalOpen(false);
+    
+    if (successMessage) {
+      setSuccessMessage(successMessage);
+      // Show success modal after a brief delay to ensure interview modal is gone
+      setTimeout(() => {
+        setShowSuccessModal(true);
+      }, 100);
+    }
+    
     setSelectedCandidates([]);
     setSelectAll(false);
+  };
+
+  // Handle success modal close
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    refreshInterviewStats();
   };
 
   const handleOpenResumeModal = () => {
@@ -881,6 +885,14 @@ const sourceCounts = useMemo(() => {
         selectedCandidates={getSelectedCandidateDetails()}
         jobId={job_id}
         onSuccess={refreshInterviewStats}
+      />
+
+      {/* Success Modal - moved to parent component */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleSuccessModalClose}
+        message={successMessage}
+        subtitle="The candidates will receive an email with instructions to complete their interview."
       />
     </div>
   );

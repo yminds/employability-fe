@@ -8,7 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
+import { useLocation } from "@/hooks/useLocation";
 // Import utility functions
 import { jobUtils } from "@/utils/jobUtils";
 
@@ -71,6 +71,14 @@ export interface IJob {
     rejected?: ICandidate[];
     hired?: ICandidate[];
   };
+  statistics?: {
+    acceptedInterviewsCount: number;
+    directApplicantsCount: number;
+    resumeApplicantsCount: number;
+    shortlistedCount: number;
+    totalInvites: number;
+  };
+
   job_views?: number;
   applications?: number;
 
@@ -128,11 +136,13 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
       : "";
 
   // Safely get counts with defaults
-  const appliedCount = job.candidates?.applied?.length || 0;
-  const shortlistedCount = job.candidates?.shortlisted?.length || 0;
-  const rejectedCount = job.candidates?.rejected?.length || 0;
-  const hiredCount = job.candidates?.hired?.length || 0;
+  const appliedCount =
+    (job.statistics?.directApplicantsCount || 0) +
+    (job.statistics?.resumeApplicantsCount || 0);
+  const shortlistedCount = job.statistics?.shortlistedCount || 0;
   const jobViews = job.job_views || 0;
+  const acceptedInterview = job.statistics?.acceptedInterviewsCount || 0;
+  const totalInvites = job.statistics?.totalInvites || 0;
 
   // Enhanced function to get the skill name from different skill formats
   const getSkillName = (skillItem: any): string => {
@@ -172,22 +182,36 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
     return "Unknown Skill";
   };
 
-  const formatLocation = (
-    location: string | { city: string; state: string; country: string }
-  ): string => {
-    if (typeof location === "string") {
-      return location;
+  const getLocationAddress = () => {
+    if (typeof job.location === "string") {
+      return { country: job.location };
     }
 
-    if (location && typeof location === "object") {
-      const { city, state, country } = location;
-      return `${city || ""}, ${state || ""}, ${country || ""}`.replace(
-        /^, |, $/g,
-        ""
-      );
+    if (job.location && typeof job.location === "object") {
+      return {
+        city: job.location.city,
+        state: job.location.state,
+        country: job.location.country,
+      };
     }
 
-    return "";
+    return {};
+  };
+
+  const { selectedCity, selectedState, selectedCountry } = useLocation(
+    getLocationAddress()
+  );
+
+  const formatLocation = (): string => {
+    if (typeof job.location === "string") {
+      return job.location;
+    }
+
+    const cityName = selectedCity?.name || job.location?.city || "";
+    const stateName = selectedState?.name || job.location?.state || "";
+    const countryName = selectedCountry?.name || job.location?.country || "";
+
+    return [cityName, stateName, countryName].filter(Boolean).join(", ");
   };
 
   // Transform skills_required to an array of skill names for display
@@ -236,11 +260,9 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
                 </Badge>
               </div>
               <div className="flex items-center mt-1 text-sm text-body2 text-[#68696B]">
-                <span>
-                  {job.company?.name || job.employer?.name || "Finopsly"}
-                </span>
+                <span>{job.company?.name || "Company name"}</span>
                 <span className="mx-2">|</span>
-                <span>{formatLocation(job.location)}</span>
+                <span>{formatLocation()}</span>
                 <span className="mx-2">|</span>
                 <span>
                   {job.work_place_type
@@ -301,24 +323,22 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
                   {jobViews}
                 </span>
               </div>
-              {/* <div className="flex flex-col">
-                <span className="text-[#909091] text-body2">Rejected</span>
-                <div>
-                  <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
-                    {rejectedCount}
-                  </span>
-                </div>
-              </div> */}
               <div className="flex flex-col">
                 <span className="text-[#909091] text-body2">
                   Accepted Interviews
                 </span>
-                <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
-                  {hiredCount}
-                </span>
-                <span className="text-xs font-dm-sans text-[#414447] ml-1">
-                  25% of 120 invites
-                </span>
+                <div>
+                  <span className="text-[#414447] font-bold font-dm-sans text-[18px] leading-[22px] tracking-normal">
+                    {acceptedInterview}
+                  </span>
+                  {totalInvites > 0 && acceptedInterview > 0 && (
+                    <span className="text-xs font-dm-sans text-[#414447] ml-1">
+                      {`${Math.round(
+                        (acceptedInterview / totalInvites) * 100
+                      )}% of ${totalInvites} invites`}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex flex-col">
                 <span className="text-[#909091] text-body2">Shortlisted</span>
@@ -334,15 +354,6 @@ const JobCard: React.FC<JobCardProps> = ({ job, onSelect, onEdit }) => {
                 View Details
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
-              {/* {onEdit && (
-                <Button
-                  variant="outline"
-                  className="ml-2"
-                  onClick={() => onEdit(job)}
-                >
-                  Edit
-                </Button>
-              )} */}
             </div>
           </div>
         </div>

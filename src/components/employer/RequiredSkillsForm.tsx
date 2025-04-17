@@ -509,7 +509,7 @@ const RequiredSkillsComponent: React.FC<RequiredSkillsProps> = ({
   return (
     <div>
       <h2 className="text-body2 mb-2">Skills</h2>
-      <p className="text-[14px] font-dm-sans font-normal leading-6 tracking-[0.07px] text-gray-500 mb-2">
+      <p className="text-[14px] font-dm-sans font-normal leading-6 tracking-[0.07px] text-gray-500 mb-6">
         A maximum of {maxMustHaveSkills} skills can be considered Very Important
       </p>
 

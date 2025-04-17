@@ -1,7 +1,6 @@
 import { apiSlice } from "./apiSlice";
 import { Job } from "./employerJobsApiSlice";
 
-
 export interface Candidate {
   _id: string;
   user_id: string;
@@ -22,10 +21,9 @@ export interface InterviewInvite {
   status: "pending" | "accepted" | "completed" | "declined" | "expired";
   sent_at: string;
   updated_at: string;
-  interview_id?: string; 
+  interview_id?: string;
   shortlist: boolean;
 }
-
 
 export interface InterviewCandidate {
   _id: string;
@@ -38,12 +36,12 @@ export interface InterviewCandidate {
   shortlist: boolean;
   interview_id?: string;
   has_report: boolean;
-  username:string;
+  username: string;
   report_id?: string;
   final_rating?: number;
   report_updated_at?: string;
   type_report_id?: string;
-  total_experience?:number;
+  total_experience?: number;
   type_final_rating?: number;
   type_report_updated_at?: string;
   effective_report_id?: string;
@@ -271,7 +269,7 @@ interface ShortlistCandidateParams {
 
 export interface UserExistsRequest {
   email: string;
-  inviteId:string;
+  inviteId: string;
 }
 
 export interface UserExistsResponse {
@@ -411,12 +409,23 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
       InterviewCandidatesResponse,
       GetInterviewCandidatesParams
     >({
-      query: ({ jobId, interviewType, status, sortBy }) => ({
+      query: ({
+        jobId,
+        interviewType,
+        filterStatus,
+        sortBy,
+        interviewScore,
+        locations,
+        workExperience,
+      }) => ({
         url: `/api/v1/employerInterviewInvitation/jobs/${jobId}/interview-candidates`,
         params: {
           interview_type: interviewType,
-          status,
+          filter_status: filterStatus,
           sort_by: sortBy,
+          interview_score: interviewScore,
+          locations: locations,
+          work_experience: workExperience,
         },
       }),
     }),
@@ -450,20 +459,20 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    getShortlistedCandiates:builder.query({
-      query:({jobId,sortBy = 'recent'})=>({
-        url:`/api/v1/employerInterviewInvitation/jobs/${jobId}/shortlisted-candidates`,
-        method:"GET",
-        params: { sortBy }
+    getShortlistedCandiates: builder.query({
+      query: ({ jobId, sortBy = "recent" }) => ({
+        url: `/api/v1/employerInterviewInvitation/jobs/${jobId}/shortlisted-candidates`,
+        method: "GET",
+        params: { sortBy },
       }),
-      transformResponse:(response)=>{
+      transformResponse: (response) => {
         return response;
-      }
+      },
     }),
     getCompanyAndJobDetails: builder.query({
       query: (inviteId: string) => ({
         url: `/api/v1/employerInterviewInvitation/invite/getCompanyDetails/${inviteId}`, // Assuming you have an endpoint for this
-        method: 'GET',
+        method: "GET",
       }),
       transformResponse: (response: any) => {
         // You can manipulate or normalize the data here if needed

@@ -36,7 +36,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   onCandidateCountChange,
   initialCount = 0,
 }) => {
-  // State for filters and pagination
+
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [interviewType, setInterviewType] = useState<InterviewType>("full");
   const [submissionStatus, setSubmissionStatus] =
@@ -53,7 +53,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   );
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   
-  // Advanced filter states
+  // Advanced filter states with updated location structure
   const [advancedFilters, setAdvancedFilters] = useState<FilterValues>({
     interviewType: "full",
     submissionType: "submitted",
@@ -88,7 +88,18 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
         | undefined,
       interviewScore: advancedFilters.interviewScore,
       workExperience: advancedFilters.workExperience, 
-      locations: advancedFilters.locations.map(loc => loc.name).join(','), // Format locations for API
+      // Format the locations data for the API
+      locations: advancedFilters.locations
+        // Include complete location information
+        .map(loc => ({
+          name: loc.name,
+          countryCode: loc.countryCode,
+          stateCode: loc.stateCode,
+          cityName: loc.cityName
+        }))
+        // Convert to JSON string for API transmission
+        .map(loc => JSON.stringify(loc))
+        .join(','),
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -145,6 +156,8 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
 
   // Handle applying advanced filters
   const handleApplyFilters = (filters: FilterValues) => {
+
+    console.log("Applying filters:", filters);
     setAdvancedFilters(filters);
     // When applying filters, we should also update our main filters to stay consistent
     setInterviewType(filters.interviewType);
@@ -239,7 +252,8 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       });
     }
     
-
+    // Apply location filtering if needed - moved to server side
+    
     if (advancedFilters.workExperience > 0) {
       filtered = filtered.filter(candidate => {
         const experience = candidate.total_experience || 0;
@@ -396,27 +410,25 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
 
   // Handle view report
   const handleViewReport = (candidate: InterviewCandidate) => {
-    // Get the appropriate report ID
-    const reportId =
-      candidate.effective_report_id ||
-      candidate.type_report_id ||
-      candidate.report_id;
+    
+    const inviteId = candidate._id
+
+    console.log("inviteId",inviteId)
   
-    if (!reportId) {
+    if (!inviteId) {
       toast({
         title: "Error",
-        description: "Report not found",
+        description: "Invite not found",
         variant: "destructive",
       });
       return;
     }
-  
+ 
     const interviewType = candidate.task?.interview_type?.type || "Full";
-    
-
+ 
     const formattedType = interviewType.charAt(0).toUpperCase() + interviewType.slice(1);
     
-    const reportUrl = `/employer/report/${formattedType}/${reportId}/${candidate?.username}/${candidate.task?.interview_type?.interview_id}`;
+    const reportUrl = `/employer/report/${formattedType}/${inviteId}/${candidate?.username}/${candidate.task?.interview_type?.interview_id}`;
     
 
     window.open(reportUrl, '_blank');
