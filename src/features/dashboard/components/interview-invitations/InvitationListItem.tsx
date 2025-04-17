@@ -185,16 +185,16 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
       setErrorMessage("Please select a submission date before continuing");
       return;
     }
-  console.log("Date in handleConfirmAccept",date)
-  console.log("inviteData in handleConfirmAccept",inviteData)
-  
+    console.log("Date in handleConfirmAccept", date)
+    console.log("inviteData in handleConfirmAccept", inviteData)
+
     try {
       const response = await respondToInvite({
         inviteId: inviteData._id,
         action: "accept",
         submission_expected_date: date.toISOString(),
       }).unwrap();
-  
+
       if (response.success && inviteStatusData?.data?.candidateInfo) {
         await sendInvitationResponseMail({
           inviteId: inviteData._id,
@@ -209,13 +209,13 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
           isUserExist: false
         });
       }
-  
+
       setInviteData(prev => ({
         ...prev,
         status: 'accepted',
         submission_expected_date: date.toISOString(),
       }));
-  
+
       setProcessingComplete(true);
       setIsModalOpen(false);
     } catch (err) {
@@ -224,7 +224,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
       setIsModalOpen(false);
     }
   };
-  
+
   useEffect(() => {
     if (userGoal && user_id) {
       fetchSkills(user_id, userGoal)
@@ -236,7 +236,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
   }, []);
 
   return (
-    <div className={`${getItemClassName(isProcessing, isSelected, isDetailsView)}`}  onClick={handleCardClick}>
+    <div className={`${getItemClassName(isProcessing, isSelected, isDetailsView)}`} onClick={handleCardClick}>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col space-y-5 md:w-2/3">
 
@@ -347,11 +347,11 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                     </div>
                     <div className="text-[14px] text-grey-5 font-dm-sans text-base font-nor leading-5">
                       You can apply for other roles or check out <span className="text-grey-8 font-dm-sans text-sm normal-case font-normal leading-[22px] underline cursor-pointer"
-                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleAvailableOpportunities(); // or any other logic
-                      }}
-                       >Available opportunities.</span>
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAvailableOpportunities(); // or any other logic
+                        }}
+                      >Available opportunities.</span>
                     </div>
                   </div>
                 </div>
@@ -374,16 +374,16 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                       <span>
                         <img src={statusIcon} alt="Status Icon" className=' ' />
                       </span>
-                       <span className='text-[#414447] font-dm-sans text-[12px] font-normal leading-4 tracking-[0.18px]'>Status</span>
+                      <span className='text-[#414447] font-dm-sans text-[12px] font-normal leading-4 tracking-[0.18px]'>Status</span>
                     </div>
                     <div>
-                    <p className='font-dm-sans text-[14px] font-semibold leading-[21px] tracking-[0.21px] text-[#414447]'>
-                      {isPending
-                        ? "Not Accepted"
-                        : isTaskCompleted
-                          ? "Completed"
-                          : "Not Submitted"}
-                    </p>
+                      <p className='font-dm-sans text-[14px] font-semibold leading-[21px] tracking-[0.21px] text-[#414447]'>
+                        {isPending
+                          ? "Not Accepted"
+                          : isTaskCompleted
+                            ? "Completed"
+                            : "Not Submitted"}
+                      </p>
                     </div>
                   </div>
                   <div className=' flex-col items-center justify-center h-[56px] space-y-2'>
@@ -514,7 +514,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
               onClose={handleCloseModal}
               onConfirm={(date: Date) => {
                 setSelectedDate(date);
-                handleConfirmAccept(date); 
+                handleConfirmAccept(date);
               }}
               deadlineDate={deadlineDate}
               isMobileDevice={isMobileDevice}
