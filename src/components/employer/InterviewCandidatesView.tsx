@@ -36,7 +36,7 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
   onCandidateCountChange,
   initialCount = 0,
 }) => {
-  // State for filters and pagination
+
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [interviewType, setInterviewType] = useState<InterviewType>("full");
   const [submissionStatus, setSubmissionStatus] =

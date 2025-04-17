@@ -39,19 +39,19 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   handleShortlist,
   handleViewReport,
 }) => {
-  // Get submission badge info
+ 
   const submissionBadge = getSubmissionBadge(candidate);
 
-  // Get time since last update
+  
   const timeSinceUpdate = getTimeSinceUpdate(candidate);
 
   console.log("timeSinceUpdate",timeSinceUpdate);
   
 
-  // Check if we should show report and shortlist options
+ 
   const showReportAndShortlist = canShowReportAndShortlist(candidate);
 
-  // Get final rating
+
   const finalRating = getCandidateFinalRating(candidate);
 
   console.log("candidate", candidate);
@@ -94,7 +94,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
     return `${day}${getOrdinalSuffix(day)} of ${month}`;
   }
 
-  // Format candidate location from object to string
+
   const formattedLocation = React.useMemo(() => {
     if (!candidate.candidate_location) return "";
 
@@ -120,7 +120,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
       return (
         <div className="w-4 h-4 mr-2 flex items-center justify-center rounded-full">
           <img src={NotSubmitted} alt="Not Submitted" />
-        </div>
+        </div>  
       );
     }
     return null;
