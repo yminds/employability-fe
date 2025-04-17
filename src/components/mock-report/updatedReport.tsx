@@ -106,7 +106,13 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   publicProfileName,
   profile,
 }) => {
-  const { data: companyAndJobDetails } = useGetCompanyAndJobDetailsQuery(inviteId);
+  console.log(['inviteId', inviteId]);
+  const { data: companyAndJobDetails } = useGetCompanyAndJobDetailsQuery(inviteId,{
+    skip: !inviteId,
+    refetchOnMountOrArgChange: true,
+  });
+  console.log("companyAndJobDetails", companyAndJobDetails);
+  
   const [reportTitle, setTitle] = useState("");
   console.log("report professionalExperience", professionalExperience);
   const navigate = useNavigate();
@@ -114,6 +120,8 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 
   // Determine whether to use employer_summary or summary
   const summary = isEmployerReport ? reportData.employer_summary || {} : reportData.summary || {};
+  console.log("summary", reportData);
+  
 
   const videoUrl = reportData.s3_recording_url?.[0];
   const [showSharePopup, setShowSharePopup] = useState(false);
@@ -297,7 +305,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
 
   function formatWorkplaceType(type: "remote" | "hybrid" | "on-site"): string {
     if (type === "on-site") return "Onsite";
-    return type.charAt(0).toUpperCase() + type.slice(1);
+    return type?.charAt(0)?.toUpperCase() + type?.slice(1);
   }
 
   useEffect(() => {
@@ -324,7 +332,6 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
       setTitle(title);
     }
   }, [companyAndJobDetails]);
-
 
   return (
     <main className=" flex w-full h-screen justify-center sm:overflow-y-auto sm:flex-col">
@@ -418,23 +425,29 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
           </div>
 
           {/* Right Content Panel */}
-          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar ">
+          <div className="flex-[8] px-6 h-full overflow-y-auto minimal-scrollbar space-y-2">
             <div>
               {companyAndJobDetails ? (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-                  <JobCard jobDetails={companyAndJobDetails} takenAT={reportData.createdAt} isEmployer={isEmployerReport} profile={profile} inviteId={inviteId} />
+                  <JobCard
+                    jobDetails={companyAndJobDetails}
+                    takenAT={reportData.createdAt}
+                    isEmployer={isEmployerReport}
+                    profile={profile}
+                    inviteId={inviteId}
+                  />
                 </section>
               ) : (
                 <section className="sticky top-0 z-[4] w-full bg-[#F5F5F5] ">
-                  {/* Hello */}
+                  <InterviewDetails takenAt={reportData.createdAt} interviewType={reportData.reportType} />
                 </section>
-              )}
+              ) }
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2">
               {/* 1. Performance Highlights */}
               <section id="highlights" className="rounded-lg p-8 shadow-sm bg-white sm:p-4">
-                {(companyAndJobDetails || reportData.reportType === "Skill" || reportData.reportType === "Project") && (
+                {/* {(companyAndJobDetails || reportData.reportType === "Skill" || reportData.reportType === "Project") && ( */}
                   <PerformanceHighlights
                     backgroundImage={mockBackground}
                     overallScore={overallScore}
@@ -453,7 +466,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
                     getRatingLabel={getRatingLabel}
                     companyDetails={companyAndJobDetails}
                   />
-                )}
+                {/* )} */}
               </section>
 
               {/* 2. Interview Recording */}

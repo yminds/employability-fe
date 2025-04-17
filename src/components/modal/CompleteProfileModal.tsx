@@ -14,7 +14,7 @@ import CertificationsForm from "../forms/certification-form";
 import { useProfileForm } from "@/hooks/useProfileForm";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Info } from "lucide-react";
 import {
   ExperienceFormSkeleton,
   EducationFormSkeleton,
@@ -354,8 +354,10 @@ const CompleteProfileModal = ({
                 <span className="flex items-center justify-between">
                   {tab.label}
                   {profileStatus[tab.id as keyof typeof profileStatus] ===
-                    "updated" && (
+                  "updated" ? (
                     <CheckCircle className="w-4 h-4 text-[#00183D]" />
+                  ) : (
+                    <Info className="w-4 h-4 text-yellow-500" />
                   )}
                 </span>
               </button>
