@@ -22,18 +22,18 @@ const InterviewDetails = ({
   interviewType,
 }: IInterviewDetails) => {
   const location = useLocation();
-  const { skillIcon, skillName ,projectName} = location.state;
+  const { skillIcon, skillName, projectName } = location.state ?? {};
   console.log("location", location.state);
 
   return (
     <div className="flex items-center justify-between bg-white shadow-sm rounded-lg p-4 w-full border border-gray-200">
-      {/* Left Section: Skill Icon + Name and Taken At info */}
+      {/* Left Section*/}
       <div className="flex items-center space-x-6">
         <div className="flex items-center justify-center w-14 h-14 bg-blue-50 rounded-full ">
           {interviewType === "Project" ? (
             <img src={projectINterviewIcon} alt={skillName} className="w-8 h-8" />
           ) : (
-            <img src={skillIcon} alt={skillName} className="w-8 h-8" />
+            <img src={skillIcon || projectINterviewIcon} alt={skillName} className="w-8 h-8" />
           )}
         </div>
         <div>
@@ -42,17 +42,17 @@ const InterviewDetails = ({
         </div>
       </div>
 
-      {/* Right Section: Action Buttons */}
+      {/* Right Section */}
       <div className="flex gap-2">
         <button
           onClick={onRetake}
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-sm font-medium hover:bg-gray-50"
+          className="px-4 py-2  sm:hidden border border-gray-300 rounded-md text-gray-700 text-sm font-medium hover:bg-gray-50"
         >
           Retake Interview
         </button>
         <button
           onClick={onImproveScore}
-          className="px-4 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800"
+          className="px-4 py-2 sm:text-sm sm:px-2 sm:py-1 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800"
         >
           Improve score
         </button>

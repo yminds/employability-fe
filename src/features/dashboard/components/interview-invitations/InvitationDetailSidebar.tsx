@@ -3,9 +3,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { DetailSidebarProps } from './interviewInvitesTypes';
 import { motion } from 'framer-motion';
-import {
-  InvitationListItem,
-} from './InvitationListItem';
+import { InvitationListItem } from './InvitationListItem';
 
 export const InvitationDetailSidebar: React.FC<DetailSidebarProps> = ({
   selectedInvite,

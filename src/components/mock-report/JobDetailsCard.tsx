@@ -4,6 +4,8 @@ import { useGetCountriesQuery, useGetStatesQuery } from '@/api/locationApiSlice'
 import { useSelector } from 'react-redux';
 import { RootState } from "@/store/store";
 import { useShortlistMutation, useGetShortlistStatusQuery } from '@/api/interviewInvitesApiSlice';
+import defaultInterviewIcon from "@/assets/projects/projectInteviewIcon.png";
+
 
 const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean, profile: any, inviteId: string }> = ({ jobDetails, takenAT, isEmployer, profile, inviteId }) => {
 	const { data, error: shortListError, isLoading: shortListStatus } = useGetShortlistStatusQuery(inviteId);
@@ -64,7 +66,7 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 						{/* Company Logo */}
 						<div className="w-10 h-10 flex items-center justify-center bg-white rounded-full">
 							<img
-								src={company?.logo !== "" ? company?.logo : defaultImg}
+								src={company?.logo || defaultInterviewIcon || defaultImg}
 								alt={company?.name}
 								className="w-[80%] h-[80%] object-cover"
 							/>
@@ -87,7 +89,7 @@ const JobCard: React.FC<{ jobDetails: any, takenAT: string, isEmployer: boolean,
 						{/* Company Logo */}
 						<div className="w-10 h-10 flex items-center justify-center bg-white rounded-full">
 							<img
-								src={profile?.profile_image !== "" ? profile?.profile_image : defaultImg}
+								src={profile?.profile_image || defaultImg}
 								alt={company?.name}
 								className=" w-10 h-10 object-cover rounded-full"
 							/>

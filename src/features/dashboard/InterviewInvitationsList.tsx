@@ -169,7 +169,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative bg-[#F5F5F5] border-0">
       <Card className="w-full">
         {!hideHeader && (
           <CardHeader>
