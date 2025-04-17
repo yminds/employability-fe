@@ -341,7 +341,7 @@ const Dashboard: React.FC<Props> = () => {
                         ) : (
                           <>
                             {invitesData?.data && Array.isArray(invitesData.data) && invitesData.data.length > 0 && !invitesError && (
-                              <section className="bg-white shadow-sm rounded-[8px] border border-1 border-[#eee] relative">
+                              <section className="bg-white rounded-[8px] border-0 relative">
                                 <InterviewList 
                                   isDashboard={true} 
                                   invites={invitesData.data}
