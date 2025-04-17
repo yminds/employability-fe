@@ -1,18 +1,13 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import type React from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useGetEmployerJobsQuery } from "../api/employerJobsApiSlice";
-import {
-  Briefcase,
-  Users,
-  Clock,
-  Inbox,
-  Building,
-  ChevronRight,
-} from "lucide-react";
+import { Clock, Inbox, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import emojiWavingImg from "@/assets/dashboard/emoji_waving.svg";
 
@@ -20,11 +15,11 @@ import emojiWavingImg from "@/assets/dashboard/emoji_waving.svg";
 import PostJobSVG from "@/assets/employer-dashboard/PostJobSVG.svg";
 import SetCompanyProfileSVG from "@/assets/employer-dashboard/SetCompanyProfileSVG.svg";
 import UploadResumesSVG from "@/assets/employer-dashboard/UploadResumesSVG.svg";
+import NoPostSVG from "@/assets/employer-dashboard/NoPostSVG.svg";
 
 // Import our components
 import DashboardOverview from "./ImprovedEmployerDashboard";
-import JobFilters from "@/components/employer/JobFilter";
-import JobCard, { IJob } from "@/components/employer/JobCard";
+import JobCard, { type IJob } from "@/components/employer/JobCard";
 import { jobUtils } from "../utils/jobUtils";
 
 // Skeleton Components
@@ -157,7 +152,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
   };
   const filteredJobs =
     jobsData?.data && jobsData.data.length > 0
-      ? jobUtils.filterJobs(jobsData.data, filters)
+      ? jobUtils.filterJobs(jobsData.data, filters).slice(0, 3)
       : [];
 
   const isContentLoading = isLoading || isFetching;
@@ -171,46 +166,50 @@ const ImprovedEmployerDashboard: React.FC = () => {
       <div className="h-full flex flex-col bg-[#F5F5F5]">
         <div className="flex-1 p-[35px] md:p-[55px] overflow-y-auto">
           {/* Header */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-8">
             <div>
-              <h1 className="text-gray-800 text-2xl md:text-3xl font-semibold flex items-center gap-3">
-                Welcome Back, {employer?.employerName || "User"}
+              <h1 className="text-[#414447] text-[18px] font-medium font-ubuntu leading-[27px] tracking-[-0.18px]  flex items-center gap-3">
+                Hi, {employer?.employerName || "User"}
                 <span className="wave">
-                  <img src={emojiWavingImg} alt="Emoji" className="w-5" />
+                  <img
+                    src={emojiWavingImg || "/placeholder.svg"}
+                    alt="Emoji"
+                    className="w-5"
+                  />
                 </span>
               </h1>
-              <p className="text-body2 text-gray-500 mt-1">
-                Manage your job postings and candidates
+              <p className="text-[20px] font-medium font-ubuntu leading-8 tracking-[-0.2px] text-[#414447] mt-1">
+                Let's get started with your hiring journey.
               </p>
             </div>
-            <div className="flex flex-row gap-6 w-full py-6">
+            <div className="flex flex-row gap-6 w-full">
               <div
                 className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full cursor-pointer overflow-hidden"
                 onClick={() => navigate("/employer/jobs/create")}
               >
                 <div className="flex items-center px-6 py-4 h-full">
-                  <div className="flex-shrink-0 w-24 h-24 mr-6 relative">
+                  <div className="flex-shrink-0 w-20 h-20 mr-6 relative">
                     <div
                       className="absolute inset-0 flex items-center justify-center"
                       style={{
                         background:
-                          "radial-gradient(circle, rgba(219,234,254,1) 30%, rgba(255,255,255,1) 80%)",
+                          "radial-gradient(circle, rgba(219,234,254,1) 25%, rgba(255,255,255,1) 80%)",
                       }}
                     >
                       <img
                         src={PostJobSVG || "/placeholder.svg"}
                         alt="Post Job"
-                        className="w-28 h-28 object-contain"
+                        className="w-20 h-20 object-contain"
                       />
                     </div>
                   </div>
                   <div className="flex flex-col flex-grow">
-                    <h3 className="text-[#414447] text-xl font-medium">
+                    <h3 className="text-[#414447] text-[18px] font-medium leading-6 font-ubuntu">
                       Post a New Job
                     </h3>
-                    <p className="text-[#909091] text-sm mt-1">
+                    {/* <p className="text-[#909091] text-sm mt-1">
                       Lorem Ipsum Confetti
-                    </p>
+                    </p> */}
                   </div>
                   <div className="ml-auto">
                     <div className="flex items-center justify-center w-10 h-10 bg-[#f0f0f0] rounded-lg">
@@ -226,27 +225,27 @@ const ImprovedEmployerDashboard: React.FC = () => {
               >
                 <div className="flex items-center px-6 py-4 h-full">
                   <div
-                    className="flex-shrink-0 w-24 h-24 mr-6 relative"
+                    className="flex-shrink-0 w-20 h-20 mr-6 relative"
                     style={{
                       background:
-                        "radial-gradient(circle, rgba(233,213,255,1) 30%, rgba(255,255,255,1) 80%)",
+                        "radial-gradient(circle, rgba(233,213,255,1) 0%, rgba(255,255,255,1) 70%)",
                     }}
                   >
                     <div className="absolute inset-0 flex items-center justify-center">
                       <img
                         src={UploadResumesSVG || "/placeholder.svg"}
                         alt="Upload Resumes"
-                        className="w-28 h-28 object-contain"
+                        className="w-20 h-20 object-contain"
                       />
                     </div>
                   </div>
                   <div className="flex flex-col flex-grow">
-                    <h3 className="text-[#414447] text-xl font-medium">
+                    <h3 className="text-[#414447] text-[18px] font-medium leading-6 font-ubuntu">
                       Upload Resumes
                     </h3>
-                    <p className="text-[#909091] text-sm mt-1">
+                    {/* <p className="text-[#909091] text-sm mt-1">
                       Lorem Ipsum Confetti
-                    </p>
+                    </p> */}
                   </div>
                   <div className="ml-auto">
                     <div className="flex items-center justify-center w-10 h-10 bg-[#f0f0f0] rounded-lg">
@@ -256,28 +255,28 @@ const ImprovedEmployerDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {hasCompany && (
+              {!hasCompany && (
                 <div
                   className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full cursor-pointer overflow-hidden"
                   onClick={() => navigate("/employer/company/create")}
                 >
                   <div className="flex items-center px-6 h-full">
-                    <div className="flex-shrink-0 w-24 h-24 mr-6 relative">
+                    <div className="flex-shrink-0 w-20 h-20 mr-6 relative">
                       <div className="absolute inset-0 flex items-center justify-center">
                         <img
                           src={SetCompanyProfileSVG || "/placeholder.svg"}
                           alt="Set Company Profile"
-                          className="w-28 h-28 object-cover"
+                          className="w-20 h-20 object-contain"
                         />
                       </div>
                     </div>
                     <div className="flex flex-col flex-grow">
-                      <h3 className="text-[#414447] text-xl font-medium">
+                      <h3 className="text-[#414447] text-[18px] font-medium leading-6 font-ubuntu">
                         Set Company Profile
                       </h3>
-                      <p className="text-[#909091] text-sm mt-1">
+                      {/* <p className="text-[#909091] text-sm mt-1">
                         Lorem Ipsum Confetti
-                      </p>
+                      </p> */}
                     </div>
                     <div className="ml-auto">
                       <div className="flex items-center justify-center w-10 h-10 bg-[#f0f0f0] rounded-lg">
@@ -291,6 +290,10 @@ const ImprovedEmployerDashboard: React.FC = () => {
           </header>
 
           {/* Dashboard Overview */}
+          {/* Overview */}
+          <div className="mb-6">
+            <h2 className="text-h2 text-[#68696B]">Overview</h2>
+          </div>
           {isContentLoading ? (
             <OverviewSkeleton />
           ) : (
@@ -299,7 +302,7 @@ const ImprovedEmployerDashboard: React.FC = () => {
 
           {/* Main Content */}
           <Tabs defaultValue="jobs" className="space-y-6">
-            <TabsList className="bg-white text-body2">
+            {/* <TabsList className="bg-white text-body2">
               <TabsTrigger
                 value="jobs"
                 className="data-[state=active]:bg-blue-50"
@@ -318,15 +321,25 @@ const ImprovedEmployerDashboard: React.FC = () => {
               >
                 Archived
               </TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
             <TabsContent value="jobs" className="space-y-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-h2 text-[#68696B]">Recently Posted Jobs</h2>
+                <button
+                  className="text-body2 text-sm text-[#414447] underline flex items-center px-3"
+                  onClick={() => navigate("/employer/jobs")}
+                >
+                  View All
+                </button>
+              </div>
+
               {/* Filters */}
-              <JobFilters
+              {/* <JobFilters
                 filters={filters}
                 setFilters={setFilters}
                 onReset={resetFilters}
-              />
+              /> */}
 
               {isContentLoading ? (
                 <div className="space-y-4">
@@ -337,34 +350,34 @@ const ImprovedEmployerDashboard: React.FC = () => {
               ) : (
                 <>
                   {!filteredJobs || filteredJobs.length === 0 ? (
-                    <Card className="text-center py-20">
+                    <Card className="text-center py-16 bg-white shadow-sm rounded-lg">
                       <CardContent>
-                        <Briefcase className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-h1 mb-2">No jobs posted yet</h3>
-                        <p className="text-gray-500 text-sub-header mb-6">
-                          Create your first job posting to start hiring talent
-                        </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                          {/* Show Create Company button if employer doesn't have a company */}
-                          {!hasCompany && (
-                            <Button
-                              onClick={() =>
-                                navigate("/employer/company/create")
-                              }
-                              className="bg-[#001630] text-[16px] font-dm-sans text-white  hover:bg-[#062549]"
-                            >
-                              <Building className="h-4 w-4 mr-2" />
-                              Create Company First
-                            </Button>
-                          )}
-                          <Button
-                            onClick={() => navigate("/employer/jobs/create")}
-                            className="bg-[#001630] text-[16px] font-dm-sans text-white  hover:bg-[#062549]"
-                          >
-                            <Briefcase className="h-4 w-4 mr-2" />
-                            Post Your First Job
-                          </Button>
+                        <div className="flex justify-center mb-4">
+                          <div className="w-16 h-16">
+                            <img
+                              src={NoPostSVG || "/placeholder.svg"}
+                              alt="No Post"
+                            />
+                          </div>
                         </div>
+                        <p className="text-body2 text-[#414447] mb-1">
+                          You haven't added posted any jobs yet.
+                        </p>
+                        {!hasCompany ? (
+                          <button
+                            onClick={() => navigate("/employer/company/create")}
+                            className="hover:bg-transparent  text-[#414447] text-body2 underline"
+                          >
+                            Create Company First
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => navigate("/employer/jobs/create")}
+                            className="hover:bg-transparent  text-[#414447] text-body2 underline"
+                          >
+                            Post Job
+                          </button>
+                        )}
                       </CardContent>
                     </Card>
                   ) : (

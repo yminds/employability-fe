@@ -423,10 +423,9 @@ const InterviewCandidatesView: React.FC<InterviewCandidatesViewProps> = ({
       });
       return;
     }
-  
+ 
     const interviewType = candidate.task?.interview_type?.type || "Full";
-    
-
+ 
     const formattedType = interviewType.charAt(0).toUpperCase() + interviewType.slice(1);
     
     const reportUrl = `/employer/report/${formattedType}/${inviteId}/${candidate?.username}/${candidate.task?.interview_type?.interview_id}`;

@@ -42,7 +42,7 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
   getRatingText,
   formatJobType,
   formatWorkplaceType,
-  companyDetails
+  companyDetails = {}
 }) => {
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   console.log("Company details", companyDetails)
@@ -53,10 +53,10 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-h2">
-                <span className="text-h2">{companyDetails.job.title}</span>
+                <span className="text-h2">{companyDetails?.job?.title}</span>
               </h2>
               <p className="text-body2 text-grey-6">
-                {formatJobType(companyDetails.job.job_type)} • {formatWorkplaceType(companyDetails.job.work_place_type)}
+                {formatJobType(companyDetails?.job?.job_type)} • {formatWorkplaceType(companyDetails?.job?.work_place_type)}
               </p>
             </div>
             <div className="flex items-center gap-3">

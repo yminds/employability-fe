@@ -186,6 +186,8 @@ const MockReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
     const inviteId = pathParts[pathParts.length - 3 ];
     const username = pathParts[pathParts.length - 2]; // e.g. "someUser"
     const interviewId = pathParts[pathParts.length - 1]; // e.g. "abc123"
+    console.log("inviteId", inviteId);
+    
     return {
       username,
       interviewId,

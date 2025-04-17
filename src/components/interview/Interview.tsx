@@ -24,7 +24,7 @@ import useScreenShot from "@/hooks/useScreenShot";
 import { useUpdateThumbnailMutation } from "@/api/reportApiSlice";
 import Example from "@/features/cap/Example";
 import { flushSync } from "react-dom";
-import { pl } from "date-fns/locale";
+import { pl, se } from "date-fns/locale";
 
 // Constants and Types
 const SOCKET_URL =
@@ -50,7 +50,7 @@ export interface IDsaQuestionResponse {
   testCases: any[];
 }
 
-interface QuestionState {
+export interface QuestionState {
   question: string;
   codeSnippet: CodeSnippetType | null;
   isCodeSnippetMode: boolean;
@@ -369,7 +369,7 @@ const Interview: React.FC<{
               : typeof Fundamentals === "string"
                 ? Fundamentals.split(",").map((c: string) => c.trim())
                 : []
-            : concepts?.slice(0,1),
+            : concepts,
         interview_id: interviewDetails.data._id,
         level: user?.experience_level || "entry",
         type: type,
@@ -483,6 +483,7 @@ const Interview: React.FC<{
               interviewState={interviewState}
               concepts={allConcepts}
               interviewId={interviewDetails?.data?._id}
+              setQuestion= {setQuestion}
             />
           )}
         </div>
@@ -501,6 +502,7 @@ interface LayoutBuilderProps {
   interviewState: InterviewState;
   concepts: any[];
   interviewId: string;
+  setQuestion: React.Dispatch<React.SetStateAction<QuestionState>>;
 }
 
 const LayoutBuilder = ({
@@ -513,11 +515,16 @@ const LayoutBuilder = ({
   interviewState,
   concepts,
   interviewId,
+  setQuestion
+
 }: LayoutBuilderProps) => {
  
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [InterviewTime, setInterviewTime] = useState<number>(0);
   const [formattedTime, setFormattedTime] = useState<string>("00:00");
+
+
+
   
   // Load saved time only when interviewId becomes available
   useEffect(() => {
@@ -534,16 +541,12 @@ const LayoutBuilder = ({
     }
   }, [interviewId]);;
 
-  // console.log("all conepts", concepts);
-
-  // // console.log("concepts", concepts);
-  const coveredConceptsLength = concepts.filter((concept) => concept.status === "completed").length;
+ 
   const calculateProgress = (concepts: any[]) => {
     if (!concepts.length) return 0;
 
     const completedCount = concepts.filter((concept) => concept.status === "completed").length;
 
-    // Round to 1 decimal place for cleaner display
     return Math.round((completedCount / concepts.length) * 1000) / 10;
   };
 
@@ -551,7 +554,6 @@ const LayoutBuilder = ({
 
   console.log("progression", progression);
 
-  // settign a interview timer
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -576,7 +578,7 @@ const LayoutBuilder = ({
       <div className="w-[60%] flex flex-col gap-8">
         <WebCam />
         {isUserAnswering ? (
-          <Controls doneAnswering={handleDoneAnswering} />
+          <Controls doneAnswering={handleDoneAnswering} setQuestion={setQuestion} />
         ) : (
           <div className="text-center text-gray-500" />
         )}
@@ -614,7 +616,7 @@ const LayoutBuilder = ({
         <div className="w-[55%] flex flex-col gap-3">
           <WebCam />
           {isUserAnswering ? (
-            <Controls doneAnswering={handleDoneAnswering} />
+            <Controls doneAnswering={handleDoneAnswering} setQuestion={setQuestion} />
           ) : (
             <div className="text-center text-gray-500" />
           )}
