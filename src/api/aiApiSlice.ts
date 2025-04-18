@@ -11,7 +11,7 @@ export const aiApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     // TTS
-    tts: builder.mutation<Blob, { text: string }>({
+    tts: builder.mutation<Blob, { text: string,interviewId:string }>({
       query: (options) => ({
         url: "/api/v1/ai/tts",
         method: "POST",
@@ -21,9 +21,10 @@ export const aiApiSlice = apiSlice.injectEndpoints({
     }),
     // STT
     stt: builder.mutation({
-      query: (audioBlob) => {
+      query: ({ audioBlob, interviewId }: { audioBlob: Blob; interviewId: string }) => {
         const formData = new FormData();
         formData.append("audio", audioBlob);
+        formData.append("interviewId", interviewId);
 
         return {
           url: "/api/v1/ai/stt", // Or your actual STT endpoint
@@ -44,9 +45,4 @@ export const aiApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {
-  useStreamMutation,
-  useTtsMutation,
-  useSttMutation,
-  useInterviewStreamMutation,
-} = aiApiSlice;
+export const { useStreamMutation, useTtsMutation, useSttMutation, useInterviewStreamMutation } = aiApiSlice;

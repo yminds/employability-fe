@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { useSttMutation } from "@/api/aiApiSlice";
 
-export const useSTT = () => {
+export const useSTT = ({ interviewId }: { interviewId?: string }) => {
   const [stt, { isSuccess, data, error }] = useSttMutation();
 
   const recordingProcessed = useRef(false);
@@ -19,7 +19,10 @@ export const useSTT = () => {
         const audioBlob = await response.blob();
 
         // Send audioBlob for STT
-        stt(audioBlob);
+        stt({
+          audioBlob,
+          interviewId: interviewId || "",
+        });
         clearBlobUrl();
       } catch (error) {
         console.error("Error transcribing audio:", error);
@@ -30,10 +33,10 @@ export const useSTT = () => {
   });
 
   useEffect(() => {
-   return () => {
-     clearBlobUrl();
-     stopRecording();
-   }
+    return () => {
+      clearBlobUrl();
+      stopRecording();
+    };
   }, []);
   return {
     startRecording,

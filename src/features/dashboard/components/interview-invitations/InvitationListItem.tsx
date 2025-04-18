@@ -149,6 +149,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    
   };
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);

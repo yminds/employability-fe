@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCreateInterview } from "@/hooks/useCreateInterview";
 import { Edit2, Trash2 } from "lucide-react";
 
@@ -138,6 +138,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
         skillName: skill,
       },
     });
+
   };
 
   // const handleImproveScore = () => {
