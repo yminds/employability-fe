@@ -1,4 +1,6 @@
 import logo from "@/assets/branding/logo.svg?url";
+import defualtInterviewIcon from "@/assets/projects/projectInteviewIcon.png";
+
 interface HeaderProbs {
   SkillName: string;
   type: string;
@@ -15,7 +17,7 @@ const Header: React.FC<HeaderProbs> = ({ SkillName, type, skillLevel, interviewI
       <div className="interviewIcon flex gap-6 items-center">
         {type === "Skill" && (
           <div className="h-16 w-16 flex items-center justify-center rounded-full border border-gray-200">
-            <img src={interviewIcon} alt="" className="w-[70%] h-[70%] " />
+            <img src={interviewIcon || defualtInterviewIcon} alt="" className="w-[70%] h-[70%] " />
           </div>
         )}
         <div className="">

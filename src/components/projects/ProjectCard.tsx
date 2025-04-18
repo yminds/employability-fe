@@ -283,14 +283,26 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   <span className={`text-sub-header ${config.color}`}>{config.text}</span>
                 </div>
               </div>
-
-              <Button
-                onClick={handleViewProject}
+              {project.latest_interview_status?.isCompleted ? (
+                <Button
+                  variant="link"
+                  className="text-[#68696B] text-body2 underline justify-center text-center md:w-full sm:w-full"
+                  onClick={handleViewProject}
+                >
+                  View Report
+                </Button>
+              ) : (
+                <Button
                 variant="link"
                 className="text-[#68696B] text-body2 underline justify-center text-center md:w-full sm:w-full"
+                onClick={()=> window.open(project.githubLink[0], "_blank", "noopener noreferrer")}
               >
-                View Report
+                View Project
               </Button>
+
+                
+
+              )}
 
               <Button
                 className="border-[#68696B] min-w-40 text-[#68696B] text-body2 justify-center md:w-full sm:w-full"

@@ -57,6 +57,10 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
   const [userSkills, setUserSkills] = useState<Skill[] | undefined>()
   console.log("userSkills", userSkills)
 
+  useEffect(() => {
+    setInviteData(invite);
+  }, [invite]);
+  
   const [getUserSkills] = useGetUserSkillsMutation();
   const [updateInviteStatus, { isLoading }] = useUpdateInviteStatusMutation();
   const isDisabled = !isTaskCompleted;
@@ -164,6 +168,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    
   };
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);

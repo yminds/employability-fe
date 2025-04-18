@@ -127,7 +127,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
       interviewId,
     };
   };
-
+ 
   // Logged-in username from Redux
   const loggedInUsername = useSelector((state: any) => state.auth.user?.username);
   console.log("loggedInUsername", loggedInUsername);
@@ -210,6 +210,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ isSharedReport }) => {
   };
 
   const professionalExperience = profile?.experience;
+
 
   return (
     <>

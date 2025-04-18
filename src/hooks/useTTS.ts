@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 import { useTtsMutation } from "@/api/aiApiSlice";
 
 interface UseTTSOptions {
@@ -6,10 +6,10 @@ interface UseTTSOptions {
 }
 
 export const useTTS = (options: UseTTSOptions = {}) => {
-  const [tts ,{isLoading:isTtsPending}] = useTtsMutation();
+  const [tts, { isLoading: isTtsPending }] = useTtsMutation();
   const [frequencyData, setFrequencyData] = useState<number>(0);
   const frequencyDataRef = useRef<number>(0);
-  
+
   // Sentence management refs
   const bufferRef = useRef<string>("");
   const sentenceIndexRef = useRef<number>(0);
@@ -26,9 +26,8 @@ export const useTTS = (options: UseTTSOptions = {}) => {
       audioElement.crossOrigin = "anonymous";
       activeAudioElementRef.current = audioElement;
 
-      const audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-        audioContextRef.current = audioContext;
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
       const source = audioContext.createMediaElementSource(audioElement);
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
@@ -40,8 +39,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
 
       const calculateFrequency = () => {
         analyser.getByteFrequencyData(dataArray);
-        const avgFrequency =
-          dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
+        const avgFrequency = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
         const normalizedFrequency = avgFrequency / 255;
 
         frequencyDataRef.current = normalizedFrequency;
@@ -56,7 +54,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
 
       audioElement.onended = () => {
         audioElement.removeEventListener("timeupdate", calculateFrequency);
-        
+
         if (nextSentenceToPlayRef.current + 1 === sentenceIndexRef.current) {
           options.onPlaybackComplete?.();
         }
@@ -104,8 +102,11 @@ export const useTTS = (options: UseTTSOptions = {}) => {
   };
 
   // Handle incoming data by accumulating and parsing sentences
-  const handleIncomingData = (data: string, onSentenceProcessed?: (sentence: string) => void) => {
-    bufferRef.current += data;
+  const handleIncomingData = (
+    data: { text: string; interviewId: string },
+    onSentenceProcessed?: (sentence: string) => void
+  ) => {
+    bufferRef.current += data.text;
 
     const sentenceRegex = /[^.!?]+[.!?]/g;
     const sentences = bufferRef.current.match(sentenceRegex) || [];
@@ -118,7 +119,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
         const currentIndex = sentenceIndexRef.current;
         sentenceIndexRef.current += 1;
 
-        tts({ text: trimmedSentence })
+        tts({ text: trimmedSentence, interviewId: data.interviewId })
           .unwrap()
           .then((audioBlob) => {
             audioBufferMap.current.set(currentIndex, audioBlob);
@@ -143,7 +144,7 @@ export const useTTS = (options: UseTTSOptions = {}) => {
     setFrequencyData(0);
     if (activeAudioElementRef.current) {
       activeAudioElementRef.current.pause();
-      activeAudioElementRef.current.src = '';
+      activeAudioElementRef.current.src = "";
       activeAudioElementRef.current = null;
     }
 

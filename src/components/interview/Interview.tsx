@@ -80,9 +80,9 @@ const Interview: React.FC<{
   Fundamentals: string | string[];
   skills_required: string | string[];
   comanyDetails: {
-    name : string;
-    location:any
-  }
+    name: string;
+    location: any;
+  };
   interviewIcon?: string;
 }> = ({
   interviewTopic,
@@ -110,10 +110,14 @@ const Interview: React.FC<{
   const [isDsaRoundActive, setIsDsaRoundActive] = useState(false);
   const [dsaQuestion, setDsaQuestion] = useState<any>(null);
   const { captureScreenshot, screenshot } = useScreenShot();
+  const [isAiRetrying, setIsAiRetrying] = useState(false);
+  const [isAiRetryingError, setIsAiRetryingError] = useState(false);
   // Queries and Speech Hooks
-  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT();
   const { data: interviewDetails, isSuccess: isInterviewLoaded } = useGetInterviewbyIdQuery(interviewId as string, {
     skip: !interviewId,
+  });
+  const { startRecording, stopRecording, isSttSuccess, sttResponse, sttError } = useSTT({
+    interviewId: interviewDetails?.data?._id as string,
   });
 
   const user = useSelector((state: RootState) => state.auth.user);
@@ -142,7 +146,7 @@ const Interview: React.FC<{
 
   useEffect(() => {
     const monitorScreens = async () => {
-      if ('getScreenDetails' in window) {
+      if ("getScreenDetails" in window) {
         try {
           const screenDetails = await (window as any).getScreenDetails();
           const updateScreenCount = () => {
@@ -154,7 +158,7 @@ const Interview: React.FC<{
 
           updateScreenCount(); // Initial check
 
-          screenDetails.addEventListener('screenschange', updateScreenCount);
+          screenDetails.addEventListener("screenschange", updateScreenCount);
         } catch (error) {
           console.error("Screen monitoring failed:", error);
         }
@@ -192,13 +196,49 @@ const Interview: React.FC<{
         addMessage(initialGreeting);
       }
     };
-    
+
+    const handleRetryAiResponse = (data: { isRetrying: boolean }) => {
+      const { isRetrying } = data;
+      isRetrying ? setIsAiRetrying(true) : setIsAiRetrying(false);
+    };
+
     const handleAIResponse = (data: string) => {
       // console.log("[enetred to ai response]", question);
 
       setInterviewState("SPEAKING"); // Move to SPEAKING when AI starts speaking
 
-      handleIncomingData(data, (sentence) => handleMessage(sentence, "AI"));
+      handleIncomingData(
+        {
+          text: data,
+          interviewId: interviewDetails.data._id,
+        },
+        (sentence) => handleMessage(sentence, "AI")
+      );
+    };
+
+    const handleAiFallbackResponse = (data: string) => {
+      setIsAiRetrying(false);
+      setInterviewState("SPEAKING");
+      setIsAiRetryingError(true);
+
+      setMessages((prevMessages) => {
+        if (prevMessages.length > 0 && prevMessages[prevMessages.length - 1].role === "AI") {
+          return prevMessages.slice(0, -1);
+        }
+        return prevMessages;
+      });
+
+      handleIncomingData(
+        {
+          text: data,
+          interviewId: interviewDetails.data._id,
+        },
+        (sentence) => {
+          setTimeout(() => {
+            handleMessage(sentence, "AI");
+          }, 500);
+        }
+      );
     };
 
     const handleShiftLayout = (data: string) => {
@@ -274,6 +314,8 @@ const Interview: React.FC<{
     newSocket.on(`endInterview${interviewDetails.data._id}`, handleEndInterview);
     newSocket.on(`conceptValidation${interviewDetails.data._id}`, handleConceptValidation);
     newSocket.on(`generateDsaQuestion${interviewDetails.data._id}`, handleGenerateDsaQuestion);
+    newSocket.on(`retryAiResponse${interviewDetails.data._id}`, handleRetryAiResponse);
+    newSocket.on(`aiFallbackResponse${interviewDetails.data._id}`, handleAiFallbackResponse);
 
     return () => {
       isComponentMounted.current = false;
@@ -286,10 +328,22 @@ const Interview: React.FC<{
       newSocket.disconnect();
     };
   }, [isInterviewLoaded, interviewDetails]);
-   
+
+  useEffect(() => {
+    if (isAiRetryingError && interviewState === "SPEAKING") return;
+
+    if (isAiRetryingError) {
+      setTimeout(() => {
+        setIsAiRetryingError(false);
+        stopScreenSharing();
+        toggleBrowserFullscreen();
+        navigate("/skills");
+      }, 1000 * 5);
+    }
+  }, [isAiRetryingError, stopScreenSharing, interviewState]);
+
   // Speech-to-Text handling
   useEffect(() => {
-    
     if (isDsaRoundActive) return;
 
     if (isSttSuccess && sttResponse) {
@@ -346,39 +400,39 @@ const Interview: React.FC<{
     // Move to "WAITING" state when sending a new question
     setInterviewState("WAITING");
 
-      const response = await interviewStream({
-        prompt,
-        // model: "deepseek-chat",
-        // provider: "deepseek",
-        model: "gpt-4o",
-        provider: "openai",
-        // model: "gemini-2.0-flash-exp",
-        // provider: "google",
-        _id: interviewDetails.data._id,
-        thread_id: interviewDetails.data.thread_id,
-        user_id: interviewDetails.data.user_id,
-        user_skill_id: interviewDetails.data.user_skill_id,
-        skill_id: interviewDetails.data.skill_id,
-        code_snippet: question.codeSnippet?.code || "",
-        question: question.question,
-        skill_name: interviewTopic,
-        concepts: 
-          type === "Mock" || type === "Full"
-            ? Array.isArray(Fundamentals)
-              ? Fundamentals
-              : typeof Fundamentals === "string"
-                ? Fundamentals.split(",").map((c: string) => c.trim())
-                : []
-            : concepts,
-        interview_id: interviewDetails.data._id,
-        level: user?.experience_level || "entry",
-        type: type,
-        jobDescription: jobDescription,
-        userName: user?.firstName,
-        projectId: projectId,
-        userExperience: userExperience,
-        skills_required: skills_required,
-      }).unwrap();
+    const response = await interviewStream({
+      prompt,
+      // model: "deepseek-chat",
+      // provider: "deepseek",
+      model: "gpt-4o",
+      provider: "openai",
+      // model: "gemini-2.0-flash-exp",
+      // provider: "google",
+      _id: interviewDetails.data._id,
+      thread_id: interviewDetails.data.thread_id,
+      user_id: interviewDetails.data.user_id,
+      user_skill_id: interviewDetails.data.user_skill_id,
+      skill_id: interviewDetails.data.skill_id,
+      code_snippet: question.codeSnippet?.code || "",
+      question: question.question,
+      skill_name: interviewTopic,
+      concepts:
+        type === "Mock" || type === "Full"
+          ? Array.isArray(Fundamentals)
+            ? Fundamentals
+            : typeof Fundamentals === "string"
+            ? Fundamentals.split(",").map((c: string) => c.trim())
+            : []
+          : concepts,
+      interview_id: interviewDetails.data._id,
+      level: user?.experience_level || "entry",
+      type: type,
+      jobDescription: jobDescription,
+      userName: user?.firstName,
+      projectId: projectId,
+      userExperience: userExperience,
+      skills_required: skills_required,
+    }).unwrap();
 
     // console.log("response", response);
 
@@ -414,7 +468,7 @@ const Interview: React.FC<{
     setIsDsaRoundStarted(false);
 
     setTimeout(() => {
-      setIsDsaRoundActive(false);
+      setIsDsaRoundActive(false); // to disable the voice capture
     }, 1000 * 10);
   };
 
@@ -474,6 +528,7 @@ const Interview: React.FC<{
             </div>
           ) : (
             <LayoutBuilder
+              isAiRetrying={isAiRetrying}
               isUserAnswering={isUserAnswering}
               handleDoneAnswering={handleDoneAnswering}
               question={question}
@@ -483,7 +538,7 @@ const Interview: React.FC<{
               interviewState={interviewState}
               concepts={allConcepts}
               interviewId={interviewDetails?.data?._id}
-              setQuestion= {setQuestion}
+              setQuestion={setQuestion}
             />
           )}
         </div>
@@ -503,6 +558,7 @@ interface LayoutBuilderProps {
   concepts: any[];
   interviewId: string;
   setQuestion: React.Dispatch<React.SetStateAction<QuestionState>>;
+  isAiRetrying: boolean;
 }
 
 const LayoutBuilder = ({
@@ -515,17 +571,13 @@ const LayoutBuilder = ({
   interviewState,
   concepts,
   interviewId,
-  setQuestion
-
+  setQuestion,
+  isAiRetrying,
 }: LayoutBuilderProps) => {
- 
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [InterviewTime, setInterviewTime] = useState<number>(0);
   const [formattedTime, setFormattedTime] = useState<string>("00:00");
 
-
-
-  
   // Load saved time only when interviewId becomes available
   useEffect(() => {
     if (interviewId) {
@@ -533,15 +585,14 @@ const LayoutBuilder = ({
       if (savedTime && !isNaN(parseInt(savedTime, 10))) {
         const time = parseInt(savedTime, 10);
         setInterviewTime(time);
-        
+
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
         setFormattedTime(`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`);
       }
     }
-  }, [interviewId]);;
+  }, [interviewId]);
 
- 
   const calculateProgress = (concepts: any[]) => {
     if (!concepts.length) return 0;
 
@@ -553,7 +604,6 @@ const LayoutBuilder = ({
   const progression = calculateProgress(concepts);
 
   console.log("progression", progression);
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -584,7 +634,7 @@ const LayoutBuilder = ({
         )}
       </div>
       <div className="w-[40%] flex flex-col gap-8">
-        <AIProfile frequency={frequencyData} interviewState={interviewState} />
+        <AIProfile frequency={frequencyData} interviewState={interviewState} isAiRetrying={isAiRetrying} />
         <Conversation layoutType={1} messages={messages} />
       </div>
     </div>
@@ -606,7 +656,8 @@ const LayoutBuilder = ({
 
       <div className="main-container w-full flex gap-8">
         <div className="w-[45%] flex flex-col gap-5  ">
-          <AIProfile frequency={frequencyData} interviewState={interviewState} /> {/* Pass state here */}
+          <AIProfile frequency={frequencyData} interviewState={interviewState} isAiRetrying={isAiRetrying} />{" "}
+          {/* Pass state here */}
           {question.isCodeSnippetMode && question.codeSnippet ? (
             <CodeSnippetQuestion question={question.codeSnippet.question} codeSnippet={question.codeSnippet.code} />
           ) : (
