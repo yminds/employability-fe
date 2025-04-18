@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import 'react-loading-skeleton/dist/skeleton.css';
-import { useInterviewInvites, InterviewInvite } from '@/hooks/useInterviewInvites';
-import partypopper from "@/assets/interview/partyPopover.png"
+import "react-loading-skeleton/dist/skeleton.css";
+import { useInterviewInvites, InterviewInvite } from "@/hooks/useInterviewInvites";
+import partypopper from "@/assets/interview/partyPopover.png";
 
 import {
   InvitationListItem,
   InvitationDetailSidebar,
   LoadingSkeleton,
   EmptyState,
-  InterviewListProps
-} from './components/interview-invitations';
+  InterviewListProps,
+} from "./components/interview-invitations";
 
 const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   isDashboard = false,
@@ -20,7 +20,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   onAccept: externalOnAccept,
   onDecline: externalOnDecline,
   userId,
-  hideHeader = false
+  hideHeader = false,
 }) => {
   const navigate = useNavigate();
   const location = useLocation(); // To track location changes
@@ -28,7 +28,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   const [showSidebar, setShowSidebar] = useState(false);
   // Add local state to track modified invites
   const [localModifiedInvites, setLocalModifiedInvites] = useState<Record<string, string>>({});
-  const [isUpdated,setIsUpdated] = useState(false)
+  const [isUpdated, setIsUpdated] = useState(false);
 
   // Use our custom hook for interview invites
   const {
@@ -50,7 +50,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
       if (localModifiedInvites[invite._id]) {
         return {
           ...invite,
-          status: localModifiedInvites[invite._id]
+          status: localModifiedInvites[invite._id],
         };
       }
       return invite;
@@ -58,11 +58,11 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   }, [invites, localModifiedInvites]);
 
   const isInterviewTypeCompleted = (invite: InterviewInvite | null) => {
-    return invite?.task?.interview_type?.status === 'completed';
+    return invite?.task?.interview_type?.status === "completed";
   };
 
   const isSkillsCompleted = (invite: InterviewInvite | null) => {
-    return invite?.task?.skills?.every((skill: any) => skill.status === 'completed');
+    return invite?.task?.skills?.every((skill: any) => skill.status === "completed");
   };
 
   const isTaskCompleted = (invite: InterviewInvite | null) => {
@@ -74,9 +74,9 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
 
   const onInviteAccept = async (id: string) => {
     // Immediately update local UI state
-    setLocalModifiedInvites(prev => ({
+    setLocalModifiedInvites((prev) => ({
       ...prev,
-      [id]: 'accepted'
+      [id]: "accepted",
     }));
 
     const success = await handleAccept(id);
@@ -88,14 +88,14 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
     if (success && selectedInvite && selectedInvite._id === id) {
       setSelectedInvite({
         ...selectedInvite,
-        status: 'accepted'
+        status: "accepted",
       });
-      setIsUpdated(true)
+      setIsUpdated(true);
     }
 
     // If not successful, revert the local state
     if (!success) {
-      setLocalModifiedInvites(prev => {
+      setLocalModifiedInvites((prev) => {
         const newState = { ...prev };
         delete newState[id];
         return newState;
@@ -105,9 +105,9 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
 
   const onInviteDecline = async (id: string) => {
     // Immediately update local UI state
-    setLocalModifiedInvites(prev => ({
+    setLocalModifiedInvites((prev) => ({
       ...prev,
-      [id]: 'declined'
+      [id]: "declined",
     }));
 
     const success = await handleDecline(id);
@@ -119,14 +119,14 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
     if (success && selectedInvite && selectedInvite._id === id) {
       setSelectedInvite({
         ...selectedInvite,
-        status: 'declined'
+        status: "declined",
       });
-      setIsUpdated(true)
+      setIsUpdated(true);
     }
 
     // If not successful, revert the local state
     if (!success) {
-      setLocalModifiedInvites(prev => {
+      setLocalModifiedInvites((prev) => {
         const newState = { ...prev };
         delete newState[id];
         return newState;
@@ -154,9 +154,9 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   }, [invites, localModifiedInvites]);
 
   useEffect(() => {
-    if (location.pathname === '/') {
+    if (location.pathname === "/") {
       refetch();
-      console.log("Refetched")
+      console.log("Refetched");
     }
   }, [location, refetch]);
 
@@ -169,68 +169,73 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   const closeSidebar = () => {
     console.log("Closing sidebar and refetching invites");
     setShowSidebar(false);
-    refetch()
+    refetch();
+    // just add re render component to show the latest data
+    setIsUpdated(false);
+
     // Refetch to ensure the latest data is displayed
     setTimeout(() => setSelectedInvite(null), 300); // Clear after animation completes
   };
-  
-  useEffect(() => {
-    if(isUpdated){
-      window.location.reload()
-    }
     
-  }, [isUpdated]);
+  // useEffect(() => {
+  //   if (isUpdated) {
+  //     window.location.reload();
+  //   }
+  // }, [isUpdated]);
 
   return (
-    <div className={`relative border-0 ${isDashboard ? 'bg-[#F5F5F5]' : 'bg-white'} `}>
+    <div className={`relative border-0 ${isDashboard ? "bg-[#F5F5F5]" : "bg-white"} `}>
       <Card className="w-full">
         {!hideHeader && totalInterviews === 1 ? (
-          <CardHeader className=' p-6'>
+          <CardHeader className=" p-6">
             <div className="flex items-center gap-4">
               <div>
-                <img
-                  src={partypopper}
-                  alt="Party Popper"
-                  className=" h-9 w-9 object-contain"
-                />
+                <img src={partypopper} alt="Party Popper" className=" h-9 w-9 object-contain" />
               </div>
-              <div className='flex flex-col justify-center items-start gap-1'>
+              <div className="flex flex-col justify-center items-start gap-1">
                 <div className="text-grey-6 font-dm-sans text-[16px] font-medium leading-[22px]">
                   Congrats! You have been invited to an interview
                 </div>
-                <div className=' text-grey-5 font-dm-sans text-[14px] font-normal leading-[22px]'>
+                <div className=" text-grey-5 font-dm-sans text-[14px] font-normal leading-[22px]">
                   Employer is waiting for your response
                 </div>
               </div>
             </div>
           </CardHeader>
-        ) : !hideHeader && totalInterviews > 1 && (
-          <CardHeader className=' py-6 px-0'>
-            <div className=' flex justify-between items-center'>
-              <h2 className="text-grey-6 text-h2 font-['Ubuntu'] leading-[22px]">
-                Interview Invitations ({totalInterviews})
-              </h2>
+        ) : (
+          !hideHeader &&
+          totalInterviews > 1 && (
+            <CardHeader className=" py-6 px-0">
+              <div className=" flex justify-between items-center">
+                <h2 className="text-grey-6 text-h2 font-['Ubuntu'] leading-[22px]">
+                  Interview Invitations ({totalInterviews})
+                </h2>
 
-              {isDashboard && totalInterviews > 3 && (
-                <div className="w-fit flex justify-center">
-                  <button
-                    onClick={() => navigate("/interviews")}
-                    className="text-black font-sf-pro-display text-base font-normal leading-6 tracking-[0.24px]"
-                  >
-                    View all
-                  </button>
-                </div>
-              )}
-            </div>
-          </CardHeader>
+                {isDashboard && totalInterviews > 3 && (
+                  <div className="w-fit flex justify-center">
+                    <button
+                      onClick={() => navigate("/interviews")}
+                      className="text-black font-sf-pro-display text-base font-normal leading-6 tracking-[0.24px]"
+                    >
+                      View all
+                    </button>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+          )
         )}
 
-        <CardContent className='p-0'>
+        <CardContent className="p-0">
           {isLoading ? (
             <div className="grid grid-cols-1 gap-4">
-              {Array(3).fill(null).map((_, index) => (
-                <div key={index}><LoadingSkeleton /></div>
-              ))}
+              {Array(3)
+                .fill(null)
+                .map((_, index) => (
+                  <div key={index}>
+                    <LoadingSkeleton />
+                  </div>
+                ))}
             </div>
           ) : (
             <div className="flex flex-col gap-6 ">
@@ -256,9 +261,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
             </div>
           )}
 
-          {!isLoading && displayedInterviews.length === 0 && (
-            <EmptyState isDashboard={isDashboard} />
-          )}
+          {!isLoading && displayedInterviews.length === 0 && <EmptyState isDashboard={isDashboard} />}
         </CardContent>
       </Card>
 
@@ -276,12 +279,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
       />
 
       {/* Overlay when sidebar is open */}
-      {showSidebar && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-40"
-          onClick={closeSidebar}
-        ></div>
-      )}
+      {showSidebar && <div className="fixed inset-0 bg-black bg-opacity-30 z-40" onClick={closeSidebar}></div>}
     </div>
   );
 };
