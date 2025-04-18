@@ -17,9 +17,13 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
 
   // Memoize skill pool IDs
   const skillPoolIds = useMemo(() =>
-    jobDescription.skills_required.map((skill: any) => skill.skill),
+    jobDescription.skills_required
+      .filter((skill: any) => skill.importance === 'Very Important')
+      .map((skill: any) => skill.skill),
     [jobDescription.skills_required]
   );
+
+  console.log("SkillPoolIds for the Very Important Skills", skillPoolIds)
 
   // Memoize the mutation call
   useMemo(() => {

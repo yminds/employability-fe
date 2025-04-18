@@ -67,6 +67,8 @@ export const useInterviewInvites = (userId?: string) => {
     refetch
   } = useGetInvitesByUserIdQuery(currentUserId, {
     skip: !currentUserId, // Skip query if no user ID is available
+    refetchOnMountOrArgChange: true,
+
   });
   
   // RTK Query mutation hook

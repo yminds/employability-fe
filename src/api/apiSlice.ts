@@ -128,6 +128,7 @@ export const apiSlice = createApi({
     "FeaturedInterview",
     "InterviewInvites",
     "InterviewStatus",
+    "Invites"
   ],
   endpoints: () => ({}),
 });

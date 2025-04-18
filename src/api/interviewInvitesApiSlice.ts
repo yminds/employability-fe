@@ -7,7 +7,8 @@ export const interviewInvitesApiSlice = apiSlice.injectEndpoints({
         url: `/api/v1/employerInterviewInvitation/invite/user/${userId}`,
         method: "GET",
       }),
-      providesTags: ['InterviewInvites'],
+      providesTags: ['Invites'],
+      keepUnusedDataFor: 0,
     }),
     
     respondToInvite: builder.mutation({

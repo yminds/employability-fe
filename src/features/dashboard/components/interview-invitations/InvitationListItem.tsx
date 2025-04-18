@@ -24,6 +24,7 @@ import rejected from "@/assets/interview/rejected.png"
 import { useNavigate } from 'react-router-dom';
 import { InterviewDateModal } from '@/components/employer/InterviewDateModal';
 import { detectMobileDevice } from '@/utils/deviceDetection';
+import { useGetCountriesQuery, useGetStatesQuery } from '@/api/locationApiSlice';
 
 import {
   useCheckInviteStatusQuery,
@@ -59,6 +60,20 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
   const [getUserSkills] = useGetUserSkillsMutation();
   const [updateInviteStatus, { isLoading }] = useUpdateInviteStatusMutation();
   const isDisabled = !isTaskCompleted;
+  const { data: countries = [] } = useGetCountriesQuery();
+  const { data: states = [] } = useGetStatesQuery(inviteData.job?.location?.country || "", {
+    skip: !inviteData.job?.location?.country,
+  });
+
+  // const country = inviteData.job?.location?.country
+  //   ? countries.find((c) => c.isoCode === inviteData.job?.location?.country)
+  //   : "";
+
+  const state =
+    inviteData.job?.location?.state && inviteData.job?.location?.country
+      ? states.find((s) => s.isoCode === inviteData.job?.location?.state)
+      : null;
+
 
   // For both "normal" view and "details" view, this local state will update
   // so we see the new inviteData.status right away without refreshing.
@@ -66,10 +81,10 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
     try {
       // onAccept(inviteData._id);
       // // 2) After successful call, update local state
-      // setInviteData(prev => ({
-      //   ...prev,
-      //   status: 'accepted'
-      // }));
+      setInviteData(prev => ({
+        ...prev,
+        status: 'accepted'
+      }));
 
       // Open the InterviewDateModal after accepting
       setDeadlineDate(inviteData.application_deadline ? new Date(inviteData.application_deadline) : null);
@@ -196,18 +211,23 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
       }).unwrap();
 
       if (response.success && inviteStatusData?.data?.candidateInfo) {
-        await sendInvitationResponseMail({
-          inviteId: inviteData._id,
-          candidateEmail: inviteStatusData.data.candidateInfo.email,
-          candidateName: inviteStatusData.data.candidateInfo.name,
-          jobTitle: inviteData.job?.title || '',
-          companyName: typeof inviteData.company === "object"
-            ? inviteData.company?.name
-            : "",
-          status: "accepted",
-          submissionDate: date.toISOString(),
-          isUserExist: false
-        });
+        try {
+          await sendInvitationResponseMail({
+            inviteId: inviteData._id,
+            candidateEmail: inviteStatusData.data.candidateInfo.email,
+            candidateName: inviteStatusData.data.candidateInfo.name,
+            jobTitle: inviteData.job?.title || '',
+            companyName: typeof inviteData.company === "object"
+              ? inviteData.company?.name
+              : "",
+            status: "accepted",
+            submissionDate: date.toISOString(),
+            isUserExist: false
+          });
+        } catch (error) {
+          console.error("Error sending invitation response mail:", error);
+          setErrorMessage("Failed to send email. Please try again.");
+        }
       }
 
       setInviteData(prev => ({
@@ -256,7 +276,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                   </span>
                 </div>
                 <p className="text-body2 text-grey-5">
-                  {capitalizeString(inviteData.company?.name)} | {typeof inviteData.job?.location === 'object' ? inviteData.job?.location?.country : inviteData.job?.location} |{" "}
+                  {capitalizeString(inviteData.company?.name)} | {inviteData.job?.location?.city}, {typeof state === 'string' ? state : state?.name || ''} |{" "}
                   {capitalizeString(inviteData.job?.work_place_type)}
                 </p>
               </div>
@@ -308,7 +328,6 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                 )
               )}
             </div>
-
           </div>
 
           {/* Horizontal line (only in normal view) */}
