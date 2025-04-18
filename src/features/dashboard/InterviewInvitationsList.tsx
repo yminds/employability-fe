@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import 'react-loading-skeleton/dist/skeleton.css';
 import { useInterviewInvites, InterviewInvite } from '@/hooks/useInterviewInvites';
+import partypopper from "@/assets/interview/partyPopover.png"
 
 import {
   InvitationListItem,
@@ -11,7 +12,6 @@ import {
   EmptyState,
   InterviewListProps
 } from './components/interview-invitations';
-import { ChevronDown } from 'lucide-react';
 
 const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   isDashboard = false,
@@ -28,6 +28,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   const [showSidebar, setShowSidebar] = useState(false);
   // Add local state to track modified invites
   const [localModifiedInvites, setLocalModifiedInvites] = useState<Record<string, string>>({});
+  const [isUpdated,setIsUpdated] = useState(false)
 
   // Use our custom hook for interview invites
   const {
@@ -89,6 +90,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
         ...selectedInvite,
         status: 'accepted'
       });
+      setIsUpdated(true)
     }
 
     // If not successful, revert the local state
@@ -119,6 +121,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
         ...selectedInvite,
         status: 'declined'
       });
+      setIsUpdated(true)
     }
 
     // If not successful, revert the local state
@@ -151,10 +154,10 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   }, [invites, localModifiedInvites]);
 
   useEffect(() => {
-    if (location.pathname === '/'){
+    if (location.pathname === '/') {
       refetch();
       console.log("Refetched")
-    } 
+    }
   }, [location, refetch]);
 
   const handleInviteClick = (invite: InterviewInvite) => {
@@ -164,21 +167,65 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
   };
 
   const closeSidebar = () => {
+    console.log("Closing sidebar and refetching invites");
     setShowSidebar(false);
+    refetch()
+    // Refetch to ensure the latest data is displayed
     setTimeout(() => setSelectedInvite(null), 300); // Clear after animation completes
   };
+  
+  useEffect(() => {
+    if(isUpdated){
+      window.location.reload()
+    }
+    
+  }, [isUpdated]);
 
   return (
-    <div className="relative bg-[#F5F5F5] border-0">
+    <div className={`relative border-0 ${isDashboard ? 'bg-[#F5F5F5]' : 'bg-white'} `}>
       <Card className="w-full">
-        {!hideHeader && (
-          <CardHeader>
-            <h2 className="text-grey-6 text-h2 font-['Ubuntu'] leading-snug">
-              Interview Invitations ({totalInterviews})
-            </h2>
+        {!hideHeader && totalInterviews === 1 ? (
+          <CardHeader className=' p-6'>
+            <div className="flex items-center gap-4">
+              <div>
+                <img
+                  src={partypopper}
+                  alt="Party Popper"
+                  className=" h-9 w-9 object-contain"
+                />
+              </div>
+              <div className='flex flex-col justify-center items-start gap-1'>
+                <div className="text-grey-6 font-dm-sans text-[16px] font-medium leading-[22px]">
+                  Congrats! You have been invited to an interview
+                </div>
+                <div className=' text-grey-5 font-dm-sans text-[14px] font-normal leading-[22px]'>
+                  Employer is waiting for your response
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+        ) : !hideHeader && totalInterviews > 1 && (
+          <CardHeader className=' py-6 px-0'>
+            <div className=' flex justify-between items-center'>
+              <h2 className="text-grey-6 text-h2 font-['Ubuntu'] leading-[22px]">
+                Interview Invitations ({totalInterviews})
+              </h2>
+
+              {isDashboard && totalInterviews > 3 && (
+                <div className="w-fit flex justify-center">
+                  <button
+                    onClick={() => navigate("/interviews")}
+                    className="text-black font-sf-pro-display text-base font-normal leading-6 tracking-[0.24px]"
+                  >
+                    View all
+                  </button>
+                </div>
+              )}
+            </div>
           </CardHeader>
         )}
-        <CardContent>
+
+        <CardContent className='p-0'>
           {isLoading ? (
             <div className="grid grid-cols-1 gap-4">
               {Array(3).fill(null).map((_, index) => (
@@ -186,7 +233,7 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 ">
               {displayedInterviews.map((invite: InterviewInvite) => {
                 const isProcessing = processingIds.includes(invite._id);
                 const isSelected = selectedInvite && selectedInvite._id === invite._id;
@@ -211,18 +258,6 @@ const InterviewInvitationsList: React.FC<InterviewListProps> = ({
 
           {!isLoading && displayedInterviews.length === 0 && (
             <EmptyState isDashboard={isDashboard} />
-          )}
-
-          {isDashboard && totalInterviews > 3 && (
-            <div className="w-full flex justify-center mt-4">
-              <button
-                onClick={() => navigate("/interviews")}
-                className="flex items-center gap-1 text-[#001630] text-sm font-medium "
-              >
-                View all
-                <ChevronDown className="h-4 w-4 ml-1" />
-              </button>
-            </div>
           )}
         </CardContent>
       </Card>

@@ -6,7 +6,7 @@ import { useUpdateInterviewIdMutation } from '@/api/interviewInvitesApiSlice';
 import { useGetUserSkillIdMutation, useCreateUserSkillsMutation } from '@/api/skillsApiSlice';
 import { toast } from 'sonner';
 
-const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id:string | undefined, userGoal:string | undefined, companyDetails:any }> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails }) => {
+const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id: string | undefined, userGoal: string | undefined, companyDetails: any }> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails }) => {
 
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
@@ -17,9 +17,13 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
 
   // Memoize skill pool IDs
   const skillPoolIds = useMemo(() =>
-    jobDescription.skills_required.map((skill: any) => skill.skill),
+    jobDescription.skills_required
+      .filter((skill: any) => skill.importance === 'Very Important')
+      .map((skill: any) => skill.skill),
     [jobDescription.skills_required]
   );
+
+  console.log("SkillPoolIds for the Very Important Skills", skillPoolIds)
 
   // Memoize the mutation call
   useMemo(() => {
@@ -31,14 +35,26 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
 
   // Actual task data
   const [taskData, setTaskData] = useState(task);
-
+    // Action text decision function
+    const getActionText = (type: string, status: string, isInterviewCompleted: boolean, interviewId: string | undefined) => {
+      if (status === 'completed') {
+        return 'View Report';
+      } else if (isInterviewCompleted === false) {
+        return 'Resume Interview';
+      } else if (type === 'skill' || type === 'full' || type === 'screening') {
+        return 'Start Interview';
+      } else {
+        return 'Unknown Action';
+      }
+    };
+  
   // Prepare tasks for rendering
   const tasks = [
     {
       process: `${taskData.interview_type.type.charAt(0).toUpperCase() + taskData.interview_type.type.slice(1)} Interview`,
       estimatedDuration: taskData.interview_type.estimated_time,
       status: taskData.interview_type.status,
-      action: `${taskData.interview_type.status === 'completed' ? 'View Report' : 'Start Interview'}`,
+      action: getActionText('task', taskData.interview_type.status, taskData.interview_type.is_interview_completed, taskData.interview_type.interview_id),
       interview_id: taskData.interview_type.interview_id
     },
     ...taskData.skills.map((skill: any) => ({
@@ -46,8 +62,8 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       skillId: skill._id,
       estimatedDuration: skill.estimated_time,
       status: skill.status,
-      action: `${skill.status === 'completed' ? 'View Report' : 'Verify Skill'}`,
-      interview_id : skill.interview_id
+      action: getActionText('skill', skill.status, skill.is_interview_completed, skill.interview_id),
+      interview_id: skill.interview_id
     }))
   ];
 
@@ -72,9 +88,9 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
         type: `${taskData.interview_type.type === "full" ? 'Full' : 'Screening'}`,
       });
       console.log("handleStartInterview Passing the updateInterviewId")
-      console.log("inviteId",inviteId)
-      console.log("interviewId",interviewId)
-      console.log("type",taskData.interview_type.type)
+      console.log("inviteId", inviteId)
+      console.log("interviewId", interviewId)
+      console.log("type", taskData.interview_type.type)
 
       updateInterviewId({
         inviteId: inviteId,
@@ -94,6 +110,57 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       });
 
       console.log("conceptNamesCSV", conceptNamesCSV?.data)
+    }
+  };
+
+
+  // Handle user skill logic (fetch or create new user skill)
+  const handleUserSkill = async (skillId: string) => {
+    let userSkillId: string;
+
+    try {
+      const result = await getSkillId({ user_id: user_id, skill_pool_id: skillId }).unwrap();
+      userSkillId = result.data.skill_id;
+    } catch (error: any) {
+      if (error?.status === 404 && error?.data?.message === "User skill not found for the given skill_pool_id") {
+        const createResponse = await createUserSkill({
+          user_id: user_id,
+          goal_id: userGoal,
+          skills: [{ skill_pool_id: skillId, self_rating: 0, level: "1" }],
+        }).unwrap();
+        userSkillId = createResponse.data;
+      } else {
+        throw error;
+      }
+    }
+
+    return userSkillId;
+  };
+  // Generic Resume Interview Handler (for both task and skill)
+  const handleResumeInterview = async (type: string, interview_id: string, skillId?: string) => {
+    console.log("type",type);
+    console.log("interview_id",interview_id);
+    console.log("skillId",skillId);
+    try {
+      if (skillId !== undefined) {
+        // Skill Interview
+        const skillToVerify = taskData.skills.find((skill: any) => skill._id === skillId);
+        if (skillToVerify) {
+          const userSkillId = await handleUserSkill(skillId || "");
+          navigate(`/interview/${interview_id}`, { state: { title: skillToVerify.name, userSkillId, skillPoolId: skillId, level: "1", type: "Skill", isResume:true } });
+        }
+      } else {
+        // Task Interview (Full/Screening)
+        if (taskData.interview_type.status === 'incomplete') {
+          navigate(`/interview/${interview_id}`, {
+            state: { title: jobDescription.title, type: taskData.interview_type.type === "full" ? 'Full' : 'Screening', jobDescription: jobDescription, isResume:true },
+          });
+        } else {
+          toast.error("Interview already completed or not started yet.");
+        }
+      }
+    } catch (error) {
+      console.error("Error resuming interview:", error);
     }
   };
 
@@ -160,7 +227,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
 
       // Start the interview directly if tutorial is disabled
       navigate(`/interview/${interviewId}`, {
-        state: { title: skillToVerify.name, userSkillId, skillPoolId:skillId, level:"1", type: "Skill" },
+        state: { title: skillToVerify.name, userSkillId, skillPoolId: skillId, level: "1", type: "Skill" },
       });
 
     } catch (err) {
@@ -171,29 +238,25 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
   // View Full Report Handler
   const handleViewFullReport = (type: 'interview' | 'skill', itemId: string) => {
     let reportUrl: string;
-  
+
     // Step 1: Determine the report URL based on the type (interview or skill)
     if (type === 'interview') {
       reportUrl = `/report/Full/${inviteId}/aman7479/${itemId}`; // Example for interview report URL
     } else {
       reportUrl = `/skills-report/aman7479/${itemId}`; // Example for skill report URL
     }
-  
+
     // Step 3: Open the report URL in a new tab after a short delay
     setTimeout(() => {
       const newTab = window.open(reportUrl, "_blank", "noopener,noreferrer");
-  
+
       // Optional: Focus on the new tab if it doesn't open automatically
       if (newTab) {
         newTab.focus();
       }
     }, 100); // Adjust delay if necessary
   };
-  // Verify Skill Report Handler
-  const handleVerifySkillReport = (interviewId: string) => {
-    console.log("skillId", interviewId);
-    window.open(`/skill/report/${interviewId}`, '_blank', `best_interview=${interviewId}`);
-  };
+
 
   return (
     <div className="w-full pt-4">
@@ -226,7 +289,10 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
                         handleStartInterview();
                       } else if (task.action === 'Verify Skill') {
                         handleVerifySkill(task.skillId);
-                      } else if (task.action === 'View Report') {
+                      } else if (task.action === 'Resume Interview') {
+                        handleResumeInterview(task.process.includes('Skill') ? 'skill' : 'task', task.interview_id, task.skillId);
+                      }
+                      else if (task.action === 'View Report') {
                         handleViewFullReport(
                           task.process.includes('Interview') ? 'interview' : 'skill',
                           task.interview_id

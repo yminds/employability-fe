@@ -39,16 +39,16 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   handleShortlist,
   handleViewReport,
 }) => {
-  // Get submission badge info
+ 
   const submissionBadge = getSubmissionBadge(candidate);
 
-  // Get time since last update
+  
   const timeSinceUpdate = getTimeSinceUpdate(candidate);
 
   console.log("timeSinceUpdate",timeSinceUpdate);
   
 
-  // Check if we should show report and shortlist options
+ 
   const showReportAndShortlist = canShowReportAndShortlist(candidate);
 
   // Get final rating

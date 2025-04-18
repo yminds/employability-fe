@@ -12,6 +12,8 @@ import Pagination from "./Pagination";
 import verified from "@/assets/skills/verified.svg";
 import Submitted from "@/assets/employer/Submitted.svg";
 import NotSubmitted from "@/assets/employer/NotSubmitted.svg";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 // Types
 interface ShortlistedCandidate {
@@ -70,6 +72,7 @@ interface ShortlistedCandidatesResponse {
 }
 
 type SortOption = "recent" | "name_asc" | "name_desc" | "rating_high" | "rating_low";
+type InterviewType = "full" | "screening" | "all";
 
 interface ShortlistedCandidateViewProps {
   jobId: string;
@@ -82,6 +85,7 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [sortBy, setSortBy] = useState<SortOption>("recent");
+  const [interviewType, setInterviewType] = useState<InterviewType>("all");
   
   // API Query
   const {
@@ -108,27 +112,39 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
     refetch()
   },[refetch])
 
-  // Filter candidates based on search term
+  // Filter candidates based on search term and interview type
   const filteredCandidates = candidates.filter((candidate: ShortlistedCandidate) => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
+    // Apply search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      
+      // Check if name contains search term
+      const nameMatch = candidate.user_id.name.toLowerCase().includes(searchLower);
+      
+      // Check if location contains search term
+      const locationMatch = candidate.user_id.address && (
+        (candidate.user_id.address.city && candidate.user_id.address.city.toLowerCase().includes(searchLower)) ||
+        (candidate.user_id.address.state && candidate.user_id.address.state.toLowerCase().includes(searchLower)) ||
+        (candidate.user_id.address.country && candidate.user_id.address.country.toLowerCase().includes(searchLower))
+      );
+      
+      // Check if skills match
+      const skillsMatch = candidate.user_id.skills && candidate.user_id.skills.some(
+        skill => skill.name.toLowerCase().includes(searchLower)
+      );
+      
+      if (!(nameMatch || locationMatch || skillsMatch)) {
+        return false;
+      }
+    }
     
-    // Check if name contains search term
-    const nameMatch = candidate.user_id.name.toLowerCase().includes(searchLower);
+    // Apply interview type filter
+    if (interviewType !== "all") {
+      const candidateInterviewType = candidate.task?.interview_type?.type?.toLowerCase();
+      return candidateInterviewType === interviewType;
+    }
     
-    // Check if location contains search term
-    const locationMatch = candidate.user_id.address && (
-      (candidate.user_id.address.city && candidate.user_id.address.city.toLowerCase().includes(searchLower)) ||
-      (candidate.user_id.address.state && candidate.user_id.address.state.toLowerCase().includes(searchLower)) ||
-      (candidate.user_id.address.country && candidate.user_id.address.country.toLowerCase().includes(searchLower))
-    );
-    
-    // Check if skills match
-    const skillsMatch = candidate.user_id.skills && candidate.user_id.skills.some(
-      skill => skill.name.toLowerCase().includes(searchLower)
-    );
-    
-    return nameMatch || locationMatch || skillsMatch;
+    return true;
   });
 
   // Pagination
@@ -143,36 +159,25 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
   };
 
   const handleViewReport = (candidate: ShortlistedCandidate) => {
-    // Prioritize type_report_id as requested
-    if (candidate.type_report_id) {
-      window.open(`/reports/${candidate.type_report_id}`, '_blank');
+    const inviteId = candidate._id;
+  
+    console.log("inviteId", inviteId);
+  
+    if (!inviteId) {
+      console.error("Invite not found");
       return;
     }
+  
+    // Get the interview type from task or default to "Full"
+    const interviewType = candidate.task?.interview_type?.type || "Full";
     
-    // If no type report ID, try effective_report_id
-    if (candidate.effective_report_id) {
-      window.open(`/reports/${candidate.effective_report_id}`, '_blank');
-      return;
-    }
+    // Capitalize the first letter of the interview type
+    const formattedType = interviewType.charAt(0).toUpperCase() + interviewType.slice(1);
     
-    // Finally, fall back to the main report ID
-    if (candidate.report_id) {
-      window.open(`/reports/${candidate.report_id}`, '_blank');
-      return;
-    }
+    // Build the URL with the new format
+    const reportUrl = `/employer/report/${formattedType}/${inviteId}/${candidate.user_id.username}/${candidate.task?.interview_type?.interview_id}`;
     
-    // If we have a raw report with ID, use that
-    if (candidate.raw_type_report?._id) {
-      window.open(`/reports/${candidate.raw_type_report._id}`, '_blank');
-      return;
-    }
-    
-    if (candidate.raw_report?._id) {
-      window.open(`/reports/${candidate.raw_report._id}`, '_blank');
-      return;
-    }
-    
-    console.error("No report ID found for candidate:", candidate);
+    window.open(reportUrl, '_blank');
   };
 
   const handleRowsPerPageChange = (value: number) => {
@@ -184,6 +189,16 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  const handleInterviewTypeChange = (value: InterviewType) => {
+    // If clicking the currently selected type, set back to "all"
+    if (value === interviewType) {
+      setInterviewType("all");
+    } else {
+      setInterviewType(value);
+    }
+    setCurrentPage(1); // Reset to first page when changing filters
   };
 
   // Helper functions
@@ -244,24 +259,6 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
     if (diffInDays === 0) return "today";
     if (diffInDays === 1) return "yesterday";
     return `${diffInDays} days ago`;
-  };
-
-  const getSubmissionBadge = (candidate: ShortlistedCandidate) => {
-    if (candidate.has_report) {
-      return {
-        bgColor: "bg-[#d1f3d9]",
-        textColor: "text-[#10b754]",
-        icon: "check",
-        text: "Submitted",
-      };
-    }
-    return {
-      bgColor: "bg-[#eceef0]",
-      textColor: "text-[#414447]",
-      icon: "x",
-      iconBg: "bg-[#414447]",
-      text: "Not Submitted",
-    };
   };
 
   const getTimeSinceUpdate = (candidate: ShortlistedCandidate) => {
@@ -339,36 +336,82 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
     <div className="flex flex-col bg-white rounded-lg overflow-hidden h-full p-6">
       {/* Filters in a single row */}
       <div className="sticky top-0 z-10 bg-white mb-5">
-        <div className="flex items-center justify-between p-4 border-b border-[#d6d7d9]">
-          {/* Search input */}
-          <div className="relative flex-1 max-w-md">
-            <input
-              type="text"
-              placeholder="Search candidates..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-10 py-2 border border-[#d6d7d9] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#001630]"
-            />
-            <Search 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#68696b] w-4 h-4" 
-            />
+          <div className="flex items-center justify-between">
+            {/* Left side with search and filters */}
+            <div className="flex items-center gap-4">
+              {/* Search input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search candidates..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-64 px-10 py-2 border border-[#d6d7d9] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#001630]"
+                />
+                <Search 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#68696b] w-4 h-4" 
+                />
+              </div>
+              
+              {/* Interview Type Radio Buttons */}
+              <div className="flex items-center space-x-2">
+                <RadioGroup
+                  value={interviewType}
+                  onValueChange={(value) => handleInterviewTypeChange(value as InterviewType)}
+                  className="flex space-x-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem 
+                      value="full" 
+                      id="full" 
+                      className="text-[#001630] border-[#68696b] data-[state=checked]:border-[#001630] data-[state=checked]:bg-[#001630]" 
+                    />
+                    <Label htmlFor="full" className="text-sm font-medium text-[#0c0f12] cursor-pointer">
+                      Full Interview
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem 
+                      value="screening" 
+                      id="screening" 
+                      className="text-[#001630] border-[#68696b] data-[state=checked]:border-[#001630] data-[state=checked]:bg-[#001630]" 
+                    />
+                    <Label htmlFor="screening" className="text-sm font-medium text-[#0c0f12] cursor-pointer">
+                      Screening Interview
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </div>
+            
+            {/* Sort dropdown */}
+            <div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="px-4 py-2 border border-[#d6d7d9] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#001630]"
+              >
+                <option value="recent">Most Recent</option>
+                <option value="name_asc">Name (A-Z)</option>
+                <option value="name_desc">Name (Z-A)</option>
+                <option value="rating_high">Rating (High to Low)</option>
+                <option value="rating_low">Rating (Low to High)</option>
+              </select>
+            </div>
           </div>
           
-          {/* Sort dropdown */}
-          <div className="ml-4">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-4 py-2 border border-[#d6d7d9] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#001630]"
-            >
-              <option value="recent">Most Recent</option>
-              <option value="name_asc">Name (A-Z)</option>
-              <option value="name_desc">Name (Z-A)</option>
-              <option value="rating_high">Rating (High to Low)</option>
-              <option value="rating_low">Rating (Low to High)</option>
-            </select>
-          </div>
-        </div>
+          {/* Clear filter button - shown only when filter is active */}
+          {interviewType !== "all" && (
+            <div className="mt-3 flex">
+              <button
+                onClick={() => setInterviewType("all")}
+                className="text-[#001630] text-xs underline hover:text-[#001630]/80"
+              >
+                Clear filter
+              </button>
+            </div>
+          )}
+
       </div>
 
       <div className="bg-white rounded-lg border border-[#d6d7d9] flex flex-col h-full">
@@ -429,7 +472,15 @@ const ShortlistedCandidatesView: React.FC<ShortlistedCandidateViewProps> = ({ jo
                               </p>
                             )}
 
-                        
+                            <div className="flex items-center gap-2 mt-2">
+                              {/* Interview Type Badge */}
+                              {candidate.task?.interview_type?.type && (
+                                <div className="inline-flex items-center px-2 py-0.5 bg-[#edf2f7] text-[#001630] rounded-md text-xs">
+                                  {candidate.task.interview_type.type.charAt(0).toUpperCase() + candidate.task.interview_type.type.slice(1)} Interview
+                                </div>
+                              )}
+
+                            </div>
                           </div>
 
                           {/* Right side with rating and buttons */}

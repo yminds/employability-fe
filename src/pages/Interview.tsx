@@ -16,7 +16,7 @@ import InterviewGuide from "@/components/interview/InterviewGuide";
 const InterviewSetupNew: React.FC = () => {
   const { id } = useParams();
   const location = useLocation();
-  const userExperience = useSelector((state: RootState) => state.auth.user?.experience_level);
+  const userExperience = useSelector((state: RootState) => state?.auth.user?.experience_level);
   const [fetchFundamental] = useGetUserFundamentalsBySkillIdMutation();
   const [fundamentals, setFundamentals] = useState<any[]>([]);
   const [screenCount, setScreenCount] = useState<number>(0);

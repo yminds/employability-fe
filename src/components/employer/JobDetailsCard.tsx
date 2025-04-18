@@ -1,61 +1,86 @@
-import { useState, useRef, useEffect } from "react"
-import { MoreVertical, Copy, Edit, Trash2 } from "lucide-react"
-import { toast } from "sonner"
+import { useState, useRef, useEffect } from "react";
+import { MoreVertical, Copy, Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useLocation } from "@/hooks/useLocation";
 
 // Updated interface to handle the new location structure
 interface JobDetailsData {
-  _id?: string
-  title?: string
+  _id?: string;
+  title?: string;
   company?: {
-    _id?: string
-    name?: string
-  }
-  location?: string | { city: string; state: string; country: string }
-  job_type?: string
-  work_place_type?: string
-  experience_level?: string
+    _id?: string;
+    name?: string;
+  };
+  location?: string | { city: string; state: string; country: string };
+  job_type?: string;
+  work_place_type?: string;
+  experience_level?: string;
   // Any other fields from your API
 }
 
 interface JobDetailsCardProps {
-  jobDetails?: JobDetailsData
-  onViewDetails: () => void
-  onDelete?: () => void
+  jobDetails?: JobDetailsData;
+  onViewDetails: () => void;
+  onDelete?: () => void;
 }
 
-// Helper function to format location
-const formatLocation = (location?: string | { city: string; state: string; country: string }): string => {
-  if (!location) return "";
-  
-  if (typeof location === "string") {
-    return location;
-  }
-  
-  if (typeof location === "object") {
-    const { city, state, country } = location;
-    return `${city || ''}${city ? ', ' : ''}${state || ''}${state ? ', ' : ''}${country || ''}`.replace(/^, |, $/g, '');
-  }
-  
-  return "";
-};
-
 // Update the JobDetailsCard component to use a portal for the dropdown
-const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardProps) => {
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const buttonRef = useRef<HTMLButtonElement>(null)
+const JobDetailsCard = ({
+  jobDetails,
+  onViewDetails,
+  onDelete,
+}: JobDetailsCardProps) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Prepare location data for the useLocation hook
+  const getLocationAddress = () => {
+    if (!jobDetails?.location) return {};
+
+    if (typeof jobDetails.location === "string") {
+      return { country: jobDetails.location };
+    }
+
+    return {
+      city: jobDetails.location.city,
+      state: jobDetails.location.state,
+      country: jobDetails.location.country,
+    };
+  };
+
+  // Use the location hook to get formatted location data
+  const { selectedCity, selectedState, selectedCountry } = useLocation(
+    getLocationAddress()
+  );
+
+  // Format the location using the location hook data
+  const getFormattedLocation = (): string => {
+    if (!jobDetails?.location) return "";
+
+    if (typeof jobDetails.location === "string") {
+      return jobDetails.location;
+    }
+
+    const cityName = selectedCity?.name || jobDetails.location.city || "";
+    const stateName = selectedState?.name || jobDetails.location.state || "";
+    const countryName =
+      selectedCountry?.name || jobDetails.location.country || "";
+
+    return [cityName, stateName, countryName].filter(Boolean).join(", ");
+  };
 
   // Update dropdown position when button is clicked
   useEffect(() => {
     if (showDropdown && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
+      const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
         top: rect.bottom + window.scrollY + 8, // 8px gap
         left: rect.right - 204, // Align right edge of dropdown with right edge of button
-      })
+      });
     }
-  }, [showDropdown])
+  }, [showDropdown]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -66,40 +91,40 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
         buttonRef.current &&
         !buttonRef.current.contains(event.target as Node)
       ) {
-        setShowDropdown(false)
+        setShowDropdown(false);
       }
-    }
+    };
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Handle copy job link
   const handleCopyLink = () => {
     if (jobDetails?._id) {
-      const link = `https://employability.ai/job-post/${jobDetails._id}`
-      navigator.clipboard.writeText(link)
-      toast.success("Job link copied to clipboard")
-      setShowDropdown(false)
+      const link = `https://employability.ai/job-post/${jobDetails._id}`;
+      navigator.clipboard.writeText(link);
+      toast.success("Job link copied to clipboard");
+      setShowDropdown(false);
     }
-  }
+  };
 
   // Handle edit details
   const handleEditDetails = () => {
-    onViewDetails()
-    setShowDropdown(false)
-  }
+    onViewDetails();
+    setShowDropdown(false);
+  };
 
   // Handle delete
   const handleDelete = () => {
     if (onDelete) {
-      onDelete()
+      onDelete();
     }
-    setShowDropdown(false)
-  }
+    setShowDropdown(false);
+  };
 
-  // Format the location for display
-  const formattedLocation = formatLocation(jobDetails?.location);
+  // Get the formatted location
+  const formattedLocation = getFormattedLocation();
 
   // If job details aren't loaded yet, show a loading state
   if (!jobDetails) {
@@ -119,7 +144,7 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
           <div className="w-9 h-9 bg-[#eceef0] rounded-full animate-pulse"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -176,7 +201,7 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
         <div className="relative">
           <button
             ref={buttonRef}
-            className="text-[#414447] bg-[#eceef0] p-2 rounded-full transition-colors hover:bg-[#e0e2e4]"
+            className="text-[#414447] hover:bg-transparent p-2 rounded-full transition-colors hover:bg-[#e0e2e4]"
             onClick={() => setShowDropdown(!showDropdown)}
           >
             <MoreVertical className="w-5 h-5" />
@@ -197,8 +222,8 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
                 className="self-stretch p-2 inline-flex justify-start items-center gap-2 hover:bg-[#f5f5f5] w-full rounded"
                 onClick={handleCopyLink}
               >
-                <Copy className="w-[15.50px] h-[18.50px] text-[#1c1b1f]" />
-                <span className="text-[#414347] text-base font-normal font-['DM_Sans'] leading-normal tracking-tight">
+                <Copy className="w-4 h-4 text-[#1c1b1f]" />
+                <span className="text-[#414347] text-body2 text-sm">
                   Copy Job link
                 </span>
               </button>
@@ -208,8 +233,8 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
                 className="self-stretch p-2 inline-flex justify-start items-center gap-2 hover:bg-[#f5f5f5] w-full rounded"
                 onClick={handleEditDetails}
               >
-                <Edit className="w-5 h-[21.10px] text-[#1c1b1f]" />
-                <span className="text-[#414347] text-base font-normal font-['DM_Sans'] leading-normal tracking-tight">
+                <Edit className="w-4 h-4 text-[#1c1b1f]" />
+                <span className="text-[#414347] text-body2 text-sm">
                   Edit Details
                 </span>
               </button>
@@ -219,8 +244,8 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
                 className="self-stretch p-2 inline-flex justify-start items-center gap-2 hover:bg-[#f5f5f5] w-full rounded"
                 onClick={handleDelete}
               >
-                <Trash2 className="w-[15px] h-[16.88px] text-[#fd5964]" />
-                <span className="text-[#fd5964] text-base font-normal font-['DM_Sans'] leading-normal tracking-tight">
+                <Trash2 className="w-4 h-4 text-[#fd5964]" />
+                <span className="text-[#fd5964] text-body2 text-sm">
                   Delete
                 </span>
               </button>
@@ -229,7 +254,7 @@ const JobDetailsCard = ({ jobDetails, onViewDetails, onDelete }: JobDetailsCardP
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default JobDetailsCard
+export default JobDetailsCard;

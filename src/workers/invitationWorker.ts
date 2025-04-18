@@ -52,7 +52,9 @@ async function sendInvitations(
     
     self.postMessage({
       type: "BATCH_CREATED",
-      data: { batchId: data.data.batch_id }
+      data: { batchId: data.data.batch_id,
+        candidateCount: candidateIds.length
+       }
     });
     
     return data.data.batch_id;
