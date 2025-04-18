@@ -13,6 +13,7 @@ export interface InterviewInvite {
   shortlist: any;
   updatedAt: string;
   submission_date: any;
+  screeningResponse:string
   _id: string;
   job?: {
     title?: string;

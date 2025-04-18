@@ -1,5 +1,6 @@
 import { apiSlice } from "./apiSlice";
 import { Job } from "./employerJobsApiSlice";
+import { ScreeningResponse } from "@/features/dashboard/components/interview-invitations/ScreeningForm"
 
 export interface Candidate {
   _id: string;
@@ -479,6 +480,16 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
         return response;
       },
     }),
+    submitScreeningResponse: builder.mutation<
+      { message: string; screeningResponse: { _id: string } },
+      { inviteId: string; responses: ScreeningResponse[] }
+    >({
+      query: ({ inviteId, responses }) => ({
+        url: `/api/v1/employerInterviewInvitation/${inviteId}/applicant_questions`,
+        method: "POST",
+        body: { responses },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -503,4 +514,5 @@ export const {
   useSendInvitationResponseMailMutation,
   useGetShortlistedCandiatesQuery,
   useGetCompanyAndJobDetailsQuery,
+  useSubmitScreeningResponseMutation
 } = interviewApiSlice;

@@ -123,50 +123,9 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   const navRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   
-  // Calculate overall score based on available ratings
-  const calculateOverallScore = () => {
-    let totalScore = 0;
-    let count = 0;
 
-    // Check technical proficiency
-    if (summary.technicalProficiency?.length) {
-      summary.technicalProficiency.forEach((item: any) => {
-        if (typeof item.rating === "number") {
-          totalScore += item.rating;
-          count++;
-        }
-      });
-    }
 
-    // Check skill proficiency
-    if (summary.skillProficiency?.length) {
-      summary.skillProficiency.forEach((item: any) => {
-        if (typeof item.rating === "number") {
-          totalScore += item.rating;
-          count++;
-        }
-      });
-    }
-
-    // Add problem solving if available
-    if (summary.problemSolvingSkills?.score) {
-      totalScore += summary.problemSolvingSkills.score;
-      count++;
-    }
-
-    // Add soft skills if available
-    if (summary.softskills?.score) {
-      totalScore += summary.softskills.score;
-      count++;
-    }
-
-    return count > 0 ? (totalScore / count).toFixed(1) : "N/A";
-  };
-
-  const overallScore =
-    (reportData.reportType === "Full" || reportData.reportType === "Screening")
-      ? 2 * Number(calculateOverallScore())
-      : reportData.final_rating?.toFixed(1) || "N/A";
+  const overallScore = reportData.final_rating?.toFixed(1) || "0";
 
   // Get rating text based on score
   const getRatingText = (score: number | string) => {
