@@ -10,6 +10,7 @@ export interface InviteItemProps {
   showSidebar: boolean;
   isTaskCompleted: boolean | undefined;
   isDetailsView: boolean;
+  
 }
 
 export interface ActionButtonsProps {

@@ -4,9 +4,13 @@ import { useCreateInterview } from '../../../../hooks/useCreateInterview';
 import { useGetFundamentalNamesAsCsvMutation } from '@/api/interviewInvitesApiSlice';
 import { useUpdateInterviewIdMutation } from '@/api/interviewInvitesApiSlice';
 import { useGetUserSkillIdMutation, useCreateUserSkillsMutation } from '@/api/skillsApiSlice';
+import ScreeningModal, { ScreeningResponse } from './ScreeningForm';
 import { toast } from 'sonner';
+import { useSubmitScreeningResponseMutation } from '@/api/InterviewInvitation';
 
-const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id: string | undefined, userGoal: string | undefined, companyDetails: any }> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails }) => {
+// Removed duplicate definition of ScreeningResponse to avoid conflicts.
+
+const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id: string | undefined, userGoal: string | undefined, companyDetails: any , isScreeningCompleted: boolean}> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails, isScreeningCompleted }) => {
 
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
@@ -14,7 +18,11 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
   const [updateInterviewId] = useUpdateInterviewIdMutation();
   const [getSkillId] = useGetUserSkillIdMutation();
   const [createUserSkill] = useCreateUserSkillsMutation();
+  const [submitScreeningResponse] =
+  useSubmitScreeningResponseMutation();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showScreeningForm, setShowScreeningForm] = useState(false);
   // Memoize skill pool IDs
   const skillPoolIds = useMemo(() =>
     jobDescription.skills_required
@@ -22,8 +30,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       .map((skill: any) => skill.skill),
     [jobDescription.skills_required]
   );
-
-  console.log("SkillPoolIds for the Very Important Skills", skillPoolIds)
+  // console.log("SkillPoolIds for the Very Important Skills", skillPoolIds)
 
   // Memoize the mutation call
   useMemo(() => {
@@ -34,20 +41,36 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
   }, [skillPoolIds, getFundamentalNamesAsCsv]);
 
   // Actual task data
-  const [taskData, setTaskData] = useState(task);
-    // Action text decision function
-    const getActionText = (type: string, status: string, isInterviewCompleted: boolean, interviewId: string | undefined) => {
-      if (status === 'completed') {
-        return 'View Report';
-      } else if (isInterviewCompleted === false) {
-        return 'Resume Interview';
-      } else if (type === 'skill' || type === 'full' || type === 'screening') {
-        return 'Start Interview';
-      } else {
-        return 'Unknown Action';
-      }
-    };
-  
+  const [taskData] = useState(task);
+  // console.log("taskData", taskData)
+  // Action text decision function
+  const getActionText = (type: string, status: string, isInterviewCompleted: boolean, interviewId: string | undefined) => {
+    // console.log(type, status, isInterviewCompleted, interviewId)
+    if (status === 'completed') {
+      return 'View Report';
+    } else if (isInterviewCompleted === false) {
+      return 'Resume Interview';
+    } else if (type === 'skill' || type === 'task' || type === 'screening') {
+      return 'Start Interview';
+    } else {
+      return 'Unknown Action';
+    }
+  };
+
+
+
+  const isScreeningAvailable = jobDescription.screening_questions.length > 0 ? true : false ;
+  console.log("jobDescription.screening_questions", jobDescription.screening_questions)
+  console.log("isScreeningAvailable",isScreeningAvailable)
+
+  const screeningTask = {
+    process: 'Questionnaire',
+    estimatedDuration: '10',
+    status: 'incomplete',
+    action: `${isScreeningCompleted ? 'View Application' : 'Answer Questions'}`,
+    interview_id: '', // no interview id for screening questions
+  };
+
   // Prepare tasks for rendering
   const tasks = [
     {
@@ -64,7 +87,8 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       status: skill.status,
       action: getActionText('skill', skill.status, skill.is_interview_completed, skill.interview_id),
       interview_id: skill.interview_id
-    }))
+    })),
+    ...(isScreeningAvailable ? [screeningTask] : [])
   ];
 
   // Status color mapping
@@ -87,10 +111,10 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
         title: `${jobDescription.title}`,
         type: `${taskData.interview_type.type === "full" ? 'Full' : 'Screening'}`,
       });
-      console.log("handleStartInterview Passing the updateInterviewId")
-      console.log("inviteId", inviteId)
-      console.log("interviewId", interviewId)
-      console.log("type", taskData.interview_type.type)
+      // console.log("handleStartInterview Passing the updateInterviewId")
+      // console.log("inviteId", inviteId)
+      // console.log("interviewId", interviewId)
+      // console.log("type", taskData.interview_type.type)
 
       updateInterviewId({
         inviteId: inviteId,
@@ -109,7 +133,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
         },
       });
 
-      console.log("conceptNamesCSV", conceptNamesCSV?.data)
+      // console.log("conceptNamesCSV", conceptNamesCSV?.data)
     }
   };
 
@@ -138,22 +162,22 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
   };
   // Generic Resume Interview Handler (for both task and skill)
   const handleResumeInterview = async (type: string, interview_id: string, skillId?: string) => {
-    console.log("type",type);
-    console.log("interview_id",interview_id);
-    console.log("skillId",skillId);
+    // console.log("type", type);
+    // console.log("interview_id", interview_id);
+    // console.log("skillId", skillId);
     try {
       if (skillId !== undefined) {
         // Skill Interview
         const skillToVerify = taskData.skills.find((skill: any) => skill._id === skillId);
         if (skillToVerify) {
           const userSkillId = await handleUserSkill(skillId || "");
-          navigate(`/interview/${interview_id}`, { state: { title: skillToVerify.name, userSkillId, skillPoolId: skillId, level: "1", type: "Skill", isResume:true } });
+          navigate(`/interview/${interview_id}`, { state: { title: skillToVerify.name, userSkillId, skillPoolId: skillId, level: "1", type: "Skill", isResume: true } });
         }
       } else {
         // Task Interview (Full/Screening)
         if (taskData.interview_type.status === 'incomplete') {
           navigate(`/interview/${interview_id}`, {
-            state: { title: jobDescription.title, type: taskData.interview_type.type === "full" ? 'Full' : 'Screening', jobDescription: jobDescription, isResume:true },
+            state: { title: jobDescription.title, type: taskData.interview_type.type === "full" ? 'Full' : 'Screening', jobDescription: jobDescription, isResume: true },
           });
         } else {
           toast.error("Interview already completed or not started yet.");
@@ -168,8 +192,8 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
   const handleVerifySkill = async (skillId: string) => {
     const skillToVerify = taskData.skills.find((skill: any) => skill._id === skillId);
 
-    console.log("skillId", skillId);
-    console.log("skillToVerify", skillToVerify);
+    // console.log("skillId", skillId);
+    // console.log("skillToVerify", skillToVerify);
 
     try {
       // // Step 1: Fetch related fundamentals
@@ -191,7 +215,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
         }).unwrap();
 
         userSkillId = result.data.skill_id;
-        console.log("User SkillId (found)", userSkillId);
+        // console.log("User SkillId (found)", userSkillId);
 
       } catch (error: any) {
         if (error?.status === 404 && error?.data?.message === "User skill not found for the given skill_pool_id") {
@@ -211,7 +235,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
           }).unwrap();
 
           userSkillId = createResponse.data; // adjust if your API returns a different structure
-          console.log("New User Skill created with ID:", userSkillId);
+          // console.log("New User Skill created with ID:", userSkillId);
         } else {
           throw error; // rethrow if it's another kind of error
         }
@@ -257,59 +281,82 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
     }, 100); // Adjust delay if necessary
   };
 
+  const handleAnswerApplication = () => {
+    setShowScreeningForm(true);
+    setIsModalOpen(true);
+  };
+
+  const handleScreeningSubmit = async (responses: ScreeningResponse[]) => {
+    // console.log("Submitted responses", responses);
+    // API call, etc...
+    await submitScreeningResponse({ inviteId, responses }).unwrap();
+  };
 
   return (
     <div className="w-full pt-4">
-      <div className="border rounded-xl overflow-hidden shadow-sm">
-        <table className="w-full border-collapse">
-          <thead className="bg-grey-1">
-            <tr>
-              <th className="p-3 text-body2 text-grey-5 text-left border-b">Interview Process</th>
-              <th className="p-3 text-body2 text-grey-5 text-left border-b">Est. Duration</th>
-              <th className="p-3 text-body2 text-grey-5 text-left border-b">Status</th>
-              <th className="p-3 text-body2 text-grey-5 text-left border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tasks.map((task, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="p-3 border-b text-body2">{task.process}</td>
-                <td className="p-3 border-b text-body2">{task.estimatedDuration} Mins</td>
-                <td className={`p-3 border-b text-body2 text-white`}>
-                  <span className={`${getStatusColor(task.status)} rounded-full px-2 py-1`}>
-                    {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-                  </span>
-                </td>
-                <td className="p-3 border-b text-body2">
-                  <button
-                    className="underline"
-                    onClick={() => {
-                      console.log(task)
-                      if (task.action === 'Start Interview') {
-                        handleStartInterview();
-                      } else if (task.action === 'Verify Skill') {
-                        handleVerifySkill(task.skillId);
-                      } else if (task.action === 'Resume Interview') {
-                        handleResumeInterview(task.process.includes('Skill') ? 'skill' : 'task', task.interview_id, task.skillId);
-                      }
-                      else if (task.action === 'View Report') {
-                        handleViewFullReport(
-                          task.process.includes('Interview') ? 'interview' : 'skill',
-                          task.interview_id
-                        );
-                      }
-                    }}
-                  >
-                    {task.action}
-                  </button>
-                </td>
+      {showScreeningForm ? (
+        <ScreeningModal
+          isOpen={isModalOpen}
+          onClose={() => {setIsModalOpen(false), setShowScreeningForm(false)}}
+          questions={jobDescription.screening_questions.map((q:any) => ({
+            question_id: q._id,
+            question: q.question,
+            question_type: q.type,
+            options: q.options,
+            is_mandatory: q.is_mandatory,
+          }))}
+          onSubmit={handleScreeningSubmit}
+        />
+      ) : (
+        <div className="border rounded-xl overflow-hidden shadow-sm">
+          <table className="w-full border-collapse">
+            <thead className="bg-grey-1">
+              <tr>
+                <th className="p-3 text-body2 text-grey-5 text-left border-b">Interview Process</th>
+                <th className="p-3 text-body2 text-grey-5 text-left border-b">Est. Duration</th>
+                <th className="p-3 text-body2 text-grey-5 text-left border-b">Status</th>
+                <th className="p-3 text-body2 text-grey-5 text-left border-b">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {tasks.map((task, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="p-3 border-b text-body2">{task.process}</td>
+                  <td className="p-3 border-b text-body2">{task.estimatedDuration} Mins</td>
+                  <td className={`p-3 border-b text-body2 text-white`}>
+                    <span className={`${getStatusColor(task.status)} rounded-full px-2 py-1`}>
+                      {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                    </span>
+                  </td>
+                  <td className="p-3 border-b text-body2">
+                    <button
+                      className="underline"
+                      onClick={() => {
+                        if (task.action === 'Answer Questions') {
+                          handleAnswerApplication();
+                        } else if (task.action === 'Start Interview') {
+                          handleStartInterview();
+                        } else if (task.action === 'Resume Interview') {
+                          handleResumeInterview(task.process.includes('Skill') ? 'skill' : 'task', task.interview_id, task.skillId);
+                        } else if (task.action === 'View Report') {
+                          handleViewFullReport(task.process.includes('Interview') ? 'interview' : 'skill', task.interview_id);
+                        } else if (task.action === 'Verify Skill') {
+                          handleVerifySkill(task.skillId);
+                        }
+                      }}
+                    >
+                      {task.action}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
+
 };
 
 export default TaskTable;
