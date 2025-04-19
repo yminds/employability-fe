@@ -13,7 +13,6 @@ import verified from "@/assets/skills/verified.svg"
 // Removed duplicate definition of ScreeningResponse to avoid conflicts.
 
 const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id: string | undefined, userGoal: string | undefined, companyDetails: any, isScreeningCompleted: boolean, candidateResponse: string | undefined }> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails, isScreeningCompleted, candidateResponse }) => {
- console.log("jobDescription",jobDescription)
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
   const [getFundamentalNamesAsCsv, { data: conceptNamesCSV }] = useGetFundamentalNamesAsCsvMutation();
@@ -61,9 +60,6 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       return 'Unknown Action';
     }
   };
-
-  console.log("candidateResponse", candidateResponse)
-
 
   const isScreeningAvailable = jobDescription.screening_questions.length > 0 ? true : false;
   // console.log("jobDescription.screening_questions", jobDescription.screening_questions)
@@ -307,8 +303,6 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
     await submitScreeningResponse({ inviteId, responses, user_id, job_id:jobDescription._id }).unwrap();
   };
 
-
-
   return (
     <div className="w-full pt-4">
       {showScreeningForm ? (
@@ -324,7 +318,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
           }))}
           onSubmit={handleScreeningSubmit}
           responses={CandidateResponseData?.screeningResponse.responses || []} // Previously submitted responses
-          mode={CandidateResponseData?.screeningResponse.responses ? taskData.status === "complete" ? "view" : "edit" : "edit"}
+          mode={CandidateResponseData?.screeningResponse.responses ? taskData.status === "completed"  && taskData.interview_type.status === "completed" && taskData.skills.every((element: any) => element.status === "completed") ? "view" : "edit" : "view"}
         />
       ) : (
         <div className="border rounded-xl overflow-hidden shadow-sm">

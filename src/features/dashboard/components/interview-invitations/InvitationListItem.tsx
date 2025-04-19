@@ -183,8 +183,6 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
 
   const {
     data: inviteStatusData,
-    error: statusError,
-    isLoading: statusLoading,
   } = useCheckInviteStatusQuery(inviteData._id || "", {
     skip: !inviteData._id,
   });

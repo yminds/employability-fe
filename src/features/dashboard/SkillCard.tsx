@@ -318,10 +318,10 @@ const SkillProgress: React.FC<SkillProgressProps> = ({
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-black text-body2">
-          Let's build your verified profile that employers trust 
+        <div className="text-grey-7 font-ubuntu text-[20px] font-medium leading-[42px] tracking[-0.2px]">
+          Build a verified profile that employers trust  
         </div>
-        <div className="ml-4 inline-flex items-center h-[46px] rounded-lg bg-white pl-4">
+        {/* <div className="ml-4 inline-flex items-center h-[46px] rounded-lg bg-white pl-4">
           <span className="text-[#00000066] font-medium mr-2">Goal:</span>
           {selectedGoal ? (
             <DropdownMenu onOpenChange={setDropdownOpen}>
@@ -352,7 +352,7 @@ const SkillProgress: React.FC<SkillProgressProps> = ({
           ) : (
             <span className="text-gray-500 italic">Loading...</span>
           )}
-        </div>
+        </div> */}
       </div>
 
       <div className="bg-white rounded-lg p-8 pl-10">
