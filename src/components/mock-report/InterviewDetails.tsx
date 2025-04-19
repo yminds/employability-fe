@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import projectINterviewIcon from "@/assets/projects/projectInteviewIcon.png";
 
 interface IInterviewDetails {
@@ -24,7 +24,21 @@ const InterviewDetails = ({
   const location = useLocation();
   const { skillIcon, skillName, projectName } = location.state ?? {};
   console.log("location", location.state);
+  // const handleImproveScore = async () => {
+  //   const navigate = useNavigate();
 
+  //   const interviewId = await createInterview({
+  //     title: `${skill} Interview`,
+  //     type: projectReportSchema,
+  //     user_skill_id: userSkillId,
+  //     skill_id: skillId,
+  //   });
+
+  //   // Start the interview after closing the tutorial
+  //   navigate(`/interview/${interviewId}`, {
+  //     state: { skill: skillName, skillId: userSkillId, skillPoolId: skillId, level: "entry" },
+  //   });
+  // };
   return (
     <div className="flex items-center justify-between bg-white shadow-sm rounded-lg p-4 w-full border border-gray-200">
       {/* Left Section*/}
