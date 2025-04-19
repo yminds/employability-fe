@@ -19,7 +19,7 @@ export const useSTT = ({ interviewId }: { interviewId?: string }) => {
         const audioBlob = await response.blob();
 
         // Send audioBlob for STT
-        stt({
+        stt({ 
           audioBlob,
           interviewId: interviewId || "",
         });
