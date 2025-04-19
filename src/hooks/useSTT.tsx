@@ -13,7 +13,7 @@ export const useSTT = ({ interviewId }: { interviewId?: string }) => {
     onStop: async (blobUrl) => {
       if (recordingProcessed.current) return;
       recordingProcessed.current = true;
-
+  
       try {
         const response = await fetch(blobUrl);
         const audioBlob = await response.blob();
