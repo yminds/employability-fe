@@ -136,32 +136,32 @@ const InterviewSetupNew: React.FC = () => {
       });
   }, [permissionRequestAttempts]);
 
-  useEffect(() => {
-    const monitorScreens = async () => {
-      if ("getScreenDetails" in window) {
-        try {
-          const screenDetails = await (window as any).getScreenDetails();
-          const updateScreenCount = () => {
-            const screens = screenDetails.screens.length;
-            if (screens > 1) {
-              setShowMultipleScreenWarning(true);
-            } else {
-              setShowMultipleScreenWarning(false);
-            }
-          };
+  // useEffect(() => {
+  //   const monitorScreens = async () => {
+  //     if ("getScreenDetails" in window) {
+  //       try {
+  //         const screenDetails = await (window as any).getScreenDetails();
+  //         const updateScreenCount = () => {
+  //           const screens = screenDetails.screens.length;
+  //           if (screens > 1) {
+  //             setShowMultipleScreenWarning(true);
+  //           } else {
+  //             setShowMultipleScreenWarning(false);
+  //           }
+  //         };
 
-          updateScreenCount();
-          screenDetails.addEventListener("screenschange", updateScreenCount);
-        } catch (error) {
-          console.error("Screen monitoring failed:", error);
-        }
-      }
-    };
+  //         updateScreenCount();
+  //         screenDetails.addEventListener("screenschange", updateScreenCount);
+  //       } catch (error) {
+  //         console.error("Screen monitoring failed:", error);
+  //       }
+  //     }
+  //   };
 
-    monitorScreens();
-    const intervalId = setInterval(monitorScreens, 5000);
-    return () => clearInterval(intervalId);
-  }, []);
+  //   monitorScreens();
+  //   const intervalId = setInterval(monitorScreens, 5000);
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
   useEffect(() => {
     const sync = async () => {

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateInterview } from '../../../../hooks/useCreateInterview';
 import { useGetFundamentalNamesAsCsvMutation } from '@/api/interviewInvitesApiSlice';
-import { useUpdateInterviewIdMutation } from '@/api/interviewInvitesApiSlice';
+import { useUpdateInterviewIdMutation, useGetCandidateResponseQuery } from '@/api/interviewInvitesApiSlice';
 import { useGetUserSkillIdMutation, useCreateUserSkillsMutation } from '@/api/skillsApiSlice';
 import ScreeningModal, { ScreeningResponse } from './ScreeningForm';
 import { toast } from 'sonner';
@@ -10,7 +10,7 @@ import { useSubmitScreeningResponseMutation } from '@/api/InterviewInvitation';
 
 // Removed duplicate definition of ScreeningResponse to avoid conflicts.
 
-const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id: string | undefined, userGoal: string | undefined, companyDetails: any , isScreeningCompleted: boolean}> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails, isScreeningCompleted }) => {
+const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id: string | undefined, userGoal: string | undefined, companyDetails: any, isScreeningCompleted: boolean, candidateResponse: string | undefined }> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails, isScreeningCompleted, candidateResponse }) => {
 
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
@@ -19,7 +19,11 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
   const [getSkillId] = useGetUserSkillIdMutation();
   const [createUserSkill] = useCreateUserSkillsMutation();
   const [submitScreeningResponse] =
-  useSubmitScreeningResponseMutation();
+    useSubmitScreeningResponseMutation();
+  const { data, isLoading, isError } = useGetCandidateResponseQuery(candidateResponse, {
+    skip: !candidateResponse
+  })
+  console.log({ data, isLoading, isError })
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showScreeningForm, setShowScreeningForm] = useState(false);
@@ -57,11 +61,12 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
     }
   };
 
+  console.log("candidateResponse", candidateResponse)
 
 
-  const isScreeningAvailable = jobDescription.screening_questions.length > 0 ? true : false ;
-  console.log("jobDescription.screening_questions", jobDescription.screening_questions)
-  console.log("isScreeningAvailable",isScreeningAvailable)
+  const isScreeningAvailable = jobDescription.screening_questions.length > 0 ? true : false;
+  // console.log("jobDescription.screening_questions", jobDescription.screening_questions)
+  // console.log("isScreeningAvailable",isScreeningAvailable)
 
   const screeningTask = {
     process: 'Questionnaire',
@@ -297,8 +302,8 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       {showScreeningForm ? (
         <ScreeningModal
           isOpen={isModalOpen}
-          onClose={() => {setIsModalOpen(false), setShowScreeningForm(false)}}
-          questions={jobDescription.screening_questions.map((q:any) => ({
+          onClose={() => { setIsModalOpen(false), setShowScreeningForm(false) }}
+          questions={jobDescription.screening_questions.map((q: any) => ({
             question_id: q._id,
             question: q.question,
             question_type: q.type,
@@ -306,6 +311,8 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
             is_mandatory: q.is_mandatory,
           }))}
           onSubmit={handleScreeningSubmit}
+          // responses={candidateResponse} // Previously submitted responses
+          // mode={candidateResponse ? "view" : "edit"}
         />
       ) : (
         <div className="border rounded-xl overflow-hidden shadow-sm">

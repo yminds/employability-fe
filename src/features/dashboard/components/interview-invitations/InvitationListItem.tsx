@@ -530,6 +530,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                   user_id={user_id}
                   userGoal={userGoal}
                   isScreeningCompleted={inviteData.screeningResponse ? true : false}
+                  candidateResponse={inviteData.screeningResponse}
                 />
               </div>
             )}
@@ -577,6 +578,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                     user_id={user_id}
                     userGoal={userGoal}
                     isScreeningCompleted={inviteData.screeningResponse ? true : false}
+                    candidateResponse={inviteData.screeningResponse}
                   />
                 </div>
               </div>
@@ -607,6 +609,7 @@ export const InvitationListItem: React.FC<InviteItemProps> = ({
                       user_id={user_id}
                       userGoal={userGoal}
                       isScreeningCompleted={inviteData.screeningResponse ? true : false}
+                      candidateResponse={inviteData.screeningResponse}
                     />
                   </div>
                 </div>
