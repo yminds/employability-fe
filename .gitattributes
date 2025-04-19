@@ -1,0 +1,3 @@
+.github/workflows/developement.yml merge=ours
+.env.dev merge=ours
+Dockerfile merge=ours
