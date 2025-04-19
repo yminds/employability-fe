@@ -482,12 +482,12 @@ export const interviewApiSlice = apiSlice.injectEndpoints({
     }),
     submitScreeningResponse: builder.mutation<
       { message: string; screeningResponse: { _id: string } },
-      { inviteId: string; responses: ScreeningResponse[] }
+      { inviteId: string; responses: ScreeningResponse[]; user_id: string| undefined; job_id:string; }
     >({
-      query: ({ inviteId, responses }) => ({
+      query: ({ inviteId, responses, user_id, job_id }) => ({
         url: `/api/v1/employerInterviewInvitation/${inviteId}/applicant_questions`,
         method: "POST",
-        body: { responses },
+        body: { responses, user_id, job_id },
       }),
     }),
   }),

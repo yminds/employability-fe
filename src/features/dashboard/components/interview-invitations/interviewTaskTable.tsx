@@ -7,23 +7,24 @@ import { useGetUserSkillIdMutation, useCreateUserSkillsMutation } from '@/api/sk
 import ScreeningModal, { ScreeningResponse } from './ScreeningForm';
 import { toast } from 'sonner';
 import { useSubmitScreeningResponseMutation } from '@/api/InterviewInvitation';
+import verified from "@/assets/skills/verified.svg"
+// import unverified from "@/assets/skills/unverifies.svg"
 
 // Removed duplicate definition of ScreeningResponse to avoid conflicts.
 
 const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, user_id: string | undefined, userGoal: string | undefined, companyDetails: any, isScreeningCompleted: boolean, candidateResponse: string | undefined }> = ({ task, jobDescription, inviteId, user_id, userGoal, companyDetails, isScreeningCompleted, candidateResponse }) => {
-
+ console.log("jobDescription",jobDescription)
   const navigate = useNavigate();
   const { createInterview } = useCreateInterview();
   const [getFundamentalNamesAsCsv, { data: conceptNamesCSV }] = useGetFundamentalNamesAsCsvMutation();
   const [updateInterviewId] = useUpdateInterviewIdMutation();
   const [getSkillId] = useGetUserSkillIdMutation();
   const [createUserSkill] = useCreateUserSkillsMutation();
-  const [submitScreeningResponse] =
-    useSubmitScreeningResponseMutation();
-  const { data, isLoading, isError } = useGetCandidateResponseQuery(candidateResponse, {
+  const [submitScreeningResponse] = useSubmitScreeningResponseMutation();
+  const { data:CandidateResponseData, isLoading, isError, refetch } = useGetCandidateResponseQuery(candidateResponse, {
     skip: !candidateResponse
   })
-  console.log({ data, isLoading, isError })
+  console.log({ CandidateResponseData, isLoading, isError })
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showScreeningForm, setShowScreeningForm] = useState(false);
@@ -71,8 +72,9 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
   const screeningTask = {
     process: 'Questionnaire',
     estimatedDuration: '10',
-    status: 'incomplete',
-    action: `${isScreeningCompleted ? 'View Application' : 'Answer Questions'}`,
+    status: `${isScreeningCompleted ? 'completed' : 'incomplete' }`,
+    score: "N/A",
+    action: `${isScreeningCompleted ? 'View Application' : 'Answer Questions' }`,
     interview_id: '', // no interview id for screening questions
   };
 
@@ -82,6 +84,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       process: `${taskData.interview_type.type.charAt(0).toUpperCase() + taskData.interview_type.type.slice(1)} Interview`,
       estimatedDuration: taskData.interview_type.estimated_time,
       status: taskData.interview_type.status,
+      score: taskData.interview_type.interview_score,
       action: getActionText('task', taskData.interview_type.status, taskData.interview_type.is_interview_completed, taskData.interview_type.interview_id),
       interview_id: taskData.interview_type.interview_id
     },
@@ -90,6 +93,7 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
       skillId: skill._id,
       estimatedDuration: skill.estimated_time,
       status: skill.status,
+      score: skill.interview_score,
       action: getActionText('skill', skill.status, skill.is_interview_completed, skill.interview_id),
       interview_id: skill.interview_id
     })),
@@ -291,11 +295,19 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
     setIsModalOpen(true);
   };
 
+  const handleViewModal = () => {
+    refetch()
+    setShowScreeningForm(true);
+    setIsModalOpen(true);
+  }
+
   const handleScreeningSubmit = async (responses: ScreeningResponse[]) => {
-    // console.log("Submitted responses", responses);
+    console.log("Submitted responses", responses);
     // API call, etc...
-    await submitScreeningResponse({ inviteId, responses }).unwrap();
+    await submitScreeningResponse({ inviteId, responses, user_id, job_id:jobDescription._id }).unwrap();
   };
+
+
 
   return (
     <div className="w-full pt-4">
@@ -311,8 +323,8 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
             is_mandatory: q.is_mandatory,
           }))}
           onSubmit={handleScreeningSubmit}
-          // responses={candidateResponse} // Previously submitted responses
-          // mode={candidateResponse ? "view" : "edit"}
+          responses={CandidateResponseData?.screeningResponse.responses || []} // Previously submitted responses
+          mode={CandidateResponseData?.screeningResponse.responses ? taskData.status === "complete" ? "view" : "edit" : "edit"}
         />
       ) : (
         <div className="border rounded-xl overflow-hidden shadow-sm">
@@ -322,25 +334,29 @@ const TaskTable: React.FC<{ task: any, jobDescription: any, inviteId: string, us
                 <th className="p-3 text-body2 text-grey-5 text-left border-b">Interview Process</th>
                 <th className="p-3 text-body2 text-grey-5 text-left border-b">Est. Duration</th>
                 <th className="p-3 text-body2 text-grey-5 text-left border-b">Status</th>
+                <th className="p-3 text-body2 text-grey-5 text-left border-b ">Score</th>
                 <th className="p-3 text-body2 text-grey-5 text-left border-b">Actions</th>
               </tr>
             </thead>
             <tbody>
               {tasks.map((task, index) => (
                 <tr key={index} className="hover:bg-gray-50">
-                  <td className="p-3 border-b text-body2">{task.process}</td>
-                  <td className="p-3 border-b text-body2">{task.estimatedDuration} Mins</td>
-                  <td className={`p-3 border-b text-body2 text-white`}>
+                  <td className="p-3 text-body2">{task.process}</td>
+                  <td className="p-3 text-body2">{task.estimatedDuration} Mins</td>
+                  <td className={`p-3 text-body2 text-white`}>
                     <span className={`${getStatusColor(task.status)} rounded-full px-2 py-1`}>
                       {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                     </span>
                   </td>
-                  <td className="p-3 border-b text-body2">
+                  <td className="flex p-3 text-body2 font-medium tracking-tight">{task.score} { task.score !== "N/A" ? <span className=' flex gap-2'><span className=' text-grey-4 '>/10</span> <img src={verified} alt="" /></span>  : ""} </td>
+                  <td className="p-3 text-body2">
                     <button
                       className="underline"
                       onClick={() => {
                         if (task.action === 'Answer Questions') {
                           handleAnswerApplication();
+                        } else if (task.action === 'View Application') {
+                          handleViewModal();
                         } else if (task.action === 'Start Interview') {
                           handleStartInterview();
                         } else if (task.action === 'Resume Interview') {
