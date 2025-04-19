@@ -21,6 +21,7 @@ interface PerformanceHighlightsProps {
   mockIllustration: string;
   getPerformanceRatingStyle: (rating: string) => string;
   getRatingText: (score: number | string) => string;
+  getEmpRatingText: (score: number | string) => string;
   formatJobType: (jobType: string) => string;
   formatWorkplaceType: (type: "remote" | "hybrid" | "on-site") => string;
   getRatingStyles: (rating: number) => string;
@@ -40,6 +41,7 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
   mockIllustration,
   getPerformanceRatingStyle,
   getRatingText,
+  getEmpRatingText,
   formatJobType,
   formatWorkplaceType,
   companyDetails = {}
@@ -136,7 +138,7 @@ const PerformanceHighlights: React.FC<PerformanceHighlightsProps> = ({
                 <div className="mt-[14px] flex items-center gap-2">
                   <span
                     className={`px-3 py-1 rounded-[5px] text-sm font-medium ${getPerformanceRatingStyle(
-                      getRatingText(Number(overallScore))
+                    !isEmployerReport ? getRatingText(Number(overallScore)) : getEmpRatingText(Number(overallScore))
                     )}`}
                   >
                     <span className=' opacity-90'>Rating:</span> {getRatingText(Number(overallScore))}

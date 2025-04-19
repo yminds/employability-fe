@@ -54,6 +54,12 @@ export const interviewInvitesApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    getCandidateResponse: builder.query({
+      query: (inviteId) => ({
+        url: `/api/v1/employerInterviewInvitation/${inviteId}/candidate_response`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -65,4 +71,5 @@ export const {
   useUpdateInterviewIdMutation,
   useShortlistMutation,
   useGetShortlistStatusQuery,
+  useGetCandidateResponseQuery
 } = interviewInvitesApiSlice; 

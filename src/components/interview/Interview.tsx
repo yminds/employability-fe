@@ -144,29 +144,29 @@ const Interview: React.FC<{
     },
   });
 
-  useEffect(() => {
-    const monitorScreens = async () => {
-      if ("getScreenDetails" in window) {
-        try {
-          const screenDetails = await (window as any).getScreenDetails();
-          const updateScreenCount = () => {
-            const screens = screenDetails.screens.length;
-            if (screens > 1) {
-              setShowScreenWarning(true);
-            }
-          };
+  // useEffect(() => {
+  //   const monitorScreens = async () => {
+  //     if ("getScreenDetails" in window) {
+  //       try {
+  //         const screenDetails = await (window as any).getScreenDetails();
+  //         const updateScreenCount = () => {
+  //           const screens = screenDetails.screens.length;
+  //           if (screens > 1) {
+  //             setShowScreenWarning(true);
+  //           }
+  //         };
 
-          updateScreenCount(); // Initial check
+  //         updateScreenCount(); // Initial check
 
-          screenDetails.addEventListener("screenschange", updateScreenCount);
-        } catch (error) {
-          console.error("Screen monitoring failed:", error);
-        }
-      }
-    };
+  //         screenDetails.addEventListener("screenschange", updateScreenCount);
+  //       } catch (error) {
+  //         console.error("Screen monitoring failed:", error);
+  //       }
+  //     }
+  //   };
 
-    monitorScreens();
-  }, []);
+  //   monitorScreens();
+  // }, []);
 
   // Socket Connection
   useEffect(() => {
