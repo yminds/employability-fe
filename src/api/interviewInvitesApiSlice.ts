@@ -39,7 +39,7 @@ export const interviewInvitesApiSlice = apiSlice.injectEndpoints({
         url: `/api/v1/employerInterviewInvitation/invite/${inviteId}`,
         method: "POST",
         body: { interviewId, type },
-      }),
+      }),    
       invalidatesTags: ['InterviewInvites'],
     }),
     shortlist: builder.mutation({
