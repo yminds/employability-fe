@@ -20,6 +20,7 @@ import softSkills from "@/assets/reports/softSkills.png";
 import Section from "./Section";
 import PerformanceHighlights from "./PerformanceHighlights";
 import InterviewDetails from "./InterviewDetails";
+import CodeSnippetComponent from "./CodeSnippetPart";
 
 interface UpdatedMockReportContainerProps {
   inviteId: string;
@@ -82,7 +83,11 @@ export const TableSection: React.FC<{
           <div key={idx} className="border-b p-4 hover:bg-gray-50 space-y-2">
             <div className="flex items-center justify-between">
               <div className="text-body2 text-grey-6">{row.criteria}</div>
-              <div className={`py-1 px-4 rounded-full text-base font-normal leading-6 tracking-[0.08px] max-w-fit ${getRatingStyles(Number(row.rating))}`}>
+              <div
+                className={`py-1 px-4 rounded-full text-base font-normal leading-6 tracking-[0.08px] max-w-fit ${getRatingStyles(
+                  Number(row.rating)
+                )}`}
+              >
                 {getRatingLabel(Number(row.rating))}
               </div>
             </div>
@@ -118,7 +123,7 @@ const UpdatedMockReportContainer: React.FC<UpdatedMockReportContainerProps> = ({
   const [showSharePopup, setShowSharePopup] = useState(false);
   const [copyText, setCopyText] = useState("Copy");
   const [activeSection, setActiveSection] = useState("highlights");
-  
+
   const sharePopupRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -212,20 +217,20 @@ const overallScore =
   // Set up Intersection Observer for sections
   useEffect(() => {
     // Create a container for observers
-    const observers: { element: HTMLElement; observer: IntersectionObserver; }[] = [];
-    
+    const observers: { element: HTMLElement; observer: IntersectionObserver }[] = [];
+
     // Options for the observer
     const options = {
       root: null, // use the viewport
       rootMargin: "-100px 0px -60% 0px", // bias toward elements at top
-      threshold: 0 // trigger as soon as even 1px is visible
+      threshold: 0, // trigger as soon as even 1px is visible
     };
 
     // Callback for the observer
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       // Find the first section that's intersecting
-      const visibleEntry = entries.find(entry => entry.isIntersecting);
-      
+      const visibleEntry = entries.find((entry) => entry.isIntersecting);
+
       if (visibleEntry) {
         setActiveSection(visibleEntry.target.id);
       }
@@ -233,9 +238,9 @@ const overallScore =
 
     // Create observer
     const observer = new IntersectionObserver(observerCallback, options);
-    
+
     // Observe all section elements
-    sections.forEach(section => {
+    sections.forEach((section) => {
       const element = document.getElementById(section.id);
       if (element) {
         observer.observe(element);
@@ -346,6 +351,8 @@ const overallScore =
     }
   }, [companyAndJobDetails, reportData.reportType]);
 
+  
+
   return (
     <main className="flex w-full h-screen justify-center sm:overflow-y-auto sm:flex-col">
       <div className="flex-col justify-center bg-[#F5F5F5] w-[95%] max-w-[1800px] h-full sm:p-0">
@@ -415,7 +422,7 @@ const overallScore =
             )}
           </header>
         </div>
-        
+
         {/* Main Content Section */}
         <div className="flex bg-[#f5f5f5] h-[90vh] max-w-[1800px] justify-center overflow-y-auto p-2 mt-6 sm:flex-col sm:p-1">
           {/* Left Navigation Panel */}
@@ -428,9 +435,11 @@ const overallScore =
                     <button
                       onClick={() => scrollToSection(section.id)}
                       className={`w-full text-left px-4 py-3 rounded-md transition flex items-center h-9 text-body2 truncate
-                        ${activeSection === section.id
-                          ? "bg-[#00183D1A] bg-opacity-10"
-                          : "text-[#001630] hover:bg-gray-100"}`}
+                        ${
+                          activeSection === section.id
+                            ? "bg-[#00183D1A] bg-opacity-10"
+                            : "text-[#001630] hover:bg-gray-100"
+                        }`}
                     >
                       {section.title}
                     </button>
@@ -483,7 +492,7 @@ const overallScore =
                     getRatingLabel={getRatingLabel}
                     companyDetails={companyAndJobDetails}
                   />
-               )} 
+                )}
               </section>
 
               {/* 2. Interview Recording */}
@@ -503,7 +512,7 @@ const overallScore =
               )}
 
               {/* 3. Technical Proficiency */}
-              {summary.technicalProficiency && summary.technicalProficiency.concepts !== "" && (
+              {summary.technicalProficiency && summary.technicalProficiency.length  > 0 && (
                 <Section
                   id="tech-proficiency"
                   title="Technical Proficiency"
@@ -531,7 +540,7 @@ const overallScore =
               )}
 
               {/* Problem Solving Skills */}
-              {summary.problemSolvingSkillsDetails && (
+              {summary.problemSolvingSkillsDetails && summary.problemSolvingSkillsDetails.length >0  && (
                 <Section
                   id="problem-solving"
                   title="Problem Solving Skills"
@@ -559,7 +568,7 @@ const overallScore =
               )}
 
               {/* 7. Conceptual Breakdown */}
-              {summary.conceptualBreakdown && (
+              {summary.conceptualBreakdown && summary.conceptualBreakdown.concepts.length >0  && (
                 <Section
                   id="conceptual-breakdown"
                   title="Conceptual Breakdown"
@@ -572,6 +581,7 @@ const overallScore =
                 />
               )}
 
+              {reportData.reportType === "Project" && reportData.codeSnippetReport.length > 0  && <CodeSnippetComponent snippets={reportData.codeSnippetReport} />}
               {/* 8. Professional Experience */}
               {isEmployerReport && (
                 <section id="professional-exp" className="rounded-lg p-8 shadow-sm bg-white sm:p-4">
